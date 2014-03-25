@@ -1,0 +1,31 @@
+* Umstellung auf einzelnen Revisionsgraphen (MG)
+** Einstellung des Graphnamen in Konfiguration
+
+* Anpassung von RMO an Änderungen, die im Artikel beschrieben sind (MG)
+** LOV (Linked Open Vocabularies) Metadaten für RMO hinzufügen
+** Subclassing von PROV
+
+* Speicherung aller Enden der Branches als vollständige Graphen (SH)
+** Aktualisierung der Update-Routine
+** Aktualisierung der Graph-Generierungsroutine (andere Richtung der Änderungsherstellung; von hinten nach vorne)
+
+* Branches haben nun mit rmo:fullGrapg Verweise auf komplette Graphen
+** Graphen werden bei Brnach auch angelegt
+
+* Skripte für automatisierte Änderungen zufälliger Triples in verschiedenen Größen
+
+* Tagerstellung über Admin-Interface
+
+* Löschen aller R43ples-Infos aus Triplestore über Admin-Interface
+
+* Verbesserte Revisionspfadsuche
+** nur bis zu Referenz mit vollem Graphen
+** komplett Objektorientiert
+
+* Add Sparql Service Description (http://www.w3.org/TR/sparql11-service-description/)
+** new Feature "R43ples"
+** sd:feature
+
+* Umsetzung der Branchingstrategie
+** Revisionsnummer ist jetzt String
+** Benennung der Branches, wie im Paper

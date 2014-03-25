@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<title>R43ples - Revision Management for the Semantic Web</title>
+<meta name="author" content="Markus Graube">
+</head>
+<body>
+
+<h1>R43ples - Revision Management for the Semantic Web</h1>
+<h2>Query Form</h2>
+<form action="sparql">
+  <label for="query">Query Text</label><br />
+	  <textarea name="query" id="query" cols="80" rows="20">
+SELECT * 
+FROM <test> #REVISION "MASTER"
+WHERE {
+	?s ?p ?o. 
+}
+	  </textarea>
+	  <br />
+	  <label for="format">Results Format</label>
+	  <select name="format" id="name">
+	  	<option value="text/html">HTML</option>
+	    <option value="application/rdf+xml">RDF/XML</option>
+	    <option value="text/turtle">Turtle</option>
+	    <option value="application/json">JSON</option>
+	  </select>
+	<br/>
+    <input type="submit" value="Run Query"/>
+	<input type="reset" value="Reset"/>
+</form>
+
+<h2>Revision Information</h2>
+<a href="revisiongraph">Get Revision information</a>
+
+<h2>Example queries</h2>
+<h3>Select Query</h3>
+<pre>SELECT * 
+FROM &lt;test&gt; #REVISION "23"
+WHERE {
+	?s ?p ?o. 
+}</pre>
+
+<h3>Select Query - Multiple Graphs</h3>
+<pre>SELECT * 
+FROM &lt;test&gt; #REVISION "MASTER"
+FROM &lt;test2&gt; #REVISION "23"
+WHERE {
+	?s ?p ?o. 
+}</pre>
+
+<h3>Update Query Variant 1</h3>
+<pre>#USER "mgraube"
+#MESSAGE "test commit"
+INSERT DATA INTO &lt;test&gt; #REVISION "2"
+{	&lt;a&gt; &lt;b&gt; &lt;c&gt; .	}</pre>
+
+<h3>Update Query Variant 2</h3>
+<pre>#USER "mgraube"
+#MESSAGE "test commit"
+INSERT { GRAPH &lt;test&gt; #REVISION "2"
+{	&lt;a&gt; &lt;b&gt; &lt;c&gt; .	}}</pre>
+
+<h3>Branching</h3>
+<pre>#USER "mgraube"
+#MESSAGE "test commit"
+BRANCH GRAPH &lt;test&gt; #REVISION "2" TO "unstable"</pre>
+
+<h3>Tagging</h3>
+<pre>#USER "mgraube"
+#MESSAGE "test commit"
+TAG GRAPH &lt;test&gt; #REVISION "2" TO "v0.3-alpha"</pre>
+
+</body>
+</html>
