@@ -20,6 +20,7 @@ import com.hp.hpl.jena.rdf.model.Resource;
  * This class provides methods for interaction with graphs.
  * 
  * @author Stephan Hensel
+ * @author Markus Graube
  *
  */
 public class RevisionManagement {
@@ -715,8 +716,8 @@ public class RevisionManagement {
 	
 	/**
 	 * Checks if specified revision of the graph is a branch revision, meaning a terminal node in a branch.
-	 * @param graphName
-	 * @param revisionNumber
+	 * @param graphName name of the revisioned graph
+	 * @param revisionName revision number or branch or tag name of the graph
 	 * @return
 	 * @throws AuthenticationException
 	 * @throws IOException
@@ -734,8 +735,8 @@ public class RevisionManagement {
 	
 	/**
 	 * Returns the name of the full graph of revision of a graph if it is available
-	 * @param graphName
-	 * @param number
+	 * @param graphName name of the revisioned graph
+	 * @param revisionName revision number or branch or tag name of the graph
 	 * @return
 	 * @throws AuthenticationException
 	 * @throws IOException
@@ -753,9 +754,10 @@ public class RevisionManagement {
 	
 	
 	/**
-	 * download complete revision information of R43ples from SPARQL endpoint. Provide only information from specified graph if nut null
+	 * Download complete revision information of R43ples from SPARQL endpoint. Provide only information from specified graph if not null
 	 * @param graphName provide only information from specified graph (if not NULL)
-	 * @return
+	 * @param format serialisation of the RDF model
+	 * @return String containing the RDF model in the specified serialisation
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
