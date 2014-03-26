@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.diffResolveTool;
+package de.tud.plt.r43ples.adminInterface;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;

@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.diffResolveTool;
+package de.tud.plt.r43ples.adminInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 
