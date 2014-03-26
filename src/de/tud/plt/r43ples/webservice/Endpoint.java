@@ -379,6 +379,8 @@ public class Endpoint {
 		// Add R43ples information
 		Pattern pattern =  Pattern.compile("(?<action>TAG|BRANCH) GRAPH <(?<graph>.*)> #REVISION \"(?<revision>.*)\" TO \"(?<name>.*)\"");
 		Matcher m = pattern.matcher(sparqlQuery);
+		
+		boolean foundEntry = false;
 		while (m.find()) {
 			String action = m.group("action");
 		    String graphName = m.group("graph");
@@ -389,8 +391,10 @@ public class Endpoint {
 		    else if (action.equals("BRANCH"))
 		    	RevisionManagement.createBranch(graphName, revisionNumber, name, user, commitMessage);
 		    else
-		    	throw new InternalServerErrorException("Wrong command usage");
+		    	throw new InternalServerErrorException("Error in query: " + sparqlQuery);
 		}
+		if (!foundEntry)
+			throw new InternalServerErrorException("Error in query: " + sparqlQuery);
 		
 		return responseBuilder.build();
 	}
@@ -401,7 +405,7 @@ public class Endpoint {
 	 * @return
 	 * @throws InternalServerErrorException
 	 */
-	private String extractUser(String query) throws InternalServerErrorException {
+	private String extractUser(String query) {
 		Pattern userPattern = Pattern.compile("#USER\\s*\"(?<user>.*)\"");
 		Matcher userMatcher = userPattern.matcher(query);
 		if (userMatcher.find()) {
@@ -416,13 +420,13 @@ public class Endpoint {
 	 * @return
 	 * @throws InternalServerErrorException
 	 */
-	private String extractCommitMessage(String query) throws InternalServerErrorException {
+	private String extractCommitMessage(String query) {
 		Pattern pattern = Pattern.compile("#MESSAGE\\s*\"(?<message>.*)\"");
 		Matcher matcher = pattern.matcher(query);
 		if (matcher.find()) {
 			return matcher.group("message");
 		} else {
-			throw new InternalServerErrorException("No user specified");
+			throw new InternalServerErrorException("No commit message specified");
 		}
 	}
 }
