@@ -7,3 +7,5 @@
 build
 R43ples-*.zip
 javadoc/
+.settings
+verification/*.csv
