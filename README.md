@@ -14,16 +14,20 @@ Furthermore, the service provides an interface for revision management and the i
 
 Starting
 --------
-Ant is used for compiling and startiing
+Ant is used for compiling and starting
+
     ant run
 
 
 SPARQL
 ------
 SPARQL endpoint is available at:
-[uri]:[port]/r43ples/sparql?query=[]&format=(HTML|JSON)
 
-A HTML page is available under [uri]:[port]/r43ples
+    [uri]:[port]/r43ples/sparql?query=[]&format=(HTML|JSON)
+
+A HTML page is available under
+
+    [uri]:[port]/r43ples
 
 
 Admin Interface
