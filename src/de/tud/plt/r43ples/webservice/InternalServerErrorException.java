@@ -6,7 +6,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 /**
- * create a HTTP not found exception
+ * create a HTTP Internal Server Error exception
  *
  */
 public class InternalServerErrorException extends WebApplicationException {

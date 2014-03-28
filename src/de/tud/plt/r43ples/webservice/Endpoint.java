@@ -48,6 +48,7 @@ import de.tud.plt.r43ples.management.TripleStoreInterface;
  * Supplies update and query.
  * 
  * @author Stephan Hensel
+ * @author Markus Graube
  * 
  */
 @Path("r43ples")
@@ -68,8 +69,8 @@ public class Endpoint {
 	}
 	
 	/**
-	 * Provide revision information for R43ples system
-	 * @param graph Provide only information of this graph (if not null)
+	 * Provide revision information about R43ples system
+	 * @param graph Provide only information about this graph (if not null)
 	 * @return RDF model of revision information
 	 * @throws IOException 
 	 * @throws AuthenticationException 

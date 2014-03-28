@@ -22,6 +22,7 @@ import de.tud.plt.r43ples.management.TripleStoreInterface;
  * Main Class starting the web server on grizzly.
  * 
  * @author Stephan Hensel
+ * @author Markus Graube
  *
  */
 public class Service {
@@ -41,8 +42,6 @@ public class Service {
 		logger.info(String.format("HTML site available under: %sr43ples/sparql", BASE_URI));
 		
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
-		
-		//AdministratorInterface.start();
 		
 		while(true);
 	}
