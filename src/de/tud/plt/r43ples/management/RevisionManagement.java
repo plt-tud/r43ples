@@ -56,11 +56,11 @@ public class RevisionManagement {
 		String dateString = getDateString();
 		
 		// General variables
-		String commitName = graphName+"-commit-" + newRevisionNumber;
-		String revisionName = graphName + "-revision-" + newRevisionNumber;
-		String addSetGraphName = graphName + "-delta-added-" + newRevisionNumber;
-		String removeSetGraphName = graphName + "-delta-removed-" + newRevisionNumber;
-		String personName =  getUserName(user);
+		String commitUri = graphName+"-commit-" + newRevisionNumber;
+		String revisionUri = graphName + "-revision-" + newRevisionNumber;
+		String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
+		String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
+		String personUri =  getUserName(user);
 		
 		// Create a new commit (activity)
 		String queryContent =	String.format(
@@ -69,10 +69,10 @@ public class RevisionManagement {
 				"	prov:generated <%s> ;" +
 				"	dc-terms:title \"%s\" ;" +
 				"	prov:atTime \"%s\" .\n",
-				commitName, personName, revisionName, commitMessage, dateString);
+				commitUri, personUri, revisionUri, commitMessage, dateString);
 		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
 			String rev = iterator.next();
-			queryContent += String.format("<%s> prov:used <%s> .\n", commitName, graphName + "-revision-" + rev.toString());
+			queryContent += String.format("<%s> prov:used <%s> .\n", commitUri, graphName + "-revision-" + rev.toString());
 		}
 		
 		// Create new revision
@@ -82,36 +82,45 @@ public class RevisionManagement {
 				"	rmo:deltaAdded <%s> ; " +
 				"	rmo:deltaRemoved <%s> ; " +
 				"	rmo:revisionNumber \"%s\" .\n"
-				,  revisionName, graphName, addSetGraphName, removeSetGraphName, newRevisionNumber);
+				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, newRevisionNumber);
 		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
 			String rev = iterator.next();
 			queryContent += String.format("<%s> prov:wasDerivedFrom <%s> .",
-						revisionName, graphName + "-revision-"+rev.toString());
+						revisionUri, graphName + "-revision-"+rev.toString());
 		}
 		String query = prefixes + String.format("INSERT IN GRAPH <%s> { %s }\n", Config.revision_graph, queryContent) ;
 		
 		// Move branch to new revision
-		// FIXME: beachte auch merge Situation
 		String oldRevision = graphName + "-revision-" + usedRevisionNumber.get(0).toString();
 		String queryBranch = prefixes + String.format("SELECT ?branch ?graph WHERE{ ?branch a rmo:Branch; rmo:references <%s>; rmo:fullGraph ?graph. }", oldRevision);
-		QuerySolution sol = ResultSetFactory.fromXML(TripleStoreInterface.executeQueryWithAuthorization(queryBranch, "XML")).next();
+		QuerySolution sol = ResultSetFactory.fromXML(TripleStoreInterface.executeQueryWithAuthorization(queryBranch, "XML")).next(); 
 		String branchName = sol.getResource("?branch").toString();
 		String branchGraph = sol.getResource("?graph").toString();
 		query += String.format("DELETE { GRAPH <%s> { <%s> rmo:references <%s>. } }\n", Config.revision_graph, branchName, oldRevision);
-		query += String.format("INSERT { GRAPH <%s> { <%s> rmo:references <%s>. } }\n", Config.revision_graph, branchName, revisionName);
+		query += String.format("INSERT { GRAPH <%s> { <%s> rmo:references <%s>. } }\n", Config.revision_graph, branchName, revisionUri);
+		
+		// Remove branch from which changes were merged, if available
+		String oldRevision2 = graphName + "-revision-" + usedRevisionNumber.get(0).toString();
+		String queryBranch2 = prefixes + String.format("SELECT ?branch ?graph WHERE{ ?branch a rmo:Branch; rmo:references <%s>; rmo:fullGraph ?graph. }", oldRevision2);
+		QuerySolution sol2 = ResultSetFactory.fromXML(TripleStoreInterface.executeQueryWithAuthorization(queryBranch2, "XML")).next();
+		String removeBranchUri = sol2.getResource("?branch").toString();
+		String removeBranchFullGraph = sol2.getResource("?graph").toString();
+		query += String.format("DELETE { GRAPH <%s> { <%s> ?p ?o. } } WHERE { GRAPH <%s> { <%s> ?p ?o. }}\n", Config.revision_graph, removeBranchUri, Config.revision_graph, removeBranchUri);
+		query += String.format("DROP GRAPH <%s>.", removeBranchFullGraph);
+		
 		// Update full graph of branch
 		query += String.format("DELETE FROM GRAPH <%s> {\n %s \n}\n", branchGraph, removedAsNTriples);
 		query += String.format("INSERT INTO GRAPH <%s> {\n %s \n}\n", branchGraph, addedAsNTriples);
 		
 		// Create new graph with delta-added-newRevisionNumber
-		logger.info("Create new graph with name " + addSetGraphName);
-		query += String.format("CREATE GRAPH <%s>\n", addSetGraphName);
-		query += String.format("INSERT IN GRAPH <%s> { %s }\n", addSetGraphName, addedAsNTriples);
+		logger.info("Create new graph with name " + addSetGraphUri);
+		query += String.format("CREATE GRAPH <%s>\n", addSetGraphUri);
+		query += String.format("INSERT IN GRAPH <%s> { %s }\n", addSetGraphUri, addedAsNTriples);
 		
 		// Create new graph with delta-removed-newRevisionNumber
-		logger.info("Create new graph with name " + removeSetGraphName);
-		query += String.format("CREATE GRAPH <%s>\n", removeSetGraphName);
-		query += String.format("INSERT IN GRAPH <%s> { %s }\n", removeSetGraphName, removedAsNTriples);
+		logger.info("Create new graph with name " + removeSetGraphUri);
+		query += String.format("CREATE GRAPH <%s>\n", removeSetGraphUri);
+		query += String.format("INSERT IN GRAPH <%s> { %s }\n", removeSetGraphUri, removedAsNTriples);
 		
 
 		// Execute queries
@@ -223,7 +232,7 @@ public class RevisionManagement {
 					,  revisionName, graphName, addSetGraphName, removeSetGraphName, 0);
 			// Add MASTER branch		
 			queryContent += String.format(
-					"<%s> a rmo:Master, rmo:Branch; "
+					"<%s> a rmo:Master, rmo:Branch, rmo:Reference; "
 					+ " rmo:fullGraph <%s>; "
 					+ "	rmo:references <%s>; "
 					+ "	rdfs:label \"MASTER\". ",
@@ -363,44 +372,44 @@ public class RevisionManagement {
 		// add- und delete-sets koennten auch aus revisionsinformationen gewonnen werden, anstatt aus programmiertem schema => aber langsamer
 		
 		/** Variante 1
-		 * scheint die ausgeglichenste Loesung zu sein
-		 * **/
-		while (!list.isEmpty()) {
-			// Get the add set
-			String queryCONSTRUCTAdd = 	"CONSTRUCT {?s ?p ?o} " +
-										"FROM <" + graphName + "-delta-added-" + number + "> " +
-										"WHERE {?s ?p ?o}";
-			String resultCONSTRUCTAdd = TripleStoreInterface.executeQueryWithAuthorization(queryCONSTRUCTAdd, "text/plain");
-			
-			// Get the delete set
-			String queryCONSTRUCTDel = 	"CONSTRUCT {?s ?p ?o} " +
-										"FROM <" + graphName + "-delta-removed-" + number + "> " +
-										"WHERE {?s ?p ?o}";
-			String resultCONSTRUCTDel = TripleStoreInterface.executeQueryWithAuthorization(queryCONSTRUCTDel, "text/plain");
-			
-			// Add data to temporary graph
-			TripleStoreInterface.executeQueryWithAuthorization("INSERT DATA INTO <" + tempGraphName + "> { " + resultCONSTRUCTDel + "}", "HTML");
-			// Remove data from temporary graph
-			TripleStoreInterface.executeQueryWithAuthorization("DELETE DATA FROM <" + tempGraphName + "> { " + resultCONSTRUCTAdd + "}", "HTML");
-			
-			number = list.pollFirst();
-		}
-		
-		/** Variante 2 
-		 * sehr langsam bei Change Size >= 50
+		 * lädt Changes runter und spielt sie dann wieder in Server ein
 		 * **/
 //		while (!list.isEmpty()) {
-//			// Add data to temporary graph
-//			TripleStoreInterface.executeQueryWithAuthorization("ADD GRAPH <"+graphName + "-delta-removed-" + number + "> TO GRAPH <" +tempGraphName + ">", "HTML");
-//			// Remove data from temporary graph
-//			TripleStoreInterface.executeQueryWithAuthorization("DELETE { GRAPH <" +tempGraphName + "> { ?s ?p ?o.} } WHERE { GRAPH <"+graphName + "-delta-added-" + number + "> {?s ?p ?o.}}", "HTML");
+//			// Get the add set
+//			String queryCONSTRUCTAdd = 	"CONSTRUCT {?s ?p ?o} " +
+//										"FROM <" + graphName + "-delta-added-" + number + "> " +
+//										"WHERE {?s ?p ?o}";
+//			String resultCONSTRUCTAdd = TripleStoreInterface.executeQueryWithAuthorization(queryCONSTRUCTAdd, "text/plain");
 //			
-//			list.pollFirst();
-//		}		
+//			// Get the delete set
+//			String queryCONSTRUCTDel = 	"CONSTRUCT {?s ?p ?o} " +
+//										"FROM <" + graphName + "-delta-removed-" + number + "> " +
+//										"WHERE {?s ?p ?o}";
+//			String resultCONSTRUCTDel = TripleStoreInterface.executeQueryWithAuthorization(queryCONSTRUCTDel, "text/plain");
+//			
+//			// Add data to temporary graph
+//			TripleStoreInterface.executeQueryWithAuthorization("INSERT DATA INTO <" + tempGraphName + "> { " + resultCONSTRUCTDel + "}", "HTML");
+//			// Remove data from temporary graph
+//			TripleStoreInterface.executeQueryWithAuthorization("DELETE DATA FROM <" + tempGraphName + "> { " + resultCONSTRUCTAdd + "}", "HTML");
+//			
+//			number = list.pollFirst();
+//		}
+		
+		/** Variante 2 
+		 * 
+		 * **/
+		while (!list.isEmpty()) {
+			// Add data to temporary graph
+			TripleStoreInterface.executeQueryWithAuthorization("ADD GRAPH <"+graphName + "-delta-removed-" + number + "> TO GRAPH <" +tempGraphName + ">", "HTML");
+			// Remove data from temporary graph (no opposite of SPARQL ADD available)
+			TripleStoreInterface.executeQueryWithAuthorization("DELETE { GRAPH <" +tempGraphName + "> { ?s ?p ?o.} } WHERE { GRAPH <"+graphName + "-delta-added-" + number + "> {?s ?p ?o.}}", "HTML");
+			
+			list.pollFirst();
+		}		
 		
 		/** Variante 3 
-		 * schnell, wird aber sprunghaft langsamer bei Change Size >= 50
 		 * fuehrt alle Changes direkt in einer Abfrage auf dem SPARQL Endpoint aus
+         * is not correct since triples can not be deleted if not created beforehand
 		 * **/
 //		String queryAddSet = "DELETE { GRAPH <" +tempGraphName + "> { ?s ?p ?o.} } WHERE {";
 //		String queryDeleteSet = "INSERT { GRAPH <" +tempGraphName + "> { ?s ?p ?o.} } WHERE {";

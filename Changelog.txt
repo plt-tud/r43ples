@@ -29,3 +29,14 @@
 * Umsetzung der Branchingstrategie
 ** Revisionsnummer ist jetzt String
 ** Benennung der Branches, wie im Paper
+
+* Add "INSERT { GRAPH <xyz> { ..}} pattern
+
+* Nutzung von erweiterter REVISION Angabe
+** statt #REVISION "23", auch #REVISION "tagname"
+** dazu rdfs:label der rmo:Branches nutzen (wie soll das rdfs:label angelegt werden?)
+
+* Branching Strategie implementieren (SH)
+** Unterscheidung von REVISION und BRANCH in Query (niedrige Priorität)??
+** Branchen auf MASTER geht derzeit nicht
+** Branchen auf Branch geht nicht (haengt jeweils mit dem Baum zusammen)

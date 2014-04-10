@@ -3,4 +3,6 @@ R43ples-*.zip
 javadoc/
 .settings
 verification/*.csv
-RevisionManagement.log
+*.log
+*.log.1
+resources/dataset

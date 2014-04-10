@@ -65,7 +65,7 @@ For each named graph 'g' in a query, a temporary graph 'TempGraph_g_r' is genera
 def select_query(query_string):
     for (graph,revision) in query_string.get_named_graphs_and_revisions():   
         execQuery("COPY GRAPH <"+graph+"> TO GRAPH <tmp-"+graph+"-"+revision+">")
-        for rev in graph.find_shortest_path_to_revision(revision):    # from nearestBranch to desired revision
+        for rev in graph.find_shortest_path_to_revision(revision):
             execQuery("REMOVE GRAPH "+ rev.add_set_graph+" FROM GRAPH <tmp-"+graph+"-"+revision+">")
             execQuery("ADD GRAPH "+ rev.delete_set_graph+" TO GRAPH <tmp-"+graph+"-"+revision+">")
         query_string.replace(graph, "tmp-"+graph+"-"+revision)

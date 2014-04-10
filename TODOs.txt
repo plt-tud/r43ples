@@ -1,25 +1,10 @@
-* Branching Strategie implementieren (SH)
-** Unterscheidung von REVISION und BRANCH in Query (niedrige Priorität)??
-** Branchen auf MASTER geht derzeit nicht
-** Branchen auf Branch geht nicht (haengt jeweils mit dem Baum zusammen)
-
 * AdminInterface
 ** Alle Graphen im Triplestore loeschen als Auswahlmöglichkeit im AdminInterface
 ** Abbrechen eines Kommandos im AdminInterface
 
 * yEd-Export doppeltes Systemout in AdminInterface
 
-* Nutzung von erweiterter REVISION Angabe
-** statt #REVISION "23", auch #REVISION "tagname"
-** dazu rdfs:label der rmo:Branches nutzen (wie soll das rdfs:label angelegt werden?)
-
-* FIXMEs bearbeiten
-
 * GraphViz Visualierung als Variante zu YED (Nutzung von rdfUmlDiagram.py) (MG)
-
-* Add "INSERT { GRAPH <xyz> { ..}} pattern
 
 * Test Blank Nodes in R43ples
 ** funktioniert nur mit neuem Pattern: INSERT { GRAPH <xyz> { [] <b> <c>.}}
-
-* bei mehreren Änderungen pro Commit, nur Angabe einer Commit-Message?

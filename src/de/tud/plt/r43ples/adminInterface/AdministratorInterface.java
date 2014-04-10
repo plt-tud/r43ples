@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -769,11 +770,9 @@ public class AdministratorInterface {
 		logger.info("Prepare jMeter performance test.");
 		// ClassLoader in order to load files from /resources/ directory
 		final ClassLoader loader = AdministratorInterface.class.getClassLoader();
-		
-		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <" + Config.revision_graph +">", "HTML");
-		
-		int[] changesizes = {10,30,50,70,90};
-		int[] datasizes = {100,1000,10000,100000};
+		int[] changesizes = {10,20,30,40,50,60,70,80,90,100};
+		int[] datasizes = {100,1000,10000,100000,1000000};
+		final int REVISIONS = 20;
 		
 		for (int j = 0; j < datasizes.length; j++) {
 			int datasize = datasizes[j];
@@ -781,10 +780,12 @@ public class AdministratorInterface {
 				int changesize = changesizes[i];
 				String graphName = "dataset-"+datasize+"-"+changesize;
 				TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <" + graphName +">", "HTML");
-				String dataSetAsNTriples = FileUtils.readFileToString(new File(loader.getResource("dataset/dataset-"+datasize+".nt").getFile()));
+				URL fileDataset = loader.getResource("dataset/dataset-"+datasize+".nt");
+				String dataSetAsNTriples = FileUtils.readFileToString(new File(fileDataset.getFile()));
 				RevisionManagement.createNewGraphWithVersionControl(graphName, dataSetAsNTriples);
-				for (int revision = 1; revision <= 10; revision++) {
-					String addedAsNTriples = FileUtils.readFileToString(new File(loader.getResource("dataset/addset-"+changesize+"-"+revision+".nt").getFile()));
+				for (int revision = 1; revision <= REVISIONS; revision++) {
+					URL fileName = loader.getResource("dataset/addset-"+changesize+"-"+revision+".nt");
+					String addedAsNTriples = FileUtils.readFileToString(new File(fileName.getFile()));
 					ArrayList<String> list = new ArrayList<>();
 					list.add(Integer.toString(revision-1));
 					RevisionManagement.createNewRevision(graphName, addedAsNTriples, "", "test", Integer.toString(revision), "test creation", list);
