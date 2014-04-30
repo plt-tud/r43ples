@@ -371,8 +371,8 @@ public class RevisionManagement {
 		
 		// add- und delete-sets koennten auch aus revisionsinformationen gewonnen werden, anstatt aus programmiertem schema => aber langsamer
 		
-		/** Variante 1
-		 * lädt Changes runter und spielt sie dann wieder in Server ein
+		/** Variant 1
+		 * download single changesets and commit them to the temporary graph on the server
 		 * **/
 //		while (!list.isEmpty()) {
 //			// Get the add set
@@ -395,7 +395,7 @@ public class RevisionManagement {
 //			number = list.pollFirst();
 //		}
 		
-		/** Variante 2 
+		/** Variant 2 
 		 * 
 		 * **/
 		while (!list.isEmpty()) {
@@ -406,24 +406,6 @@ public class RevisionManagement {
 			
 			list.pollFirst();
 		}		
-		
-		/** Variante 3 
-		 * fuehrt alle Changes direkt in einer Abfrage auf dem SPARQL Endpoint aus
-         * is not correct since triples can not be deleted if not created beforehand
-		 * **/
-//		String queryAddSet = "DELETE { GRAPH <" +tempGraphName + "> { ?s ?p ?o.} } WHERE {";
-//		String queryDeleteSet = "INSERT { GRAPH <" +tempGraphName + "> { ?s ?p ?o.} } WHERE {";
-//		while (!list.isEmpty()) {
-//			number = list.getFirst();
-//			queryDeleteSet += "{GRAPH <"+graphName + "-delta-removed-" + number+"> {?s ?p ?o.}} UNION ";		
-//			queryAddSet += "{GRAPH <"+graphName + "-delta-added-" + number+"> {?s ?p ?o.}} UNION ";
-//			list.removeFirst();
-//		}
-//		queryAddSet += "{} }";
-//		queryDeleteSet += "{} }";
-//		TripleStoreInterface.executeQueryWithAuthorization(queryAddSet, "HTML");
-//		TripleStoreInterface.executeQueryWithAuthorization(queryDeleteSet, "HTML");
-		
 		
 	}
 	
