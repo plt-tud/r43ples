@@ -73,5 +73,16 @@
         <mkdir dir="javadoc" />
         <javadoc sourcepath="${src.dir}" destdir="javadoc" use="true" private="true" classpathref="classpath" version="true" author="true" windowtitle="${app.name} - Version ${app.version}" doctitle="${app.name} - Version ${app.version}" packagenames="*"/>
     </target>
+    
+    <target name="test" >
+        <junit printsummary="yes" haltonfailure="yes">
+            <classpath refid="classpath"/>
+<!--            <test name="com.jenkov.test.MyUnitTest"
+                    haltonfailure="no" outfile="result">
+            <formatter type="plain"/>
+            <formatter type="xml"/>
+            </test>-->
+        </junit>
+    </target>
 
 </project>
