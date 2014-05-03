@@ -743,7 +743,7 @@ public class AdministratorInterface {
 		logger.info("purge R43ples information.");
 		String query =
 				"PREFIX rmo: <http://revision.management.et.tu-dresden.de/rmo#> "
-				+ "SELECT DISTINCT ?graph FROM <r43ples-revisions> WHERE {";
+				+ "SELECT DISTINCT ?graph FROM <"+Config.revision_graph+"> WHERE {";
 		if (keepMaster)
 			query += "	{ ?branch rmo:fullGraph ?graph MINUS {?branch a rmo:Master} }";
 		else

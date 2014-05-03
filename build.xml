@@ -10,6 +10,20 @@
         <pathelement location="${res.dir}"/>
         <fileset dir="${lib.dir}" includes="*.jar" />
     </path>
+    
+    
+    <!-- Variables used for JUnit testin -->
+
+    <property name="test.report.dir" location="testreport" />
+
+    <!-- Define the classpath which includes the junit.jar and the classes after compiling-->
+    <path id="junit.classpath">
+        <pathelement location="lib/junit-4.11.jar" />
+        <pathelement location="lib/hamcrest-core-1.3.jar" />
+        <pathelement location="${classes.dir}" />
+    </path>
+
+
 
     <manifestclasspath property="manifest.class.path" jarfile="${jar.name}">
         <classpath refid="classpath" />
@@ -31,6 +45,7 @@
         <echo message="${app.name}: ${ant.file}"/>
         <javac debug="true" destdir="${classes.dir}" includeantruntime="false">
             <src path="${src.dir}"/>
+            <src path="${test.dir}"/>
             <classpath refid="classpath"/>
         </javac>
     </target>
@@ -74,14 +89,17 @@
         <javadoc sourcepath="${src.dir}" destdir="javadoc" use="true" private="true" classpathref="classpath" version="true" author="true" windowtitle="${app.name} - Version ${app.version}" doctitle="${app.name} - Version ${app.version}" packagenames="*"/>
     </target>
     
-    <target name="test" >
-        <junit printsummary="yes" haltonfailure="yes">
-            <classpath refid="classpath"/>
-<!--            <test name="com.jenkov.test.MyUnitTest"
-                    haltonfailure="no" outfile="result">
-            <formatter type="plain"/>
-            <formatter type="xml"/>
-            </test>-->
+    <!-- Run the JUnit Tests -->
+    <!-- Output is XML, could also be plain-->
+    <target name="test" depends="build">
+        <junit printsummary="yes" fork="true" haltonfailure="yes">
+            <classpath refid="classpath" />
+            <formatter type="xml" />
+            <batchtest todir="${test.report.dir}">
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test*.java" />
+                </fileset>
+            </batchtest>
         </junit>
     </target>
 

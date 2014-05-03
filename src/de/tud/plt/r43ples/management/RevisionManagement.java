@@ -795,6 +795,44 @@ public class RevisionManagement {
 		return TripleStoreInterface.executeQueryWithAuthorization(sparqlQuery, format);
 	}
 	
+	public static void purgeGraph(String graph) throws AuthenticationException, IOException {
+		logger.info("purge R43ples information.");
+		String query = String.format(
+				prefixes
+				+ "SELECT DISTINCT ?graph FROM <%s> WHERE {"
+				+ "		?rev rmo:revisionOf <%s>."
+				+ " 	{?rev rmo:deltaAdded ?graph}"
+				+ " UNION {?rev rmo:deltaRemoved ?graph}"
+				+ " UNION { ?ref rmo:references ?rev; rmo:fullGraph ?graph }"
+				+ "}", Config.revision_graph, graph);
+		String graphInformation = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
+		ResultSet results = ResultSetFactory.fromXML(graphInformation);		
+		while (results.hasNext()) {
+			QuerySolution qs = results.next();
+			String graphName = qs.getResource("?graph").toString();
+			TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <"+graphName+">","XML");
+			System.out.println("Graph deleted: " + graphName);
+		}
+		String queryDelete = String.format(
+				prefixes
+				+ "DELETE"
+				+ " { GRAPH <%s> {?s ?p ?o} }"
+				+ "WHERE {"
+				+ "	GRAPH <%s> { {"
+				+ "		?s a rmo:Revision; rmo:revisionOf <%s>;"
+				+ "			?p ?o."
+				+ " } UNION {"
+				+ " 	?s a rmo:Reference; rmo:references [rmo:revisionOf <%s>];"
+				+ "			?p ?o."
+				+ "} UNION {"
+				+ " 	?s a rmo:Commit; prov:generated [rmo:revisionOf <%s>];"
+				+ "			?p ?o."
+				+ "} } }", Config.revision_graph, Config.revision_graph, graph, graph, graph);
+		TripleStoreInterface.executeQueryWithAuthorization(queryDelete, "XML");
+		System.out.println("Graph deleted: " + Config.revision_graph);
+	}
+	
+	
 	/**
 	 * @param user
 	 * @param personName
