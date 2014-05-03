@@ -16,6 +16,8 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 
+import de.tud.plt.r43ples.webservice.InternalServerErrorException;
+
 /**
  * This class provides methods for interaction with graphs.
  * 
@@ -28,9 +30,10 @@ public class RevisionManagement {
 	/** The logger. **/
 	private static Logger logger = Logger.getLogger(RevisionManagement.class);
 	/** The SPARQL prefixes. **/
-	private static String prefixes = "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
+	private final static String prefix_rmo = "PREFIX rmo: <http://revision.management.et.tu-dresden.de/rmo#> \n";
+	private final static String prefixes = "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
 			+ "PREFIX dc-terms: <http://purl.org/dc/terms/> \n"
-			+ "PREFIX rmo: <http://revision.management.et.tu-dresden.de/rmo#> \n"
+			+ prefix_rmo
 			+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
 			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n";
 	
@@ -100,13 +103,15 @@ public class RevisionManagement {
 		query += String.format("INSERT { GRAPH <%s> { <%s> rmo:references <%s>. } }\n", Config.revision_graph, branchName, revisionUri);
 		
 		// Remove branch from which changes were merged, if available
-		String oldRevision2 = graphName + "-revision-" + usedRevisionNumber.get(0).toString();
-		String queryBranch2 = prefixes + String.format("SELECT ?branch ?graph WHERE{ ?branch a rmo:Branch; rmo:references <%s>; rmo:fullGraph ?graph. }", oldRevision2);
-		QuerySolution sol2 = ResultSetFactory.fromXML(TripleStoreInterface.executeQueryWithAuthorization(queryBranch2, "XML")).next();
-		String removeBranchUri = sol2.getResource("?branch").toString();
-		String removeBranchFullGraph = sol2.getResource("?graph").toString();
-		query += String.format("DELETE { GRAPH <%s> { <%s> ?p ?o. } } WHERE { GRAPH <%s> { <%s> ?p ?o. }}\n", Config.revision_graph, removeBranchUri, Config.revision_graph, removeBranchUri);
-		query += String.format("DROP GRAPH <%s>.", removeBranchFullGraph);
+		if (usedRevisionNumber.size()>1){
+			String oldRevision2 = graphName + "-revision-" + usedRevisionNumber.get(1).toString();
+			String queryBranch2 = prefixes + String.format("SELECT ?branch ?graph WHERE{ ?branch a rmo:Branch; rmo:references <%s>; rmo:fullGraph ?graph. }", oldRevision2);
+			QuerySolution sol2 = ResultSetFactory.fromXML(TripleStoreInterface.executeQueryWithAuthorization(queryBranch2, "XML")).next();
+			String removeBranchUri = sol2.getResource("?branch").toString();
+			String removeBranchFullGraph = sol2.getResource("?graph").toString();
+			query += String.format("DELETE { GRAPH <%s> { <%s> ?p ?o. } } WHERE { GRAPH <%s> { <%s> ?p ?o. }}\n", Config.revision_graph, removeBranchUri, Config.revision_graph, removeBranchUri);
+			query += String.format("DROP GRAPH <%s>\n", removeBranchFullGraph);
+		}
 		
 		// Update full graph of branch
 		query += String.format("DELETE FROM GRAPH <%s> {\n %s \n}\n", branchGraph, removedAsNTriples);
@@ -309,16 +314,16 @@ public class RevisionManagement {
 		logger.info("Insert info into revision graph.");	
 		String revisionName = graphName + "-revision-0";
 		String queryContent = 	String.format(
-				"<%s> a rmo:Revision ; " +
-				"	rmo:revisionOf <%s> ; " +
-				"	rmo:revisionNumber \"%s\" . "
+				"<%s> a rmo:Revision ;\n" +
+				"	rmo:revisionOf <%s> ;\n" +
+				"	rmo:revisionNumber \"%s\" .\n"
 				,  revisionName, graphName, 0);
 		// Add MASTER branch		
 		queryContent += String.format(
-				"<%s> a rmo:Master, rmo:Branch, rmo:Reference; "
-				+ " rmo:fullGraph <%s>; "
-				+ "	rmo:references <%s>; "
-				+ "	rdfs:label \"master\". ",
+				"<%s> a rmo:Master, rmo:Branch, rmo:Reference;\n"
+				+ " rmo:fullGraph <%s>;\n"
+				+ "	rmo:references <%s>;\n"
+				+ "	rdfs:label \"master\".\n",
 				graphName+"-master", graphName, revisionName);
 		
 		String queryRevision = String.format(
@@ -411,20 +416,26 @@ public class RevisionManagement {
 	
 	
 	public static String getRevisionNumber(String graphName, String referenceName) throws AuthenticationException, IOException {
-		String queryASK = prefixes + String.format(
+		String queryASK = prefix_rmo + String.format(
 				"ASK { GRAPH <%s> { ?rev a rmo:Revision; rmo:revisionOf <%s>; rmo:revisionNumber \"%s\" .}}",
 				Config.revision_graph, graphName, referenceName);
 		String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
 		if (resultASK.equals("true"))
 			return referenceName;
 		else {		
-			String query = prefixes + String.format("SELECT ?revisionNumber { GRAPH <%s> { "
-					+ " ?rev a rmo:Revision; rmo:revisionOf <%s>; rmo:revisionNumber ?revisionNumber . "
-					+ " ?reference a rmo:Reference; rmo:references ?rev; rdfs:label \"%s\". } } ",
+			String query = prefix_rmo + String.format("SELECT ?revisionNumber { GRAPH <%s> {\n"
+					+ " ?rev a rmo:Revision; rmo:revisionOf <%s>; rmo:revisionNumber ?revisionNumber .\n"
+					+ " ?reference a rmo:Reference; rmo:references ?rev; rdfs:label ?refName.\n"
+					+ " FILTER ( UCASE(?refName) = UCASE(\"%s\")). } } ",
 					Config.revision_graph, graphName, referenceName);
 			String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
-			QuerySolution qs = ResultSetFactory.fromXML(result).next();
-			return qs.getLiteral("?revisionNumber").toString();
+			try {
+				QuerySolution qs = ResultSetFactory.fromXML(result).next();
+				return qs.getLiteral("?revisionNumber").toString();
+			}
+			catch (Exception e){
+				throw new InternalServerErrorException("No Revision or Reference found with identifier: " + referenceName);
+			}
 		}
 	}
 
@@ -542,11 +553,11 @@ public class RevisionManagement {
 			checkIdentifierRevisionNumber = startIdentifierRevisionNumber + ".";
 		}
 
-		String queryString = prefixes + String.format("SELECT MAX(xsd:integer(STRAFTER(STRBEFORE(xsd:string(?revisionNumber), \"-\"), \"%s.\"))) as ?number " +
-				"FROM <%s> " +
-				"WHERE {" +
-				"	?revision rmo:revisionNumber ?revisionNumber ;"
-				+ "		rmo:revisionOf <%s> . " +
+		String queryString = prefixes + String.format("SELECT MAX(xsd:integer(STRAFTER(STRBEFORE(xsd:string(?revisionNumber), \"-\"), \"%s.\"))) as ?number\n" +
+				"FROM <%s>\n" +
+				"WHERE {\n" +
+				"	?revision rmo:revisionNumber ?revisionNumber ;\n"
+				+ "		rmo:revisionOf <%s> .\n" +
 				"} ", startIdentifierRevisionNumber, Config.revision_graph, graphName);
 		String resultSparql = TripleStoreInterface.executeQueryWithAuthorization(queryString, "XML");
 		ResultSet results = ResultSetFactory.fromXML(resultSparql);
@@ -714,7 +725,7 @@ public class RevisionManagement {
 	 * @throws IOException
 	 */
 	public static boolean isBranch(String graphName, String revisionName) throws AuthenticationException, IOException {
-		String queryASK = prefixes + String.format("ASK { GRAPH <%s> { "
+		String queryASK = prefix_rmo + String.format("ASK { GRAPH <%s> { "
 				+ " ?rev a rmo:Revision; rmo:revisionOf <%s>. "
 				+ " ?ref a rmo:Reference; rmo:references ?rev ."
 				+ " { ?rev rmo:revisionNumber \"%s\"} UNION { ?ref rdfs:label \"%s\"} }} ",
@@ -733,7 +744,7 @@ public class RevisionManagement {
 	 * @throws IOException
 	 */
 	public static String getFullGraphName(String graphName, String revisionName) throws AuthenticationException, IOException {
-		String query = prefixes + String.format("SELECT ?graph { GRAPH <%s> { "
+		String query = prefix_rmo + String.format("SELECT ?graph { GRAPH <%s> { "
 				+ " ?rev a rmo:Revision; rmo:revisionOf <%s> . "
 				+ " ?ref a rmo:Reference; rmo:references ?rev; rmo:fullGraph ?graph ."
 				+ " { ?rev rmo:revisionNumber \"%s\"} UNION { ?ref rdfs:label \"%s\"} }} ",
@@ -766,7 +777,7 @@ public class RevisionManagement {
 		}
 		else {
 			sparqlQuery = String.format(
-					prefixes
+					prefix_rmo
 					+ "CONSTRUCT"
 					+ "	{ "
 					+ "		?revision ?r_p ?r_o. "

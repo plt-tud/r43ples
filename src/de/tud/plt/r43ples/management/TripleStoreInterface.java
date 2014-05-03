@@ -94,7 +94,7 @@ public class TripleStoreInterface {
 	public static String executeQueryWithAuthorization(String query, String format) throws AuthenticationException, IOException {
 		String result = null;
 		
-		logger.debug("Execute query on SPARQL endpoint: "+ query);
+		logger.info("Execute query on SPARQL endpoint: "+ query);
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 	    httpClient.getCredentialsProvider().setCredentials(new AuthScope(null, -1, null), credentials);
 			

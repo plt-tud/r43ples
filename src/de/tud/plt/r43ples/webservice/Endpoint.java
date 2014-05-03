@@ -212,8 +212,9 @@ public class Endpoint {
 		Pattern pattern = Pattern.compile("FROM\\s*<(?<graph>.*)>\\s*#REVISION\\s*\"(?<revision>.*)\"");
 		
 		Matcher m = pattern.matcher(query);
-		
+		boolean found = false;
 		while (m.find()){
+			found = true;
 		    String graphName = m.group("graph");
 		    String revisionNumber = m.group("revision");
 		    
@@ -240,6 +241,9 @@ public class Endpoint {
 		    // Respond with specified revision
 			responseBuilder.header(graphName + "-revision-number", headerRevisionNumber);
 		    responseBuilder.header(graphName + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
+		}
+		if (!found) {
+			throw new InternalServerErrorException("Query contain errors:\n"+query);
 		}
 		return responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(query, format)).type(format).build();
 	}
@@ -271,8 +275,12 @@ public class Endpoint {
 		String query_replaced = query;
 		Pattern pattern =  Pattern.compile("(FROM|INTO|GRAPH)\\s*<(?<graph>.*)>\\s*#REVISION\\s*\"(?<revision>.*)\"");
 		Matcher m = pattern.matcher(query);
-		m.find();
-
+		boolean found = m.find();
+		
+		if (!found) {
+			throw new InternalServerErrorException("Query contain errors:\n"+query);
+		}
+		
 	    String graphName = m.group("graph");
 	    String revisionName = m.group("revision"); //can contain revision numbers or reference names
 	    String revisionNumber = RevisionManagement.getRevisionNumber(graphName, revisionName); //contains only revision numbers
@@ -340,20 +348,25 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	private Response produceCreateGraphResponse(String sparqlQuery,
+	private Response produceCreateGraphResponse(String query,
 			String format) throws AuthenticationException, IOException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Graph creation detected");
 		
 		// Execute SPARQL query
-		responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(sparqlQuery, format)); 
+		responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(query, format)); 
 		
 		// Add R43ples information
 		Pattern pattern =  Pattern.compile("CREATE GRAPH <(?<graph>.*)>");
-		Matcher m = pattern.matcher(sparqlQuery);
+		Matcher m = pattern.matcher(query);
+		boolean found = false;
 		while (m.find()) {
+			found = true;
 		    String graphName = m.group("graph");
 		    RevisionManagement.putGraphUnderVersionControl(graphName);
+		}
+		if (!found) {
+			throw new InternalServerErrorException("Query contain errors:\n"+query);
 		}
 		
 		return responseBuilder.build();

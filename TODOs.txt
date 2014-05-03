@@ -1,10 +1,8 @@
 * AdminInterface
-** Alle Graphen im Triplestore loeschen als Auswahlmöglichkeit im AdminInterface
 ** Abbrechen eines Kommandos im AdminInterface
 
 * yEd-Export doppeltes Systemout in AdminInterface
 
 * GraphViz Visualierung als Variante zu YED (Nutzung von rdfUmlDiagram.py) (MG)
 
-* Test Blank Nodes in R43ples
-** funktioniert nur mit neuem Pattern: INSERT { GRAPH <xyz> { [] <b> <c>.}}
+* Use skolemization for supporting Blank Nodes
