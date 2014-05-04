@@ -99,8 +99,8 @@ public class RevisionManagement {
 		QuerySolution sol = ResultSetFactory.fromXML(TripleStoreInterface.executeQueryWithAuthorization(queryBranch, "XML")).next(); 
 		String branchName = sol.getResource("?branch").toString();
 		String branchGraph = sol.getResource("?graph").toString();
-		query += String.format("DELETE { GRAPH <%s> { <%s> rmo:references <%s>. } }\n", Config.revision_graph, branchName, oldRevision);
-		query += String.format("INSERT { GRAPH <%s> { <%s> rmo:references <%s>. } }\n", Config.revision_graph, branchName, revisionUri);
+		query += String.format("DELETE FROM GRAPH <%s> { <%s> rmo:references <%s>. }\n", Config.revision_graph, branchName, oldRevision);
+		query += String.format("INSERT INTO GRAPH <%s> { <%s> rmo:references <%s>. }\n", Config.revision_graph, branchName, revisionUri);
 		
 		// Remove branch from which changes were merged, if available
 		if (usedRevisionNumber.size()>1){
