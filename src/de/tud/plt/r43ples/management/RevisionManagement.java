@@ -795,6 +795,12 @@ public class RevisionManagement {
 		return TripleStoreInterface.executeQueryWithAuthorization(sparqlQuery, format);
 	}
 	
+	/**
+	 * Deletes all information for a specific named graph including all full graphs and information in the R43ples system
+	 * @param graph graph to be purged
+	 * @throws AuthenticationException
+	 * @throws IOException
+	 */
 	public static void purgeGraph(String graph) throws AuthenticationException, IOException {
 		logger.info("purge R43ples information.");
 		String query = String.format(
