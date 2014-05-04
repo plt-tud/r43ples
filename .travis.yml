@@ -13,7 +13,7 @@ addons:
       description: "Revision Control for the Semantic Web"
     notification_email: markus.graube@tu-dresden.de
     build_command_prepend:
-    build_command:
+    build_command: ant
     branch_pattern: coverity_scan
 
 before_install:

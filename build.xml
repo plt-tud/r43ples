@@ -78,7 +78,7 @@
     <!-- Run the JUnit Tests -->
     <!-- Output is XML, could also be plain-->
     <target name="test" depends="build">
-        <junit printsummary="yes" fork="true" haltonfailure="no">
+        <junit printsummary="yes" fork="true" haltonfailure="no" showoutput="yes">
             <classpath refid="classpath" />
             <formatter type="xml" />
             <batchtest todir="${test.dir}">
