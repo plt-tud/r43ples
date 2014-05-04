@@ -10,20 +10,6 @@
         <pathelement location="${res.dir}"/>
         <fileset dir="${lib.dir}" includes="*.jar" />
     </path>
-    
-    
-    <!-- Variables used for JUnit testin -->
-
-    <property name="test.report.dir" location="testreport" />
-
-    <!-- Define the classpath which includes the junit.jar and the classes after compiling-->
-    <path id="junit.classpath">
-        <pathelement location="lib/junit-4.11.jar" />
-        <pathelement location="lib/hamcrest-core-1.3.jar" />
-        <pathelement location="${classes.dir}" />
-    </path>
-
-
 
     <manifestclasspath property="manifest.class.path" jarfile="${jar.name}">
         <classpath refid="classpath" />
@@ -95,7 +81,7 @@
         <junit printsummary="yes" fork="true" haltonfailure="yes">
             <classpath refid="classpath" />
             <formatter type="xml" />
-            <batchtest todir="${test.report.dir}">
+            <batchtest todir="${test.dir}">
                 <fileset dir="${test.dir}">
                     <include name="**/*Test*.java" />
                 </fileset>
