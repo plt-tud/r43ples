@@ -46,28 +46,28 @@ public class AdministratorInterface {
 	 * @throws ClientProtocolException 
 	 * @throws AuthenticationException 
 	 */
-	public static void start() {
+	public static void start() throws AuthenticationException, ClientProtocolException, IOException {
 		System.out.println("\nAdministration interface!");
 		System.out.println("=========================\n");
 		
-		String commandValue = readCommandDataFromSystemIN(
-				"Command options:\n"
-				+ " c - create a new revision from turtle file\n"
-				+ " e - export revision to turtle file\n"
-				+ " g - generate revision graph (refreshed yEd export)\n"
-				+ " t - tag a revision\n"
-				+ " h - set a new MASTER revision\n"
-				+ " i - import a new graph under revision control\n"
-				+ " m - merge two revisions\n"
-				+ " l - list all revisioned graphs\n"
-				+ " p - purge all R43ples data \n"
-				+ " d - purge all R43ples data (excluding MASTER revision) \n"
-				+ " x - put eXisting graph under version control \n"
-				+ " j - prepare for jMeter permormance test \n"
-				+ " q - quit \n \nEnter command: ");
-		
-		System.out.println("============================================================\n");
-		try {
+		while (true) {
+			String commandValue = readCommandDataFromSystemIN(
+					"Command options:\n"
+					+ " c - create a new revision from turtle file\n"
+					+ " e - export revision to turtle file\n"
+					+ " g - generate revision graph (refreshed yEd export)\n"
+					+ " t - tag a revision\n"
+					+ " h - set a new MASTER revision\n"
+					+ " i - import a new graph under revision control\n"
+					+ " m - merge two revisions\n"
+					+ " l - list all revisioned graphs\n"
+					+ " p - purge all R43ples data \n"
+					+ " d - purge all R43ples data (excluding MASTER revision) \n"
+					+ " x - put eXisting graph under version control \n"
+					+ " j - prepare for jMeter permormance test \n"
+					+ " q - quit \n \nEnter command: ");
+			
+			System.out.println("============================================================\n");
 			switch (commandValue) {
 			case "c":
 				System.out.println("Create a new revision from turtle file.");
@@ -124,10 +124,7 @@ public class AdministratorInterface {
 			default:
 				break;
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
-		start();
 	}
 	
 
