@@ -74,7 +74,7 @@ public class Tree {
 	 * @return linked list with all revisions from 0 to specified revision number 
 	 */
 	public LinkedList<String> getPathToRevision(String revisionNumber) {
-		// TODO: intelligentere Pfadauflösung implementieren: nicht immer ersten Nachfolger, sondern einen richtige Breitensuche
+		// TODO: make path resolving more clever; not always using first successor but breadth-first search
 		LinkedList<String> list = new LinkedList<String>();
 		NodeSpecification node = map.get(revisionNumber);
 		
