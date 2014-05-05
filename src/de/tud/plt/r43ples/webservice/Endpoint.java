@@ -396,6 +396,7 @@ public class Endpoint {
 		
 		boolean foundEntry = false;
 		while (m.find()) {
+			foundEntry = true;
 			String action = m.group("action");
 		    String graphName = m.group("graph");
 		    String revisionNumber = m.group("revision");

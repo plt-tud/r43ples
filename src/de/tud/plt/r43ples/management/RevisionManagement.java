@@ -481,7 +481,7 @@ public class RevisionManagement {
 			Resource t = qsCommits.getResource("?fullGraph");
 			if (t!=null){
 				String fullGraph = t.getURI();
-				if (fullGraph != "")
+				if (fullGraph.equals(""))
 					tree.addFullGraphOfNode(generated, fullGraph);
 			}
 			
