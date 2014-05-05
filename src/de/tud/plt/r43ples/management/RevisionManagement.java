@@ -776,9 +776,8 @@ public class RevisionManagement {
 				Config.revision_graph);
 		}
 		else {
-			sparqlQuery = String.format(
-					prefix_rmo
-					+ "CONSTRUCT"
+			sparqlQuery = prefix_rmo + String.format(
+					"CONSTRUCT"
 					+ "	{ "
 					+ "		?revision ?r_p ?r_o. "
 					+ "		?reference ?ref_p ?ref_o. "
@@ -803,13 +802,12 @@ public class RevisionManagement {
 	 */
 	public static void purgeGraph(String graph) throws AuthenticationException, IOException {
 		logger.info("purge R43ples information.");
-		String query = String.format(
-				prefixes
-				+ "SELECT DISTINCT ?graph FROM <%s> WHERE {"
+		String query = prefixes + String.format(
+				"SELECT DISTINCT ?graph FROM <%s> WHERE {"
 				+ "		?rev rmo:revisionOf <%s>."
 				+ " 	{?rev rmo:deltaAdded ?graph}"
 				+ " UNION {?rev rmo:deltaRemoved ?graph}"
-				+ " UNION { ?ref rmo:references ?rev; rmo:fullGraph ?graph }"
+				+ " UNION {?ref rmo:references ?rev; rmo:fullGraph ?graph}"
 				+ "}", Config.revision_graph, graph);
 		String graphInformation = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
 		ResultSet results = ResultSetFactory.fromXML(graphInformation);		

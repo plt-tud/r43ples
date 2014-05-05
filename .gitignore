@@ -6,3 +6,4 @@ verification/*.csv
 *.log
 *.log.1
 resources/dataset
+/cov-int

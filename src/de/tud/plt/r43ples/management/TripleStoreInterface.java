@@ -69,12 +69,10 @@ public class TripleStoreInterface {
 		InputStream in = null;
 		con = url.openConnection();
 		in = con.getInputStream();
-
 	
 		String encoding = con.getContentEncoding();
-		encoding = encoding == null ? "UTF-8" : encoding;
-		String body = null;
-		body = IOUtils.toString(in, encoding);
+		encoding = (encoding == null) ? "UTF-8" : encoding;
+		String body = IOUtils.toString(in, encoding);
 		
 		return body;
 		
@@ -96,7 +94,7 @@ public class TripleStoreInterface {
 		
 		logger.info("Execute query on SPARQL endpoint: "+ query);
 		DefaultHttpClient httpClient = new DefaultHttpClient();
-	    httpClient.getCredentialsProvider().setCredentials(new AuthScope(null, -1, null), credentials);
+	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
 			
 	    HttpPost request = new HttpPost(endpoint);
 		
