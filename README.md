@@ -5,10 +5,6 @@ R43ples (Revision for triples) is Revision Management Tool for the Semantic Web.
 
 It is based on storing the differences of revisions of graphs in additional Named Graphs which are then referenced in a revision graph.
 
-<a href="https://scan.coverity.com/projects/2125">
-  <img alt="Coverity Scan Build Status"
-       src="https://scan.coverity.com/projects/2125/badge.svg"/>
-</a>
 [![Build Status](https://travis-ci.org/plt-tud/r43ples.png?branch=master)](https://travis-ci.org/plt-tud/r43ples)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/2125/badge.svg)](https://scan.coverity.com/projects/2125)
 
