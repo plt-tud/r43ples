@@ -118,13 +118,9 @@ public class Endpoint {
 				logger.info("SPARQL form requested");
 				File fileToSend = new File("resources/index.html");
 				return Response.ok(fileToSend, "text/html").build();
-			} else
-				try {
-					return getServiceDescription(format);
-				} catch (IOException e) {
-					e.printStackTrace();
-					throw new InternalServerErrorException(e.getMessage());
-				}
+			} else {
+				return getServiceDescription(format);
+			}
 		}
 		else {
 			logger.info("SPARQL query was requested. Query: " + sparqlQuery);
@@ -161,36 +157,41 @@ public class Endpoint {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	private Response getServiceDescription(String format) throws ClientProtocolException, IOException {
+	private Response getServiceDescription(String format) {
 		logger.info("Service Description requested");
 		DefaultHttpClient client =new DefaultHttpClient();
 		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(Config.sparql_user, Config.sparql_password);
 	    client.getCredentialsProvider().setCredentials(new AuthScope(null, -1, null), credentials);
 	    HttpGet request = new HttpGet(Config.sparql_endpoint);
 		request.setHeader("Accept", "text/turtle");
-		HttpResponse response = client.execute(request);
-
-		Model model = ModelFactory.createDefaultModel();
-		model.read(response.getEntity().getContent(), null, Lang.TURTLE.getName());
-		
-		UpdateRequest srequest = UpdateFactory.create("PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
-				+ "DELETE { ?s ?p ?o.} "
-				+ "INSERT { <"+uriInfo.getAbsolutePath()+"> ?p ?o.} "
-				+ "WHERE { ?s a sd:Service; ?p ?o.} ");
-		UpdateAction.execute(srequest, model);
-		srequest = UpdateFactory.create("PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
-				+ "DELETE { ?s sd:url ?url.} "
-				+ "INSERT { ?s sd:url <"+uriInfo.getAbsolutePath()+">.} "
-				+ "WHERE { ?s sd:url ?url.} ");
-		UpdateAction.execute(srequest, model); 
-		srequest = UpdateFactory.create("PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
-				+ "INSERT { ?s sd:feature sd:r43ples.} "
-				+ "WHERE { ?s a sd:Service.} ");
-		UpdateAction.execute(srequest, model); 
-		
-		StringWriter sw = new StringWriter();
-		model.write(sw,  RDFLanguages.nameToLang(format).getName());
-		return Response.ok().entity(sw.toString()).build();
+		try{
+			HttpResponse response = client.execute(request);
+	
+			Model model = ModelFactory.createDefaultModel();
+			model.read(response.getEntity().getContent(), null, Lang.TURTLE.getName());
+			
+			UpdateRequest srequest = UpdateFactory.create("PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
+					+ "DELETE { ?s ?p ?o.} "
+					+ "INSERT { <"+uriInfo.getAbsolutePath()+"> ?p ?o.} "
+					+ "WHERE { ?s a sd:Service; ?p ?o.} ");
+			UpdateAction.execute(srequest, model);
+			srequest = UpdateFactory.create("PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
+					+ "DELETE { ?s sd:url ?url.} "
+					+ "INSERT { ?s sd:url <"+uriInfo.getAbsolutePath()+">.} "
+					+ "WHERE { ?s sd:url ?url.} ");
+			UpdateAction.execute(srequest, model); 
+			srequest = UpdateFactory.create("PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
+					+ "INSERT { ?s sd:feature sd:r43ples.} "
+					+ "WHERE { ?s a sd:Service.} ");
+			UpdateAction.execute(srequest, model); 
+			
+			StringWriter sw = new StringWriter();
+			model.write(sw,  RDFLanguages.nameToLang(format).getName());
+			return Response.ok().entity(sw.toString()).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException(e.getMessage());
+		}
 	}
 	
 	
