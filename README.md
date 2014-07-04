@@ -41,7 +41,7 @@ It directly accepts SPARQL queries with HTTP GET parameters for //query// and //
 
 Admin Interface
 ---------------
-There is a command line admin interface which can be started separatly.
+There is a command line admin interface which can be started separately.
 
 
 There is a configuration file named Service.conf where all parameters are configured.
