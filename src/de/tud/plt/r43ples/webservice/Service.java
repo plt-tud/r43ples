@@ -38,8 +38,7 @@ public class Service {
 		URI BASE_URI = UriBuilder.fromUri(Config.service_uri).port(Config.service_port).build();
 		ResourceConfig rc = new PackagesResourceConfig("de.tud.plt.r43ples.webservice");
 		GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
-		logger.info(String.format("Server started: %s", BASE_URI));
-		logger.info(String.format("HTML site available under: %sr43ples/sparql", BASE_URI));
+		logger.info(String.format("Server started -R43ples endpoint available under: %sr43ples/sparql", BASE_URI));
 		
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
 		
