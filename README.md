@@ -33,9 +33,11 @@ Ant is used for compiling and starting
 SPARQL
 ------
 SPARQL endpoint is available at:
+
 	[uri]:[port]/r43ples/sparql
 
-It directly accepts SPARQL queries with HTTP GET parameters for //query// and //format//: 
+It directly accepts SPARQL queries with HTTP GET parameters for **query** and **format**: 
+
     [uri]:[port]/r43ples/sparql?query=[]&format=(HTML|JSON)
 
 
