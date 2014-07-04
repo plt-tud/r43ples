@@ -34,7 +34,7 @@ public class Service {
 	public static void main(String[] args) throws ConfigurationException, IOException, HttpException {
 		
 		logger.info("Starting R43ples on grizzly...");
-		Config.readConfig("Service.conf");
+		Config.readConfig("r43ples.conf");
 		URI BASE_URI = UriBuilder.fromUri(Config.service_uri).port(Config.service_port).build();
 		ResourceConfig rc = new PackagesResourceConfig("de.tud.plt.r43ples.webservice");
 		GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
