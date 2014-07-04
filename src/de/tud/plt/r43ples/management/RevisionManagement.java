@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import org.apache.http.HttpException;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.log4j.Logger;
 
@@ -53,7 +54,7 @@ public class RevisionManagement {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static void createNewRevision(String graphName, String addedAsNTriples, String removedAsNTriples, String user, String newRevisionNumber, String commitMessage, ArrayList<String> usedRevisionNumber) throws AuthenticationException, IOException {
+	public static void createNewRevision(String graphName, String addedAsNTriples, String removedAsNTriples, String user, String newRevisionNumber, String commitMessage, ArrayList<String> usedRevisionNumber) throws HttpException, IOException {
 		logger.info("Start creation of new revision!");
 		
 		String dateString = getDateString();
@@ -146,7 +147,7 @@ public class RevisionManagement {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static void createBranch(String graphName, String revisionNumber, String branchName, String user, String commitMessage) throws AuthenticationException, IOException {
+	public static void createBranch(String graphName, String revisionNumber, String branchName, String user, String commitMessage) throws HttpException, IOException {
 		logger.info("Start creation of new branch!");
 		
 		// General variables
@@ -202,7 +203,7 @@ public class RevisionManagement {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static boolean createNewGraphWithVersionControl(String graphName, String dataSetAsNTriples) throws AuthenticationException, IOException {
+	public static boolean createNewGraphWithVersionControl(String graphName, String dataSetAsNTriples) throws HttpException, IOException {
 		logger.info("Start creation of new graph under version control with the name " + graphName + "!");
 
 		if (existGraph(graphName)) {
@@ -263,7 +264,7 @@ public class RevisionManagement {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static void createTag(String graphName, String revisionNumber, String tagName, String user, String commitMessage) throws AuthenticationException, IOException {
+	public static void createTag(String graphName, String revisionNumber, String tagName, String user, String commitMessage) throws HttpException, IOException {
 		logger.info("Create tag for revision " + revisionNumber + " of graph " + graphName);
 		
 		// General variables
@@ -307,7 +308,7 @@ public class RevisionManagement {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static void putGraphUnderVersionControl(String graphName) throws AuthenticationException, IOException {
+	public static void putGraphUnderVersionControl(String graphName) throws HttpException, IOException {
 		logger.info("Put existing graph under version control with the name " + graphName);
 
 		// Insert information in revision graph
@@ -340,7 +341,7 @@ public class RevisionManagement {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static boolean existGraph(String graphName) throws AuthenticationException, IOException {
+	public static boolean existGraph(String graphName) throws HttpException, IOException {
 		// Ask whether graph exists
 		String query = "ASK { GRAPH <" + graphName + "> {?s ?p ?o} }";
 		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
@@ -358,7 +359,7 @@ public class RevisionManagement {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static void generateFullGraphOfRevision(String graphName, String revisionName, String tempGraphName) throws AuthenticationException, IOException {
+	public static void generateFullGraphOfRevision(String graphName, String revisionName, String tempGraphName) throws HttpException, IOException {
 		logger.info("Rebuild whole content of revision " + revisionName + " of graph <" + graphName + "> into temporary graph <" + tempGraphName+">");
 		String revisionNumber = getRevisionNumber(graphName, revisionName);
 		
@@ -415,7 +416,7 @@ public class RevisionManagement {
 	}
 	
 	
-	public static String getRevisionNumber(String graphName, String referenceName) throws AuthenticationException, IOException {
+	public static String getRevisionNumber(String graphName, String referenceName) throws HttpException, IOException {
 		String queryASK = prefix_rmo + String.format(
 				"ASK { GRAPH <%s> { ?rev a rmo:Revision; rmo:revisionOf <%s>; rmo:revisionNumber \"%s\" .}}",
 				Config.revision_graph, graphName, referenceName);
@@ -448,7 +449,7 @@ public class RevisionManagement {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static Tree getRevisionTree(String graphName) throws AuthenticationException, IOException {
+	public static Tree getRevisionTree(String graphName) throws HttpException, IOException {
 		logger.info("Start creation of revision tree of graph " + graphName + "!");
 
 		Tree tree = new Tree();
@@ -499,7 +500,7 @@ public class RevisionManagement {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static String getMasterRevisionNumber(String graphName) throws AuthenticationException, IOException {
+	public static String getMasterRevisionNumber(String graphName) throws HttpException, IOException {
 		logger.info("Get MASTER revision number of graph " + graphName);
 
 		String queryString = String.format("PREFIX rmo: <http://revision.management.et.tu-dresden.de/rmo#>%n" +
@@ -541,7 +542,7 @@ public class RevisionManagement {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static String getRevisionNumberForNewBranch(String graphName, String revisionNumber) throws AuthenticationException, IOException {
+	public static String getRevisionNumberForNewBranch(String graphName, String revisionNumber) throws HttpException, IOException {
 		logger.info("Get the revision number for a new branch of graph " + graphName + " and revision number " + revisionNumber); 		
 		String startIdentifierRevisionNumber = "0";
 		String checkIdentifierRevisionNumber = "0";
@@ -598,7 +599,7 @@ public class RevisionManagement {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static void setHeadRevisionNumber(String graphName, String revisionNumberOfNewHeadRevision) throws AuthenticationException, IOException {
+	public static void setHeadRevisionNumber(String graphName, String revisionNumberOfNewHeadRevision) throws HttpException, IOException {
 		logger.info("Set MASTER revision number of graph " + graphName + " to " + revisionNumberOfNewHeadRevision + "!");
 		String query =	String.format(
 						"DELETE DATA FROM <%s>" +
@@ -627,7 +628,7 @@ public class RevisionManagement {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static void createNewMergedRevision(String graphName, String user, String newRevisionNumber, String revisionNumber1, String revisionNumber2, String generatedVersionAsNTriples) throws AuthenticationException, IOException {
+	public static void createNewMergedRevision(String graphName, String user, String newRevisionNumber, String revisionNumber1, String revisionNumber2, String generatedVersionAsNTriples) throws HttpException, IOException {
 		logger.info("Start merging of revisions " + revisionNumber1 + " and " + revisionNumber2 + " of graph " + graphName + "!");
 		
 		// Create temporary graphs
@@ -688,7 +689,7 @@ public class RevisionManagement {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static void executeINSERT(String graphName, String dataSetAsNTriples) throws AuthenticationException, IOException {
+	public static void executeINSERT(String graphName, String dataSetAsNTriples) throws HttpException, IOException {
 
 		final int MAX_STATEMENTS = 10;
 		String lines[] = dataSetAsNTriples.split("\\.\\s*<");
@@ -724,7 +725,7 @@ public class RevisionManagement {
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 */
-	public static boolean isBranch(String graphName, String revisionName) throws AuthenticationException, IOException {
+	public static boolean isBranch(String graphName, String revisionName) throws HttpException, IOException {
 		String queryASK = prefix_rmo + String.format("ASK { GRAPH <%s> { "
 				+ " ?rev a rmo:Revision; rmo:revisionOf <%s>. "
 				+ " ?ref a rmo:Reference; rmo:references ?rev ."
@@ -743,7 +744,7 @@ public class RevisionManagement {
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 */
-	public static String getFullGraphName(String graphName, String revisionName) throws AuthenticationException, IOException {
+	public static String getFullGraphName(String graphName, String revisionName) throws HttpException, IOException {
 		String query = prefix_rmo + String.format("SELECT ?graph { GRAPH <%s> { "
 				+ " ?rev a rmo:Revision; rmo:revisionOf <%s> . "
 				+ " ?ref a rmo:Reference; rmo:references ?rev; rmo:fullGraph ?graph ."
@@ -763,7 +764,7 @@ public class RevisionManagement {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static String getRevisionInformation(String graphName, String format) throws AuthenticationException, IOException {
+	public static String getRevisionInformation(String graphName, String format) throws HttpException, IOException {
 		String sparqlQuery;
 		if (graphName.equals("")) {
 			 sparqlQuery = String.format(
@@ -800,7 +801,7 @@ public class RevisionManagement {
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 */
-	public static void purgeGraph(String graph) throws AuthenticationException, IOException {
+	public static void purgeGraph(String graph) throws HttpException, IOException {
 		logger.info("purge R43ples information.");
 		String query = prefixes + String.format(
 				"SELECT DISTINCT ?graph FROM <%s> WHERE {"
@@ -846,7 +847,7 @@ public class RevisionManagement {
 	 * @throws IOException
 	 */
 	private static String getUserName(String user)
-			throws AuthenticationException, IOException {
+			throws HttpException, IOException {
 		// When user does not already exists - create new
 		String personName =  "http://revision.management.et.tu-dresden.de/persons/" + user;
 		String queryASK = String.format("PREFIX prov: <http://www.w3.org/ns/prov#> %n"

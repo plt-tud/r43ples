@@ -9,7 +9,10 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.ws.rs.core.Response.Status;
+
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthScope;
@@ -41,7 +44,7 @@ public class TripleStoreInterface {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static void init(String sparql_endpoint, String sparql_username, String sparql_password) throws AuthenticationException, IOException {
+	public static void init(String sparql_endpoint, String sparql_username, String sparql_password) throws HttpException, IOException {
 		credentials = new UsernamePasswordCredentials(sparql_username, sparql_password);
 		endpoint = sparql_endpoint;
 		if (!RevisionManagement.existGraph(Config.revision_graph)){
@@ -86,13 +89,13 @@ public class TripleStoreInterface {
 	 * @param query the SPARQL query
 	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
 	 * @return the result of the query
-	 * @throws AuthenticationException 
 	 * @throws IOException 
+	 * @throws HttpException 
 	 */
-	public static String executeQueryWithAuthorization(String query, String format) throws AuthenticationException, IOException {
+	public static String executeQueryWithAuthorization(String query, String format) throws IOException, HttpException {
 		String result = null;
 		
-		logger.info("Execute query on SPARQL endpoint: "+ query);
+		logger.info("Execute query on SPARQL endpoint:\n"+ query);
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
 			
@@ -107,6 +110,10 @@ public class TripleStoreInterface {
 		
 		//Execute Query
 		HttpResponse response = httpClient.execute(request);
+		logger.debug("Statuscode: " + response.getStatusLine().getStatusCode());
+		if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
+			throw new HttpException(response.getStatusLine().toString());
+		}
 		InputStreamReader in = new InputStreamReader(response.getEntity().getContent());
 		result = IOUtils.toString(in);
 		

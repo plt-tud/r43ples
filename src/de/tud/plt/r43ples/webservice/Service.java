@@ -6,7 +6,7 @@ import java.net.URI;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.http.auth.AuthenticationException;
+import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
@@ -31,7 +31,7 @@ public class Service {
 	private static Logger logger = Logger.getLogger(Service.class);
 	
 	
-	public static void main(String[] args) throws ConfigurationException, IOException, AuthenticationException {
+	public static void main(String[] args) throws ConfigurationException, IOException, HttpException {
 		
 		logger.info("Starting R43ples on grizzly...");
 		Config.readConfig("Service.conf");

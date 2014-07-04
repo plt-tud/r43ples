@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.http.auth.AuthenticationException;
+import org.apache.http.HttpException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,20 +18,20 @@ import de.tud.plt.r43ples.management.TripleStoreInterface;
 public class TestRevisionManagment {
 
 	@Before
-	public void setUp() throws AuthenticationException, IOException, ConfigurationException{
+	public void setUp() throws HttpException, IOException, ConfigurationException{
 		Config.readConfig("Service.conf");
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
 		RevisionManagement.putGraphUnderVersionControl("test1234");
 	}
 	
 	@After
-	public void tearDown() throws AuthenticationException, IOException{
+	public void tearDown() throws HttpException, IOException{
 		RevisionManagement.purgeGraph("test1234");
 	}
 	
 	
 	@Test
-	public void testR43ples() throws AuthenticationException, IOException {
+	public void testR43ples() throws HttpException, IOException {
 		RevisionManagement.putGraphUnderVersionControl("test1234");
 		String revNumberMaster = RevisionManagement.getMasterRevisionNumber("test1234");
 		Assert.assertEquals("0", revNumberMaster);

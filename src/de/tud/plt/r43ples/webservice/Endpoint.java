@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.AuthenticationException;
@@ -77,7 +78,7 @@ public class Endpoint {
 	 */
 	@Path("revisiongraph")
 	@GET
-	@Produces({"text/turtle", "application/rdf+xml"})
+	@Produces({"text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON})
 	public String getRevisionGraph(
 			@HeaderParam("Accept") String format_header, 
 			@QueryParam("format") @DefaultValue("text/turtle") String format_query,
@@ -88,7 +89,7 @@ public class Endpoint {
 		
 		try {
 			return RevisionManagement.getRevisionInformation(graph, format);
-		} catch (AuthenticationException | IOException e) {
+		} catch (HttpException | IOException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException(e.getMessage());
 		}
@@ -141,7 +142,7 @@ public class Endpoint {
 					// query  with create graph
 					response = produceBranchOrTagResponse(sparqlQuery, format);
 				}
-			} catch (AuthenticationException | IOException e) {
+			} catch (HttpException | IOException e) {
 				e.printStackTrace();
 				throw new InternalServerErrorException(e.getMessage());
 			}	
@@ -205,7 +206,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	private Response produceSelectResponse(String query, String format) throws AuthenticationException, IOException {
+	private Response produceSelectResponse(String query, String format) throws HttpException, IOException {
 
 		ResponseBuilder responseBuilder = Response.ok();
 		
@@ -259,7 +260,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	private Response produceInsertDeleteResponse(String query, String format) throws AuthenticationException, IOException {
+	private Response produceInsertDeleteResponse(String query, String format) throws HttpException, IOException {
 		
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));		
 		logger.info("Update detected");
@@ -347,10 +348,10 @@ public class Endpoint {
 	 * @param format the result format
 	 * @return
 	 * @throws IOException 
-	 * @throws AuthenticationException 
+	 * @throws HttpException 
 	 */
 	private Response produceCreateGraphResponse(String query,
-			String format) throws AuthenticationException, IOException {
+			String format) throws IOException, HttpException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Graph creation detected");
 		
@@ -385,7 +386,7 @@ public class Endpoint {
 	 * @throws AuthenticationException 
 	 */
 	private Response produceBranchOrTagResponse(String sparqlQuery,
-			String format) throws AuthenticationException, IOException {
+			String format) throws HttpException, IOException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Tag or branch creation detected");
 		String user = extractUser(sparqlQuery);

@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.http.auth.AuthenticationException;
+import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.management.Config;
@@ -18,7 +18,7 @@ public class RdfUmlDiagramExport {
 	
 
 
-	public static boolean generateRdfUmlDiagram(String graph, String fileName) throws AuthenticationException, IOException{
+	public static boolean generateRdfUmlDiagram(String graph, String fileName) throws HttpException, IOException{
 		// download revision graph to a file and pass it to rdfUmlDiagram.py python script
 		String filePath = Config.visualisation_path +  fileName;
 		logger.debug(filePath);

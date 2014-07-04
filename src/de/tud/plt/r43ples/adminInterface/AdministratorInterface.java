@@ -13,6 +13,7 @@ import java.util.HashMap;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.io.FileUtils;
+import org.apache.http.HttpException;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.log4j.Logger;
@@ -34,7 +35,7 @@ public class AdministratorInterface {
 	private static Logger logger = Logger.getLogger(AdministratorInterface.class);
 	
 	
-	public static void main(String[] args) throws ConfigurationException, AuthenticationException, ClientProtocolException, IOException {
+	public static void main(String[] args) throws ConfigurationException, HttpException, IOException {
 		Config.readConfig("Service.conf");
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
 		start();
@@ -46,7 +47,7 @@ public class AdministratorInterface {
 	 * @throws ClientProtocolException 
 	 * @throws AuthenticationException 
 	 */
-	public static void start() throws AuthenticationException, ClientProtocolException, IOException {
+	public static void start() throws HttpException, IOException {
 		System.out.println("\nAdministration interface!");
 		System.out.println("=========================\n");
 		
@@ -128,12 +129,12 @@ public class AdministratorInterface {
 	}
 	
 
-	private static void putExistingGraphUnderVersionControl() throws AuthenticationException, IOException {
+	private static void putExistingGraphUnderVersionControl() throws HttpException, IOException {
 		String graphName = getUserInputExistingGraph();
 		RevisionManagement.putGraphUnderVersionControl(graphName);
 	}
 
-	private static void createTag() throws AuthenticationException, IOException {
+	private static void createTag() throws HttpException, IOException {
 		String graphName = getUserInputExistingGraph();
 		String revisionNumber = getUserInputRevisionNumber();
 		
@@ -150,7 +151,7 @@ public class AdministratorInterface {
 	 * @throws ClientProtocolException 
 	 * @throws AuthenticationException 
 	 */
-	private static void createNewRevisionFromTurtleFile() throws AuthenticationException, ClientProtocolException, IOException {
+	private static void createNewRevisionFromTurtleFile() throws HttpException, IOException {
 		
 		String graphName = "";
 		try {
@@ -254,7 +255,7 @@ public class AdministratorInterface {
 	 * @throws Exception 
 	 */
 	private static String getUserInputExistingGraph()
-			throws IOException, AuthenticationException {
+			throws IOException, HttpException {
 		// Get the graph name
 		System.out.println("Please enter the graph name:");
 		
@@ -276,7 +277,7 @@ public class AdministratorInterface {
 	 * @throws Exception 
 	 */
 	private static String getUserInputRevisionNumber()
-			throws IOException, AuthenticationException {
+			throws IOException, HttpException {
 		// Get the revision number
 		System.out.println("Please enter the revision number:");
 		
@@ -295,7 +296,7 @@ public class AdministratorInterface {
 	 * @throws ClientProtocolException 
 	 * @throws AuthenticationException 
 	 */
-	private static void exportRevisionToTurtleFile() throws AuthenticationException, ClientProtocolException, IOException {
+	private static void exportRevisionToTurtleFile() throws HttpException, IOException {
 		
 		// Get the graph name
 		System.out.println("Please enter the graph name:");
@@ -375,7 +376,7 @@ public class AdministratorInterface {
 	 * @throws ClientProtocolException 
 	 * @throws AuthenticationException 
 	 */
-	private static void setNewHeadRevisionAI() throws AuthenticationException, ClientProtocolException, IOException {
+	private static void setNewHeadRevisionAI() throws HttpException, IOException {
 		logger.info("Administration interface - set a new MASTER revision.");
 		System.out.println("Please enter the graph name:");
 		
@@ -437,7 +438,7 @@ public class AdministratorInterface {
 	 * @throws ClientProtocolException 
 	 * @throws AuthenticationException 
 	 */
-	private static void createNewGraphUnderVersionControl() throws AuthenticationException, ClientProtocolException, IOException {
+	private static void createNewGraphUnderVersionControl() throws HttpException, IOException {
 		
 		// Get the graph name
 		System.out.println("Please enter the graph name:");
@@ -506,7 +507,7 @@ public class AdministratorInterface {
 	 * @throws ClientProtocolException 
 	 * @throws AuthenticationException 
 	 */
-	private static void mergeRevisionAI() throws AuthenticationException, ClientProtocolException, IOException {
+	private static void mergeRevisionAI() throws HttpException, IOException {
 		
 		DiffResolveTool diffResolveTool = new DiffResolveTool();
 		
@@ -682,7 +683,7 @@ public class AdministratorInterface {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	private static void listAllRevisionedGraphs() throws AuthenticationException, IOException {
+	private static void listAllRevisionedGraphs() throws HttpException, IOException {
 		String graphInformation = TripleStoreInterface.executeQueryWithAuthorization("SELECT DISTINCT ?graph FROM <r43ples-revisions> WHERE {?s <http://revision.management.et.tu-dresden.de/rmo#revisionOf> ?graph}", "XML");
 
 		ResultSet results = ResultSetFactory.fromXML(graphInformation);
@@ -702,7 +703,7 @@ public class AdministratorInterface {
 	 * @throws IOException 
 	 * @throws ClientProtocolException 
 	 */
-	private static void generateRefreshedYEDExport() throws AuthenticationException, ClientProtocolException, IOException {
+	private static void generateRefreshedYEDExport() throws HttpException, IOException {
 		// Get the graph name
 		System.out.println("Please enter the graph name:");
 		
@@ -736,7 +737,7 @@ public class AdministratorInterface {
 	 * @throws AuthenticationException 
 	 * @throws IOException 
 	 */
-	private static void purgeR43plesInformation(boolean keepMaster) throws AuthenticationException, IOException {
+	private static void purgeR43plesInformation(boolean keepMaster) throws HttpException, IOException {
 		logger.info("purge R43ples information.");
 		String query =
 				"PREFIX rmo: <http://revision.management.et.tu-dresden.de/rmo#> "
@@ -763,7 +764,7 @@ public class AdministratorInterface {
 	}
 	
 	
-	private static void prepareJmeterPerformanceTest() throws AuthenticationException, IOException {
+	private static void prepareJmeterPerformanceTest() throws HttpException, IOException {
 		logger.info("Prepare jMeter performance test.");
 		// ClassLoader in order to load files from /resources/ directory
 		final ClassLoader loader = AdministratorInterface.class.getClassLoader();
