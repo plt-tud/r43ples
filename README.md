@@ -16,6 +16,13 @@ It provides a SPARQL endpoint where all queries have to be directed to.
 The SPARQL query defines whether only a revision is queried, or a new revision needs to be created. 
 Furthermore, the service provides an interface for revision management and the import or export of data from the Computer Aided Engineering tools.
 
+An demonstration systems runs at http://eatld.et.tu-dresden.de/r43ples/sparql
+
+Dependencies
+------------
+R43ples depends on JDK 1.7
+
+
 Starting
 --------
 Ant is used for compiling and starting
@@ -26,12 +33,10 @@ Ant is used for compiling and starting
 SPARQL
 ------
 SPARQL endpoint is available at:
+	[uri]:[port]/r43ples/sparql
 
+It directly accepts SPARQL queries with HTTP GET parameters for //query// and //format//: 
     [uri]:[port]/r43ples/sparql?query=[]&format=(HTML|JSON)
-
-A HTML page is available under
-
-    [uri]:[port]/r43ples
 
 
 Admin Interface
