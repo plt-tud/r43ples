@@ -36,7 +36,7 @@ public class AdministratorInterface {
 	
 	
 	public static void main(String[] args) throws ConfigurationException, HttpException, IOException {
-		Config.readConfig("Service.conf");
+		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
 		start();
 	}
@@ -264,7 +264,7 @@ public class AdministratorInterface {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
 		graphName = br.readLine();
-		if (!RevisionManagement.existGraph(graphName)) {
+		if (!RevisionManagement.checkGraphExistence(graphName)) {
 			System.out.println("Entered graph name does not exists. Please try again.");
 			throw new IOException("Entered graph name does not exists. Please try again.");
 		}
@@ -450,7 +450,7 @@ public class AdministratorInterface {
 		try {
 			graphName = br.readLine();
 
-			if (RevisionManagement.existGraph(graphName)) {
+			if (RevisionManagement.checkGraphExistence(graphName)) {
 				System.out.println("Entered graph already exists. Please try again.");
 				createNewGraphUnderVersionControl();
 				return;
@@ -521,7 +521,7 @@ public class AdministratorInterface {
 		try {
 			graphName = br.readLine();
 
-			if (RevisionManagement.existGraph(graphName)) {
+			if (RevisionManagement.checkGraphExistence(graphName)) {
 				System.out.println("Entered graph name does not exists. Please try again.");
 				mergeRevisionAI();
 				return;
@@ -543,7 +543,7 @@ public class AdministratorInterface {
 		try {
 			ontologyName=brO.readLine();
 			
-			if (RevisionManagement.existGraph(ontologyName)) {
+			if (RevisionManagement.checkGraphExistence(ontologyName)) {
 				System.out.println("Entered graph name does not exists. Please try again.");
 				mergeRevisionAI();
 				return;
