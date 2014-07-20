@@ -111,7 +111,7 @@ public class RevisionManagement {
 			String removeBranchUri = sol2.getResource("?branch").toString();
 			String removeBranchFullGraph = sol2.getResource("?graph").toString();
 			query += String.format("DELETE { GRAPH <%s> { <%s> ?p ?o. } } WHERE { GRAPH <%s> { <%s> ?p ?o. }}%n", Config.revision_graph, removeBranchUri, Config.revision_graph, removeBranchUri);
-			query += String.format("DROP GRAPH <%s>%n", removeBranchFullGraph);
+			query += String.format("DROP SILENT GRAPH <%s>%n", removeBranchFullGraph);
 		}
 		
 		// Update full graph of branch
@@ -364,7 +364,7 @@ public class RevisionManagement {
 		String revisionNumber = getRevisionNumber(graphName, revisionName);
 		
 		// Create temporary graph
-		TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <" + tempGraphName + ">", "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <" + tempGraphName + ">", "HTML");
 		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <" + tempGraphName + ">", "HTML");
 		
 		// Create path to revision
@@ -632,17 +632,17 @@ public class RevisionManagement {
 		logger.info("Start merging of revisions " + revisionNumber1 + " and " + revisionNumber2 + " of graph " + graphName + "!");
 		
 		// Create temporary graphs
-		TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <RM-MERGE-TEMP-1>", "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <RM-MERGE-TEMP-1>", "HTML");
 		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <RM-MERGE-TEMP-1>", "HTML");
 		generateFullGraphOfRevision(graphName, revisionNumber1, "RM-TEMP-" + graphName);
 		TripleStoreInterface.executeQueryWithAuthorization("COPY <RM-TEMP-" + graphName+ "> TO <RM-MERGE-TEMP-1>", "HTML");
 		
-		TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <RM-MERGE-TEMP-2>", "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <RM-MERGE-TEMP-2>", "HTML");
 		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <RM-MERGE-TEMP-2>", "HTML");
 		generateFullGraphOfRevision(graphName, revisionNumber2, "RM-TEMP-" + graphName);
 		TripleStoreInterface.executeQueryWithAuthorization("COPY <RM-TEMP-" + graphName+ "> TO <RM-MERGE-TEMP-2>", "HTML");
 		
-		TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <RM-MERGE-TEMP-MERGED>", "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <RM-MERGE-TEMP-MERGED>", "HTML");
 		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <RM-MERGE-TEMP-MERGED>", "HTML");
 		executeINSERT("RM-MERGE-TEMP-MERGED", generatedVersionAsNTriples);
 
@@ -815,7 +815,7 @@ public class RevisionManagement {
 		while (results.hasNext()) {
 			QuerySolution qs = results.next();
 			String graphName = qs.getResource("?graph").toString();
-			TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <"+graphName+">","XML");
+			TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <"+graphName+">","XML");
 			System.out.println("Graph deleted: " + graphName);
 		}
 		String queryDelete = String.format(
@@ -851,9 +851,9 @@ public class RevisionManagement {
 		// When user does not already exists - create new
 		String personName =  "http://revision.management.et.tu-dresden.de/persons/" + user;
 		String queryASK = String.format("PREFIX prov: <http://www.w3.org/ns/prov#> %n"
-				+ "ASK  { "
+				+ "ASK { GRAPH <%s>  { "
 				+ "<%s> a prov:Person"
-				+ "} FROM <%s>", personName, Config.revision_graph);
+				+ "} }", Config.revision_graph, personName);
 		String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
 		if (resultASK.equals("true")) {
 			logger.info("User " + user + " already exists.");

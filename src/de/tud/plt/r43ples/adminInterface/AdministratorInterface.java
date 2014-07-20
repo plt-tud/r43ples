@@ -216,7 +216,7 @@ public class AdministratorInterface {
 		}
 		
 		// Create temporary graph <RM-INOUT-TEMP>
-		TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <RM-INOUT-TEMP>", "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <RM-INOUT-TEMP>", "HTML");
 		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <RM-INOUT-TEMP>", "HTML");
 					
 		// Add data to temporary graph
@@ -758,10 +758,10 @@ public class AdministratorInterface {
 		while (results.hasNext()) {
 			QuerySolution qs = results.next();
 			String graphName = qs.getResource("?graph").toString();
-			TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <"+graphName+">","XML");
+			TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <"+graphName+">","XML");
 			System.out.println("Graph deleted: " + graphName);
 		}
-		TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <"+Config.revision_graph+">","XML");
+		TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <"+Config.revision_graph+">","XML");
 		System.out.println("Graph deleted: " + Config.revision_graph);
 	}
 	
@@ -779,7 +779,7 @@ public class AdministratorInterface {
 			for (int i = 0; i < changesizes.length; i++) {
 				int changesize = changesizes[i];
 				String graphName = "dataset-"+datasize+"-"+changesize;
-				TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <" + graphName +">", "HTML");
+				TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <" + graphName +">", "HTML");
 				URL fileDataset = loader.getResource("dataset/dataset-"+datasize+".nt");
 				String dataSetAsNTriples = FileUtils.readFileToString(new File(fileDataset.getFile()));
 				RevisionManagement.createNewGraphWithVersionControl(graphName, dataSetAsNTriples);

@@ -294,7 +294,7 @@ public class Endpoint {
 	    String newRevisionNumber = RevisionManagement.getNextRevisionNumberForLastRevisionNumber(graphName, revisionNumber);
 
 	    // Create the temporary graph and fill with reference full graph
-	    TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
+	    TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT SILENT GRAPH <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
 		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
 		TripleStoreInterface.executeQueryWithAuthorization("COPY <" + referenceFullGraph + "> TO <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
 		
