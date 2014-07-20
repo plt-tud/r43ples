@@ -20,7 +20,8 @@ An demonstration systems runs at http://eatld.et.tu-dresden.de/r43ples/sparql
 
 Dependencies
 ------------
-R43ples depends on JDK 1.7
+* JDK 1.7
+* Running Triplestore with SPARQL endpoint supporting SPARUL requests
 
 
 Starting
