@@ -16,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpException;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.jena.atlas.logging.Log;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.QuerySolution;
@@ -663,6 +664,7 @@ public class AdministratorInterface {
 		} catch (UnsupportedEncodingException e) {
 			System.out.println("There was a UnsupportedEncodingException the merged revision could not be created!");
 		}
+		Log.debug(AdministratorInterface.class, mergedModelStringAsNTriples);
 		
 //		Tree tree = RevisionManagement.createRevisionTree(graphName);
 		// TODO Auf welchem Branch soll die merged Revision abgelegt werden????
