@@ -1,0 +1,12 @@
+prefix : <http:/test.com/>
+
+select distinct *
+from <test>
+from <test-delta-removed-3>
+from named <test-delta-added-3>
+where {
+  ?s :knows ?o1, ?o2.
+  MINUS { GRAPH  <test-delta-added-3> {?s :knows ?o1.}}
+  MINUS { GRAPH  <test-delta-added-3> {?s :knows ?o2.}}
+  FILTER (?o1 != ?o2)
+}
