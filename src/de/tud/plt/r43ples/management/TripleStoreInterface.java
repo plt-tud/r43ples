@@ -47,8 +47,10 @@ public class TripleStoreInterface {
 	public static void init(String sparql_endpoint, String sparql_username, String sparql_password) throws HttpException, IOException {
 		credentials = new UsernamePasswordCredentials(sparql_username, sparql_password);
 		endpoint = sparql_endpoint;
-		if (!RevisionManagement.existGraph(Config.revision_graph)){
+		if (!RevisionManagement.checkGraphExistence(Config.revision_graph)){
 			logger.info("Create revision graph");
+			// Maybe the revision graph exists but it is empty so the create will be fail when there was no drop before
+			executeQueryWithAuthorization("DROP SILENT GRAPH <" + Config.revision_graph +">", "HTML");
 			executeQueryWithAuthorization("CREATE GRAPH <" + Config.revision_graph +">", "HTML");
 	 	}
 	}

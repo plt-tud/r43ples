@@ -206,7 +206,7 @@ public class RevisionManagement {
 	public static boolean createNewGraphWithVersionControl(String graphName, String dataSetAsNTriples) throws HttpException, IOException {
 		logger.info("Start creation of new graph under version control with the name " + graphName + "!");
 
-		if (existGraph(graphName)) {
+		if (checkGraphExistence(graphName)) {
 			logger.info("Graph name " + graphName + " already exists. Graph can not be created.");
 			return false;
 		} else {
@@ -335,13 +335,14 @@ public class RevisionManagement {
 	
 
 	/**
-	 * Checks if graph exists in triplestore
-	 * @param graphName
-	 * @return boolean value if specified graph exists
+	 * Checks if graph exists in triple store. Works only when the graph is not empty.
+	 * 
+	 * @param graphName the graph name
+	 * @return boolean value if specified graph exists and contains at least one triple elsewhere it will return false
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static boolean existGraph(String graphName) throws HttpException, IOException {
+	public static boolean checkGraphExistence(String graphName) throws HttpException, IOException {
 		// Ask whether graph exists
 		String query = "ASK { GRAPH <" + graphName + "> {?s ?p ?o} }";
 		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
