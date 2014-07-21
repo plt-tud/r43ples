@@ -222,9 +222,6 @@ public class AdministratorInterface {
 		// Add data to temporary graph
 		RevisionManagement.executeINSERT("RM-INOUT-TEMP", modelStringAsNTriples);
 		
-		// Get next revision number
-		String newRevisionNumber = RevisionManagement.getNextRevisionNumberForLastRevisionNumber(graphName, revisionNumber);
-		
 		RevisionManagement.generateFullGraphOfRevision(graphName,revisionNumberString, "RM-TEMP-" + graphName);
 			    
 		// Get all added triples
@@ -247,7 +244,7 @@ public class AdministratorInterface {
 		list.add(revisionNumber);
 		
 		// Create new revision
-		RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, "Administrator", newRevisionNumber, "Created new revision from turtle file.", list);
+		RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, "Administrator", "Created new revision from turtle file.", list);
 	}
 
 	/**
@@ -788,7 +785,7 @@ public class AdministratorInterface {
 					String addedAsNTriples = FileUtils.readFileToString(new File(fileName.getFile()));
 					ArrayList<String> list = new ArrayList<>();
 					list.add(Integer.toString(revision-1));
-					RevisionManagement.createNewRevision(graphName, addedAsNTriples, "", "test", Integer.toString(revision), "test creation", list);
+					RevisionManagement.createNewRevision(graphName, addedAsNTriples, "", "test", "test creation", list);
 				}
 			}
 		}

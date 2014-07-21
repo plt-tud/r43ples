@@ -288,7 +288,6 @@ public class Endpoint {
 			throw new InternalServerErrorException("Revision is not referenced by branch");
 	    
 	    String referenceFullGraph = RevisionManagement.getFullGraphName(graphName, revisionNumber);
-	    String newRevisionNumber = RevisionManagement.getNextRevisionNumberForLastRevisionNumber(graphName, revisionNumber);
 
 	    // Create the temporary graph and fill with reference full graph
 	    TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
@@ -325,7 +324,7 @@ public class Endpoint {
 		list.add(revisionNumber);
 					
 		// Create new revision
-		RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, newRevisionNumber, commitMessage, list);
+		String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, list);
 		
 		// Respond with next revision number
     	responseBuilder.header(graphName + "-revision-number", newRevisionNumber);

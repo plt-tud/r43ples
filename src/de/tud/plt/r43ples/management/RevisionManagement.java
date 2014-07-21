@@ -48,16 +48,18 @@ public class RevisionManagement {
 	 * @param addedAsNTriples the data set of added triples as N-Triples
 	 * @param removedAsNTriples the data set of removed triples as N-Triples
 	 * @param user the user name who creates the revision
-	 * @param newRevisionNumber the new revision number
 	 * @param commitMessage the title of the revision
 	 * @param usedRevisionNumber the number of the revision which is used for creation of the new
+	 * @returns new revision number
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static void createNewRevision(String graphName, String addedAsNTriples, String removedAsNTriples, String user, String newRevisionNumber, String commitMessage, ArrayList<String> usedRevisionNumber) throws HttpException, IOException {
+	public static String createNewRevision(String graphName, String addedAsNTriples, String removedAsNTriples, String user, String commitMessage, ArrayList<String> usedRevisionNumber) throws HttpException, IOException {
 		logger.info("Start creation of new revision!");
 		
 		String dateString = getDateString();
+		
+		String newRevisionNumber = getNextRevisionNumberForLastRevisionNumber(graphName, usedRevisionNumber.get(0));
 		
 		// General variables
 		String commitUri = graphName+"-commit-" + newRevisionNumber;
@@ -132,6 +134,8 @@ public class RevisionManagement {
 		// Execute queries
 		logger.info("Execute all queries.");
 		TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
+		
+		return newRevisionNumber;
 	}
 	
 	
@@ -679,7 +683,7 @@ public class RevisionManagement {
 		usedRevisionNumbers.add(revisionNumber1);
 		usedRevisionNumbers.add(revisionNumber2);
 		
-		createNewRevision(graphName, addedTriples, removedTriples, user, newRevisionNumber, "Merged revisions " + revisionNumber1 + " and " + revisionNumber2 + "!", usedRevisionNumbers);
+		createNewRevision(graphName, addedTriples, removedTriples, user, "Merged revisions " + revisionNumber1 + " and " + revisionNumber2 + "!", usedRevisionNumbers);
 	}
 	
 	
