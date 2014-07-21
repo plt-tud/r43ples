@@ -8,8 +8,8 @@ from named <test-delta-added-3>
 from named <test-delta-added-2>
 where {
   ?s :knows ?o1, ?o2.
-  MINUS { GRAPH  <test-delta-added-3> {?s :knows ?o1.}}
-  MINUS { GRAPH  <test-delta-added-3> {?s :knows ?o2.}}
+  MINUS { GRAPH  <test-delta-added-3> {?s :knows ?o1.} MINUS GRAPH <test-delta-removed-2> {?s :knows ?o1.} }
+  MINUS { GRAPH  <test-delta-added-3> {?s :knows ?o2.} MINUS GRAPH <test-delta-removed-2> {?s :knows ?o2.} }
   MINUS { GRAPH  <test-delta-added-2> {?s :knows ?o1.}}
   MINUS { GRAPH  <test-delta-added-2> {?s :knows ?o2.}}
   FILTER (?o1 != ?o2)
