@@ -804,7 +804,7 @@ public class RevisionManagement {
 	 * @throws IOException
 	 */
 	public static void purgeGraph(String graph) throws HttpException, IOException {
-		logger.info("purge R43ples information.");
+		logger.info("Purge graph "+graph+" and all related R43ples information.");
 		String query = prefixes + String.format(
 				"SELECT DISTINCT ?graph FROM <%s> WHERE {"
 				+ "		?rev rmo:revisionOf <%s>."
@@ -836,7 +836,7 @@ public class RevisionManagement {
 				+ "			?p ?o."
 				+ "} } }", Config.revision_graph, Config.revision_graph, graph, graph, graph);
 		TripleStoreInterface.executeQueryWithAuthorization(queryDelete, "XML");
-		System.out.println("Graph deleted: " + Config.revision_graph);
+		System.out.println("Graph deleted: " + graph);
 	}
 	
 	

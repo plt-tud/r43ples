@@ -129,17 +129,14 @@ public class Endpoint {
 			try {
 				sparqlQuery = URLDecoder.decode(sparqlQuery, "UTF-8");
 				if (sparqlQuery.toUpperCase().contains("SELECT") || sparqlQuery.toUpperCase().contains("ASK")) {
-					// query only
 					response = produceSelectResponse(sparqlQuery, format);
 				} else if (sparqlQuery.toUpperCase().contains("INSERT") || sparqlQuery.toUpperCase().contains("DELETE")) {
-					// query with update
 					response = produceInsertDeleteResponse(sparqlQuery, format);
 				} else if (sparqlQuery.toUpperCase().contains("CREATE")) {
-					// query  with create graph
 					response = produceCreateGraphResponse(sparqlQuery, format);
-				}
-				else if (sparqlQuery.toUpperCase().contains("TAG") || sparqlQuery.toUpperCase().contains("BRANCH")) {
-					// query  with create graph
+				} else if (sparqlQuery.toUpperCase().contains("DROP")) {
+					response = produceDropGraphResponse(sparqlQuery, format);
+				} else if (sparqlQuery.toUpperCase().contains("TAG") || sparqlQuery.toUpperCase().contains("BRANCH")) {
 					response = produceBranchOrTagResponse(sparqlQuery, format);
 				}
 			} catch (HttpException | IOException e) {
@@ -294,7 +291,7 @@ public class Endpoint {
 	    String newRevisionNumber = RevisionManagement.getNextRevisionNumberForLastRevisionNumber(graphName, revisionNumber);
 
 	    // Create the temporary graph and fill with reference full graph
-	    TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT SILENT GRAPH <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
+	    TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
 		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
 		TripleStoreInterface.executeQueryWithAuthorization("COPY <" + referenceFullGraph + "> TO <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
 		
@@ -359,7 +356,7 @@ public class Endpoint {
 		responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(query, format)); 
 		
 		// Add R43ples information
-		Pattern pattern =  Pattern.compile("CREATE GRAPH <(?<graph>.*)>");
+		Pattern pattern =  Pattern.compile("CREATE(?<silent> SILENT)? GRAPH <(?<graph>.*)>");
 		Matcher m = pattern.matcher(query);
 		boolean found = false;
 		while (m.find()) {
@@ -374,6 +371,38 @@ public class Endpoint {
 		return responseBuilder.build();
 	}
 	
+	
+	/** Drops a graph under version control for command "DROP (SILENT) GRAPH <?>"
+	 * 
+	 * @param sparqlQuery the SPARQL query
+	 * @param format the result format
+	 * @return
+	 * @throws IOException 
+	 * @throws HttpException 
+	 */
+	private Response produceDropGraphResponse(String query,
+			String format) throws IOException, HttpException {
+		ResponseBuilder responseBuilder = Response.created(URI.create(""));
+		
+		// Clear R43ples information for specified graphs
+		Pattern pattern =  Pattern.compile("DROP(?<silent> SILENT)? GRAPH <(?<graph>.*)>");
+		Matcher m = pattern.matcher(query);
+		boolean found = false;
+		while (m.find()) {
+			found = true;
+		    String graphName = m.group("graph"); 
+		    RevisionManagement.purgeGraph(graphName);
+		}
+		if (!found) {
+			throw new InternalServerErrorException("Query contain errors:\n"+query);
+		}
+		else {
+			// Execute SPARQL query
+			responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(query, format));
+		}
+		
+		return responseBuilder.build();
+	}
 	
 	/** Creates a tag or a branch for a specific graph and revision.
 	 * Using command "TAG GRAPH <?> #REVISION "rev" TO "tag"
