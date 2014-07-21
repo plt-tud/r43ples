@@ -31,7 +31,7 @@ public class RevisionManagement {
 	/** The logger. **/
 	private static Logger logger = Logger.getLogger(RevisionManagement.class);
 	/** The SPARQL prefixes. **/
-	private final static String prefix_rmo = "PREFIX rmo: <http://revision.management.et.tu-dresden.de/rmo#> \n";
+	private final static String prefix_rmo = "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> \n";
 	private final static String prefixes = "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
 			+ "PREFIX dc-terms: <http://purl.org/dc/terms/> \n"
 			+ prefix_rmo
@@ -245,7 +245,7 @@ public class RevisionManagement {
 					graphName+"-master", graphName, revisionName);
 			
 			String queryRevision = String.format(
-					"PREFIX rmo: <http://revision.management.et.tu-dresden.de/rmo#> "
+					prefix_rmo
 					+ "INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
 			TripleStoreInterface.executeQueryWithAuthorization(queryRevision, "HTML");
 			return true;
@@ -328,7 +328,7 @@ public class RevisionManagement {
 				graphName+"-master", graphName, revisionName);
 		
 		String queryRevision = String.format(
-				"PREFIX rmo: <http://revision.management.et.tu-dresden.de/rmo#> "
+				prefix_rmo
 				+ "INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
 		TripleStoreInterface.executeQueryWithAuthorization(queryRevision, "HTML");
 	}
@@ -504,7 +504,7 @@ public class RevisionManagement {
 	public static String getMasterRevisionNumber(String graphName) throws HttpException, IOException {
 		logger.info("Get MASTER revision number of graph " + graphName);
 
-		String queryString = String.format("PREFIX rmo: <http://revision.management.et.tu-dresden.de/rmo#>%n" +
+		String queryString = String.format(prefix_rmo +
 				"SELECT ?revisionNumber " +
 				"FROM <%s> " +
 				"WHERE {" +

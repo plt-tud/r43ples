@@ -686,7 +686,7 @@ public class AdministratorInterface {
 	 * @throws AuthenticationException 
 	 */
 	private static void listAllRevisionedGraphs() throws HttpException, IOException {
-		String graphInformation = TripleStoreInterface.executeQueryWithAuthorization("SELECT DISTINCT ?graph FROM <r43ples-revisions> WHERE {?s <http://revision.management.et.tu-dresden.de/rmo#revisionOf> ?graph}", "XML");
+		String graphInformation = TripleStoreInterface.executeQueryWithAuthorization("SELECT DISTINCT ?graph FROM <r43ples-revisions> WHERE {?s <http://eatld.et.tu-dresden.de/rmo#revisionOf> ?graph}", "XML");
 
 		ResultSet results = ResultSetFactory.fromXML(graphInformation);
 		
@@ -742,7 +742,7 @@ public class AdministratorInterface {
 	private static void purgeR43plesInformation(boolean keepMaster) throws HttpException, IOException {
 		logger.info("purge R43ples information.");
 		String query =
-				"PREFIX rmo: <http://revision.management.et.tu-dresden.de/rmo#> "
+				"PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> "
 				+ "SELECT DISTINCT ?graph FROM <"+Config.revision_graph+"> WHERE {";
 		if (keepMaster)
 			query += "	{ ?branch rmo:fullGraph ?graph MINUS {?branch a rmo:Master} }";
