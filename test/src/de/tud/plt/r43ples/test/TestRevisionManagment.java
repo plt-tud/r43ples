@@ -19,7 +19,7 @@ public class TestRevisionManagment {
 
 	@Before
 	public void setUp() throws HttpException, IOException, ConfigurationException{
-		Config.readConfig("Service.conf");
+		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
 		RevisionManagement.putGraphUnderVersionControl("test1234");
 	}

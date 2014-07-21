@@ -555,6 +555,7 @@ public class RevisionManagement {
 			checkIdentifierRevisionNumber = startIdentifierRevisionNumber + ".";
 		}
 
+		// This requires SPARQL 1.1 (STRAFTER, STRBEFORE)
 		String queryString = prefixes + String.format("SELECT MAX(xsd:integer(STRAFTER(STRBEFORE(xsd:string(?revisionNumber), \"-\"), \"%s.\"))) as ?number %n" +
 				"FROM <%s> %n" +
 				"WHERE { %n" +
