@@ -706,7 +706,7 @@ public class RevisionManagement {
 			if (i < lines.length - 1) {
 				sub = sub + ".";
 			}
-			insert = insert + "%n" + sub;
+			insert = insert + "\n" + sub;
 			counter++;
 			if (counter == MAX_STATEMENTS-1) {
 				TripleStoreInterface.executeQueryWithAuthorization("INSERT IN GRAPH <" + graphName + "> { " + insert + "}", "HTML");
