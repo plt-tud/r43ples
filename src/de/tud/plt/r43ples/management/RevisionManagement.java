@@ -825,19 +825,13 @@ public class RevisionManagement {
 		}
 		String queryDelete = String.format(
 				prefixes
-				+ "DELETE"
-				+ " { GRAPH <%s> {?s ?p ?o} }"
+				+ "DELETE { GRAPH <%s> {?s ?p ?o} } "
 				+ "WHERE {"
-				+ "	GRAPH <%s> { {"
-				+ "		?s a rmo:Revision; rmo:revisionOf <%s>;"
-				+ "			?p ?o."
-				+ " } UNION {"
-				+ " 	?s a rmo:Reference; rmo:references [rmo:revisionOf <%s>];"
-				+ "			?p ?o."
-				+ "} UNION {"
-				+ " 	?s a rmo:Commit; prov:generated [rmo:revisionOf <%s>];"
-				+ "			?p ?o."
-				+ "} } }", Config.revision_graph, Config.revision_graph, graph, graph, graph);
+				+ "  GRAPH <%s> { {"
+				+ "    {?s a rmo:Revision; rmo:revisionOf <%s>;	?p ?o.}"
+				+ "    UNION {?s a rmo:Reference; rmo:references [rmo:revisionOf <%s>]; ?p ?o.}"
+				+ "    UNION {?s a rmo:Commit; prov:generated [rmo:revisionOf <%s>]; ?p ?o.}"
+				+ "} }", Config.revision_graph, Config.revision_graph, graph, graph, graph);
 		TripleStoreInterface.executeQueryWithAuthorization(queryDelete, "XML");
 		System.out.println("Graph deleted: " + graph);
 	}

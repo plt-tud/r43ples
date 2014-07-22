@@ -1,6 +1,5 @@
 language: java
 jdk:
-  - oraclejdk7
   - openjdk7
 
 env:
@@ -21,5 +20,6 @@ addons:
 
 before_install:
 - sudo apt-get install -qq virtuoso-opensource
+- virtuoso-t -h
 - echo "RUN=yes" | sudo tee -a /etc/default/virtuoso-opensource-6.1
 - sudo /etc/init.d/virtuoso-opensource-6.1 start
