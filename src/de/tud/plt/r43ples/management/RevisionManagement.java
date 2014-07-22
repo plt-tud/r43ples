@@ -161,7 +161,7 @@ public class RevisionManagement {
 		String revisionUri = graphName + "-revision-" + revisionNumber;
 		String newRevisionNumber = getRevisionNumberForNewBranch(graphName, revisionNumber);
 		String newRevisionUri = graphName + "-revision-" + newRevisionNumber;
-		String personName =  getUserName(user);
+		String personUri =  getUserName(user);
 		
 		// Create a new commit (activity)
 		String queryContent =	String.format(
@@ -171,7 +171,7 @@ public class RevisionManagement {
 				"   prov:used <%s> ;" +
 				"	dc-terms:title \"%s\" ;" +
 				"	prov:atTime \"%s\" .%n",
-				commitUri, personName, branchUri, newRevisionUri, revisionUri, commitMessage, dateString);
+				commitUri, personUri, branchUri, newRevisionUri, revisionUri, commitMessage, dateString);
 		
 		// Create new revision
 		queryContent += String.format(
@@ -848,32 +848,36 @@ public class RevisionManagement {
 	 * @param user
 	 * @param personName
 	 * @param queryContent
-	 * @return
+	 * @return URI of person
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 */
 	private static String getUserName(String user)
 			throws HttpException, IOException {
 		// When user does not already exists - create new
-		String personName =  "http://revision.management.et.tu-dresden.de/persons/" + user;
-		String queryASK = String.format("PREFIX prov: <http://www.w3.org/ns/prov#> %n"
-				+ "ASK { GRAPH <%s>  { "
-				+ "<%s> a prov:Person"
-				+ "} }", Config.revision_graph, personName);
-		String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
-		if (resultASK.equals("true")) {
+
+		String query = String.format(prefixes
+				+ "SELECT ?personUri { GRAPH <%s>  { "
+				+ "?uri a prov:Person;"
+				+ "  rdfs:label \"%s\"."
+				+ "} }", Config.revision_graph, user);
+		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
+		ResultSet results = ResultSetFactory.fromXML(result);		
+		if (results.hasNext()) {
 			logger.info("User " + user + " already exists.");
+			QuerySolution qs = results.next();
+			return qs.getResource("?personUri").toString();
 		} else {
-			logger.info("User does not exists. Create user " + user + ".");
-			String query = prefixes + String.format("INSERT { GRAPH <%s> { <%s> a prov:Person. } }", Config.revision_graph, personName);
-			logger.info(query);
+			String personUri =  "http://eatld.et.tu-dresden.de/persons/" + user;
+			logger.info("User does not exists. Create user " + personUri + ".");
+			query = prefixes + String.format("INSERT { GRAPH <%s> { <%s> a prov:Person; rdfs:label \"%s\". } }", Config.revision_graph, personUri, user);
 			TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
+			return personUri;
 		}
-		return personName;
 	}
 	
 	/**
-	 * @return
+	 * @return current date formatted as xsd:DateTime
 	 */
 	private static String getDateString() {
 		// Create current time stamp
