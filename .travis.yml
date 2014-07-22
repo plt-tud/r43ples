@@ -19,7 +19,8 @@ addons:
     branch_pattern: coverity_scan
 
 before_install:
-- sudo apt-get install -qq -t testing virtuoso-opensource
-- virtuoso-t -h
-- echo "RUN=yes" | sudo tee -a /etc/default/virtuoso-opensource-6.1
-- sudo /etc/init.d/virtuoso-opensource-6.1 start
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq -t testing virtuoso-opensource
+  - echo `virtuoso-t -h`
+  - echo "RUN=yes" | sudo tee -a /etc/default/virtuoso-opensource-6.1
+  - sudo /etc/init.d/virtuoso-opensource-6.1 start
