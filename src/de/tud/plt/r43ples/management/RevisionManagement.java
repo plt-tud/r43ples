@@ -803,7 +803,7 @@ public class RevisionManagement {
 	/**
 	 * Deletes all information for a specific named graph including all full graphs and information in the R43ples system
 	 * @param graph graph to be purged
-	 * @throws AuthenticationException
+	 * @throws HttpException
 	 * @throws IOException
 	 */
 	public static void purgeGraph(String graph) throws HttpException, IOException {
@@ -838,7 +838,7 @@ public class RevisionManagement {
 	
 	
 	/**
-	 * @param user
+	 * @param user name as string
 	 * @return URI of person
 	 * @throws HttpException
 	 * @throws IOException
