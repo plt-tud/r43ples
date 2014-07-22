@@ -45,8 +45,8 @@ import de.tud.plt.r43ples.management.TripleStoreInterface;
 
 
 /**
- * Provides SPARQL endpoint via [host]:[port]/endpoint/
- * Supplies update and query.
+ * Provides SPARQL endpoint via [host]:[port]/r43ples/
+ * Supplies version information, service description as well as SPARQL queries.
  * 
  * @author Stephan Hensel
  * @author Markus Graube

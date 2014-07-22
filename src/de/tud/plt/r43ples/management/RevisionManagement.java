@@ -855,7 +855,7 @@ public class RevisionManagement {
 
 		String query = String.format(prefixes
 				+ "SELECT ?personUri { GRAPH <%s>  { "
-				+ "?uri a prov:Person;"
+				+ "?personUri a prov:Person;"
 				+ "  rdfs:label \"%s\"."
 				+ "} }", Config.revision_graph, user);
 		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
