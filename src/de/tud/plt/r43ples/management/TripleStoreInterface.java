@@ -58,7 +58,6 @@ public class TripleStoreInterface {
 	/**
 	 * Executes a SPARQL-query against the triple store without authorization.
 	 * 
-	 * @param graphUri the default graph URI
 	 * @param query the SPARQL query
 	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
 	 * @return the result of the query

@@ -50,7 +50,7 @@ public class RevisionManagement {
 	 * @param user the user name who creates the revision
 	 * @param commitMessage the title of the revision
 	 * @param usedRevisionNumber the number of the revision which is used for creation of the new
-	 * @returns new revision number
+	 * @return new revision number
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
@@ -358,9 +358,8 @@ public class RevisionManagement {
 	 * Creates the whole revision from the add and delete sets of the predecessors. Saved in graph tempGraphName.
 	 * 
 	 * @param graphName the graph name
-	 * @param revisionNumber the revision number to build content for
+	 * @param revisionName revision number or revision name to build content for
 	 * @param tempGraphName the graph where the temporary graph is stored
-	 * @return revision content as turtle
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
@@ -727,7 +726,7 @@ public class RevisionManagement {
 	 * Checks if specified revision of the graph is a branch revision, meaning a terminal node in a branch.
 	 * @param graphName name of the revisioned graph
 	 * @param revisionName revision number or branch or tag name of the graph
-	 * @return
+	 * @return true if specified revision of the graph is a branch
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 */
@@ -746,7 +745,7 @@ public class RevisionManagement {
 	 * Returns the name of the full graph of revision of a graph if it is available
 	 * @param graphName name of the revisioned graph
 	 * @param revisionName revision number or branch or tag name of the graph
-	 * @return
+	 * @return name of the full graph of a revision of a graph
 	 * @throws AuthenticationException
 	 * @throws IOException
 	 */
@@ -846,10 +845,8 @@ public class RevisionManagement {
 	
 	/**
 	 * @param user
-	 * @param personName
-	 * @param queryContent
 	 * @return URI of person
-	 * @throws AuthenticationException
+	 * @throws HttpException
 	 * @throws IOException
 	 */
 	private static String getUserName(String user)

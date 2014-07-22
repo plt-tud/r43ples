@@ -248,7 +248,7 @@ public class AdministratorInterface {
 	}
 
 	/**
-	 * @return
+	 * @return existing graph selected by the user
 	 * @throws AuthenticationException 
 	 * @throws Exception 
 	 */
@@ -270,7 +270,7 @@ public class AdministratorInterface {
 	}
 	
 	/**
-	 * @return
+	 * @return revision number selected by the user
 	 * @throws AuthenticationException 
 	 * @throws Exception 
 	 */

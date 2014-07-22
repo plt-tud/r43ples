@@ -53,16 +53,16 @@ public class Tree {
 	
 	
 	/**
-	 * Add new node to tree or extend old node.
+	 * Add new graph name of full graph to existing node.
 	 * 
-	 * @param node the node to create or change
-	 * @param predecessor the predecessor to add
+	 * @param node the node to be updated
+	 * @param graphName URI of the full graph
 	 */
-	public void addFullGraphOfNode(String generated, String graphName) {
-		if (map.containsKey(generated)) {
+	public void addFullGraphOfNode(String node, String graphName) {
+		if (map.containsKey(node)) {
 			// extend old node
-			NodeSpecification node = map.get(generated);
-			node.setFullGraph(graphName);
+			NodeSpecification nodeS = map.get(node);
+			nodeS.setFullGraph(graphName);
 		}
 	}	
 	

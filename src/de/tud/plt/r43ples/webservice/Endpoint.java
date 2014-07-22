@@ -101,7 +101,8 @@ public class Endpoint {
 	 * Provides HTML form if no query is specified and HTML is requested
 	 * Provides Service Description if no query is specified and RDF representation is requested
 	 * 
-	 * @param format the format
+	 * @param format_header format specified in the HTTP header
+	 * @param format_query format specified in the HTTP parameters
 	 * @param sparqlQuery the SPARQL query
 	 * @return the response
 	 */
@@ -151,7 +152,7 @@ public class Endpoint {
 	/**
 	 * Provides the SPARQL Endpoint description of the original sparql endpoint with the additional R43ples feature (sd:feature)
 	 * and replaces URIs.
-	 * @return
+	 * @return Extended Service Description
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
@@ -340,9 +341,8 @@ public class Endpoint {
 		
 	/** Creates a graph under version control for command "CREATE GRAPH <?>"
 	 * 
-	 * @param sparqlQuery the SPARQL query
+	 * @param query the SPARQL query
 	 * @param format the result format
-	 * @return
 	 * @throws IOException 
 	 * @throws HttpException 
 	 */
@@ -373,9 +373,8 @@ public class Endpoint {
 	
 	/** Drops a graph under version control for command "DROP (SILENT) GRAPH <?>"
 	 * 
-	 * @param sparqlQuery the SPARQL query
+	 * @param query the SPARQL query
 	 * @param format the result format
-	 * @return
 	 * @throws IOException 
 	 * @throws HttpException 
 	 */
@@ -409,7 +408,6 @@ public class Endpoint {
 	 * 
 	 * @param sparqlQuery the SPARQL query
 	 * @param format the result format
-	 * @return
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
@@ -447,7 +445,7 @@ public class Endpoint {
 
 	/** Extracts user out of query
 	 * @param query
-	 * @return
+	 * @return user mentioned in a query
 	 * @throws InternalServerErrorException
 	 */
 	private String extractUser(String query) {
@@ -462,7 +460,6 @@ public class Endpoint {
 	
 	/** Extracts commit message out of query
 	 * @param query
-	 * @return
 	 * @throws InternalServerErrorException
 	 */
 	private String extractCommitMessage(String query) {
