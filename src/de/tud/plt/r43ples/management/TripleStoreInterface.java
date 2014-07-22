@@ -77,7 +77,7 @@ public class TripleStoreInterface {
 		String encoding = con.getContentEncoding();
 		encoding = (encoding == null) ? "UTF-8" : encoding;
 		String body = IOUtils.toString(in, encoding);
-		
+		logger.info(body);
 		return body;
 		
 	}
