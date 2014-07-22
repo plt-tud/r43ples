@@ -33,5 +33,5 @@ before_install:
   - #wget http://launchpadlibrarian.net/168544103/libmagickwand5_6.7.7.10-6ubuntu3_amd64.deb
   - #wget https://launchpad.net/ubuntu/+archive/primary/+files/virtuoso-minimal_6.1.6%2Brepack-0ubuntu3_all.deb
   - #echo `virtuoso-t -h`
-  - #echo "RUN=yes" | sudo tee -a /etc/default/virtuoso-opensource-6.1
-  - #sudo /etc/init.d/virtuoso-opensource-6.1 start
+  - echo "RUN=yes" | sudo tee -a /etc/default/virtuoso-opensource-6.1
+  - sudo /etc/init.d/virtuoso-opensource-6.1 start
