@@ -827,7 +827,7 @@ public class RevisionManagement {
 				prefixes
 				+ "DELETE { GRAPH <%s> {?s ?p ?o} } "
 				+ "WHERE {"
-				+ "  GRAPH <%s> { {"
+				+ "  GRAPH <%s> {"
 				+ "    {?s a rmo:Revision; rmo:revisionOf <%s>;	?p ?o.}"
 				+ "    UNION {?s a rmo:Reference; rmo:references [rmo:revisionOf <%s>]; ?p ?o.}"
 				+ "    UNION {?s a rmo:Commit; prov:generated [rmo:revisionOf <%s>]; ?p ?o.}"
