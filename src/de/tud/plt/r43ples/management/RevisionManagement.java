@@ -103,7 +103,7 @@ public class RevisionManagement {
 		String branchName = sol.getResource("?branch").toString();
 		String branchGraph = sol.getResource("?graph").toString();
 		query += String.format("DELETE FROM GRAPH <%s> { <%s> rmo:references <%s>. }%n", Config.revision_graph, branchName, oldRevision);
-		query += String.format("INSERT INTO GRAPH <%s> { <%s> rmo:references <%s>. }%n", Config.revision_graph, branchName, revisionUri);
+		query += String.format("INSERT IN GRAPH <%s> { <%s> rmo:references <%s>. }%n", Config.revision_graph, branchName, revisionUri);
 		
 		// Remove branch from which changes were merged, if available
 		if (usedRevisionNumber.size()>1){
@@ -118,7 +118,7 @@ public class RevisionManagement {
 		
 		// Update full graph of branch
 		query += String.format("DELETE FROM GRAPH <%s> {%n %s %n}%n", branchGraph, removedAsNTriples);
-		query += String.format("INSERT INTO GRAPH <%s> {%n %s %n}%n", branchGraph, addedAsNTriples);
+		query += String.format("INSERT IN GRAPH <%s> {%n %s %n}%n", branchGraph, addedAsNTriples);
 		
 		// Create new graph with delta-added-newRevisionNumber
 		logger.info("Create new graph with name " + addSetGraphUri);
@@ -867,7 +867,7 @@ public class RevisionManagement {
 		} else {
 			String personUri =  "http://eatld.et.tu-dresden.de/persons/" + user;
 			logger.info("User does not exists. Create user " + personUri + ".");
-			query = prefixes + String.format("INSERT { GRAPH <%s> { <%s> a prov:Person; rdfs:label \"%s\". } }", Config.revision_graph, personUri, user);
+			query = prefixes + String.format("INSERT IN GRAPH <%s> { <%s> a prov:Person; rdfs:label \"%s\". }", Config.revision_graph, personUri, user);
 			TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
 			return personUri;
 		}
