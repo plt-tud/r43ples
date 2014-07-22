@@ -77,7 +77,6 @@ public class TripleStoreInterface {
 		String encoding = con.getContentEncoding();
 		encoding = (encoding == null) ? "UTF-8" : encoding;
 		String body = IOUtils.toString(in, encoding);
-		logger.info(body);
 		return body;
 		
 	}
@@ -112,11 +111,11 @@ public class TripleStoreInterface {
 		//Execute Query
 		HttpResponse response = httpClient.execute(request);
 		logger.debug("Statuscode: " + response.getStatusLine().getStatusCode());
-		if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
-			throw new HttpException(response.getStatusLine().toString());
-		}
 		InputStreamReader in = new InputStreamReader(response.getEntity().getContent());
 		result = IOUtils.toString(in);
+		if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
+			throw new HttpException(response.getStatusLine().toString()+"\n"+result);
+		}
 		
 		return result;
 	}
