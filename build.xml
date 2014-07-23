@@ -82,7 +82,7 @@
                 <pathelement location="${test.dir}/resources"/>
             </classpath>
             <formatter type="xml" />
-            <formatter type="brief" usefile="false" />
+            <formatter type="brief" />
             <batchtest todir="${test.dir}">
                 <fileset dir="${test.dir}/src" includes="**/*Test*.java" />
             </batchtest>
