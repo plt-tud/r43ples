@@ -48,7 +48,7 @@ public class CreateExampleGraph {
 		logger.info("Purge silent example graph");
 		String query = String.format("DROP SILENT GRAPH <%s>", graphName);
 		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + executeQueryWithoutAuthorization(query, "HTML"));;
+		logger.info("Response: \n" + executeQueryWithoutAuthorization(query, "HTML"));
 		
 		// Create new example graph
 		logger.info("Create new example graph");
