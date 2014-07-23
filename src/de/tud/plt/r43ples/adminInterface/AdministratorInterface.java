@@ -59,7 +59,6 @@ public class AdministratorInterface {
 					+ " e - export revision to turtle file\n"
 					+ " g - generate revision graph (refreshed yEd export)\n"
 					+ " t - tag a revision\n"
-					+ " h - set a new MASTER revision\n"
 					+ " i - import a new graph under revision control\n"
 					+ " m - merge two revisions\n"
 					+ " l - list all revisioned graphs\n"
@@ -86,10 +85,6 @@ public class AdministratorInterface {
 			case "t":
 				System.out.println("Create a tag for a revision.");
 				createTag();
-				break;
-			case "h":
-				System.out.println("Set a new MASTER revision.");
-				setNewHeadRevisionAI();
 				break;
 			case "i":
 				System.out.println("Import a new graph under version control.");
@@ -366,68 +361,6 @@ public class AdministratorInterface {
 			return;
 		}
 	}	
-	
-	
-	/**
-	 * Set a new MASTER revision
-	 * @throws IOException 
-	 * @throws ClientProtocolException 
-	 * @throws AuthenticationException 
-	 */
-	private static void setNewHeadRevisionAI() throws HttpException, IOException {
-		logger.info("Administration interface - set a new MASTER revision.");
-		System.out.println("Please enter the graph name:");
-		
-		String graphName = "";
-		try {
-			graphName = getUserInputExistingGraph();
-			
-		} catch (IOException | AuthenticationException e) {
-			System.out.println("There was a IOException. Please try again.");
-			setNewHeadRevisionAI();
-			return;
-		}
-		
-		String headRevision = RevisionManagement.getMasterRevisionNumber(graphName);
-		System.out.println("Current MASTER revision: " + headRevision);
-		
-		System.out.println("Please enter the new MASTER revision number:");
-		
-		String revisionNumber = "";
-		String newHeadRevisionNumber = "0";
-		BufferedReader brRN = new BufferedReader(new InputStreamReader(System.in));
-		
-		try {
-			revisionNumber = brRN.readLine();
-		} catch (IOException e) {
-			System.out.println("There was a IOException. Please try again.");
-			setNewHeadRevisionAI();
-			return;
-		}
-		try {
-			newHeadRevisionNumber = revisionNumber;
-		} catch (NumberFormatException e) {
-			// TODO Create check if valid revision number was entered
-			System.out.println("Entered value was not a valid integer value. Please try again.");
-			setNewHeadRevisionAI();
-			return;
-		}
-		
-		RevisionManagement.setHeadRevisionNumber(graphName, newHeadRevisionNumber);
-		System.out.println("New MASTER revision was set to: " + newHeadRevisionNumber);
-		
-		// Refresh yEd export
-		Tree tree = RevisionManagement.getRevisionTree(graphName);
-		String filePath = Config.yed_filepath;
-
-		try {
-			new YEDExport().writeYEDDataToFile(tree, RevisionManagement.getMasterRevisionNumber(graphName), filePath);
-		} catch (IOException e) {
-			System.out.println("There was a IOException while refreshing yEd.");
-			return;
-		}
-		System.out.println("yEd export file was refreshed.");
-	}
 	
 	
 	/**

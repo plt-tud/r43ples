@@ -627,31 +627,6 @@ public class RevisionManagement {
 	
 	
 	/**
-	 * Set MASTER revision number of a graph and refresh MASTER graph.
-	 * 
-	 * @param graphName the graph name
-	 * @param revisionNumberOfNewHeadRevision the revision number of the new MASTER revision
-	 * @throws IOException 
-	 * @throws AuthenticationException 
-	 */
-	public static void setHeadRevisionNumber(String graphName, String revisionNumberOfNewHeadRevision) throws HttpException, IOException {
-		logger.info("Set MASTER revision number of graph " + graphName + " to " + revisionNumberOfNewHeadRevision + "!");
-		String query =	String.format(
-						"DELETE DATA FROM <%s>" +
-						"	{ <http://revision.management.et.tu-dresden.de/graphs/revisions/head> <http://www.w3.org/2002/07/owl#sameAs> <http://revision.management.et.tu-dresden.de/graphs/revisions/revision-" + getMasterRevisionNumber(graphName) + "> . }" +
-						"INSERT DATA INTO <%s>" +
-						"	{ <http://revision.management.et.tu-dresden.de/graphs/revisions/head> <http://www.w3.org/2002/07/owl#sameAs> <http://revision.management.et.tu-dresden.de/graphs/revisions/revision-" + revisionNumberOfNewHeadRevision + "> . }",
-						Config.revision_graph, Config.revision_graph);
-		
-		TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
-		
-		// Update content of MASTER graph - therefore create content of new MASTER revision and copy RM-TEMP-graphName to graph
-		generateFullGraphOfRevision(graphName, revisionNumberOfNewHeadRevision, "RM-TEMP-" + graphName);
-		TripleStoreInterface.executeQueryWithAuthorization("COPY <RM-TEMP-" + graphName + "> TO <" + graphName + ">", "HTML");		
-	}
-	
-	
-	/**
 	 * Create new merged revision.
 	 * 
 	 * @param graphName the graph name
