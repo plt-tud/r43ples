@@ -254,9 +254,7 @@ public class RevisionManagement {
 					+ "	rdfs:label \"MASTER\". ",
 					graphName+"-master", graphName, revisionName);
 			
-			String queryRevision = String.format(
-					prefix_rmo
-					+ "INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
+			String queryRevision = prefix_rmo + String.format("INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
 			TripleStoreInterface.executeQueryWithAuthorization(queryRevision, "HTML");
 			return true;
 		}
@@ -337,9 +335,7 @@ public class RevisionManagement {
 				+ "	rdfs:label \"master\".%n",
 				graphName+"-master", graphName, revisionName);
 		
-		String queryRevision = String.format(
-				prefix_rmo
-				+ "INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
+		String queryRevision = prefix_rmo + String.format("INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
 		TripleStoreInterface.executeQueryWithAuthorization(queryRevision, "HTML");
 	}
 	
@@ -537,7 +533,7 @@ public class RevisionManagement {
 	public static String getMasterRevisionNumber(String graphName) throws HttpException, IOException {
 		logger.info("Get MASTER revision number of graph " + graphName);
 
-		String queryString = String.format(prefix_rmo +
+		String queryString = prefix_rmo + String.format(
 				"SELECT ?revisionNumber " +
 				"FROM <%s> " +
 				"WHERE {" +
@@ -847,9 +843,8 @@ public class RevisionManagement {
 			TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <"+graphName+">","XML");
 			System.out.println("Graph deleted: " + graphName);
 		}
-		String queryDelete = String.format(
-				prefixes
-				+ "DELETE { GRAPH <%s> {?s ?p ?o} } "
+		String queryDelete = prefixes + String.format(
+				"DELETE { GRAPH <%s> {?s ?p ?o} } "
 				+ "WHERE {"
 				+ "  GRAPH <%s> {"
 				+ "    {?s a rmo:Revision; rmo:revisionOf <%s>;	?p ?o.}"
@@ -871,8 +866,8 @@ public class RevisionManagement {
 			throws HttpException, IOException {
 		// When user does not already exists - create new
 
-		String query = String.format(prefixes
-				+ "SELECT ?personUri { GRAPH <%s>  { "
+		String query = prefixes + String.format(
+				"SELECT ?personUri { GRAPH <%s>  { "
 				+ "?personUri a prov:Person;"
 				+ "  rdfs:label \"%s\"."
 				+ "} }", Config.revision_graph, user);

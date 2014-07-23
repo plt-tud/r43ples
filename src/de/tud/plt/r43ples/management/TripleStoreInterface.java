@@ -116,6 +116,7 @@ public class TripleStoreInterface {
 		logger.debug("Statuscode: " + response.getStatusLine().getStatusCode());
 		InputStreamReader in = new InputStreamReader(response.getEntity().getContent());
 		result = IOUtils.toString(in);
+		in.close();
 		if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
 			throw new HttpException(response.getStatusLine().toString()+"\n"+result);
 		}
