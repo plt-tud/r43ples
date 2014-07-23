@@ -34,12 +34,13 @@ WHERE {
 <a href="revisiongraph">Get Revision information</a>
 
 <h2>Example queries</h2>
-<h3>Create Graph under Version Control</h3>
+<h3><a href="?query=CREATE GRAPH <test>">Create Graph under Version Control</a></h3>
 <pre>
-CREATE GRAPH <test>
+CREATE GRAPH &lt;test&gt;
 </pre>
 
-<h3>Select Query</h3>
+<!-- http://crypo.in.ua/tools/eng_encode-uri.php -->
+<h3><a href="?query=SELECT%20*%20FROM%20%3Ctest%3E%20REVISION%20%2223%22%20WHERE%20%7B?s%20?p%20?o.%20%7D">Select Query</a></h3>
 <pre>SELECT * 
 FROM &lt;test&gt; REVISION "23"
 WHERE {
