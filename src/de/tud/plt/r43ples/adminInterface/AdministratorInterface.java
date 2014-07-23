@@ -244,7 +244,7 @@ public class AdministratorInterface {
 		list.add(revisionNumber);
 		
 		// Create new revision
-		RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, "Administrator", "Created new revision from turtle file.", list);
+		RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, "Administrator", "Created new revision from turtle file.", list, list.get(0));
 	}
 
 	/**
@@ -785,7 +785,7 @@ public class AdministratorInterface {
 					String addedAsNTriples = FileUtils.readFileToString(new File(fileName.getFile()));
 					ArrayList<String> list = new ArrayList<>();
 					list.add(Integer.toString(revision-1));
-					RevisionManagement.createNewRevision(graphName, addedAsNTriples, "", "test", "test creation", list);
+					RevisionManagement.createNewRevision(graphName, addedAsNTriples, "", "test", "test creation", list, list.get(0));
 				}
 			}
 		}

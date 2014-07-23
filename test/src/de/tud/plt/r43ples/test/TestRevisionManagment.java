@@ -42,7 +42,7 @@ public class TestRevisionManagment {
 		ArrayList<String> list = new ArrayList<String>();
 		list.add("0");
 		
-		RevisionManagement.createNewRevision("test1234", "<a> <b> <c>.", "", "test", "test commit message", list);
+		RevisionManagement.createNewRevision("test1234", "<a> <b> <c>.", "", "test", "test commit message", list, list.get(0));
 		
 		revNumberMaster = RevisionManagement.getMasterRevisionNumber("test1234");
 		Assert.assertEquals("1", revNumberMaster);
@@ -62,7 +62,7 @@ public class TestRevisionManagment {
 		String deleteset = writer.toString();
 		
 		
-		RevisionManagement.createNewRevision("test_dataset_user", addset, deleteset, "test_user", "test commit message", list);
+		RevisionManagement.createNewRevision("test_dataset_user", addset, deleteset, "test_user", "test commit message", list, list.get(0));
 		
 		String revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
 		Assert.assertEquals("1", revNumberMaster);

@@ -40,6 +40,7 @@ import com.hp.hpl.jena.update.UpdateFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
 
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 
@@ -285,10 +286,10 @@ public class Endpoint {
 	    String revisionName = m.group("revision"); //can contain revision numbers or reference names
 	    String revisionNumber = RevisionManagement.getRevisionNumber(graphName, revisionName); //contains only revision numbers
 	    
-	    if (!RevisionManagement.isBranch(graphName, revisionNumber))
+	    if (!RevisionManagement.isBranch(graphName, revisionName))
 			throw new InternalServerErrorException("Revision is not referenced by branch");
 	    
-	    String referenceFullGraph = RevisionManagement.getFullGraphName(graphName, revisionNumber);
+	    String referenceFullGraph = RevisionManagement.getFullGraphName(graphName, revisionName);
 
 	    // Create the temporary graph and fill with reference full graph
 	    TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
@@ -325,7 +326,7 @@ public class Endpoint {
 		list.add(revisionNumber);
 					
 		// Create new revision
-		String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, list);
+		String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, list, revisionName);
 		
 		// Respond with next revision number
     	responseBuilder.header(graphName + "-revision-number", newRevisionNumber);
@@ -431,9 +432,17 @@ public class Endpoint {
 		    String name = m.group("name");
 		    if (action.equals("TAG"))
 		    	RevisionManagement.createTag(graphName, revisionNumber, name, user, commitMessage);
-		    else if (action.equals("BRANCH"))
-		    	RevisionManagement.createBranch(graphName, revisionNumber, name, user, commitMessage);
-		    else
+		    else if (action.equals("BRANCH")) {
+		    	try {
+					RevisionManagement.createBranch(graphName, revisionNumber, name, user, commitMessage);
+				} catch (IdentifierAlreadyExistsException e) {
+					responseBuilder = Response.status(Response.Status.CONFLICT);
+				}
+		    	
+		    	// Respond with next revision number
+//	 TODO   		responseBuilder.header(graphName + "-revision-number", name);
+//	    		responseBuilder.header(graphName + "-revision-number-of-BRANCH", RevisionManagement.getMasterRevisionNumber(graphName));
+		    } else
 		    	throw new InternalServerErrorException("Error in query: " + sparqlQuery);
 		}
 		if (!foundEntry)
