@@ -82,7 +82,7 @@ public class TestRevisionManagment {
 		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 3", list, list.get(0));
 		
 		revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
-		Assert.assertEquals("4", revNumberMaster);
+		Assert.assertEquals("3", revNumberMaster);
 		
 		
 		list.remove("2");
