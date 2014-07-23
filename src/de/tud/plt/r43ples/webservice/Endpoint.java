@@ -356,7 +356,7 @@ public class Endpoint {
 		responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(query, format)); 
 		
 		// Add R43ples information
-		Pattern pattern =  Pattern.compile("CREATE(?<silent> SILENT)? GRAPH <(?<graph>.*)>");
+		Pattern pattern =  Pattern.compile("CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>.*)>");
 		Matcher m = pattern.matcher(query);
 		boolean found = false;
 		while (m.find()) {
@@ -384,7 +384,7 @@ public class Endpoint {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		
 		// Clear R43ples information for specified graphs
-		Pattern pattern =  Pattern.compile("DROP(?<silent> SILENT)? GRAPH <(?<graph>.*)>");
+		Pattern pattern =  Pattern.compile("DROP\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>.*)>");
 		Matcher m = pattern.matcher(query);
 		boolean found = false;
 		while (m.find()) {
@@ -420,7 +420,7 @@ public class Endpoint {
 		String commitMessage = extractCommitMessage(sparqlQuery);
 		
 		// Add R43ples information
-		Pattern pattern =  Pattern.compile("(?<action>TAG|BRANCH) GRAPH <(?<graph>.*)> #REVISION \"(?<revision>.*)\" TO \"(?<name>.*)\"");
+		Pattern pattern =  Pattern.compile("(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>.*)>\\s*#REVISION\\s*\"(?<revision>.*)\"\\s*TO\\s*\"(?<name>.*)\"");
 		Matcher m = pattern.matcher(sparqlQuery);
 		
 		boolean foundEntry = false;
