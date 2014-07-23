@@ -210,7 +210,7 @@ public class Endpoint {
 		ResponseBuilder responseBuilder = Response.ok();
 		
 		// create pattern for FROM clause
-		Pattern pattern = Pattern.compile("FROM\\s*<(?<graph>.*)>\\s*#REVISION\\s*\"(?<revision>.*)\"");
+		Pattern pattern = Pattern.compile("FROM\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"");
 		
 		Matcher m = pattern.matcher(query);
 		boolean found = false;
@@ -274,7 +274,7 @@ public class Endpoint {
 		
 		// create pattern for FROM and INTO clause
 		String query_replaced = query;
-		Pattern pattern =  Pattern.compile("(FROM|INTO|GRAPH)\\s*<(?<graph>.*)>\\s*#REVISION\\s*\"(?<revision>.*)\"");
+		Pattern pattern =  Pattern.compile("(FROM|INTO|GRAPH)\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"");
 		Matcher m = pattern.matcher(query);
 		boolean found = m.find();
 		
@@ -404,8 +404,8 @@ public class Endpoint {
 	}
 	
 	/** Creates a tag or a branch for a specific graph and revision.
-	 * Using command "TAG GRAPH <?> #REVISION "rev" TO "tag"
-	 * Using command "BRANCH GRAPH <?> #REVISION "rev" TO "tag"
+	 * Using command "TAG GRAPH <?> REVISION "rev" TO "tag"
+	 * Using command "BRANCH GRAPH <?> REVISION "rev" TO "tag"
 	 * 
 	 * @param sparqlQuery the SPARQL query
 	 * @param format the result format
@@ -420,7 +420,7 @@ public class Endpoint {
 		String commitMessage = extractCommitMessage(sparqlQuery);
 		
 		// Add R43ples information
-		Pattern pattern =  Pattern.compile("(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>.*)>\\s*#REVISION\\s*\"(?<revision>.*)\"\\s*TO\\s*\"(?<name>.*)\"");
+		Pattern pattern =  Pattern.compile("(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"\\s*TO\\s*\"(?<name>.*)\"");
 		Matcher m = pattern.matcher(sparqlQuery);
 		
 		boolean foundEntry = false;
@@ -458,7 +458,7 @@ public class Endpoint {
 	 * @throws InternalServerErrorException
 	 */
 	private String extractUser(String query) {
-		Pattern userPattern = Pattern.compile("#USER\\s*\"(?<user>.*)\"");
+		Pattern userPattern = Pattern.compile("USER\\s*\"(?<user>.*)\"");
 		Matcher userMatcher = userPattern.matcher(query);
 		if (userMatcher.find()) {
 			return userMatcher.group("user");
@@ -472,7 +472,7 @@ public class Endpoint {
 	 * @throws InternalServerErrorException
 	 */
 	private String extractCommitMessage(String query) {
-		Pattern pattern = Pattern.compile("#MESSAGE\\s*\"(?<message>.*)\"");
+		Pattern pattern = Pattern.compile("MESSAGE\\s*\"(?<message>.*)\"");
 		Matcher matcher = pattern.matcher(query);
 		if (matcher.find()) {
 			return matcher.group("message");

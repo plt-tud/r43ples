@@ -12,7 +12,7 @@
   <label for="query">Query Text</label><br />
 	  <textarea name="query" id="query" cols="80" rows="20">
 SELECT * 
-FROM <test> #REVISION "MASTER"
+FROM <test> REVISION "MASTER"
 WHERE {
 	?s ?p ?o. 
 }
@@ -41,40 +41,40 @@ CREATE GRAPH <test>
 
 <h3>Select Query</h3>
 <pre>SELECT * 
-FROM &lt;test&gt; #REVISION "23"
+FROM &lt;test&gt; REVISION "23"
 WHERE {
 	?s ?p ?o. 
 }</pre>
 
 <h3>Select Query - Multiple Graphs</h3>
 <pre>SELECT * 
-FROM &lt;test&gt; #REVISION "MASTER"
-FROM &lt;test2&gt; #REVISION "23"
+FROM &lt;test&gt; REVISION "MASTER"
+FROM &lt;test2&gt; REVISION "23"
 WHERE {
 	?s ?p ?o. 
 }</pre>
 
 <h3>Update Query Variant 1</h3>
-<pre>#USER "mgraube"
-#MESSAGE "test commit"
-INSERT DATA INTO &lt;test&gt; #REVISION "2"
+<pre>USER "mgraube"
+MESSAGE "test commit"
+INSERT DATA INTO &lt;test&gt; REVISION "2"
 {	&lt;a&gt; &lt;b&gt; &lt;c&gt; .	}</pre>
 
 <h3>Update Query Variant 2</h3>
-<pre>#USER "mgraube"
-#MESSAGE "test commit"
-INSERT { GRAPH &lt;test&gt; #REVISION "2"
+<pre>USER "mgraube"
+MESSAGE "test commit"
+INSERT { GRAPH &lt;test&gt; REVISION "2"
 {	&lt;a&gt; &lt;b&gt; &lt;c&gt; .	}}</pre>
 
 <h3>Branching</h3>
-<pre>#USER "mgraube"
-#MESSAGE "test commit"
-BRANCH GRAPH &lt;test&gt; #REVISION "2" TO "unstable"</pre>
+<pre>USER "mgraube"
+MESSAGE "test commit"
+BRANCH GRAPH &lt;test&gt; REVISION "2" TO "unstable"</pre>
 
 <h3>Tagging</h3>
-<pre>#USER "mgraube"
-#MESSAGE "test commit"
-TAG GRAPH &lt;test&gt; #REVISION "2" TO "v0.3-alpha"</pre>
+<pre>USER "mgraube"
+MESSAGE "test commit"
+TAG GRAPH &lt;test&gt; REVISION "2" TO "v0.3-alpha"</pre>
 
 </body>
 </html>
