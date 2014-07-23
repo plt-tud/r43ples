@@ -89,7 +89,7 @@ public class TestRevisionManagment {
 		list.add("3");
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-3.nt"), addSetW, "UTF-8");
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-3.nt"), deleteSetW, "UTF-8");
-		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 3", list, list.get(0));
+		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 4", list, list.get(0));
 		
 		revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
 		Assert.assertEquals("4", revNumberMaster);
