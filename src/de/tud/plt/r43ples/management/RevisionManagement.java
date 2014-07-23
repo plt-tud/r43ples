@@ -178,26 +178,35 @@ public class RevisionManagement {
 		} else {
 			// General variables
 			String dateString = getDateString();
+			String commitUri = graphName + "-commit-" + dateString;
 			String branchUri = graphName + "-branch-" + branchName;
 			String revisionUri = graphName + "-revision-" + revisionNumber;
 			String personUri =  getUserName(user);
 				
+			// Create a new commit (activity)
+			String queryContent =	String.format(
+					"<%s> a rmo:Commit; " +
+					"	prov:wasAssociatedWith <%s> ;" +
+					"	prov:generated <%s> ;" +
+					"   prov:used <%s> ;" +
+					"	dc-terms:title \"%s\" ;" +
+					"	prov:atTime \"%s\" .%n",
+					commitUri, personUri, branchUri, revisionUri, branchMessage, dateString);
+			
 			// Create new branch
-			String queryContent = String.format(
+			queryContent += String.format(
 					"<%s> a rmo:Branch, rmo:Reference; "
-					+ " prov:wasAssociatedWith <%s>; "
-					+ " dc-terms:title \"%s\"; "
-					+ " prov:atTime \"%s\"; "
 					+ " rmo:fullGraph <%s>; "
 					+ "	prov:wasDerivedFrom <%s>; "
+					+ "	rmo:references <%s>; "
 					+ "	rdfs:label \"%s\". "
-					, branchUri, personUri, branchMessage, dateString, branchUri, revisionUri, branchName);
+					, branchUri, branchUri, revisionUri, revisionUri, branchName);
 			
 			// Update full graph of branch
 			generateFullGraphOfRevision(graphName, revisionNumber, branchUri);
 			
 			// Execute queries
-			String query = prefixes + String.format("INSERT IN GRAPH <%s> { %s }%n", Config.revision_graph, queryContent) ;
+			String query = prefixes + String.format("INSERT IN GRAPH <%s> { %s }", Config.revision_graph, queryContent) ;
 			TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
 		}		
 	}
@@ -211,7 +220,7 @@ public class RevisionManagement {
 	 * @param dataSetAsNTriples the initial data set as N-Triples
 	 * @return boolean created or not
 	 * @throws IOException 
-	 * @throws AuthenticationException 
+	 * @throws HttpException 
 	 */
 	public static boolean createNewGraphWithVersionControl(String graphName, String dataSetAsNTriples) throws HttpException, IOException {
 		logger.info("Start creation of new graph under version control with the name " + graphName + "!");
@@ -272,11 +281,17 @@ public class RevisionManagement {
 	 * @param user user who performs this commit
 	 * @param commitMessage message of this commit
 	 * @throws IOException 
+	 * @throws IdentifierAlreadyExistsException 
 	 * @throws AuthenticationException 
 	 */
-	public static void createTag(String graphName, String revisionNumber, String tagName, String user, String commitMessage) throws HttpException, IOException {
+	public static void createTag(String graphName, String revisionNumber, String tagName, String user, String commitMessage) throws HttpException, IOException, IdentifierAlreadyExistsException {
 		logger.info("Create tag for revision " + revisionNumber + " of graph " + graphName);
 		
+		if (checkBranchNameExistence(graphName, tagName)) {
+			// Branch name is already in use
+			logger.error("The branch name '" + tagName + "' is for the graph '" + graphName + "' already in use.");
+			throw new IdentifierAlreadyExistsException("The tag name '" + tagName + "' is for the graph '" + graphName + "' already in use.");
+		}
 		// General variables
 		String dateString = getDateString();
 		String commitUri = graphName + "-commit-" + dateString;
@@ -294,7 +309,7 @@ public class RevisionManagement {
 				"	prov:atTime \"%s\" .%n",
 				commitUri, personName, tagUri, revisionUri, commitMessage, dateString);
 		
-		// Create new branch
+		// Create new tag
 		queryContent += String.format(
 				"<%s> a rmo:Tag, rmo:Reference; "
 				+ " rmo:fullGraph <%s>; "
@@ -306,7 +321,7 @@ public class RevisionManagement {
 		generateFullGraphOfRevision(graphName, revisionNumber, tagUri);	
 		
 		// Execute queries
-		String query = prefixes + String.format("INSERT IN GRAPH <%s> { %s }%n", Config.revision_graph, queryContent) ;
+		String query = prefixes + String.format("INSERT IN GRAPH <%s> { %s }", Config.revision_graph, queryContent) ;
 		TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");		
 	}
 	

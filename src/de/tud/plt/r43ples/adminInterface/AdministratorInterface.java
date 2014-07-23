@@ -26,6 +26,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.Tree;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
@@ -45,8 +46,7 @@ public class AdministratorInterface {
 	/**
 	 * Start the administration interface.
 	 * @throws IOException 
-	 * @throws ClientProtocolException 
-	 * @throws AuthenticationException 
+	 * @throws HttpException
 	 */
 	public static void start() throws HttpException, IOException {
 		System.out.println("\nAdministration interface!");
@@ -138,7 +138,13 @@ public class AdministratorInterface {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String tagName = br.readLine();
 		
-		RevisionManagement.createTag(graphName, revisionNumber, tagName, "Admin", "commited from Admin Interface");
+		try {
+			RevisionManagement.createTag(graphName, revisionNumber, tagName, "Admin", "commited from Admin Interface");
+		} catch (IdentifierAlreadyExistsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+			
 	}
 
 	/**
