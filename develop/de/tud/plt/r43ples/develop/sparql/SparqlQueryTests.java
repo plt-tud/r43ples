@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.test.sparql;
+package de.tud.plt.r43ples.develop.sparql;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +28,7 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 
-import de.tud.plt.r43ples.test.examples.CreateExampleGraph;
+import de.tud.plt.r43ples.develop.examples.CreateExampleGraph;
 
 /**
  * Contains SPARQL queries which will be later used. 
