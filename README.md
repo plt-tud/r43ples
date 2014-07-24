@@ -16,7 +16,6 @@ It provides a SPARQL endpoint where all queries have to be directed to.
 The SPARQL query defines whether only a revision is queried, or a new revision needs to be created. 
 Furthermore, the service provides an interface for revision management and the import or export of data from the Computer Aided Engineering tools.
 
-An demonstration systems runs at http://eatld.et.tu-dresden.de/r43ples/sparql
 
 Dependencies
 ------------
