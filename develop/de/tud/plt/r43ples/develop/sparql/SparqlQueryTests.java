@@ -7,11 +7,14 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
@@ -29,6 +32,9 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 
 import de.tud.plt.r43ples.develop.examples.CreateExampleGraph;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.TripleStoreInterface;
 
 /**
  * Contains SPARQL queries which will be later used. 
@@ -41,11 +47,19 @@ public class SparqlQueryTests {
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(CreateExampleGraph.class);
 	/** The endpoint. **/
-	private static String endpoint = "http://localhost:8890/sparql";
+	private static String endpoint = "http://localhost:8890/sparql-auth";
 	/** The revision graph. **/
 	private static String revisionGraph = "r43ples-revisions";
 	/** The user credentials. **/
 	private static UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("dba", "dba");
+	/** The SPARQL prefixes. **/
+	private final static String prefix_rmo = "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> \n";
+	private final static String prefixes = "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
+			+ "PREFIX dc-terms: <http://purl.org/dc/terms/> \n"
+			+ prefix_rmo
+			+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
+			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
+			+ "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n";
 	
 	
 	/**
@@ -54,8 +68,14 @@ public class SparqlQueryTests {
 	 * @param args
 	 * @throws IOException 
 	 * @throws HttpException 
+	 * @throws ConfigurationException 
 	 */
-	public static void main(String[] args) throws IOException, HttpException {
+	public static void main(String[] args) throws IOException, HttpException, ConfigurationException {
+		
+		// Start service
+		//Service.main(null);
+		Config.readConfig("r43ples.conf");
+		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
 		
 		logger.info("Common revision: \n" + getCommonRevisionWithShortestPath("exampleGraph-revision-1.0-1", "exampleGraph-revision-1.1-1"));
 		
@@ -64,6 +84,8 @@ public class SparqlQueryTests {
 		
 		getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.1-1");
 		
+//		Under construction
+//		createRevisionProgress(getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.0-1"), "RM-REVISION-PROGRESS-1-exampleGraph", "http://example/branch-0");
 	}
 	
 	
@@ -257,6 +279,91 @@ public class SparqlQueryTests {
 	
 	
 	/**
+	 * Create the revision progress.
+	 * 
+	 * @param list
+	 * @param graphNameRevisionProgress
+	 * @param uri
+	 * @throws IOException
+	 * @throws HttpException
+	 */
+	private static void createRevisionProgress(LinkedList<String> list, String graphNameRevisionProgress, String uri) throws IOException, HttpException {
+		
+		logger.info("Create the revision progress graph with the name: \n" + graphNameRevisionProgress);
+		executeQueryWithAuthorization(String.format("DROP SILENT GRAPH <%s>", graphNameRevisionProgress), "HTML");
+		executeQueryWithAuthorization(String.format("CREATE GRAPH  <%s>", graphNameRevisionProgress), "HTML");
+		
+		Iterator<String> iteList = list.iterator();
+		
+		if (iteList.hasNext()) {
+			String firstRevision = iteList.next();
+			
+			// Get the revision number of first revision
+			String firstRevisionNumber = "";
+			String graphName = "";
+
+			String query = String.format(
+				  "SELECT ?number ?graph \n"
+				+ "FROM <%s> \n"
+				+ "WHERE { \n"
+				+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#revisionNumber> ?number . \n"
+				+ " <%s> <http://eatld.et.tu-dresden.de/rmo#revisionOf> ?graph . \n"
+				+ "}", revisionGraph, firstRevision, firstRevision);
+			
+			String result = executeQueryWithAuthorization(query, "XML");
+			
+			if (ResultSetFactory.fromXML(result).hasNext()) {
+				QuerySolution qs = ResultSetFactory.fromXML(result).next();
+				firstRevisionNumber = qs.getLiteral("?number").toString();
+				graphName = qs.getResource("?graph").toString();
+			}
+			
+			// Get the full graph name of first revision or create full revision graph of first revision
+			String fullGraphName = "";
+			try {
+				fullGraphName = RevisionManagement.getFullGraphName(graphName, firstRevisionNumber);
+			} catch (NoSuchElementException e) {
+				// Create a temporary full graph
+				RevisionManagement.generateFullGraphOfRevision(graphName, firstRevisionNumber, "RM-TEMP-REVISION-PROGRESS-FIRSTREVISION");
+				fullGraphName = "RM-TEMP-REVISION-PROGRESS-FIRSTREVISION";
+			}
+			
+			
+			// Create the initial content
+			String queryInitial = prefixes + String.format(	
+				  "INSERT INTO <test-process> { \n"
+				+ "	<%s> a rmo:RevisionProcess; \n"
+				+ "		rmo:original [ \n"
+				+ "			rdf:subject ?s ; \n"
+				+ "			rdf:predicate ?p ; \n"
+				+ "			rdf:object ?o ; \n"
+				+ "			rmo:revisionNumber \"%s\" \n"
+				+ "		] \n"
+				+ "} WHERE { \n"
+				+ "	GRAPH <%s> \n"
+				+ "		{ ?s ?p ?o . } \n"
+				+ "}", uri, firstRevisionNumber, fullGraphName);
+		
+			// Drop the temporary full graph
+			executeQueryWithAuthorization("DROP SILENT GRAPH <RM-TEMP-REVISION-PROGRESS-FIRSTREVISION>", "HTML");
+			
+			// Update content by current add and delete set - remove old entries
+			while (iteList.hasNext()) {
+				String revision = iteList.next();
+				
+				
+				
+				
+				
+			}
+			
+			
+		}
+		
+	}
+		
+	
+	/**
 	 * Executes a SPARQL-query against an endpoint without authorization.
 	 * 
 	 * @param query the SPARQL query
@@ -295,9 +402,6 @@ public class SparqlQueryTests {
 	 */
 	public static String executeQueryWithAuthorization(String query, String format) throws IOException, HttpException {
 		String result = null;
-		
-		logger.info("Hide all keywords in comments");
-		query = query.replace("USER", "#USER").replace("MESSAGE", "#MESSAGE").replace("REVISION", "#REVISION");	
 		
 		logger.info("Execute query on SPARQL endpoint:\n"+ query);
 		DefaultHttpClient httpClient = new DefaultHttpClient();
