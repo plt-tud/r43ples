@@ -7,6 +7,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.ws.rs.core.Response.Status;
@@ -24,6 +25,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 
 import de.tud.plt.r43ples.test.examples.CreateExampleGraph;
@@ -40,6 +42,8 @@ public class SparqlQueryTests {
 	private static Logger logger = Logger.getLogger(CreateExampleGraph.class);
 	/** The endpoint. **/
 	private static String endpoint = "http://localhost:8890/sparql";
+	/** The revision graph. **/
+	private static String revisionGraph = "r43ples-revisions";
 	/** The user credentials. **/
 	private static UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("dba", "dba");
 	
@@ -56,6 +60,9 @@ public class SparqlQueryTests {
 		logger.info("Common revision: \n" + getCommonRevisionWithShortestPath("exampleGraph-revision-1.0-1", "exampleGraph-revision-1.1-1"));
 		
 		logger.info("Common revision: \n" + getCommonRevisionWithShortestPath("exampleGraph-revision-1", "exampleGraph-revision-1.1-1"));
+		
+		
+		getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.1-1");
 		
 	}
 	
@@ -84,7 +91,7 @@ public class SparqlQueryTests {
 			+ "			{ \n"
 			+ "				SELECT ?s ?startRevision1 \n"
 			+ "				WHERE { \n"
-			+ "					graph <r43ples-revisions> { \n"
+			+ "					graph <%s> { \n"
 			+ "						?s <http://www.w3.org/ns/prov#wasDerivedFrom> ?startRevision1 . \n"
 			+ "					} \n"
 			+ "				} \n"
@@ -108,7 +115,7 @@ public class SparqlQueryTests {
 			+ "			{ \n"
 			+ "				SELECT ?s ?startRevision2 \n"
 			+ "				WHERE { \n"
-			+ "					graph <r43ples-revisions> { \n"
+			+ "					graph <%s> { \n"
 			+ "						?s <http://www.w3.org/ns/prov#wasDerivedFrom> ?startRevision2 . \n"
 			+ "					} \n"
 			+ "				} \n"
@@ -136,7 +143,7 @@ public class SparqlQueryTests {
 			+ "					{ \n"
 			+ "						SELECT ?s ?o \n"
 			+ "						WHERE { \n"
-			+ "							graph <r43ples-revisions> { \n"
+			+ "							graph <%s> { \n"
 			+ "								?s <http://www.w3.org/ns/prov#wasDerivedFrom> ?o . \n"
 			+ "							} \n"
 			+ "						} \n"
@@ -160,7 +167,7 @@ public class SparqlQueryTests {
 			+ "					{ \n"
 			+ "						SELECT ?s ?o \n"
 			+ "						WHERE { \n"
-			+ "							graph <r43ples-revisions> { \n"
+			+ "							graph <%s> { \n"
 			+ "								?s <http://www.w3.org/ns/prov#wasDerivedFrom> ?o . \n"
 			+ "							} \n"
 			+ "						} \n"
@@ -181,7 +188,7 @@ public class SparqlQueryTests {
 			+ "	} \n"
 			+ "	FILTER ( ?startRevision1 = ?startRevision2 && ?startRevision1 = ?link ) \n"
 			+ "} ORDER BY ?pathElementCountBothBranches \n"
-			+ "LIMIT 1", revision1, revision2, revision1, revision2);
+			+ "LIMIT 1", revisionGraph, revision1, revisionGraph, revision2, revisionGraph, revision1, revisionGraph, revision2);
 		
 		String result = executeQueryWithAuthorization(query, "XML");
 		
@@ -193,6 +200,59 @@ public class SparqlQueryTests {
 		
 		logger.info("No common revision could be found.");
 		return null;		
+	}
+	
+	
+	/**
+	 * Calculate the path from start revision to target revision.
+	 * 
+	 * @param startRevision the start revision
+	 * @param targetRevision the target revision
+	 * @return linked list with all revisions from start revision to target revision
+	 * @throws HttpException 
+	 * @throws IOException 
+	 */
+	public static LinkedList<String> getPathBetweenStartAndTargetRevision(String startRevision, String targetRevision) throws IOException, HttpException {
+		
+		logger.info("Calculate the shortest path from revision <" + startRevision + "> to <" + targetRevision + "> .");
+		String query = String.format(
+			  "# Query creates shortest path between start and target revision \n"
+			+ "SELECT ?link ?step \n"
+			+ "WHERE { \n"
+			+ "	{ \n"
+			+ "		SELECT ?s ?o \n"
+			+ "		WHERE { \n"
+			+ "			graph <%s> { \n"
+			+ "				?s <http://www.w3.org/ns/prov#wasDerivedFrom> ?o . \n"
+			+ "			} \n"
+			+ "		} \n"
+			+ "	} \n"
+			+ "	OPTION ( TRANSITIVE, \n"
+			+ "			 t_distinct, \n"
+			+ "			 t_in(?s), \n"
+			+ "			 t_out(?o), \n"
+			+ "			 t_shortest_only, \n"
+			+ "			 t_step (?s) as ?link, \n"
+			+ "			 t_step ('path_id') as ?path, \n"
+			+ "			 t_step ('step_no') as ?step \n"
+			+ "			) . \n"
+			+ "	FILTER ( ?s = <%s> && ?o = <%s> ) \n"
+			+ "}  ORDER BY ?step", revisionGraph, targetRevision, startRevision);
+		
+		String result = executeQueryWithAuthorization(query, "XML");
+		
+		LinkedList<String> list = new LinkedList<String>();
+		
+		ResultSet resultSet = ResultSetFactory.fromXML(result);
+
+		while (resultSet.hasNext()) {
+			QuerySolution qs = resultSet.next();
+			String resource = qs.getResource("?link").toString();
+			logger.info("Path element: \n" + resource);
+			list.addFirst(resource);
+		}
+
+		return list;
 	}
 	
 	
@@ -263,7 +323,5 @@ public class SparqlQueryTests {
 		
 		return result;
 	}
-	
-	
 
 }
