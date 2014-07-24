@@ -326,7 +326,7 @@ public class Endpoint {
 		list.add(revisionNumber);
 					
 		// Create new revision
-		String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, list, revisionName);
+		String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, list);
 		
 		// Respond with next revision number
     	responseBuilder.header(graphName + "-revision-number", newRevisionNumber);
@@ -432,9 +432,9 @@ public class Endpoint {
 		    String name = m.group("name");
 		    try {
 			    if (action.equals("TAG"))
-			    	RevisionManagement.createTag(graphName, revisionNumber, name, user, commitMessage);
+			    	RevisionManagement.createReference("tag", graphName, revisionNumber, name, user, commitMessage);
 			    else if (action.equals("BRANCH"))
-		    		RevisionManagement.createBranch(graphName, revisionNumber, name, user, commitMessage);
+		    		RevisionManagement.createReference("branch", graphName, revisionNumber, name, user, commitMessage);
 		        else
 		        	throw new InternalServerErrorException("Error in query: " + sparqlQuery);
 			} catch (IdentifierAlreadyExistsException e) {

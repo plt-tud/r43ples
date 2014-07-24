@@ -42,7 +42,7 @@ public class TestRevisionManagment {
 		ArrayList<String> list = new ArrayList<String>();
 		list.add("0");
 		
-		RevisionManagement.createNewRevision("test1234", "<a> <b> <c>.", "", "test", "test commit message", list, list.get(0));
+		RevisionManagement.createNewRevision("test1234", "<a> <b> <c>.", "", "test", "test commit message", list);
 		
 		revNumberMaster = RevisionManagement.getMasterRevisionNumber("test1234");
 		Assert.assertEquals("1", revNumberMaster);
@@ -59,7 +59,7 @@ public class TestRevisionManagment {
 		list.add("0");
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-0.nt"), addSetW, "UTF-8");
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-0.nt"), deleteSetW, "UTF-8");
-		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 1", list, list.get(0));
+		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 1", list);
 				
 		String revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
 		Assert.assertEquals("1", revNumberMaster);
@@ -69,7 +69,7 @@ public class TestRevisionManagment {
 		list.add("1");
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-1.nt"), addSetW, "UTF-8");
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-1.nt"), deleteSetW, "UTF-8");
-		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 2", list, list.get(0));
+		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 2", list);
 		
 		revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
 		Assert.assertEquals("2", revNumberMaster);
@@ -79,7 +79,7 @@ public class TestRevisionManagment {
 		list.add("2");
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-2.nt"), addSetW, "UTF-8");
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-2.nt"), deleteSetW, "UTF-8");
-		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 3", list, list.get(0));
+		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 3", list);
 		
 		revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
 		Assert.assertEquals("3", revNumberMaster);
@@ -89,7 +89,7 @@ public class TestRevisionManagment {
 		list.add("3");
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-3.nt"), addSetW, "UTF-8");
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-3.nt"), deleteSetW, "UTF-8");
-		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 4", list, list.get(0));
+		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 4", list);
 		
 		revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
 		Assert.assertEquals("4", revNumberMaster);
