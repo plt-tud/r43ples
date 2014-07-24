@@ -41,6 +41,7 @@ import com.hp.hpl.jena.update.UpdateRequest;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 
 
@@ -210,44 +211,12 @@ public class Endpoint {
 
 		ResponseBuilder responseBuilder = Response.ok();
 		
-		// create pattern for FROM clause
-		Pattern pattern = Pattern.compile("FROM\\s*<(?<graph>.*)>\\s*#REVISION\\s*\"(?<revision>.*)\"");
-		
-		Matcher m = pattern.matcher(query);
-		boolean found = false;
-		while (m.find()){
-			found = true;
-		    String graphName = m.group("graph");
-		    String revisionNumber = m.group("revision");
-		    
-		    // if no revision number is declared use the MASTER as default
-		    if (revisionNumber == null) {
-		    	revisionNumber = "MASTER";
-		    }
-		    String headerRevisionNumber;
-		    if (revisionNumber.equalsIgnoreCase("MASTER")) {
-				// Respond with MASTER revision - nothing to be done - MASTER revisions are already created in the named graphs				
-		    	headerRevisionNumber = "MASTER";
-			} else {
-				String newGraphName;
-				if (RevisionManagement.isBranch(graphName, revisionNumber))
-					newGraphName = RevisionManagement.getFullGraphName(graphName, revisionNumber);
-				else {
-					// Respond with specified revision, therefore the revision must be generated - saved in graph <RM-TEMP-graphName>
-					newGraphName = "RM-TEMP-" + graphName;
-					RevisionManagement.generateFullGraphOfRevision(graphName, revisionNumber, newGraphName);
-				}
-				query = query.replace("<" + graphName + ">", "<" + newGraphName + ">");
-				headerRevisionNumber = revisionNumber;
-			}
-		    // Respond with specified revision
-			responseBuilder.header(graphName + "-revision-number", headerRevisionNumber);
-		    responseBuilder.header(graphName + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
-		}
-		if (!found) {
+		try {
+			String query_rewritten = SparqlRewriter.rewriteQuery(query);
+			return responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(query_rewritten, format)).type(format).build();
+		} catch (Exception e) {
 			throw new InternalServerErrorException("Query contain errors:\n"+query);
 		}
-		return responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(query, format)).type(format).build();
 	}
 	
 	
