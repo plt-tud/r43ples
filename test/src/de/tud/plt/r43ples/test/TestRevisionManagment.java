@@ -57,6 +57,8 @@ public class TestRevisionManagment {
 		StringWriter deleteSetW = new StringWriter();
 		
 		list.add("0");
+		addSetW = new StringWriter();
+		deleteSetW = new StringWriter();
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-0.nt"), addSetW, "UTF-8");
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-0.nt"), deleteSetW, "UTF-8");
 		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 1", list, list.get(0));
@@ -67,6 +69,8 @@ public class TestRevisionManagment {
 		
 		list.remove("0");
 		list.add("1");
+		addSetW = new StringWriter();
+		deleteSetW = new StringWriter();
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-1.nt"), addSetW, "UTF-8");
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-1.nt"), deleteSetW, "UTF-8");
 		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 2", list, list.get(0));
@@ -77,6 +81,8 @@ public class TestRevisionManagment {
 		
 		list.remove("1");
 		list.add("2");
+		addSetW = new StringWriter();
+		deleteSetW = new StringWriter();
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-2.nt"), addSetW, "UTF-8");
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-2.nt"), deleteSetW, "UTF-8");
 		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 3", list, list.get(0));
@@ -87,6 +93,8 @@ public class TestRevisionManagment {
 		
 		list.remove("2");
 		list.add("3");
+		addSetW = new StringWriter();
+		deleteSetW = new StringWriter();
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-3.nt"), addSetW, "UTF-8");
 		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-3.nt"), deleteSetW, "UTF-8");
 		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 4", list, list.get(0));

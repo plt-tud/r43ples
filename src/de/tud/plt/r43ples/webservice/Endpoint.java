@@ -21,6 +21,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -147,6 +148,59 @@ public class Endpoint {
 			}	
 			return response;
 		}
+	}
+	
+	@Path("createTestDataset")
+	@GET
+	public String createTestDataset(){
+		ArrayList<String> list = new ArrayList<String>();
+		
+		StringWriter addSetW;
+		StringWriter deleteSetW;
+		
+		String graphName = "r43ples-test-dataset";
+		try{
+			RevisionManagement.putGraphUnderVersionControl(graphName);
+			
+			list.add("0");
+			addSetW = new StringWriter();
+			deleteSetW = new StringWriter();
+			IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-0.nt"), addSetW, "UTF-8");
+			IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-0.nt"), deleteSetW, "UTF-8");
+			RevisionManagement.createNewRevision(graphName, addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 1", list, list.get(0));
+			
+			
+			list.remove("0");
+			list.add("1");
+			addSetW = new StringWriter();
+			deleteSetW = new StringWriter();
+			IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-1.nt"), addSetW, "UTF-8");
+			IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-1.nt"), deleteSetW, "UTF-8");
+			RevisionManagement.createNewRevision(graphName, addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 2", list, list.get(0));
+			
+			list.remove("1");
+			list.add("2");
+			addSetW = new StringWriter();
+			deleteSetW = new StringWriter();
+			IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-2.nt"), addSetW, "UTF-8");
+			IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-2.nt"), deleteSetW, "UTF-8");
+			RevisionManagement.createNewRevision(graphName, addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 3", list, list.get(0));	
+			
+			list.remove("2");
+			list.add("3");
+			addSetW = new StringWriter();
+			deleteSetW = new StringWriter();
+			IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-3.nt"), addSetW, "UTF-8");
+			IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-3.nt"), deleteSetW, "UTF-8");
+			RevisionManagement.createNewRevision(graphName, addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 4", list, list.get(0));
+			addSetW.close();
+			deleteSetW.close();
+		} catch (HttpException | IOException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException(e.getMessage());
+		}	
+		
+		return "Test dataset successfully created in graph <"+graphName+">";
 	}
 	
 
