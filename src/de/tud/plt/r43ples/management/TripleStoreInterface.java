@@ -93,10 +93,10 @@ public class TripleStoreInterface {
 	public static String executeQueryWithAuthorization(String query, String format) throws IOException, HttpException {
 		String result = null;
 		
-		logger.info("Hide all keywords in comments");
+		logger.debug("Hide all keywords in comments");
 		query = query.replace("USER", "#USER").replace("MESSAGE", "#MESSAGE").replace("REVISION", "#REVISION");	
 		
-		logger.info("Execute query on SPARQL endpoint:\n"+ query);
+		logger.debug("Execute query on SPARQL endpoint:\n"+ query);
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
 			
@@ -107,16 +107,27 @@ public class TripleStoreInterface {
 		nameValuePairs.add(new BasicNameValuePair("format",format));
 		nameValuePairs.add(new BasicNameValuePair("query", query));
 		
-		request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+		HttpResponse response =  null;
+		InputStreamReader in = null;
 		
-		//Execute Query
-		HttpResponse response = httpClient.execute(request);
-		logger.debug("Statuscode: " + response.getStatusLine().getStatusCode());
-		InputStreamReader in = new InputStreamReader(response.getEntity().getContent());
-		result = IOUtils.toString(in);
-		in.close();
-		if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
-			throw new HttpException(response.getStatusLine().toString()+"\n"+result);
+		try{
+			request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+			
+			//Execute Query
+			response = httpClient.execute(request);
+			logger.debug("Statuscode: " + response.getStatusLine().getStatusCode());
+			in = new InputStreamReader(response.getEntity().getContent());
+			result = IOUtils.toString(in);
+			if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
+				throw new HttpException(response.getStatusLine().toString()+"\n"+result);
+			}
+			
+			
+		} catch (HttpException | IOException e){
+			throw e;
+		}
+		finally {
+			in.close();
 		}
 		
 		return result;
