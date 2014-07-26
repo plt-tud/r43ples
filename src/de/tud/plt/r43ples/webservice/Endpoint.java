@@ -395,11 +395,8 @@ public class Endpoint {
 		if (!found) {
 			throw new InternalServerErrorException("Query contain errors:\n"+query);
 		}
-		else {
-			// Execute SPARQL query
-			responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(query, format));
-		}
-		
+		responseBuilder.status(Response.Status.OK);
+		responseBuilder.entity("Successful: "+ query);
 		return responseBuilder.build();
 	}
 	

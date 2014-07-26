@@ -828,6 +828,7 @@ public class RevisionManagement {
 	 */
 	public static void purgeGraph(String graph) throws HttpException, IOException {
 		logger.info("Purge graph "+graph+" and all related R43ples information.");
+		// Drop all full graphs as well as add and delete sets which are related to specified graph 
 		String query = prefixes + String.format(
 				"SELECT DISTINCT ?graph FROM <%s> WHERE {"
 				+ "		?rev rmo:revisionOf <%s>."
@@ -843,6 +844,7 @@ public class RevisionManagement {
 			TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <"+graphName+">","XML");
 			System.out.println("Graph deleted: " + graphName);
 		}
+		// Remove information from revision graph		
 		String queryDelete = prefixes + String.format(
 				"DELETE { GRAPH <%s> {?s ?p ?o} } "
 				+ "WHERE {"
