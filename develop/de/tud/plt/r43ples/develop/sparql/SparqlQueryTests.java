@@ -277,6 +277,7 @@ public class SparqlQueryTests {
 		return list;
 	}
 	
+	//TODO maybe it is better that the big query returns the numbers and not the URIs
 	
 	/**
 	 * Create the revision progress.
@@ -328,7 +329,8 @@ public class SparqlQueryTests {
 				fullGraphName = "RM-TEMP-REVISION-PROGRESS-FIRSTREVISION";
 			}
 			
-			
+			//TODO make test-process variable
+			//TODO maybe replace rmo:revision with wasChangedByRevision (check PROV for possible solutions)
 			// Create the initial content
 			String queryInitial = prefixes + String.format(	
 				  "INSERT INTO <test-process> { \n"
@@ -337,19 +339,69 @@ public class SparqlQueryTests {
 				+ "			rdf:subject ?s ; \n"
 				+ "			rdf:predicate ?p ; \n"
 				+ "			rdf:object ?o ; \n"
-				+ "			rmo:revisionNumber \"%s\" \n"
+				+ "			rmo:revision \"%s\" \n"
 				+ "		] \n"
 				+ "} WHERE { \n"
 				+ "	GRAPH <%s> \n"
 				+ "		{ ?s ?p ?o . } \n"
-				+ "}", uri, firstRevisionNumber, fullGraphName);
+				+ "}", uri, firstRevision, fullGraphName);
 		
+			// Execute the query which generates the initial content
+			executeQueryWithAuthorization(queryInitial, "HTML");
+			
 			// Drop the temporary full graph
 			executeQueryWithAuthorization("DROP SILENT GRAPH <RM-TEMP-REVISION-PROGRESS-FIRSTREVISION>", "HTML");
 			
 			// Update content by current add and delete set - remove old entries
 			while (iteList.hasNext()) {
 				String revision = iteList.next();
+				
+				// Get the ADD and DELETE set URIs
+				String addSetURI = getAddSetURI(revision, Config.revision_graph);
+				String deleteSetURI = getDeleteSetURI(revision, Config.revision_graph);
+				
+				if ((addSetURI != null) && (deleteSetURI != null)) {
+					
+					// Update the revision process with the data of the current revision ADD set
+					
+					// Delete old entries
+					
+					
+					String queryRevision = prefixes + String.format(	
+						  "INSERT INTO <test-process> { \n"
+						+ "	<%s> a rmo:RevisionProcess; \n"
+						+ "		rmo:added [ \n"
+						+ "			rdf:subject ?s ; \n"
+						+ "			rdf:predicate ?p ; \n"
+						+ "			rdf:object ?o ; \n"
+						+ "			rmo:revision \"%s\" \n"
+						+ "		] \n"
+						+ "} WHERE { \n"
+						+ "	GRAPH <%s> \n"
+						+ "		{ ?s ?p ?o . } \n"
+						+ "}", uri, revision, addSetURI);
+				
+					// Execute the query which updates the revision process by the current revision
+					executeQueryWithAuthorization(queryRevision, "HTML");
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+					
+				} else {
+					//TODO Error management
+				}
+				
 				
 				
 				
@@ -427,5 +479,60 @@ public class SparqlQueryTests {
 		
 		return result;
 	}
-
+	
+	
+	/**
+	 * Get the ADD set URI of a given revision URI.
+	 * 
+	 * @param revisionURI the revision URI
+	 * @param revisionGraph the revision graph
+	 * @return the ADD set URI, returns null when the revision URI does not exists or no ADD set is referenced by the revision URI
+	 * @throws HttpException 
+	 * @throws IOException 
+	 */
+	private static String getAddSetURI(String revisionURI, String revisionGraph) throws IOException, HttpException {
+		String query = String.format(
+			  "SELECT ?addSetURI \n"
+			+ "FROM <%s> \n"
+			+ "WHERE { \n"
+			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaAdded> ?addSetURI . \n"
+			+ "}", revisionGraph, revisionURI);
+		
+		String result = executeQueryWithAuthorization(query, "XML");
+		
+		if (ResultSetFactory.fromXML(result).hasNext()) {
+			QuerySolution qs = ResultSetFactory.fromXML(result).next();
+			return qs.getResource("?addSetURI").toString();
+		} else {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Get the DELETE set URI of a given revision URI.
+	 * 
+	 * @param revisionURI the revision URI
+	 * @param revisionGraph the revision graph
+	 * @return the DELETE set URI, returns null when the revision URI does not exists or no DELETE set is referenced by the revision URI
+	 * @throws HttpException 
+	 * @throws IOException 
+	 */
+	private static String getDeleteSetURI(String revisionURI, String revisionGraph) throws IOException, HttpException {
+		String query = String.format(
+			  "SELECT ?deleteSetURI \n"
+			+ "FROM <%s> \n"
+			+ "WHERE { \n"
+			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaRemoved> ?deleteSetURI . \n"
+			+ "}", revisionGraph, revisionURI);
+		
+		String result = executeQueryWithAuthorization(query, "XML");
+		
+		if (ResultSetFactory.fromXML(result).hasNext()) {
+			QuerySolution qs = ResultSetFactory.fromXML(result).next();
+			return qs.getResource("?deleteSetURI").toString();
+		} else {
+			return null;
+		}
+	}	
 }
