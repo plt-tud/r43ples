@@ -120,7 +120,7 @@ public class Endpoint {
 		{
 			if (format.contains("text/html")){
 				logger.info("SPARQL form requested");
-				File fileToSend = new File("resources/index.html");
+				File fileToSend = new File("resources/webapp/index.html");
 				return Response.ok(fileToSend, "text/html").build();
 			} else {
 				return getServiceDescription(format);
