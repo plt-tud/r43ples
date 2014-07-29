@@ -84,8 +84,8 @@ public class SparqlQueryTests {
 		
 		getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.1-1");
 		
-//		Under construction
-//		createRevisionProgress(getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.0-1"), "RM-REVISION-PROGRESS-1-exampleGraph", "http://example/branch-0");
+		createRevisionProgress(getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.0-1"), "RM-REVISION-PROGRESS-0-exampleGraph", "http://example/branch-0");
+		createRevisionProgress(getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.1-1"), "RM-REVISION-PROGRESS-1-exampleGraph", "http://example/branch-1");
 	}
 	
 	
@@ -277,29 +277,43 @@ public class SparqlQueryTests {
 		return list;
 	}
 	
-	//TODO maybe it is better that the big query returns the numbers and not the URIs
+	
+	/**
+	 * Create a new graph.
+	 * 
+	 * @param graphname the graph name
+	 * @throws IOException
+	 * @throws HttpException
+	 */
+	private static void createNewGraph(String graphName) throws IOException, HttpException {
+		logger.info("Create new graph with the name: " + graphName + ".");
+		executeQueryWithAuthorization(String.format("DROP SILENT GRAPH <%s>", graphName), "HTML");
+		executeQueryWithAuthorization(String.format("CREATE GRAPH  <%s>", graphName), "HTML");
+	}
+
 	
 	/**
 	 * Create the revision progress.
 	 * 
-	 * @param list
-	 * @param graphNameRevisionProgress
-	 * @param uri
+	 * @param list the linked list with all revisions from start revision to target revision
+	 * @param graphNameRevisionProgress the graph name of the revision progress
+	 * @param uri the URI of the revision progress
 	 * @throws IOException
 	 * @throws HttpException
 	 */
 	private static void createRevisionProgress(LinkedList<String> list, String graphNameRevisionProgress, String uri) throws IOException, HttpException {
+		logger.info("Create the revision progress of " + uri + " in graph " + graphNameRevisionProgress + ".");
 		
 		logger.info("Create the revision progress graph with the name: \n" + graphNameRevisionProgress);
 		executeQueryWithAuthorization(String.format("DROP SILENT GRAPH <%s>", graphNameRevisionProgress), "HTML");
 		executeQueryWithAuthorization(String.format("CREATE GRAPH  <%s>", graphNameRevisionProgress), "HTML");
-		
 		Iterator<String> iteList = list.iterator();
 		
 		if (iteList.hasNext()) {
 			String firstRevision = iteList.next();
 			
 			// Get the revision number of first revision
+			logger.info("Get the revision number of first revision.");
 			String firstRevisionNumber = "";
 			String graphName = "";
 
@@ -329,12 +343,12 @@ public class SparqlQueryTests {
 				fullGraphName = "RM-TEMP-REVISION-PROGRESS-FIRSTREVISION";
 			}
 			
-			//TODO make test-process variable
 			//TODO maybe replace rmo:revision with wasChangedByRevision (check PROV for possible solutions)
 			// Create the initial content
+			logger.info("Create the initial content.");
 			String queryInitial = prefixes + String.format(	
-				  "INSERT INTO <test-process> { \n"
-				+ "	<%s> a rmo:RevisionProcess; \n"
+				  "INSERT INTO <%s> { \n"
+				+ "	<%s> a rmo:RevisionProgress; \n"
 				+ "		rmo:original [ \n"
 				+ "			rdf:subject ?s ; \n"
 				+ "			rdf:predicate ?p ; \n"
@@ -344,32 +358,85 @@ public class SparqlQueryTests {
 				+ "} WHERE { \n"
 				+ "	GRAPH <%s> \n"
 				+ "		{ ?s ?p ?o . } \n"
-				+ "}", uri, firstRevision, fullGraphName);
+				+ "}",graphNameRevisionProgress,uri, firstRevision, fullGraphName);
 		
 			// Execute the query which generates the initial content
 			executeQueryWithAuthorization(queryInitial, "HTML");
 			
 			// Drop the temporary full graph
+			logger.info("Drop the temporary full graph.");
 			executeQueryWithAuthorization("DROP SILENT GRAPH <RM-TEMP-REVISION-PROGRESS-FIRSTREVISION>", "HTML");
 			
 			// Update content by current add and delete set - remove old entries
 			while (iteList.hasNext()) {
 				String revision = iteList.next();
-				
+				logger.info("Update content by current add and delete set of revision " + revision + " - remove old entries.");
 				// Get the ADD and DELETE set URIs
 				String addSetURI = getAddSetURI(revision, Config.revision_graph);
 				String deleteSetURI = getDeleteSetURI(revision, Config.revision_graph);
 				
 				if ((addSetURI != null) && (deleteSetURI != null)) {
 					
-					// Update the revision process with the data of the current revision ADD set
+					// Update the revision progress with the data of the current revision ADD set
 					
-					// Delete old entries
+					// Delete old entries (original)
+					String queryRevision = prefixes + String.format(
+						  "DELETE FROM GRAPH <%s> { \n"
+						+ "	<%s> rmo:original ?blank . \n"
+						+ "	?blank rdf:subject ?s . \n"
+						+ "	?blank rdf:predicate ?p . \n"
+						+ "	?blank rdf:object ?o . \n"
+						+ "	?blank rmo:revision ?revision . \n"
+						+ "} \n"
+						+ "WHERE { \n"
+						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
+						+ "	WHERE { \n"
+						+ "		{ \n"
+						+ "			<%s> rmo:original ?blank . \n"
+						+ "			?blank rdf:subject ?s . \n"
+						+ "			?blank rdf:predicate ?p . \n"
+						+ "			?blank rdf:object ?o . \n"
+						+ "			?blank rmo:revision ?revision . \n"
+						+ "		} \n"
+						+ "		GRAPH <%s> { \n"
+						+ "			?s ?p ?o \n"
+						+ "		} \n"
+						+ "	} \n"
+						+ "}",graphNameRevisionProgress, uri, uri, addSetURI);
 					
+					queryRevision += "\n";
 					
-					String queryRevision = prefixes + String.format(	
-						  "INSERT INTO <test-process> { \n"
-						+ "	<%s> a rmo:RevisionProcess; \n"
+					// Delete old entries (removed)
+					queryRevision += String.format(
+						  "DELETE FROM GRAPH <%s> { \n"
+						+ "	<%s> rmo:removed ?blank . \n"
+						+ "	?blank rdf:subject ?s . \n"
+						+ "	?blank rdf:predicate ?p . \n"
+						+ "	?blank rdf:object ?o . \n"
+						+ "	?blank rmo:revision ?revision . \n"
+						+ "} \n"
+						+ "WHERE { \n"
+						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
+						+ "	WHERE { \n"
+						+ "		{ \n"
+						+ "			<%s> rmo:removed ?blank . \n"
+						+ "			?blank rdf:subject ?s . \n"
+						+ "			?blank rdf:predicate ?p . \n"
+						+ "			?blank rdf:object ?o . \n"
+						+ "			?blank rmo:revision ?revision . \n"
+						+ "		} \n"
+						+ "		GRAPH <%s> { \n"
+						+ "			?s ?p ?o \n"
+						+ "		} \n"
+						+ "	} \n"
+						+ "}",graphNameRevisionProgress, uri, uri, addSetURI);
+					
+					queryRevision += "\n";
+					
+					// Insert new entries (added)
+					queryRevision += String.format(	
+						  "INSERT INTO <%s> { \n"
+						+ "	<%s> a rmo:RevisionProgress; \n"
 						+ "		rmo:added [ \n"
 						+ "			rdf:subject ?s ; \n"
 						+ "			rdf:predicate ?p ; \n"
@@ -379,33 +446,89 @@ public class SparqlQueryTests {
 						+ "} WHERE { \n"
 						+ "	GRAPH <%s> \n"
 						+ "		{ ?s ?p ?o . } \n"
-						+ "}", uri, revision, addSetURI);
+						+ "}",graphNameRevisionProgress, uri, revision, addSetURI);
+					
+					queryRevision += "\n \n";
+					
+					// Update the revision progress with the data of the current revision DELETE set
+					
+					// Delete old entries (original)
+					queryRevision += String.format(
+						  "DELETE FROM GRAPH <%s> { \n"
+						+ "	<%s> rmo:original ?blank . \n"
+						+ "	?blank rdf:subject ?s . \n"
+						+ "	?blank rdf:predicate ?p . \n"
+						+ "	?blank rdf:object ?o . \n"
+						+ "	?blank rmo:revision ?revision . \n"
+						+ "} \n"
+						+ "WHERE { \n"
+						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
+						+ "	WHERE { \n"
+						+ "		{ \n"
+						+ "			<%s> rmo:original ?blank . \n"
+						+ "			?blank rdf:subject ?s . \n"
+						+ "			?blank rdf:predicate ?p . \n"
+						+ "			?blank rdf:object ?o . \n"
+						+ "			?blank rmo:revision ?revision . \n"
+						+ "		} \n"
+						+ "		GRAPH <%s> { \n"
+						+ "			?s ?p ?o \n"
+						+ "		} \n"
+						+ "	} \n"
+						+ "}",graphNameRevisionProgress, uri, uri, deleteSetURI);
+					
+					queryRevision += "\n";
+					
+					// Delete old entries (added)
+					queryRevision += String.format(
+						  "DELETE FROM GRAPH <%s> { \n"
+						+ "	<%s> rmo:added ?blank . \n"
+						+ "	?blank rdf:subject ?s . \n"
+						+ "	?blank rdf:predicate ?p . \n"
+						+ "	?blank rdf:object ?o . \n"
+						+ "	?blank rmo:revision ?revision . \n"
+						+ "} \n"
+						+ "WHERE { \n"
+						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
+						+ "	WHERE { \n"
+						+ "		{ \n"
+						+ "			<%s> rmo:added ?blank . \n"
+						+ "			?blank rdf:subject ?s . \n"
+						+ "			?blank rdf:predicate ?p . \n"
+						+ "			?blank rdf:object ?o . \n"
+						+ "			?blank rmo:revision ?revision . \n"
+						+ "		} \n"
+						+ "		GRAPH <%s> { \n"
+						+ "			?s ?p ?o \n"
+						+ "		} \n"
+						+ "	} \n"
+						+ "}",graphNameRevisionProgress, uri, uri, deleteSetURI);
+					
+					queryRevision += "\n";
+					
+					// Insert new entries (removed)
+					queryRevision += String.format(	
+						  "INSERT INTO <%s> { \n"
+						+ "	<%s> a rmo:RevisionProgress; \n"
+						+ "		rmo:removed [ \n"
+						+ "			rdf:subject ?s ; \n"
+						+ "			rdf:predicate ?p ; \n"
+						+ "			rdf:object ?o ; \n"
+						+ "			rmo:revision \"%s\" \n"
+						+ "		] \n"
+						+ "} WHERE { \n"
+						+ "	GRAPH <%s> \n"
+						+ "		{ ?s ?p ?o . } \n"
+						+ "}",graphNameRevisionProgress, uri, revision, deleteSetURI);
 				
-					// Execute the query which updates the revision process by the current revision
+					// Execute the query which updates the revision progress by the current revision
 					executeQueryWithAuthorization(queryRevision, "HTML");
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
-					
+
 				} else {
-					//TODO Error management
+					//TODO Error management - is needed when a ADD or DELETE set is not referenced in the current implementation this error should not occur
+					logger.error("ADD or DELETE set of " + revision + "does not exists.");
 				}
-				
-				
-				
-				
-				
+				logger.info("Revision progress was created.");
 				
 			}
 			
