@@ -96,7 +96,7 @@ public class TripleStoreInterface {
 		logger.debug("Hide all keywords in comments");
 		query = query.replace("USER", "#USER").replace("MESSAGE", "#MESSAGE").replace("REVISION", "#REVISION");	
 		
-		logger.debug("Execute query on SPARQL endpoint:\n"+ query);
+		logger.info("Execute query on SPARQL endpoint:\n"+ query);
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
 			
