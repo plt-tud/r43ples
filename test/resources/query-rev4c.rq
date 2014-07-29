@@ -1,0 +1,49 @@
+prefix : <http:/test.com/>
+prefix rmo:	<http://eatld.et.tu-dresden.de/rmo#>
+prefix prov:	<http://www.w3.org/ns/prov#> 
+
+select distinct ?o1 ?o2
+
+where {
+	GRAPH ?g1 { ?s :knows ?o1. }
+  		{ <r43ples-test-dataset-master> rmo:fullGraph ?g1. } UNION
+  		{ ?rg1 a rmo:Revision; rmo:deltaRemoved ?g1. VALUES ?rg1 {} }
+  	MINUS {
+		GRAPH ?gm1 { ?s :knows ?o1. }
+  			?rm1 a rmo:Revision; rmo:deltaAdded ?gm1.
+  			VALUES ?rm1 {}
+  			MINUS {
+  			    # Following line is not working with Virtuoso 7. Don't know why
+  				# ?rm1_old a rmo:Revision.
+  				#?rm1 a rmo:Revision; prov:wasDerivedFrom+ ?rm1_old.
+  		        # following lines are a work-around
+  				?rm1 rmo:revisionNumber ?rm1_n.
+  				?rm1_old rmo:revisionNumber ?rm1_old_n.
+  				FILTER (?rm1_old_n < ?rm1_n)
+  				
+  				VALUES ?rm1_old {}
+  				?rm1_old rmo:deltaRemoved ?gm1_old.
+  				GRAPH ?gm1_old {?s :knows ?o1. }
+			}
+  	} 
+  	
+  	
+  	GRAPH ?g2 { ?s :knows ?o2. }
+  		{ <r43ples-test-dataset-master> rmo:fullGraph ?g2. } UNION
+  		{ ?rg2 a rmo:Revision; rmo:deltaRemoved ?g2. VALUES ?rg2 {} }
+  	MINUS {
+		GRAPH ?gm2 { ?s :knows ?o2. }
+  			?rm2 a rmo:Revision; rmo:deltaAdded ?gm2.
+  			VALUES ?rm2 {}
+  			MINUS {
+  				?rm2 rmo:revisionNumber ?rm2_n.
+  				?rm2_old rmo:revisionNumber ?rm2_old_n.
+  				FILTER (?rm2_old_n < ?rm2_n)
+  				
+  				VALUES ?rm2_old {}
+  				?rm2_old rmo:deltaRemoved ?gm2_old.
+  				GRAPH ?gm2_ol2 {?s :knows ?o2. }
+			}
+  	} 
+  	FILTER (?o1 != ?o2)
+}

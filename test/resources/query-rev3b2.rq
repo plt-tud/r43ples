@@ -1,0 +1,9 @@
+prefix : <http:/test.com/>
+
+select distinct ?s ?p ?o
+
+where {
+  GRAPH ?g1 { ?s ?p ?o.  } VALUES ?g1 {<r43ples-test-dataset>  <r43ples-test-dataset-delta-removed-4> }
+  MINUS { GRAPH ?g_minus { ?s ?p ?o. } VALUES ?g_minus {<r43ples-test-dataset-delta-added-4>} }
+  
+}
