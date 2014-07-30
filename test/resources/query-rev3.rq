@@ -1,8 +1,0 @@
-prefix : <http:/test.com/>
-
-select *
-from <test>
-where {
-  [] :knows ?o1, ?o2.
-  FILTER (?o1 != ?o2)
-}

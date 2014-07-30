@@ -1,0 +1,63 @@
+prefix rmo:	<http://eatld.et.tu-dresden.de/rmo#>
+prefix prov:	<http://www.w3.org/ns/prov#> 
+prefix eatld:	<http://eatld.et.tu-dresden.de/>
+prefix : <http://test.com/>
+
+select distinct ?o1 ?o2
+where {
+	GRAPH ?g1 { ?s :knows ?o1. }
+  	GRAPH eatld:r43ples-revisions {
+  		{ <http://test.com/r43ples-dataset-master> rmo:fullGraph ?g1. } UNION
+  		{ ?rg1 a rmo:Revision.
+  		  ?rg1 rmo:deltaRemoved ?g1.
+          FILTER (?rg1 IN (<http://test.com/r43ples-dataset-revision-4>, <http://test.com/r43ples-dataset-revision-3>, <http://test.com/r43ples-dataset-revision-2>, <http://test.com/r43ples-dataset-revision-1>))
+        }
+    }
+  	MINUS {
+		GRAPH ?gm1 { ?s :knows ?o1. }
+  		GRAPH eatld:r43ples-revisions{
+  			?rm1 a rmo:Revision.
+  			?rm1 rmo:deltaAdded ?gm1.
+  			FILTER (?rm1 IN (<http://test.com/r43ples-dataset-revision-4>, <http://test.com/r43ples-dataset-revision-3>, <http://test.com/r43ples-dataset-revision-2>, <http://test.com/r43ples-dataset-revision-1>))
+		}
+		MINUS {
+			GRAPH ?gm1_old {?s :knows ?o1.}
+			GRAPH eatld:r43ples-revisions {
+				?rm1_old a rmo:Revision.
+  				?rm1_old rmo:deltaRemoved ?gm1_old.
+  				?rm1 prov:wasDerivedFrom+ ?rm1_old.
+  				FILTER (?rm1_old IN (<http://test.com/r43ples-dataset-revision-4>, <http://test.com/r43ples-dataset-revision-3>, <http://test.com/r43ples-dataset-revision-2>, <http://test.com/r43ples-dataset-revision-1>))
+			}
+		}
+	} 
+  	
+  	
+  	GRAPH ?g2 { ?s :knows ?o2. }
+  	GRAPH eatld:r43ples-revisions {
+  		{ <http://test.com/r43ples-dataset-master> rmo:fullGraph ?g2. } UNION
+  		{ ?rg2 a rmo:Revision.
+  		  ?rg2 rmo:deltaRemoved ?g2.
+          FILTER (?rg2 IN (<http://test.com/r43ples-dataset-revision-4>, <http://test.com/r43ples-dataset-revision-3>, <http://test.com/r43ples-dataset-revision-2>, <http://test.com/r43ples-dataset-revision-1>))
+        }
+    }
+  	MINUS {
+		GRAPH ?gm2 { ?s :knows ?o2. }
+  		GRAPH eatld:r43ples-revisions{
+  			?rm2 a rmo:Revision.
+  			?rm2 rmo:deltaAdded ?gm2.
+  			FILTER (?rm2 IN (<http://test.com/r43ples-dataset-revision-4>, <http://test.com/r43ples-dataset-revision-3>, <http://test.com/r43ples-dataset-revision-2>, <http://test.com/r43ples-dataset-revision-1>))
+		}
+		MINUS {
+			GRAPH ?gm2_old {?s :knows ?o2.}
+			GRAPH eatld:r43ples-revisions {
+				?rm2_old a rmo:Revision.
+  				?rm2_old rmo:deltaRemoved ?gm2_old.
+  				?rm2 prov:wasDerivedFrom+ ?rm2_old.
+  				FILTER (?rm2_old IN (<http://test.com/r43ples-dataset-revision-4>, <http://test.com/r43ples-dataset-revision-3>, <http://test.com/r43ples-dataset-revision-2>, <http://test.com/r43ples-dataset-revision-1>))
+			}
+		}
+	} 
+  	
+  	
+  	FILTER (?o1 != ?o2)
+}
