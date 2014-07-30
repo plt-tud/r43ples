@@ -54,8 +54,8 @@ public class TestRevisionManagment {
 		
 		list.add("0");
 		RevisionManagement.createNewRevision("test_dataset_user", 
-				ResourceManagement.getContentFromResource("test-delta-added-0.nt"), 
-				ResourceManagement.getContentFromResource("test-delta-removed-0.nt"),
+				ResourceManagement.getContentFromResource("test-delta-added-1.nt"), 
+				ResourceManagement.getContentFromResource("test-delta-removed-1.nt"),
 				"test_user", "test commit message 1", list);
 
 		String revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
@@ -65,8 +65,8 @@ public class TestRevisionManagment {
 		list.remove("0");
 		list.add("1");
 		RevisionManagement.createNewRevision("test_dataset_user", 
-				ResourceManagement.getContentFromResource("test-delta-added-1.nt"), 
-				ResourceManagement.getContentFromResource("test-delta-removed-1.nt"),
+				ResourceManagement.getContentFromResource("test-delta-added-2.nt"), 
+				ResourceManagement.getContentFromResource("test-delta-removed-2.nt"),
 				"test_user", "test commit message 2", list);		
 		revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
 		Assert.assertEquals("2", revNumberMaster);
@@ -75,8 +75,8 @@ public class TestRevisionManagment {
 		list.remove("1");
 		list.add("2");
 		RevisionManagement.createNewRevision("test_dataset_user", 
-				ResourceManagement.getContentFromResource("test-delta-added-2.nt"), 
-				ResourceManagement.getContentFromResource("test-delta-removed-2.nt"),
+				ResourceManagement.getContentFromResource("test-delta-added-3.nt"), 
+				ResourceManagement.getContentFromResource("test-delta-removed-3.nt"),
 				"test_user", "test commit message 3", list);		
 		revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
 		Assert.assertEquals("3", revNumberMaster);
@@ -85,8 +85,8 @@ public class TestRevisionManagment {
 		list.remove("2");
 		list.add("3");
 		RevisionManagement.createNewRevision("test_dataset_user", 
-				ResourceManagement.getContentFromResource("test-delta-added-3.nt"), 
-				ResourceManagement.getContentFromResource("test-delta-removed-3.nt"),
+				ResourceManagement.getContentFromResource("test-delta-added-4.nt"), 
+				ResourceManagement.getContentFromResource("test-delta-removed-4.nt"),
 				"test_user", "test commit message 4", list);
 		revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
 		Assert.assertEquals("4", revNumberMaster);

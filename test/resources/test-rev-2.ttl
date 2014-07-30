@@ -1,4 +1,4 @@
-@prefix : <http:/test.com/> .
+@prefix : <http://test.com/> .
 
 :Adam :knows :Bob.
 :Adam :knows :Emma.
