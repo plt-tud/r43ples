@@ -1,0 +1,182 @@
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix : <http://eatld.et.tu-dresden.de/sddo#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix swrlx: <http://www.w3.org/2003/11/swrlx#> .
+@prefix swrl: <http://www.w3.org/2003/11/swrl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl2: <http://www.w3.org/2006/12/owl2#> .
+@base <http://eatld.et.tu-dresden.de/sddo> .
+
+<http://eatld.et.tu-dresden.de/sddo> rdf:type owl:Ontology .
+
+
+#################################################################
+#
+#    Annotation properties
+#
+#################################################################
+
+
+
+
+#################################################################
+#
+#    Object Properties
+#
+#################################################################
+
+
+###  http://eatld.et.tu-dresden.de/sddo#hasTripleStateA
+
+:hasTripleStateA rdf:type owl:ObjectProperty ;
+                 
+                 rdfs:label "hat Tripelstatus Revision A"@de ,
+                            "hast triple state revision A"@en ;
+                 
+                 rdfs:comment "Spezifiziert den Tripelstatus in Revision A."@de ,
+                              "Specifies the triple state in revision A."@en ;
+                 
+                 rdfs:domain :StructuralDefinition ;
+                 
+                 rdfs:range :TripleState .
+
+
+
+###  http://eatld.et.tu-dresden.de/sddo#hasTripleStateB
+
+:hasTripleStateB rdf:type owl:ObjectProperty ;
+                 
+                 rdfs:label "hat Tripelstatus Revision B"@de ,
+                            "has triple state revision B"@en ;
+                 
+                 rdfs:comment "Spezifiziert den Tripelstatus in Revision B."@de ,
+                              "Specifies the triple state in revision B."@en ;
+                 
+                 rdfs:domain :StructuralDefinition ;
+                 
+                 rdfs:range :TripleState .
+
+
+
+
+
+#################################################################
+#
+#    Data properties
+#
+#################################################################
+
+
+###  http://eatld.et.tu-dresden.de/sddo#isConflicting
+
+:isConflicting rdf:type owl:DatatypeProperty ;
+               
+               rdfs:label "ist konfliktbehaftet"@de ,
+                          "is conflicting"@en ;
+               
+               rdfs:comment "Definiert, ob die Tripelstatus einen Konflikt hervorrufen."@de ,
+                            "Defines if the triple states are in conflict. "@en ;
+               
+               rdfs:domain :StructuralDefinition ;
+               
+               rdfs:range xsd:boolean .
+
+
+
+
+
+#################################################################
+#
+#    Classes
+#
+#################################################################
+
+
+###  http://eatld.et.tu-dresden.de/sddo#Added
+
+:Added rdf:type owl:Class ;
+       
+       rdfs:label "hinzugefuegt"@de ,
+                  "added"@en ;
+       
+       rdfs:subClassOf :TripleState ;
+       
+       rdfs:comment "Das korrespondierende Tripel wurde hinzugefuegt."@de ,
+                    "The corresponding triple was added."@en .
+
+
+
+###  http://eatld.et.tu-dresden.de/sddo#NotIncluded
+
+:NotIncluded rdf:type owl:Class ;
+             
+             rdfs:label "nicht enthalten"@de ,
+                        "not included"@en ;
+             
+             rdfs:subClassOf :TripleState ;
+             
+             rdfs:comment "Das korrespondierende Tripel ist nicht enthalten."@de ,
+                          "The corresponding triple is not included."@en .
+
+
+
+###  http://eatld.et.tu-dresden.de/sddo#Original
+
+:Original rdf:type owl:Class ;
+          
+          rdfs:label "original"@de ,
+                     "original"@en ;
+          
+          rdfs:subClassOf :TripleState ;
+          
+          rdfs:comment "Das korrespondierende Tripel ist original."@de ,
+                       "The corresponding triple is original."@en .
+
+
+
+###  http://eatld.et.tu-dresden.de/sddo#Removed
+
+:Removed rdf:type owl:Class ;
+         
+         rdfs:label "Das korrespondierende Tripel wurde entfernt."@de ,
+                    "entfernt"@de ,
+                    "removed"@en ;
+         
+         rdfs:subClassOf :TripleState ;
+         
+         rdfs:comment "The corresponding triple was removed."@en .
+
+
+
+###  http://eatld.et.tu-dresden.de/sddo#StructuralDefinition
+
+:StructuralDefinition rdf:type owl:Class ;
+                      
+                      rdfs:label "Strukturelle Definition"@de ,
+                                 "structural definition"@en ;
+                      
+                      rdfs:subClassOf owl:Thing ;
+                      
+                      rdfs:comment "Beschreibt den Tripelstatus in zwei Revisionen und ob daraus ein Konflikt abgeleitet werden kann."@de ,
+                                   "Describes the triple state in two revisions and if there is a conflict."@en .
+
+
+
+###  http://eatld.et.tu-dresden.de/sddo#TripleState
+
+:TripleState rdf:type owl:Class ;
+             
+             rdfs:label "Beschreibt den Status eines Tripels."@de ,
+                        "Tripelstatus"@de ,
+                        "triple state"@en ;
+             
+             rdfs:comment "Describes the state of a triple."@en .
+
+
+
+
+###  Generated by the OWL API (version 3.2.0.1502) http://owlapi.sourceforge.net
+

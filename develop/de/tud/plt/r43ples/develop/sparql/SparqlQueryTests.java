@@ -37,7 +37,7 @@ import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 
 /**
- * Contains SPARQL queries which will be later used. 
+ * Contains SPARQL queries which will be used later. 
  * 
  * @author Stephan Hensel
  *
@@ -84,8 +84,8 @@ public class SparqlQueryTests {
 		
 		getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.1-1");
 		
-		createRevisionProgress(getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.0-1"), "RM-REVISION-PROGRESS-0-exampleGraph", "http://example/branch-0");
-		createRevisionProgress(getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.1-1"), "RM-REVISION-PROGRESS-1-exampleGraph", "http://example/branch-1");
+		createRevisionProgress(getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.0-1"), "RM-REVISION-PROGRESS-A-exampleGraph", "http://example/branch-A");
+		createRevisionProgress(getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.1-1"), "RM-REVISION-PROGRESS-B-exampleGraph", "http://example/branch-B");
 	}
 	
 	
@@ -535,6 +535,44 @@ public class SparqlQueryTests {
 			
 		}
 		
+	}
+	
+
+	/**
+	 * Creates the structural differences between two revision progresses.
+	 * 
+	 * @param graphNameRevisionProgressA the graph name of the revision progress of branch A
+	 * @param uriA the URI of the revision progress of branch A
+	 * @param graphNameRevisionProgressB the graph name of the revision progress of branch B
+	 * @param uriB the URI of the revision progress of branch B
+	 */
+	private static void createStructuralDifferences(String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB) {
+
+		// Tabelle in RDF darstellen, sodass es konfigurierbar ist, was Konflikte sind und was nicht
+		// aus diesem Modell dann die unten stehenden Abfragen generieren
+		// die Ergebnisse in einem neuen Graphen speichern
+		
+		
+//		PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#>
+//			PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+//
+//			SELECT ?s ?p ?o ?revisionA ?revisionB
+//			WHERE {
+//				GRAPH <RM-REVISION-PROGRESS-A-exampleGraph> {
+//					<http://example/branch-A> rmo:removed ?blankA .
+//						?blankA rdf:subject ?s .
+//						?blankA rdf:predicate ?p .
+//						?blankA rdf:object ?o .
+//						?blankA rmo:revision ?revisionA .
+//				}
+//				GRAPH <RM-REVISION-PROGRESS-B-exampleGraph> {
+//					<http://example/branch-B> rmo:added ?blankB .
+//						?blankB rdf:subject ?s .
+//						?blankB rdf:predicate ?p .
+//						?blankB rdf:object ?o .
+//						?blankB rmo:revision ?revisionB .
+//				}
+//			}
 	}
 		
 	
