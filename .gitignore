@@ -7,4 +7,4 @@ verification/*.csv
 *.log.1
 resources/dataset
 /cov-int
-/dataset
+
