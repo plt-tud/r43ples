@@ -109,6 +109,20 @@
 
 
 
+###  http://eatld.et.tu-dresden.de/sddo#Deleted
+
+:Deleted rdf:type owl:Class ;
+         
+         rdfs:label "Das korrespondierende Tripel wurde geloescht."@de ,
+                    "geloescht"@de ,
+                    "deleted"@en ;
+         
+         rdfs:subClassOf :TripleState ;
+         
+         rdfs:comment "The corresponding triple was deleted."@en .
+
+
+
 ###  http://eatld.et.tu-dresden.de/sddo#NotIncluded
 
 :NotIncluded rdf:type owl:Class ;
@@ -134,20 +148,6 @@
           
           rdfs:comment "Das korrespondierende Tripel ist original."@de ,
                        "The corresponding triple is original."@en .
-
-
-
-###  http://eatld.et.tu-dresden.de/sddo#Removed
-
-:Removed rdf:type owl:Class ;
-         
-         rdfs:label "Das korrespondierende Tripel wurde entfernt."@de ,
-                    "entfernt"@de ,
-                    "removed"@en ;
-         
-         rdfs:subClassOf :TripleState ;
-         
-         rdfs:comment "The corresponding triple was removed."@en .
 
 
 
