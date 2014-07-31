@@ -955,4 +955,60 @@ public class RevisionManagement {
 		}
 	}
 	
+	
+	/**
+	 * Get the ADD set URI of a given revision URI.
+	 * 
+	 * @param revisionURI the revision URI
+	 * @param revisionGraph the revision graph
+	 * @return the ADD set URI, returns null when the revision URI does not exists or no ADD set is referenced by the revision URI
+	 * @throws HttpException 
+	 * @throws IOException 
+	 */
+	public static String getAddSetURI(String revisionURI, String revisionGraph) throws IOException, HttpException {
+		String query = String.format(
+			  "SELECT ?addSetURI \n"
+			+ "FROM <%s> \n"
+			+ "WHERE { \n"
+			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaAdded> ?addSetURI . \n"
+			+ "}", revisionGraph, revisionURI);
+		
+		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
+		
+		if (ResultSetFactory.fromXML(result).hasNext()) {
+			QuerySolution qs = ResultSetFactory.fromXML(result).next();
+			return qs.getResource("?addSetURI").toString();
+		} else {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Get the DELETE set URI of a given revision URI.
+	 * 
+	 * @param revisionURI the revision URI
+	 * @param revisionGraph the revision graph
+	 * @return the DELETE set URI, returns null when the revision URI does not exists or no DELETE set is referenced by the revision URI
+	 * @throws HttpException 
+	 * @throws IOException 
+	 */
+	public static String getDeleteSetURI(String revisionURI, String revisionGraph) throws IOException, HttpException {
+		String query = String.format(
+			  "SELECT ?deleteSetURI \n"
+			+ "FROM <%s> \n"
+			+ "WHERE { \n"
+			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaRemoved> ?deleteSetURI . \n"
+			+ "}", revisionGraph, revisionURI);
+		
+		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
+		
+		if (ResultSetFactory.fromXML(result).hasNext()) {
+			QuerySolution qs = ResultSetFactory.fromXML(result).next();
+			return qs.getResource("?deleteSetURI").toString();
+		} else {
+			return null;
+		}
+	}
+	
 }

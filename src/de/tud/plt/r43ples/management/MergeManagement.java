@@ -1,32 +1,18 @@
-package de.tud.plt.r43ples.develop.sparql;
+package de.tud.plt.r43ples.management;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
-import java.util.ArrayList;
+import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.NoSuchElementException;
 
-import javax.ws.rs.core.Response.Status;
-
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.QuerySolution;
@@ -35,27 +21,19 @@ import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
+import de.tud.plt.r43ples.adminInterface.DiffResolveTool;
 import de.tud.plt.r43ples.develop.examples.CreateExampleGraph;
-import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.management.TripleStoreInterface;
 
-/**
- * Contains SPARQL queries which will be used later. 
- * 
+/*
+ * This class provides methods for merging branches.
+ * *
  * @author Stephan Hensel
  *
  */
-public class SparqlQueryTests {
+public class MergeManagement {
 
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(CreateExampleGraph.class);
-	/** The endpoint. **/
-	private static String endpoint = "http://localhost:8890/sparql-auth";
-	/** The revision graph. **/
-	private static String revisionGraph = "r43ples-revisions";
-	/** The user credentials. **/
-	private static UsernamePasswordCredentials credentials = new UsernamePasswordCredentials("dba", "dba");
 	/** The SPARQL prefixes. **/
 	private final static String prefix_rmo = "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> \n";
 	private final static String prefixes = "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
@@ -64,33 +42,6 @@ public class SparqlQueryTests {
 			+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
 			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
 			+ "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n";
-	
-	
-	/**
-	 * Main entry point. Execute some tests.
-	 * 
-	 * @param args
-	 * @throws IOException 
-	 * @throws HttpException 
-	 * @throws ConfigurationException 
-	 */
-	public static void main(String[] args) throws IOException, HttpException, ConfigurationException {
-		
-		// Start service
-		//Service.main(null);
-		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
-		
-		logger.info("Common revision: \n" + getCommonRevisionWithShortestPath("exampleGraph-revision-1.0-1", "exampleGraph-revision-1.1-1"));
-		
-		logger.info("Common revision: \n" + getCommonRevisionWithShortestPath("exampleGraph-revision-1", "exampleGraph-revision-1.1-1"));
-		
-		
-		getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.1-1");
-		
-		createRevisionProgress(getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.0-1"), "RM-REVISION-PROGRESS-A-exampleGraph", "http://example/branch-A");
-		createRevisionProgress(getPathBetweenStartAndTargetRevision("exampleGraph-revision-1", "exampleGraph-revision-1.1-1"), "RM-REVISION-PROGRESS-B-exampleGraph", "http://example/branch-B");
-	}
 	
 	
 	/**
@@ -214,9 +165,9 @@ public class SparqlQueryTests {
 			+ "	} \n"
 			+ "	FILTER ( ?startRevision1 = ?startRevision2 && ?startRevision1 = ?link ) \n"
 			+ "} ORDER BY ?pathElementCountBothBranches \n"
-			+ "LIMIT 1", revisionGraph, revision1, revisionGraph, revision2, revisionGraph, revision1, revisionGraph, revision2);
+			+ "LIMIT 1", Config.revision_graph, revision1, Config.revision_graph, revision2, Config.revision_graph, revision1, Config.revision_graph, revision2);
 		
-		String result = executeQueryWithAuthorization(query, "XML");
+		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
 		
 		if (ResultSetFactory.fromXML(result).hasNext()) {
 			QuerySolution qs = ResultSetFactory.fromXML(result).next();
@@ -263,9 +214,9 @@ public class SparqlQueryTests {
 			+ "			 t_step ('step_no') as ?step \n"
 			+ "			) . \n"
 			+ "	FILTER ( ?s = <%s> && ?o = <%s> ) \n"
-			+ "}  ORDER BY ?step", revisionGraph, targetRevision, startRevision);
+			+ "}  ORDER BY ?step", Config.revision_graph, targetRevision, startRevision);
 		
-		String result = executeQueryWithAuthorization(query, "XML");
+		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
 		
 		LinkedList<String> list = new LinkedList<String>();
 		
@@ -283,20 +234,6 @@ public class SparqlQueryTests {
 	
 	
 	/**
-	 * Create a new graph.
-	 * 
-	 * @param graphname the graph name
-	 * @throws IOException
-	 * @throws HttpException
-	 */
-	private static void createNewGraph(String graphName) throws IOException, HttpException {
-		logger.info("Create new graph with the name: " + graphName + ".");
-		executeQueryWithAuthorization(String.format("DROP SILENT GRAPH <%s>", graphName), "HTML");
-		executeQueryWithAuthorization(String.format("CREATE GRAPH  <%s>", graphName), "HTML");
-	}
-
-	
-	/**
 	 * Create the revision progress.
 	 * 
 	 * @param list the linked list with all revisions from start revision to target revision
@@ -309,8 +246,8 @@ public class SparqlQueryTests {
 		logger.info("Create the revision progress of " + uri + " in graph " + graphNameRevisionProgress + ".");
 		
 		logger.info("Create the revision progress graph with the name: \n" + graphNameRevisionProgress);
-		executeQueryWithAuthorization(String.format("DROP SILENT GRAPH <%s>", graphNameRevisionProgress), "HTML");
-		executeQueryWithAuthorization(String.format("CREATE GRAPH  <%s>", graphNameRevisionProgress), "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization(String.format("DROP SILENT GRAPH <%s>", graphNameRevisionProgress), "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization(String.format("CREATE GRAPH  <%s>", graphNameRevisionProgress), "HTML");
 		Iterator<String> iteList = list.iterator();
 		
 		if (iteList.hasNext()) {
@@ -327,9 +264,9 @@ public class SparqlQueryTests {
 				+ "WHERE { \n"
 				+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#revisionNumber> ?number . \n"
 				+ " <%s> <http://eatld.et.tu-dresden.de/rmo#revisionOf> ?graph . \n"
-				+ "}", revisionGraph, firstRevision, firstRevision);
+				+ "}", Config.revision_graph, firstRevision, firstRevision);
 			
-			String result = executeQueryWithAuthorization(query, "XML");
+			String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
 			
 			if (ResultSetFactory.fromXML(result).hasNext()) {
 				QuerySolution qs = ResultSetFactory.fromXML(result).next();
@@ -365,19 +302,19 @@ public class SparqlQueryTests {
 				+ "}",graphNameRevisionProgress,uri, firstRevision, fullGraphName);
 		
 			// Execute the query which generates the initial content
-			executeQueryWithAuthorization(queryInitial, "HTML");
+			TripleStoreInterface.executeQueryWithAuthorization(queryInitial, "HTML");
 			
 			// Drop the temporary full graph
 			logger.info("Drop the temporary full graph.");
-			executeQueryWithAuthorization("DROP SILENT GRAPH <RM-TEMP-REVISION-PROGRESS-FIRSTREVISION>", "HTML");
+			TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <RM-TEMP-REVISION-PROGRESS-FIRSTREVISION>", "HTML");
 			
 			// Update content by current add and delete set - remove old entries
 			while (iteList.hasNext()) {
 				String revision = iteList.next();
 				logger.info("Update content by current add and delete set of revision " + revision + " - remove old entries.");
 				// Get the ADD and DELETE set URIs
-				String addSetURI = getAddSetURI(revision, Config.revision_graph);
-				String deleteSetURI = getDeleteSetURI(revision, Config.revision_graph);
+				String addSetURI = RevisionManagement.getAddSetURI(revision, Config.revision_graph);
+				String deleteSetURI = RevisionManagement.getDeleteSetURI(revision, Config.revision_graph);
 				
 				if ((addSetURI != null) && (deleteSetURI != null)) {
 					
@@ -526,7 +463,7 @@ public class SparqlQueryTests {
 						+ "}",graphNameRevisionProgress, uri, revision, deleteSetURI);
 				
 					// Execute the query which updates the revision progress by the current revision
-					executeQueryWithAuthorization(queryRevision, "HTML");
+					TripleStoreInterface.executeQueryWithAuthorization(queryRevision, "HTML");
 
 				} else {
 					//TODO Error management - is needed when a ADD or DELETE set is not referenced in the current implementation this error should not occur
@@ -541,7 +478,7 @@ public class SparqlQueryTests {
 		
 	}
 	
-
+	
 	/**
 	 * Creates the structural differences between two revision progresses.
 	 * 
@@ -578,128 +515,6 @@ public class SparqlQueryTests {
 //				}
 //			}
 	}
-		
-	
-	/**
-	 * Executes a SPARQL-query against an endpoint without authorization.
-	 * 
-	 * @param query the SPARQL query
-	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
-	 * @return the result of the query
-	 * @throws IOException 
-	 */
-	public static String executeQueryWithoutAuthorization(String query, String format) throws IOException {
-		URL url = null;
-		
-		url = new URL(endpoint+ "?query=" + URLEncoder.encode(query, "UTF-8") + "&format=" + URLEncoder.encode(format, "UTF-8") + "&timeout=0");
-		logger.debug(url.toString());
-
-		URLConnection con = null;
-		InputStream in = null;
-		con = url.openConnection();
-		in = con.getInputStream();
-	
-		String encoding = con.getContentEncoding();
-		encoding = (encoding == null) ? "UTF-8" : encoding;
-		String body = IOUtils.toString(in, encoding);
-		return body;
-		
-	}
-	
-	
-	/**
-	 * Executes a SPARQL-query against the triple store with authorization.
-	 * (Based on the source code of the IAF device explorer - created by Sebastian Heinze.)
-	 * 
-	 * @param query the SPARQL query
-	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
-	 * @return the result of the query
-	 * @throws IOException 
-	 * @throws HttpException 
-	 */
-	public static String executeQueryWithAuthorization(String query, String format) throws IOException, HttpException {
-		String result = null;
-		
-		logger.info("Execute query on SPARQL endpoint:\n"+ query);
-		DefaultHttpClient httpClient = new DefaultHttpClient();
-	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
-			
-	    HttpPost request = new HttpPost(endpoint);
-		
-		//set up HTTP Post Request (look at http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VOSSparqlProtocol for Protocol)
-		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-		nameValuePairs.add(new BasicNameValuePair("format",format));
-		nameValuePairs.add(new BasicNameValuePair("query", query));
-		
-		request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-		
-		//Execute Query
-		HttpResponse response = httpClient.execute(request);
-		logger.debug("Statuscode: " + response.getStatusLine().getStatusCode());
-		InputStreamReader in = new InputStreamReader(response.getEntity().getContent());
-		result = IOUtils.toString(in);
-		if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
-			throw new HttpException(response.getStatusLine().toString()+"\n"+result);
-		}
-		
-		return result;
-	}
-	
-	
-	/**
-	 * Get the ADD set URI of a given revision URI.
-	 * 
-	 * @param revisionURI the revision URI
-	 * @param revisionGraph the revision graph
-	 * @return the ADD set URI, returns null when the revision URI does not exists or no ADD set is referenced by the revision URI
-	 * @throws HttpException 
-	 * @throws IOException 
-	 */
-	private static String getAddSetURI(String revisionURI, String revisionGraph) throws IOException, HttpException {
-		String query = String.format(
-			  "SELECT ?addSetURI \n"
-			+ "FROM <%s> \n"
-			+ "WHERE { \n"
-			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaAdded> ?addSetURI . \n"
-			+ "}", revisionGraph, revisionURI);
-		
-		String result = executeQueryWithAuthorization(query, "XML");
-		
-		if (ResultSetFactory.fromXML(result).hasNext()) {
-			QuerySolution qs = ResultSetFactory.fromXML(result).next();
-			return qs.getResource("?addSetURI").toString();
-		} else {
-			return null;
-		}
-	}
-	
-	
-	/**
-	 * Get the DELETE set URI of a given revision URI.
-	 * 
-	 * @param revisionURI the revision URI
-	 * @param revisionGraph the revision graph
-	 * @return the DELETE set URI, returns null when the revision URI does not exists or no DELETE set is referenced by the revision URI
-	 * @throws HttpException 
-	 * @throws IOException 
-	 */
-	private static String getDeleteSetURI(String revisionURI, String revisionGraph) throws IOException, HttpException {
-		String query = String.format(
-			  "SELECT ?deleteSetURI \n"
-			+ "FROM <%s> \n"
-			+ "WHERE { \n"
-			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaRemoved> ?deleteSetURI . \n"
-			+ "}", revisionGraph, revisionURI);
-		
-		String result = executeQueryWithAuthorization(query, "XML");
-		
-		if (ResultSetFactory.fromXML(result).hasNext()) {
-			QuerySolution qs = ResultSetFactory.fromXML(result).next();
-			return qs.getResource("?deleteSetURI").toString();
-		} else {
-			return null;
-		}
-	}
 	
 	
 	/**
@@ -709,7 +524,7 @@ public class SparqlQueryTests {
 	 * @return the model
 	 * @throws IOException
 	 */
-	public Model readTurtleFileToJenaModel(String path) throws IOException {
+	public static Model readTurtleFileToJenaModel(String path) throws IOException {
 		Model model = null;
 		model = ModelFactory.createDefaultModel();
 		InputStream is = new BufferedInputStream(new FileInputStream(path));
@@ -718,5 +533,64 @@ public class SparqlQueryTests {
 		
 		return model;
 	}
+	
+	
+	/**
+	 * Converts a jena model to N-Triple syntax. 
+	 * 
+	 * @param model the jena model
+	 * @return the string which contains the N-Triples
+	 * @throws UnsupportedEncodingException
+	 */
+	public static String convertJenaModelToNTriple(Model model) throws UnsupportedEncodingException {
+			
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		model.write(os, "N-TRIPLES");
+		
+		return new String(os.toByteArray(), "UTF-8");
+	}
+	
+		
+	/**
+	 * Create the initial SDD for the specified graph under revision control.
+	 * 
+	 * @param graphName the graph name
+	 * @throws IOException 
+	 * @throws UnsupportedEncodingException 
+	 * @throws HttpException 
+	 */
+	public static void createInitialSDD(String graphName) throws UnsupportedEncodingException, IOException, HttpException {
+		// Load initial SDD into virtuoso
+		createNewGraph(graphName + "-SDD");		
+		RevisionManagement.executeINSERT(graphName + "-SDD", convertJenaModelToNTriple(readTurtleFileToJenaModel("dataset/sdd.ttl")));
+
+		// TODO extend RMO with link to SDD
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * Create a new graph. When graph already exists it will be dropped.
+	 * 
+	 * @param graphname the graph name
+	 * @throws IOException
+	 * @throws HttpException
+	 */
+	private static void createNewGraph(String graphName) throws IOException, HttpException {
+		logger.info("Create new graph with the name: " + graphName + ".");
+		TripleStoreInterface.executeQueryWithAuthorization(String.format("DROP SILENT GRAPH <%s>", graphName), "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization(String.format("CREATE GRAPH  <%s>", graphName), "HTML");
+	}
+	
+	
+	
+	// TODO upload on initialization RMO and SDDO so the client has the possibility to use the ontology data
+	
+	
 	
 }

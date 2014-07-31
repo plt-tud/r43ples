@@ -5,6 +5,7 @@
 	<classpathentry kind="src" path="test/src"/>
 	<classpathentry kind="src" path="test/resources"/>
 	<classpathentry kind="src" path="develop"/>
+	<classpathentry kind="src" path="dataset"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
 	<classpathentry kind="lib" path="lib/grizzly-framework-2.2.16.jar"/>
 	<classpathentry kind="lib" path="lib/grizzly-http-2.2.16.jar"/>
