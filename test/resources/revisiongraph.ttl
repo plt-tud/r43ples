@@ -1,0 +1,78 @@
+@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix pers:	<http://eatld.et.tu-dresden.de/persons/> .
+@prefix prov:	<http://www.w3.org/ns/prov#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rmo:	<http://eatld.et.tu-dresden.de/rmo#> .
+@prefix dct:	<http://purl.org/dc/terms/> .
+
+pers:test	rdf:type	prov:Person .
+pers:test	rdfs:label	"test" .
+pers:test_user	rdf:type	prov:Person ;
+	rdfs:label	"test_user" .
+
+<http://test.com/r43ples-dataset-revision-0>	rdf:type	rmo:Revision ;
+	rmo:revisionOf	<http://test.com/r43ples-dataset> ;
+	rmo:revisionNumber	"0" .
+	
+<http://test.com/r43ples-dataset-master>	rdf:type	rmo:Reference ,
+		rmo:Branch ,
+		rmo:Master ;
+	rdfs:label	"master" ;
+	rmo:references	<http://test.com/r43ples-dataset-revision-4> ;
+	rmo:fullGraph	<http://test.com/r43ples-dataset> .
+	
+<http://test.com/r43ples-dataset-commit-1>	rdf:type	rmo:Commit ;
+	prov:generated	<http://test.com/r43ples-dataset-revision-1> ;
+	prov:wasAssociatedWith	pers:test_user ;
+    dct:title	"test commit message 1" ;
+	prov:atTime	"2014-07-29T23:34:15" ;
+	prov:used	<http://test.com/r43ples-dataset-revision-0> .
+	
+<http://test.com/r43ples-dataset-revision-1>	rdf:type	rmo:Revision ;
+	rmo:revisionOf	<http://test.com/r43ples-dataset> ;
+	prov:wasDerivedFrom	<http://test.com/r43ples-dataset-revision-0> ;
+	rmo:revisionNumber	"1" ;
+	rmo:deltaAdded	<http://test.com/r43ples-dataset-delta-added-1> ;
+	rmo:deltaRemoved	<http://test.com/r43ples-dataset-delta-removed-1> .
+	
+<http://test.com/r43ples-dataset-commit-2>	rdf:type	rmo:Commit ;
+	prov:generated	<http://test.com/r43ples-dataset-revision-2> ;
+	prov:wasAssociatedWith	pers:test_user ;
+	dct:title	"test commit message 2" ;
+	prov:atTime	"2014-07-29T23:34:15" ;
+	prov:used	<http://test.com/r43ples-dataset-revision-1> .
+	
+<http://test.com/r43ples-dataset-revision-2>	rdf:type	rmo:Revision ;
+	rmo:revisionOf	<http://test.com/r43ples-dataset> ;
+	prov:wasDerivedFrom	<http://test.com/r43ples-dataset-revision-1> ;
+	rmo:revisionNumber	"2" ;
+	rmo:deltaAdded	<http://test.com/r43ples-dataset-delta-added-2> ;
+	rmo:deltaRemoved	<http://test.com/r43ples-dataset-delta-removed-2> .
+	
+<http://test.com/r43ples-dataset-commit-3>	rdf:type	rmo:Commit ;
+	prov:generated	<http://test.com/r43ples-dataset-revision-3> ;
+	prov:wasAssociatedWith	pers:test_user ;
+	dct:title	"test commit message 3" ;
+	prov:atTime	"2014-07-29T23:34:15" ;
+	prov:used	<http://test.com/r43ples-dataset-revision-2> .
+	
+<http://test.com/r43ples-dataset-revision-3>	rdf:type	rmo:Revision ;
+	rmo:revisionOf	<http://test.com/r43ples-dataset> ;
+	prov:wasDerivedFrom	<http://test.com/r43ples-dataset-revision-2> ;
+	rmo:revisionNumber	"3" ;
+	rmo:deltaAdded	<http://test.com/r43ples-dataset-delta-added-3> ;
+	rmo:deltaRemoved	<http://test.com/r43ples-dataset-delta-removed-3> .
+	
+<http://test.com/r43ples-dataset-commit-4>	rdf:type	rmo:Commit ;
+	prov:generated	<http://test.com/r43ples-dataset-revision-4> ;
+	prov:wasAssociatedWith	pers:test_user ;
+	dct:title	"test commit message 4" ;
+	prov:atTime	"2014-07-29T23:34:15" ;
+	prov:used	<http://test.com/r43ples-dataset-revision-3> .
+	
+<http://test.com/r43ples-dataset-revision-4>	rdf:type	rmo:Revision ;
+	rmo:revisionOf	<http://test.com/r43ples-dataset> ;
+	prov:wasDerivedFrom	<http://test.com/r43ples-dataset-revision-3> ;
+	rmo:revisionNumber	"4" ;
+	rmo:deltaAdded	<http://test.com/r43ples-dataset-delta-added-4> ;
+	rmo:deltaRemoved	<http://test.com/r43ples-dataset-delta-removed-4> .
