@@ -336,11 +336,19 @@ public class RevisionManagement {
 				+ "	rmo:references <%s>;%n"
 				+ "	rdfs:label \"master\".%n",
 				graphName+"-master", graphName, revisionName);
+		// Add graph element
+		// TODO It is possible to add more information about the graph under revision control (e.g. label, comment, user, ...)
+		queryContent += String.format(
+				  "<%s> a rmo:Graph .%n"
+				  , graphName);
 		
 		String queryRevision = String.format(
 				prefix_rmo
 				+ "INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
 		TripleStoreInterface.executeQueryWithAuthorization(queryRevision, "HTML");
+		
+		// Create the initial (default) SDD graph
+		MergeManagement.createInitialSDD(graphName);
 	}
 	
 

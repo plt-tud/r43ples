@@ -561,18 +561,22 @@ public class MergeManagement {
 	 */
 	public static void createInitialSDD(String graphName) throws UnsupportedEncodingException, IOException, HttpException {
 		// Load initial SDD into virtuoso
+		logger.info("Create the initial SDD graph.");
 		createNewGraph(graphName + "-SDD");		
 		RevisionManagement.executeINSERT(graphName + "-SDD", convertJenaModelToNTriple(readTurtleFileToJenaModel("dataset/sdd.ttl")));
 
-		// TODO extend RMO with link to SDD
+		// Create the reference
+		logger.info("Insert reference to SDD graph into revision graph.");	
+		String queryContent = String.format(
+				  "<%s> rmo:referencedSDD <%s> .%n"
+				  , graphName, graphName + "-SDD");
 		
+		String querySDD = String.format(
+				prefix_rmo
+				+ "INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
+		TripleStoreInterface.executeQueryWithAuthorization(querySDD, "HTML");
 	}
-	
-	
-	
-	
-	
-	
+
 	
 	/**
 	 * Create a new graph. When graph already exists it will be dropped.
@@ -590,7 +594,7 @@ public class MergeManagement {
 	
 	
 	// TODO upload on initialization RMO and SDDO so the client has the possibility to use the ontology data
-	
+	// TODO Add SPIN file to graph and also reference in RMO
 	
 	
 }

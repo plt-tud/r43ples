@@ -2,6 +2,7 @@
 
 @prefix sddo:	<http://eatld.et.tu-dresden.de/sddo#> .
 @prefix sdd:	<http://eatld.et.tu-dresden.de/sdd#> .
+@prefix xsd:	<http://www.w3.org/2001/XMLSchema#> .
 
 
 ###########################################################
