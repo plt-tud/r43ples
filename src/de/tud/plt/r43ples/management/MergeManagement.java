@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
@@ -493,7 +494,7 @@ public class MergeManagement {
 		// aus diesem Modell dann die unten stehenden Abfragen generieren
 		// die Ergebnisse in einem neuen Graphen speichern
 		
-		
+		// Example for added-added
 //		PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#>
 //			PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
 //
@@ -514,6 +515,133 @@ public class MergeManagement {
 //						?blankB rmo:revision ?revisionB .
 //				}
 //			}
+	}
+	
+	
+	
+	/**
+	 * Create the conflicting triple model which contains all conflicting triples.
+	 * 
+	 * @param graphName the graph name
+	 * @param graphNameRevisionProgressA the graph name of the revision progress of branch A
+	 * @param uriA the URI of the revision progress of branch A
+	 * @param graphNameRevisionProgressB the graph name of the revision progress of branch B
+	 * @param uriB the URI of the revision progress of branch B
+	 * @throws HttpException 
+	 * @throws IOException 
+	 */
+	public static void createConflictingTripleModel(String graphName, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB) throws IOException, HttpException {
+		
+		// Get all structural definitions which are generating conflicts
+		String queryConflictingSD = String.format(
+				  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
+				+ "PREFIX sdd:  <http://eatld.et.tu-dresden.de/sdd#> %n"
+				+ "PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#> %n"
+				+ "SELECT ?combinationURI %n"
+				+ "FROM <%s> %n"
+				+ "WHERE { %n"
+				+ "	?combinationURI a sddo:StructuralDefinition ; %n"
+				+ "		sddo:isConflicting ?conflict . %n"
+				+ "	FILTER (?conflict = \"true\"^^xsd:boolean) %n"
+				+ "} %n", graphName + "-SDD");
+		
+		String result = TripleStoreInterface.executeQueryWithAuthorization(queryConflictingSD, "XML");
+		
+		// Get all conflicting combination URIs and save them in array list
+		ArrayList<String> conflictingCombinationURIs = new ArrayList<String>();
+		
+		while (ResultSetFactory.fromXML(result).hasNext()) {
+			QuerySolution qs = ResultSetFactory.fromXML(result).next();
+			conflictingCombinationURIs.add(qs.getResource("?combinationURI").toString());
+		}
+
+		// Templates for revision A and B
+		String sparqlTemplateRevisionA = String.format(
+				  "	GRAPH <%s> { %n"
+				+ "		<%s> %s ?blankA . %n"
+				+ "			?blankA rdf:subject ?s . %n"
+				+ "			?blankA rdf:predicate ?p . %n"
+				+ "			?blankA rdf:object ?o . %n"
+				+ "			?blankA rmo:revision ?revisionA . %n"
+				+ "	} %n", graphNameRevisionProgressA, uriA);
+		String sparqlTemplateRevisionB = String.format(
+				  "	GRAPH <%s> { %n"
+				+ "		<%s> %s ?blankB . %n"
+				+ "			?blankB rdf:subject ?s . %n"
+				+ "			?blankB rdf:predicate ?p . %n"
+				+ "			?blankB rdf:object ?o . %n"
+				+ "			?blankB rmo:revision ?revisionB . %n"
+				+ "	} %n", graphNameRevisionProgressB, uriB);
+
+		String sparqlTemplateNotExistsRevisionA = String.format(
+				"FILTER NOT EXISTS {"
+				+ "%s"
+				+ "}", sparqlTemplateRevisionA);
+		
+		String sparqlTemplateNotExistsRevisionB = String.format(
+				"FILTER NOT EXISTS {"
+				+ "%s"
+				+ "}", sparqlTemplateRevisionB);
+
+		// Query for triple states of conflicting combination URI (A and B)
+		
+		
+		
+		
+//		 "CONSTRUCT {?s ?p ?o} WHERE {" +
+//			"  GRAPH <RM-MERGE-TEMP-MERGED> { ?s ?p ?o }" +
+//			"  FILTER NOT EXISTS { GRAPH <RM-MERGE-TEMP-2> { ?s ?p ?o } }" +
+//			" }";		
+		
+		
+		
+		
+		// Create queries from template
+		String sparqlQueryRevisionA = sparqlTemplateRevisionA;
+		String sparqlQueryRevisionB = sparqlTemplateRevisionB;
+		
+		
+		
+		// Concatenated SPARQL query
+		String query = String.format(
+				prefixes
+				+ "SELECT ?s ?p ?o ?revisionA ?revisionB %n"
+				+ "WHERE { %n"
+				+ "%s"
+				+ "%s"
+				+ "} %n", sparqlQueryRevisionA, sparqlQueryRevisionB);
+		
+		
+				
+				
+//		PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#>
+//			PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+//
+//			SELECT ?s ?p ?o ?revisionB
+//			WHERE {
+//				FILTER NOT EXISTS {
+//					GRAPH <RM-REVISION-PROGRESS-A-exampleGraph> {
+//						<http://example/branch-A> rmo:removed ?blankA .
+//							?blankA rdf:subject ?s .
+//							?blankA rdf:predicate ?p .
+//							?blankA rdf:object ?o .
+//							?blankA rmo:revision ?revisionA .
+//					}
+//				}
+//				GRAPH <RM-REVISION-PROGRESS-B-exampleGraph> {
+//					<http://example/branch-B> rmo:added ?blankB .
+//						?blankB rdf:subject ?s .
+//						?blankB rdf:predicate ?p .
+//						?blankB rdf:object ?o .
+//						?blankB rmo:revision ?revisionB .
+//				}
+//			}
+				
+				
+				
+
+				
+		
 	}
 	
 	
