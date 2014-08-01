@@ -1,9 +1,11 @@
 package de.tud.plt.r43ples.test;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 
 import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpException;
 import org.junit.After;
 import org.junit.Assert;
@@ -11,7 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 
@@ -41,7 +42,7 @@ public class TestRevisionManagment {
 		ArrayList<String> list = new ArrayList<String>();
 		list.add("0");
 		
-		RevisionManagement.createNewRevision("test1234", "<a> <b> <c>.", "", "test", "test commit message", list);
+		RevisionManagement.createNewRevision("test1234", "<a> <b> <c>.", "", "test", "test commit message", list, list.get(0));
 		
 		revNumberMaster = RevisionManagement.getMasterRevisionNumber("test1234");
 		Assert.assertEquals("1", revNumberMaster);
@@ -52,44 +53,46 @@ public class TestRevisionManagment {
 	public void testR43ples_user() throws HttpException, IOException {
 		ArrayList<String> list = new ArrayList<String>();
 		
+		StringWriter addSetW = new StringWriter();
+		StringWriter deleteSetW = new StringWriter();
+		
 		list.add("0");
-		RevisionManagement.createNewRevision("test_dataset_user", 
-				ResourceManagement.getContentFromResource("test-delta-added-1.nt"), 
-				ResourceManagement.getContentFromResource("test-delta-removed-1.nt"),
-				"test_user", "test commit message 1", list);
-
+		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-0.nt"), addSetW, "UTF-8");
+		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-0.nt"), deleteSetW, "UTF-8");
+		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 1", list, list.get(0));
+		
 		String revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
 		Assert.assertEquals("1", revNumberMaster);
 		
 		
 		list.remove("0");
 		list.add("1");
-		RevisionManagement.createNewRevision("test_dataset_user", 
-				ResourceManagement.getContentFromResource("test-delta-added-2.nt"), 
-				ResourceManagement.getContentFromResource("test-delta-removed-2.nt"),
-				"test_user", "test commit message 2", list);		
+		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-1.nt"), addSetW, "UTF-8");
+		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-1.nt"), deleteSetW, "UTF-8");
+		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 2", list, list.get(0));
+		
 		revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
 		Assert.assertEquals("2", revNumberMaster);
 		
 		
 		list.remove("1");
 		list.add("2");
-		RevisionManagement.createNewRevision("test_dataset_user", 
-				ResourceManagement.getContentFromResource("test-delta-added-3.nt"), 
-				ResourceManagement.getContentFromResource("test-delta-removed-3.nt"),
-				"test_user", "test commit message 3", list);		
+		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-2.nt"), addSetW, "UTF-8");
+		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-2.nt"), deleteSetW, "UTF-8");
+		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 3", list, list.get(0));
+		
 		revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
 		Assert.assertEquals("3", revNumberMaster);
 		
 		
 		list.remove("2");
 		list.add("3");
-		RevisionManagement.createNewRevision("test_dataset_user", 
-				ResourceManagement.getContentFromResource("test-delta-added-4.nt"), 
-				ResourceManagement.getContentFromResource("test-delta-removed-4.nt"),
-				"test_user", "test commit message 4", list);
+		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-added-3.nt"), addSetW, "UTF-8");
+		IOUtils.copy(ClassLoader.getSystemResourceAsStream("test-delta-removed-3.nt"), deleteSetW, "UTF-8");
+		RevisionManagement.createNewRevision("test_dataset_user", addSetW.toString(), deleteSetW.toString(), "test_user", "test commit message 3", list, list.get(0));
+		
 		revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
 		Assert.assertEquals("4", revNumberMaster);
 	}
-	
+
 }

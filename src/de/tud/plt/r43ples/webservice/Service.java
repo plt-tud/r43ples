@@ -8,8 +8,6 @@ import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
-import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.grizzly.http.server.StaticHttpHandler;
 
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.PackagesResourceConfig;
@@ -39,10 +37,7 @@ public class Service {
 		Config.readConfig("r43ples.conf");
 		URI BASE_URI = UriBuilder.fromUri(Config.service_uri).port(Config.service_port).build();
 		ResourceConfig rc = new PackagesResourceConfig("de.tud.plt.r43ples.webservice");
-		HttpServer server = GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
-		server.getServerConfiguration().addHttpHandler(
-		        new StaticHttpHandler("./resources/webapp/"), "/static/");
-		 server.start();
+		GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
 		logger.info(String.format("Server started -R43ples endpoint available under: %sr43ples/sparql", BASE_URI));
 		
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);

@@ -49,7 +49,9 @@ public class TripleStoreInterface {
 		endpoint = sparql_endpoint;
 		if (!RevisionManagement.checkGraphExistence(Config.revision_graph)){
 			logger.info("Create revision graph");
-			executeQueryWithAuthorization("CREATE SILENT GRAPH <" + Config.revision_graph +">", "HTML");
+			// Maybe the revision graph exists but it is empty so the create will be fail when there was no drop before
+			executeQueryWithAuthorization("DROP SILENT GRAPH <" + Config.revision_graph +">", "HTML");
+			executeQueryWithAuthorization("CREATE GRAPH <" + Config.revision_graph +">", "HTML");
 	 	}
 	}
 	
@@ -93,11 +95,10 @@ public class TripleStoreInterface {
 	public static String executeQueryWithAuthorization(String query, String format) throws IOException, HttpException {
 		String result = null;
 		
-		logger.debug("Hide all keywords in comments");
-		// TODO: fix issue when no line ending after these keywords
+		logger.info("Hide all keywords in comments");
 		query = query.replace("USER", "#USER").replace("MESSAGE", "#MESSAGE").replace("REVISION", "#REVISION");	
 		
-		logger.debug("Execute query on SPARQL endpoint:"+ query);
+		logger.info("Execute query on SPARQL endpoint:\n"+ query);
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
 			
@@ -108,28 +109,15 @@ public class TripleStoreInterface {
 		nameValuePairs.add(new BasicNameValuePair("format",format));
 		nameValuePairs.add(new BasicNameValuePair("query", query));
 		
-		HttpResponse response =  null;
-		InputStreamReader in = null;
-		
-		
 		request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 		
 		//Execute Query
-		response = httpClient.execute(request);
+		HttpResponse response = httpClient.execute(request);
 		logger.debug("Statuscode: " + response.getStatusLine().getStatusCode());
-		try{
-			in = new InputStreamReader(response.getEntity().getContent());
-			result = IOUtils.toString(in);
-			if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
-				throw new HttpException(response.getStatusLine().toString()+"\n"+result);
-			}
-			
-			
-		} catch (HttpException | IOException e){
-			throw e;
-		}
-		finally {
-			in.close();
+		InputStreamReader in = new InputStreamReader(response.getEntity().getContent());
+		result = IOUtils.toString(in);
+		if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
+			throw new HttpException(response.getStatusLine().toString()+"\n"+result);
 		}
 		
 		return result;

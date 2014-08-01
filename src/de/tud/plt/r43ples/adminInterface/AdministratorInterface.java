@@ -26,7 +26,6 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.Tree;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
@@ -46,7 +45,8 @@ public class AdministratorInterface {
 	/**
 	 * Start the administration interface.
 	 * @throws IOException 
-	 * @throws HttpException
+	 * @throws ClientProtocolException 
+	 * @throws AuthenticationException 
 	 */
 	public static void start() throws HttpException, IOException {
 		System.out.println("\nAdministration interface!");
@@ -138,13 +138,7 @@ public class AdministratorInterface {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String tagName = br.readLine();
 		
-		try {
-			RevisionManagement.createReference("tag", graphName, revisionNumber, tagName, "Admin", "commited from Admin Interface");
-		} catch (IdentifierAlreadyExistsException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-			
+		RevisionManagement.createTag(graphName, revisionNumber, tagName, "Admin", "commited from Admin Interface");
 	}
 
 	/**
@@ -245,7 +239,7 @@ public class AdministratorInterface {
 		list.add(revisionNumber);
 		
 		// Create new revision
-		RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, "Administrator", "Created new revision from turtle file.", list);
+		RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, "Administrator", "Created new revision from turtle file.", list, list.get(0));
 	}
 
 	/**
@@ -431,10 +425,10 @@ public class AdministratorInterface {
 		}
 
 		// create new graph with version control
-		RevisionManagement.putGraphUnderVersionControl(graphName);
-		ArrayList<String> list = new ArrayList<String>();
-		list.add("0");
-		RevisionManagement.createNewRevision(graphName, modelStringAsNTriples, "", "admin", "committed by admin interface", list);
+		if (RevisionManagement.createNewGraphWithVersionControl(graphName, modelStringAsNTriples))
+			System.out.println("Successfully created");
+		else
+			System.out.println("Error");
 	}
 	
 	
@@ -718,16 +712,13 @@ public class AdministratorInterface {
 				TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <" + graphName +">", "HTML");
 				URL fileDataset = loader.getResource("dataset/dataset-"+datasize+".nt");
 				String dataSetAsNTriples = FileUtils.readFileToString(new File(fileDataset.getFile()));
-				RevisionManagement.putGraphUnderVersionControl(graphName);
-				ArrayList<String> list = new ArrayList<String>();
-				list.add("0");
-				RevisionManagement.createNewRevision(graphName, dataSetAsNTriples, "", "test", "test creation", list);
+				RevisionManagement.createNewGraphWithVersionControl(graphName, dataSetAsNTriples);
 				for (int revision = 1; revision <= REVISIONS; revision++) {
 					URL fileName = loader.getResource("dataset/addset-"+changesize+"-"+revision+".nt");
 					String addedAsNTriples = FileUtils.readFileToString(new File(fileName.getFile()));
-					list = new ArrayList<>();
+					ArrayList<String> list = new ArrayList<>();
 					list.add(Integer.toString(revision-1));
-					RevisionManagement.createNewRevision(graphName, addedAsNTriples, "", "test", "test creation", list);
+					RevisionManagement.createNewRevision(graphName, addedAsNTriples, "", "test", "test creation", list, list.get(0));
 				}
 			}
 		}
