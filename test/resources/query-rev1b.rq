@@ -1,0 +1,14 @@
+prefix : <http:/test.com/>
+
+select distinct ?o1 ?o2
+
+where {
+  GRAPH ?g1 { ?s :knows ?o1.  } VALUES ?g1 {<test>  <test-delta-removed-3> <test-delta-removed-2> <test-delta-removed-1>}
+  MINUS { GRAPH ?g_minus { ?s :knows ?o1. } VALUES ?g_minus {<test-delta-added-3> <test-delta-added-2> <test-delta-added-1>} }
+  
+  GRAPH ?g2 { ?s :knows ?o2.  } VALUES ?g2 {<test>  <test-delta-removed-3> <test-delta-removed-2> <test-delta-removed-1>}
+  MINUS { GRAPH ?g_minus { ?s :knows ?o2. } VALUES ?g_minus {<test-delta-added-3> <test-delta-added-2> <test-delta-added-1>} }
+  
+  FILTER (?o1 != ?o2)
+  
+}

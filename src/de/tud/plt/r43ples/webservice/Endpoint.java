@@ -41,6 +41,7 @@ import com.hp.hpl.jena.update.UpdateRequest;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.IdentifierAlreadyExistsException;
+import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 
@@ -119,7 +120,7 @@ public class Endpoint {
 		{
 			if (format.contains("text/html")){
 				logger.info("SPARQL form requested");
-				File fileToSend = new File("resources/index.html");
+				File fileToSend = new File("resources/webapp/index.html");
 				return Response.ok(fileToSend, "text/html").build();
 			} else {
 				return getServiceDescription(format);
@@ -147,6 +148,48 @@ public class Endpoint {
 			}	
 			return response;
 		}
+	}
+	
+	@Path("createTestDataset")
+	@GET
+	public String createTestDataset(){
+		ArrayList<String> list = new ArrayList<String>();		
+		String graphName = "r43ples-test-dataset";
+		try{
+			RevisionManagement.putGraphUnderVersionControl(graphName);
+			
+			list.add("0");
+			RevisionManagement.createNewRevision(graphName, 
+					ResourceManagement.getContentFromResource("test-delta-added-0.nt"), 
+					ResourceManagement.getContentFromResource("test-delta-removed-0.nt"),
+					"test_user", "test commit message 1", list);			
+			
+			list.remove("0");
+			list.add("1");
+			RevisionManagement.createNewRevision(graphName, 
+					ResourceManagement.getContentFromResource("test-delta-added-1.nt"), 
+					ResourceManagement.getContentFromResource("test-delta-removed-1.nt"),
+					"test_user", "test commit message 2", list);		
+			
+			list.remove("1");
+			list.add("2");
+			RevisionManagement.createNewRevision(graphName, 
+					ResourceManagement.getContentFromResource("test-delta-added-2.nt"), 
+					ResourceManagement.getContentFromResource("test-delta-removed-2.nt"),
+					"test_user", "test commit message 3", list);		
+			
+			list.remove("2");
+			list.add("3");
+			RevisionManagement.createNewRevision(graphName, 
+					ResourceManagement.getContentFromResource("test-delta-added-3.nt"), 
+					ResourceManagement.getContentFromResource("test-delta-removed-3.nt"),
+					"test_user", "test commit message 4", list);
+		} catch (HttpException | IOException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException(e.getMessage());
+		}	
+		
+		return "Test dataset successfully created in graph <"+graphName+">";
 	}
 	
 
@@ -326,7 +369,7 @@ public class Endpoint {
 		list.add(revisionNumber);
 					
 		// Create new revision
-		String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, list, revisionName);
+		String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, list);
 		
 		// Respond with next revision number
     	responseBuilder.header(graphName + "-revision-number", newRevisionNumber);
@@ -395,11 +438,8 @@ public class Endpoint {
 		if (!found) {
 			throw new InternalServerErrorException("Query contain errors:\n"+query);
 		}
-		else {
-			// Execute SPARQL query
-			responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(query, format));
-		}
-		
+		responseBuilder.status(Response.Status.OK);
+		responseBuilder.entity("Successful: "+ query);
 		return responseBuilder.build();
 	}
 	
@@ -430,20 +470,21 @@ public class Endpoint {
 		    String graphName = m.group("graph");
 		    String revisionNumber = m.group("revision");
 		    String name = m.group("name");
-		    if (action.equals("TAG"))
-		    	RevisionManagement.createTag(graphName, revisionNumber, name, user, commitMessage);
-		    else if (action.equals("BRANCH")) {
-		    	try {
-					RevisionManagement.createBranch(graphName, revisionNumber, name, user, commitMessage);
-				} catch (IdentifierAlreadyExistsException e) {
-					responseBuilder = Response.status(Response.Status.CONFLICT);
-				}
+		    try {
+			    if (action.equals("TAG"))
+			    	RevisionManagement.createReference("tag", graphName, revisionNumber, name, user, commitMessage);
+			    else if (action.equals("BRANCH"))
+		    		RevisionManagement.createReference("branch", graphName, revisionNumber, name, user, commitMessage);
+		        else
+		        	throw new InternalServerErrorException("Error in query: " + sparqlQuery);
+			} catch (IdentifierAlreadyExistsException e) {
+				responseBuilder = Response.status(Response.Status.CONFLICT);
+			}
 		    	
 		    	// Respond with next revision number
 //	 TODO   		responseBuilder.header(graphName + "-revision-number", name);
 //	    		responseBuilder.header(graphName + "-revision-number-of-BRANCH", RevisionManagement.getMasterRevisionNumber(graphName));
-		    } else
-		    	throw new InternalServerErrorException("Error in query: " + sparqlQuery);
+		    
 		}
 		if (!foundEntry)
 			throw new InternalServerErrorException("Error in query: " + sparqlQuery);

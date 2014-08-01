@@ -1,0 +1,16 @@
+prefix : <http:/test.com/>
+
+select distinct *
+where {
+  GRAPH ?g1 { ?s :knows ?o1.}
+  GRAPH ?g2 { ?s :knows ?o2.}
+  MINUS { GRAPH  <test-delta-added-3> {?s :knows ?o1.}}
+  MINUS { GRAPH  <test-delta-added-3> {?s :knows ?o2.}}
+  FILTER (?o1 != ?o2)
+  FILTER (?g1  in(<test>,  <test-delta-removed-3>))
+  FILTER (?g2  in(<test>,  <test-delta-removed-3>))
+  
+  # VOS doesn't support VALUES yet
+  #VALUES ?g1 { <test> <test-delta-removed-3> }
+  #VALUES ?g2 { <test> <test-delta-removed-3> }
+}
