@@ -532,29 +532,6 @@ public class MergeManagement {
 	 */
 	public static void createConflictingTripleModel(String graphName, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB) throws IOException, HttpException {
 		
-		// Get all structural definitions which are generating conflicts
-		String queryConflictingSD = String.format(
-				  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
-				+ "PREFIX sdd:  <http://eatld.et.tu-dresden.de/sdd#> %n"
-				+ "PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#> %n"
-				+ "SELECT ?combinationURI %n"
-				+ "FROM <%s> %n"
-				+ "WHERE { %n"
-				+ "	?combinationURI a sddo:StructuralDefinition ; %n"
-				+ "		sddo:isConflicting ?conflict . %n"
-				+ "	FILTER (?conflict = \"true\"^^xsd:boolean) %n"
-				+ "} %n", graphName + "-SDD");
-		
-		String result = TripleStoreInterface.executeQueryWithAuthorization(queryConflictingSD, "XML");
-		
-		// Get all conflicting combination URIs and save them in array list
-		ArrayList<String> conflictingCombinationURIs = new ArrayList<String>();
-		
-		while (ResultSetFactory.fromXML(result).hasNext()) {
-			QuerySolution qs = ResultSetFactory.fromXML(result).next();
-			conflictingCombinationURIs.add(qs.getResource("?combinationURI").toString());
-		}
-
 		// Templates for revision A and B
 		String sparqlTemplateRevisionA = String.format(
 				  "	GRAPH <%s> { %n"
@@ -582,38 +559,96 @@ public class MergeManagement {
 				"FILTER NOT EXISTS {"
 				+ "%s"
 				+ "}", sparqlTemplateRevisionB);
-
-		// Query for triple states of conflicting combination URI (A and B)
 		
-		
-		
-		
-//		 "CONSTRUCT {?s ?p ?o} WHERE {" +
-//			"  GRAPH <RM-MERGE-TEMP-MERGED> { ?s ?p ?o }" +
-//			"  FILTER NOT EXISTS { GRAPH <RM-MERGE-TEMP-2> { ?s ?p ?o } }" +
-//			" }";		
-		
-		
-		
-		
-		// Create queries from template
-		String sparqlQueryRevisionA = sparqlTemplateRevisionA;
-		String sparqlQueryRevisionB = sparqlTemplateRevisionB;
-		
-		
-		
-		// Concatenated SPARQL query
-		String query = String.format(
-				prefixes
-				+ "SELECT ?s ?p ?o ?revisionA ?revisionB %n"
+		// Get all structural definitions which are generating conflicts
+		String queryConflictingSD = String.format(
+				  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
+				+ "PREFIX sdd:  <http://eatld.et.tu-dresden.de/sdd#> %n"
+				+ "PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#> %n"
+				+ "SELECT ?combinationURI ?tripleStateA ?tripleStateB %n"
+				+ "FROM <%s> %n"
 				+ "WHERE { %n"
-				+ "%s"
-				+ "%s"
-				+ "} %n", sparqlQueryRevisionA, sparqlQueryRevisionB);
+				+ "	?combinationURI a sddo:StructuralDefinition ; %n"
+				+ "		sddo:hasTripleStateA ?tripleStateA ; %n"
+				+ "		sddo:hasTripleStateB ?tripleStateB ; %n"
+				+ "		sddo:isConflicting ?conflict . %n"
+				+ "	FILTER (?conflict = \"true\"^^xsd:boolean) %n"
+				+ "} %n", graphName + "-SDD");
+		
+		String result = TripleStoreInterface.executeQueryWithAuthorization(queryConflictingSD, "XML");
+		
+		// Iterate over all conflicting combination URIs
+		while (ResultSetFactory.fromXML(result).hasNext()) {
+			QuerySolution qs = ResultSetFactory.fromXML(result).next();
+			// Currently not needed
+			// String currentConflictingCombinationURI = qs.getResource("?combinationURI").toString();
+			String currentTripleStateA = qs.getResource("?tripleStateA").toString();
+			String currentTripleStateB = qs.getResource("?tripleStateB").toString();
+			
+			String querySelectPart = "SELECT ?s ?p ?o %s %s %n";
+			String sparqlQueryRevisionA = null;
+			String sparqlQueryRevisionB = null;			
+			
+			// A
+			if (currentTripleStateA.equals(SDDTripleState.ADDED.getSddRepresentation())) {
+				// In revision A the triple was added
+				querySelectPart = String.format(querySelectPart, "?revisionA");
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.ADDED.getRmoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleState.DELETED.getSddRepresentation())) {
+				// In revision A the triple was deleted
+				querySelectPart = String.format(querySelectPart, "?revisionA");
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.DELETED.getRmoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleState.ORIGINAL.getSddRepresentation())) {
+				// In revision A the triple is original
+				querySelectPart = String.format(querySelectPart, "?revisionA");
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.ORIGINAL.getRmoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+				// In revision A the triple is not included
+				querySelectPart = String.format(querySelectPart, "");
+				sparqlQueryRevisionA = sparqlTemplateNotExistsRevisionA;
+			}
+			
+			// B
+			if (currentTripleStateB.equals(SDDTripleState.ADDED.getSddRepresentation())) {
+				// In revision B the triple was added
+				querySelectPart = String.format(querySelectPart, "?revisionB");
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.ADDED.getRmoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleState.DELETED.getSddRepresentation())) {
+				// In revision B the triple was deleted
+				querySelectPart = String.format(querySelectPart, "?revisionB");
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.DELETED.getRmoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleState.ORIGINAL.getSddRepresentation())) {
+				// In revision B the triple is original
+				querySelectPart = String.format(querySelectPart, "?revisionB");
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.ORIGINAL.getRmoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+				// In revision B the triple is not included
+				querySelectPart = String.format(querySelectPart, "");
+				sparqlQueryRevisionB = sparqlTemplateNotExistsRevisionB;
+			}
+		
+			// Concatenated SPARQL query
+			String query = String.format(
+					prefixes
+					+ "%s"
+					+ "WHERE { %n"
+					+ "%s"
+					+ "%s"
+					+ "} %n", querySelectPart, sparqlQueryRevisionA, sparqlQueryRevisionB);
+					
+			String queryResult = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");		
+		
+			// Iterate over all triples
+			while (ResultSetFactory.fromXML(queryResult).hasNext()) {
+				QuerySolution qsQuery = ResultSetFactory.fromXML(queryResult).next();
+				//qs.getResource("?tripleStateA").toString();zh
+			}
+		
+		}
 		
 		
-				
-				
+		
+		
 //		PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#>
 //			PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
 //
@@ -724,5 +759,6 @@ public class MergeManagement {
 	// TODO upload on initialization RMO and SDDO so the client has the possibility to use the ontology data
 	// TODO Add SPIN file to graph and also reference in RMO
 	
+	// TODO add rmo:original to ontology (maybe it would be better to use rmo:added ... instead of sddo:added
 	
 }
