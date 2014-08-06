@@ -354,11 +354,11 @@ public class RevisionManagement {
 	public static String getReferenceUri(String graphName, String referenceIdentifier) throws HttpException, IOException {
 		String query = prefix_rmo + String.format(
 				"SELECT ?ref WHERE { GRAPH <%s> {"
-				+ "	?ref a rmo:Reference."
-				+ "	{?rev a rmo:Revision; rmo:revisionOf <%s>; rmo:revisionNumber \"%s\". ?ref rmo:references ?rev.}"
-				+ "	UNION {?ref rdfs:label \"%s\" .}"
+				+ "	?ref a rmo:Reference; rmo:references ?rev."
+				+ " ?rev a rmo:Revision; rmo:revisionOf <%s>."
+				+ "	{?rev rmo:revisionNumber \"%s\".} UNION {?ref rdfs:label \"%s\" .}"
 				+ "} }",
-				Config.revision_graph, graphName, referenceIdentifier, graphName, referenceIdentifier);
+				Config.revision_graph, graphName, referenceIdentifier, referenceIdentifier);
 		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
 		ResultSet resultSet = ResultSetFactory.fromXML(result);
 		if (resultSet.hasNext()) {
