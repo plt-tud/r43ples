@@ -7,26 +7,26 @@ package de.tud.plt.r43ples.management;
  *
  */
 public enum SDDTripleState {
-	ADDED("http://eatld.et.tu-dresden.de/sddo#Added", "http://eatld.et.tu-dresden.de/rmo#added"),
-	DELETED("http://eatld.et.tu-dresden.de/sddo#Deleted", "http://eatld.et.tu-dresden.de/rmo#removed"),
-	ORIGINAL("http://eatld.et.tu-dresden.de/sddo#Original", "http://eatld.et.tu-dresden.de/rmo#original"),
+	ADDED("http://eatld.et.tu-dresden.de/sddo#Added", "http://eatld.et.tu-dresden.de/rpo#added"),
+	DELETED("http://eatld.et.tu-dresden.de/sddo#Deleted", "http://eatld.et.tu-dresden.de/rpo#removed"),
+	ORIGINAL("http://eatld.et.tu-dresden.de/sddo#Original", "http://eatld.et.tu-dresden.de/rpo#original"),
 	NOTINCLUDED("http://eatld.et.tu-dresden.de/sddo#NotIncluded", null);
 	
 	/** The SDD representation. **/
 	private String sddRepresentation;
-	/** The RMO representation. **/
-	private String rmoRepresentation;
+	/** The RPO representation. **/
+	private String rpoRepresentation;
 	
 	
 	/**
 	 * The constructor.
 	 * 
 	 * @param sddRepresentation the SDD representation
-	 * @param rmoRepresentation the RMO representation
+	 * @param rpoRepresentation the RPO representation
 	 */
-	private SDDTripleState(String sddRepresentation, String rmoRepresentation) {
+	private SDDTripleState(String sddRepresentation, String rpoRepresentation) {
 		this.sddRepresentation = sddRepresentation;
-		this.rmoRepresentation = rmoRepresentation;
+		this.rpoRepresentation = rpoRepresentation;
 	}
 	
 	
@@ -41,12 +41,12 @@ public enum SDDTripleState {
 	
 	
 	/**
-	 * Get the RMO representation.
+	 * Get the RPO representation.
 	 * 
-	 * @return the RMO representation
+	 * @return the RPO representation
 	 */
-	public String getRmoRepresentation() {
-		return rmoRepresentation;
+	public String getRpoRepresentation() {
+		return rpoRepresentation;
 	}
 	
 }

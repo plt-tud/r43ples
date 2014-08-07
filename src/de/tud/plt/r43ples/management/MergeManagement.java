@@ -42,7 +42,8 @@ public class MergeManagement {
 			+ prefix_rmo
 			+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
 			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
-			+ "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n";
+			+ "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n"
+			+ "PREFIX rpo: <http://eatld.et.tu-dresden.de/rpo#> \n";
 	
 	
 	/**
@@ -55,7 +56,7 @@ public class MergeManagement {
 	 * @throws IOException
 	 * @throws HttpException 
 	 */
-	private static String getCommonRevisionWithShortestPath(String revision1, String revision2) throws IOException, HttpException {
+	public static String getCommonRevisionWithShortestPath(String revision1, String revision2) throws IOException, HttpException {
 		
 		logger.info("Get the common revision of <" + revision1 + "> and <" + revision2 + "> which has the shortest path.");
 		String query = String.format(
@@ -243,7 +244,7 @@ public class MergeManagement {
 	 * @throws IOException
 	 * @throws HttpException
 	 */
-	private static void createRevisionProgress(LinkedList<String> list, String graphNameRevisionProgress, String uri) throws IOException, HttpException {
+	public static void createRevisionProgress(LinkedList<String> list, String graphNameRevisionProgress, String uri) throws IOException, HttpException {
 		logger.info("Create the revision progress of " + uri + " in graph " + graphNameRevisionProgress + ".");
 		
 		logger.info("Create the revision progress graph with the name: \n" + graphNameRevisionProgress);
@@ -290,12 +291,12 @@ public class MergeManagement {
 			logger.info("Create the initial content.");
 			String queryInitial = prefixes + String.format(	
 				  "INSERT INTO <%s> { \n"
-				+ "	<%s> a rmo:RevisionProgress; \n"
-				+ "		rmo:original [ \n"
+				+ "	<%s> a rpo:RevisionProgress; \n"
+				+ "		rpo:original [ \n"
 				+ "			rdf:subject ?s ; \n"
 				+ "			rdf:predicate ?p ; \n"
 				+ "			rdf:object ?o ; \n"
-				+ "			rmo:revision \"%s\" \n"
+				+ "			rmo:references \"%s\" \n"
 				+ "		] \n"
 				+ "} WHERE { \n"
 				+ "	GRAPH <%s> \n"
@@ -324,21 +325,21 @@ public class MergeManagement {
 					// Delete old entries (original)
 					String queryRevision = prefixes + String.format(
 						  "DELETE FROM GRAPH <%s> { \n"
-						+ "	<%s> rmo:original ?blank . \n"
+						+ "	<%s> rpo:original ?blank . \n"
 						+ "	?blank rdf:subject ?s . \n"
 						+ "	?blank rdf:predicate ?p . \n"
 						+ "	?blank rdf:object ?o . \n"
-						+ "	?blank rmo:revision ?revision . \n"
+						+ "	?blank rmo:references ?revision . \n"
 						+ "} \n"
 						+ "WHERE { \n"
 						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
 						+ "	WHERE { \n"
 						+ "		{ \n"
-						+ "			<%s> rmo:original ?blank . \n"
+						+ "			<%s> rpo:original ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
 						+ "			?blank rdf:predicate ?p . \n"
 						+ "			?blank rdf:object ?o . \n"
-						+ "			?blank rmo:revision ?revision . \n"
+						+ "			?blank rmo:references ?revision . \n"
 						+ "		} \n"
 						+ "		GRAPH <%s> { \n"
 						+ "			?s ?p ?o \n"
@@ -351,21 +352,21 @@ public class MergeManagement {
 					// Delete old entries (removed)
 					queryRevision += String.format(
 						  "DELETE FROM GRAPH <%s> { \n"
-						+ "	<%s> rmo:removed ?blank . \n"
+						+ "	<%s> rpo:removed ?blank . \n"
 						+ "	?blank rdf:subject ?s . \n"
 						+ "	?blank rdf:predicate ?p . \n"
 						+ "	?blank rdf:object ?o . \n"
-						+ "	?blank rmo:revision ?revision . \n"
+						+ "	?blank rmo:references ?revision . \n"
 						+ "} \n"
 						+ "WHERE { \n"
 						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
 						+ "	WHERE { \n"
 						+ "		{ \n"
-						+ "			<%s> rmo:removed ?blank . \n"
+						+ "			<%s> rpo:removed ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
 						+ "			?blank rdf:predicate ?p . \n"
 						+ "			?blank rdf:object ?o . \n"
-						+ "			?blank rmo:revision ?revision . \n"
+						+ "			?blank rmo:references ?revision . \n"
 						+ "		} \n"
 						+ "		GRAPH <%s> { \n"
 						+ "			?s ?p ?o \n"
@@ -378,12 +379,12 @@ public class MergeManagement {
 					// Insert new entries (added)
 					queryRevision += String.format(	
 						  "INSERT INTO <%s> { \n"
-						+ "	<%s> a rmo:RevisionProgress; \n"
-						+ "		rmo:added [ \n"
+						+ "	<%s> a rpo:RevisionProgress; \n"
+						+ "		rpo:added [ \n"
 						+ "			rdf:subject ?s ; \n"
 						+ "			rdf:predicate ?p ; \n"
 						+ "			rdf:object ?o ; \n"
-						+ "			rmo:revision \"%s\" \n"
+						+ "			rmo:references \"%s\" \n"
 						+ "		] \n"
 						+ "} WHERE { \n"
 						+ "	GRAPH <%s> \n"
@@ -397,21 +398,21 @@ public class MergeManagement {
 					// Delete old entries (original)
 					queryRevision += String.format(
 						  "DELETE FROM GRAPH <%s> { \n"
-						+ "	<%s> rmo:original ?blank . \n"
+						+ "	<%s> rpo:original ?blank . \n"
 						+ "	?blank rdf:subject ?s . \n"
 						+ "	?blank rdf:predicate ?p . \n"
 						+ "	?blank rdf:object ?o . \n"
-						+ "	?blank rmo:revision ?revision . \n"
+						+ "	?blank rmo:references ?revision . \n"
 						+ "} \n"
 						+ "WHERE { \n"
 						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
 						+ "	WHERE { \n"
 						+ "		{ \n"
-						+ "			<%s> rmo:original ?blank . \n"
+						+ "			<%s> rpo:original ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
 						+ "			?blank rdf:predicate ?p . \n"
 						+ "			?blank rdf:object ?o . \n"
-						+ "			?blank rmo:revision ?revision . \n"
+						+ "			?blank rmo:references ?revision . \n"
 						+ "		} \n"
 						+ "		GRAPH <%s> { \n"
 						+ "			?s ?p ?o \n"
@@ -424,21 +425,21 @@ public class MergeManagement {
 					// Delete old entries (added)
 					queryRevision += String.format(
 						  "DELETE FROM GRAPH <%s> { \n"
-						+ "	<%s> rmo:added ?blank . \n"
+						+ "	<%s> rpo:added ?blank . \n"
 						+ "	?blank rdf:subject ?s . \n"
 						+ "	?blank rdf:predicate ?p . \n"
 						+ "	?blank rdf:object ?o . \n"
-						+ "	?blank rmo:revision ?revision . \n"
+						+ "	?blank rmo:references ?revision . \n"
 						+ "} \n"
 						+ "WHERE { \n"
 						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
 						+ "	WHERE { \n"
 						+ "		{ \n"
-						+ "			<%s> rmo:added ?blank . \n"
+						+ "			<%s> rpo:added ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
 						+ "			?blank rdf:predicate ?p . \n"
 						+ "			?blank rdf:object ?o . \n"
-						+ "			?blank rmo:revision ?revision . \n"
+						+ "			?blank rmo:references ?revision . \n"
 						+ "		} \n"
 						+ "		GRAPH <%s> { \n"
 						+ "			?s ?p ?o \n"
@@ -451,12 +452,12 @@ public class MergeManagement {
 					// Insert new entries (removed)
 					queryRevision += String.format(	
 						  "INSERT INTO <%s> { \n"
-						+ "	<%s> a rmo:RevisionProgress; \n"
-						+ "		rmo:removed [ \n"
+						+ "	<%s> a rpo:RevisionProgress; \n"
+						+ "		rpo:removed [ \n"
 						+ "			rdf:subject ?s ; \n"
 						+ "			rdf:predicate ?p ; \n"
 						+ "			rdf:object ?o ; \n"
-						+ "			rmo:revision \"%s\" \n"
+						+ "			rmo:references \"%s\" \n"
 						+ "		] \n"
 						+ "} WHERE { \n"
 						+ "	GRAPH <%s> \n"
@@ -539,7 +540,7 @@ public class MergeManagement {
 				+ "			?blankA rdf:subject ?s . %n"
 				+ "			?blankA rdf:predicate ?p . %n"
 				+ "			?blankA rdf:object ?o . %n"
-				+ "			?blankA rmo:revision ?revisionA . %n"
+				+ "			?blankA rmo:references ?revisionA . %n"
 				+ "	} %n", graphNameRevisionProgressA, uriA);
 		String sparqlTemplateRevisionB = String.format(
 				  "	GRAPH <%s> { %n"
@@ -547,7 +548,7 @@ public class MergeManagement {
 				+ "			?blankB rdf:subject ?s . %n"
 				+ "			?blankB rdf:predicate ?p . %n"
 				+ "			?blankB rdf:object ?o . %n"
-				+ "			?blankB rmo:revision ?revisionB . %n"
+				+ "			?blankB rmo:references ?revisionB . %n"
 				+ "	} %n", graphNameRevisionProgressB, uriB);
 
 		String sparqlTemplateNotExistsRevisionA = String.format(
@@ -593,15 +594,15 @@ public class MergeManagement {
 			if (currentTripleStateA.equals(SDDTripleState.ADDED.getSddRepresentation())) {
 				// In revision A the triple was added
 				querySelectPart = String.format(querySelectPart, "?revisionA");
-				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.ADDED.getRmoRepresentation());
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.ADDED.getRpoRepresentation());
 			} else if (currentTripleStateA.equals(SDDTripleState.DELETED.getSddRepresentation())) {
 				// In revision A the triple was deleted
 				querySelectPart = String.format(querySelectPart, "?revisionA");
-				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.DELETED.getRmoRepresentation());
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.DELETED.getRpoRepresentation());
 			} else if (currentTripleStateA.equals(SDDTripleState.ORIGINAL.getSddRepresentation())) {
 				// In revision A the triple is original
 				querySelectPart = String.format(querySelectPart, "?revisionA");
-				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.ORIGINAL.getRmoRepresentation());
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.ORIGINAL.getRpoRepresentation());
 			} else if (currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
 				// In revision A the triple is not included
 				querySelectPart = String.format(querySelectPart, "");
@@ -612,15 +613,15 @@ public class MergeManagement {
 			if (currentTripleStateB.equals(SDDTripleState.ADDED.getSddRepresentation())) {
 				// In revision B the triple was added
 				querySelectPart = String.format(querySelectPart, "?revisionB");
-				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.ADDED.getRmoRepresentation());
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.ADDED.getRpoRepresentation());
 			} else if (currentTripleStateA.equals(SDDTripleState.DELETED.getSddRepresentation())) {
 				// In revision B the triple was deleted
 				querySelectPart = String.format(querySelectPart, "?revisionB");
-				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.DELETED.getRmoRepresentation());
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.DELETED.getRpoRepresentation());
 			} else if (currentTripleStateA.equals(SDDTripleState.ORIGINAL.getSddRepresentation())) {
 				// In revision B the triple is original
 				querySelectPart = String.format(querySelectPart, "?revisionB");
-				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.ORIGINAL.getRmoRepresentation());
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.ORIGINAL.getRpoRepresentation());
 			} else if (currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
 				// In revision B the triple is not included
 				querySelectPart = String.format(querySelectPart, "");
@@ -642,6 +643,24 @@ public class MergeManagement {
 			while (ResultSetFactory.fromXML(queryResult).hasNext()) {
 				QuerySolution qsQuery = ResultSetFactory.fromXML(queryResult).next();
 				//qs.getResource("?tripleStateA").toString();zh
+				
+				
+				
+//				String queryInitial = prefixes + String.format(	
+//						  "INSERT INTO <%s> { \n"
+//						+ "	<%s> a rpo:Conflict; \n"
+//						+ "		rpo:original [ \n"
+//						+ "			rdf:subject ?s ; \n"
+//						+ "			rdf:predicate ?p ; \n"
+//						+ "			rdf:object ?o ; \n"
+//						+ "			rmo:references \"%s\" \n"
+//						+ "		] \n"
+//						+ "} WHERE { \n"
+//						+ "	GRAPH <%s> \n"
+//						+ "		{ ?s ?p ?o . } \n"
+//						+ "}",graphNameRevisionProgress,uri, firstRevision, fullGraphName);
+				
+				
 			}
 		
 		}

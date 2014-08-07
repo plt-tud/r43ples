@@ -41,6 +41,7 @@ import com.hp.hpl.jena.update.UpdateRequest;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.IdentifierAlreadyExistsException;
+import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 
@@ -138,8 +139,10 @@ public class Endpoint {
 					response = produceCreateGraphResponse(sparqlQuery, format);
 				} else if (sparqlQuery.toUpperCase().contains("DROP")) {
 					response = produceDropGraphResponse(sparqlQuery, format);
-				} else if (sparqlQuery.toUpperCase().contains("TAG") || sparqlQuery.toUpperCase().contains("BRANCH")) {
+				} else if (sparqlQuery.toUpperCase().contains("TAG") || (sparqlQuery.toUpperCase().contains("BRANCH") && !sparqlQuery.toUpperCase().contains("MERGE"))) {
 					response = produceBranchOrTagResponse(sparqlQuery, format);
+				} else if (sparqlQuery.toUpperCase().contains("MERGE") && sparqlQuery.toUpperCase().contains("INTO")) {
+					response = produceMergeResponse(sparqlQuery, format);
 				}
 			} catch (HttpException | IOException e) {
 				e.printStackTrace();
@@ -450,6 +453,57 @@ public class Endpoint {
 		
 		return responseBuilder.build();
 	}
+	
+	
+	/** 
+	 * Creates a merge between the specified branches.
+	 * 
+	 * Using command: MERGE GRAPH <graphURI> BRANCH "branchNameA" INTO "branchNameB"
+	 * 
+	 * @param sparqlQuery the SPARQL query
+	 * @param format the result format
+	 * @throws IOException 
+	 * @throws AuthenticationException 
+	 */
+	private Response produceMergeResponse(String sparqlQuery, String format) throws HttpException, IOException {
+		ResponseBuilder responseBuilder = Response.created(URI.create(""));
+		logger.info("Merge creation detected");
+		String user = extractUser(sparqlQuery);
+		String commitMessage = extractCommitMessage(sparqlQuery);
+		
+		// Add R43ples information
+		Pattern pattern =  Pattern.compile("MERGE\\s*GRAPH\\s*<(?<graph>.*)>\\s*BRANCH\\s*\"(?<branchNameA>.*)\"\\s*INTO\\s*\"(?<branchNameB>.*)\"");
+		Matcher m = pattern.matcher(sparqlQuery);
+		
+		boolean foundEntry = false;
+		while (m.find()) {
+			foundEntry = true;
+			String graphName = m.group("graph");
+			String branchNameA = m.group("branchNameA");
+			String branchNameB = m.group("branchNameB");
+			
+			// TODO Check if A and B are different valid branches
+			// TODO Think about usage of branch (terminal nodes) only or possibility to merge any revision of different branch into another 
+			
+			// Get the common revision with shortest path
+			String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(branchNameA, branchNameB);
+			
+			// Create the revision progress for A and B
+			String graphNameA = "RM-REVISION-PROGRESS-A-" + graphName;
+			
+			
+			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, branchNameA), graphNameA, "http://eatld.et.tu-dresden.de/branch-A");
+			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, branchNameB), "RM-REVISION-PROGRESS-B-" + graphName, "http://eatld.et.tu-dresden.de/branch-B");
+			
+			
+			// TODO Create response
+		}
+		if (!foundEntry)
+			throw new InternalServerErrorException("Error in query: " + sparqlQuery);
+		
+		return responseBuilder.build();
+	}
+
 
 
 	/** Extracts user out of query

@@ -61,6 +61,22 @@
 
 
 
+###  http://eatld.et.tu-dresden.de/sddo#useTripleAutomaticResolution
+
+:useTripleAutomaticResolution rdf:type owl:ObjectProperty ;
+                              
+                              rdfs:label "nutze Tripel fuer automatische Konfliktbehebung"@de ,
+                                         "use triple for automatic conflict resolution"@en ;
+                              
+                              rdfs:comment "Spezifiziert das Tripel, welches bei einer automatischen Konfliktbehebung genutzt werden soll."@de ,
+                                           "Specifies the triple which should be used when the conflict should be resolved automatically."@en ;
+                              
+                              rdfs:domain :StructuralDefinition ;
+                              
+                              rdfs:range :Triple .
+
+
+
 
 
 #################################################################
@@ -162,6 +178,48 @@
                       
                       rdfs:comment "Beschreibt den Tripelstatus in zwei Revisionen und ob daraus ein Konflikt abgeleitet werden kann."@de ,
                                    "Describes the triple state in two revisions and if there is a conflict."@en .
+
+
+
+###  http://eatld.et.tu-dresden.de/sddo#Triple
+
+:Triple rdf:type owl:Class ;
+        
+        rdfs:label "Tripel"@de ,
+                   "triple"@en ;
+        
+        rdfs:subClassOf owl:Thing ;
+        
+        rdfs:comment "Spezifiziert ein Tripel."@de ,
+                     "Specifies a triple."@en .
+
+
+
+###  http://eatld.et.tu-dresden.de/sddo#TripleA
+
+:TripleA rdf:type owl:Class ;
+         
+         rdfs:label "Tripel A"@de ,
+                    "triple A"@en ;
+         
+         rdfs:subClassOf :Triple ;
+         
+         rdfs:comment "Tripel von Revision A"@de ,
+                      "Triple of revision A."@en .
+
+
+
+###  http://eatld.et.tu-dresden.de/sddo#TripleB
+
+:TripleB rdf:type owl:Class ;
+         
+         rdfs:label "Tripel B"@de ,
+                    "triple B"@en ;
+         
+         rdfs:subClassOf :Triple ;
+         
+         rdfs:comment "Tripel von Revision B."@de ,
+                      "Triple of revision B."@en .
 
 
 

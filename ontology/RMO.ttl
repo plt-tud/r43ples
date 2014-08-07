@@ -1,10 +1,10 @@
-@prefix rmo: <http://eatld.et.tu-dresden.de/rmo#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix : <http://eatld.et.tu-dresden.de/rmo#> .
-@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rmo: <http://eatld.et.tu-dresden.de/rmo#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @base <http://eatld.et.tu-dresden.de/rmo> .
 
@@ -12,16 +12,7 @@
                                     
                                     rdfs:label "Revision Management Ontology" ;
                                     
-                                    owl:imports prov: .
-
-
-#################################################################
-#
-#    Annotation properties
-#
-#################################################################
-
-
+                                    owl:imports <http://www.w3.org/ns/prov#> .
 
 
 #################################################################
@@ -33,33 +24,33 @@
 
 ###  http://eatld.et.tu-dresden.de/rmo#references
 
-rmo:references rdf:type owl:ObjectProperty ;
-               
-               rdfs:label "referenziert Revision"@de ,
-                          "references revision"@en ;
-               
-               rdfs:comment "Spezifiert Revision, auf die diese Referenz verweiset."@de ,
-                            "Specifies revision which is linked by this reference."@en ;
-               
-               rdfs:domain rmo:Reference ;
-               
-               rdfs:range rmo:Revision .
+:references rdf:type owl:ObjectProperty ;
+            
+            rdfs:label "referenziert Revision"@de ,
+                       "references revision"@en ;
+            
+            rdfs:comment "Spezifiert Revision, auf die diese Referenz verweiset."@de ,
+                         "Specifies revision which is linked by this reference."@en ;
+            
+            rdfs:domain :Reference ;
+            
+            rdfs:range :Revision .
 
 
 
 ###  http://eatld.et.tu-dresden.de/rmo#revisionOf
 
-rmo:revisionOf rdf:type owl:ObjectProperty ;
-               
-               rdfs:label "Revision von Graph"@de ,
-                          "revision of graph"@en ;
-               
-               rdfs:comment "Spezifiert Graph, den diese Revisison versioniert."@de ,
-                            "Specifies graph which is versioned by this revision."@en ;
-               
-               rdfs:range rmo:Graph ;
-               
-               rdfs:domain rmo:Revision .
+:revisionOf rdf:type owl:ObjectProperty ;
+            
+            rdfs:label "Revision von Graph"@de ,
+                       "revision of graph"@en ;
+            
+            rdfs:comment "Spezifiert Graph, den diese Revisison versioniert."@de ,
+                         "Specifies graph which is versioned by this revision."@en ;
+            
+            rdfs:range :Graph ;
+            
+            rdfs:domain :Revision .
 
 
 
@@ -74,81 +65,81 @@ rmo:revisionOf rdf:type owl:ObjectProperty ;
 
 ###  http://eatld.et.tu-dresden.de/rmo#deltaAdded
 
-rmo:deltaAdded rdf:type owl:DatatypeProperty ;
-               
-               rdfs:label "Delta hinzugefügt"@de ,
-                          "delta added"@en ;
-               
-               rdfs:comment "Spezifiziert Graph mit den hinzugefügten Tripeln."@de ,
-                            "Specifies graph which consists of the added triples."@en ;
-               
-               rdfs:domain rmo:Revision ;
-               
-               rdfs:range xsd:string .
+:deltaAdded rdf:type owl:DatatypeProperty ;
+            
+            rdfs:label "Delta hinzugefügt"@de ,
+                       "delta added"@en ;
+            
+            rdfs:comment "Spezifiziert Graph mit den hinzugefügten Tripeln."@de ,
+                         "Specifies graph which consists of the added triples."@en ;
+            
+            rdfs:domain :Revision ;
+            
+            rdfs:range xsd:string .
 
 
 
 ###  http://eatld.et.tu-dresden.de/rmo#deltaRemoved
 
-rmo:deltaRemoved rdf:type owl:DatatypeProperty ;
-                 
-                 rdfs:label "Delta geloescht"@de ,
-                            "delta removed"@en ;
-                 
-                 rdfs:comment "Spezifiziert Graph mit den gelöschten Tripeln."@de ,
-                              "Specifies graph which consists of the removed triples."@en ;
-                 
-                 rdfs:domain rmo:Revision ;
-                 
-                 rdfs:range xsd:string .
+:deltaRemoved rdf:type owl:DatatypeProperty ;
+              
+              rdfs:label "Delta geloescht"@de ,
+                         "delta removed"@en ;
+              
+              rdfs:comment "Spezifiziert Graph mit den gelöschten Tripeln."@de ,
+                           "Specifies graph which consists of the removed triples."@en ;
+              
+              rdfs:domain :Revision ;
+              
+              rdfs:range xsd:string .
 
 
 
 ###  http://eatld.et.tu-dresden.de/rmo#fullGraph
 
-rmo:fullGraph rdf:type owl:DatatypeProperty ;
-              
-              rdfs:label "vollständiger Graph"@de ,
-                         "full graph"@en ;
-              
-              rdfs:comment "Spezifiert Graph, der eine vollständige Materialisierung des Branches enthält."@de ,
-                           "Specifies graph which contains full materialized graph of this branch."@en ;
-              
-              rdfs:domain rmo:Branch ;
-              
-              rdfs:range xsd:anyURI .
+:fullGraph rdf:type owl:DatatypeProperty ;
+           
+           rdfs:label "vollständiger Graph"@de ,
+                      "full graph"@en ;
+           
+           rdfs:comment "Spezifiert Graph, der eine vollständige Materialisierung des Branches enthält."@de ,
+                        "Specifies graph which contains full materialized graph of this branch."@en ;
+           
+           rdfs:domain :Branch ;
+           
+           rdfs:range xsd:anyURI .
 
 
 
 ###  http://eatld.et.tu-dresden.de/rmo#referencedSDD
 
-rmo:referencedSDD rdf:type owl:DatatypeProperty ;
-                  
-                  rdfs:label "referenzierte SDD"@de ,
-                             "referenced SDD"@en ;
-                  
-                  rdfs:comment "Spezifiziert den Graphen, welcher die SDD Informationen enth�lt."@de ,
-                               "Specifies the graph which contains the SDD information."@en ;
-                  
-                  rdfs:domain rmo:Graph ;
-                  
-                  rdfs:range xsd:anyURI .
+:referencedSDD rdf:type owl:DatatypeProperty ;
+               
+               rdfs:label "referenzierte SDD"@de ,
+                          "referenced SDD"@en ;
+               
+               rdfs:comment "Spezifiziert den Graphen, welcher die SDD Informationen enth�lt."@de ,
+                            "Specifies the graph which contains the SDD information."@en ;
+               
+               rdfs:domain :Graph ;
+               
+               rdfs:range xsd:anyURI .
 
 
 
 ###  http://eatld.et.tu-dresden.de/rmo#revisionNumber
 
-rmo:revisionNumber rdf:type owl:DatatypeProperty ;
-                   
-                   rdfs:label "Revisionsnummer"@de ,
-                              "revision number"@en ;
-                   
-                   rdfs:comment "Spezifiziert Revisionsnummer."@de ,
-                                "Specifies revision number."@en ;
-                   
-                   rdfs:domain rmo:Revision ;
-                   
-                   rdfs:range xsd:integer .
+:revisionNumber rdf:type owl:DatatypeProperty ;
+                
+                rdfs:label "Revisionsnummer"@de ,
+                           "revision number"@en ;
+                
+                rdfs:comment "Spezifiziert Revisionsnummer."@de ,
+                             "Specifies revision number."@en ;
+                
+                rdfs:domain :Revision ;
+                
+                rdfs:range xsd:integer .
 
 
 
@@ -163,88 +154,88 @@ rmo:revisionNumber rdf:type owl:DatatypeProperty ;
 
 ###  http://eatld.et.tu-dresden.de/rmo#Branch
 
-rmo:Branch rdf:type owl:Class ;
-           
-           rdfs:label "Branch"@de ,
-                      "branch"@en ;
-           
-           rdfs:subClassOf rmo:Reference ;
-           
-           rdfs:comment "Dynamische Referenz auf letzte Revision eines Zweiges, die automatisch weitergesetzt wird."@de ,
-                        "Dynamic reference to terminal revision in a branch which is updated automatically."@en .
+:Branch rdf:type owl:Class ;
+        
+        rdfs:label "Branch"@de ,
+                   "branch"@en ;
+        
+        rdfs:subClassOf :Reference ;
+        
+        rdfs:comment "Dynamische Referenz auf letzte Revision eines Zweiges, die automatisch weitergesetzt wird."@de ,
+                     "Dynamic reference to terminal revision in a branch which is updated automatically."@en .
 
 
 
 ###  http://eatld.et.tu-dresden.de/rmo#Commit
 
-rmo:Commit rdf:type owl:Class ;
-           
-           rdfs:label "Commit"@de ,
-                      "commit"@en ;
-           
-           rdfs:subClassOf prov:Activity .
+:Commit rdf:type owl:Class ;
+        
+        rdfs:label "Commit"@de ,
+                   "commit"@en ;
+        
+        rdfs:subClassOf prov:Activity .
 
 
 
 ###  http://eatld.et.tu-dresden.de/rmo#Graph
 
-rmo:Graph rdf:type owl:Class ;
-          
-          rdfs:label "Graph"@de ,
-                     "graph"@en ;
-          
-          rdfs:subClassOf prov:Entity .
+:Graph rdf:type owl:Class ;
+       
+       rdfs:label "Graph"@de ,
+                  "graph"@en ;
+       
+       rdfs:subClassOf prov:Entity .
 
 
 
 ###  http://eatld.et.tu-dresden.de/rmo#Master
 
-rmo:Master rdf:type owl:Class ;
-           
-           rdfs:label "Master"@de ,
-                      "master"@en ;
-           
-           rdfs:subClassOf rmo:Branch ;
-           
-           rdfs:comment "Spezifische Referenz, der den Standard-Branch festlegt."@de ,
-                        "Specific reference which determines default branch."@en .
+:Master rdf:type owl:Class ;
+        
+        rdfs:label "Master"@de ,
+                   "master"@en ;
+        
+        rdfs:subClassOf :Branch ;
+        
+        rdfs:comment "Spezifische Referenz, der den Standard-Branch festlegt."@de ,
+                     "Specific reference which determines default branch."@en .
 
 
 
 ###  http://eatld.et.tu-dresden.de/rmo#Reference
 
-rmo:Reference rdf:type owl:Class ;
-              
-              rdfs:label "Referenz"@de ,
-                         "reference"@en .
+:Reference rdf:type owl:Class ;
+           
+           rdfs:label "Referenz"@de ,
+                      "reference"@en .
 
 
 
 ###  http://eatld.et.tu-dresden.de/rmo#Revision
 
-rmo:Revision rdf:type owl:Class ;
-             
-             rdfs:label "Revision"@de ,
-                        "revision"@en ;
-             
-             rdfs:subClassOf prov:Entity .
+:Revision rdf:type owl:Class ;
+          
+          rdfs:label "Revision"@de ,
+                     "revision"@en ;
+          
+          rdfs:subClassOf prov:Entity .
 
 
 
 ###  http://eatld.et.tu-dresden.de/rmo#Tag
 
-rmo:Tag rdf:type owl:Class ;
-        
-        rdfs:label "Tag"@de ,
-                   "tag"@en ;
-        
-        rdfs:subClassOf rmo:Reference ;
-        
-        rdfs:comment "Feste, manuell festgelegte Referenz auf eine Revision."@de ,
-                     "Fixes manually created reference to one revision."@en .
+:Tag rdf:type owl:Class ;
+     
+     rdfs:label "Tag"@de ,
+                "tag"@en ;
+     
+     rdfs:subClassOf :Reference ;
+     
+     rdfs:comment "Feste, manuell festgelegte Referenz auf eine Revision."@de ,
+                  "Fixes manually created reference to one revision."@en .
 
 
 
 
-###  Generated by the OWL API (version 3.2.0.1502) http://owlapi.sourceforge.net
+###  Generated by the OWL API (version 3.5.0) http://owlapi.sourceforge.net
 
