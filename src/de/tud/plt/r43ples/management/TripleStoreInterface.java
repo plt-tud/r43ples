@@ -47,16 +47,15 @@ public class TripleStoreInterface {
 	public static void init(String sparql_endpoint, String sparql_username, String sparql_password) throws HttpException, IOException {
 		credentials = new UsernamePasswordCredentials(sparql_username, sparql_password);
 		endpoint = sparql_endpoint;
-		if (!RevisionManagement.existGraph(Config.revision_graph)){
+		if (!RevisionManagement.checkGraphExistence(Config.revision_graph)){
 			logger.info("Create revision graph");
-			executeQueryWithAuthorization("CREATE GRAPH <" + Config.revision_graph +">", "HTML");
+			executeQueryWithAuthorization("CREATE SILENT GRAPH <" + Config.revision_graph +">", "HTML");
 	 	}
 	}
 	
 	/**
 	 * Executes a SPARQL-query against the triple store without authorization.
 	 * 
-	 * @param graphUri the default graph URI
 	 * @param query the SPARQL query
 	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
 	 * @return the result of the query
@@ -76,7 +75,6 @@ public class TripleStoreInterface {
 		String encoding = con.getContentEncoding();
 		encoding = (encoding == null) ? "UTF-8" : encoding;
 		String body = IOUtils.toString(in, encoding);
-		
 		return body;
 		
 	}
@@ -95,7 +93,11 @@ public class TripleStoreInterface {
 	public static String executeQueryWithAuthorization(String query, String format) throws IOException, HttpException {
 		String result = null;
 		
-		logger.info("Execute query on SPARQL endpoint:\n"+ query);
+		logger.debug("Hide all keywords in comments");
+		// TODO: fix issue when no line ending after these keywords
+		query = query.replace("USER", "#USER").replace("MESSAGE", "#MESSAGE").replace("REVISION", "#REVISION");	
+		
+		logger.debug("Execute query on SPARQL endpoint:"+ query);
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
 			
@@ -106,16 +108,29 @@ public class TripleStoreInterface {
 		nameValuePairs.add(new BasicNameValuePair("format",format));
 		nameValuePairs.add(new BasicNameValuePair("query", query));
 		
+		HttpResponse response =  null;
+		InputStreamReader in = null;
+		
+		
 		request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 		
 		//Execute Query
-		HttpResponse response = httpClient.execute(request);
+		response = httpClient.execute(request);
 		logger.debug("Statuscode: " + response.getStatusLine().getStatusCode());
-		if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
-			throw new HttpException(response.getStatusLine().toString());
+		try{
+			in = new InputStreamReader(response.getEntity().getContent());
+			result = IOUtils.toString(in);
+			if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
+				throw new HttpException(response.getStatusLine().toString()+"\n"+result);
+			}
+			
+			
+		} catch (HttpException | IOException e){
+			throw e;
 		}
-		InputStreamReader in = new InputStreamReader(response.getEntity().getContent());
-		result = IOUtils.toString(in);
+		finally {
+			in.close();
+		}
 		
 		return result;
 	}

@@ -1,13 +1,13 @@
-@prefix : <http://revision.management.et.tu-dresden.de/rmo#> .
+@prefix : <http://eatld.et.tu-dresden.de/rmo#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rmo: <http://revision.management.et.tu-dresden.de/rmo#> .
+@prefix rmo: <http://eatld.et.tu-dresden.de/rmo#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@base <http://revision.management.et.tu-dresden.de/rmo> .
+@base <http://eatld.et.tu-dresden.de/rmo> .
 
-<http://revision.management.et.tu-dresden.de/rmo> rdf:type owl:Ontology ;
+<http://eatld.et.tu-dresden.de/rmo> rdf:type owl:Ontology ;
                                                   
                                                   rdfs:label "Revision Management Ontology" ;
                                                   
@@ -21,7 +21,7 @@
 #################################################################
 
 
-###  http://revision.management.et.tu-dresden.de/rmo#references
+###  http://eatld.et.tu-dresden.de/rmo#references
 
 :references rdf:type owl:ObjectProperty ;
             
@@ -46,7 +46,7 @@
 #################################################################
 
 
-###  http://revision.management.et.tu-dresden.de/rmo#deltaAdded
+###  http://eatld.et.tu-dresden.de/rmo#deltaAdded
 
 :deltaAdded rdf:type owl:DatatypeProperty ;
             
@@ -62,7 +62,7 @@
 
 
 
-###  http://revision.management.et.tu-dresden.de/rmo#deltaRemoved
+###  http://eatld.et.tu-dresden.de/rmo#deltaRemoved
 
 :deltaRemoved rdf:type owl:DatatypeProperty ;
               
@@ -78,7 +78,7 @@
 
 
 
-###  http://revision.management.et.tu-dresden.de/rmo#revisionNumber
+###  http://eatld.et.tu-dresden.de/rmo#revisionNumber
 
 :revisionNumber rdf:type owl:DatatypeProperty ;
                 
@@ -94,7 +94,7 @@
 
 
 
-###  http://revision.management.et.tu-dresden.de/rmo#revisionOf
+###  http://eatld.et.tu-dresden.de/rmo#revisionOf
 
 :revisionOf rdf:type owl:DatatypeProperty ;
             
@@ -110,7 +110,7 @@
 
 
 
-###  http://revision.management.et.tu-dresden.de/rmo#fullGraph
+###  http://eatld.et.tu-dresden.de/rmo#fullGraph
 
 :fullGraph rdf:type owl:DatatypeProperty ;
             
@@ -133,7 +133,7 @@
 #################################################################
 
 
-###  http://revision.management.et.tu-dresden.de/rmo#Branch
+###  http://eatld.et.tu-dresden.de/rmo#Branch
 
 :Branch rdf:type owl:Class ;
         
@@ -147,7 +147,7 @@
 
 
 
-###  http://revision.management.et.tu-dresden.de/rmo#Commit
+###  http://eatld.et.tu-dresden.de/rmo#Commit
 
 :Commit rdf:type owl:Class ;
 
@@ -158,7 +158,7 @@
 
 
 
-###  http://revision.management.et.tu-dresden.de/rmo#Master
+###  http://eatld.et.tu-dresden.de/rmo#Master
 
 :Master rdf:type owl:Class ;
         
@@ -172,7 +172,7 @@
 
 
 
-###  http://revision.management.et.tu-dresden.de/rmo#Reference
+###  http://eatld.et.tu-dresden.de/rmo#Reference
 
 :Reference rdf:type owl:Class ;
            
@@ -181,7 +181,7 @@
 
 
 
-###  http://revision.management.et.tu-dresden.de/rmo#Revision
+###  http://eatld.et.tu-dresden.de/rmo#Revision
 
 :Revision rdf:type owl:Class ;
           
@@ -192,7 +192,7 @@
 
 
 
-###  http://revision.management.et.tu-dresden.de/rmo#Tag
+###  http://eatld.et.tu-dresden.de/rmo#Tag
 
 :Tag rdf:type owl:Class ;
      

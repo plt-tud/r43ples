@@ -16,6 +16,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpException;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.jena.atlas.logging.Log;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.QuerySolution;
@@ -25,6 +26,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.Tree;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
@@ -36,7 +38,7 @@ public class AdministratorInterface {
 	
 	
 	public static void main(String[] args) throws ConfigurationException, HttpException, IOException {
-		Config.readConfig("Service.conf");
+		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
 		start();
 	}
@@ -44,8 +46,7 @@ public class AdministratorInterface {
 	/**
 	 * Start the administration interface.
 	 * @throws IOException 
-	 * @throws ClientProtocolException 
-	 * @throws AuthenticationException 
+	 * @throws HttpException
 	 */
 	public static void start() throws HttpException, IOException {
 		System.out.println("\nAdministration interface!");
@@ -58,7 +59,6 @@ public class AdministratorInterface {
 					+ " e - export revision to turtle file\n"
 					+ " g - generate revision graph (refreshed yEd export)\n"
 					+ " t - tag a revision\n"
-					+ " h - set a new MASTER revision\n"
 					+ " i - import a new graph under revision control\n"
 					+ " m - merge two revisions\n"
 					+ " l - list all revisioned graphs\n"
@@ -85,10 +85,6 @@ public class AdministratorInterface {
 			case "t":
 				System.out.println("Create a tag for a revision.");
 				createTag();
-				break;
-			case "h":
-				System.out.println("Set a new MASTER revision.");
-				setNewHeadRevisionAI();
 				break;
 			case "i":
 				System.out.println("Import a new graph under version control.");
@@ -142,7 +138,13 @@ public class AdministratorInterface {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String tagName = br.readLine();
 		
-		RevisionManagement.createTag(graphName, revisionNumber, tagName, "Admin", "commited from Admin Interface");
+		try {
+			RevisionManagement.createReference("tag", graphName, revisionNumber, tagName, "Admin", "commited from Admin Interface");
+		} catch (IdentifierAlreadyExistsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+			
 	}
 
 	/**
@@ -215,14 +217,11 @@ public class AdministratorInterface {
 		}
 		
 		// Create temporary graph <RM-INOUT-TEMP>
-		TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <RM-INOUT-TEMP>", "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <RM-INOUT-TEMP>", "HTML");
 		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <RM-INOUT-TEMP>", "HTML");
 					
 		// Add data to temporary graph
 		RevisionManagement.executeINSERT("RM-INOUT-TEMP", modelStringAsNTriples);
-		
-		// Get next revision number
-		String newRevisionNumber = RevisionManagement.getNextRevisionNumberForLastRevisionNumber(graphName, revisionNumber);
 		
 		RevisionManagement.generateFullGraphOfRevision(graphName,revisionNumberString, "RM-TEMP-" + graphName);
 			    
@@ -246,11 +245,11 @@ public class AdministratorInterface {
 		list.add(revisionNumber);
 		
 		// Create new revision
-		RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, "Administrator", newRevisionNumber, "Created new revision from turtle file.", list);
+		RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, "Administrator", "Created new revision from turtle file.", list);
 	}
 
 	/**
-	 * @return
+	 * @return existing graph selected by the user
 	 * @throws AuthenticationException 
 	 * @throws Exception 
 	 */
@@ -264,7 +263,7 @@ public class AdministratorInterface {
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
 		graphName = br.readLine();
-		if (!RevisionManagement.existGraph(graphName)) {
+		if (!RevisionManagement.checkGraphExistence(graphName)) {
 			System.out.println("Entered graph name does not exists. Please try again.");
 			throw new IOException("Entered graph name does not exists. Please try again.");
 		}
@@ -272,7 +271,7 @@ public class AdministratorInterface {
 	}
 	
 	/**
-	 * @return
+	 * @return revision number selected by the user
 	 * @throws AuthenticationException 
 	 * @throws Exception 
 	 */
@@ -371,68 +370,6 @@ public class AdministratorInterface {
 	
 	
 	/**
-	 * Set a new MASTER revision
-	 * @throws IOException 
-	 * @throws ClientProtocolException 
-	 * @throws AuthenticationException 
-	 */
-	private static void setNewHeadRevisionAI() throws HttpException, IOException {
-		logger.info("Administration interface - set a new MASTER revision.");
-		System.out.println("Please enter the graph name:");
-		
-		String graphName = "";
-		try {
-			graphName = getUserInputExistingGraph();
-			
-		} catch (IOException | AuthenticationException e) {
-			System.out.println("There was a IOException. Please try again.");
-			setNewHeadRevisionAI();
-			return;
-		}
-		
-		String headRevision = RevisionManagement.getMasterRevisionNumber(graphName);
-		System.out.println("Current MASTER revision: " + headRevision);
-		
-		System.out.println("Please enter the new MASTER revision number:");
-		
-		String revisionNumber = "";
-		String newHeadRevisionNumber = "0";
-		BufferedReader brRN = new BufferedReader(new InputStreamReader(System.in));
-		
-		try {
-			revisionNumber = brRN.readLine();
-		} catch (IOException e) {
-			System.out.println("There was a IOException. Please try again.");
-			setNewHeadRevisionAI();
-			return;
-		}
-		try {
-			newHeadRevisionNumber = revisionNumber;
-		} catch (NumberFormatException e) {
-			// TODO Create check if valid revision number was entered
-			System.out.println("Entered value was not a valid integer value. Please try again.");
-			setNewHeadRevisionAI();
-			return;
-		}
-		
-		RevisionManagement.setHeadRevisionNumber(graphName, newHeadRevisionNumber);
-		System.out.println("New MASTER revision was set to: " + newHeadRevisionNumber);
-		
-		// Refresh yEd export
-		Tree tree = RevisionManagement.getRevisionTree(graphName);
-		String filePath = Config.yed_filepath;
-
-		try {
-			new YEDExport().writeYEDDataToFile(tree, RevisionManagement.getMasterRevisionNumber(graphName), filePath);
-		} catch (IOException e) {
-			System.out.println("There was a IOException while refreshing yEd.");
-			return;
-		}
-		System.out.println("yEd export file was refreshed.");
-	}
-	
-	
-	/**
 	 * Create new graph under version control.
 	 * @throws IOException 
 	 * @throws ClientProtocolException 
@@ -450,7 +387,7 @@ public class AdministratorInterface {
 		try {
 			graphName = br.readLine();
 
-			if (RevisionManagement.existGraph(graphName)) {
+			if (RevisionManagement.checkGraphExistence(graphName)) {
 				System.out.println("Entered graph already exists. Please try again.");
 				createNewGraphUnderVersionControl();
 				return;
@@ -494,10 +431,10 @@ public class AdministratorInterface {
 		}
 
 		// create new graph with version control
-		if (RevisionManagement.createNewGraphWithVersionControl(graphName, modelStringAsNTriples))
-			System.out.println("Successfully created");
-		else
-			System.out.println("Error");
+		RevisionManagement.putGraphUnderVersionControl(graphName);
+		ArrayList<String> list = new ArrayList<String>();
+		list.add("0");
+		RevisionManagement.createNewRevision(graphName, modelStringAsNTriples, "", "admin", "committed by admin interface", list);
 	}
 	
 	
@@ -521,7 +458,7 @@ public class AdministratorInterface {
 		try {
 			graphName = br.readLine();
 
-			if (RevisionManagement.existGraph(graphName)) {
+			if (RevisionManagement.checkGraphExistence(graphName)) {
 				System.out.println("Entered graph name does not exists. Please try again.");
 				mergeRevisionAI();
 				return;
@@ -543,7 +480,7 @@ public class AdministratorInterface {
 		try {
 			ontologyName=brO.readLine();
 			
-			if (RevisionManagement.existGraph(ontologyName)) {
+			if (RevisionManagement.checkGraphExistence(ontologyName)) {
 				System.out.println("Entered graph name does not exists. Please try again.");
 				mergeRevisionAI();
 				return;
@@ -663,6 +600,7 @@ public class AdministratorInterface {
 		} catch (UnsupportedEncodingException e) {
 			System.out.println("There was a UnsupportedEncodingException the merged revision could not be created!");
 		}
+		Log.debug(AdministratorInterface.class, mergedModelStringAsNTriples);
 		
 //		Tree tree = RevisionManagement.createRevisionTree(graphName);
 		// TODO Auf welchem Branch soll die merged Revision abgelegt werden????
@@ -684,7 +622,7 @@ public class AdministratorInterface {
 	 * @throws AuthenticationException 
 	 */
 	private static void listAllRevisionedGraphs() throws HttpException, IOException {
-		String graphInformation = TripleStoreInterface.executeQueryWithAuthorization("SELECT DISTINCT ?graph FROM <r43ples-revisions> WHERE {?s <http://revision.management.et.tu-dresden.de/rmo#revisionOf> ?graph}", "XML");
+		String graphInformation = TripleStoreInterface.executeQueryWithAuthorization("SELECT DISTINCT ?graph FROM <r43ples-revisions> WHERE {?s <http://eatld.et.tu-dresden.de/rmo#revisionOf> ?graph}", "XML");
 
 		ResultSet results = ResultSetFactory.fromXML(graphInformation);
 		
@@ -740,7 +678,7 @@ public class AdministratorInterface {
 	private static void purgeR43plesInformation(boolean keepMaster) throws HttpException, IOException {
 		logger.info("purge R43ples information.");
 		String query =
-				"PREFIX rmo: <http://revision.management.et.tu-dresden.de/rmo#> "
+				"PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> "
 				+ "SELECT DISTINCT ?graph FROM <"+Config.revision_graph+"> WHERE {";
 		if (keepMaster)
 			query += "	{ ?branch rmo:fullGraph ?graph MINUS {?branch a rmo:Master} }";
@@ -756,10 +694,10 @@ public class AdministratorInterface {
 		while (results.hasNext()) {
 			QuerySolution qs = results.next();
 			String graphName = qs.getResource("?graph").toString();
-			TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <"+graphName+">","XML");
+			TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <"+graphName+">","XML");
 			System.out.println("Graph deleted: " + graphName);
 		}
-		TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <"+Config.revision_graph+">","XML");
+		TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <"+Config.revision_graph+">","XML");
 		System.out.println("Graph deleted: " + Config.revision_graph);
 	}
 	
@@ -777,16 +715,19 @@ public class AdministratorInterface {
 			for (int i = 0; i < changesizes.length; i++) {
 				int changesize = changesizes[i];
 				String graphName = "dataset-"+datasize+"-"+changesize;
-				TripleStoreInterface.executeQueryWithAuthorization("DROP GRAPH <" + graphName +">", "HTML");
+				TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <" + graphName +">", "HTML");
 				URL fileDataset = loader.getResource("dataset/dataset-"+datasize+".nt");
 				String dataSetAsNTriples = FileUtils.readFileToString(new File(fileDataset.getFile()));
-				RevisionManagement.createNewGraphWithVersionControl(graphName, dataSetAsNTriples);
+				RevisionManagement.putGraphUnderVersionControl(graphName);
+				ArrayList<String> list = new ArrayList<String>();
+				list.add("0");
+				RevisionManagement.createNewRevision(graphName, dataSetAsNTriples, "", "test", "test creation", list);
 				for (int revision = 1; revision <= REVISIONS; revision++) {
 					URL fileName = loader.getResource("dataset/addset-"+changesize+"-"+revision+".nt");
 					String addedAsNTriples = FileUtils.readFileToString(new File(fileName.getFile()));
-					ArrayList<String> list = new ArrayList<>();
+					list = new ArrayList<>();
 					list.add(Integer.toString(revision-1));
-					RevisionManagement.createNewRevision(graphName, addedAsNTriples, "", "test", Integer.toString(revision), "test creation", list);
+					RevisionManagement.createNewRevision(graphName, addedAsNTriples, "", "test", "test creation", list);
 				}
 			}
 		}

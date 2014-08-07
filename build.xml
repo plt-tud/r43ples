@@ -74,18 +74,17 @@
         <mkdir dir="javadoc" />
         <javadoc sourcepath="${src.dir}" destdir="javadoc" use="true" private="true" classpathref="classpath" version="true" author="true" windowtitle="${app.name} - Version ${app.version}" doctitle="${app.name} - Version ${app.version}" packagenames="*"/>
     </target>
-    
-    <!-- Run the JUnit Tests -->
-    <!-- Output is XML, could also be plain-->
+
     <target name="test" depends="build">
-        <junit printsummary="yes" fork="true" haltonfailure="no" showoutput="no">
-            <classpath refid="classpath" />
+        <junit printsummary="yes" fork="true" haltonfailure="on">
+            <classpath>
+                <path refid="classpath"/>
+                <pathelement location="${test.dir}/resources"/>
+            </classpath>
             <formatter type="xml" />
-            <formatter type="brief" usefile="false" />
+            <formatter type="brief" />
             <batchtest todir="${test.dir}">
-                <fileset dir="${test.dir}">
-                    <include name="**/*Test*.java" />
-                </fileset>
+                <fileset dir="${test.dir}/src" includes="**/*Test*.java" />
             </batchtest>
         </junit>
     </target>
