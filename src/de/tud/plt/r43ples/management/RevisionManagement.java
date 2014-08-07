@@ -849,17 +849,17 @@ public class RevisionManagement {
 	/**
 	 * Checks if specified revision of the graph is a branch revision, meaning a terminal node in a branch.
 	 * @param graphName name of the revisioned graph
-	 * @param revisionName revision number or branch or tag name of the graph
+	 * @param identifier revision number or branch or tag name of the graph
 	 * @return true if specified revision of the graph is a branch
-	 * @throws AuthenticationException
+	 * @throws HttpException
 	 * @throws IOException
 	 */
-	public static boolean isBranch(String graphName, String revisionName) throws HttpException, IOException {
+	public static boolean isBranch(String graphName, String identifier) throws HttpException, IOException {
 		String queryASK = prefixes + String.format("ASK { GRAPH <%s> { "
 				+ " ?rev a rmo:Revision; rmo:revisionOf <%s>. "
 				+ " ?ref a rmo:Reference; rmo:references ?rev ."
 				+ " { ?rev rmo:revisionNumber \"%s\"} UNION { ?ref rdfs:label \"%s\"} }} ",
-				Config.revision_graph, graphName, revisionName, revisionName);
+				Config.revision_graph, graphName, identifier, identifier);
 		String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
 		
 		return resultASK.equals("true");
