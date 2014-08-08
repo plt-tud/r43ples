@@ -490,11 +490,16 @@ public class Endpoint {
 			
 			// Create the revision progress for A and B
 			String graphNameA = "RM-REVISION-PROGRESS-A-" + graphName;
+			String graphNameB = "RM-REVISION-PROGRESS-B-" + graphName;
+			String uriA = "http://eatld.et.tu-dresden.de/branch-A";
+			String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 			
 			
-			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, branchNameA), graphNameA, "http://eatld.et.tu-dresden.de/branch-A");
-			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, branchNameB), "RM-REVISION-PROGRESS-B-" + graphName, "http://eatld.et.tu-dresden.de/branch-B");
+			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, branchNameA), graphNameA, uriA);
+			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, branchNameB), graphNameB, uriB);
 			
+			// Create conflict model
+			MergeManagement.createConflictingTripleModel(graphName, "RM-CONFLICT-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB);
 			
 			// TODO Create response
 		}
