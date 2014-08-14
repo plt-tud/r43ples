@@ -122,12 +122,12 @@ public class RevisionManagement {
 		
 		// Create new graph with delta-added-newRevisionNumber
 		logger.info("Create new graph with name " + addSetGraphUri);
-		query += String.format("CREATE GRAPH <%s>%n", addSetGraphUri);
+		query += String.format("CREATE SILENT GRAPH <%s>%n", addSetGraphUri);
 		query += String.format("INSERT IN GRAPH <%s> { %s }%n", addSetGraphUri, addedAsNTriples);
 		
 		// Create new graph with delta-removed-newRevisionNumber
 		logger.info("Create new graph with name " + removeSetGraphUri);
-		query += String.format("CREATE GRAPH <%s>%n", removeSetGraphUri);
+		query += String.format("CREATE SILENT GRAPH <%s>%n", removeSetGraphUri);
 		query += String.format("INSERT IN GRAPH <%s> { %s }%n", removeSetGraphUri, removedAsNTriples);
 		
 
