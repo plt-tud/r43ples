@@ -578,73 +578,9 @@ public class RevisionManagement {
 	}
 	
 	
-	/**
-	 * Create new merged revision.
-	 * 
-	 * @param graphName the graph name
-	 * @param user the user
-	 * @param newRevisionNumber the new revision number
-	 * @param revisionNumber1 the revision number of the first revision
-	 * @param revisionNumber2 the revision number of the second revision
-	 * @param generatedVersionAsNTriples the merged revision as N-Triples
-	 * @throws IOException 
-	 * @throws AuthenticationException 
-	 */
-	public static void createNewMergedRevision(String graphName, String user, String newRevisionNumber, String revisionNumber1, String revisionNumber2, String generatedVersionAsNTriples) throws HttpException, IOException {
-		logger.info("Start merging of revisions " + revisionNumber1 + " and " + revisionNumber2 + " of graph " + graphName + "!");
-		
-		// Create temporary graphs
-		TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <RM-MERGE-TEMP-1>", "HTML");
-		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <RM-MERGE-TEMP-1>", "HTML");
-		generateFullGraphOfRevision(graphName, revisionNumber1, "RM-TEMP-" + graphName);
-		TripleStoreInterface.executeQueryWithAuthorization("COPY <RM-TEMP-" + graphName+ "> TO <RM-MERGE-TEMP-1>", "HTML");
-		
-		TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <RM-MERGE-TEMP-2>", "HTML");
-		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <RM-MERGE-TEMP-2>", "HTML");
-		generateFullGraphOfRevision(graphName, revisionNumber2, "RM-TEMP-" + graphName);
-		TripleStoreInterface.executeQueryWithAuthorization("COPY <RM-TEMP-" + graphName+ "> TO <RM-MERGE-TEMP-2>", "HTML");
-		
-		TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <RM-MERGE-TEMP-MERGED>", "HTML");
-		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <RM-MERGE-TEMP-MERGED>", "HTML");
-		executeINSERT("RM-MERGE-TEMP-MERGED", generatedVersionAsNTriples);
-
-		// Get all added triples (concatenate all triples which are in MERGED but not in 1 and all triples which are in MERGED but not in 2) 
-		String queryAddedTriples = 	"CONSTRUCT {?s ?p ?o} WHERE {" +
-									"  GRAPH <RM-MERGE-TEMP-MERGED> { ?s ?p ?o }" +
-									"  FILTER NOT EXISTS { GRAPH <RM-MERGE-TEMP-1> { ?s ?p ?o } }" +
-									" }";
-		String addedTriples = TripleStoreInterface.executeQueryWithAuthorization(queryAddedTriples, "text/plain");
-		
-		queryAddedTriples = "CONSTRUCT {?s ?p ?o} WHERE {" +
-							"  GRAPH <RM-MERGE-TEMP-MERGED> { ?s ?p ?o }" +
-							"  FILTER NOT EXISTS { GRAPH <RM-MERGE-TEMP-2> { ?s ?p ?o } }" +
-							" }";		
-		addedTriples += TripleStoreInterface.executeQueryWithAuthorization(queryAddedTriples, "text/plain");
-		
-		// Get all removed triples (concatenate all triples which are in 1 but not in MERGED and all triples which are in 2 but not in MERGED) 
-		String queryRemovedTriples = 	"CONSTRUCT {?s ?p ?o} WHERE {" +
-										"  GRAPH <RM-MERGE-TEMP-1> { ?s ?p ?o }" +
-										"  FILTER NOT EXISTS { GRAPH <RM-MERGE-TEMP-MERGED> { ?s ?p ?o } }" +
-										" }";
-		String removedTriples = TripleStoreInterface.executeQueryWithAuthorization(queryRemovedTriples, "text/plain");
-		
-		queryRemovedTriples = 	"CONSTRUCT {?s ?p ?o} WHERE {" +
-								"  GRAPH <RM-MERGE-TEMP-2> { ?s ?p ?o }" +
-								"  FILTER NOT EXISTS { GRAPH <RM-MERGE-TEMP-MERGED> { ?s ?p ?o } }" +
-								" }";		
-		removedTriples += TripleStoreInterface.executeQueryWithAuthorization(queryRemovedTriples, "text/plain");		
-		
-		// Create list with the 2 predecessors
-		ArrayList<String> usedRevisionNumbers = new ArrayList<String>();
-		usedRevisionNumbers.add(revisionNumber1);
-		usedRevisionNumbers.add(revisionNumber2);
-		
-		createNewRevision(graphName, addedTriples, removedTriples, user, "Merged revisions " + revisionNumber1 + " and " + revisionNumber2 + "!", usedRevisionNumbers);
-	}
-	
 	
 	/**
-	 * Split huge INSERT statements into separate queries of up to ten triple statements.
+	 * Split huge INSERT statements into separate queries of up to fifty triple statements.
 	 * 
 	 * @param graphName the graph name
 	 * @param dataSetAsNTriples the data to insert as N-Triples
@@ -653,7 +589,7 @@ public class RevisionManagement {
 	 */
 	public static void executeINSERT(String graphName, String dataSetAsNTriples) throws HttpException, IOException {
 
-		final int MAX_STATEMENTS = 10;
+		final int MAX_STATEMENTS = 50;
 		String lines[] = dataSetAsNTriples.split("\\.\\s*<");
 		int counter = 0;
 		String insert = "";
