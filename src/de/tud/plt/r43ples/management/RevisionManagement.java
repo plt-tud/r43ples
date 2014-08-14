@@ -272,35 +272,9 @@ public class RevisionManagement {
 		String number = list.pollFirst();
 		TripleStoreInterface.executeQueryWithAuthorization("COPY GRAPH <" + RevisionManagement.getFullGraphName(graphName, number) + "> TO GRAPH <" + tempGraphName + ">", "HTML");
 		
-		// add- und delete-sets koennten auch aus revisionsinformationen gewonnen werden, anstatt aus programmiertem schema => aber langsamer
+		// add- und delete-sets could be extracted from revision tree information
+		// hard coded variant is faster
 		
-		/** Variant 1
-		 * download single changesets and commit them to the temporary graph on the server
-		 * **/
-//		while (!list.isEmpty()) {
-//			// Get the add set
-//			String queryCONSTRUCTAdd = 	"CONSTRUCT {?s ?p ?o} " +
-//										"FROM <" + graphName + "-delta-added-" + number + "> " +
-//										"WHERE {?s ?p ?o}";
-//			String resultCONSTRUCTAdd = TripleStoreInterface.executeQueryWithAuthorization(queryCONSTRUCTAdd, "text/plain");
-//			
-//			// Get the delete set
-//			String queryCONSTRUCTDel = 	"CONSTRUCT {?s ?p ?o} " +
-//										"FROM <" + graphName + "-delta-removed-" + number + "> " +
-//										"WHERE {?s ?p ?o}";
-//			String resultCONSTRUCTDel = TripleStoreInterface.executeQueryWithAuthorization(queryCONSTRUCTDel, "text/plain");
-//			
-//			// Add data to temporary graph
-//			TripleStoreInterface.executeQueryWithAuthorization("INSERT DATA INTO <" + tempGraphName + "> { " + resultCONSTRUCTDel + "}", "HTML");
-//			// Remove data from temporary graph
-//			TripleStoreInterface.executeQueryWithAuthorization("DELETE DATA FROM <" + tempGraphName + "> { " + resultCONSTRUCTAdd + "}", "HTML");
-//			
-//			number = list.pollFirst();
-//		}
-		
-		/** Variant 2 
-		 * 
-		 * **/
 		while (!list.isEmpty()) {
 			// Add data to temporary graph
 			TripleStoreInterface.executeQueryWithAuthorization("ADD GRAPH <"+graphName + "-delta-removed-" + number + "> TO GRAPH <" +tempGraphName + ">", "HTML");
