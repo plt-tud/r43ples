@@ -13,6 +13,7 @@ import org.junit.Test;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 
 
@@ -87,6 +88,14 @@ public class TestRevisionManagment {
 	public void testR43ples_user() throws HttpException, IOException {
 		String revNumberMaster = RevisionManagement.getMasterRevisionNumber("test_dataset_user");
 		Assert.assertEquals("4", revNumberMaster);
+	}
+	
+	@Test
+	public void testSparqlRewrite() throws HttpException, IOException {
+		String result = SparqlRewriter.rewriteQuery("SELECT * FROM <test_dataset_user> #REVISION \"3\" WHERE {?a ?p ?b. ?b ?p ?c.}");
+		
+		Assert.assertNotEquals("", result);
+		
 	}
 	
 }

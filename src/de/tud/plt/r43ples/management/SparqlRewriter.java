@@ -3,6 +3,7 @@ package de.tud.plt.r43ples.management;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,22 +32,18 @@ public class SparqlRewriter {
 		Pattern pattern = Pattern.compile("FROM\\s*<(?<graph>.*)>\\s*#REVISION\\s*\"(?<revision>.*)\"");
 		
 		Matcher m = pattern.matcher(query);
-		while (m.find()){
-		    String graphName = m.group("graph");
-		    String revisionNumber = m.group("revision");
-		    
-		    LinkedList<String> list =  RevisionManagement.getRevisionTree(graphName).getPathToRevision(revisionNumber);
-			logger.info("Path to revision: " + list.toString());				
-			
-			
-			
-			
-			
-			
-		}
+		m.find();
+	    String graphName = m.group("graph");
+	    String revisionNumber = m.group("revision");
+	    
+	    LinkedList<String> list =  RevisionManagement.getRevisionTree(graphName).getPathToRevision(revisionNumber);
+		logger.info("Path to revision: " + list.toString());				
 		
+		m.reset();
+		String query_new = m.replaceAll("");
+			
 		// creates the Query
-		Query qe = QueryFactory.create(query);
+		Query qe = QueryFactory.create(query_new);
 		ElementGroup originalEG = (ElementGroup) qe.getQueryPattern();
 				
 		// stores the modified elements
@@ -57,48 +54,46 @@ public class SparqlRewriter {
 
 		int graph_i = 1;
 				
-		for (Element element : originalEG.getElements()) {
-					
-						
-						ElementPathBlock epb = (ElementPathBlock) element;
-						Iterator<TriplePath> itPatternElts = epb.patternElts();
-						
-						while (itPatternElts.hasNext())
-						{
-							try {
-								TriplePath next = itPatternElts.next();
-								Node graph = Var.alloc("graph"+graph_i);
-								
-								//add pattern match
-								//block.addTriple(Triple.create(Node.createURI(this.role), Node.createURI(ac+"canSee"), graph));
-								
-								ElementTriplesBlock block2 = new ElementTriplesBlock();
-								block2.addTriple(next.asTriple());
-								ElementNamedGraph ng = new ElementNamedGraph(graph, block2 );
-								
-								modifiedEG.addElement(ng);
-								graph_i += 1;
-						
-							} catch (ClassCastException e) {
-						
-							}
-						}
-				}		
+		for (Element element : originalEG.getElements()) {	
+				ElementPathBlock epb = (ElementPathBlock) element;
+				Iterator<TriplePath> itPatternElts = epb.patternElts();
 				
-				ElementNamedGraph accessGraph = new ElementNamedGraph(Var.alloc("g_ac"), block);
+				while (itPatternElts.hasNext())
+				{
+					try {
+						TriplePath next = itPatternElts.next();
+						Node graph = Var.alloc("graph"+graph_i);
+						
+						//add pattern match
+						//block.addTriple(Triple.create(Node.createURI(this.role), Node.createURI(ac+"canSee"), graph));
+						
+						ElementTriplesBlock block2 = new ElementTriplesBlock();
+						block2.addTriple(next.asTriple());
+						ElementNamedGraph ng = new ElementNamedGraph(graph, block2 );
+						
+						modifiedEG.addElement(ng);
+						graph_i += 1;
 				
-				//add Elements to body_mod_result in the right order
-				ElementGroup resultEG = new ElementGroup();
-				resultEG.addElement(accessGraph);
-				Iterator<Element> itElement = modifiedEG.getElements().iterator();
-				while (itElement.hasNext()) {
-					Element nextElement = itElement.next();
-					resultEG.addElement(nextElement);
+					} catch (ClassCastException e) {
+				
+					}
 				}
-				
-				
-				qe.setQueryPattern(resultEG);
-				query = qe.serialize();
+			}		
+			
+			ElementNamedGraph accessGraph = new ElementNamedGraph(Var.alloc("g_ac"), block);
+			
+			//add Elements to body_mod_result in the right order
+			ElementGroup resultEG = new ElementGroup();
+			resultEG.addElement(accessGraph);
+			Iterator<Element> itElement = modifiedEG.getElements().iterator();
+			while (itElement.hasNext()) {
+				Element nextElement = itElement.next();
+				resultEG.addElement(nextElement);
+			}
+			
+			
+			qe.setQueryPattern(resultEG);
+			query = qe.serialize();
 		
 		return query;
 	}
