@@ -335,14 +335,15 @@ public class Endpoint {
 	    String referenceFullGraph = RevisionManagement.getFullGraphName(graphName, revisionName);
 
 	    // Create the temporary graph and fill with reference full graph
-	    TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
-		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
-		TripleStoreInterface.executeQueryWithAuthorization("COPY <" + referenceFullGraph + "> TO <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
+	    String graphUpdateTemp = "RM-UPDATE-TEMP-" + graphName;
+	    TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <" + graphUpdateTemp + ">", "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <" + graphUpdateTemp + ">", "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization("COPY <" + referenceFullGraph + "> TO <" + graphUpdateTemp + ">", "HTML");
 		
 		// Replace graph name in SPARQL query 
-		query_replaced = query_replaced.replace("FROM <" + graphName + ">", "FROM <RM-UPDATE-TEMP-" + graphName + ">");
-		query_replaced = query_replaced.replace("INTO <" + graphName + ">", "INTO <RM-UPDATE-TEMP-" + graphName + ">");
-		query_replaced = query_replaced.replace("GRAPH <" + graphName + ">", "GRAPH <RM-UPDATE-TEMP-" + graphName + ">");
+		query_replaced = query_replaced.replace("FROM <" + graphName + ">", "FROM <" + graphUpdateTemp + ">");
+		query_replaced = query_replaced.replace("INTO <" + graphName + ">", "INTO <" + graphUpdateTemp + ">");
+		query_replaced = query_replaced.replace("GRAPH <" + graphName + ">", "GRAPH <" + graphUpdateTemp + ">");
 		
 		logger.info("query replaced: " + query_replaced);
 
@@ -353,7 +354,7 @@ public class Endpoint {
 		// Create deltas for new revision
 		// Get all added triples
 		String queryAddedTriples = 	"CONSTRUCT {?s ?p ?o} WHERE {" +
-									"  GRAPH <RM-UPDATE-TEMP-" + graphName + "> { ?s ?p ?o }" +
+									"  GRAPH <" + graphUpdateTemp + "> { ?s ?p ?o }" +
 									"  FILTER NOT EXISTS { GRAPH <" + referenceFullGraph + "> { ?s ?p ?o } }" +
 									" }";
 		String addedTriples = TripleStoreInterface.executeQueryWithAuthorization(queryAddedTriples, "text/plain");
@@ -361,7 +362,7 @@ public class Endpoint {
 		// Get all removed triples
 		String queryRemovedTriples = 	"CONSTRUCT {?s ?p ?o} WHERE {" +
 										"  GRAPH <" + referenceFullGraph + "> { ?s ?p ?o }" +
-										"  FILTER NOT EXISTS { GRAPH <RM-UPDATE-TEMP-" + graphName + "> { ?s ?p ?o } }" +
+										"  FILTER NOT EXISTS { GRAPH <" + graphUpdateTemp + "> { ?s ?p ?o } }" +
 										" }";
 		String removedTriples = TripleStoreInterface.executeQueryWithAuthorization(queryRemovedTriples, "text/plain");
 		
