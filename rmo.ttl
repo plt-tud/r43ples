@@ -1,11 +1,10 @@
 @prefix : <http://eatld.et.tu-dresden.de/rmo#> .
+@prefix rmo: <http://eatld.et.tu-dresden.de/rmo#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rmo: <http://eatld.et.tu-dresden.de/rmo#> .
-@prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@base <http://eatld.et.tu-dresden.de/rmo> .
+@base <http://eatld.et.tu-dresden.de/rmo#> .
 
 <http://eatld.et.tu-dresden.de/rmo> rdf:type owl:Ontology ;
                                                   
