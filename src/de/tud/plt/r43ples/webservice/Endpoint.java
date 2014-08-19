@@ -279,7 +279,8 @@ public class Endpoint {
 					newGraphName = "RM-TEMP-" + graphName;
 					RevisionManagement.generateFullGraphOfRevision(graphName, revisionNumber, newGraphName);
 				}
-				query = query.replace("<" + graphName + ">", "<" + newGraphName + ">");
+				query = m.replaceFirst("FROM <" + newGraphName + ">");
+				m = pattern.matcher(query);
 				headerRevisionNumber = revisionNumber;
 			}
 		    // Respond with specified revision
@@ -289,7 +290,8 @@ public class Endpoint {
 		if (!found) {
 			throw new InternalServerErrorException("Query contain errors:\n"+query);
 		}
-		return responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(query, format)).type(format).build();
+		String response = TripleStoreInterface.executeQueryWithAuthorization(query, format);
+		return responseBuilder.entity(response).type(format).build();
 	}
 	
 	
