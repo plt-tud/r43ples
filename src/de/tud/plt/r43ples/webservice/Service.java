@@ -31,23 +31,29 @@ public class Service {
 
 	/** The logger */
 	private static Logger logger = Logger.getLogger(Service.class);
-	
+	private static HttpServer server;
 	
 	public static void main(String[] args) throws ConfigurationException, IOException, HttpException {
-		
+		start();
+		while(true);
+	}
+	
+	public static void start()  throws ConfigurationException, IOException, HttpException {
 		logger.info("Starting R43ples on grizzly...");
 		Config.readConfig("r43ples.conf");
 		URI BASE_URI = UriBuilder.fromUri(Config.service_uri).port(Config.service_port).build();
 		ResourceConfig rc = new PackagesResourceConfig("de.tud.plt.r43ples.webservice");
-		HttpServer server = GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
+		server = GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
 		server.getServerConfiguration().addHttpHandler(
 		        new StaticHttpHandler("./resources/webapp/"), "/static/");
-		 server.start();
+		server.start();
 		logger.info(String.format("Server started -R43ples endpoint available under: %sr43ples/sparql", BASE_URI));
 		
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
-		
-		while(true);
+	}
+	
+	public static void stop() {
+		server.stop();
 	}
 	
 }
