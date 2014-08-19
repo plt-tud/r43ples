@@ -212,10 +212,12 @@ public class RevisionManagement {
 
 		// Insert information in revision graph
 		logger.info("Insert info into revision graph.");	
-		String revisionName = graphName + "-revision-0";
+		String revisionName = graphName + "-revision-0";		
 		String queryContent = 	String.format(
 				"<%s> a rmo:Revision ;%n" +
 				"	rmo:revisionOf <%s> ;%n" +
+				"	rmo:deltaAdded \"\"; " +
+				"	rmo:deltaRemoved \"\"; " +
 				"	rmo:revisionNumber \"%s\" .%n"
 				,  revisionName, graphName, 0);
 		// Add MASTER branch		
