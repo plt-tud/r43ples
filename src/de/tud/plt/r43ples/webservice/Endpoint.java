@@ -154,7 +154,7 @@ public class Endpoint {
 	@GET
 	public String createTestDataset(){
 		ArrayList<String> list = new ArrayList<String>();		
-		String graphName = "r43ples-test-dataset";
+		String graphName = "http://test.com/r43ples-dataset";
 		try{
 			RevisionManagement.putGraphUnderVersionControl(graphName);
 			
@@ -406,10 +406,14 @@ public class Endpoint {
 			found = true;
 		    String graphName = m.group("graph");
 		    RevisionManagement.putGraphUnderVersionControl(graphName);
+	    	responseBuilder.header(graphName + "-revision-number", 0);
+			responseBuilder.header(graphName + "-revision-number-of-MASTER", 0);
 		}
 		if (!found) {
 			throw new InternalServerErrorException("Query contain errors:\n"+query);
 		}
+		
+		
 		
 		return responseBuilder.build();
 	}
