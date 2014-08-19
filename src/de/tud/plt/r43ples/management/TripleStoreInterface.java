@@ -81,7 +81,12 @@ public class TripleStoreInterface {
 		
 	}
 	
+	
+	public static String executeQueryWithAuthorization(String query) throws IOException, HttpException {
+		return executeQueryWithAuthorization(query, "XML");
+	}
 
+	
 	/**
 	 * Executes a SPARQL-query against the triple store with authorization.
 	 * (Based on the source code of the IAF device explorer - created by Sebastian Heinze.)

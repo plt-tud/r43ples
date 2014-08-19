@@ -120,7 +120,7 @@ public class Endpoint {
 		{
 			if (format.contains("text/html")){
 				logger.info("SPARQL form requested");
-				File fileToSend = new File("resources/index.html");
+				File fileToSend = new File("resources/webapp/index.html");
 				return Response.ok(fileToSend, "text/html").build();
 			} else {
 				return getServiceDescription(format);
@@ -295,14 +295,15 @@ public class Endpoint {
 	    String referenceFullGraph = RevisionManagement.getFullGraphName(graphName, revisionName);
 
 	    // Create the temporary graph and fill with reference full graph
-	    TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
-		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
-		TripleStoreInterface.executeQueryWithAuthorization("COPY <" + referenceFullGraph + "> TO <RM-UPDATE-TEMP-" + graphName + ">", "HTML");
+	    String graphUpdateTemp = "RM-UPDATE-TEMP-" + graphName;
+	    TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <" + graphUpdateTemp + ">", "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <" + graphUpdateTemp + ">", "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization("COPY <" + referenceFullGraph + "> TO <" + graphUpdateTemp + ">", "HTML");
 		
 		// Replace graph name in SPARQL query 
-		query_replaced = query_replaced.replace("FROM <" + graphName + ">", "FROM <RM-UPDATE-TEMP-" + graphName + ">");
-		query_replaced = query_replaced.replace("INTO <" + graphName + ">", "INTO <RM-UPDATE-TEMP-" + graphName + ">");
-		query_replaced = query_replaced.replace("GRAPH <" + graphName + ">", "GRAPH <RM-UPDATE-TEMP-" + graphName + ">");
+		query_replaced = query_replaced.replace("FROM <" + graphName + ">", "FROM <" + graphUpdateTemp + ">");
+		query_replaced = query_replaced.replace("INTO <" + graphName + ">", "INTO <" + graphUpdateTemp + ">");
+		query_replaced = query_replaced.replace("GRAPH <" + graphName + ">", "GRAPH <" + graphUpdateTemp + ">");
 		
 		logger.info("query replaced: " + query_replaced);
 
@@ -313,7 +314,7 @@ public class Endpoint {
 		// Create deltas for new revision
 		// Get all added triples
 		String queryAddedTriples = 	"CONSTRUCT {?s ?p ?o} WHERE {" +
-									"  GRAPH <RM-UPDATE-TEMP-" + graphName + "> { ?s ?p ?o }" +
+									"  GRAPH <" + graphUpdateTemp + "> { ?s ?p ?o }" +
 									"  FILTER NOT EXISTS { GRAPH <" + referenceFullGraph + "> { ?s ?p ?o } }" +
 									" }";
 		String addedTriples = TripleStoreInterface.executeQueryWithAuthorization(queryAddedTriples, "text/plain");
@@ -321,7 +322,7 @@ public class Endpoint {
 		// Get all removed triples
 		String queryRemovedTriples = 	"CONSTRUCT {?s ?p ?o} WHERE {" +
 										"  GRAPH <" + referenceFullGraph + "> { ?s ?p ?o }" +
-										"  FILTER NOT EXISTS { GRAPH <RM-UPDATE-TEMP-" + graphName + "> { ?s ?p ?o } }" +
+										"  FILTER NOT EXISTS { GRAPH <" + graphUpdateTemp + "> { ?s ?p ?o } }" +
 										" }";
 		String removedTriples = TripleStoreInterface.executeQueryWithAuthorization(queryRemovedTriples, "text/plain");
 		
@@ -329,7 +330,7 @@ public class Endpoint {
 		list.add(revisionNumber);
 					
 		// Create new revision
-		String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, list, revisionName);
+		String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, list);
 		
 		// Respond with next revision number
     	responseBuilder.header(graphName + "-revision-number", newRevisionNumber);
@@ -433,20 +434,21 @@ public class Endpoint {
 		    String graphName = m.group("graph");
 		    String revisionNumber = m.group("revision");
 		    String name = m.group("name");
-		    if (action.equals("TAG"))
-		    	RevisionManagement.createTag(graphName, revisionNumber, name, user, commitMessage);
-		    else if (action.equals("BRANCH")) {
-		    	try {
-					RevisionManagement.createBranch(graphName, revisionNumber, name, user, commitMessage);
-				} catch (IdentifierAlreadyExistsException e) {
-					responseBuilder = Response.status(Response.Status.CONFLICT);
-				}
+		    try {
+			    if (action.equals("TAG"))
+			    	RevisionManagement.createReference("tag", graphName, revisionNumber, name, user, commitMessage);
+			    else if (action.equals("BRANCH"))
+		    		RevisionManagement.createReference("branch", graphName, revisionNumber, name, user, commitMessage);
+		        else
+		        	throw new InternalServerErrorException("Error in query: " + sparqlQuery);
+			} catch (IdentifierAlreadyExistsException e) {
+				responseBuilder = Response.status(Response.Status.CONFLICT);
+			}
 		    	
 		    	// Respond with next revision number
 //	 TODO   		responseBuilder.header(graphName + "-revision-number", name);
 //	    		responseBuilder.header(graphName + "-revision-number-of-BRANCH", RevisionManagement.getMasterRevisionNumber(graphName));
-		    } else
-		    	throw new InternalServerErrorException("Error in query: " + sparqlQuery);
+		    
 		}
 		if (!foundEntry)
 			throw new InternalServerErrorException("Error in query: " + sparqlQuery);
