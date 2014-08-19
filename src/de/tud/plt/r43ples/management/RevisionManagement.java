@@ -163,7 +163,7 @@ public class RevisionManagement {
 		} else {
 			// General variables
 			String dateString = getDateString();
-			String commitUri = graphName + "-commit-" + dateString;
+			String commitUri = graphName + "-commit-" + referenceType + "-" + newReferenceName;
 			String referenceUri = graphName + "-" + referenceType + "-" + newReferenceName;
 			String referenceTypUri = (referenceType.equals("tag")) ? "rmo:Tag" : "rmo:Branch";
 			String revisionUri = getRevisionUri(graphName, revisionNumber);
