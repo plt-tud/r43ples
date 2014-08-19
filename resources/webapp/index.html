@@ -3,12 +3,26 @@
 <head>
 <title>R43ples - Revision Management for the Semantic Web</title>
 <meta name="author" content="Markus Graube">
+<meta charset="utf-8">
+<script src="/static/jquery-2.1.1.js"></script>
+<script src="/static/jquery-ui.js"></script>
+<link href="/static/jquery-ui.css" rel="stylesheet" />
+<link href="/static/r43ples.css" rel="stylesheet" />
+  <script>
+  $(function() {
+    $(".accordion" ).accordion();
+  });
+  </script>
 </head>
 <body>
 
+<div id="header">
 <h1>R43ples - Revision Management for the Semantic Web</h1>
+</div>
+
+<div id="query_form">
 <h2>Query Form</h2>
-<form action="sparql">
+<form action="/r43ples/sparql">
   <label for="query">Query Text</label><br />
 	  <textarea name="query" id="query" cols="80" rows="20">
 SELECT * 
@@ -30,13 +44,16 @@ WHERE {
 	<input type="reset" value="Reset"/>
 </form>
 
-<h2>Revision Management</h2>
+<h2>Revision Information</h2>
 <ul>
-  <li><a href="/r43ples/revisiongraph">Get Revision information</a></li>
-  <li><a href="/r43ples/createTestDataset">Create test data set</a></li>
+  <li><a href="revisiongraph">Get Revision information</a></li>
+  <li><a href="createTestDataset">Create test data set</a></li>
 </ul>
+</div>
 
+<div id="examples">
 <h2>Example queries</h2>
+<div class="accordion">
 <h3><a href="?query=CREATE GRAPH <test>">Create Graph under Version Control</a></h3>
 <pre>
 CREATE GRAPH &lt;test&gt;
@@ -79,6 +96,12 @@ BRANCH GRAPH &lt;test&gt; REVISION "2" TO "unstable"</pre>
 <pre>USER "mgraube"
 MESSAGE "test commit"
 TAG GRAPH &lt;test&gt; REVISION "2" TO "v0.3-alpha"</pre>
+</div>
+</div>
+
+<div id="footer">
+	2014 - Version 0.8 | R43ples@<a href="https://github.com/plt-tud/r43ples">GitHub</a> | powered by <a href="https://jersey.java.net/">Jersey</a>
+</div>
 
 </body>
 </html>
