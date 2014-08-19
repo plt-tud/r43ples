@@ -113,8 +113,8 @@ public class RevisionManagement {
 				"	prov:atTime \"%s\". %n",
 				commitUri, personUri, revisionUri, commitMessage, dateString);
 		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
-			String rev = iterator.next();
-			queryContent += String.format("<%s> prov:used <%s>. %n", commitUri, graphName + "-revision-" + rev.toString());
+			String revUri = getRevisionUri(graphName, iterator.next());
+			queryContent += String.format("<%s> prov:used <%s>. %n", commitUri, revUri);
 		}
 		
 		// Create new revision
@@ -126,21 +126,20 @@ public class RevisionManagement {
 				"	rmo:revisionNumber \"%s\". %n"
 				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, newRevisionNumber);
 		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
-			String rev = iterator.next();
-			queryContent += String.format("<%s> prov:wasDerivedFrom <%s> .",
-						revisionUri, graphName + "-revision-"+rev.toString());
+			String revUri = getRevisionUri(graphName, iterator.next());
+			queryContent += String.format("<%s> prov:wasDerivedFrom <%s> .", revisionUri, revUri);
 		}
 		String query = prefixes + String.format("INSERT IN GRAPH <%s> { %s }%n", Config.revision_graph, queryContent) ;
 		
 		// Move branch to new revision
-		String oldRevision = graphName + "-revision-" + usedRevisionNumber.get(0).toString();
+		String oldRevisionUri = getRevisionUri(graphName, usedRevisionNumber.get(0).toString());
 		
-		String queryBranch = prefixes + String.format("SELECT ?branch ?graph WHERE{ ?branch a rmo:Branch; rmo:references <%s>; rmo:fullGraph ?graph. }", oldRevision);
+		String queryBranch = prefixes + String.format("SELECT ?branch ?graph WHERE{ ?branch a rmo:Branch; rmo:references <%s>; rmo:fullGraph ?graph. }", oldRevisionUri);
 		QuerySolution sol = ResultSetFactory.fromXML(TripleStoreInterface.executeQueryWithAuthorization(queryBranch, "XML")).next(); 
 		String branchName = sol.getResource("?branch").toString();
 		String branchGraph = sol.getResource("?graph").toString();
 			
-		query += String.format("DELETE FROM GRAPH <%s> { <%s> rmo:references <%s>. }%n", Config.revision_graph, branchName, oldRevision);
+		query += String.format("DELETE FROM GRAPH <%s> { <%s> rmo:references <%s>. }%n", Config.revision_graph, branchName, oldRevisionUri);
 		query += String.format("INSERT IN GRAPH <%s> { <%s> rmo:references <%s>. }%n", Config.revision_graph, branchName, revisionUri);
 		
 		// Remove branch from which changes were merged, if available
