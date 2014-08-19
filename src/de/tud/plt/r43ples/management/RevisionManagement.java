@@ -1,21 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 package de.tud.plt.r43ples.management;
 
 import java.io.IOException;
@@ -59,6 +41,53 @@ public class RevisionManagement {
 
 	
 	/**
+	 * Put existing graph under version control. existence of graph is not checked.
+	 * 
+	 * @param graphName the graph name of the existing graph
+	 * @throws IOException 
+	 * @throws AuthenticationException 
+	 */
+	public static void putGraphUnderVersionControl(String graphName) throws HttpException, IOException {
+		logger.info("Put existing graph under version control with the name " + graphName);
+	
+		// General variables
+		int revisionNumber  = 0;
+		String revisionUri = graphName + "-revision-" + revisionNumber;
+		String addSetGraphUri = graphName + "-delta-added-" + revisionNumber;
+		String removeSetGraphUri = graphName + "-delta-removed-" + revisionNumber;
+		
+		// Create new revision
+		String queryContent = String.format(
+				"<%s> a rmo:Revision; " +
+				"	rmo:revisionOf <%s>; " +
+				"	rmo:deltaAdded <%s>; " +
+				"	rmo:deltaRemoved <%s>; " +
+				"	rmo:revisionNumber \"%s\". %n"
+				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, revisionNumber);
+		
+		// Add MASTER branch		
+		queryContent += String.format(
+				"<%s> a rmo:Master, rmo:Branch, rmo:Reference;%n"
+				+ " rmo:fullGraph <%s>;%n"
+				+ "	rmo:references <%s>;%n"
+				+ "	rdfs:label \"master\".%n",
+				graphName+"-master", graphName, revisionUri);
+		
+		// Add graph element
+		// TODO It is possible to add more information about the graph under revision control (e.g. label, comment, user, ...)
+		queryContent += String.format(
+				"<%s> a rmo:Graph .%n", 
+				graphName);
+		
+		String queryRevision = prefix_rmo + String.format("INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
+		TripleStoreInterface.executeQueryWithAuthorization(queryRevision, "HTML");
+		
+		// Create the initial (default) SDD graph
+		MergeManagement.createInitialSDD(graphName);
+	}
+	
+	
+	/**
 	 * Create a new revision.
 	 * 
 	 * @param graphName the graph name
@@ -93,8 +122,8 @@ public class RevisionManagement {
 				"	prov:atTime \"%s\". %n",
 				commitUri, personUri, revisionUri, commitMessage, dateString);
 		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
-			String rev = iterator.next();
-			queryContent += String.format("<%s> prov:used <%s>. %n", commitUri, graphName + "-revision-" + rev.toString());
+			String revUri = getRevisionUri(graphName, iterator.next());
+			queryContent += String.format("<%s> prov:used <%s>. %n", commitUri, revUri);
 		}
 		
 		// Create new revision
@@ -106,21 +135,20 @@ public class RevisionManagement {
 				"	rmo:revisionNumber \"%s\". %n"
 				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, newRevisionNumber);
 		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
-			String rev = iterator.next();
-			queryContent += String.format("<%s> prov:wasDerivedFrom <%s> .",
-						revisionUri, graphName + "-revision-"+rev.toString());
+			String revUri = getRevisionUri(graphName, iterator.next());
+			queryContent += String.format("<%s> prov:wasDerivedFrom <%s> .", revisionUri, revUri);
 		}
 		String query = prefixes + String.format("INSERT IN GRAPH <%s> { %s }%n", Config.revision_graph, queryContent) ;
 		
 		// Move branch to new revision
-		String oldRevision = graphName + "-revision-" + usedRevisionNumber.get(0).toString();
+		String oldRevisionUri = getRevisionUri(graphName, usedRevisionNumber.get(0).toString());
 		
-		String queryBranch = prefixes + String.format("SELECT ?branch ?graph WHERE{ ?branch a rmo:Branch; rmo:references <%s>; rmo:fullGraph ?graph. }", oldRevision);
+		String queryBranch = prefixes + String.format("SELECT ?branch ?graph WHERE{ ?branch a rmo:Branch; rmo:references <%s>; rmo:fullGraph ?graph. }", oldRevisionUri);
 		QuerySolution sol = ResultSetFactory.fromXML(TripleStoreInterface.executeQueryWithAuthorization(queryBranch, "XML")).next(); 
 		String branchName = sol.getResource("?branch").toString();
 		String branchGraph = sol.getResource("?graph").toString();
 			
-		query += String.format("DELETE FROM GRAPH <%s> { <%s> rmo:references <%s>. }%n", Config.revision_graph, branchName, oldRevision);
+		query += String.format("DELETE FROM GRAPH <%s> { <%s> rmo:references <%s>. }%n", Config.revision_graph, branchName, oldRevisionUri);
 		query += String.format("INSERT IN GRAPH <%s> { <%s> rmo:references <%s>. }%n", Config.revision_graph, branchName, revisionUri);
 		
 		// Remove branch from which changes were merged, if available
@@ -215,49 +243,6 @@ public class RevisionManagement {
 		}		
 	}
 	
-	
-	
-
-	/**
-	 * Put existing graph under version control. existence of graph is not checked.
-	 * 
-	 * @param graphName the graph name of the existing graph
-	 * @throws IOException 
-	 * @throws AuthenticationException 
-	 */
-	public static void putGraphUnderVersionControl(String graphName) throws HttpException, IOException {
-		logger.info("Put existing graph under version control with the name " + graphName);
-
-		// Insert information in revision graph
-		logger.info("Insert info into revision graph.");	
-		String revisionName = graphName + "-revision-0";
-		String queryContent = 	String.format(
-				"<%s> a rmo:Revision ;%n" +
-				"	rmo:revisionOf <%s> ;%n" +
-				"	rmo:revisionNumber \"%s\" .%n"
-				,  revisionName, graphName, 0);
-		// Add MASTER branch		
-		queryContent += String.format(
-				"<%s> a rmo:Master, rmo:Branch, rmo:Reference;%n"
-				+ " rmo:fullGraph <%s>;%n"
-				+ "	rmo:references <%s>;%n"
-				+ "	rdfs:label \"master\".%n",
-				graphName+"-master", graphName, revisionName);
-		// Add graph element
-		// TODO It is possible to add more information about the graph under revision control (e.g. label, comment, user, ...)
-		queryContent += String.format(
-				  "<%s> a rmo:Graph .%n"
-				  , graphName);
-		
-		String queryRevision = String.format(
-				prefix_rmo
-				+ "INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
-		TripleStoreInterface.executeQueryWithAuthorization(queryRevision, "HTML");
-		
-		// Create the initial (default) SDD graph
-		MergeManagement.createInitialSDD(graphName);
-	}
-	
 
 	/**
 	 * Checks if graph exists in triple store. Works only when the graph is not empty.
@@ -268,7 +253,6 @@ public class RevisionManagement {
 	 * @throws AuthenticationException 
 	 */
 	public static boolean checkGraphExistence(String graphName) throws HttpException, IOException {
-		// Ask whether graph exists
 		String query = "ASK { GRAPH <" + graphName + "> {?s ?p ?o} }";
 		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
 		return result.equals("true");
@@ -505,6 +489,7 @@ public class RevisionManagement {
 			return getNextRevisionNumberForLastRevisionNumber(graphName, revisionNumber);
 	}
 	
+	
 	/**
 	 * Get the next revision number for specified revision number of any branch.
 	 * 
@@ -617,8 +602,6 @@ public class RevisionManagement {
 	}
 	
 	
-
-	
 	
 	/**
 	 * Returns the name of the full graph of revision of a graph if it is available
@@ -682,6 +665,7 @@ public class RevisionManagement {
 		}
 		return TripleStoreInterface.executeQueryWithAuthorization(sparqlQuery, format);
 	}
+	
 	
 	/**
 	 * Deletes all information for a specific named graph including all full graphs and information in the R43ples system
@@ -751,6 +735,7 @@ public class RevisionManagement {
 		}
 	}
 	
+	
 	/**
 	 * @return current date formatted as xsd:DateTime
 	 */
@@ -783,6 +768,7 @@ public class RevisionManagement {
 		String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
 		return resultASK.equals("true");
 	}
+	
 	
 	/**
 	 * Checks if specified revision of the graph is a branch revision, meaning a terminal node in a branch.

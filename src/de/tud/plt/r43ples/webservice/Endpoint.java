@@ -287,7 +287,6 @@ public class Endpoint {
 		
 	    String graphName = m.group("graph");
 	    String revisionName = m.group("revision"); //can contain revision numbers or reference names
-	    String revisionNumber = RevisionManagement.getRevisionNumber(graphName, revisionName); //contains only revision numbers
 	    
 	    if (!RevisionManagement.isBranch(graphName, revisionName))
 			throw new InternalServerErrorException("Revision is not referenced by branch");
@@ -327,7 +326,7 @@ public class Endpoint {
 		String removedTriples = TripleStoreInterface.executeQueryWithAuthorization(queryRemovedTriples, "text/plain");
 		
 		ArrayList<String> list = new ArrayList<String>();
-		list.add(revisionNumber);
+		list.add(revisionName);
 					
 		// Create new revision
 		String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, list);
