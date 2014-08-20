@@ -318,8 +318,7 @@ public class Endpoint {
 		}
 		
 		// create pattern for FROM and INTO clause
-		String query_replaced = query;
-		Pattern pattern =  Pattern.compile("(FROM|INTO|GRAPH)\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"");
+		Pattern pattern =  Pattern.compile("(?<action>FROM|INTO|GRAPH)\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"");
 		Matcher m = pattern.matcher(query);
 		boolean found = m.find();
 		
@@ -329,6 +328,7 @@ public class Endpoint {
 		
 	    String graphName = m.group("graph");
 	    String revisionName = m.group("revision"); //can contain revision numbers or reference names
+	    String action = m.group("action");
 	    
 	    if (!RevisionManagement.isBranch(graphName, revisionName))
 			throw new InternalServerErrorException("Revision is not referenced by branch");
@@ -342,10 +342,8 @@ public class Endpoint {
 		TripleStoreInterface.executeQueryWithAuthorization("COPY <" + referenceFullGraph + "> TO <" + graphUpdateTemp + ">", "HTML");
 		
 		// Replace graph name in SPARQL query 
-		query_replaced = query_replaced.replace("FROM <" + graphName + ">", "FROM <" + graphUpdateTemp + ">");
-		query_replaced = query_replaced.replace("INTO <" + graphName + ">", "INTO <" + graphUpdateTemp + ">");
-		query_replaced = query_replaced.replace("GRAPH <" + graphName + ">", "GRAPH <" + graphUpdateTemp + ">");
-		
+		String query_replaced = m.replaceFirst(action + " <" + graphUpdateTemp + ">");
+		//m = pattern.matcher(query);		
 		logger.info("query replaced: " + query_replaced);
 
 		
