@@ -40,7 +40,7 @@ before_install:
     - sudo apt-get update -qq
     - sudo apt-get install -qq libc6 ibldap-2.4-2 libreadline6 libssl1.0.0
     - wget http://wwwpub.zih.tu-dresden.de/~mgraube/virtuoso-opensource_7.1_amd64.deb
-    - sudo dpkg -i http://wwwpub.zih.tu-dresden.de/~mgraube/virtuoso-opensource_7.1_amd64.deb
+    - sudo dpkg -i virtuoso-opensource_7.1_amd64.deb
     - sudo /etc/init.d/virtuoso-opensource start
 
   
