@@ -470,21 +470,21 @@ public class Endpoint {
 			String action = m.group("action");
 		    String graphName = m.group("graph");
 		    String revisionNumber = m.group("revision");
-		    String name = m.group("name");
+		    String referenceName = m.group("name");
 		    try {
 			    if (action.equals("TAG"))
-			    	RevisionManagement.createReference("tag", graphName, revisionNumber, name, user, commitMessage);
+			    	RevisionManagement.createReference("tag", graphName, revisionNumber, referenceName, user, commitMessage);
 			    else if (action.equals("BRANCH"))
-		    		RevisionManagement.createReference("branch", graphName, revisionNumber, name, user, commitMessage);
+		    		RevisionManagement.createReference("branch", graphName, revisionNumber, referenceName, user, commitMessage);
 		        else
 		        	throw new InternalServerErrorException("Error in query: " + sparqlQuery);
 			} catch (IdentifierAlreadyExistsException e) {
 				responseBuilder = Response.status(Response.Status.CONFLICT);
 			}
 		    	
-		    	// Respond with next revision number
-//	 TODO   		responseBuilder.header(graphName + "-revision-number", name);
-//	    		responseBuilder.header(graphName + "-revision-number-of-BRANCH", RevisionManagement.getMasterRevisionNumber(graphName));
+	    	// Respond with next revision number
+		    responseBuilder.header(graphName + "-revision-number", RevisionManagement.getRevisionNumber(graphName, referenceName));
+	    	responseBuilder.header(graphName + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
 		    
 		}
 		if (!foundEntry)
