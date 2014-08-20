@@ -21,11 +21,22 @@ addons:
     branch_pattern: coverity_scan
 
 before_install:
-    - sudo apt-add-repository -y ppa:kubuntu-ppa/backports
-    - sudo apt-get update -qq
-    - sudo apt-get install -qq virtuoso-opensource
-    - echo "RUN=yes" | sudo tee -a /etc/default/virtuoso-opensource-6.1
-    - sudo /etc/init.d/virtuoso-opensource-6.1 start
+    - #sudo apt-add-repository -y ppa:kubuntu-ppa/backports
+    - #sudo apt-get update -qq
+    - #sudo apt-get install -qq virtuoso-opensource
+    - #echo "RUN=yes" | sudo tee -a /etc/default/virtuoso-opensource-6.1
+    - #sudo /etc/init.d/virtuoso-opensource-6.1 start
+    - sudo aptitude install -qq dpkg-dev build-essential autoconf automake libtool flex bison gperf gawk m4 make odbcinst libxml2-dev libssl-dev libreadline-dev
+    - git clone https://github.com/openlink/virtuoso-opensource.git
+    - cd virtuoso-opensource
+    - export CFLAGS="-O2 -m64"
+    - ./autogen.sh
+    - ./configure
+    - make
+    - sudo make install
+    - sudo /etc/init.d/virtuoso-opensource start
+    - # use LOD2 stack virtuoso 7 package
+
   
 after_success:
     - ./.coverity.sh
