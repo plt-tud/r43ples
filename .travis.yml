@@ -26,16 +26,21 @@ before_install:
     - #sudo apt-get install -qq virtuoso-opensource
     - #echo "RUN=yes" | sudo tee -a /etc/default/virtuoso-opensource-6.1
     - #sudo /etc/init.d/virtuoso-opensource-6.1 start
-    - sudo apt-get install -qq dpkg-dev build-essential autoconf automake libtool flex bison gperf gawk m4 make odbcinst libxml2-dev libssl-dev libreadline-dev
-    - git clone https://github.com/openlink/virtuoso-opensource.git
-    - cd virtuoso-opensource
-    - export CFLAGS="-O2 -m64"
-    - ./autogen.sh
-    - ./configure
-    - make
-    - sudo make install
-    - sudo /etc/init.d/virtuoso-opensource start
+    - #sudo apt-get install -qq dpkg-dev build-essential autoconf automake libtool flex bison gperf gawk m4 make odbcinst libxml2-dev libssl-dev libreadline-dev
+    - #git clone https://github.com/openlink/virtuoso-opensource.git
+    - #cd virtuoso-opensource
+    - #export CFLAGS="-O2 -m64"
+    - #./autogen.sh
+    - #./configure
+    - #make
+    - #sudo make install
+    - # doesn't start
+    - # sudo /etc/init.d/virtuoso-opensource start
     - # use LOD2 stack virtuoso 7 package
+    - sudo apt-get install -qq libc6 ibldap-2.4-2 libreadline6 libssl1.0.0
+    - wget https://cloudstore.zih.tu-dresden.de/public.php?service=files&t=27bfa7d71ed6b9d3e3225da318cc4639 
+    - sudo dpkg -i public.php?service=files&t=27bfa7d71ed6b9d3e3225da318cc4639
+    - sudo /etc/init.d/virtuoso-opensource start
 
   
 after_success:
