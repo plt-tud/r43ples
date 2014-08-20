@@ -73,7 +73,7 @@ public class TestR43ples {
 		
 		// Create new example graph
 		logger.info("Create new example graph");
-		query = String.format("CREATE GRAPH <%s>", graphName);
+		query = String.format("CREATE SILENT GRAPH <%s>", graphName);
 		logger.info("Execute query: \n" + query);
 		logger.info("Response: \n" + executeR43plesQuery(query));
 		
