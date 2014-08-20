@@ -395,26 +395,23 @@ public class Endpoint {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Graph creation detected");
 		
-		// Execute SPARQL query
-		responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(query, format)); 
-		
-		// Add R43ples information
 		Pattern pattern =  Pattern.compile("CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>.*)>");
 		Matcher m = pattern.matcher(query);
 		boolean found = false;
 		while (m.find()) {
 			found = true;
 		    String graphName = m.group("graph");
+		    // Execute SPARQL query
+		    String querySparql = m.group();
+			responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(querySparql, format));
+		    // Add R43ples information
 		    RevisionManagement.putGraphUnderVersionControl(graphName);
 	    	responseBuilder.header(graphName + "-revision-number", 0);
 			responseBuilder.header(graphName + "-revision-number-of-MASTER", 0);
 		}
 		if (!found) {
-			throw new InternalServerErrorException("Query contain errors:\n"+query);
+			throw new InternalServerErrorException("Query doesn't contain a correct CREATE query:\n"+query);
 		}
-		
-		
-		
 		return responseBuilder.build();
 	}
 	
