@@ -37,6 +37,7 @@ before_install:
     - # doesn't start
     - # sudo /etc/init.d/virtuoso-opensource start
     - # use LOD2 stack virtuoso 7 package
+    - sudo apt-get update -qq
     - sudo apt-get install -qq libc6 ibldap-2.4-2 libreadline6 libssl1.0.0
     - wget https://cloudstore.zih.tu-dresden.de/public.php?service=files&t=27bfa7d71ed6b9d3e3225da318cc4639 
     - sudo dpkg -i public.php?service=files&t=27bfa7d71ed6b9d3e3225da318cc4639
