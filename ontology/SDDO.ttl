@@ -29,6 +29,36 @@
 #################################################################
 
 
+###  http://eatld.et.tu-dresden.de/sddo#hasDefaultSDD
+
+:hasDefaultSDD rdf:type owl:ObjectProperty ;
+               
+               rdfs:label "hat Standard-SDD"@de ,
+                          "has default SDD"@en ;
+               
+               rdfs:comment "Spezifiziert die Standard-SDD von einem Graphen. Diese wird standardmaessig ausgewaehlt, wenn eine Zusammenfuehrung ausgefuehrt wird."@de ,
+                            "Specifies the default SDD of a graph, wich is used by default when a merge is executed."@en ;
+               
+               rdfs:range :StructuralDefinitionGroup .
+
+
+
+###  http://eatld.et.tu-dresden.de/sddo#hasStructuralDefinition
+
+:hasStructuralDefinition rdf:type owl:ObjectProperty ;
+                         
+                         rdfs:label "hat strukturelle Definition"@de ,
+                                    "has structural definition"@en ;
+                         
+                         rdfs:comment "Spezifiziert die strukturellen Definitionen, die durch die Gruppe der strukturellen Definitionen gruppiert werden."@de ,
+                                      "Specifies the structural definitions which are grouped by the structural definition group."@en ;
+                         
+                         rdfs:range :StructuralDefinition ;
+                         
+                         rdfs:domain :StructuralDefinitionGroup .
+
+
+
 ###  http://eatld.et.tu-dresden.de/sddo#hasTripleStateA
 
 :hasTripleStateA rdf:type owl:ObjectProperty ;
@@ -178,6 +208,20 @@
                       
                       rdfs:comment "Beschreibt den Tripelstatus in zwei Revisionen und ob daraus ein Konflikt abgeleitet werden kann."@de ,
                                    "Describes the triple state in two revisions and if there is a conflict."@en .
+
+
+
+###  http://eatld.et.tu-dresden.de/sddo#StructuralDefinitionGroup
+
+:StructuralDefinitionGroup rdf:type owl:Class ;
+                           
+                           rdfs:label "Gruppe struktureller Definitionen"@de ,
+                                      "structural definition group"@en ;
+                           
+                           rdfs:subClassOf owl:Thing ;
+                           
+                           rdfs:comment "Gruppiert strukturelle Definitionen."@de ,
+                                        "Groups structural definitions."@en .
 
 
 
