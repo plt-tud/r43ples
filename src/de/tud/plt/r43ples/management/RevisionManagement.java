@@ -105,31 +105,32 @@ public class RevisionManagement {
 		String personUri =  getUserName(user);
 		
 		// Create a new commit (activity)
-		String queryContent =	String.format(
+		StringBuilder queryContent = new StringBuilder();
+		queryContent.append(String.format(
 				"<%s> a rmo:Commit; " +
 				"	prov:wasAssociatedWith <%s>;" +
 				"	prov:generated <%s>;" +
 				"	dc-terms:title \"%s\";" +
 				"	prov:atTime \"%s\". %n",
-				commitUri, personUri, revisionUri, commitMessage, dateString);
+				commitUri, personUri, revisionUri, commitMessage, dateString));
 		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
 			String revUri = getRevisionUri(graphName, iterator.next());
-			queryContent += String.format("<%s> prov:used <%s>. %n", commitUri, revUri);
+			queryContent.append(String.format("<%s> prov:used <%s>. %n", commitUri, revUri));
 		}
 		
 		// Create new revision
-		queryContent += String.format(
+		queryContent.append(String.format(
 				"<%s> a rmo:Revision; " +
 				"	rmo:revisionOf <%s>; " +
 				"	rmo:deltaAdded <%s>; " +
 				"	rmo:deltaRemoved <%s>; " +
 				"	rmo:revisionNumber \"%s\". %n"
-				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, newRevisionNumber);
+				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, newRevisionNumber));
 		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
 			String revUri = getRevisionUri(graphName, iterator.next());
-			queryContent += String.format("<%s> prov:wasDerivedFrom <%s> .", revisionUri, revUri);
+			queryContent.append(String.format("<%s> prov:wasDerivedFrom <%s> .", revisionUri, revUri));
 		}
-		String query = prefixes + String.format("INSERT IN GRAPH <%s> { %s }%n", Config.revision_graph, queryContent) ;
+		String query = prefixes + String.format("INSERT IN GRAPH <%s> { %s }%n", Config.revision_graph, queryContent.toString()) ;
 		
 		// Move branch to new revision
 		String oldRevisionUri = getRevisionUri(graphName, usedRevisionNumber.get(0).toString());

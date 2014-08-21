@@ -113,30 +113,24 @@ public class TripleStoreInterface {
 		nameValuePairs.add(new BasicNameValuePair("format",format));
 		nameValuePairs.add(new BasicNameValuePair("query", query));
 		
-		HttpResponse response =  null;
-		InputStreamReader in = null;
-		
-		
-		request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+    	request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 		
 		//Execute Query
-		response = httpClient.execute(request);
+		HttpResponse response = httpClient.execute(request);
 		logger.debug("Statuscode: " + response.getStatusLine().getStatusCode());
+		
+		InputStreamReader in = new InputStreamReader(response.getEntity().getContent());
 		try{
-			in = new InputStreamReader(response.getEntity().getContent());
 			result = IOUtils.toString(in);
 			if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
 				throw new HttpException(response.getStatusLine().toString()+"\n"+result);
-			}
-			
-			
+			}	
 		} catch (HttpException | IOException e){
 			throw e;
 		}
 		finally {
 			in.close();
 		}
-		
 		return result;
 	}
 	
