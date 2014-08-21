@@ -79,7 +79,12 @@ public class TripleStoreInterface {
 		
 	}
 	
+	
+	public static String executeQueryWithAuthorization(String query) throws IOException, HttpException {
+		return executeQueryWithAuthorization(query, "XML");
+	}
 
+	
 	/**
 	 * Executes a SPARQL-query against the triple store with authorization.
 	 * (Based on the source code of the IAF device explorer - created by Sebastian Heinze.)
@@ -94,7 +99,7 @@ public class TripleStoreInterface {
 		String result = null;
 		
 		logger.debug("Hide all keywords in comments");
-		// TODO: fix issue when no line ending after these keywords
+		// TODO: #20 fix issue when no line ending after these keywords
 		query = query.replace("USER", "#USER").replace("MESSAGE", "#MESSAGE").replace("REVISION", "#REVISION");	
 		
 		logger.debug("Execute query on SPARQL endpoint:"+ query);
@@ -108,30 +113,24 @@ public class TripleStoreInterface {
 		nameValuePairs.add(new BasicNameValuePair("format",format));
 		nameValuePairs.add(new BasicNameValuePair("query", query));
 		
-		HttpResponse response =  null;
-		InputStreamReader in = null;
-		
-		
-		request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+    	request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
 		
 		//Execute Query
-		response = httpClient.execute(request);
+		HttpResponse response = httpClient.execute(request);
 		logger.debug("Statuscode: " + response.getStatusLine().getStatusCode());
+		
+		InputStreamReader in = new InputStreamReader(response.getEntity().getContent());
 		try{
-			in = new InputStreamReader(response.getEntity().getContent());
 			result = IOUtils.toString(in);
 			if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
 				throw new HttpException(response.getStatusLine().toString()+"\n"+result);
-			}
-			
-			
+			}	
 		} catch (HttpException | IOException e){
 			throw e;
 		}
 		finally {
 			in.close();
 		}
-		
 		return result;
 	}
 	

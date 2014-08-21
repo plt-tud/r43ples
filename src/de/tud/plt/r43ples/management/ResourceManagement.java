@@ -10,10 +10,16 @@ public class ResourceManagement {
 	public static String getContentFromResource(String resourceName) throws IOException{
 		InputStream is = ClassLoader.getSystemResourceAsStream(resourceName);
 		StringWriter sw = new StringWriter();
-		IOUtils.copy(is, sw, "UTF-8");
-		String result = sw.toString();
-		is.close();
-		sw.close();
-		return result;
+		try {
+			IOUtils.copy(is, sw, "UTF-8");
+			return sw.toString();
+		} catch (IOException e) {
+			return "";
+		}
+		finally {
+			is.close();
+			sw.close();
+		}
+		
 	}
 }
