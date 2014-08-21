@@ -99,7 +99,7 @@ public class TripleStoreInterface {
 		String result = null;
 		
 		logger.debug("Hide all keywords in comments");
-		// TODO: fix issue when no line ending after these keywords
+		// TODO: #20 fix issue when no line ending after these keywords
 		query = query.replace("USER", "#USER").replace("MESSAGE", "#MESSAGE").replace("REVISION", "#REVISION");	
 		
 		logger.debug("Execute query on SPARQL endpoint:"+ query);
