@@ -133,9 +133,18 @@ public class RevisionManagement {
 		String query = prefixes + String.format("INSERT IN GRAPH <%s> { %s }%n", Config.revision_graph, queryContent.toString()) ;
 		
 		// Move branch to new revision
-		String oldRevisionUri = getRevisionUri(graphName, usedRevisionNumber.get(0).toString());
+		String branchIdentifier = usedRevisionNumber.get(0).toString();
+		String oldRevisionUri = getRevisionUri(graphName, branchIdentifier);
 		
-		String queryBranch = prefixes + String.format("SELECT ?branch ?graph WHERE{ ?branch a rmo:Branch; rmo:references <%s>; rmo:fullGraph ?graph. }", oldRevisionUri);
+		String queryBranch = prefixes + String.format(""
+				+ "SELECT ?branch ?graph "
+				+ "FROM <%s>"
+				+ "WHERE{"
+				+ "	?branch a rmo:Branch; "
+				+ "		rmo:references <%s>;"
+				+ "		rmo:fullGraph ?graph."
+				+ "	{?branch rdfs:label \"%s\"} UNION {<%s> rmo:revisionNumber \"%s\"}"
+				+ "}", Config.revision_graph, oldRevisionUri, branchIdentifier, oldRevisionUri, branchIdentifier);
 		QuerySolution sol = ResultSetFactory.fromXML(TripleStoreInterface.executeQueryWithAuthorization(queryBranch, "XML")).next(); 
 		String branchName = sol.getResource("?branch").toString();
 		String branchGraph = sol.getResource("?graph").toString();
@@ -509,51 +518,23 @@ public class RevisionManagement {
 	 */
 	public static String getRevisionNumberForNewBranch(String graphName, String revisionNumber) throws HttpException, IOException {
 		logger.info("Get the revision number for a new branch of graph " + graphName + " and revision number " + revisionNumber); 		
-		String startIdentifierRevisionNumber;
-		String checkIdentifierRevisionNumber;
-		if (revisionNumber.contains("-")) {
-			startIdentifierRevisionNumber = revisionNumber.substring(0, revisionNumber.indexOf("-")) + ".";
-			checkIdentifierRevisionNumber = startIdentifierRevisionNumber;
-		} else {
-			startIdentifierRevisionNumber = revisionNumber;
-			checkIdentifierRevisionNumber = startIdentifierRevisionNumber + ".";
-		}
-
-		// This requires SPARQL 1.1 (STRAFTER, STRBEFORE)
-		String queryString = prefixes + String.format("SELECT MAX(xsd:integer(STRAFTER(STRBEFORE(xsd:string(?revisionNumber), \"-\"), \"%s.\"))) as ?number %n" +
-				"FROM <%s> %n" +
-				"WHERE { %n" +
-				"	?revision rmo:revisionNumber ?revisionNumber; %n"
-				+ "		rmo:revisionOf <%s>. %n" +
-				"} ", startIdentifierRevisionNumber, Config.revision_graph, graphName);
-		String resultSparql = TripleStoreInterface.executeQueryWithAuthorization(queryString, "XML");
-		ResultSet results = ResultSetFactory.fromXML(resultSparql);
-		QuerySolution qs = results.next();
-		if (qs.getLiteral("?number") != null) {
-			if (qs.getLiteral("?number").getString().equals("")) {
-				// No max value was found - means that this is the creation of the first branch for this revision
-				return startIdentifierRevisionNumber + ".0-0";
-			} else {
-				if (qs.getLiteral("?number").getInt() == 0) {
-					String queryASK = prefixes + String.format("ASK { GRAPH <%s> { "
-							+ " <%s> a rmo:Revision . } } ",
-							Config.revision_graph, graphName + "-revision-" + checkIdentifierRevisionNumber + "0-0");//hier muss revisionNumber hin
-					String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
-					if (resultASK.equals("false")) {
-						return startIdentifierRevisionNumber + ".0-0";
-					} else {
-						// Max value + 1
-						return startIdentifierRevisionNumber + "." + (qs.getLiteral("?number").getInt() + 1) + "-0";
-					}
-				} else {
-					// Max value + 1
-					return startIdentifierRevisionNumber + "." + (qs.getLiteral("?number").getInt() + 1) + "-0";
-				}
+		int ii = 0;
+		String newRevisionNumber;
+		while (ii<99) {
+			newRevisionNumber = revisionNumber +"."+ ii + "-0";
+			String queryASK = prefixes + String.format(""
+					+ "ASK { GRAPH <%s> { "
+					+ " ?rev a rmo:Revision;"
+					+ "		rmo:revisionOf <%s>;"
+					+ "		rmo:revisionNumber \"%s\"}}",
+					Config.revision_graph, graphName, newRevisionNumber);
+			String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
+			if (resultASK.equals("false")) {
+				return newRevisionNumber;
 			}
-		} else {
-			// No max value was found - means that this is the creation of the first branch for this revision
-			return startIdentifierRevisionNumber + ".0-0";
+			ii++;
 		}
+		return null;
 	}
 	
 	
