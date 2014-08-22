@@ -91,10 +91,18 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void testSparqlRewrite() throws HttpException, IOException {
-		String result = SparqlRewriter.rewriteQuery("SELECT * FROM <test_dataset_user> #REVISION \"3\" WHERE {?a ?p ?b. ?b ?p ?c.}");
+	public void testSparqlRewrite_simple() throws HttpException, IOException {
+		String result = SparqlRewriter.rewriteQuery("SELECT ?s ?p ?o FROM <http://test.com/r43ples-dataset> REVISION \"2\" WHERE {?s ?p ?o.}");
+		System.out.println(result);
+		Assert.assertEquals("", result);
+	}
+	
+	@Test
+	public void testSparqlRewrite_two_statements() throws HttpException, IOException {
+		String result = SparqlRewriter.rewriteQuery("SELECT * FROM <test_dataset_user> REVISION \"3\" WHERE {?a ?p ?b. ?b ?p ?c.}");
+		System.out.println(result);
+		Assert.assertEquals("", result);
 		
-		Assert.assertNotEquals("", result);
 		
 	}
 	
