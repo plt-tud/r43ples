@@ -151,7 +151,9 @@
                       "statement"@en ;
            
            rdfs:comment "Elternobjekteigenschaft von hinzugefuegt, nicht enthalten, original und geloescht. Definiert den aktuellen Status eines Tripels im Revisionsverlauf."@de ,
-                        "Parent object properties of added, not included, original and removed. Defines the current state of a triple in the revision progress."@en .
+                        "Parent object properties of added, not included, original and removed. Defines the current state of a triple in the revision progress."@en ;
+           
+           rdfs:domain :RevisionProgress .
 
 
 
