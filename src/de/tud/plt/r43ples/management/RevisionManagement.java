@@ -105,7 +105,7 @@ public class RevisionManagement {
 		String personUri =  getUserName(user);
 		
 		// Create a new commit (activity)
-		StringBuilder queryContent = new StringBuilder();
+		StringBuilder queryContent = new StringBuilder(1000);
 		queryContent.append(String.format(
 				"<%s> a rmo:Commit; " +
 				"	prov:wasAssociatedWith <%s>;" +
@@ -163,24 +163,37 @@ public class RevisionManagement {
 			query += String.format("DROP SILENT GRAPH <%s>%n", removeBranchFullGraph);
 		}
 		
+//		// Update full graph of branch
+//		query += String.format("DELETE FROM GRAPH <%s> {%n %s %n}%n", branchGraph, removedAsNTriples);
+//		query += String.format("INSERT IN GRAPH <%s> {%n %s %n}%n", branchGraph, addedAsNTriples);
+//		
+//		// Create new graph with delta-added-newRevisionNumber
+//		logger.info("Create new graph with name " + addSetGraphUri);
+//		query += String.format("CREATE SILENT GRAPH <%s>%n", addSetGraphUri);
+//		query += String.format("INSERT IN GRAPH <%s> { %s }%n", addSetGraphUri, addedAsNTriples);
+//		
+//		// Create new graph with delta-removed-newRevisionNumber
+//		logger.info("Create new graph with name " + removeSetGraphUri);
+//		query += String.format("CREATE SILENT GRAPH <%s>%n", removeSetGraphUri);
+//		query += String.format("INSERT IN GRAPH <%s> { %s }%n", removeSetGraphUri, removedAsNTriples);
+	
+		// Execute queries
+		logger.info("Execute all queries updating the revision graph, full graph and change sets");
+		TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
+		
 		// Update full graph of branch
-		query += String.format("DELETE FROM GRAPH <%s> {%n %s %n}%n", branchGraph, removedAsNTriples);
-		query += String.format("INSERT IN GRAPH <%s> {%n %s %n}%n", branchGraph, addedAsNTriples);
+		TripleStoreInterface.executeQueryWithAuthorization(String.format("DELETE FROM GRAPH <%s> {%n %s %n}%n", branchGraph, removedAsNTriples));
+		RevisionManagement.executeINSERT(branchGraph, addedAsNTriples);
 		
 		// Create new graph with delta-added-newRevisionNumber
 		logger.info("Create new graph with name " + addSetGraphUri);
-		query += String.format("CREATE SILENT GRAPH <%s>%n", addSetGraphUri);
-		query += String.format("INSERT IN GRAPH <%s> { %s }%n", addSetGraphUri, addedAsNTriples);
+		TripleStoreInterface.executeQueryWithAuthorization(String.format("CREATE SILENT GRAPH <%s>%n", addSetGraphUri));
+		RevisionManagement.executeINSERT(addSetGraphUri, addedAsNTriples);
 		
 		// Create new graph with delta-removed-newRevisionNumber
 		logger.info("Create new graph with name " + removeSetGraphUri);
-		query += String.format("CREATE SILENT GRAPH <%s>%n", removeSetGraphUri);
-		query += String.format("INSERT IN GRAPH <%s> { %s }%n", removeSetGraphUri, removedAsNTriples);
-		
-
-		// Execute queries
-		logger.info("Execute all queries.");
-		TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization(String.format("CREATE SILENT GRAPH <%s>%n", removeSetGraphUri));
+		RevisionManagement.executeINSERT(removeSetGraphUri, removedAsNTriples);
 		
 		return newRevisionNumber;
 	}
@@ -321,11 +334,13 @@ public class RevisionManagement {
 		ResultSet resultSet = ResultSetFactory.fromXML(result);
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
-			if (resultSet.hasNext())
+			if (resultSet.hasNext()) {
 				throw new InternalServerErrorException("Identifier not unique: " + revisionIdentifier);
+			}
 			return qs.getResource("?rev").toString();
-		} else
+		} else {
 			throw new InternalServerErrorException("No Revision or Reference found with identifier: " + revisionIdentifier);
+		}
 	}
 	
 	
@@ -350,11 +365,13 @@ public class RevisionManagement {
 		ResultSet resultSet = ResultSetFactory.fromXML(result);
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
-			if (resultSet.hasNext())
-				throw new InternalServerErrorException("Identifier not unique: " + referenceIdentifier);
+			if (resultSet.hasNext()) {
+				throw new InternalServerErrorException("Identifier is not unique for specified graph name: " + referenceIdentifier);
+			}	
 			return qs.getResource("?ref").toString();
-		} else
+		} else {
 			throw new InternalServerErrorException("No Revision or Reference found with identifier: " + referenceIdentifier);
+		}
 	}
 	
 	
@@ -500,7 +517,7 @@ public class RevisionManagement {
 	 */
 	public static String getNextRevisionNumberForLastRevisionNumber(String graphName, String revisionNumber) {
 		if (revisionNumber.contains("-")) {
-			return revisionNumber.substring(0, revisionNumber.indexOf("-") + 1) + (Integer.parseInt(revisionNumber.substring(revisionNumber.indexOf("-") + 1, revisionNumber.length())) + 1);
+			return revisionNumber.substring(0, revisionNumber.indexOf('-') + 1) + (Integer.parseInt(revisionNumber.substring(revisionNumber.indexOf('-') + 1, revisionNumber.length())) + 1);
 		} else {
 			return Integer.toString((Integer.parseInt(revisionNumber) + 1));
 		}
@@ -549,26 +566,28 @@ public class RevisionManagement {
 	 */
 	public static void executeINSERT(String graphName, String dataSetAsNTriples) throws HttpException, IOException {
 
-		final int MAX_STATEMENTS = 50;
-		String lines[] = dataSetAsNTriples.split("\\.\\s*<");
+		final int MAX_STATEMENTS = 200;
+		String lines[] = dataSetAsNTriples.split("\\.\\s");
 		int counter = 0;
-		String insert = "";
+		StringBuilder insert = new StringBuilder();
 		
 		for (int i=0; i<lines.length; i++) {
 			String sub = lines[i];
 			
-			if (!sub.startsWith("<")) {
-				sub = "<" + sub;
+//			if (!sub.startsWith("<")) {
+//				sub = "<" + sub;
+//			}
+//			if (i < lines.length - 1) {
+//				sub = sub + ".";
+//			}
+			if (!sub.equals("")){
+				insert.append(sub).append(". ");
 			}
-			if (i < lines.length - 1) {
-				sub = sub + ".";
-			}
-			insert = insert + "\n" + sub;
 			counter++;
 			if (counter == MAX_STATEMENTS-1) {
 				TripleStoreInterface.executeQueryWithAuthorization("INSERT IN GRAPH <" + graphName + "> { " + insert + "}", "HTML");
 				counter = 0;
-				insert = "";
+				insert = new StringBuilder();
 			}
 		}
 		TripleStoreInterface.executeQueryWithAuthorization("INSERT IN GRAPH <" + graphName + "> { " + insert + "}", "HTML");
@@ -696,12 +715,12 @@ public class RevisionManagement {
 		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
 		ResultSet results = ResultSetFactory.fromXML(result);		
 		if (results.hasNext()) {
-			logger.info("User " + user + " already exists.");
+			logger.debug("User " + user + " already exists.");
 			QuerySolution qs = results.next();
 			return qs.getResource("?personUri").toString();
 		} else {
 			String personUri =  "http://eatld.et.tu-dresden.de/persons/" + user;
-			logger.info("User does not exists. Create user " + personUri + ".");
+			logger.debug("User does not exists. Create user " + personUri + ".");
 			query = prefixes + String.format("INSERT IN GRAPH <%s> { <%s> a prov:Person; rdfs:label \"%s\". }", Config.revision_graph, personUri, user);
 			TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
 			return personUri;

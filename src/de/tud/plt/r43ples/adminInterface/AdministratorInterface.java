@@ -723,7 +723,7 @@ public class AdministratorInterface {
 					URL fileName = loader.getResource("dataset/addset-"+changesize+"-"+revision+".nt");
 					String addedAsNTriples = FileUtils.readFileToString(new File(fileName.getFile()));
 					list = new ArrayList<>();
-					list.add(Integer.toString(revision-1));
+					list.add(Integer.toString(revision));
 					RevisionManagement.createNewRevision(graphName, addedAsNTriples, "", "test", "test creation", list);
 				}
 			}
