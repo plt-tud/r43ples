@@ -66,7 +66,7 @@ public class Endpoint {
 	 */
 	@Path("version")
 	@GET
-	public String version() {
+	public final String version() {
 		logger.info("Version queried.");
 		return "Version 0.8";
 	}
@@ -81,10 +81,10 @@ public class Endpoint {
 	@Path("revisiongraph")
 	@GET
 	@Produces({"text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON})
-	public String getRevisionGraph(
-			@HeaderParam("Accept") String format_header, 
-			@QueryParam("format") @DefaultValue("text/turtle") String format_query,
-			@QueryParam("graph") @DefaultValue("") String graph) {
+	public final String getRevisionGraph(
+			@HeaderParam("Accept") final String format_header, 
+			@QueryParam("format") @DefaultValue("text/turtle") final String format_query,
+			@QueryParam("graph") @DefaultValue("") final String graph) {
 		logger.info("Get Revision Graph");
 		String format = (format_query!=null) ? format_query : format_header;
 		logger.info("format: " +  format);
@@ -111,8 +111,8 @@ public class Endpoint {
 	@Path("sparql")
 	@GET
 	@Produces({MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle"})
-	public Response sparql(@HeaderParam("Accept") String format_header, 
-			@QueryParam("format") String format_query, 
+	public final Response sparql(@HeaderParam("Accept") final String format_header, 
+			@QueryParam("format") final String format_query, 
 			@QueryParam("query") @DefaultValue("") String sparqlQuery) {
 		String format = (format_query!=null) ? format_query : format_header;
 		logger.info("SPARQL requested with format: " +  format);
@@ -152,7 +152,7 @@ public class Endpoint {
 	
 	@Path("createTestDataset")
 	@GET
-	public String createTestDataset(){
+	public final String createTestDataset(){
 		ArrayList<String> list = new ArrayList<String>();		
 		String graphName = "http://test.com/r43ples-dataset";
 		try{
@@ -200,7 +200,7 @@ public class Endpoint {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	private Response getServiceDescription(String format) {
+	private Response getServiceDescription(final String format) {
 		logger.info("Service Description requested");
 		DefaultHttpClient client =new DefaultHttpClient();
 		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(Config.sparql_user, Config.sparql_password);
@@ -248,7 +248,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	private Response produceSelectResponse(String query, String format) throws HttpException, IOException {
+	private Response produceSelectResponse(String query, final String format) throws HttpException, IOException {
 
 		ResponseBuilder responseBuilder = Response.ok();
 		
@@ -272,9 +272,9 @@ public class Endpoint {
 		    	headerRevisionNumber = "MASTER";
 			} else {
 				String newGraphName;
-				if (RevisionManagement.isBranch(graphName, revisionNumber))
+				if (RevisionManagement.isBranch(graphName, revisionNumber)) {
 					newGraphName = RevisionManagement.getFullGraphName(graphName, revisionNumber);
-				else {
+				} else {
 					// Respond with specified revision, therefore the revision must be generated - saved in graph <RM-TEMP-graphName>
 					newGraphName = "RM-TEMP-" + graphName;
 					RevisionManagement.generateFullGraphOfRevision(graphName, revisionNumber, newGraphName);
@@ -304,7 +304,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	private Response produceInsertDeleteResponse(String query, String format) throws HttpException, IOException {
+	private Response produceInsertDeleteResponse(final String query, final String format) throws HttpException, IOException {
 		
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));		
 		logger.info("Update detected");
@@ -330,8 +330,9 @@ public class Endpoint {
 	    String revisionName = m.group("revision"); //can contain revision numbers or reference names
 	    String action = m.group("action");
 	    
-	    if (!RevisionManagement.isBranch(graphName, revisionName))
+	    if (!RevisionManagement.isBranch(graphName, revisionName)) {
 			throw new InternalServerErrorException("Revision is not referenced by branch");
+		}
 	    
 	    String referenceFullGraph = RevisionManagement.getFullGraphName(graphName, revisionName);
 
@@ -390,8 +391,8 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws HttpException 
 	 */
-	private Response produceCreateGraphResponse(String query,
-			String format) throws IOException, HttpException {
+	private Response produceCreateGraphResponse(final String query,
+			final String format) throws IOException, HttpException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Graph creation detected");
 		
@@ -423,8 +424,8 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws HttpException 
 	 */
-	private Response produceDropGraphResponse(String query,
-			String format) throws IOException, HttpException {
+	private Response produceDropGraphResponse(final String query,
+			final String format) throws IOException, HttpException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		
 		// Clear R43ples information for specified graphs
@@ -453,8 +454,8 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	private Response produceBranchOrTagResponse(String sparqlQuery,
-			String format) throws HttpException, IOException {
+	private Response produceBranchOrTagResponse(final String sparqlQuery,
+			final String format) throws HttpException, IOException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Tag or branch creation detected");
 		String user = extractUser(sparqlQuery);
@@ -472,12 +473,13 @@ public class Endpoint {
 		    String revisionNumber = m.group("revision");
 		    String referenceName = m.group("name");
 		    try {
-			    if (action.equals("TAG"))
-			    	RevisionManagement.createReference("tag", graphName, revisionNumber, referenceName, user, commitMessage);
-			    else if (action.equals("BRANCH"))
-		    		RevisionManagement.createReference("branch", graphName, revisionNumber, referenceName, user, commitMessage);
-		        else
-		        	throw new InternalServerErrorException("Error in query: " + sparqlQuery);
+			    if (action.equals("TAG")) {
+					RevisionManagement.createReference("tag", graphName, revisionNumber, referenceName, user, commitMessage);
+				} else if (action.equals("BRANCH")) {
+					RevisionManagement.createReference("branch", graphName, revisionNumber, referenceName, user, commitMessage);
+				} else {
+					throw new InternalServerErrorException("Error in query: " + sparqlQuery);
+				}
 			} catch (IdentifierAlreadyExistsException e) {
 				responseBuilder = Response.status(Response.Status.CONFLICT);
 			}
@@ -487,8 +489,9 @@ public class Endpoint {
 	    	responseBuilder.header(graphName + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
 		    
 		}
-		if (!foundEntry)
+		if (!foundEntry) {
 			throw new InternalServerErrorException("Error in query: " + sparqlQuery);
+		}
 		
 		return responseBuilder.build();
 	}
@@ -499,7 +502,7 @@ public class Endpoint {
 	 * @return user mentioned in a query
 	 * @throws InternalServerErrorException
 	 */
-	private String extractUser(String query) {
+	private String extractUser(final String query) {
 		Pattern userPattern = Pattern.compile("USER\\s*\"(?<user>.*)\"");
 		Matcher userMatcher = userPattern.matcher(query);
 		if (userMatcher.find()) {
@@ -513,7 +516,7 @@ public class Endpoint {
 	 * @param query
 	 * @throws InternalServerErrorException
 	 */
-	private String extractCommitMessage(String query) {
+	private String extractCommitMessage(final String query) {
 		Pattern pattern = Pattern.compile("MESSAGE\\s*\"(?<message>.*)\"");
 		Matcher matcher = pattern.matcher(query);
 		if (matcher.find()) {
