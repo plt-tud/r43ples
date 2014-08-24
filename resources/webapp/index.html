@@ -3,7 +3,6 @@
 <head>
 <title>R43ples - Revision Management for the Semantic Web</title>
 <meta name="author" content="Markus Graube">
-<meta charset="utf-8">
 <script src="/static/jquery-2.1.1.js"></script>
 <script src="/static/jquery-ui.js"></script>
 <link href="/static/jquery-ui.css" rel="stylesheet" />
@@ -26,7 +25,7 @@
   <label for="query">Query Text</label><br />
 	  <textarea name="query" id="query" cols="80" rows="20">
 SELECT * 
-FROM <test> REVISION "MASTER"
+FROM &lt;test&gt; REVISION "MASTER"
 WHERE {
 	?s ?p ?o. 
 }
