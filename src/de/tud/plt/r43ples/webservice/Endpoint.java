@@ -72,11 +72,9 @@ public class Endpoint {
 	}
 	
 	/**
-	 * Provide revision information about R43ples system
+	 * Provide revision information about R43ples system.
 	 * @param graph Provide only information about this graph (if not null)
 	 * @return RDF model of revision information
-	 * @throws IOException 
-	 * @throws AuthenticationException 
 	 */
 	@Path("revisiongraph")
 	@GET
@@ -103,44 +101,42 @@ public class Endpoint {
 	 * Provides HTML form if no query is specified and HTML is requested
 	 * Provides Service Description if no query is specified and RDF representation is requested
 	 * 
-	 * @param format_header format specified in the HTTP header
-	 * @param format_query format specified in the HTTP parameters
+	 * @param formatHeader format specified in the HTTP header
+	 * @param formatQuery format specified in the HTTP parameters
 	 * @param sparqlQuery the SPARQL query
 	 * @return the response
 	 */
 	@Path("sparql")
 	@GET
 	@Produces({MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle"})
-	public final Response sparql(@HeaderParam("Accept") final String format_header, 
-			@QueryParam("format") final String format_query, 
-			@QueryParam("query") @DefaultValue("") String sparqlQuery) {
-		String format = (format_query!=null) ? format_query : format_header;
+	public final Response sparql(@HeaderParam("Accept") final String formatHeader, 
+			@QueryParam("format") final String formatQuery, 
+			@QueryParam("query") @DefaultValue("") final String sparqlQuery) {
+		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		logger.info("SPARQL requested with format: " +  format);
-		if (sparqlQuery.equals(""))
-		{
-			if (format.contains("text/html")){
+		if (sparqlQuery.equals(""))	{
+			if (format.contains("text/html")) {
 				logger.info("SPARQL form requested");
 				File fileToSend = new File("resources/webapp/index.html");
 				return Response.ok(fileToSend, "text/html").build();
 			} else {
 				return getServiceDescription(format);
 			}
-		}
-		else {
+		} else {
 			logger.info("SPARQL query was requested. Query: " + sparqlQuery);
 			Response response = null;
 			try {
-				sparqlQuery = URLDecoder.decode(sparqlQuery, "UTF-8");
-				if (sparqlQuery.toUpperCase().contains("SELECT") || sparqlQuery.toUpperCase().contains("ASK")) {
-					response = produceSelectResponse(sparqlQuery, format);
-				} else if (sparqlQuery.toUpperCase().contains("INSERT") || sparqlQuery.toUpperCase().contains("DELETE")) {
-					response = produceInsertDeleteResponse(sparqlQuery, format);
-				} else if (sparqlQuery.toUpperCase().contains("CREATE")) {
-					response = produceCreateGraphResponse(sparqlQuery, format);
-				} else if (sparqlQuery.toUpperCase().contains("DROP")) {
-					response = produceDropGraphResponse(sparqlQuery, format);
-				} else if (sparqlQuery.toUpperCase().contains("TAG") || sparqlQuery.toUpperCase().contains("BRANCH")) {
-					response = produceBranchOrTagResponse(sparqlQuery, format);
+				String sparqlQueryDecoded = URLDecoder.decode(sparqlQuery, "UTF-8");
+				if (sparqlQueryDecoded.toUpperCase().contains("SELECT") || sparqlQueryDecoded.toUpperCase().contains("ASK")) {
+					response = produceSelectResponse(sparqlQueryDecoded, format);
+				} else if (sparqlQueryDecoded.toUpperCase().contains("INSERT") || sparqlQueryDecoded.toUpperCase().contains("DELETE")) {
+					response = produceInsertDeleteResponse(sparqlQueryDecoded, format);
+				} else if (sparqlQueryDecoded.toUpperCase().contains("CREATE")) {
+					response = produceCreateGraphResponse(sparqlQueryDecoded, format);
+				} else if (sparqlQueryDecoded.toUpperCase().contains("DROP")) {
+					response = produceDropGraphResponse(sparqlQueryDecoded, format);
+				} else if (sparqlQueryDecoded.toUpperCase().contains("TAG") || sparqlQueryDecoded.toUpperCase().contains("BRANCH")) {
+					response = produceBranchOrTagResponse(sparqlQueryDecoded, format);
 				}
 			} catch (HttpException | IOException e) {
 				e.printStackTrace();
@@ -152,10 +148,10 @@ public class Endpoint {
 	
 	@Path("createTestDataset")
 	@GET
-	public final String createTestDataset(){
+	public final String createTestDataset() {
 		ArrayList<String> list = new ArrayList<String>();		
 		String graphName = "http://test.com/r43ples-dataset";
-		try{
+		try {
 			RevisionManagement.putGraphUnderVersionControl(graphName);
 			
 			list.add("0");
@@ -196,18 +192,19 @@ public class Endpoint {
 	/**
 	 * Provides the SPARQL Endpoint description of the original sparql endpoint with the additional R43ples feature (sd:feature)
 	 * and replaces URIs.
+	 * @param format serialisation format of the service description
 	 * @return Extended Service Description
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
 	private Response getServiceDescription(final String format) {
 		logger.info("Service Description requested");
-		DefaultHttpClient client =new DefaultHttpClient();
+		DefaultHttpClient client = new DefaultHttpClient();
 		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(Config.sparql_user, Config.sparql_password);
 	    client.getCredentialsProvider().setCredentials(new AuthScope(null, -1, null), credentials);
 	    HttpGet request = new HttpGet(Config.sparql_endpoint);
 		request.setHeader("Accept", "text/turtle");
-		try{
+		try {
 			HttpResponse response = client.execute(request);
 	
 			Model model = ModelFactory.createDefaultModel();
@@ -248,16 +245,17 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	private Response produceSelectResponse(String query, final String format) throws HttpException, IOException {
+	private Response produceSelectResponse(final String query, final String format) throws HttpException, IOException {
 
+		String queryM = query;
 		ResponseBuilder responseBuilder = Response.ok();
 		
 		// create pattern for FROM clause
 		Pattern pattern = Pattern.compile("FROM\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"");
 		
-		Matcher m = pattern.matcher(query);
+		Matcher m = pattern.matcher(queryM);
 		boolean found = false;
-		while (m.find()){
+		while (m.find()) {
 			found = true;
 		    String graphName = m.group("graph");
 		    String revisionNumber = m.group("revision");
@@ -279,8 +277,8 @@ public class Endpoint {
 					newGraphName = "RM-TEMP-" + graphName;
 					RevisionManagement.generateFullGraphOfRevision(graphName, revisionNumber, newGraphName);
 				}
-				query = m.replaceFirst("FROM <" + newGraphName + ">");
-				m = pattern.matcher(query);
+				queryM = m.replaceFirst("FROM <" + newGraphName + ">");
+				m = pattern.matcher(queryM);
 				headerRevisionNumber = revisionNumber;
 			}
 		    // Respond with specified revision
@@ -288,9 +286,9 @@ public class Endpoint {
 		    responseBuilder.header(graphName + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
 		}
 		if (!found) {
-			throw new InternalServerErrorException("Query contain errors:\n"+query);
+			throw new InternalServerErrorException("Query contain errors:\n"+queryM);
 		}
-		String response = TripleStoreInterface.executeQueryWithAuthorization(query, format);
+		String response = TripleStoreInterface.executeQueryWithAuthorization(queryM, format);
 		return responseBuilder.entity(response).type(format).build();
 	}
 	
@@ -302,7 +300,7 @@ public class Endpoint {
 	 * @param format the result format
 	 * @return the response with HTTP header for every graph (revision number and MASTER revision number)
 	 * @throws IOException 
-	 * @throws AuthenticationException 
+	 * @throws HttpException 
 	 */
 	private Response produceInsertDeleteResponse(final String query, final String format) throws HttpException, IOException {
 		
@@ -323,7 +321,7 @@ public class Endpoint {
 		boolean found = m.find();
 		
 		if (!found) {
-			throw new InternalServerErrorException("Query contain errors:\n"+query);
+			throw new InternalServerErrorException("Query contain errors:\n" + query);
 		}
 		
 	    String graphName = m.group("graph");
