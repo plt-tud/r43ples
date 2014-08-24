@@ -572,27 +572,26 @@ public class RevisionManagement {
 	public static void executeINSERT(final String graphName, final String dataSetAsNTriples) throws HttpException, IOException {
 
 		final int MAX_STATEMENTS = 200;
-		String[] lines = dataSetAsNTriples.split("\\.\\s");
+		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
 		int counter = 0;
 		StringBuilder insert = new StringBuilder();
 		
-		for (int i=0; i<lines.length; i++) {
+		for (int i=0; i < lines.length; i++) {
 			String sub = lines[i];
-			
-//			if (!sub.startsWith("<")) {
-//				sub = "<" + sub;
-//			}
-//			if (i < lines.length - 1) {
-//				sub = sub + ".";
-//			}
-			if (!sub.equals("")){
-				insert.append(sub).append(". ");
-			}
-			counter++;
-			if (counter == MAX_STATEMENTS-1) {
-				TripleStoreInterface.executeQueryWithAuthorization("INSERT IN GRAPH <" + graphName + "> { " + insert + "}", "HTML");
-				counter = 0;
-				insert = new StringBuilder();
+			if (!sub.equals("") && !sub.startsWith("#")) {
+				if (!sub.startsWith("<")) {
+					sub = "<" + sub;
+				}
+				if (i < lines.length - 1) {
+					sub = sub + ".";
+				}
+				insert.append('\n').append(sub);
+				counter++;
+				if (counter == MAX_STATEMENTS-1) {
+					TripleStoreInterface.executeQueryWithAuthorization("INSERT IN GRAPH <" + graphName + "> { " + insert + "}", "HTML");
+					counter = 0;
+					insert = new StringBuilder();
+				}
 			}
 		}
 		TripleStoreInterface.executeQueryWithAuthorization("INSERT IN GRAPH <" + graphName + "> { " + insert + "}", "HTML");
