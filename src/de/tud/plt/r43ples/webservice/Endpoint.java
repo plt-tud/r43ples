@@ -33,6 +33,8 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.log4j.Logger;
 
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.update.UpdateAction;
@@ -344,7 +346,10 @@ public class Endpoint {
 		TripleStoreInterface.executeQueryWithAuthorization("COPY <" + referenceFullGraph + "> TO <" + graphUpdateTemp + ">", "HTML");
 		
 		// Replace graph name in SPARQL query 
-		String query_replaced = m.replaceFirst(action + " <" + graphUpdateTemp + ">");
+//		String query_replaced = m.replaceFirst(action + " <" + graphUpdateTemp + ">");
+		String query_replaced = query.replace("FROM <" + graphName + ">", "FROM <" + graphUpdateTemp + ">");
+		query_replaced = query_replaced.replace("INTO <" + graphName + ">", "INTO <" + graphUpdateTemp + ">");
+		query_replaced = query_replaced.replace("GRAPH <" + graphName + ">", "GRAPH <" + graphUpdateTemp + ">");
 		//m = pattern.matcher(query);		
 		logger.info("query replaced: " + query_replaced);
 
@@ -527,6 +532,27 @@ public class Endpoint {
 			// TODO Check if A and B are different valid branches
 			// TODO Think about usage of branch (terminal nodes) only or possibility to merge any revision of different branch into another 
 			
+			// TODO differ between MERGE query with specified and SDD and without SDD			
+			// Query the referenced SDD
+			String querySDD = String.format(
+					  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
+					+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> \n"
+					+ "SELECT ?defaultSDD \n"
+					+ "FROM <%s> \n"
+					+ "WHERE { \n"
+					+ "	<%s> a rmo:Graph ;%n"
+					+ "		sddo:hasDefaultSDD ?defaultSDD ."
+					+ "}", Config.revision_graph, graphName);
+			
+			String resultSDD = TripleStoreInterface.executeQueryWithAuthorization(querySDD, "XML");
+			String defaultSDDURI = "";
+			if (ResultSetFactory.fromXML(resultSDD).hasNext()) {
+				QuerySolution qs = ResultSetFactory.fromXML(resultSDD).next();
+				defaultSDDURI = qs.getResource("?defaultSDD").toString();
+			} else {
+				throw new InternalServerErrorException("Error in revision graph! Selected graph <" + graphName + "> has no default SDD referenced.");
+			}
+
 			// Get the common revision with shortest path
 			String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(branchNameA, branchNameB);
 			
@@ -541,7 +567,7 @@ public class Endpoint {
 			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, branchNameB), graphNameB, uriB);
 			
 			// Create conflict model
-			MergeManagement.createConflictingTripleModel(graphName, "RM-CONFLICT-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB);
+			MergeManagement.createConflictingTripleModel(graphName, "RM-CONFLICT-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI);
 			
 			// TODO Create response
 		}

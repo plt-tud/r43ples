@@ -51,6 +51,15 @@ public class TripleStoreInterface {
 			logger.info("Create revision graph");
 			executeQueryWithAuthorization("CREATE SILENT GRAPH <" + Config.revision_graph +">", "HTML");
 	 	}
+		
+		// Create SDD graph
+		if (!RevisionManagement.checkGraphExistence(Config.sdd_graph)){
+			logger.info("Create sdd graph");
+			executeQueryWithAuthorization("CREATE SILENT GRAPH <" + Config.revision_graph +">", "HTML");
+			// Insert default content into SDD graph
+			RevisionManagement.executeINSERT(Config.sdd_graph, MergeManagement.convertJenaModelToNTriple(MergeManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent)));
+	 	}
+		
 	}
 	
 	/**
@@ -100,7 +109,7 @@ public class TripleStoreInterface {
 		
 		logger.debug("Hide all keywords in comments");
 		// TODO: #20 fix issue when no line ending after these keywords
-		query = query.replace("USER", "#USER").replace("MESSAGE", "#MESSAGE").replace("REVISION", "#REVISION");	
+		query = query.replace("USER", "#USER").replace("MESSAGE", "#MESSAGE").replace("REVISION", "#REVISION").replace("#REVISION-PROGRESS", "REVISION-PROGRESS");
 		
 		logger.debug("Execute query on SPARQL endpoint:"+ query);
 		DefaultHttpClient httpClient = new DefaultHttpClient();

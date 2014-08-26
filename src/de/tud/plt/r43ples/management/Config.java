@@ -13,6 +13,8 @@ public class Config {
 	public static String yed_filepath;
 	public static String visualisation_path;
 	public static String revision_graph;
+	public static String sdd_graph;
+	public static String sdd_graph_defaultContent;
 
 	
 	/**
@@ -31,6 +33,8 @@ public class Config {
 		sparql_password = config.getString("sparql.password");
 		
 		revision_graph = config.getString("revision.graph");
+		sdd_graph = config.getString("sdd.graph");
+		sdd_graph_defaultContent = config.getString("sdd.graph.defaultContent");
 		
 		yed_filepath = config.getString("yEd.filePath");
 		visualisation_path = config.getString("visualisation.path");

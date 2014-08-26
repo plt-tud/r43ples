@@ -36,12 +36,14 @@ public class RevisionManagement {
 			+ "PREFIX dc-terms: <http://purl.org/dc/terms/> \n"
 			+ prefix_rmo
 			+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
-			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n";
+			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
+			+ "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
+			+ "PREFIX sdd: <http://eatld.et.tu-dresden.de/sdd#> \n";
 	
 
 	
 	/**
-	 * Put existing graph under version control. existence of graph is not checked.
+	 * Put existing graph under version control. Existence of graph is not checked.
 	 * 
 	 * @param graphName the graph name of the existing graph
 	 * @throws IOException 
@@ -75,15 +77,14 @@ public class RevisionManagement {
 		
 		// Add graph element
 		// TODO It is possible to add more information about the graph under revision control (e.g. label, comment, user, ...)
+		// TODO Currently to every created graph the default SDD is referenced - provide possibility to choose SDD
 		queryContent += String.format(
-				"<%s> a rmo:Graph .%n", 
+				"<%s> a rmo:Graph ;%n"
+				+ "sddo:hasDefaultSDD sdd:DefaultSDD .", 
 				graphName);
-		
-		String queryRevision = prefix_rmo + String.format("INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
+
+		String queryRevision = prefixes + String.format("INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
 		TripleStoreInterface.executeQueryWithAuthorization(queryRevision, "HTML");
-		
-		// Create the initial (default) SDD graph
-		MergeManagement.createInitialSDD(graphName);
 	}
 	
 	

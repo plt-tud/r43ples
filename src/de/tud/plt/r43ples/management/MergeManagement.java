@@ -531,10 +531,11 @@ public class MergeManagement {
 	 * @param uriA the URI of the revision progress of branch A
 	 * @param graphNameRevisionProgressB the graph name of the revision progress of branch B
 	 * @param uriB the URI of the revision progress of branch B
+	 * @param uriSDD the URI of the SDD to use
 	 * @throws HttpException 
 	 * @throws IOException 
 	 */
-	public static void createConflictingTripleModel(String graphName, String graphNameConflictingTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB) throws IOException, HttpException {
+	public static void createConflictingTripleModel(String graphName, String graphNameConflictingTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD) throws IOException, HttpException {
 		
 		logger.info("Create the conflicting triple model");
 		TripleStoreInterface.executeQueryWithAuthorization(String.format("DROP SILENT GRAPH <%s>", graphNameConflictingTripleModel), "HTML");
@@ -576,13 +577,15 @@ public class MergeManagement {
 				+ "SELECT ?combinationURI ?tripleStateA ?tripleStateB %n"
 				+ "FROM <%s> %n"
 				+ "WHERE { %n"
+				+ "	<%s> a sddo:StructuralDefinitionGroup ;"
+				+ "		sddo:hasStructuralDefinition ?combinationURI ."
 				+ "	?combinationURI a sddo:StructuralDefinition ; %n"
 				+ "		sddo:hasTripleStateA ?tripleStateA ; %n"
 				+ "		sddo:hasTripleStateB ?tripleStateB ; %n"
 				+ "		sddo:isConflicting ?conflict . %n"
 				+ "	FILTER (?conflict = \"true\"^^xsd:boolean) %n"
-				+ "} %n", graphName + "-SDD");
-		
+				+ "} %n", Config.sdd_graph, uriSDD);
+				
 		String result = TripleStoreInterface.executeQueryWithAuthorization(queryConflictingSD, "XML");
 		
 		// Iterate over all conflicting combination URIs
@@ -831,32 +834,32 @@ public class MergeManagement {
 		return new String(os.toByteArray(), "UTF-8");
 	}
 	
-		
-	/**
-	 * Create the initial SDD for the specified graph under revision control.
-	 * 
-	 * @param graphName the graph name
-	 * @throws IOException 
-	 * @throws UnsupportedEncodingException 
-	 * @throws HttpException 
-	 */
-	public static void createInitialSDD(String graphName) throws UnsupportedEncodingException, IOException, HttpException {
-		// Load initial SDD into virtuoso
-		logger.info("Create the initial SDD graph.");
-		createNewGraph(graphName + "-SDD");		
-		RevisionManagement.executeINSERT(graphName + "-SDD", convertJenaModelToNTriple(readTurtleFileToJenaModel("dataset/sdd.ttl")));
-
-		// Create the reference
-		logger.info("Insert reference to SDD graph into revision graph.");	
-		String queryContent = String.format(
-				  "<%s> rmo:referencedSDD <%s> .%n"
-				  , graphName, graphName + "-SDD");
-		
-		String querySDD = String.format(
-				prefix_rmo
-				+ "INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
-		TripleStoreInterface.executeQueryWithAuthorization(querySDD, "HTML");
-	}
+// Not needed anymore
+//	/**
+//	 * Create the initial SDD for the specified graph under revision control.
+//	 * 
+//	 * @param graphName the graph name
+//	 * @throws IOException 
+//	 * @throws UnsupportedEncodingException 
+//	 * @throws HttpException 
+//	 */
+//	public static void createInitialSDD(String graphName) throws UnsupportedEncodingException, IOException, HttpException {
+//		// Load initial SDD into virtuoso
+//		logger.info("Create the initial SDD graph.");
+//		createNewGraph(graphName + "-SDD");		
+//		RevisionManagement.executeINSERT(graphName + "-SDD", convertJenaModelToNTriple(readTurtleFileToJenaModel("dataset/sdd.ttl")));
+//
+//		// Create the reference
+//		logger.info("Insert reference to SDD graph into revision graph.");	
+//		String queryContent = String.format(
+//				  "<%s> rmo:referencedSDD <%s> .%n"
+//				  , graphName, graphName + "-SDD");
+//		
+//		String querySDD = String.format(
+//				prefix_rmo
+//				+ "INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
+//		TripleStoreInterface.executeQueryWithAuthorization(querySDD, "HTML");
+//	}
 
 	
 	/**
