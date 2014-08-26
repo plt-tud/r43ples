@@ -57,19 +57,9 @@ import de.tud.plt.r43ples.management.TripleStoreInterface;
 @Path("r43ples")
 public class Endpoint {
 
-	@Context UriInfo uriInfo;
+	@Context private UriInfo uriInfo;
 	static Logger logger = Logger.getLogger(Endpoint.class);
 
-
-	/**
-	 * @return service version
-	 */
-	@Path("version")
-	@GET
-	public final String version() {
-		logger.info("Version queried.");
-		return "Version 0.8";
-	}
 	
 	/**
 	 * Provide revision information about R43ples system.
@@ -89,6 +79,28 @@ public class Endpoint {
 		
 		try {
 			return RevisionManagement.getRevisionInformation(graph, format);
+		} catch (HttpException | IOException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Provide information about revised graphs
+	 * @param graph Provide only information about this graph (if not null)
+	 * @return RDF model of revision information
+	 */
+	@Path("getRevisedGraphs")
+	@GET
+	@Produces({MediaType.APPLICATION_JSON})
+	public final String getRevisedGraphs(
+			@HeaderParam("Accept") final String format_header, 
+			@QueryParam("format") @DefaultValue("application/json") final String format_query) {
+		logger.info("Get Revised Graphs");
+		String format = (format_query!=null) ? format_query : format_header;
+		logger.info("format: " +  format);
+		try {
+			return RevisionManagement.getRevisedGraphs(format);
 		} catch (HttpException | IOException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException(e.getMessage());

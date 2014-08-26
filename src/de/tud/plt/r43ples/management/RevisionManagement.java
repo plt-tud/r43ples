@@ -662,6 +662,23 @@ public class RevisionManagement {
 		return TripleStoreInterface.executeQueryWithAuthorization(sparqlQuery, format);
 	}
 	
+	/**
+	 * Get revised graphs in R43ples.
+	 * @param format serialization of the response
+	 * @return String containing the SPARQL response in specified format
+	 * @throws IOException 
+	 * @throws HttpException 
+	 */
+	public static String getRevisedGraphs(final String format) throws HttpException, IOException {
+		String sparqlQuery = prefix_rmo + String.format(""
+				+ "SELECT DISTINCT ?graph "
+				+ "FROM <%s> "
+				+ "WHERE {"
+				+ "	?rev rmo:revisionOf ?graph."
+				+ "} ORDER BY ?graph", Config.revision_graph);
+		return TripleStoreInterface.executeQueryWithAuthorization(sparqlQuery, format);
+	}
+	
 	
 	/**
 	 * Deletes all information for a specific named graph including all full graphs and information in the R43ples system.
