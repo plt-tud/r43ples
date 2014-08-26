@@ -326,7 +326,6 @@ public class Endpoint {
 		
 	    String graphName = m.group("graph");
 	    String revisionName = m.group("revision"); //can contain revision numbers or reference names
-	    String action = m.group("action");
 	    
 	    if (!RevisionManagement.isBranch(graphName, revisionName)) {
 			throw new InternalServerErrorException("Revision is not referenced by branch");
@@ -341,8 +340,8 @@ public class Endpoint {
 		TripleStoreInterface.executeQueryWithAuthorization("COPY <" + referenceFullGraph + "> TO <" + graphUpdateTemp + ">", "HTML");
 		
 		// Replace graph name in SPARQL query 
-		String query_replaced = m.replaceFirst(action + " <" + graphUpdateTemp + ">");
-		//m = pattern.matcher(query);		
+		// TODO: should also work with different graph names and revisions in one query
+		String query_replaced = m.replaceAll("${action} <" + graphUpdateTemp + ">");
 		logger.info("query replaced: " + query_replaced);
 
 		
