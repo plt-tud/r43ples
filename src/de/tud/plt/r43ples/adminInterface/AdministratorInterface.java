@@ -622,7 +622,7 @@ public class AdministratorInterface {
 	 * @throws AuthenticationException 
 	 */
 	private static void listAllRevisionedGraphs() throws HttpException, IOException {
-		String graphInformation = TripleStoreInterface.executeQueryWithAuthorization("SELECT DISTINCT ?graph FROM <r43ples-revisions> WHERE {?s <http://eatld.et.tu-dresden.de/rmo#revisionOf> ?graph}", "XML");
+		String graphInformation = TripleStoreInterface.executeQueryWithAuthorization("SELECT DISTINCT ?graph FROM <"+ Config.revision_graph +"> WHERE {?s <http://eatld.et.tu-dresden.de/rmo#revisionOf> ?graph}", "XML");
 
 		ResultSet results = ResultSetFactory.fromXML(graphInformation);
 		
@@ -641,10 +641,7 @@ public class AdministratorInterface {
 	 * @throws IOException 
 	 * @throws ClientProtocolException 
 	 */
-	private static void generateRefreshedYEDExport() throws HttpException, IOException {
-		// Get the graph name
-		System.out.println("Please enter the graph name:");
-		
+	private static void generateRefreshedYEDExport() throws HttpException, IOException {		
 		String graphName = "";
 		try {
 			graphName=getUserInputExistingGraph();
@@ -726,7 +723,7 @@ public class AdministratorInterface {
 					URL fileName = loader.getResource("dataset/addset-"+changesize+"-"+revision+".nt");
 					String addedAsNTriples = FileUtils.readFileToString(new File(fileName.getFile()));
 					list = new ArrayList<>();
-					list.add(Integer.toString(revision-1));
+					list.add(Integer.toString(revision));
 					RevisionManagement.createNewRevision(graphName, addedAsNTriples, "", "test", "test creation", list);
 				}
 			}

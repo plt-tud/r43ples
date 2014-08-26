@@ -8,3 +8,4 @@ verification/*.csv
 resources/dataset
 /cov-int
 
+/yEdExport.graphml

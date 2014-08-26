@@ -38,8 +38,8 @@ public class YEDExport {
 		// Define colors
 		String yellow = "#FFCC00";
 		String red = "#FF0000";
-		
-		String result = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+		StringBuilder result = new StringBuilder(
+				 		"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
 						"<graphml xmlns=\"http://graphml.graphdrawing.org/xmlns\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:y=\"http://www.yworks.com/xml/graphml\" xmlns:yed=\"http://www.yworks.com/xml/yed/3\" xsi:schemaLocation=\"http://graphml.graphdrawing.org/xmlns http://www.yworks.com/xml/schema/graphml/1.1/ygraphml.xsd\">\n" +
 						"  <!--Created by yFiles for Java 2.11-->\n" +
 						"  <key for=\"graphml\" id=\"d0\" yfiles.type=\"resources\"/>\n" +
@@ -54,7 +54,7 @@ public class YEDExport {
 						"  <key attr.name=\"description\" attr.type=\"string\" for=\"edge\" id=\"d9\"/>\n" +
 						"  <key for=\"edge\" id=\"d10\" yfiles.type=\"edgegraphics\"/>\n" +
 						"  <graph edgedefault=\"directed\" id=\"G\">\n" +
-						"    <data key=\"d7\"/>\n";
+						"    <data key=\"d7\"/>\n");
 		// Create nodes and edges
 		HashMap<String, NodeSpecification> map = tree.getMap();
 		Iterator<String> ite = map.keySet().iterator();
@@ -63,32 +63,30 @@ public class YEDExport {
 			
 			// Create new node
 			if (key.equals(headRevision)) {
-				result += createNode(key, red);
+				result.append(createNode(key, red));
 			} else {
-				result += createNode(key, yellow);
+				result.append(createNode(key, yellow));
 			}
 			
 			// Create new edges
 			Iterator<NodeSpecification> iteEdges = map.get(key).getSuccessors().iterator();
 			while (iteEdges.hasNext()) {
 				NodeSpecification next = iteEdges.next();
-				result += createEdge(next.getRevisionNumber(),key);
+				result.append(createEdge(next.getRevisionNumber(),key));
 			}
 		}
 		
 		// If key set is null then there is only the revision 0 (HEAD)
 		if ((map.keySet() == null) || (map.keySet().isEmpty())) {
-			result += createNode("0", red);
+			result.append(createNode("0", red));
 		}
 		
-		result +=		"  </graph>\n" +
+		result.append(	"  </graph>\n" +
 						"  <data key=\"d0\">\n" +
 						"    <y:Resources/>\n" +
 						"  </data>\n" +
-						"</graphml>\n";
-		
-		
-		return result;
+						"</graphml>\n");
+		return result.toString();
 	}
 	
 	
