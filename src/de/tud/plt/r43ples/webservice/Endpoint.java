@@ -164,7 +164,6 @@ public class Endpoint {
 			}
 		} else {
 			logger.info("SPARQL query was requested. Query: " + sparqlQuery);
-			Response response = null;
 			try {
 				String sparqlQueryDecoded = URLDecoder.decode(sparqlQuery, "UTF-8");
 				if (patternSelectQuery.matcher(sparqlQueryDecoded).find()) {
@@ -186,7 +185,7 @@ public class Endpoint {
 				e.printStackTrace();
 				throw new InternalServerErrorException(e.getMessage());
 			}	
-			return response;
+			throw new InternalServerErrorException("No R43ples query detected");
 		}
 	}
 	
