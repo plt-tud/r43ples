@@ -335,10 +335,12 @@ public class RevisionManagement {
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
 			if (resultSet.hasNext()) {
+				logger.error("Identifier not unique: " + revisionIdentifier);
 				throw new InternalServerErrorException("Identifier not unique: " + revisionIdentifier);
 			}
 			return qs.getResource("?rev").toString();
 		} else {
+			logger.error("No Revision or Reference found with identifier: " + revisionIdentifier);
 			throw new InternalServerErrorException("No Revision or Reference found with identifier: " + revisionIdentifier);
 		}
 	}

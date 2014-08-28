@@ -178,7 +178,7 @@ public class TestR43ples {
 				+ "WHERE { ?s ?p ?o. }"
 				+ "ORDER BY ?s ?p ?o", graphName);
 		String result = executeR43plesQueryWithFormat(query, "application/xml");
-		String expected = ResourceManagement.getContentFromResource("response1.xml");
+		String expected = ResourceManagement.getContentFromResource("response-1.1-0.xml");
 		Assert.assertEquals(expected, result);
 	}
 	
@@ -187,6 +187,16 @@ public class TestR43ples {
 		Assert.assertNotEquals("", result);
 	}
 	
+	
+	@Test public void testSelectQueryWithoutRevision() throws IOException {
+		String query = String.format(""
+				+ "select * from <%s>"
+				+ "where { ?s ?p ?o. }"
+				+ "ORDER BY ?s ?p ?o", graphName);
+		String result = executeR43plesQueryWithFormat(query, "application/xml");
+		String expected = ResourceManagement.getContentFromResource("response-master.xml");
+		Assert.assertEquals(expected, result);
+	}
 	
 	/**
 	 * Executes a SPARQL-query against the R43ples endpoint
