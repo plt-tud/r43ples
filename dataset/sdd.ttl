@@ -34,25 +34,25 @@ sdd:Deleted-Deleted a sddo:StructuralDefinition ;
 	sddo:hasTripleStateA sddo:Deleted ;
 	sddo:hasTripleStateB sddo:Deleted ;
 	sddo:isConflicting "false"^^xsd:boolean ;
-	sddo:useTripleAutomaticResolution sddo:TripleA .
+	sddo:automaticResolutionState sddo:Deleted .
 	
 sdd:Deleted-Added a sddo:StructuralDefinition ;
 	sddo:hasTripleStateA sddo:Deleted ;
 	sddo:hasTripleStateB sddo:Added ;
 	sddo:isConflicting "true"^^xsd:boolean ;
-	sddo:useTripleAutomaticResolution sddo:TripleA .
+	sddo:automaticResolutionState sddo:Deleted .
 
 sdd:Deleted-Original a sddo:StructuralDefinition ;
 	sddo:hasTripleStateA sddo:Deleted ;
 	sddo:hasTripleStateB sddo:Original ;
 	sddo:isConflicting "false"^^xsd:boolean ;
-	sddo:useTripleAutomaticResolution sddo:TripleA .
+	sddo:automaticResolutionState sddo:Deleted .
 	
 sdd:Deleted-NotIncluded a sddo:StructuralDefinition ;
 	sddo:hasTripleStateA sddo:Deleted ;
 	sddo:hasTripleStateB sddo:NotIncluded ;
 	sddo:isConflicting "false"^^xsd:boolean ;
-	sddo:useTripleAutomaticResolution sddo:TripleA .
+	sddo:automaticResolutionState sddo:Deleted .
 	
 
 ###########################################################
@@ -63,25 +63,25 @@ sdd:Added-Deleted a sddo:StructuralDefinition ;
 	sddo:hasTripleStateA sddo:Added ;
 	sddo:hasTripleStateB sddo:Deleted ;
 	sddo:isConflicting "true"^^xsd:boolean ;
-	sddo:useTripleAutomaticResolution sddo:TripleA .
+	sddo:automaticResolutionState sddo:Added .
 	
 sdd:Added-Added a sddo:StructuralDefinition ;
 	sddo:hasTripleStateA sddo:Added ;
 	sddo:hasTripleStateB sddo:Added ;
 	sddo:isConflicting "false"^^xsd:boolean ;
-	sddo:useTripleAutomaticResolution sddo:TripleA .
+	sddo:automaticResolutionState sddo:Added .
 
 sdd:Added-Original a sddo:StructuralDefinition ;
 	sddo:hasTripleStateA sddo:Added ;
 	sddo:hasTripleStateB sddo:Original ;
 	sddo:isConflicting "false"^^xsd:boolean ;
-	sddo:useTripleAutomaticResolution sddo:TripleA .
+	sddo:automaticResolutionState sddo:Added .
 	
 sdd:Added-NotIncluded a sddo:StructuralDefinition ;
 	sddo:hasTripleStateA sddo:Added ;
 	sddo:hasTripleStateB sddo:NotIncluded ;
 	sddo:isConflicting "false"^^xsd:boolean ;
-	sddo:useTripleAutomaticResolution sddo:TripleA .
+	sddo:automaticResolutionState sddo:Added .
 	
 	
 ###########################################################
@@ -92,26 +92,26 @@ sdd:Original-Deleted a sddo:StructuralDefinition ;
 	sddo:hasTripleStateA sddo:Original ;
 	sddo:hasTripleStateB sddo:Deleted ;
 	sddo:isConflicting "false"^^xsd:boolean ;
-	sddo:useTripleAutomaticResolution sddo:TripleA .
+	sddo:automaticResolutionState sddo:Added .
 	
 sdd:Original-Added a sddo:StructuralDefinition ;
 	sddo:hasTripleStateA sddo:Original ;
 	sddo:hasTripleStateB sddo:Added ;
 	sddo:isConflicting "false"^^xsd:boolean ;
-	sddo:useTripleAutomaticResolution sddo:TripleA .
+	sddo:automaticResolutionState sddo:Added .
 
 sdd:Original-Original a sddo:StructuralDefinition ;
 	sddo:hasTripleStateA sddo:Original ;
 	sddo:hasTripleStateB sddo:Original ;
 	sddo:isConflicting "false"^^xsd:boolean ;
-	sddo:useTripleAutomaticResolution sddo:TripleA .
+	sddo:automaticResolutionState sddo:Added .
 
 # not possible	
 #sdd:Original-NotIncluded a sddo:StructuralDefinition ;
 #	sddo:hasTripleStateA sddo:Original ;
 #	sddo:hasTripleStateB sddo:NotIncluded ;
 #	sddo:isConflicting "false"^^xsd:boolean ;
-#	sddo:useTripleAutomaticResolution sddo:TripleA .
+#	sddo:automaticResolutionState sddo:Added .
 
 
 ###########################################################
@@ -122,25 +122,25 @@ sdd:NotIncluded-Deleted a sddo:StructuralDefinition ;
 	sddo:hasTripleStateA sddo:NotIncluded ;
 	sddo:hasTripleStateB sddo:Deleted ;
 	sddo:isConflicting "false"^^xsd:boolean ;
-	sddo:useTripleAutomaticResolution sddo:TripleA .
+	sddo:automaticResolutionState sddo:Deleted .
 	
 sdd:NotIncluded-Added a sddo:StructuralDefinition ;
 	sddo:hasTripleStateA sddo:NotIncluded ;
 	sddo:hasTripleStateB sddo:Added ;
 	sddo:isConflicting "false"^^xsd:boolean ;
-	sddo:useTripleAutomaticResolution sddo:TripleA .
+	sddo:automaticResolutionState sddo:Added .
 
 # not possible
 #sdd:NotIncluded-Original a sddo:StructuralDefinition ;
 #	sddo:hasTripleStateA sddo:NotIncluded ;
 #	sddo:hasTripleStateB sddo:Original ;
 #	sddo:isConflicting "false"^^xsd:boolean ;
-#	sddo:useTripleAutomaticResolution sddo:TripleA .
+#	sddo:automaticResolutionState sddo:Added .
 
 # makes no sense	
 #sdd:NotIncluded-NotIncluded a sddo:StructuralDefinition ;
 #	sddo:hasTripleStateA sddo:NotIncluded ;
 #	sddo:hasTripleStateB sddo:NotIncluded ;
 #	sddo:isConflicting "false"^^xsd:boolean ;
-#	sddo:useTripleAutomaticResolution sddo:TripleA .
+#	sddo:automaticResolutionState sddo:Deleted .
 	
