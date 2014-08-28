@@ -15,6 +15,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.webservice.Service;
 
 /**
@@ -171,11 +172,19 @@ public class TestR43ples {
 				+ "}", graphName);
 		logger.debug("Execute query: \n" + query);
 		logger.debug("Response: \n" + executeR43plesQuery(query));
+		
+		query = String.format(""
+				+ "SELECT * FROM <%s> REVISION \"1.1-0\" "
+				+ "WHERE { ?s ?p ?o. }"
+				+ "ORDER BY ?s ?p ?o", graphName);
+		String result = executeR43plesQueryWithFormat(query, "application/xml");
+		String expected = ResourceManagement.getContentFromResource("response1.xml");
+		Assert.assertEquals(expected, result);
 	}
 	
 	@Test public void testServiceDescription() throws IOException{
 		String result = executeR43plesQueryWithFormat("", "text/turtle");
-		Assert.assertNotNull(result);
+		Assert.assertNotEquals("", result);
 	}
 	
 	

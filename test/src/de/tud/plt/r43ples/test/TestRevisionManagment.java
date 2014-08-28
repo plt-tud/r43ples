@@ -106,14 +106,14 @@ public class TestRevisionManagment {
 		Assert.assertEquals("2.0-1", revNumber2);
 		
 		RevisionManagement.createReference("branch", graphName, "2.0-1", "testBranch2", "test_user", "branching as junit test");
-		usedRevisionNumber.removeAll(usedRevisionNumber);
+		usedRevisionNumber.clear();
 		usedRevisionNumber.add("testBranch2");
 		RevisionManagement.createNewRevision(graphName, "<a> <b> <e>", "", "test_user", "test_commitMessage", usedRevisionNumber);
 		String revNumber3 = RevisionManagement.getRevisionNumber(graphName, "testBranch2");
 		Assert.assertEquals("2.0-1.0-0", revNumber3);
 		
 		RevisionManagement.createReference("branch", graphName, "2.0-1", "testBranch2a", "test_user", "branching as junit test");
-		usedRevisionNumber.removeAll(usedRevisionNumber);
+		usedRevisionNumber.clear();
 		usedRevisionNumber.add("testBranch2a");
 		RevisionManagement.createNewRevision(graphName, "<a> <b> <f>", "", "test_user", "test_commitMessage", usedRevisionNumber);
 		String revNumber4 = RevisionManagement.getRevisionNumber(graphName, "testBranch2a");

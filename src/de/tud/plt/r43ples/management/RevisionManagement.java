@@ -672,6 +672,23 @@ public class RevisionManagement {
 		return TripleStoreInterface.executeQueryWithAuthorization(sparqlQuery, format);
 	}
 	
+	/**
+	 * Get revised graphs in R43ples.
+	 * @param format serialization of the response
+	 * @return String containing the SPARQL response in specified format
+	 * @throws IOException 
+	 * @throws HttpException 
+	 */
+	public static String getRevisedGraphs(final String format) throws HttpException, IOException {
+		String sparqlQuery = prefix_rmo + String.format(""
+				+ "SELECT DISTINCT ?graph "
+				+ "FROM <%s> "
+				+ "WHERE {"
+				+ "	?rev rmo:revisionOf ?graph."
+				+ "} ORDER BY ?graph", Config.revision_graph);
+		return TripleStoreInterface.executeQueryWithAuthorization(sparqlQuery, format);
+	}
+	
 	
 	/**
 	 * Deletes all information for a specific named graph including all full graphs and information in the R43ples system.
@@ -849,6 +866,24 @@ public class RevisionManagement {
 		} else {
 			return null;
 		}
+	}
+	
+	
+	/**
+	 * Get the content of a graph by execution of CONSTRUCT.
+	 * 
+	 * @param graphName the graphName
+	 * @return the constructed graph content as turtle
+	 * @throws HttpException 
+	 * @throws IOException 
+	 */
+	public static String getContentOfGraphByConstruct(String graphName) throws IOException, HttpException {
+		String query = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "FROM <%s> %n"
+				+ "WHERE {?s ?p ?o} %n", graphName);
+		
+		return TripleStoreInterface.executeQueryWithAuthorization(query, "TURTLE");		
 	}
 	
 }

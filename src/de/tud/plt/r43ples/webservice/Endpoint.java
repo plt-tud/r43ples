@@ -19,6 +19,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.http.HttpException;
@@ -29,6 +30,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.log4j.Logger;
@@ -47,6 +49,7 @@ import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
+import de.tud.plt.r43ples.webservice.InternalServerErrorException;
 
 
 /**
@@ -60,19 +63,9 @@ import de.tud.plt.r43ples.management.TripleStoreInterface;
 @Path("r43ples")
 public class Endpoint {
 
-	@Context UriInfo uriInfo;
+	@Context private UriInfo uriInfo;
 	static Logger logger = Logger.getLogger(Endpoint.class);
 
-
-	/**
-	 * @return service version
-	 */
-	@Path("version")
-	@GET
-	public final String version() {
-		logger.info("Version queried.");
-		return "Version 0.8";
-	}
 	
 	/**
 	 * Provide revision information about R43ples system.
@@ -92,6 +85,28 @@ public class Endpoint {
 		
 		try {
 			return RevisionManagement.getRevisionInformation(graph, format);
+		} catch (HttpException | IOException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException(e.getMessage());
+		}
+	}
+	
+	/**
+	 * Provide information about revised graphs
+	 * @param graph Provide only information about this graph (if not null)
+	 * @return RDF model of revision information
+	 */
+	@Path("getRevisedGraphs")
+	@GET
+	@Produces({MediaType.APPLICATION_JSON})
+	public final String getRevisedGraphs(
+			@HeaderParam("Accept") final String format_header, 
+			@QueryParam("format") @DefaultValue("application/json") final String format_query) {
+		logger.info("Get Revised Graphs");
+		String format = (format_query!=null) ? format_query : format_header;
+		logger.info("format: " +  format);
+		try {
+			return RevisionManagement.getRevisedGraphs(format);
 		} catch (HttpException | IOException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException(e.getMessage());
@@ -331,7 +346,6 @@ public class Endpoint {
 		
 	    String graphName = m.group("graph");
 	    String revisionName = m.group("revision"); //can contain revision numbers or reference names
-	    String action = m.group("action");
 	    
 	    if (!RevisionManagement.isBranch(graphName, revisionName)) {
 			throw new InternalServerErrorException("Revision is not referenced by branch");
@@ -346,11 +360,8 @@ public class Endpoint {
 		TripleStoreInterface.executeQueryWithAuthorization("COPY <" + referenceFullGraph + "> TO <" + graphUpdateTemp + ">", "HTML");
 		
 		// Replace graph name in SPARQL query 
-//		String query_replaced = m.replaceFirst(action + " <" + graphUpdateTemp + ">");
-		String query_replaced = query.replace("FROM <" + graphName + ">", "FROM <" + graphUpdateTemp + ">");
-		query_replaced = query_replaced.replace("INTO <" + graphName + ">", "INTO <" + graphUpdateTemp + ">");
-		query_replaced = query_replaced.replace("GRAPH <" + graphName + ">", "GRAPH <" + graphUpdateTemp + ">");
-		//m = pattern.matcher(query);		
+		// TODO: should also work with different graph names and revisions in one query
+		String query_replaced = m.replaceAll("${action} <" + graphUpdateTemp + ">");
 		logger.info("query replaced: " + query_replaced);
 
 		
@@ -519,20 +530,30 @@ public class Endpoint {
 		String commitMessage = extractCommitMessage(sparqlQuery);
 		
 		// Add R43ples information
-		Pattern pattern =  Pattern.compile("MERGE\\s*GRAPH\\s*<(?<graph>.*)>\\s*BRANCH\\s*\"(?<branchNameA>.*)\"\\s*INTO\\s*\"(?<branchNameB>.*)\"");
+		Pattern pattern =  Pattern.compile("MERGE\\s*(?<auto>AUTO)?\\s*GRAPH\\s*<(?<graph>.*)>\\s*BRANCH\\s*\"(?<branchNameA>.*)\"\\s*INTO\\s*\"(?<branchNameB>.*)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?");
 		Matcher m = pattern.matcher(sparqlQuery);
 		
 		boolean foundEntry = false;
 		while (m.find()) {
 			foundEntry = true;
+			String auto = m.group("auto");
 			String graphName = m.group("graph");
 			String branchNameA = m.group("branchNameA");
 			String branchNameB = m.group("branchNameB");
+			String with = m.group("with");
+			String triples = m.group("triples");
+			
+			logger.debug("auto: " + auto);
+			logger.debug("graph: " + graphName);
+			logger.debug("branchNameA: " + branchNameA);
+			logger.debug("branchNameB: " + branchNameB);
+			logger.debug("with: " + with);
+			logger.debug("triples: " + triples);
 			
 			// TODO Check if A and B are different valid branches
 			// TODO Think about usage of branch (terminal nodes) only or possibility to merge any revision of different branch into another 
 			
-			// TODO differ between MERGE query with specified and SDD and without SDD			
+			// TODO differ between MERGE query with specified SDD and without SDD			
 			// Query the referenced SDD
 			String querySDD = String.format(
 					  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
@@ -562,14 +583,36 @@ public class Endpoint {
 			String uriA = "http://eatld.et.tu-dresden.de/branch-A";
 			String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 			
-			
 			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, branchNameA), graphNameA, uriA);
 			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, branchNameB), graphNameB, uriB);
 			
 			// Create conflict model
 			MergeManagement.createConflictingTripleModel(graphName, "RM-CONFLICT-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI);
 			
-			// TODO Create response
+			// Differ between the different merge queries
+			if ((auto != null) && (with == null) && (triples == null)) {
+				logger.info("AUTO MERGE query detected");
+				// Create the merged revision
+				// TODO
+			} else if ((auto == null) && (with != null)) {
+				logger.info("MERGE WITH query detected");
+				// Create the merged revision
+				// TODO
+			} else if ((auto == null) && (with == null) && (triples == null)) {
+				logger.info("MERGE query detected");
+				if (RevisionManagement.checkGraphExistence("RM-CONFLICT-MODEL-" + graphName)) {
+					// Conflict model contains conflicts
+					// Return the conflict model to the client
+					responseBuilder = Response.status(Response.Status.CONFLICT);
+					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct("RM-CONFLICT-MODEL-" + graphName)); 
+				} else {
+					// Conflict model contains no conflicts
+					// Create the merged revision
+					//TODO
+				}
+			} else {
+				throw new InternalServerErrorException("This is not a valid MERGE query: " + sparqlQuery);
+			}
 		}
 		if (!foundEntry)
 			throw new InternalServerErrorException("Error in query: " + sparqlQuery);

@@ -801,6 +801,142 @@ public class MergeManagement {
 	}
 	
 	
+	
+	/**
+	 * Create a merged revision.
+	 * 
+	 * @param graphName the graph name
+	 * @param branchNameA the name of branch A
+	 * @param branchNameB the name of branch B
+	 * @param user the user
+	 * @param commitMessage the commit message
+	 * @param graphNameConflictingTripleModel the graph name of the conflicting triple model
+	 * @param graphNameRevisionProgressA the graph name of the revisions progress A
+	 * @param uriA the URI A
+	 * @param graphNameRevisionProgressB the graph name of the revisions progress B
+	 * @param uriB the URI B
+	 * @param uriSDD the URI of the SDD
+	 * @param auto when set to true it is a MERGE AUTO query
+	 * @param triples the triples of the WITH part, when unequal to null it is a MERGE WITH query
+	 * @throws HttpException
+	 * @throws IOException
+	 */
+	public void createMergedRevision(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameConflictingTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, boolean auto, String triples) throws HttpException, IOException {
+		
+		// Zusammenführung erfolgt immer nach SDD
+		 
+		// Create an empty temporary graph which will contain the merged full content
+		String graphNameOfMerged = "RM-MERGED-TEMP-" + graphName;
+		createNewGraph(graphNameOfMerged);
+		
+		// Get the full graph name of branch A
+		String graphNameOfBranchA = RevisionManagement.getFullGraphName(graphName, branchNameA);
+		// Get the full graph name of branch B
+		String graphNameOfBranchB = RevisionManagement.getFullGraphName(graphName, branchNameB);
+		
+		// Copy graph B to temporary merged graph
+		String queryCopy = String.format("COPY <%s> TO <%s>", graphNameOfBranchB, graphNameOfMerged);
+		TripleStoreInterface.executeQueryWithAuthorization(queryCopy, "HTML");
+		
+		// Get the triples from branch A which should be added to/removed from the merged revision
+		String triplesToAdd;
+		String triplesToDelete;
+		
+		// Differ between the different MERGE queries
+		if (auto == true) {
+			// AUTO MERGE query
+			
+			
+			
+			
+			
+		} else if (triples != null) {
+			// MERGE WITH query
+		} else {
+			// MERGE query
+		}
+		
+		
+		
+		
+//		durchgehen und schauen, an welchen stellen A genutzt wird - B ist ja schon enthalten
+		
+		
+		
+		
+		
+		
+		
+		
+		// Update the merged graph
+		
+		// insert triplesToAdd
+		// delete triples to delete
+		
+		// Finale zusammmengeführte Revision
+		
+		
+		
+		// Calculate the add and delete sets
+		
+		// Get all added triples (concatenate all triples which are in MERGED but not in A and all triples which are in MERGED but not in B)
+		String queryAddedTriples = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "WHERE { %n"
+				+ "	GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	FILTER NOT EXISTS { %n"
+				+ "		GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	} %n"
+				+ "}", graphNameOfMerged, graphNameOfBranchA);
+		
+		String addedTriples = TripleStoreInterface.executeQueryWithAuthorization(queryAddedTriples, "text/plain");
+		
+		queryAddedTriples = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "WHERE { %n"
+				+ "	GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	FILTER NOT EXISTS { %n"
+				+ "		GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	} %n"
+				+ "}", graphNameOfMerged, graphNameOfBranchB);
+
+		addedTriples += TripleStoreInterface.executeQueryWithAuthorization(queryAddedTriples, "text/plain");
+		
+		// Get all removed triples (concatenate all triples which are in A but not in MERGED and all triples which are in B but not in MERGED)
+		String queryRemovedTriples = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "WHERE { %n"
+				+ "	GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	FILTER NOT EXISTS { %n"
+				+ "		GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	} %n"
+				+ "}", graphNameOfBranchA, graphNameOfMerged);
+		
+		String removedTriples = TripleStoreInterface.executeQueryWithAuthorization(queryRemovedTriples, "text/plain");
+		
+		queryRemovedTriples = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "WHERE { %n"
+				+ "	GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	FILTER NOT EXISTS { %n"
+				+ "		GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	} %n"
+				+ "}", graphNameOfBranchB, graphNameOfMerged);
+		
+		removedTriples += TripleStoreInterface.executeQueryWithAuthorization(queryRemovedTriples, "text/plain");
+
+		// Create list with the 2 predecessors
+		ArrayList<String> usedRevisionNumbers = new ArrayList<String>();
+		usedRevisionNumbers.add(branchNameA);
+		usedRevisionNumbers.add(branchNameB);
+		RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, usedRevisionNumbers);
+		
+	}
+	
+	
+	
+	
+	
 	/**
 	 * Read turtle file to jena model.
 	 * 

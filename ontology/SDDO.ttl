@@ -29,6 +29,23 @@
 #################################################################
 
 
+###  http://eatld.et.tu-dresden.de/sddo#automaticResolutionState
+
+:automaticResolutionState rdf:type owl:ObjectProperty ;
+                          
+                          rdfs:label "nutze Status fuer automatische Konfliktbehebung"@de ,
+                                     "use state for automatic conflict resolution"@en ;
+                          
+                          rdfs:comment "Spezifiziert den Status, welcher bei einer automatischen Konfliktbehebung genutzt werden soll."@de ,
+                                       "Specifies the state which should be used when the conflict should be resolved automatically."@en ;
+                          
+                          rdfs:range :Added ,
+                                     :Deleted ;
+                          
+                          rdfs:domain :StructuralDefinition .
+
+
+
 ###  http://eatld.et.tu-dresden.de/sddo#hasDefaultSDD
 
 :hasDefaultSDD rdf:type owl:ObjectProperty ;
@@ -88,22 +105,6 @@
                  rdfs:domain :StructuralDefinition ;
                  
                  rdfs:range :TripleState .
-
-
-
-###  http://eatld.et.tu-dresden.de/sddo#useTripleAutomaticResolution
-
-:useTripleAutomaticResolution rdf:type owl:ObjectProperty ;
-                              
-                              rdfs:label "nutze Tripel fuer automatische Konfliktbehebung"@de ,
-                                         "use triple for automatic conflict resolution"@en ;
-                              
-                              rdfs:comment "Spezifiziert das Tripel, welches bei einer automatischen Konfliktbehebung genutzt werden soll."@de ,
-                                           "Specifies the triple which should be used when the conflict should be resolved automatically."@en ;
-                              
-                              rdfs:domain :StructuralDefinition ;
-                              
-                              rdfs:range :Triple .
 
 
 
