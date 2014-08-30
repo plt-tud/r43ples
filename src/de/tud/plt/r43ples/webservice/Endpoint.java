@@ -550,6 +550,8 @@ public class Endpoint {
 			logger.debug("with: " + with);
 			logger.debug("triples: " + triples);
 			
+			// TODO check graph existence
+			
 			// TODO Check if A and B are different valid branches
 			// TODO Think about usage of branch (terminal nodes) only or possibility to merge any revision of different branch into another 
 			
@@ -586,8 +588,11 @@ public class Endpoint {
 			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, branchNameA), graphNameA, uriA);
 			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, branchNameB), graphNameB, uriB);
 			
+//			// Create conflict model
+//			MergeManagement.createConflictingTripleModel(graphName, "RM-CONFLICT-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI);
+			
 			// Create conflict model
-			MergeManagement.createConflictingTripleModel(graphName, "RM-CONFLICT-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI);
+			MergeManagement.createDifferenceTripleModel(graphName, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI);
 			
 			// Differ between the different merge queries
 			if ((auto != null) && (with == null) && (triples == null)) {

@@ -707,7 +707,7 @@ public class MergeManagement {
 				TripleStoreInterface.executeQueryWithAuthorization(queryTriple, "XML");
 				
 				
-				
+
 				
 				
 				
@@ -800,6 +800,207 @@ public class MergeManagement {
 		
 	}
 	
+	/*
+	 * Create the difference triple model which contains all differing triples.
+	 * 
+	 * @param graphName the graph name
+	 * @param graphNameDifferenceTripleModel the graph name of the difference triple model
+	 * @param graphNameRevisionProgressA the graph name of the revision progress of branch A
+	 * @param uriA the URI of the revision progress of branch A
+	 * @param graphNameRevisionProgressB the graph name of the revision progress of branch B
+	 * @param uriB the URI of the revision progress of branch B
+	 * @param uriSDD the URI of the SDD to use
+	 * @throws HttpException 
+	 * @throws IOException 
+	 */
+	public static void createDifferenceTripleModel(String graphName, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD) throws IOException, HttpException {
+		
+		logger.info("Create the difference triple model");
+		TripleStoreInterface.executeQueryWithAuthorization(String.format("DROP SILENT GRAPH <%s>", graphNameDifferenceTripleModel), "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization(String.format("CREATE GRAPH  <%s>", graphNameDifferenceTripleModel), "HTML");
+		
+		// Templates for revision A and B
+		String sparqlTemplateRevisionA = String.format(
+				  "	GRAPH <%s> { %n"
+				+ "		<%s> <%s> ?blankA . %n"
+				+ "			?blankA rdf:subject ?s . %n"
+				+ "			?blankA rdf:predicate ?p . %n"
+				+ "			?blankA rdf:object ?o . %n"
+				+ "			?blankA rmo:references ?revisionA . %n"
+				+ "	} %n", graphNameRevisionProgressA, uriA, "%s");
+		String sparqlTemplateRevisionB = String.format(
+				  "	GRAPH <%s> { %n"
+				+ "		<%s> <%s> ?blankB . %n"
+				+ "			?blankB rdf:subject ?s . %n"
+				+ "			?blankB rdf:predicate ?p . %n"
+				+ "			?blankB rdf:object ?o . %n"
+				+ "			?blankB rmo:references ?revisionB . %n"
+				+ "	} %n", graphNameRevisionProgressB, uriB, "%s");
+
+		String sparqlTemplateNotExistsRevisionA = String.format(
+				"FILTER NOT EXISTS {"
+				+ "%s"
+				+ "}", sparqlTemplateRevisionA);
+		
+		String sparqlTemplateNotExistsRevisionB = String.format(
+				"FILTER NOT EXISTS {"
+				+ "%s"
+				+ "}", sparqlTemplateRevisionB);
+		
+		// Get all structural definitions which are generating differences
+		String queryDifferingSD = String.format(
+				  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
+				+ "PREFIX sdd:  <http://eatld.et.tu-dresden.de/sdd#> %n"
+				+ "PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#> %n"
+				+ "SELECT ?combinationURI ?tripleStateA ?tripleStateB ?conflict %n"
+				+ "FROM <%s> %n"
+				+ "WHERE { %n"
+				+ "	<%s> a sddo:StructuralDefinitionGroup ;"
+				+ "		sddo:hasStructuralDefinition ?combinationURI ."
+				+ "	?combinationURI a sddo:StructuralDefinition ; %n"
+				+ "		sddo:hasTripleStateA ?tripleStateA ; %n"
+				+ "		sddo:hasTripleStateB ?tripleStateB ; %n"
+				+ "		sddo:isConflicting ?conflict . %n"
+//				+ "	FILTER (?conflict = \"true\"^^xsd:boolean) %n"
+				+ "} %n", Config.sdd_graph, uriSDD);
+				
+		String result = TripleStoreInterface.executeQueryWithAuthorization(queryDifferingSD, "XML");
+		
+		// Iterate over all differing combination URIs
+		ResultSet resultSetDifferences = ResultSetFactory.fromXML(result);
+		while (resultSetDifferences.hasNext()) {
+			QuerySolution qs = resultSetDifferences.next();
+
+			String currentDifferenceCombinationURI = qs.getResource("?combinationURI").toString();
+			String currentTripleStateA = qs.getResource("?tripleStateA").toString();
+			String currentTripleStateB = qs.getResource("?tripleStateB").toString();
+			// Will return an integer value because virtuoso stores boolean internal as integer
+			String currentConflictState = qs.getLiteral("?conflict").toString();
+			// Convert integer to boolean to use it in the next query correctly
+			if (currentConflictState.equals("1^^http://www.w3.org/2001/XMLSchema#integer")) {
+				currentConflictState = "\"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>";
+			} else {
+				currentConflictState = "\"false\"^^<http://www.w3.org/2001/XMLSchema#boolean>";
+			}
+			
+			String querySelectPart = "SELECT ?s ?p ?o %s %s %n";
+			String sparqlQueryRevisionA = null;
+			String sparqlQueryRevisionB = null;			
+			
+			// A
+			if (currentTripleStateA.equals(SDDTripleState.ADDED.getSddRepresentation())) {
+				// In revision A the triple was added
+				querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.ADDED.getRpoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleState.DELETED.getSddRepresentation())) {
+				// In revision A the triple was deleted
+				querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.DELETED.getRpoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleState.ORIGINAL.getSddRepresentation())) {
+				// In revision A the triple is original
+				querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.ORIGINAL.getRpoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+				// In revision A the triple is not included
+				querySelectPart = String.format(querySelectPart, "", "%s");
+				sparqlQueryRevisionA = sparqlTemplateNotExistsRevisionA;
+			}
+			
+			// B
+			if (currentTripleStateB.equals(SDDTripleState.ADDED.getSddRepresentation())) {
+				// In revision B the triple was added
+				querySelectPart = String.format(querySelectPart, "?revisionB");
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.ADDED.getRpoRepresentation());
+			} else if (currentTripleStateB.equals(SDDTripleState.DELETED.getSddRepresentation())) {
+				// In revision B the triple was deleted
+				querySelectPart = String.format(querySelectPart, "?revisionB");
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.DELETED.getRpoRepresentation());
+			} else if (currentTripleStateB.equals(SDDTripleState.ORIGINAL.getSddRepresentation())) {
+				// In revision B the triple is original
+				querySelectPart = String.format(querySelectPart, "?revisionB");
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.ORIGINAL.getRpoRepresentation());
+			} else if (currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+				// In revision B the triple is not included
+				querySelectPart = String.format(querySelectPart, "");
+				sparqlQueryRevisionB = sparqlTemplateNotExistsRevisionB;
+			}
+		
+			// Concatenated SPARQL query
+			String query = String.format(
+					prefixes
+					+ "%s"
+					+ "WHERE { %n"
+					+ "%s"
+					+ "%s"
+					+ "} %n", querySelectPart, sparqlQueryRevisionA, sparqlQueryRevisionB);
+					
+			String queryResult = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
+		
+			// Iterate over all triples
+			ResultSet resultSetTriples = ResultSetFactory.fromXML(queryResult);
+			while (resultSetTriples.hasNext()) {
+				QuerySolution qsQuery = resultSetTriples.next();
+				
+				String subject = qsQuery.getResource("?s").toString();
+				String predicate = qsQuery.getResource("?p").toString();
+
+				// Differ between literal and resource
+				String object = "";
+				if (qsQuery.get("?o").isLiteral()) {
+					object = "\"" + qsQuery.getLiteral("?o").toString() + "\"";
+				} else {
+					object = "<" + qsQuery.getResource("?o").toString() + ">";
+				}
+				
+				// Create the references A and B part of the query
+				String referencesAB = ". %n";
+				if (!currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation()) && !currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+					referencesAB = String.format(
+							  "			rpo:referencesA <%s> ; %n"
+							+ "			rpo:referencesB <%s> %n", qsQuery.getResource("?revisionA").toString(), 
+																qsQuery.getResource("?revisionB").toString());
+				} else if (currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation()) && !currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+					referencesAB = String.format(
+							  "			rpo:referencesB <%s> %n", qsQuery.getResource("?revisionB").toString());
+				} else if (!currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation()) && currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+					referencesAB = String.format(
+							  "			rpo:referencesA <%s> %n", qsQuery.getResource("?revisionA").toString());
+				}
+				
+				String queryTriple = prefixes + String.format(
+						  "INSERT INTO <%s> {%n"
+						+ "	<%s> a rpo:DifferenceGroup ; %n"
+						+ "	sddo:hasTripleStateA <%s> ; %n"
+						+ "	sddo:hasTripleStateB <%s> ; %n"
+						+ "	sddo:isConflicting %s ; %n"
+						+ "	rpo:hasDifference [ %n"
+						+ "		a rpo:Difference ; %n"
+						+ "			rpo:hasTriple [ %n"
+						+ "				rdf:subject <%s> ; %n"
+						+ "				rdf:predicate <%s> ; %n"
+						+ "				rdf:object %s %n"
+						+ "			] ; %n"
+						+ "%s"
+						+ "	] . %n"
+						+ "}", graphNameDifferenceTripleModel, 
+									currentDifferenceCombinationURI, 
+									currentTripleStateA, 
+									currentTripleStateB,
+									currentConflictState,
+									subject, 
+									predicate,
+									object,
+									referencesAB);
+				
+				TripleStoreInterface.executeQueryWithAuthorization(queryTriple, "XML");
+			}
+		}
+	}
+	
+	
+	
+	
+	
 	
 	
 	/**
@@ -846,7 +1047,8 @@ public class MergeManagement {
 		if (auto == true) {
 			// AUTO MERGE query
 			
-			
+			// durchgehen durch alle structural definitions und immer dort, wo der automatic state nicht dem state von revision B
+			// entspricht muss das tripel in die entsprechende add oder delete sets aufgenommen werden
 			
 			
 			
