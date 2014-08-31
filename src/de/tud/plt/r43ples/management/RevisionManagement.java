@@ -608,6 +608,42 @@ public class RevisionManagement {
 	}
 	
 	
+	/**
+	 * Split huge DELETE statements into separate queries of up to fifty triple statements.
+	 * 
+	 * @param graphName the graph name
+	 * @param dataSetAsNTriples the data to insert as N-Triples
+	 * @throws IOException 
+	 * @throws HttpException 
+	 */
+	public static void executeDELETE(final String graphName, final String dataSetAsNTriples) throws HttpException, IOException {
+
+		final int MAX_STATEMENTS = 200;
+		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
+		int counter = 0;
+		StringBuilder delete = new StringBuilder();
+		
+		for (int i=0; i < lines.length; i++) {
+			String sub = lines[i];
+			if (!sub.equals("") && !sub.startsWith("#")) {
+				if (!sub.startsWith("<")) {
+					sub = "<" + sub;
+				}
+				if (i < lines.length - 1) {
+					sub = sub + ".";
+				}
+				delete.append('\n').append(sub);
+				counter++;
+				if (counter == MAX_STATEMENTS-1) {
+					TripleStoreInterface.executeQueryWithAuthorization("DELETE DATA FROM <" + graphName + "> { " + delete + "}", "HTML");
+					counter = 0;
+					delete = new StringBuilder();
+				}
+			}
+		}
+		TripleStoreInterface.executeQueryWithAuthorization("DELETE DATA FROM <" + graphName + "> { " + delete + "}", "HTML");
+	}
+	
 	
 	/**
 	 * Returns the name of the full graph of revision of a graph if it is available.

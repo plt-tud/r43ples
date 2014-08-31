@@ -46,6 +46,7 @@ import com.hp.hpl.jena.update.UpdateRequest;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.management.MergeManagement;
+import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
@@ -530,20 +531,20 @@ public class Endpoint {
 		String commitMessage = extractCommitMessage(sparqlQuery);
 		
 		// Add R43ples information
-		Pattern pattern =  Pattern.compile("MERGE\\s*(?<auto>AUTO)?\\s*GRAPH\\s*<(?<graph>.*)>\\s*BRANCH\\s*\"(?<branchNameA>.*)\"\\s*INTO\\s*\"(?<branchNameB>.*)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?");
+		Pattern pattern =  Pattern.compile("MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>.*)>\\s*BRANCH\\s*\"(?<branchNameA>.*)\"\\s*INTO\\s*\"(?<branchNameB>.*)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?");
 		Matcher m = pattern.matcher(sparqlQuery);
 		
 		boolean foundEntry = false;
 		while (m.find()) {
 			foundEntry = true;
-			String auto = m.group("auto");
+			String action = m.group("action");
 			String graphName = m.group("graph");
 			String branchNameA = m.group("branchNameA");
 			String branchNameB = m.group("branchNameB");
 			String with = m.group("with");
 			String triples = m.group("triples");
 			
-			logger.debug("auto: " + auto);
+			logger.debug("action: " + action);
 			logger.debug("graph: " + graphName);
 			logger.debug("branchNameA: " + branchNameA);
 			logger.debug("branchNameB: " + branchNameB);
@@ -558,13 +559,13 @@ public class Endpoint {
 			// TODO differ between MERGE query with specified SDD and without SDD			
 			// Query the referenced SDD
 			String querySDD = String.format(
-					  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
-					+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> \n"
-					+ "SELECT ?defaultSDD \n"
-					+ "FROM <%s> \n"
-					+ "WHERE { \n"
+					  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
+					+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> %n"
+					+ "SELECT ?defaultSDD %n"
+					+ "FROM <%s> %n"
+					+ "WHERE { %n"
 					+ "	<%s> a rmo:Graph ;%n"
-					+ "		sddo:hasDefaultSDD ?defaultSDD ."
+					+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
 					+ "}", Config.revision_graph, graphName);
 			
 			String resultSDD = TripleStoreInterface.executeQueryWithAuthorization(querySDD, "XML");
@@ -591,30 +592,52 @@ public class Endpoint {
 //			// Create conflict model
 //			MergeManagement.createConflictingTripleModel(graphName, "RM-CONFLICT-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI);
 			
-			// Create conflict model
+			// Create difference model
 			MergeManagement.createDifferenceTripleModel(graphName, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI);
 			
 			// Differ between the different merge queries
-			if ((auto != null) && (with == null) && (triples == null)) {
+			if ((action != null) && (action.equalsIgnoreCase("AUTO")) && (with == null) && (triples == null)) {
 				logger.info("AUTO MERGE query detected");
 				// Create the merged revision
-				// TODO
-			} else if ((auto == null) && (with != null)) {
+				MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.AUTO, "");
+			} else if ((action != null) && (action.equalsIgnoreCase("MANUAL")) && (with != null) && (triples != null)) {
+				logger.info("MANUAL MERGE query detected");
+				// Create the merged revision
+				MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.MANUAL, triples);
+			} else if ((action == null) && (with != null) && (triples != null)) {
 				logger.info("MERGE WITH query detected");
 				// Create the merged revision
-				// TODO
-			} else if ((auto == null) && (with == null) && (triples == null)) {
+				MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.WITH, triples);
+			} else if ((action == null) && (with == null) && (triples == null)) {
 				logger.info("MERGE query detected");
-				if (RevisionManagement.checkGraphExistence("RM-CONFLICT-MODEL-" + graphName)) {
-					// Conflict model contains conflicts
+				// Check if difference model contains conflicts
+				String queryASK = String.format(
+						  "ASK { %n"
+						+ "	GRAPH <%s> { %n"
+						+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
+						+ "	} %n"
+						+ "}", "RM-DIFFERENCE-MODEL-" + graphName);
+				String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
+				if (resultASK.equals("true")) {
+					// Difference model contains conflicts
 					// Return the conflict model to the client
 					responseBuilder = Response.status(Response.Status.CONFLICT);
-					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct("RM-CONFLICT-MODEL-" + graphName)); 
+					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct("RM-DIFFERENCE-MODEL-" + graphName));
 				} else {
-					// Conflict model contains no conflicts
+					// Difference model contains no conflicts
 					// Create the merged revision
-					//TODO
+					MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.COMMON, "");
 				}
+//				if (RevisionManagement.checkGraphExistence("RM-DIFFERENCE-MODEL-" + graphName)) {
+//					// Conflict model contains conflicts
+//					// Return the conflict model to the client
+//					responseBuilder = Response.status(Response.Status.CONFLICT);
+//					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct("RM-DIFFERENCE-MODEL-" + graphName)); 
+//				} else {
+//					// Conflict model contains no conflicts
+//					// Create the merged revision
+//					MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.COMMON, "");
+//				}
 			} else {
 				throw new InternalServerErrorException("This is not a valid MERGE query: " + sparqlQuery);
 			}

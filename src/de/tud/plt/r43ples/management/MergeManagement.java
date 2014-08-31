@@ -2,6 +2,7 @@ package de.tud.plt.r43ples.management;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,6 +17,10 @@ import java.util.NoSuchElementException;
 import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
@@ -531,7 +536,7 @@ public class MergeManagement {
 	 * @param uriA the URI of the revision progress of branch A
 	 * @param graphNameRevisionProgressB the graph name of the revision progress of branch B
 	 * @param uriB the URI of the revision progress of branch B
-	 * @param uriSDD the URI of the SDD to use
+	 * @param uriSDD the URI of the SDD to use (Structural Definition Group URI)
 	 * @throws HttpException 
 	 * @throws IOException 
 	 */
@@ -852,7 +857,7 @@ public class MergeManagement {
 				  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
 				+ "PREFIX sdd:  <http://eatld.et.tu-dresden.de/sdd#> %n"
 				+ "PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#> %n"
-				+ "SELECT ?combinationURI ?tripleStateA ?tripleStateB ?conflict %n"
+				+ "SELECT ?combinationURI ?tripleStateA ?tripleStateB ?conflict ?automaticResolutionState %n"
 				+ "FROM <%s> %n"
 				+ "WHERE { %n"
 				+ "	<%s> a sddo:StructuralDefinitionGroup ;"
@@ -860,8 +865,8 @@ public class MergeManagement {
 				+ "	?combinationURI a sddo:StructuralDefinition ; %n"
 				+ "		sddo:hasTripleStateA ?tripleStateA ; %n"
 				+ "		sddo:hasTripleStateB ?tripleStateB ; %n"
-				+ "		sddo:isConflicting ?conflict . %n"
-//				+ "	FILTER (?conflict = \"true\"^^xsd:boolean) %n"
+				+ "		sddo:isConflicting ?conflict ; %n"
+				+ "		sddo:automaticResolutionState ?automaticResolutionState . %n"
 				+ "} %n", Config.sdd_graph, uriSDD);
 				
 		String result = TripleStoreInterface.executeQueryWithAuthorization(queryDifferingSD, "XML");
@@ -882,6 +887,7 @@ public class MergeManagement {
 			} else {
 				currentConflictState = "\"false\"^^<http://www.w3.org/2001/XMLSchema#boolean>";
 			}
+			String currentAutomaticResolutionState = qs.getResource("?automaticResolutionState").toString();
 			
 			String querySelectPart = "SELECT ?s ?p ?o %s %s %n";
 			String sparqlQueryRevisionA = null;
@@ -973,6 +979,7 @@ public class MergeManagement {
 						+ "	sddo:hasTripleStateA <%s> ; %n"
 						+ "	sddo:hasTripleStateB <%s> ; %n"
 						+ "	sddo:isConflicting %s ; %n"
+						+ "	sddo:automaticResolutionState <%s> ; %n"
 						+ "	rpo:hasDifference [ %n"
 						+ "		a rpo:Difference ; %n"
 						+ "			rpo:hasTriple [ %n"
@@ -987,6 +994,7 @@ public class MergeManagement {
 									currentTripleStateA, 
 									currentTripleStateB,
 									currentConflictState,
+									currentAutomaticResolutionState,
 									subject, 
 									predicate,
 									object,
@@ -1011,20 +1019,18 @@ public class MergeManagement {
 	 * @param branchNameB the name of branch B
 	 * @param user the user
 	 * @param commitMessage the commit message
-	 * @param graphNameConflictingTripleModel the graph name of the conflicting triple model
+	 * @param graphNameDifferenceTripleModel the graph name of the difference triple model
 	 * @param graphNameRevisionProgressA the graph name of the revisions progress A
 	 * @param uriA the URI A
 	 * @param graphNameRevisionProgressB the graph name of the revisions progress B
 	 * @param uriB the URI B
 	 * @param uriSDD the URI of the SDD
-	 * @param auto when set to true it is a MERGE AUTO query
-	 * @param triples the triples of the WITH part, when unequal to null it is a MERGE WITH query
+	 * @param type the merge query type
+	 * @param triples the triples which are belonging to the current merge query in N-Triple serialization
 	 * @throws HttpException
 	 * @throws IOException
 	 */
-	public void createMergedRevision(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameConflictingTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, boolean auto, String triples) throws HttpException, IOException {
-		
-		// Zusammenführung erfolgt immer nach SDD
+	public static void createMergedRevision(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type, String triples) throws HttpException, IOException {
 		 
 		// Create an empty temporary graph which will contain the merged full content
 		String graphNameOfMerged = "RM-MERGED-TEMP-" + graphName;
@@ -1035,49 +1041,110 @@ public class MergeManagement {
 		// Get the full graph name of branch B
 		String graphNameOfBranchB = RevisionManagement.getFullGraphName(graphName, branchNameB);
 		
-		// Copy graph B to temporary merged graph
-		String queryCopy = String.format("COPY <%s> TO <%s>", graphNameOfBranchB, graphNameOfMerged);
-		TripleStoreInterface.executeQueryWithAuthorization(queryCopy, "HTML");
-		
-		// Get the triples from branch A which should be added to/removed from the merged revision
-		String triplesToAdd;
-		String triplesToDelete;
-		
-		// Differ between the different MERGE queries
-		if (auto == true) {
-			// AUTO MERGE query
+		if (type.equals(MergeQueryTypeEnum.MANUAL)) {
+			// Manual merge query
+			RevisionManagement.executeINSERT(graphNameOfMerged, triples);
+		} else {	
+			// Copy graph B to temporary merged graph
+			String queryCopy = String.format("COPY <%s> TO <%s>", graphNameOfBranchB, graphNameOfMerged);
+			TripleStoreInterface.executeQueryWithAuthorization(queryCopy, "HTML");
 			
-			// durchgehen durch alle structural definitions und immer dort, wo der automatic state nicht dem state von revision B
-			// entspricht muss das tripel in die entsprechende add oder delete sets aufgenommen werden
+			// Get the triples from branch A which should be added to/removed from the merged revision
+			String triplesToAdd = "";
+			String triplesToDelete = "";
 			
-			
-			
-		} else if (triples != null) {
-			// MERGE WITH query
-		} else {
-			// MERGE query
+			// Get all difference groups
+			String queryDifferenceGroup = prefixes + String.format(
+					  "SELECT ?differenceCombinationURI ?automaticResolutionState ?tripleStateA ?tripleStateB ?conflict %n"
+					+ "FROM <%s> %n"
+					+ "WHERE { %n"
+					+ "	?differenceCombinationURI a rpo:DifferenceGroup ; %n"
+					+ "		sddo:automaticResolutionState ?automaticResolutionState ; %n"
+					+ "		sddo:hasTripleStateA ?tripleStateA ; %n"
+					+ "		sddo:hasTripleStateB ?tripleStateB ; %n"
+					+ "		sddo:isConflicting ?conflict . %n"
+					+ "}", graphNameDifferenceTripleModel);
+	
+			String resultDifferenceGroup = TripleStoreInterface.executeQueryWithAuthorization(queryDifferenceGroup, "XML");
+			// Iterate over all difference groups
+			ResultSet resultSetDifferenceGroups = ResultSetFactory.fromXML(resultDifferenceGroup);
+			while (resultSetDifferenceGroups.hasNext()) {
+				QuerySolution qsCurrentDifferenceGroup = resultSetDifferenceGroups.next();
+	
+				String currentDifferencGroupURI = qsCurrentDifferenceGroup.getResource("?differenceCombinationURI").toString();
+				String currentDifferencGroupAutomaticResolutionState = qsCurrentDifferenceGroup.getResource("?automaticResolutionState").toString();
+				String currentDifferencGroupTripleStateA = qsCurrentDifferenceGroup.getResource("?tripleStateA").toString();
+				String currentDifferencGroupTripleStateB = qsCurrentDifferenceGroup.getResource("?tripleStateB").toString();
+				int currentDifferencGroupConflict = qsCurrentDifferenceGroup.getLiteral("?conflict").getInt();
+				
+				// Get all differences (triples) of current difference group
+				String queryDifference = prefixes + String.format(
+						  "SELECT ?s ?p ?o %n"
+						+ "FROM <%s> %n"
+						+ "WHERE { %n"
+						+ "	<%s> a rpo:DifferenceGroup ; %n"
+						+ "		rpo:hasDifference ?blankDifference . %n"
+						+ "	?blankDifference a rpo:Difference ; %n"
+						+ "		rpo:hasTriple ?triple . %n"
+						+ "	?triple rdf:subject ?s . %n"
+						+ "	?triple rdf:predicate ?p . %n"
+						+ "	?triple rdf:object ?o . %n"
+						+ "}", graphNameDifferenceTripleModel, currentDifferencGroupURI);
+				
+				String resultDifference = TripleStoreInterface.executeQueryWithAuthorization(queryDifference, "XML");
+				// Iterate over all differences (triples)
+				ResultSet resultSetDifferences = ResultSetFactory.fromXML(resultDifference);
+				while (resultSetDifferences.hasNext()) {
+					QuerySolution qsCurrentDifference = resultSetDifferences.next();
+					
+					String subject = "<" + qsCurrentDifference.getResource("?s").toString() + ">";
+					String predicate = "<" + qsCurrentDifference.getResource("?p").toString() + ">";
+	
+					// Differ between literal and resource
+					String object = "";
+					if (qsCurrentDifference.get("?o").isLiteral()) {
+						object = "\"" + qsCurrentDifference.getLiteral("?o").toString() + "\"";
+					} else {
+						object = "<" + qsCurrentDifference.getResource("?o").toString() + ">";
+					}
+					
+					if (type.equals(MergeQueryTypeEnum.AUTO) || type.equals(MergeQueryTypeEnum.COMMON) || (type.equals(MergeQueryTypeEnum.WITH) && (currentDifferencGroupConflict == 0))) {
+						// MERGE AUTO or common MERGE query
+						if (currentDifferencGroupAutomaticResolutionState.equals(SDDTripleState.ADDED.getSddRepresentation())) {
+							// Triple should be added
+							triplesToAdd += subject + " " + predicate + " " + object + " . \n";
+						} else {
+							// Triple should be deleted
+							triplesToDelete += subject + " " + predicate + " " + object + " . \n";
+						}
+					} else {
+						// MERGE WITH query - conflicting triple
+						Model model = readNTripleStringToJenaModel(triples);
+						// Create ASK query which will check if the model contains the specified triple
+						String queryAsk = String.format(
+								  "ASK { %n"
+								+ " %s %s %s %n"
+								+ "}", subject, predicate, object);
+						Query query = QueryFactory.create(queryAsk);
+						QueryExecution qe = QueryExecutionFactory.create(query, model);
+						boolean resultAsk = qe.execAsk();
+						if (resultAsk) {
+							// Model contains the specified triple
+							// Triple should be added
+							triplesToAdd += subject + " " + predicate + " " + object + " . \n";
+						} else {
+							// Triple should be deleted
+							triplesToDelete += subject + " " + predicate + " " + object + " . \n";
+						}
+					}
+				}
+				// Update the merged graph
+				// Insert triplesToAdd
+				RevisionManagement.executeINSERT(graphNameOfMerged, triplesToAdd);
+				// Delete triplesToDelete
+				RevisionManagement.executeDELETE(graphNameOfMerged, triplesToDelete);
+			}
 		}
-		
-		
-		
-		
-//		durchgehen und schauen, an welchen stellen A genutzt wird - B ist ja schon enthalten
-		
-		
-		
-		
-		
-		
-		
-		
-		// Update the merged graph
-		
-		// insert triplesToAdd
-		// delete triples to delete
-		
-		// Finale zusammmengeführte Revision
-		
-		
 		
 		// Calculate the add and delete sets
 		
@@ -1134,10 +1201,7 @@ public class MergeManagement {
 		RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, usedRevisionNumbers);
 		
 	}
-	
-	
-	
-	
+
 	
 	/**
 	 * Read turtle file to jena model.
@@ -1158,7 +1222,25 @@ public class MergeManagement {
 	
 	
 	/**
-	 * Converts a jena model to N-Triple syntax. 
+	 * Read N-Triple string to jena model.
+	 * 
+	 * @param triples the triples in N-Triple serialization
+	 * @return
+	 * @throws IOException
+	 */
+	public static Model readNTripleStringToJenaModel(String triples) throws IOException {
+		Model model = null;
+		model = ModelFactory.createDefaultModel();
+		InputStream is = new ByteArrayInputStream(triples.getBytes());
+		model.read(is, null, "N-TRIPLE");
+		is.close();
+		
+		return model;
+	}
+	
+	
+	/**
+	 * Converts a jena model to N-Triple serialization. 
 	 * 
 	 * @param model the jena model
 	 * @return the string which contains the N-Triples

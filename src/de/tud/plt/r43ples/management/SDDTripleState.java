@@ -3,7 +3,7 @@ package de.tud.plt.r43ples.management;
 /**
  * The SDD triple state.
  * 
- * @author Stephan
+ * @author Stephan Hensel
  *
  */
 public enum SDDTripleState {
