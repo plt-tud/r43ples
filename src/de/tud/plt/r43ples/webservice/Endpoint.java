@@ -110,25 +110,25 @@ public class Endpoint {
 	
 	private final Pattern patternSelectQuery = Pattern.compile(
 			"(?<type>SELECT|ASK).*WHERE\\s*\\{(?<where>.*)\\}", 
-			Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
 	private final Pattern patternSelectFromPart = Pattern.compile(
 			"FROM\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"",
-			Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
 	private final Pattern patternUpdateQuery = Pattern.compile(
 			"(?<action>INSERT|DELETE).*<(?<graph>.*)>", 
 			Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
 	private final Pattern patternUpdateRevisionQuery =  Pattern.compile(
 			"(?<action>FROM|INTO|GRAPH)\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"",
-			Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
 	private final Pattern patternCreateGraph =  Pattern.compile(
 			"CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>.*)>",
-			Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
 	private final Pattern patternDropGraph =  Pattern.compile(
 			"DROP\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>.*)>",
-			Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
 	private final Pattern patternBranchOrTagQuery =  Pattern.compile(
 			"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"\\s*TO\\s*\"(?<name>.*)\"",
-			Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
 	private final Pattern patternUser = Pattern.compile(
 			"USER\\s*\"(?<user>.*)\"",
 			Pattern.CASE_INSENSITIVE);
