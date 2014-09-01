@@ -1,10 +1,10 @@
-prefix rmo:	<http://eatld.et.tu-dresden.de/rmo#>
-prefix prov:	<http://www.w3.org/ns/prov#> 
-prefix eatld:	<http://eatld.et.tu-dresden.de/>
+PREFIX rmo:	<http://eatld.et.tu-dresden.de/rmo#>
+PREFIX prov:	<http://www.w3.org/ns/prov#> 
+PREFIX eatld:	<http://eatld.et.tu-dresden.de/>
 
-select distinct ?s ?p ?o
+SELECT DISTINCT ?s ?p ?o
 FROM eatld:r43ples-revisions
-where {
+WHERE {
 	GRAPH ?g1 { ?s ?p ?o. }
 	{ 
 		<http://test.com/r43ples-dataset-master> rmo:fullGraph ?g1.
