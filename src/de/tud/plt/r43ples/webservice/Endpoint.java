@@ -19,7 +19,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.http.HttpException;
@@ -30,7 +29,6 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.jena.atlas.logging.Log;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.log4j.Logger;
@@ -50,7 +48,6 @@ import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
-import de.tud.plt.r43ples.webservice.InternalServerErrorException;
 
 
 /**
@@ -562,12 +559,17 @@ public class Endpoint {
 		boolean foundEntry = false;
 		while (m.find()) {
 			foundEntry = true;
+			String newRevisionNumber = null;
+			
 			String action = m.group("action");
 			String graphName = m.group("graph");
 			String branchNameA = m.group("branchNameA");
 			String branchNameB = m.group("branchNameB");
 			String with = m.group("with");
 			String triples = m.group("triples");
+			
+			String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
+			String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
 			
 			logger.debug("action: " + action);
 			logger.debug("graph: " + graphName);
@@ -603,7 +605,7 @@ public class Endpoint {
 			}
 
 			// Get the common revision with shortest path
-			String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(branchNameA, branchNameB);
+			String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionUriA, revisionUriB);
 			
 			// Create the revision progress for A and B
 			String graphNameA = "RM-REVISION-PROGRESS-A-" + graphName;
@@ -611,8 +613,8 @@ public class Endpoint {
 			String uriA = "http://eatld.et.tu-dresden.de/branch-A";
 			String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 			
-			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, branchNameA), graphNameA, uriA);
-			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, branchNameB), graphNameB, uriB);
+			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA), graphNameA, uriA);
+			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
 			
 //			// Create conflict model
 //			MergeManagement.createConflictingTripleModel(graphName, "RM-CONFLICT-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI);
@@ -624,15 +626,15 @@ public class Endpoint {
 			if ((action != null) && (action.equalsIgnoreCase("AUTO")) && (with == null) && (triples == null)) {
 				logger.info("AUTO MERGE query detected");
 				// Create the merged revision
-				MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.AUTO, "");
+				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.AUTO, "");
 			} else if ((action != null) && (action.equalsIgnoreCase("MANUAL")) && (with != null) && (triples != null)) {
 				logger.info("MANUAL MERGE query detected");
 				// Create the merged revision
-				MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.MANUAL, triples);
+				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.MANUAL, triples);
 			} else if ((action == null) && (with != null) && (triples != null)) {
 				logger.info("MERGE WITH query detected");
 				// Create the merged revision
-				MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.WITH, triples);
+				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.WITH, triples);
 			} else if ((action == null) && (with == null) && (triples == null)) {
 				logger.info("MERGE query detected");
 				// Check if difference model contains conflicts
@@ -651,7 +653,7 @@ public class Endpoint {
 				} else {
 					// Difference model contains no conflicts
 					// Create the merged revision
-					MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.COMMON, "");
+					newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.COMMON, "");
 				}
 //				if (RevisionManagement.checkGraphExistence("RM-DIFFERENCE-MODEL-" + graphName)) {
 //					// Conflict model contains conflicts
@@ -666,11 +668,18 @@ public class Endpoint {
 			} else {
 				throw new InternalServerErrorException("This is not a valid MERGE query: " + sparqlQuery);
 			}
+			
+			if (newRevisionNumber != null) {
+				// Respond with next revision number
+		    	responseBuilder.header(graphName + "-revision-number", newRevisionNumber);
+				responseBuilder.header(graphName + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
+				logger.info("Respond with new revision number " + newRevisionNumber + ".");
+			}
 		}
 		if (!foundEntry)
 			throw new InternalServerErrorException("Error in query: " + sparqlQuery);
 		
-		return responseBuilder.build();
+		return responseBuilder.build();	
 	}
 
 

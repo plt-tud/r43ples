@@ -1,13 +1,11 @@
 package de.tud.plt.r43ples.management;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -27,7 +25,6 @@ import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
-import de.tud.plt.r43ples.adminInterface.DiffResolveTool;
 import de.tud.plt.r43ples.develop.examples.CreateExampleGraph;
 
 /*
@@ -293,7 +290,6 @@ public class MergeManagement {
 				fullGraphName = "RM-TEMP-REVISION-PROGRESS-FIRSTREVISION";
 			}
 			
-			//TODO maybe replace rmo:revision with wasChangedByRevision (check PROV for possible solutions)
 			// Create the initial content
 			logger.info("Create the initial content.");
 			String queryInitial = prefixes + String.format(	
@@ -1027,10 +1023,11 @@ public class MergeManagement {
 	 * @param uriSDD the URI of the SDD
 	 * @param type the merge query type
 	 * @param triples the triples which are belonging to the current merge query in N-Triple serialization
+	 * @return 
 	 * @throws HttpException
 	 * @throws IOException
 	 */
-	public static void createMergedRevision(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type, String triples) throws HttpException, IOException {
+	public static String createMergedRevision(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type, String triples) throws HttpException, IOException {
 		 
 		// Create an empty temporary graph which will contain the merged full content
 		String graphNameOfMerged = "RM-MERGED-TEMP-" + graphName;
@@ -1194,12 +1191,11 @@ public class MergeManagement {
 		
 		removedTriples += TripleStoreInterface.executeQueryWithAuthorization(queryRemovedTriples, "text/plain");
 
-		// Create list with the 2 predecessors
+		// Create list with the 2 predecessors - the order is important - fist item will specify the branch were the new merged revision will be created
 		ArrayList<String> usedRevisionNumbers = new ArrayList<String>();
-		usedRevisionNumbers.add(branchNameA);
 		usedRevisionNumbers.add(branchNameB);
-		RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, usedRevisionNumbers);
-		
+		usedRevisionNumbers.add(branchNameA);
+		return RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, usedRevisionNumbers);
 	}
 
 	

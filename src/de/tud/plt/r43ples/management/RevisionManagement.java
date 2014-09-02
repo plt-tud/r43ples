@@ -60,12 +60,13 @@ public class RevisionManagement {
 		
 		// Create new revision
 		String queryContent = String.format(
-				"<%s> a rmo:Revision; " +
-				"	rmo:revisionOf <%s>; " +
-				"	rmo:deltaAdded <%s>; " +
-				"	rmo:deltaRemoved <%s>; " +
-				"	rmo:revisionNumber \"%s\". %n"
-				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, revisionNumber);
+				  "<%s> a rmo:Revision ; %n"
+				+ "	rmo:revisionOf <%s> ; %n"
+				+ "	rmo:deltaAdded <%s> ; %n"
+				+ "	rmo:deltaRemoved <%s> ; %n"
+				+ "	rmo:revisionNumber \"%s\" ; %n"
+				+ "	rmo:revisionOfBranch <%s> . %n"
+				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, revisionNumber, graphName + "-master");
 		
 		// Add MASTER branch		
 		queryContent += String.format(
@@ -96,7 +97,7 @@ public class RevisionManagement {
 	 * @param removedAsNTriples the data set of removed triples as N-Triples
 	 * @param user the user name who creates the revision
 	 * @param commitMessage the title of the revision
-	 * @param usedRevisionNumber the number of the revision which is used for creation of the new
+	 * @param usedRevisionNumber the number of the revision which is used for creation of the new (for creation of merged maximal two revision are  - the first revision in array list specifies the branch where the merged revision will be created)
 	 * @param revisionName the revision name which was specified by the client (revision number, branch name or tag name)
 	 * @return new revision number
 	 * @throws IOException 
@@ -108,11 +109,12 @@ public class RevisionManagement {
 		// General variables
 		String dateString = getDateString();
 		String newRevisionNumber  = getNextRevisionNumber(graphName, usedRevisionNumber.get(0));
+		String branchUri = getReferenceUri(graphName, usedRevisionNumber.get(0));	
 		String commitUri = graphName+"-commit-" + newRevisionNumber;
 		String revisionUri = graphName + "-revision-" + newRevisionNumber;
 		String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
 		String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
-		String personUri =  getUserName(user);
+		String personUri =  getUserName(user);	
 		
 		// Create a new commit (activity)
 		StringBuilder queryContent = new StringBuilder(1000);
@@ -127,15 +129,16 @@ public class RevisionManagement {
 			String revUri = getRevisionUri(graphName, iterator.next());
 			queryContent.append(String.format("<%s> prov:used <%s>. %n", commitUri, revUri));
 		}
-		
+
 		// Create new revision
 		queryContent.append(String.format(
-				"<%s> a rmo:Revision; " +
-				"	rmo:revisionOf <%s>; " +
-				"	rmo:deltaAdded <%s>; " +
-				"	rmo:deltaRemoved <%s>; " +
-				"	rmo:revisionNumber \"%s\". %n"
-				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, newRevisionNumber));
+				  "<%s> a rmo:Revision ; %n"
+				+ "	rmo:revisionOf <%s> ; %n"
+				+ "	rmo:deltaAdded <%s> ; %n"
+				+ "	rmo:deltaRemoved <%s> ; %n"
+				+ "	rmo:revisionNumber \"%s\" ; %n"
+				+ "	rmo:revisionOfBranch <%s> . %n"
+				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, newRevisionNumber, branchUri));
 		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
 			String revUri = getRevisionUri(graphName, iterator.next());
 			queryContent.append(String.format("<%s> prov:wasDerivedFrom <%s> .", revisionUri, revUri));
