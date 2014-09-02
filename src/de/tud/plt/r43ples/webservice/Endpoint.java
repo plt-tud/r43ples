@@ -65,7 +65,7 @@ import de.tud.plt.r43ples.webservice.InternalServerErrorException;
 public class Endpoint {
 
 	@Context private UriInfo uriInfo;
-	static Logger logger = Logger.getLogger(Endpoint.class);
+	private final static Logger logger = Logger.getLogger(Endpoint.class);
 
 	
 	/**
@@ -115,6 +115,37 @@ public class Endpoint {
 	}
 
 	
+	private final Pattern patternSelectQuery = Pattern.compile(
+			"(?<type>SELECT|ASK).*WHERE\\s*\\{(?<where>.*)\\}", 
+			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
+	private final Pattern patternSelectFromPart = Pattern.compile(
+			"FROM\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"",
+			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
+	private final Pattern patternUpdateQuery = Pattern.compile(
+			"(?<action>INSERT|DELETE).*<(?<graph>.*)>", 
+			Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+	private final Pattern patternUpdateRevisionQuery =  Pattern.compile(
+			"(?<action>FROM|INTO|GRAPH)\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"",
+			Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+	private final Pattern patternCreateGraph =  Pattern.compile(
+			"CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>.*)>",
+			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
+	private final Pattern patternDropGraph =  Pattern.compile(
+			"DROP\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>.*)>",
+			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
+	private final Pattern patternBranchOrTagQuery =  Pattern.compile(
+			"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"\\s*TO\\s*\"(?<name>.*)\"",
+			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
+	private final Pattern patternMergeQuery =  Pattern.compile(
+			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>.*)>\\s*BRANCH\\s*\"(?<branchNameA>.*)\"\\s*INTO\\s*\"(?<branchNameB>.*)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
+			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
+	private final Pattern patternUser = Pattern.compile(
+			"USER\\s*\"(?<user>.*)\"",
+			Pattern.CASE_INSENSITIVE);
+	private final Pattern patternCommitMessage = Pattern.compile(
+			"MESSAGE\\s*\"(?<message>.*)\"",
+			Pattern.CASE_INSENSITIVE);
+	
 	/**
 	 * HTTP GET interface for query and update (e.g. SELECT, INSERT, DELETE).
 	 * Provides HTML form if no query is specified and HTML is requested
@@ -143,27 +174,31 @@ public class Endpoint {
 			}
 		} else {
 			logger.info("SPARQL query was requested. Query: " + sparqlQuery);
-			Response response = null;
 			try {
 				String sparqlQueryDecoded = URLDecoder.decode(sparqlQuery, "UTF-8");
-				if (sparqlQueryDecoded.toUpperCase().contains("SELECT") || sparqlQueryDecoded.toUpperCase().contains("ASK")) {
-					response = produceSelectResponse(sparqlQueryDecoded, format);
-				} else if (sparqlQueryDecoded.toUpperCase().contains("INSERT") || sparqlQueryDecoded.toUpperCase().contains("DELETE")) {
-					response = produceInsertDeleteResponse(sparqlQueryDecoded, format);
-				} else if (sparqlQueryDecoded.toUpperCase().contains("CREATE")) {
-					response = produceCreateGraphResponse(sparqlQueryDecoded, format);
-				} else if (sparqlQueryDecoded.toUpperCase().contains("DROP")) {
-					response = produceDropGraphResponse(sparqlQueryDecoded, format);
-				} else if (sparqlQueryDecoded.toUpperCase().contains("TAG") || sparqlQueryDecoded.toUpperCase().contains("BRANCH") &&  !sparqlQueryDecoded.toUpperCase().contains("MERGE")) {
-					response = produceBranchOrTagResponse(sparqlQueryDecoded, format);
-				} else if (sparqlQueryDecoded.toUpperCase().contains("MERGE") && sparqlQueryDecoded.toUpperCase().contains("INTO")) {
-					response = produceMergeResponse(sparqlQueryDecoded, format);
+				if (patternSelectQuery.matcher(sparqlQueryDecoded).find()) {
+					return produceSelectResponse(sparqlQueryDecoded, format);
+				}
+				if (patternUpdateQuery.matcher(sparqlQueryDecoded).find()) {
+					return produceInsertDeleteResponse(sparqlQueryDecoded, format);
+				}
+				if (patternCreateGraph.matcher(sparqlQueryDecoded).find()) {
+					return produceCreateGraphResponse(sparqlQueryDecoded, format);
+				}
+				if (patternDropGraph.matcher(sparqlQueryDecoded).find()) {
+					return produceDropGraphResponse(sparqlQueryDecoded, format);
+				}
+				if (patternBranchOrTagQuery.matcher(sparqlQueryDecoded).find()) {
+					return produceBranchOrTagResponse(sparqlQueryDecoded, format);
+				}
+				if (patternMergeQuery.matcher(sparqlQueryDecoded).find()) {
+					return produceMergeResponse(sparqlQueryDecoded, format);
 				}
 			} catch (HttpException | IOException e) {
 				e.printStackTrace();
 				throw new InternalServerErrorException(e.getMessage());
 			}	
-			return response;
+			throw new InternalServerErrorException("No R43ples query detected");
 		}
 	}
 	
@@ -270,11 +305,8 @@ public class Endpoint {
 
 		String queryM = query;
 		ResponseBuilder responseBuilder = Response.ok();
-		
-		// create pattern for FROM clause
-		Pattern pattern = Pattern.compile("FROM\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"");
-		
-		Matcher m = pattern.matcher(queryM);
+			
+		Matcher m = patternSelectFromPart.matcher(queryM);
 		boolean found = false;
 		while (m.find()) {
 			found = true;
@@ -299,7 +331,7 @@ public class Endpoint {
 					RevisionManagement.generateFullGraphOfRevision(graphName, revisionNumber, newGraphName);
 				}
 				queryM = m.replaceFirst("FROM <" + newGraphName + ">");
-				m = pattern.matcher(queryM);
+				m = patternSelectFromPart.matcher(queryM);
 				headerRevisionNumber = revisionNumber;
 			}
 		    // Respond with specified revision
@@ -307,7 +339,7 @@ public class Endpoint {
 		    responseBuilder.header(graphName + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
 		}
 		if (!found) {
-			throw new InternalServerErrorException("Query contain errors:\n"+queryM);
+			logger.info("No R43ples SELECT query: "+queryM);
 		}
 		String response = TripleStoreInterface.executeQueryWithAuthorization(queryM, format);
 		return responseBuilder.entity(response).type(format).build();
@@ -335,10 +367,7 @@ public class Endpoint {
 		if (commitMessage == null) {
 			commitMessage = "No commit message specified.";
 		}
-		
-		// create pattern for FROM and INTO clause
-		Pattern pattern =  Pattern.compile("(?<action>FROM|INTO|GRAPH)\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"");
-		Matcher m = pattern.matcher(query);
+		Matcher m = patternUpdateRevisionQuery.matcher(query);
 		boolean found = m.find();
 		
 		if (!found) {
@@ -414,8 +443,7 @@ public class Endpoint {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Graph creation detected");
 		
-		Pattern pattern =  Pattern.compile("CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>.*)>");
-		Matcher m = pattern.matcher(query);
+		Matcher m = patternCreateGraph.matcher(query);
 		boolean found = false;
 		while (m.find()) {
 			found = true;
@@ -447,8 +475,7 @@ public class Endpoint {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		
 		// Clear R43ples information for specified graphs
-		Pattern pattern =  Pattern.compile("DROP\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>.*)>");
-		Matcher m = pattern.matcher(query);
+		Matcher m = patternDropGraph.matcher(query);
 		boolean found = false;
 		while (m.find()) {
 			found = true;
@@ -480,8 +507,7 @@ public class Endpoint {
 		String commitMessage = extractCommitMessage(sparqlQuery);
 		
 		// Add R43ples information
-		Pattern pattern =  Pattern.compile("(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"\\s*TO\\s*\"(?<name>.*)\"");
-		Matcher m = pattern.matcher(sparqlQuery);
+		Matcher m = patternBranchOrTagQuery.matcher(sparqlQuery);
 		
 		boolean foundEntry = false;
 		while (m.find()) {
@@ -531,8 +557,7 @@ public class Endpoint {
 		String commitMessage = extractCommitMessage(sparqlQuery);
 		
 		// Add R43ples information
-		Pattern pattern =  Pattern.compile("MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>.*)>\\s*BRANCH\\s*\"(?<branchNameA>.*)\"\\s*INTO\\s*\"(?<branchNameB>.*)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?");
-		Matcher m = pattern.matcher(sparqlQuery);
+		Matcher m = patternMergeQuery.matcher(sparqlQuery);
 		
 		boolean foundEntry = false;
 		while (m.find()) {
@@ -655,8 +680,7 @@ public class Endpoint {
 	 * @throws InternalServerErrorException
 	 */
 	private String extractUser(final String query) {
-		Pattern userPattern = Pattern.compile("USER\\s*\"(?<user>.*)\"");
-		Matcher userMatcher = userPattern.matcher(query);
+		Matcher userMatcher = patternUser.matcher(query);
 		if (userMatcher.find()) {
 			return userMatcher.group("user");
 		} else {
@@ -669,8 +693,7 @@ public class Endpoint {
 	 * @throws InternalServerErrorException
 	 */
 	private String extractCommitMessage(final String query) {
-		Pattern pattern = Pattern.compile("MESSAGE\\s*\"(?<message>.*)\"");
-		Matcher matcher = pattern.matcher(query);
+		Matcher matcher = patternCommitMessage.matcher(query);
 		if (matcher.find()) {
 			return matcher.group("message");
 		} else {
