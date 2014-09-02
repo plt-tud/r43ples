@@ -66,15 +66,30 @@ JMeter
 
 SPARQL Interface
 ----------------
-* Create graph: ```CREATE GRAPH <graph>```
-* Select query: ```SELECT * FROM <graph> REVISION "23" WHERE {?s ?p ?o}```
-* Update query: ```USER "mgraube" MESSAGE "test commit" INSERT DATA INTO <test> REVISION "2" {	<a> <b> <c> .	} ```
-* Branching: ```USER "mgraube"
-MESSAGE "test commit"
-BRANCH GRAPH <test> REVISION "2" TO "unstable"```
-* Tagging: ```USER "mgraube"
-MESSAGE "test commit"
-TAG GRAPH <test> REVISION "2" TO "v0.3-alpha"```
+* Create graph
+
+		CREATE GRAPH <graph>
+		
+* Select query
+
+		SELECT * FROM <graph> REVISION "23" WHERE {?s ?p ?o}
+		
+* Update query
+
+		USER "mgraube" MESSAGE "test commit" 
+		INSERT DATA INTO <test> REVISION "2" {	<a> <b> <c> .	}
+
+* Branching
+
+		USER "mgraube"
+		MESSAGE "test commit"
+		BRANCH GRAPH <test> REVISION "2" TO "unstable"
+		
+* Tagging
+
+		USER "mgraube"
+		MESSAGE "test commit"
+		TAG GRAPH <test> REVISION "2" TO "v0.3-alpha"
 
 
 
