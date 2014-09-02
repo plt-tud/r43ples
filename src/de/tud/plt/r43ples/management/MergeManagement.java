@@ -482,324 +482,7 @@ public class MergeManagement {
 		}
 		
 	}
-	
-	
-	/**
-	 * Creates the structural differences between two revision progresses.
-	 * 
-	 * @param graphNameRevisionProgressA the graph name of the revision progress of branch A
-	 * @param uriA the URI of the revision progress of branch A
-	 * @param graphNameRevisionProgressB the graph name of the revision progress of branch B
-	 * @param uriB the URI of the revision progress of branch B
-	 */
-	private static void createStructuralDifferences(String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB) {
 
-		// Tabelle in RDF darstellen, sodass es konfigurierbar ist, was Konflikte sind und was nicht
-		// aus diesem Modell dann die unten stehenden Abfragen generieren
-		// die Ergebnisse in einem neuen Graphen speichern
-		
-		// Example for added-added
-//		PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#>
-//			PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
-//
-//			SELECT ?s ?p ?o ?revisionA ?revisionB
-//			WHERE {
-//				GRAPH <RM-REVISION-PROGRESS-A-exampleGraph> {
-//					<http://example/branch-A> rmo:removed ?blankA .
-//						?blankA rdf:subject ?s .
-//						?blankA rdf:predicate ?p .
-//						?blankA rdf:object ?o .
-//						?blankA rmo:revision ?revisionA .
-//				}
-//				GRAPH <RM-REVISION-PROGRESS-B-exampleGraph> {
-//					<http://example/branch-B> rmo:added ?blankB .
-//						?blankB rdf:subject ?s .
-//						?blankB rdf:predicate ?p .
-//						?blankB rdf:object ?o .
-//						?blankB rmo:revision ?revisionB .
-//				}
-//			}
-	}
-	
-	
-	
-	/**
-	 * Create the conflicting triple model which contains all conflicting triples.
-	 * 
-	 * @param graphName the graph name
-	 * @param graphNameConflictingTripleModel the graph name of the conflicting triple model
-	 * @param graphNameRevisionProgressA the graph name of the revision progress of branch A
-	 * @param uriA the URI of the revision progress of branch A
-	 * @param graphNameRevisionProgressB the graph name of the revision progress of branch B
-	 * @param uriB the URI of the revision progress of branch B
-	 * @param uriSDD the URI of the SDD to use (Structural Definition Group URI)
-	 * @throws HttpException 
-	 * @throws IOException 
-	 */
-	public static void createConflictingTripleModel(String graphName, String graphNameConflictingTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD) throws IOException, HttpException {
-		
-		logger.info("Create the conflicting triple model");
-		TripleStoreInterface.executeQueryWithAuthorization(String.format("DROP SILENT GRAPH <%s>", graphNameConflictingTripleModel), "HTML");
-		TripleStoreInterface.executeQueryWithAuthorization(String.format("CREATE GRAPH  <%s>", graphNameConflictingTripleModel), "HTML");
-		
-		// Templates for revision A and B
-		String sparqlTemplateRevisionA = String.format(
-				  "	GRAPH <%s> { %n"
-				+ "		<%s> <%s> ?blankA . %n"
-				+ "			?blankA rdf:subject ?s . %n"
-				+ "			?blankA rdf:predicate ?p . %n"
-				+ "			?blankA rdf:object ?o . %n"
-				+ "			?blankA rmo:references ?revisionA . %n"
-				+ "	} %n", graphNameRevisionProgressA, uriA, "%s");
-		String sparqlTemplateRevisionB = String.format(
-				  "	GRAPH <%s> { %n"
-				+ "		<%s> <%s> ?blankB . %n"
-				+ "			?blankB rdf:subject ?s . %n"
-				+ "			?blankB rdf:predicate ?p . %n"
-				+ "			?blankB rdf:object ?o . %n"
-				+ "			?blankB rmo:references ?revisionB . %n"
-				+ "	} %n", graphNameRevisionProgressB, uriB, "%s");
-
-		String sparqlTemplateNotExistsRevisionA = String.format(
-				"FILTER NOT EXISTS {"
-				+ "%s"
-				+ "}", sparqlTemplateRevisionA);
-		
-		String sparqlTemplateNotExistsRevisionB = String.format(
-				"FILTER NOT EXISTS {"
-				+ "%s"
-				+ "}", sparqlTemplateRevisionB);
-		
-		// Get all structural definitions which are generating conflicts
-		String queryConflictingSD = String.format(
-				  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
-				+ "PREFIX sdd:  <http://eatld.et.tu-dresden.de/sdd#> %n"
-				+ "PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#> %n"
-				+ "SELECT ?combinationURI ?tripleStateA ?tripleStateB %n"
-				+ "FROM <%s> %n"
-				+ "WHERE { %n"
-				+ "	<%s> a sddo:StructuralDefinitionGroup ;"
-				+ "		sddo:hasStructuralDefinition ?combinationURI ."
-				+ "	?combinationURI a sddo:StructuralDefinition ; %n"
-				+ "		sddo:hasTripleStateA ?tripleStateA ; %n"
-				+ "		sddo:hasTripleStateB ?tripleStateB ; %n"
-				+ "		sddo:isConflicting ?conflict . %n"
-				+ "	FILTER (?conflict = \"true\"^^xsd:boolean) %n"
-				+ "} %n", Config.sdd_graph, uriSDD);
-				
-		String result = TripleStoreInterface.executeQueryWithAuthorization(queryConflictingSD, "XML");
-		
-		// Iterate over all conflicting combination URIs
-		ResultSet resultSetConflicts = ResultSetFactory.fromXML(result);
-		while (resultSetConflicts.hasNext()) {
-			QuerySolution qs = resultSetConflicts.next();
-
-			String currentConflictingCombinationURI = qs.getResource("?combinationURI").toString();
-			String currentTripleStateA = qs.getResource("?tripleStateA").toString();
-			String currentTripleStateB = qs.getResource("?tripleStateB").toString();
-			
-			String querySelectPart = "SELECT ?s ?p ?o %s %s %n";
-			String sparqlQueryRevisionA = null;
-			String sparqlQueryRevisionB = null;			
-			
-			// A
-			if (currentTripleStateA.equals(SDDTripleState.ADDED.getSddRepresentation())) {
-				// In revision A the triple was added
-				querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
-				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.ADDED.getRpoRepresentation());
-			} else if (currentTripleStateA.equals(SDDTripleState.DELETED.getSddRepresentation())) {
-				// In revision A the triple was deleted
-				querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
-				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.DELETED.getRpoRepresentation());
-			} else if (currentTripleStateA.equals(SDDTripleState.ORIGINAL.getSddRepresentation())) {
-				// In revision A the triple is original
-				querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
-				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.ORIGINAL.getRpoRepresentation());
-			} else if (currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
-				// In revision A the triple is not included
-				querySelectPart = String.format(querySelectPart, "", "%s");
-				sparqlQueryRevisionA = sparqlTemplateNotExistsRevisionA;
-			}
-			
-			// B
-			if (currentTripleStateB.equals(SDDTripleState.ADDED.getSddRepresentation())) {
-				// In revision B the triple was added
-				querySelectPart = String.format(querySelectPart, "?revisionB");
-				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.ADDED.getRpoRepresentation());
-			} else if (currentTripleStateB.equals(SDDTripleState.DELETED.getSddRepresentation())) {
-				// In revision B the triple was deleted
-				querySelectPart = String.format(querySelectPart, "?revisionB");
-				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.DELETED.getRpoRepresentation());
-			} else if (currentTripleStateB.equals(SDDTripleState.ORIGINAL.getSddRepresentation())) {
-				// In revision B the triple is original
-				querySelectPart = String.format(querySelectPart, "?revisionB");
-				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.ORIGINAL.getRpoRepresentation());
-			} else if (currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
-				// In revision B the triple is not included
-				querySelectPart = String.format(querySelectPart, "");
-				sparqlQueryRevisionB = sparqlTemplateNotExistsRevisionB;
-			}
-		
-			// Concatenated SPARQL query
-			String query = String.format(
-					prefixes
-					+ "%s"
-					+ "WHERE { %n"
-					+ "%s"
-					+ "%s"
-					+ "} %n", querySelectPart, sparqlQueryRevisionA, sparqlQueryRevisionB);
-					
-			String queryResult = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
-		
-			// Iterate over all triples
-			ResultSet resultSetTriples = ResultSetFactory.fromXML(queryResult);
-			while (resultSetTriples.hasNext()) {
-				QuerySolution qsQuery = resultSetTriples.next();
-				
-				String subject = qsQuery.getResource("?s").toString();
-				String predicate = qsQuery.getResource("?p").toString();
-
-				// Differ between literal and resource
-				String object = "";
-				if (qsQuery.get("?o").isLiteral()) {
-					object = "\"" + qsQuery.getLiteral("?o").toString() + "\"";
-				} else {
-					object = "<" + qsQuery.getResource("?o").toString() + ">";
-				}
-				
-				// Create the references A and B part of the query
-				String referencesAB = ". %n";
-				if (!currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation()) && !currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
-					referencesAB = String.format(
-							  "			rpo:referencesA <%s> ; %n"
-							+ "			rpo:referencesB <%s> %n", qsQuery.getResource("?revisionA").toString(), 
-																qsQuery.getResource("?revisionB").toString());
-				} else if (currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation()) && !currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
-					referencesAB = String.format(
-							  "			rpo:referencesB <%s> %n", qsQuery.getResource("?revisionB").toString());
-				} else if (!currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation()) && currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
-					referencesAB = String.format(
-							  "			rpo:referencesA <%s> %n", qsQuery.getResource("?revisionA").toString());
-				}
-				
-				String queryTriple = prefixes + String.format(
-						  "INSERT INTO <%s> {%n"
-						+ "	<%s> a rpo:ConflictGroup ; %n"
-						+ "	sddo:hasTripleStateA <%s> ; %n"
-						+ "	sddo:hasTripleStateB <%s> ; %n"
-						+ "	rpo:hasConflict [ %n"
-						+ "		a rpo:Conflict ; %n"
-						+ "			rpo:hasTriple [ %n"
-						+ "				rdf:subject <%s> ; %n"
-						+ "				rdf:predicate <%s> ; %n"
-						+ "				rdf:object %s %n"
-						+ "			] ; %n"
-						+ "%s"
-						+ "	] . %n"
-						+ "}", graphNameConflictingTripleModel, 
-									currentConflictingCombinationURI, 
-									currentTripleStateA, 
-									currentTripleStateB, 
-									subject, 
-									predicate,
-									object,
-									referencesAB);
-				
-				TripleStoreInterface.executeQueryWithAuthorization(queryTriple, "XML");
-				
-				
-
-				
-				
-				
-				
-				
-				
-//				INSERT DATA INTO <http://example/bookStore>
-//				{ <http://example/book3>  dc:title  "Fundamentals of Compiler Design" }
-//				
-//				
-//				xyz a rpo:ConflictGroup ;
-//				sddo:hasTripleStateA <xyz> ;
-//				sddo:hasTripleStateB <xyz> ;
-//				rpo:hasConflict [
-//					a rpo:Conflict ;
-//						rpo:hasTriple [
-//							rdf:subject ?s ;
-//							rdf:predicate ?p ;
-//							rdf:object ?o .
-//						]
-//						rpo:referencesA <XYZ> ;
-//						rpo:referencesB <XYZ> .
-//				] .
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				//qs.getResource("?tripleStateA").toString();zh
-				
-				
-				
-//				String queryInitial = prefixes + String.format(	
-//						  "INSERT INTO <%s> { \n"
-//						+ "	<%s> a rpo:Conflict; \n"
-//						+ "		rpo:original [ \n"
-//						+ "			rdf:subject ?s ; \n"
-//						+ "			rdf:predicate ?p ; \n"
-//						+ "			rdf:object ?o ; \n"
-//						+ "			rmo:references \"%s\" \n"
-//						+ "		] \n"
-//						+ "} WHERE { \n"
-//						+ "	GRAPH <%s> \n"
-//						+ "		{ ?s ?p ?o . } \n"
-//						+ "}",graphNameRevisionProgress,uri, firstRevision, fullGraphName);
-				
-				
-			}
-		
-		}
-		
-		
-		
-		
-//		PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#>
-//			PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
-//
-//			SELECT ?s ?p ?o ?revisionB
-//			WHERE {
-//				FILTER NOT EXISTS {
-//					GRAPH <RM-REVISION-PROGRESS-A-exampleGraph> {
-//						<http://example/branch-A> rmo:removed ?blankA .
-//							?blankA rdf:subject ?s .
-//							?blankA rdf:predicate ?p .
-//							?blankA rdf:object ?o .
-//							?blankA rmo:revision ?revisionA .
-//					}
-//				}
-//				GRAPH <RM-REVISION-PROGRESS-B-exampleGraph> {
-//					<http://example/branch-B> rmo:added ?blankB .
-//						?blankB rdf:subject ?s .
-//						?blankB rdf:predicate ?p .
-//						?blankB rdf:object ?o .
-//						?blankB rmo:revision ?revisionB .
-//				}
-//			}
-				
-				
-				
-
-				
-		
-	}
 	
 	/*
 	 * Create the difference triple model which contains all differing triples.
@@ -1002,11 +685,6 @@ public class MergeManagement {
 	}
 	
 	
-	
-	
-	
-	
-	
 	/**
 	 * Create a merged revision.
 	 * 
@@ -1070,8 +748,9 @@ public class MergeManagement {
 	
 				String currentDifferencGroupURI = qsCurrentDifferenceGroup.getResource("?differenceCombinationURI").toString();
 				String currentDifferencGroupAutomaticResolutionState = qsCurrentDifferenceGroup.getResource("?automaticResolutionState").toString();
-				String currentDifferencGroupTripleStateA = qsCurrentDifferenceGroup.getResource("?tripleStateA").toString();
-				String currentDifferencGroupTripleStateB = qsCurrentDifferenceGroup.getResource("?tripleStateB").toString();
+//				Currently not needed
+//				String currentDifferencGroupTripleStateA = qsCurrentDifferenceGroup.getResource("?tripleStateA").toString();
+//				String currentDifferencGroupTripleStateB = qsCurrentDifferenceGroup.getResource("?tripleStateB").toString();
 				int currentDifferencGroupConflict = qsCurrentDifferenceGroup.getLiteral("?conflict").getInt();
 				
 				// Get all differences (triples) of current difference group
@@ -1250,33 +929,6 @@ public class MergeManagement {
 		return new String(os.toByteArray(), "UTF-8");
 	}
 	
-// Not needed anymore
-//	/**
-//	 * Create the initial SDD for the specified graph under revision control.
-//	 * 
-//	 * @param graphName the graph name
-//	 * @throws IOException 
-//	 * @throws UnsupportedEncodingException 
-//	 * @throws HttpException 
-//	 */
-//	public static void createInitialSDD(String graphName) throws UnsupportedEncodingException, IOException, HttpException {
-//		// Load initial SDD into virtuoso
-//		logger.info("Create the initial SDD graph.");
-//		createNewGraph(graphName + "-SDD");		
-//		RevisionManagement.executeINSERT(graphName + "-SDD", convertJenaModelToNTriple(readTurtleFileToJenaModel("dataset/sdd.ttl")));
-//
-//		// Create the reference
-//		logger.info("Insert reference to SDD graph into revision graph.");	
-//		String queryContent = String.format(
-//				  "<%s> rmo:referencedSDD <%s> .%n"
-//				  , graphName, graphName + "-SDD");
-//		
-//		String querySDD = String.format(
-//				prefix_rmo
-//				+ "INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
-//		TripleStoreInterface.executeQueryWithAuthorization(querySDD, "HTML");
-//	}
-
 	
 	/**
 	 * Create a new graph. When graph already exists it will be dropped.
@@ -1292,10 +944,7 @@ public class MergeManagement {
 	}
 	
 	
-	
 	// TODO upload on initialization RMO and SDDO so the client has the possibility to use the ontology data
 	// TODO Add SPIN file to graph and also reference in RMO
-	
-	// TODO add rmo:original to ontology (maybe it would be better to use rmo:added ... instead of sddo:added
 	
 }

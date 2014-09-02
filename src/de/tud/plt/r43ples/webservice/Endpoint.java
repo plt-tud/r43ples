@@ -616,9 +616,6 @@ public class Endpoint {
 			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA), graphNameA, uriA);
 			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
 			
-//			// Create conflict model
-//			MergeManagement.createConflictingTripleModel(graphName, "RM-CONFLICT-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI);
-			
 			// Create difference model
 			MergeManagement.createDifferenceTripleModel(graphName, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI);
 			
@@ -655,16 +652,6 @@ public class Endpoint {
 					// Create the merged revision
 					newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.COMMON, "");
 				}
-//				if (RevisionManagement.checkGraphExistence("RM-DIFFERENCE-MODEL-" + graphName)) {
-//					// Conflict model contains conflicts
-//					// Return the conflict model to the client
-//					responseBuilder = Response.status(Response.Status.CONFLICT);
-//					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct("RM-DIFFERENCE-MODEL-" + graphName)); 
-//				} else {
-//					// Conflict model contains no conflicts
-//					// Create the merged revision
-//					MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.COMMON, "");
-//				}
 			} else {
 				throw new InternalServerErrorException("This is not a valid MERGE query: " + sparqlQuery);
 			}
@@ -709,4 +696,5 @@ public class Endpoint {
 			throw new InternalServerErrorException("No commit message specified");
 		}
 	}
+	
 }
