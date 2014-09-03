@@ -900,7 +900,7 @@ public class MergeManagement {
 	 * Read N-Triple string to jena model.
 	 * 
 	 * @param triples the triples in N-Triple serialization
-	 * @return
+	 * @return the model
 	 * @throws IOException
 	 */
 	public static Model readNTripleStringToJenaModel(String triples) throws IOException {
