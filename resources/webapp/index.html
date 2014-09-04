@@ -24,7 +24,6 @@
 		      elDrop.textContent = opt;
 		      elDrop.value = "DROP GRAPH <"+opt+">";
 		      selectDrop.appendChild(elDrop);
-		      
 		    }       
 		  });
 		});
@@ -72,6 +71,11 @@ WHERE {
 <form action="revisiongraph" method="get">
     <select id="selectRevisedGraph" name="graph">
     	<option value="">(All)</option>
+    </select>
+    <select name="format">
+    	<option value="text/turtle">Turtle</option>
+    	<option value="text/html">HTML (Graphical)</option>
+    	<option value="text/vnd.graphviz">GraphViz</option>
     </select>
     <input type="submit" value="Get RevisionInformation" />
 </form>

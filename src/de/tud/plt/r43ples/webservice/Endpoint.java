@@ -44,6 +44,7 @@ import de.tud.plt.r43ples.management.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
+import de.tud.plt.r43ples.visualisation.GraphVizVisualisation;
 
 
 /**
@@ -68,17 +69,24 @@ public class Endpoint {
 	 */
 	@Path("revisiongraph")
 	@GET
-	@Produces({"text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON})
+	@Produces({"text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML, MediaType.APPLICATION_SVG_XML, "text/vnd.graphviz"})
 	public final String getRevisionGraph(
 			@HeaderParam("Accept") final String format_header, 
-			@QueryParam("format") @DefaultValue("text/turtle") final String format_query,
+			@QueryParam("format") final String format_query,
 			@QueryParam("graph") @DefaultValue("") final String graph) {
 		logger.info("Get Revision Graph");
 		String format = (format_query!=null) ? format_query : format_header;
 		logger.info("format: " +  format);
 		
 		try {
-			return RevisionManagement.getRevisionInformation(graph, format);
+			if (format.contains(MediaType.TEXT_HTML) || format.contains("text/vnd.graphviz")){
+				if (format.contains(MediaType.TEXT_HTML))
+					return GraphVizVisualisation.getGraphVizHtmlOutput(graph);
+				else
+					return GraphVizVisualisation.getGraphVizOutput(graph);
+			}
+			else
+				return RevisionManagement.getRevisionInformation(graph, format);
 		} catch (HttpException | IOException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException(e.getMessage());
@@ -106,6 +114,7 @@ public class Endpoint {
 			throw new InternalServerErrorException(e.getMessage());
 		}
 	}
+	
 
 	
 	private final Pattern patternSelectQuery = Pattern.compile(
@@ -158,7 +167,7 @@ public class Endpoint {
 			if (format.contains("text/html")) {
 				logger.info("SPARQL form requested");
 				File fileToSend = new File("resources/webapp/index.html");
-				return Response.ok(fileToSend, "text/html").build();
+				return Response.ok(fileToSend, MediaType.TEXT_HTML).build();
 			} else {
 				return getServiceDescription(format);
 			}
@@ -476,6 +485,7 @@ public class Endpoint {
 		responseBuilder.entity("Successful: "+ query);
 		return responseBuilder.build();
 	}
+	
 	
 	/** Creates a tag or a branch for a specific graph and revision.
 	 * Using command "TAG GRAPH <?> REVISION "rev" TO "tag"
