@@ -42,7 +42,6 @@ public class SparqlRewriter {
 	
 	public static String rewriteQuery(String query_r43ples) throws HttpException, IOException {
 
-		// create pattern for FROM clause
 		Pattern pattern = Pattern.compile("FROM\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"");
 		
 		Matcher m = pattern.matcher(query_r43ples);
@@ -54,9 +53,9 @@ public class SparqlRewriter {
 		logger.info("Path to revision: " + list.toString());
 		list.removeLast();
 		Node lastRevision = NodeFactory.createURI(String.format("%s-revision-%s", graphName, list.get(0)));
-		ExprList el = new ExprList();
+		ExprList expression_list_revision_path = new ExprList();
 		for (String string : list) {
-			el.add(ExprUtils.nodeToExpr(NodeFactory.createURI(String.format("%s-revision-%s", graphName, string))));
+			expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(String.format("%s-revision-%s", graphName, string))));
 		}
 		
 		m.reset();
@@ -111,7 +110,7 @@ public class SparqlRewriter {
 					eg2.addTriplePattern(new Triple(var_rg1, rmo_deltaRemoved, var_g1));
 					// add filter
 					//FILTER (?rg1 IN (<http://test.com/r43ples-dataset-revision-4>, <http://test.com/r43ples-dataset-revision-3>))
-					eg2.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_rg1), el)));
+					eg2.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_rg1), expression_list_revision_path)));
 					ElementUnion union = new ElementUnion();
 					union.addElement(eg2);
 					
@@ -146,11 +145,9 @@ public class SparqlRewriter {
 					eg_innerminus.addElement(ebp);
 					
 					
-					eg_innerminus.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_rm1_old), el)));
-					eg_minus.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_rm1), el)));
+					eg_innerminus.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_rm1_old), expression_list_revision_path)));
+					eg_minus.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_rm1), expression_list_revision_path)));
 					eg_minus.addElement(inner_minus);
-					
-
 					
 					
 					eg_modified.addElement(ng);
@@ -160,7 +157,6 @@ public class SparqlRewriter {
 				}
 			}			
 			
-		    qe.setResultVars();
 			qe.setQueryPattern(eg_modified);
 			query_r43ples = qe.serialize();
 		

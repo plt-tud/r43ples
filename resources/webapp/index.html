@@ -1,18 +1,38 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<title>R43ples - Revision Management for the Semantic Web</title>
-<meta name="author" content="Markus Graube">
-<meta charset="utf-8">
-<script src="/static/jquery-2.1.1.js"></script>
-<script src="/static/jquery-ui.js"></script>
-<link href="/static/jquery-ui.css" rel="stylesheet" />
-<link href="/static/r43ples.css" rel="stylesheet" />
-  <script>
-  $(function() {
-    $(".accordion" ).accordion();
-  });
-  </script>
+	<title>R43ples - Revision Management for the Semantic Web</title>
+	<meta name="author" content="Markus Graube">
+	<link href="/static/jquery-ui.css" rel="stylesheet" />
+	<link href="/static/r43ples.css" rel="stylesheet" />
+	<script src="/static/jquery-2.1.1.js"></script>
+	<script src="/static/jquery-ui.js"></script>
+	<script language="JavaScript">
+		$(document).ready(function(){
+		  var url = "getRevisedGraphs";
+		  $.getJSON(url, function(data) {
+		    var select = document.getElementById("selectRevisedGraph");
+		    var selectDrop = document.getElementById("dropRevisedGraph");
+		    var options = data.results.bindings;
+		    for(var i = 0; i < options.length; i++) {
+		      var opt = options[i].graph.value;
+		      var el = document.createElement("option");
+		      el.textContent = opt;
+		      el.value = opt;
+		      select.appendChild(el);
+		      var elDrop = document.createElement("option");
+		      elDrop.textContent = opt;
+		      elDrop.value = "DROP GRAPH <"+opt+">";
+		      selectDrop.appendChild(elDrop);
+		    }       
+		  });
+		});
+	</script>
+	<script>
+		$(function() {
+	 		$(".accordion" ).accordion();
+		});
+	</script>
 </head>
 <body>
 
@@ -26,7 +46,7 @@
   <label for="query">Query Text</label><br />
 	  <textarea name="query" id="query" cols="80" rows="20">
 SELECT * 
-FROM <test> REVISION "MASTER"
+FROM &lt;exampleGraph&gt; REVISION "MASTER"
 WHERE {
 	?s ?p ?o. 
 }
@@ -46,9 +66,30 @@ WHERE {
 
 <h2>Revision Information</h2>
 <ul>
-  <li><a href="revisiongraph">Get Revision information</a></li>
   <li><a href="createTestDataset">Create test data set</a></li>
+  <li>	
+<form action="revisiongraph" method="get">
+    <select id="selectRevisedGraph" name="graph">
+    	<option value="">(All)</option>
+    </select>
+    <select name="format">
+    	<option value="text/turtle">Turtle</option>
+    	<option value="text/html">HTML (Graphical)</option>
+    	<option value="text/vnd.graphviz">GraphViz</option>
+    </select>
+    <input type="submit" value="Get RevisionInformation" />
+</form>
+</li>
+  <li>	
+<form action="sparql" method="get">
+    <select id="dropRevisedGraph" name="query">
+    	<option value="">(None)</option>
+    </select>
+    <input type="submit" value="Drop Graph" />
+</form>
+</li>
 </ul>
+
 </div>
 
 <div id="examples">

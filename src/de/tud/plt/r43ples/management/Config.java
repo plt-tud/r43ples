@@ -17,9 +17,10 @@ public class Config {
 	
 	/**
 	 * read the configuration information from local file
+	 * @param configFilePath path to config file
 	 * @throws ConfigurationException
 	 */
-	public static void readConfig(String configFilePath) throws ConfigurationException{
+	public static void readConfig(final String configFilePath) throws ConfigurationException{
 		
 		PropertiesConfiguration config = new PropertiesConfiguration(configFilePath);
 		service_uri = config.getString("service.uri");

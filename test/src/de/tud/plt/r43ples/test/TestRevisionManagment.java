@@ -11,6 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SparqlRewriter;
@@ -103,6 +104,36 @@ public class TestRevisionManagment {
 	public void testSparqlRewrite_two_statements() throws HttpException, IOException {
 		String result = SparqlRewriter.rewriteQuery("SELECT * FROM <" + graph1 + "> REVISION \"3\" WHERE {?a ?p ?b. ?b ?p ?c.}");
 		Assert.assertNotEquals("", result);		
+	}
+
+	@Test
+	public void testBranching() throws HttpException, IOException, IdentifierAlreadyExistsException {
+		String graphName = "test_dataset_user";
+		
+		RevisionManagement.createReference("branch", graphName, "2", "testBranch", "test_user", "branching as junit test");
+		ArrayList<String> usedRevisionNumber = new ArrayList<String>();
+		usedRevisionNumber.add("testBranch");
+		RevisionManagement.createNewRevision(graphName, "<a> <b> <c>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		String revNumber = RevisionManagement.getRevisionNumber(graphName, "testBranch");
+		Assert.assertEquals("2.0-0", revNumber);
+		
+		RevisionManagement.createNewRevision(graphName, "<a> <b> <d>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		String revNumber2 = RevisionManagement.getRevisionNumber(graphName, "testBranch");
+		Assert.assertEquals("2.0-1", revNumber2);
+		
+		RevisionManagement.createReference("branch", graphName, "2.0-1", "testBranch2", "test_user", "branching as junit test");
+		usedRevisionNumber.clear();
+		usedRevisionNumber.add("testBranch2");
+		RevisionManagement.createNewRevision(graphName, "<a> <b> <e>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		String revNumber3 = RevisionManagement.getRevisionNumber(graphName, "testBranch2");
+		Assert.assertEquals("2.0-1.0-0", revNumber3);
+		
+		RevisionManagement.createReference("branch", graphName, "2.0-1", "testBranch2a", "test_user", "branching as junit test");
+		usedRevisionNumber.clear();
+		usedRevisionNumber.add("testBranch2a");
+		RevisionManagement.createNewRevision(graphName, "<a> <b> <f>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		String revNumber4 = RevisionManagement.getRevisionNumber(graphName, "testBranch2a");
+		Assert.assertEquals("2.0-1.1-0", revNumber4);
 	}
 	
 }
