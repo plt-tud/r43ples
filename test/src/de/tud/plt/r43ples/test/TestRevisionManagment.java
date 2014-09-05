@@ -91,6 +91,16 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
+	public void testSelect() throws HttpException, IOException {
+		String graphName = "test_dataset_user";
+		RevisionManagement.generateFullGraphOfRevision(graphName, "2", "tempGraphName");
+		String result = TripleStoreInterface.executeQueryWithAuthorization(
+				"SELECT ?s ?p ?o FROM <tempGraphName> WHERE {?s ?p ?o} ORDER By ?s ?p ?o");
+		String expected = ResourceManagement.getContentFromResource("response-test.xml");
+		Assert.assertEquals(expected, result);
+	}
+	
+	@Test
 	public void testBranching() throws HttpException, IOException, IdentifierAlreadyExistsException {
 		String graphName = "test_dataset_user";
 		

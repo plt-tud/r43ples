@@ -307,7 +307,7 @@ public class RevisionManagement {
 			// Remove data from temporary graph (no opposite of SPARQL ADD available)
 			TripleStoreInterface.executeQueryWithAuthorization("DELETE { GRAPH <" +tempGraphName + "> { ?s ?p ?o.} } WHERE { GRAPH <"+graphName + "-delta-added-" + number + "> {?s ?p ?o.}}", "HTML");
 			
-			list.pollFirst();
+			number = list.pollFirst();
 		}		
 		
 	}
@@ -704,7 +704,7 @@ public class RevisionManagement {
 			QuerySolution qs = results.next();
 			String graphName = qs.getResource("?graph").toString();
 			TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <"+graphName+">","XML");
-			System.out.println("Graph deleted: " + graphName);
+			logger.debug("Graph deleted: " + graphName);
 		}
 		// Remove information from revision graph		
 		String queryDelete = prefixes + String.format(
@@ -716,7 +716,6 @@ public class RevisionManagement {
 				+ "    UNION {?s a rmo:Commit; prov:generated [rmo:revisionOf <%s>]; ?p ?o.}"
 				+ "} }", Config.revision_graph, Config.revision_graph, graph, graph, graph);
 		TripleStoreInterface.executeQueryWithAuthorization(queryDelete, "XML");
-		System.out.println("Graph deleted: " + graph);
 	}
 	
 	
