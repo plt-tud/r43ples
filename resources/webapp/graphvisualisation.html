@@ -1,0 +1,25 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<title>R43ples - Revision Graph Visualisation</title>
+	<meta name="author" content="Markus Graube">
+	<meta charset="utf-8">
+	<link href="/static/r43ples.css" rel="stylesheet" />
+	<script src="/static/jquery-2.1.1.js"></script>
+	<script src="/static/viz.js"></script>
+	<script src="/static/webtoolkit.base64.js"></script>
+	<script>
+		$(document)
+				.ready(
+						function() {
+							var data = document.getElementById("graph").innerHTML;
+							var svg = Viz(data, "svg");
+							var b64 = Base64.encode(svg);
+							document.body.innerHTML = "<img src='data:image/svg+xml;base64,"+b64+"' alt='Revision graph'/>";
+						});
+	</script>
+</head>
+	<body>
+		<script type="text/vnd.graphviz" id="graph">%s</script>
+	</body>
+</html>
