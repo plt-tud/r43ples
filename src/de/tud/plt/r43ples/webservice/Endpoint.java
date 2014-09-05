@@ -302,9 +302,13 @@ public class Endpoint {
 		ResponseBuilder responseBuilder = Response.ok();
 		if (query.contains("#OPTION r43ples:SPARQL_JOIN")){
 			try {
-				String query_rewritten = SparqlRewriter.rewriteQuery(query);
-				return responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(query_rewritten, format)).type(format).build();
+				String query_rewritten = query.replace("#OPTION r43ples:SPARQL_JOIN", "");
+				query_rewritten = SparqlRewriter.rewriteQuery(query_rewritten);
+				String result = TripleStoreInterface.executeQueryWithAuthorization(query_rewritten, format);
+				return responseBuilder.entity(result).type(format).build();
 			} catch (Exception e) {
+				logger.error(e);
+				e.printStackTrace();
 				throw new InternalServerErrorException("Query contain errors:\n"+query);
 			}
 		}

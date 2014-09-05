@@ -16,6 +16,7 @@ import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
+import de.tud.plt.r43ples.webservice.Endpoint;
 
 
 public class TestRevisionManagment {
@@ -72,14 +73,12 @@ public class TestRevisionManagment {
 	public void test1234_master_number() throws HttpException, IOException {
 		String revNumberMaster = RevisionManagement.getMasterRevisionNumber(graph2);
 		Assert.assertEquals("1", revNumberMaster);
-		
 	}
 	
 	@Test
 	public void test1234_reference_uri() throws HttpException, IOException {
 		String res = RevisionManagement.getReferenceUri(graph2, "master");
 		Assert.assertEquals("test1234-master", res);
-		
 	}
 	
 	@Test
@@ -95,15 +94,51 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void testSparqlRewrite_simple() throws HttpException, IOException {
-		String result = SparqlRewriter.rewriteQuery("SELECT ?s ?p ?o FROM <" + graph1 + "> REVISION \"2\" WHERE {?s ?p ?o.}");
-		Assert.assertNotEquals("", result);
-	}
-	
-	@Test
 	public void testSparqlRewrite_two_statements() throws HttpException, IOException {
 		String result = SparqlRewriter.rewriteQuery("SELECT * FROM <" + graph1 + "> REVISION \"3\" WHERE {?a ?p ?b. ?b ?p ?c.}");
 		Assert.assertNotEquals("", result);		
+	}
+	
+	@Test
+	public void testSelectWithRewriting() throws IOException{
+		Endpoint ep = new Endpoint();
+        String result;
+        String expected;
+        
+        result = ep.sparql("application/sparql-results+xml", null, ""
+        		+ "#OPTION r43ples:SPARQL_JOIN\n"
+        		+ "SELECT ?s ?p ?o FROM <"+graph1+"> REVISION \"0\"\n"
+        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o").getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev0.xml");
+        Assert.assertEquals(expected, result);
+        
+        result = ep.sparql("application/sparql-results+xml", null, ""
+        		+ "#OPTION r43ples:SPARQL_JOIN\n"
+        		+ "SELECT ?s ?p ?o FROM <"+graph1+"> REVISION \"1\"\n"
+        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o").getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev1.xml");
+        Assert.assertEquals(expected, result);
+        
+        result = ep.sparql("application/sparql-results+xml", null, ""
+        		+ "#OPTION r43ples:SPARQL_JOIN\n"
+        		+ "SELECT ?s ?p ?o FROM <"+graph1+"> REVISION \"2\"\n"
+        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o").getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev2.xml");
+        Assert.assertEquals(expected, result);
+        
+        result = ep.sparql("application/sparql-results+xml", null, ""
+        		+ "#OPTION r43ples:SPARQL_JOIN\n"
+        		+ "SELECT ?s ?p ?o FROM <"+graph1+"> REVISION \"3\"\n"
+        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o").getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev3.xml");
+        Assert.assertEquals(expected, result);
+        
+        result = ep.sparql("application/sparql-results+xml", null, ""
+        		+ "#OPTION r43ples:SPARQL_JOIN\n"
+        		+ "SELECT ?s ?p ?o FROM <"+graph1+"> REVISION \"4\"\n"
+        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o").getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
+        Assert.assertEquals(expected, result);
 	}
 
 	@Test
@@ -111,23 +146,31 @@ public class TestRevisionManagment {
 		String graphName = "test_dataset_user";
 		String result;
 		String expected;
+		String query = "SELECT ?s ?p ?o FROM <tempGraphName> WHERE {?s ?p ?o} ORDER By ?s ?p ?o"; 
+		
+		RevisionManagement.generateFullGraphOfRevision(graphName, "0", "tempGraphName");
+		result = TripleStoreInterface.executeQueryWithAuthorization(query);
+		expected = ResourceManagement.getContentFromResource("response-test-rev0.xml");
+		Assert.assertEquals(expected, result);
 		
 		RevisionManagement.generateFullGraphOfRevision(graphName, "1", "tempGraphName");
-		result = TripleStoreInterface.executeQueryWithAuthorization(
-				"SELECT ?s ?p ?o FROM <tempGraphName> WHERE {?s ?p ?o} ORDER By ?s ?p ?o");
+		result = TripleStoreInterface.executeQueryWithAuthorization(query);
 		expected = ResourceManagement.getContentFromResource("response-test-rev1.xml");
 		Assert.assertEquals(expected, result);
 		
 		RevisionManagement.generateFullGraphOfRevision(graphName, "2", "tempGraphName");
-		result = TripleStoreInterface.executeQueryWithAuthorization(
-				"SELECT ?s ?p ?o FROM <tempGraphName> WHERE {?s ?p ?o} ORDER By ?s ?p ?o");
+		result = TripleStoreInterface.executeQueryWithAuthorization(query);
 		expected = ResourceManagement.getContentFromResource("response-test-rev2.xml");
 		Assert.assertEquals(expected, result);
 		
 		RevisionManagement.generateFullGraphOfRevision(graphName, "3", "tempGraphName");
-		result = TripleStoreInterface.executeQueryWithAuthorization(
-				"SELECT ?s ?p ?o FROM <tempGraphName> WHERE {?s ?p ?o} ORDER By ?s ?p ?o");
+		result = TripleStoreInterface.executeQueryWithAuthorization(query);
 		expected = ResourceManagement.getContentFromResource("response-test-rev3.xml");
+		Assert.assertEquals(expected, result);
+		
+		RevisionManagement.generateFullGraphOfRevision(graphName, "4", "tempGraphName");
+		result = TripleStoreInterface.executeQueryWithAuthorization(query);
+		expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
 		Assert.assertEquals(expected, result);
 	}
 	

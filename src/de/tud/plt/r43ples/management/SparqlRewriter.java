@@ -48,9 +48,16 @@ public class SparqlRewriter {
 		m.find();
 	    String graphName = m.group("graph");
 	    String revisionNumber = m.group("revision");
+	    m.reset();
 	    
 	    LinkedList<String> list =  RevisionManagement.getRevisionTree(graphName).getPathToRevision(revisionNumber);
 		logger.info("Path to revision: " + list.toString());
+		
+		// Already reference revision -> only remove REVISON keyword
+		if (list.size()==1) {
+			return m.replaceAll("FROM <${graph}>");
+		}
+		
 		list.removeLast();
 		Node lastRevision = NodeFactory.createURI(String.format("%s-revision-%s", graphName, list.get(0)));
 		ExprList expression_list_revision_path = new ExprList();
@@ -58,8 +65,8 @@ public class SparqlRewriter {
 			expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(String.format("%s-revision-%s", graphName, string))));
 		}
 		
-		m.reset();
 		String query_sparql = m.replaceAll("");
+
 			
 		Node rmo_Revision = NodeFactory.createURI(rmo +"Revision");
 		Node rmo_deltaRemoved = NodeFactory.createURI(rmo + "deltaRemoved");
@@ -157,6 +164,7 @@ public class SparqlRewriter {
 				}
 			}			
 			
+			qe.setDistinct(true);		
 			qe.setQueryPattern(eg_modified);
 			query_r43ples = qe.serialize();
 		
