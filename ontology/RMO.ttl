@@ -142,6 +142,22 @@
 
 
 
+###  http://eatld.et.tu-dresden.de/rmo#referencedSPIN
+
+:referencedSPIN rdf:type owl:DatatypeProperty ;
+                
+                rdfs:label "referenzierte SPIN Regeln"@de ,
+                           "referenced SPIN rules"@en ;
+                
+                rdfs:comment "Spezifiziert die SPIN Regeln, die vom Graphen referenziert werden. Ein Client kann diese nutzen, um den zusammengefuehrten Inhalt zu ueberpruefen bevor der Commit ausgefuehrt wird."@de ,
+                             "Specifies the SPIN rules which are referenced by the graph. Client can use this connection to check merged content before committing."@en ;
+                
+                rdfs:domain :Graph ;
+                
+                rdfs:range xsd:anyURI .
+
+
+
 ###  http://eatld.et.tu-dresden.de/rmo#revisionNumber
 
 :revisionNumber rdf:type owl:DatatypeProperty ;
