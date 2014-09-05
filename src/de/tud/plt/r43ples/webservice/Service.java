@@ -49,6 +49,8 @@ public class Service {
 		server.start();
 		logger.info(String.format("Server started -R43ples endpoint available under: %sr43ples/sparql", BASE_URI));
 		
+		logger.info("Version: "+ Service.class.getPackage().getImplementationVersion());
+		
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
 	}
 	

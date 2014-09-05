@@ -15,6 +15,7 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 import de.tud.plt.r43ples.webservice.InternalServerErrorException;
@@ -103,29 +104,8 @@ public class GraphVizVisualisation {
 	}
 
 	public static String getGraphVizHtmlOutput(String graphName) throws IOException, HttpException{
-		String htmlHead = "<!DOCTYPE html>"
-				+ "<html>"
-				+ "  <head>"
-				+ "		<meta charset=\"utf-8\">"
-				+ " 	<title>R43ples - Revisoin Graph Visualisation</title>"
-				+ "		<link href=\"/static/r43ples.css\" rel=\"stylesheet\" />"
-				+ "		<script src=\"/static/jquery-2.1.1.js\"></script>"
-				+ "    	<script src=\"/static/viz.js\"></script> \n"
-				+ "    	<script src=\"/static/webtoolkit.base64.js\"></script> \n"
-				+ "    	<script>"
-				+ "    		$(document).ready(function(){"
-				+ "				var data= document.getElementById(\"graph\").innerHTML;"
-				+ "	    		var svg = Viz(data, \"svg\");"
-				+ "				var b64 = Base64.encode(svg);"
-				+ "	    		document.body.innerHTML = \"<img src='data:image/svg+xml;base64,\"+b64+\"' alt='Revision graph'/>\" ;"
-				+ "		  	});"
-				+ "   	</script>"
-				+ "	</head>"
-				+ "<body>"
-				+ "	<script type=\"text/vnd.graphviz\" id=\"graph\">";
-		String gv = GraphVizVisualisation.getGraphVizOutput(graphName);
-		String htmlTail = "  </script></body>"
-				+ "</html>";
-		return htmlHead+gv+htmlTail;
+		String html = ResourceManagement.getContentFromResource("webapp/graphvisualisation.html");
+		String content = String.format(html, getGraphVizOutput(graphName));
+		return content;
 	}	
 }
