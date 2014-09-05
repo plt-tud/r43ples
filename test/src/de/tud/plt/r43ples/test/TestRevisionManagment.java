@@ -93,10 +93,25 @@ public class TestRevisionManagment {
 	@Test
 	public void testSelect() throws HttpException, IOException {
 		String graphName = "test_dataset_user";
-		RevisionManagement.generateFullGraphOfRevision(graphName, "2", "tempGraphName");
-		String result = TripleStoreInterface.executeQueryWithAuthorization(
+		String result;
+		String expected;
+		
+		RevisionManagement.generateFullGraphOfRevision(graphName, "1", "tempGraphName");
+		result = TripleStoreInterface.executeQueryWithAuthorization(
 				"SELECT ?s ?p ?o FROM <tempGraphName> WHERE {?s ?p ?o} ORDER By ?s ?p ?o");
-		String expected = ResourceManagement.getContentFromResource("response-test.xml");
+		expected = ResourceManagement.getContentFromResource("response-test-rev1.xml");
+		Assert.assertEquals(expected, result);
+		
+		RevisionManagement.generateFullGraphOfRevision(graphName, "2", "tempGraphName");
+		result = TripleStoreInterface.executeQueryWithAuthorization(
+				"SELECT ?s ?p ?o FROM <tempGraphName> WHERE {?s ?p ?o} ORDER By ?s ?p ?o");
+		expected = ResourceManagement.getContentFromResource("response-test-rev2.xml");
+		Assert.assertEquals(expected, result);
+		
+		RevisionManagement.generateFullGraphOfRevision(graphName, "3", "tempGraphName");
+		result = TripleStoreInterface.executeQueryWithAuthorization(
+				"SELECT ?s ?p ?o FROM <tempGraphName> WHERE {?s ?p ?o} ORDER By ?s ?p ?o");
+		expected = ResourceManagement.getContentFromResource("response-test-rev3.xml");
 		Assert.assertEquals(expected, result);
 	}
 	
