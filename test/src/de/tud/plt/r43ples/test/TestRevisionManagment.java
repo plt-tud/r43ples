@@ -104,39 +104,28 @@ public class TestRevisionManagment {
 		Endpoint ep = new Endpoint();
         String result;
         String expected;
+        String query_template = "#OPTION r43ples:SPARQL_JOIN\n"
+        		+ "SELECT ?s ?p ?o FROM <"+graph1+"> REVISION \"%d\"\n"
+        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
+        String format = "application/sparql-results+xml";
         
-        result = ep.sparql("application/sparql-results+xml", null, ""
-        		+ "#OPTION r43ples:SPARQL_JOIN\n"
-        		+ "SELECT ?s ?p ?o FROM <"+graph1+"> REVISION \"0\"\n"
-        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o").getEntity().toString();
+        result = ep.sparql(format, null, String.format(query_template, 0)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev0.xml");
         Assert.assertEquals(expected, result);
         
-        result = ep.sparql("application/sparql-results+xml", null, ""
-        		+ "#OPTION r43ples:SPARQL_JOIN\n"
-        		+ "SELECT ?s ?p ?o FROM <"+graph1+"> REVISION \"1\"\n"
-        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o").getEntity().toString();
+        result = ep.sparql(format, null, String.format(query_template, 1)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev1.xml");
         Assert.assertEquals(expected, result);
         
-        result = ep.sparql("application/sparql-results+xml", null, ""
-        		+ "#OPTION r43ples:SPARQL_JOIN\n"
-        		+ "SELECT ?s ?p ?o FROM <"+graph1+"> REVISION \"2\"\n"
-        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o").getEntity().toString();
+        result = ep.sparql(format, null, String.format(query_template, 2)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev2.xml");
         Assert.assertEquals(expected, result);
         
-        result = ep.sparql("application/sparql-results+xml", null, ""
-        		+ "#OPTION r43ples:SPARQL_JOIN\n"
-        		+ "SELECT ?s ?p ?o FROM <"+graph1+"> REVISION \"3\"\n"
-        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o").getEntity().toString();
+        result = ep.sparql(format, null, String.format(query_template, 3)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev3.xml");
         Assert.assertEquals(expected, result);
         
-        result = ep.sparql("application/sparql-results+xml", null, ""
-        		+ "#OPTION r43ples:SPARQL_JOIN\n"
-        		+ "SELECT ?s ?p ?o FROM <"+graph1+"> REVISION \"4\"\n"
-        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o").getEntity().toString();
+        result = ep.sparql(format, null, String.format(query_template, 4)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
         Assert.assertEquals(expected, result);
 	}
