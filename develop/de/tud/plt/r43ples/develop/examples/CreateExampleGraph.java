@@ -33,7 +33,7 @@ public class CreateExampleGraph {
 	/** The endpoint. **/
 	private static String endpoint = "http://localhost:9998/r43ples/sparql";
 	/** The graph name. **/
-	private static String graphName = "exampleGraph";
+	private static String graphName = "http://exampleGraph";
 	
 	
 	/**
