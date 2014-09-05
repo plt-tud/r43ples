@@ -42,7 +42,6 @@
 
 	<target name="build" depends="init">
 		<echo message="${app.name}: ${ant.file}" />
-		<buildnumber file="build.num" />
 		<javac debug="true" destdir="${classes.dir}" includeantruntime="false">
 			<src path="${src.dir}" />
 			<src path="${test.dir}" />
@@ -51,9 +50,6 @@
 	</target>
 
 	<target name="run" depends="build">
-		<manifest>
-			<attribute name="Implementation-Version" value="${app.version}" />
-		</manifest>
 		<java classname="${main.class}" failonerror="true" fork="true">
 			<classpath refid="classpath" />
 		</java>
