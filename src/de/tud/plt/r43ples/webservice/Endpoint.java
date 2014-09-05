@@ -1,6 +1,5 @@
 package de.tud.plt.r43ples.webservice;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
@@ -155,20 +154,23 @@ public class Endpoint {
 	 * @param formatQuery format specified in the HTTP parameters
 	 * @param sparqlQuery the SPARQL query
 	 * @return the response
+	 * @throws IOException 
 	 */
 	@Path("sparql")
 	@GET
 	@Produces({MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle"})
 	public final Response sparql(@HeaderParam("Accept") final String formatHeader, 
 			@QueryParam("format") final String formatQuery, 
-			@QueryParam("query") @DefaultValue("") final String sparqlQuery) {
+			@QueryParam("query") @DefaultValue("") final String sparqlQuery) throws IOException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		logger.info("SPARQL requested with format: " +  format);
 		if (sparqlQuery.equals(""))	{
 			if (format.contains("text/html")) {
 				logger.info("SPARQL form requested");
-				File fileToSend = new File("resources/webapp/index.html");
-				return Response.ok(fileToSend, MediaType.TEXT_HTML).build();
+				String content = String.format(
+						ResourceManagement.getContentFromResource("webapp/index.html"),
+						Service.class.getPackage().getImplementationVersion());
+				return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
 			} else {
 				return getServiceDescription(format);
 			}
