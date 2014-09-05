@@ -126,15 +126,15 @@
 
 
 
-###  http://eatld.et.tu-dresden.de/rmo#referencedSDD
+###  http://eatld.et.tu-dresden.de/rmo#hasDefaultSDD
 
-:referencedSDD rdf:type owl:DatatypeProperty ;
+:hasDefaultSDD rdf:type owl:DatatypeProperty ;
                
-               rdfs:label "referenzierte SDD"@de ,
-                          "referenced SDD"@en ;
+               rdfs:label "hat Standard-SDD"@de ,
+                          "has default SDD"@en ;
                
-               rdfs:comment "Spezifiziert den Graphen, welcher die SDD Informationen enth�lt."@de ,
-                            "Specifies the graph which contains the SDD information."@en ;
+               rdfs:comment "Spezifiziert Standard-SDD des Graphen."@de ,
+                            "Specifies the default SDD of the graph."@en ;
                
                rdfs:domain :Graph ;
                
