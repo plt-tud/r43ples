@@ -190,11 +190,11 @@ public class Endpoint {
 				if (patternBranchOrTagQuery.matcher(sparqlQueryDecoded).find()) {
 					return produceBranchOrTagResponse(sparqlQueryDecoded, format);
 				}
+				throw new InternalServerErrorException("No R43ples query detected");
 			} catch (HttpException | IOException e) {
 				e.printStackTrace();
 				throw new InternalServerErrorException(e.getMessage());
 			}	
-			throw new InternalServerErrorException("No R43ples query detected");
 		}
 	}
 	

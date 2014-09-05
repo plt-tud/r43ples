@@ -15,17 +15,21 @@ public class NodeSpecification {
 	/** The successors of the node */
 	private ArrayList<NodeSpecification> successor;
 	/** The full graph of a tag or branch if available */
-	private String fullGraph = null;
+	private String fullGraph = "";
 	/** The revision number of the node */
 	private String revisionNumber;
+	/** revision URI of the node */
+	private String revisionUri;
 	
 	/**
 	 * The constructor.
 	 */
-	public NodeSpecification(String node) {
+	public NodeSpecification(String revisionNumber, String revisionUri, String fullGraph) {
 		predecessor = new ArrayList<NodeSpecification>();
 		successor = new ArrayList<NodeSpecification>();
-		revisionNumber = node;
+		this.revisionNumber = revisionNumber;
+		this.revisionUri = revisionUri;
+		this.fullGraph = fullGraph;
 	}
 
 	
@@ -97,5 +101,12 @@ public class NodeSpecification {
 	 */
 	public String getRevisionNumber() {
 		return revisionNumber;
+	}
+	
+	/**
+	 * @return the revisionUri
+	 */
+	public String getRevisionUri() {
+		return revisionUri;
 	}
 }
