@@ -60,6 +60,26 @@ public class Tree {
 		return list;
 	}
 	
+	/**
+	 * Calculate the path from specified revision to a referenced revision.
+	 * 
+	 * @param revisionNumber the revision number to calculate the path for
+	 * @return linked list with all revisions from specified revision number to referenced revision 
+	 */
+	public LinkedList<String> getPathToRevisionWithUri(String revisionNumber) {
+		// TODO: make path resolving more clever; not always using first successor but breadth-first search
+		LinkedList<String> list = new LinkedList<String>();
+		NodeSpecification node = map.get(revisionNumber);
+		
+		// Add all revision numbers from specified revision to first found revision with a full graph
+		list.addFirst(node.getRevisionUri());
+		while (node.getFullGraph().equals("")) {
+			node = node.getFirstSuccessor();
+			list.addFirst(node.getRevisionUri());
+		}
+		return list;
+	}
+	
 	
 	/**
 	 * Get the map.

@@ -50,7 +50,7 @@ public class SparqlRewriter {
 	    String revisionNumber = m.group("revision");
 	    m.reset();
 	    
-	    LinkedList<String> list =  RevisionManagement.getRevisionTree(graphName).getPathToRevision(revisionNumber);
+	    LinkedList<String> list =  RevisionManagement.getRevisionTree(graphName).getPathToRevisionWithUri(revisionNumber);
 		logger.info("Path to revision: " + list.toString());
 		
 		// Already reference revision -> only remove REVISON keyword
@@ -59,10 +59,10 @@ public class SparqlRewriter {
 		}
 		
 		list.removeLast();
-		Node lastRevision = NodeFactory.createURI(String.format("%s-revision-%s", graphName, list.get(0)));
+		Node lastRevision = NodeFactory.createURI(list.get(0));
 		ExprList expression_list_revision_path = new ExprList();
 		for (String string : list) {
-			expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(String.format("%s-revision-%s", graphName, string))));
+			expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(string)));
 		}
 		
 		String query_sparql = m.replaceAll("");
