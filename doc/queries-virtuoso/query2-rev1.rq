@@ -8,8 +8,7 @@ FROM eatld:r43ples-revisions
 where {
 	GRAPH ?g1 { ?s :knows ?o1. }
 	{
-		?reference rmo:references <http://test.com/r43ples-dataset-revision-4>;
-			rmo:fullGraph ?g1.
+		<http://test.com/r43ples-dataset-master> rmo:fullGraph ?g1.
 	} UNION
   	{	?rg1 a rmo:Revision.
   		?rg1 rmo:deltaRemoved ?g1.
@@ -31,8 +30,7 @@ where {
   	
   	
   	GRAPH ?g2 { ?s :knows ?o2. }
-	{ ?reference rmo:references <http://test.com/r43ples-dataset-revision-4>;
-			rmo:fullGraph ?g2. }
+	{ <http://test.com/r43ples-dataset-master> rmo:fullGraph ?g2. }
 	UNION
   	{
   		?rg2 a rmo:Revision.

@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
-import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.tud.plt.r43ples.webservice.InternalServerErrorException;
 
@@ -307,7 +306,7 @@ public class RevisionManagement {
 			// Remove data from temporary graph (no opposite of SPARQL ADD available)
 			TripleStoreInterface.executeQueryWithAuthorization("DELETE { GRAPH <" +tempGraphName + "> { ?s ?p ?o.} } WHERE { GRAPH <"+graphName + "-delta-added-" + number + "> {?s ?p ?o.}}", "HTML");
 			
-			list.pollFirst();
+			number = list.pollFirst();
 		}		
 		
 	}
@@ -420,41 +419,45 @@ public class RevisionManagement {
 
 		Tree tree = new Tree();
 		//create query
-		String queryStringCommits =	prefixes + String.format("SELECT ?uri ?revNumber ?preRevNumber ?fullGraph " +
+		String queryRevisions =	prefixes + String.format("SELECT ?uri ?revNumber ?fullGraph " +
 									"FROM <%s> " +
 									"WHERE {" +
 									"?uri a rmo:Revision;"
 									+ "	rmo:revisionOf <%s>; "
-									+ "	rmo:revisionNumber ?revNumber; "
-									+ "	prov:wasDerivedFrom ?preRev. "
-									+ "?preRev rmo:revisionNumber ?preRevNumber. "
-									+ "OPTIONAL { ?branch rmo:references ?uri; rmo:fullGraph ?fullGraph.} "
+									+ "	rmo:revisionNumber ?revNumber."
+									+ "OPTIONAL { ?branch rmo:references ?uri; rmo:fullGraph ?fullGraph.}"
 									+ " }", Config.revision_graph, graphName);
-		
-		String resultSparql = TripleStoreInterface.executeQueryWithAuthorization(queryStringCommits, "XML");
-		
+		String resultSparql = TripleStoreInterface.executeQueryWithAuthorization(queryRevisions, "XML");
 		ResultSet resultsCommits = ResultSetFactory.fromXML(resultSparql);
-		
-		// Iterate through all commits
 		while(resultsCommits.hasNext()) {
 			QuerySolution qsCommits = resultsCommits.next();
 			String revision = qsCommits.getResource("?uri").toString();
+			String revisionNumber = qsCommits.getLiteral("?revNumber").getString();
+			String fullGraph = "";
+			if (qsCommits.getResource("?fullGraph")!=null)
+				fullGraph = qsCommits.getResource("?fullGraph").toString();
+			
 			logger.debug("Found revision: " + revision + ".");
-			
-			String predecessor = qsCommits.getLiteral("?preRevNumber").getString();
-			String generated = qsCommits.getLiteral("?revNumber").getString();
-						
-			tree.addNode(generated, predecessor);
-			Resource t = qsCommits.getResource("?fullGraph");
-			if (t!=null){
-				String fullGraph = t.getURI();
-				if (!fullGraph.equals("")) {
-					tree.addFullGraphOfNode(generated, fullGraph);
-				}
-			}
-			
+			tree.addNode(revisionNumber, revision, fullGraph);
 		}
 		
+		String queryRevisionConnection = prefixes + String.format("SELECT ?revNumber ?preRevNumber " +
+				"FROM <%s> " +
+				"WHERE {" +
+				"?rev a rmo:Revision;"
+				+ "	rmo:revisionOf <%s>; "
+				+ "	rmo:revisionNumber ?revNumber; "
+				+ "	prov:wasDerivedFrom ?preRev. "
+				+ "?preRev rmo:revisionNumber ?preRevNumber. "
+				+ " }", Config.revision_graph, graphName);
+		String resultSparqlConnection = TripleStoreInterface.executeQueryWithAuthorization(queryRevisionConnection, "XML");
+		ResultSet resultRevConnection = ResultSetFactory.fromXML(resultSparqlConnection);
+		while(resultRevConnection.hasNext()) {
+			QuerySolution qsCommits = resultRevConnection.next();
+			String revision = qsCommits.getLiteral("?revNumber").toString();
+			String preRevision = qsCommits.getLiteral("?preRevNumber").toString();
+			tree.addEdgeNode(revision, preRevision);
+		}
 		return tree;
 	}
 	
@@ -485,16 +488,16 @@ public class RevisionManagement {
 	
 
 	 /**
-	  * Checks whether the referenced revision name is also a branch identifier of an empty branch.
+	  * Checks whether the referenced reference has at least one own revision.
 	  * 
 	  * @param graphName the graph name
-	  * @param revisionName the revision name which was specified by the client (revision number, branch name or tag name)
+	  * @param referenceIdentifier the reference identifier which was specified by the client (branch name or tag name)
 	  * @return true when it is an empty branch
 	  * @throws HttpException 
 	  * @throws IOException 
 	  */
-	 private static boolean isBranchEmpty(final String graphName, final String revisionIdentifier) throws IOException, HttpException {
-	 	String referenceUri = getReferenceUri(graphName, revisionIdentifier);
+	 private static boolean isBranchEmpty(final String graphName, final String referenceIdentifier) throws IOException, HttpException {
+	 	String referenceUri = getReferenceUri(graphName, referenceIdentifier);
  		String queryASKBranch = prefixes + String.format("ASK { GRAPH <%s> { "
  				+ " <%s> rmo:references ?rev; prov:wasDerivedFrom ?rev ."
  				+ " }} ",
@@ -504,6 +507,7 @@ public class RevisionManagement {
 	 }
 	 
 	
+	 
 	public static String getNextRevisionNumber(final String graphName, final String revisionIdentifier) throws HttpException, IOException{
 		String revisionNumber = getRevisionNumber(graphName, revisionIdentifier);
 		if (isBranchEmpty(graphName, revisionIdentifier)) {
@@ -704,7 +708,7 @@ public class RevisionManagement {
 			QuerySolution qs = results.next();
 			String graphName = qs.getResource("?graph").toString();
 			TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <"+graphName+">","XML");
-			System.out.println("Graph deleted: " + graphName);
+			logger.debug("Graph deleted: " + graphName);
 		}
 		// Remove information from revision graph		
 		String queryDelete = prefixes + String.format(
@@ -716,7 +720,6 @@ public class RevisionManagement {
 				+ "    UNION {?s a rmo:Commit; prov:generated [rmo:revisionOf <%s>]; ?p ?o.}"
 				+ "} }", Config.revision_graph, Config.revision_graph, graph, graph, graph);
 		TripleStoreInterface.executeQueryWithAuthorization(queryDelete, "XML");
-		System.out.println("Graph deleted: " + graph);
 	}
 	
 	
