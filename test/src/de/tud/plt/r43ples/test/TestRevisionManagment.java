@@ -22,19 +22,15 @@ import de.tud.plt.r43ples.webservice.Endpoint;
 public class TestRevisionManagment {
 	
 	final String graph1 = "test_dataset_user";
-	final String graph2 = "test1234";
 
 	@Before
 	public void setUp() throws HttpException, IOException, ConfigurationException{
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
 		
-		RevisionManagement.putGraphUnderVersionControl(graph2);
+		
 		ArrayList<String> list = new ArrayList<String>();
 		list.add("0");
-		RevisionManagement.createNewRevision(graph2, "<a> <b> <c>.", "", "test", "test commit message", list);
-		
-		
 		RevisionManagement.putGraphUnderVersionControl(graph1);
 		RevisionManagement.createNewRevision(graph1, 
 				ResourceManagement.getContentFromResource("samples/test-delta-added-1.nt"), 
@@ -62,33 +58,23 @@ public class TestRevisionManagment {
 	
 	@After
 	public void tearDown() throws HttpException, IOException{
-		RevisionManagement.purgeGraph(graph2);
 		RevisionManagement.purgeGraph(graph1);
 	}
 	
-	
-	
-	
 	@Test
-	public void test1234_master_number() throws HttpException, IOException {
-		String revNumberMaster = RevisionManagement.getMasterRevisionNumber(graph2);
-		Assert.assertEquals("1", revNumberMaster);
+	public void test_reference_uri() throws HttpException, IOException {
+		String res = RevisionManagement.getReferenceUri(graph1, "master");
+		Assert.assertEquals("test_dataset_user-master", res);
 	}
 	
 	@Test
-	public void test1234_reference_uri() throws HttpException, IOException {
-		String res = RevisionManagement.getReferenceUri(graph2, "master");
-		Assert.assertEquals("test1234-master", res);
+	public void test_revision_uri() throws HttpException, IOException {
+		String a = RevisionManagement.getRevisionUri(graph1, "master");
+		Assert.assertEquals("test_dataset_user-revision-4", a);
 	}
 	
 	@Test
-	public void test1234_revision_uri() throws HttpException, IOException {
-		String a = RevisionManagement.getRevisionUri(graph2, "master");
-		Assert.assertEquals("test1234-revision-1", a);
-	}
-	
-	@Test
-	public void testR43ples_user() throws HttpException, IOException {
+	public void test_master_number() throws HttpException, IOException {
 		String revNumberMaster = RevisionManagement.getMasterRevisionNumber(graph1);
 		Assert.assertEquals("4", revNumberMaster);
 	}
@@ -166,31 +152,29 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void testBranching() throws HttpException, IOException, IdentifierAlreadyExistsException {
-		String graphName = "test_dataset_user";
-		
-		RevisionManagement.createReference("branch", graphName, "2", "testBranch", "test_user", "branching as junit test");
+		RevisionManagement.createReference("branch", graph1, "2", "testBranch", "test_user", "branching as junit test");
 		ArrayList<String> usedRevisionNumber = new ArrayList<String>();
 		usedRevisionNumber.add("testBranch");
-		RevisionManagement.createNewRevision(graphName, "<a> <b> <c>", "", "test_user", "test_commitMessage", usedRevisionNumber);
-		String revNumber = RevisionManagement.getRevisionNumber(graphName, "testBranch");
+		RevisionManagement.createNewRevision(graph1, "<a> <b> <c>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		String revNumber = RevisionManagement.getRevisionNumber(graph1, "testBranch");
 		Assert.assertEquals("2.0-0", revNumber);
 		
-		RevisionManagement.createNewRevision(graphName, "<a> <b> <d>", "", "test_user", "test_commitMessage", usedRevisionNumber);
-		String revNumber2 = RevisionManagement.getRevisionNumber(graphName, "testBranch");
+		RevisionManagement.createNewRevision(graph1, "<a> <b> <d>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		String revNumber2 = RevisionManagement.getRevisionNumber(graph1, "testBranch");
 		Assert.assertEquals("2.0-1", revNumber2);
 		
-		RevisionManagement.createReference("branch", graphName, "2.0-1", "testBranch2", "test_user", "branching as junit test");
+		RevisionManagement.createReference("branch", graph1, "2.0-1", "testBranch2", "test_user", "branching as junit test");
 		usedRevisionNumber.clear();
 		usedRevisionNumber.add("testBranch2");
-		RevisionManagement.createNewRevision(graphName, "<a> <b> <e>", "", "test_user", "test_commitMessage", usedRevisionNumber);
-		String revNumber3 = RevisionManagement.getRevisionNumber(graphName, "testBranch2");
+		RevisionManagement.createNewRevision(graph1, "<a> <b> <e>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		String revNumber3 = RevisionManagement.getRevisionNumber(graph1, "testBranch2");
 		Assert.assertEquals("2.0-1.0-0", revNumber3);
 		
-		RevisionManagement.createReference("branch", graphName, "2.0-1", "testBranch2a", "test_user", "branching as junit test");
+		RevisionManagement.createReference("branch", graph1, "2.0-1", "testBranch2a", "test_user", "branching as junit test");
 		usedRevisionNumber.clear();
 		usedRevisionNumber.add("testBranch2a");
-		RevisionManagement.createNewRevision(graphName, "<a> <b> <f>", "", "test_user", "test_commitMessage", usedRevisionNumber);
-		String revNumber4 = RevisionManagement.getRevisionNumber(graphName, "testBranch2a");
+		RevisionManagement.createNewRevision(graph1, "<a> <b> <f>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		String revNumber4 = RevisionManagement.getRevisionNumber(graph1, "testBranch2a");
 		Assert.assertEquals("2.0-1.1-0", revNumber4);
 	}
 	
