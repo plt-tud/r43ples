@@ -1,149 +1,140 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-	<title>R43ples - Revision Management for the Semantic Web</title>
-	<meta name="author" content="Markus Graube">
-	<meta charset="utf-8">
-	<link href="/static/jquery-ui.css" rel="stylesheet" />
-	<link href="/static/r43ples.css" rel="stylesheet" />
-	<script src="/static/jquery-2.1.1.js"></script>
-	<script src="/static/jquery-ui.js"></script>
-	<script language="JavaScript">
-		$(document).ready(function(){
-		  var url = "getRevisedGraphs";
-		  $.getJSON(url, function(data) {
-		    var select = document.getElementById("selectRevisedGraph");
-		    var selectDrop = document.getElementById("dropRevisedGraph");
-		    var options = data.results.bindings;
-		    for(var i = 0; i < options.length; i++) {
-		      var opt = options[i].graph.value;
-		      var el = document.createElement("option");
-		      el.textContent = opt;
-		      el.value = opt;
-		      select.appendChild(el);
-		      var elDrop = document.createElement("option");
-		      elDrop.textContent = opt;
-		      elDrop.value = "DROP GRAPH <"+opt+">";
-		      selectDrop.appendChild(elDrop);
-		    }       
-		  });
+<title>R43ples - Revision Management for the Semantic Web</title>
+<meta name="author" content="Markus Graube">
+<meta charset="utf-8">
+<link href="/static/jquery-ui.css" rel="stylesheet" />
+<link href="/static/r43ples.css" rel="stylesheet" />
+<script src="/static/jquery-2.1.1.js"></script>
+<script src="/static/jquery-ui.js"></script>
+<script language="JavaScript">
+	$(document).ready(function() {
+		$(".accordion").accordion();
+		var url = "getRevisedGraphs";
+		$.getJSON(url, function(data) {
+			var select = document.getElementById("selectRevisedGraph");
+			var selectDrop = document.getElementById("dropRevisedGraph");
+			var options = data.results.bindings;
+			for (var i = 0; i < options.length; i++) {
+				var opt = options[i].graph.value;
+				var el = document.createElement("option");
+				el.textContent = opt;
+				el.value = opt;
+				select.appendChild(el);
+				var elDrop = document.createElement("option");
+				elDrop.textContent = opt;
+				elDrop.value = "DROP GRAPH <"+opt+">";
+				selectDrop.appendChild(elDrop);
+			}
 		});
-	</script>
-	<script>
-		$(function() {
-	 		$(".accordion" ).accordion();
-		});
-	</script>
+	});
+</script>
 </head>
 <body>
 
-<div id="header">
-<h1>R43ples - Revision Management for the Semantic Web</h1>
-</div>
+	<div id="header">
+		<h1>R43ples - Revision Management for the Semantic Web</h1>
+	</div>
 
-<div id="query_form">
-<h2>Query Form</h2>
-<form action="/r43ples/sparql">
-  <label for="query">Query Text</label><br />
-	  <textarea name="query" id="query" cols="80" rows="20">
+	<div id="query_form">
+		<h2>Query Form</h2>
+		<form action="/r43ples/sparql">
+			<label for="query">Query Text</label><br />
+			<textarea name="query" id="query" cols="80" rows="20">
 SELECT * 
 FROM &lt;exampleGraph&gt; REVISION "MASTER"
 WHERE {
 	?s ?p ?o. 
 }
 	  </textarea>
-	  <br />
-	  <label for="format">Results Format</label>
-	  <select name="format" id="name">
-	  	<option value="text/html">HTML</option>
-	    <option value="application/rdf+xml">RDF/XML</option>
-	    <option value="text/turtle">Turtle</option>
-	    <option value="application/json">JSON</option>
-	  </select>
-	<br/>
-    <input type="submit" value="Run Query"/>
-	<input type="reset" value="Reset"/>
-</form>
+			<br /> <label for="format">Results Format</label> <select
+				name="format" id="name">
+				<option value="text/html">HTML</option>
+				<option value="application/rdf+xml">RDF/XML</option>
+				<option value="text/turtle">Turtle</option>
+				<option value="application/json">JSON</option>
+			</select> <br /> <input type="submit" value="Run Query" /> <input type="reset"
+				value="Reset" />
+		</form>
 
-<h2>Revision Information</h2>
-<ul>
-  <li><a href="createTestDataset">Create test data set</a></li>
-  <li>	
-<form action="revisiongraph" method="get">
-    <select id="selectRevisedGraph" name="graph">
-    	<option value="">(All)</option>
-    </select>
-    <select name="format">
-    	<option value="text/turtle">Turtle</option>
-    	<option value="text/html">HTML (Graphical)</option>
-    	<option value="text/vnd.graphviz">GraphViz</option>
-    </select>
-    <input type="submit" value="Get RevisionInformation" />
-</form>
-</li>
-  <li>	
-<form action="sparql" method="get">
-    <select id="dropRevisedGraph" name="query">
-    	<option value="">(None)</option>
-    </select>
-    <input type="submit" value="Drop Graph" />
-</form>
-</li>
-</ul>
+		<h2>Revision Information</h2>
+		<ul>
+			<li><a href="createTestDataset">Create test data set</a></li>
+			<li>
+				<form action="revisiongraph" method="get">
+					<select id="selectRevisedGraph" name="graph">
+						<option value="">(All)</option>
+					</select>
+					<select name="format">
+						<option value="text/turtle">Turtle</option>
+						<option value="text/html">Graphical</option>
+						<option value="text/vnd.graphviz">Dot</option>
+					</select> <input type="submit" value="Get RevisionInformation" />
+				</form>
+			</li>
+			<li>
+				<form action="sparql" method="get">
+					<select id="dropRevisedGraph" name="query">
+						<option value="">(None)</option>
+					</select> <input type="submit" value="Drop Graph" />
+				</form>
+			</li>
+		</ul>
+	</div>
 
-</div>
-
-<div id="examples">
-<h2>Example queries</h2>
-<div class="accordion">
-<h3><a href="?query=CREATE GRAPH <test>">Create Graph under Version Control</a></h3>
-<pre>
+	<div id="examples">
+		<h2>Example queries</h2>
+		<div class="accordion">
+			<h3>Create Graph under Version Control</h3>
+			<pre>
 CREATE GRAPH &lt;test&gt;
 </pre>
 
-<!-- http://crypo.in.ua/tools/eng_encode-uri.php -->
-<h3><a href="?query=SELECT%%20*%%20FROM%%20%%3Ctest%%3E%%20REVISION%%20%%2223%%22%%20WHERE%%20%%7B?s%%20?p%%20?o.%%20%%7D">Select Query</a></h3>
-<pre>SELECT * 
+			<!-- http://crypo.in.ua/tools/eng_encode-uri.php -->
+			<h3>Select Query</h3>
+			<pre>SELECT * 
 FROM &lt;test&gt; REVISION "23"
 WHERE {
 	?s ?p ?o. 
 }</pre>
 
-<h3>Select Query - Multiple Graphs</h3>
-<pre>SELECT * 
+			<h3>Select Query - Multiple Graphs</h3>
+			<pre>SELECT * 
 FROM &lt;test&gt; REVISION "MASTER"
 FROM &lt;test2&gt; REVISION "23"
 WHERE {
 	?s ?p ?o. 
 }</pre>
 
-<h3>Update Query Variant 1</h3>
-<pre>USER "mgraube"
+			<h3>Update Query Variant 1</h3>
+			<pre>USER "mgraube"
 MESSAGE "test commit"
 INSERT DATA INTO &lt;test&gt; REVISION "2"
 {	&lt;a&gt; &lt;b&gt; &lt;c&gt; .	}</pre>
 
-<h3>Update Query Variant 2</h3>
-<pre>USER "mgraube"
+			<h3>Update Query Variant 2</h3>
+			<pre>USER "mgraube"
 MESSAGE "test commit"
 INSERT { GRAPH &lt;test&gt; REVISION "2"
 {	&lt;a&gt; &lt;b&gt; &lt;c&gt; .	}}</pre>
 
-<h3>Branching</h3>
-<pre>USER "mgraube"
+			<h3>Branching</h3>
+			<pre>USER "mgraube"
 MESSAGE "test commit"
 BRANCH GRAPH &lt;test&gt; REVISION "2" TO "unstable"</pre>
 
-<h3>Tagging</h3>
-<pre>USER "mgraube"
+			<h3>Tagging</h3>
+			<pre>USER "mgraube"
 MESSAGE "test commit"
 TAG GRAPH &lt;test&gt; REVISION "2" TO "v0.3-alpha"</pre>
-</div>
-</div>
+		</div>
+	</div>
 
-<div id="footer">
-	2014 - Version %s | R43ples@<a href="https://github.com/plt-tud/r43ples">GitHub</a> | powered by <a href="https://jersey.java.net/">Jersey</a>
-</div>
+	<div id="footer">
+		2014 - Version %s | <a href="https://github.com/plt-tud/r43ples">R43ples@GitHub</a>
+		| powered by <a href="https://jersey.java.net/">Jersey</a>
+	</div>
 
 </body>
 </html>
