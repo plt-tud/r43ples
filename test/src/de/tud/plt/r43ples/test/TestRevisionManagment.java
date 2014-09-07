@@ -21,7 +21,7 @@ import de.tud.plt.r43ples.webservice.Endpoint;
 
 public class TestRevisionManagment {
 	
-	final String graph1 = "test_dataset_user";
+	final static String graph1 = "test_dataset_user";
 
 	@Before
 	public void setUp() throws HttpException, IOException, ConfigurationException{
@@ -90,8 +90,8 @@ public class TestRevisionManagment {
 		Endpoint ep = new Endpoint();
         String result;
         String expected;
-        String query_template = "#OPTION r43ples:SPARQL_JOIN\n"
-        		+ "SELECT ?s ?p ?o FROM <"+graph1+"> REVISION \"%d\"\n"
+        String query_template = "#OPTION r43ples:SPARQL_JOIN%n"
+        		+ "SELECT ?s ?p ?o FROM <"+graph1+"> REVISION \"%d\"%n"
         		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
         String format = "application/sparql-results+xml";
         

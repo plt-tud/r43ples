@@ -25,16 +25,13 @@ public class GraphVizVisualisation {
 	
 	public static String getGraphVizOutput(String namedGraph) throws IOException, HttpException {
 		Graph graph =  new Graph("RevisionGraph of " + namedGraph);
-		String query_nodes = String.format(RevisionManagement.prefixes
+		String query_nodes = RevisionManagement.prefixes + String.format(""
 				+ "SELECT DISTINCT ?revision ?number "
 				+ "FROM <%s> "
 				+ "WHERE {"
 				+ " ?revision a rmo:Revision;"
 				+ "		rmo:revisionOf <%s>;"
 				+ "		rmo:revisionNumber ?number."
-//				+ " ?commit a rmo:Commit;"
-//				+ "		rdfs:label ?label;"
-//				+ "		?p ?date. "
 				+ "}", Config.revision_graph, namedGraph );
 		
 		String result_nodes = TripleStoreInterface.executeQueryWithAuthorization(query_nodes);
@@ -53,7 +50,7 @@ public class GraphVizVisualisation {
 			
 		}		
 		
-		String query_edge = String.format(RevisionManagement.prefixes
+		String query_edge = RevisionManagement.prefixes + String.format(""
 				+ "SELECT DISTINCT ?revision ?next_revision "
 				+ "FROM <%s> "
 				+ "WHERE {"
@@ -74,7 +71,7 @@ public class GraphVizVisualisation {
 			graph.addEdge(new Edge(graph, newNode, nextNode));
 		}
 		
-		String query_reference = String.format(RevisionManagement.prefixes
+		String query_reference = RevisionManagement.prefixes + String.format(""
 				+ "SELECT DISTINCT ?revision ?label "
 				+ "FROM <%s> "
 				+ "WHERE {"
