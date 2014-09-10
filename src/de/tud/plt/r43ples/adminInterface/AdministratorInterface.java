@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -65,7 +64,6 @@ public class AdministratorInterface {
 					+ " p - purge all R43ples data \n"
 					+ " d - purge all R43ples data (excluding MASTER revision) \n"
 					+ " x - put eXisting graph under version control \n"
-					+ " j - prepare for jMeter permormance test \n"
 					+ " q - quit \n \nEnter command: ");
 			
 			System.out.println("============================================================\n");
@@ -109,10 +107,6 @@ public class AdministratorInterface {
 			case "x":
 				System.out.println("Put existing graph under version control.");
 				putExistingGraphUnderVersionControl();
-				break;
-			case "j":
-				System.out.println("Prepare for jMeter performance test.");
-				prepareJmeterPerformanceTest();
 				break;
 			case "q":
 				System.out.println("Quit.");
@@ -699,36 +693,7 @@ public class AdministratorInterface {
 	}
 	
 	
-	private static void prepareJmeterPerformanceTest() throws HttpException, IOException {
-		logger.info("Prepare jMeter performance test.");
-		// ClassLoader in order to load files from /resources/ directory
-		final ClassLoader loader = AdministratorInterface.class.getClassLoader();
-		int[] changesizes = {10,20,30,40,50,60,70,80,90,100};
-		int[] datasizes = {100,1000,10000,100000,1000000};
-		final int REVISIONS = 20;
-		
-		for (int j = 0; j < datasizes.length; j++) {
-			int datasize = datasizes[j];
-			for (int i = 0; i < changesizes.length; i++) {
-				int changesize = changesizes[i];
-				String graphName = "dataset-"+datasize+"-"+changesize;
-				TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <" + graphName +">", "HTML");
-				URL fileDataset = loader.getResource("dataset/dataset-"+datasize+".nt");
-				String dataSetAsNTriples = FileUtils.readFileToString(new File(fileDataset.getFile()));
-				RevisionManagement.putGraphUnderVersionControl(graphName);
-				ArrayList<String> list = new ArrayList<String>();
-				list.add("0");
-				RevisionManagement.createNewRevision(graphName, dataSetAsNTriples, "", "test", "test creation", list);
-				for (int revision = 1; revision <= REVISIONS; revision++) {
-					URL fileName = loader.getResource("dataset/addset-"+changesize+"-"+revision+".nt");
-					String addedAsNTriples = FileUtils.readFileToString(new File(fileName.getFile()));
-					list = new ArrayList<>();
-					list.add(Integer.toString(revision));
-					RevisionManagement.createNewRevision(graphName, addedAsNTriples, "", "test", "test creation", list);
-				}
-			}
-		}
-	}
+	
 	
 	
 
