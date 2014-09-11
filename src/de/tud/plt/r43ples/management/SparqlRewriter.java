@@ -183,7 +183,7 @@ public class SparqlRewriter {
 					eg_modified.addElement(union);
 					eg_modified.addElement(minus);
 				}
-			} catch (Exception e) {
+			} catch (ClassCastException e) {
 				eg_modified.addElement(element);
 			}
 		}
