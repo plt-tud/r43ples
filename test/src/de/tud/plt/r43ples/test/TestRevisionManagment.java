@@ -14,7 +14,6 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
@@ -80,12 +79,6 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void testSparqlRewrite_two_statements() throws HttpException, IOException {
-		String result = SparqlRewriter.rewriteQuery("SELECT * FROM <" + graph_test + "> REVISION \"3\" WHERE {?a ?p ?b. ?b ?p ?c.}");
-		Assert.assertNotEquals("", result);		
-	}
-	
-	@Test
 	public void testSelectWithRewriting() throws IOException{
 		Endpoint ep = new Endpoint();
         String result;
@@ -118,34 +111,33 @@ public class TestRevisionManagment {
 
 	@Test
 	public void testSelect() throws HttpException, IOException {
-		String result;
-		String expected;
-		String query = "SELECT ?s ?p ?o FROM <tempGraphName> WHERE {?s ?p ?o} ORDER By ?s ?p ?o"; 
-		
-		RevisionManagement.generateFullGraphOfRevision(graph_test, "0", "tempGraphName");
-		result = TripleStoreInterface.executeQueryWithAuthorization(query);
-		expected = ResourceManagement.getContentFromResource("response-test-rev0.xml");
-		Assert.assertEquals(expected, result);
-		
-		RevisionManagement.generateFullGraphOfRevision(graph_test, "1", "tempGraphName");
-		result = TripleStoreInterface.executeQueryWithAuthorization(query);
-		expected = ResourceManagement.getContentFromResource("response-test-rev1.xml");
-		Assert.assertEquals(expected, result);
-		
-		RevisionManagement.generateFullGraphOfRevision(graph_test, "2", "tempGraphName");
-		result = TripleStoreInterface.executeQueryWithAuthorization(query);
-		expected = ResourceManagement.getContentFromResource("response-test-rev2.xml");
-		Assert.assertEquals(expected, result);
-		
-		RevisionManagement.generateFullGraphOfRevision(graph_test, "3", "tempGraphName");
-		result = TripleStoreInterface.executeQueryWithAuthorization(query);
-		expected = ResourceManagement.getContentFromResource("response-test-rev3.xml");
-		Assert.assertEquals(expected, result);
-		
-		RevisionManagement.generateFullGraphOfRevision(graph_test, "4", "tempGraphName");
-		result = TripleStoreInterface.executeQueryWithAuthorization(query);
-		expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
-		Assert.assertEquals(expected, result);
+		Endpoint ep = new Endpoint();
+        String result;
+        String expected;
+        String query_template = ""
+        		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
+        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
+        String format = "application/sparql-results+xml";
+        
+        result = ep.sparql(format, null, String.format(query_template, 0)).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev0.xml");
+        Assert.assertEquals(expected, result);
+        
+        result = ep.sparql(format, null, String.format(query_template, 1)).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev1.xml");
+        Assert.assertEquals(expected, result);
+        
+        result = ep.sparql(format, null, String.format(query_template, 2)).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev2.xml");
+        Assert.assertEquals(expected, result);
+        
+        result = ep.sparql(format, null, String.format(query_template, 3)).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev3.xml");
+        Assert.assertEquals(expected, result);
+        
+        result = ep.sparql(format, null, String.format(query_template, 4)).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
+        Assert.assertEquals(expected, result);
 	}
 	
 	@Test
