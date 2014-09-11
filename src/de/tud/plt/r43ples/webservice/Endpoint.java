@@ -397,7 +397,7 @@ public class Endpoint {
 	    String referenceFullGraph = RevisionManagement.getFullGraphName(graphName, revisionName);
 
 	    // Create the temporary graph and fill with reference full graph
-	    String graphUpdateTemp = "RM-UPDATE-TEMP-" + graphName;
+	    String graphUpdateTemp = graphName+"-temp";
 	    TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <" + graphUpdateTemp + ">", "HTML");
 		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <" + graphUpdateTemp + ">", "HTML");
 		TripleStoreInterface.executeQueryWithAuthorization("COPY <" + referenceFullGraph + "> TO <" + graphUpdateTemp + ">", "HTML");

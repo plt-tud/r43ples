@@ -27,9 +27,9 @@ import de.tud.plt.r43ples.webservice.Service;
  * ADD: A,B,C    |
  * ---X----------+ (Master)
  * DEL: -        |
- *               |  ADD: D,H              ADD: I
- *               +-----X---------------------X--------- (Branch B2)
- *                  DEL: C                DEL: -
+ *               |  ADD: D,H              ADD: I    ADD: J
+ *               +-----X---------------------X---------X----- (Branch B2)
+ *                  DEL: C                DEL: -    DEL: -
  * 
  * 
  * @author Stephan Hensel
@@ -161,6 +161,14 @@ public class TestR43ples {
 		logger.debug("Execute query: \n" + query);
 		logger.debug("Response: \n" + executeR43plesQuery(query));
 		
+		query = String.format(""
+				+ "SELECT * FROM <%s> REVISION \"1.1-0\" "
+				+ "WHERE { ?s ?p ?o. }"
+				+ "ORDER BY ?s ?p ?o", graphName);
+		String result = executeR43plesQueryWithFormat(query, "application/xml");
+		String expected = ResourceManagement.getContentFromResource("response-1.1-0.xml");
+		Assert.assertEquals(expected, result);
+		
 		// Second commit to B2
 		logger.info("Second commit to B2");
 		query = String.format(""
@@ -173,13 +181,53 @@ public class TestR43ples {
 		logger.debug("Execute query: \n" + query);
 		logger.debug("Response: \n" + executeR43plesQuery(query));
 		
+		// Modify commit to B2
+		logger.info("Modify commit to B2");
 		query = String.format(""
-				+ "SELECT * FROM <%s> REVISION \"1.1-0\" "
+				+ "USER \"shensel\" %n"
+				+ "MESSAGE \"Modify commit to B2.\" %n"
+				+ "INSERT { GRAPH <%s> REVISION \"B2\" %n"
+				+ "{ <http://example.com/testS> <http://example.com/testP> \"J\". }"
+				+ "}", graphName);
+		logger.debug("Execute query: \n" + query);
+		logger.debug("Response: \n" + executeR43plesQuery(query));
+		
+		query = String.format(""
+				+ "SELECT * FROM <%s> REVISION \"B2\" "
 				+ "WHERE { ?s ?p ?o. }"
 				+ "ORDER BY ?s ?p ?o", graphName);
-		String result = executeR43plesQueryWithFormat(query, "application/xml");
-		String expected = ResourceManagement.getContentFromResource("response-1.1-0.xml");
-		Assert.assertEquals(expected, result);
+		String result2 = executeR43plesQueryWithFormat(query, "application/xml");
+		String expected2 = ResourceManagement.getContentFromResource("response-1.1-2.xml");
+		Assert.assertEquals(expected2, result2);
+		
+		
+		// restructure commit to B2
+		logger.info("Restructure commit to B2");
+		query = String.format(""
+				+ "USER \"shensel\" %n"
+				+ "MESSAGE \"restructure commit to B2.\" %n"
+				+ "DELETE { GRAPH <%s> REVISION \"B2\" {"
+				+ " <http://example.com/testS> <http://example.com/testP> ?o."
+				+ "} } %n"
+				+ "INSERT { GRAPH <%s> REVISION \"B2\" {"
+				+ " <http://example.com/newTestS> <http://example.com/newTestP> ?o."
+				+ "} } %n"
+				+ "WHERE { GRAPH <%s> REVISION \"B2\" {"
+				+ "	<http://example.com/testS> <http://example.com/testP> ?o"
+				+ "} }", 
+				graphName, graphName, graphName);
+		logger.debug("Execute query: \n" + query);
+		logger.debug("Response: \n" + executeR43plesQuery(query));
+		
+
+		
+		query = String.format(""
+				+ "SELECT * FROM <%s> REVISION \"B2\" "
+				+ "WHERE { ?s ?p ?o. }"
+				+ "ORDER BY ?s ?p ?o", graphName);
+		String result3 = executeR43plesQueryWithFormat(query, "application/xml");
+		String expected3 = ResourceManagement.getContentFromResource("response-1.1-3.xml");
+		Assert.assertEquals(expected3, result3);
 	}
 	
 	@Test public void testServiceDescription() throws IOException{
