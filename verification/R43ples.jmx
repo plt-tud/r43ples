@@ -15,7 +15,7 @@
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Schleifen-Controller (Loop Controller)" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
-          <stringProp name="LoopController.loops">5</stringProp>
+          <intProp name="LoopController.loops">-1</intProp>
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">1</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
@@ -32,25 +32,24 @@
           <boolProp name="ForeachController.useSeparator">true</boolProp>
         </ForeachController>
         <hashTree>
-          <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Schleifen-Controller (Loop Controller) changesize" enabled="true">
-            <boolProp name="LoopController.continue_forever">true</boolProp>
-            <stringProp name="LoopController.loops">10</stringProp>
-          </LoopController>
+          <ForeachController guiclass="ForeachControlPanel" testclass="ForeachController" testname="ForEach Controller changesize" enabled="true">
+            <stringProp name="ForeachController.inputVal">changesize</stringProp>
+            <stringProp name="ForeachController.returnVal">changesize</stringProp>
+            <boolProp name="ForeachController.useSeparator">true</boolProp>
+          </ForeachController>
           <hashTree>
-            <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Schleifen-Controller (Loop Controller) revision" enabled="true">
-              <boolProp name="LoopController.continue_forever">true</boolProp>
-              <stringProp name="LoopController.loops">11</stringProp>
-            </LoopController>
+            <ForeachController guiclass="ForeachControlPanel" testclass="ForeachController" testname="ForEach Controller" enabled="true">
+              <stringProp name="ForeachController.inputVal">revision</stringProp>
+              <stringProp name="ForeachController.returnVal">revision</stringProp>
+              <boolProp name="ForeachController.useSeparator">true</boolProp>
+            </ForeachController>
             <hashTree>
-              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="SELECT Revision ${revision} FROM &lt;dataset-${dataset}-${changesize}&gt;" enabled="true">
+              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Revision ${revision} of &lt;dataset-${dataset}-${changesize}&gt;" enabled="true">
                 <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="Benutzer definierte Variablen" enabled="true">
                   <collectionProp name="Arguments.arguments">
                     <elementProp name="query" elementType="HTTPArgument">
                       <boolProp name="HTTPArgument.always_encode">true</boolProp>
-                      <stringProp name="Argument.value">SELECT * 
-FROM &lt;dataset-${dataset}-${changesize}&gt; #REVISION &quot;${revision}&quot;
-WHERE { ?s ?p ?o.}
-LIMIT 10</stringProp>
+                      <stringProp name="Argument.value">SELECT * FROM &lt;dataset-${dataset}-${changesize}&gt; REVISION &quot;${revision}&quot; WHERE { ?s ?p ?o.} LIMIT 10</stringProp>
                       <stringProp name="Argument.metadata">=</stringProp>
                       <boolProp name="HTTPArgument.use_equals">true</boolProp>
                       <stringProp name="Argument.name">query</stringProp>
@@ -73,25 +72,41 @@ LIMIT 10</stringProp>
                 <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
               </HTTPSamplerProxy>
               <hashTree/>
-              <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Zähler (Counter)" enabled="true">
-                <stringProp name="CounterConfig.start">10</stringProp>
-                <stringProp name="CounterConfig.end">20</stringProp>
-                <stringProp name="CounterConfig.incr">1</stringProp>
-                <stringProp name="CounterConfig.name">revision</stringProp>
-                <stringProp name="CounterConfig.format"></stringProp>
-                <boolProp name="CounterConfig.per_user">false</boolProp>
-              </CounterConfig>
+              <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Revision ${revision} of &lt;dataset-${dataset}-${changesize}&gt; - JOIN" enabled="true">
+                <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="Benutzer definierte Variablen" enabled="true">
+                  <collectionProp name="Arguments.arguments">
+                    <elementProp name="query" elementType="HTTPArgument">
+                      <boolProp name="HTTPArgument.always_encode">true</boolProp>
+                      <stringProp name="Argument.value">#OPTION r43ples:SPARQL_JOIN SELECT * FROM &lt;dataset-${dataset}-${changesize}&gt; REVISION &quot;${revision}&quot; WHERE { ?s ?p ?o.} LIMIT 10</stringProp>
+                      <stringProp name="Argument.metadata">=</stringProp>
+                      <boolProp name="HTTPArgument.use_equals">true</boolProp>
+                      <stringProp name="Argument.name">query</stringProp>
+                    </elementProp>
+                  </collectionProp>
+                </elementProp>
+                <stringProp name="HTTPSampler.domain"></stringProp>
+                <stringProp name="HTTPSampler.port"></stringProp>
+                <stringProp name="HTTPSampler.connect_timeout"></stringProp>
+                <stringProp name="HTTPSampler.response_timeout"></stringProp>
+                <stringProp name="HTTPSampler.protocol"></stringProp>
+                <stringProp name="HTTPSampler.contentEncoding"></stringProp>
+                <stringProp name="HTTPSampler.path"></stringProp>
+                <stringProp name="HTTPSampler.method">GET</stringProp>
+                <boolProp name="HTTPSampler.follow_redirects">true</boolProp>
+                <boolProp name="HTTPSampler.auto_redirects">false</boolProp>
+                <boolProp name="HTTPSampler.use_keepalive">true</boolProp>
+                <boolProp name="HTTPSampler.DO_MULTIPART_POST">false</boolProp>
+                <boolProp name="HTTPSampler.monitor">false</boolProp>
+                <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
+              </HTTPSamplerProxy>
               <hashTree/>
             </hashTree>
-            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="SELECT Revision MASTER FROM &lt;dataset-${dataset}-${changesize}&gt;" enabled="true">
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="MASTER of &lt;dataset-${dataset}-${changesize}&gt;" enabled="true">
               <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="Benutzer definierte Variablen" enabled="true">
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="query" elementType="HTTPArgument">
                     <boolProp name="HTTPArgument.always_encode">true</boolProp>
-                    <stringProp name="Argument.value">SELECT * 
-FROM &lt;dataset-${dataset}-${changesize}&gt; #REVISION &quot;MASTER&quot; 
-WHERE { ?s ?p ?o.}
-LIMIT 10</stringProp>
+                    <stringProp name="Argument.value">SELECT * FROM &lt;dataset-${dataset}-${changesize}&gt; REVISION &quot;MASTER&quot;  WHERE { ?s ?p ?o.} LIMIT 10</stringProp>
                     <stringProp name="Argument.metadata">=</stringProp>
                     <boolProp name="HTTPArgument.use_equals">true</boolProp>
                     <stringProp name="Argument.name">query</stringProp>
@@ -114,12 +129,12 @@ LIMIT 10</stringProp>
               <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
             </HTTPSamplerProxy>
             <hashTree/>
-            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="SELECT Direct FROM &lt;dataset-${dataset}-${changesize}&gt;" enabled="true">
+            <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="Direct &lt;dataset-${dataset}-${changesize}&gt;" enabled="true">
               <elementProp name="HTTPsampler.Arguments" elementType="Arguments" guiclass="HTTPArgumentsPanel" testclass="Arguments" testname="Benutzer definierte Variablen" enabled="true">
                 <collectionProp name="Arguments.arguments">
                   <elementProp name="query" elementType="HTTPArgument">
                     <boolProp name="HTTPArgument.always_encode">true</boolProp>
-                    <stringProp name="Argument.value">SELECT *  FROM &lt;dataset-${dataset}-${changesize}&gt; WHERE { ?s ?p ?o.} LIMIT 10</stringProp>
+                    <stringProp name="Argument.value">SELECT * FROM &lt;dataset-${dataset}-${changesize}&gt; WHERE { ?s ?p ?o.} LIMIT 10</stringProp>
                     <stringProp name="Argument.metadata">=</stringProp>
                     <boolProp name="HTTPArgument.use_equals">true</boolProp>
                     <stringProp name="Argument.name">query</stringProp>
@@ -141,15 +156,6 @@ LIMIT 10</stringProp>
               <boolProp name="HTTPSampler.monitor">false</boolProp>
               <stringProp name="HTTPSampler.embedded_url_re"></stringProp>
             </HTTPSamplerProxy>
-            <hashTree/>
-            <CounterConfig guiclass="CounterConfigGui" testclass="CounterConfig" testname="Zähler (Counter)" enabled="true">
-              <stringProp name="CounterConfig.start">10</stringProp>
-              <stringProp name="CounterConfig.end">100</stringProp>
-              <stringProp name="CounterConfig.incr">10</stringProp>
-              <stringProp name="CounterConfig.name">changesize</stringProp>
-              <stringProp name="CounterConfig.format"></stringProp>
-              <boolProp name="CounterConfig.per_user">false</boolProp>
-            </CounterConfig>
             <hashTree/>
           </hashTree>
         </hashTree>
@@ -233,44 +239,7 @@ LIMIT 10</stringProp>
         <stringProp name="HTTPSampler.concurrentPool">4</stringProp>
       </ConfigTestElement>
       <hashTree/>
-      <AuthManager guiclass="AuthPanel" testclass="AuthManager" testname="HTTP Authorisierungs Manager" enabled="true">
-        <collectionProp name="AuthManager.auth_list">
-          <elementProp name="" elementType="Authorization">
-            <stringProp name="Authorization.url">http://localhost:8890/sparql-auth</stringProp>
-            <stringProp name="Authorization.username">dba</stringProp>
-            <stringProp name="Authorization.password">dba</stringProp>
-            <stringProp name="Authorization.domain"></stringProp>
-            <stringProp name="Authorization.realm"></stringProp>
-          </elementProp>
-        </collectionProp>
-      </AuthManager>
-      <hashTree/>
       <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="Benutzer definierte Variablen" enabled="true">
-        <collectionProp name="Arguments.arguments">
-          <elementProp name="dataset_1" elementType="Argument">
-            <stringProp name="Argument.name">dataset_1</stringProp>
-            <stringProp name="Argument.value">100</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="dataset_2" elementType="Argument">
-            <stringProp name="Argument.name">dataset_2</stringProp>
-            <stringProp name="Argument.value">1000</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="dataset_3" elementType="Argument">
-            <stringProp name="Argument.name">dataset_3</stringProp>
-            <stringProp name="Argument.value">10000</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-          <elementProp name="dataset_4" elementType="Argument">
-            <stringProp name="Argument.name">dataset_4</stringProp>
-            <stringProp name="Argument.value">100000</stringProp>
-            <stringProp name="Argument.metadata">=</stringProp>
-          </elementProp>
-        </collectionProp>
-      </Arguments>
-      <hashTree/>
-      <Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="Benutzer definierte Variablen" enabled="false">
         <collectionProp name="Arguments.arguments">
           <elementProp name="dataset_1" elementType="Argument">
             <stringProp name="Argument.name">dataset_1</stringProp>
@@ -297,6 +266,61 @@ LIMIT 10</stringProp>
             <stringProp name="Argument.value">1000000</stringProp>
             <stringProp name="Argument.metadata">=</stringProp>
           </elementProp>
+          <elementProp name="changesize_1" elementType="Argument">
+            <stringProp name="Argument.name">changesize_1</stringProp>
+            <stringProp name="Argument.value">10</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="changesize_2" elementType="Argument">
+            <stringProp name="Argument.name">changesize_2</stringProp>
+            <stringProp name="Argument.value">30</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="changesize_3" elementType="Argument">
+            <stringProp name="Argument.name">changesize_3</stringProp>
+            <stringProp name="Argument.value">50</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="changesize_4" elementType="Argument">
+            <stringProp name="Argument.name">changesize_4</stringProp>
+            <stringProp name="Argument.value">70</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="changesize_5" elementType="Argument">
+            <stringProp name="Argument.name">changesize_5</stringProp>
+            <stringProp name="Argument.value">90</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="revision_1" elementType="Argument">
+            <stringProp name="Argument.name">revision_1</stringProp>
+            <stringProp name="Argument.value">1</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="revision_2" elementType="Argument">
+            <stringProp name="Argument.name">revision_2</stringProp>
+            <stringProp name="Argument.value">5</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="revision_3" elementType="Argument">
+            <stringProp name="Argument.name">revision_3</stringProp>
+            <stringProp name="Argument.value">9</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="revision_4" elementType="Argument">
+            <stringProp name="Argument.name">revision_4</stringProp>
+            <stringProp name="Argument.value">13</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="revision_5" elementType="Argument">
+            <stringProp name="Argument.name">revision_5</stringProp>
+            <stringProp name="Argument.value">17</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="revision_6" elementType="Argument">
+            <stringProp name="Argument.name">revision_6</stringProp>
+            <stringProp name="Argument.value">21</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
         </collectionProp>
       </Arguments>
       <hashTree/>
@@ -317,19 +341,19 @@ LIMIT 10</stringProp>
             <encoding>false</encoding>
             <assertions>true</assertions>
             <subresults>true</subresults>
-            <responseData>true</responseData>
-            <samplerData>true</samplerData>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
             <xml>true</xml>
             <fieldNames>false</fieldNames>
-            <responseHeaders>true</responseHeaders>
-            <requestHeaders>true</requestHeaders>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
             <responseDataOnError>false</responseDataOnError>
             <saveAssertionResultsFailureMessage>false</saveAssertionResultsFailureMessage>
             <assertionsResultsToSave>0</assertionsResultsToSave>
             <bytes>true</bytes>
           </value>
         </objProp>
-        <stringProp name="filename">test.xml</stringProp>
+        <stringProp name="filename"></stringProp>
       </ResultCollector>
       <hashTree/>
       <ResultCollector guiclass="GraphVisualizer" testclass="ResultCollector" testname="Ergebnisse" enabled="false">
