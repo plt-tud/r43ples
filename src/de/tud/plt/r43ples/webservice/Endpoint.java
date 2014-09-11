@@ -323,6 +323,7 @@ public class Endpoint {
 			found = true;
 		    String graphName = m.group("graph");
 		    String revisionNumber = m.group("revision");
+		    String newGraphName;
 		    
 		    // if no revision number is declared use the MASTER as default
 		    if (revisionNumber == null) {
@@ -332,8 +333,8 @@ public class Endpoint {
 		    if (revisionNumber.equalsIgnoreCase("MASTER")) {
 				// Respond with MASTER revision - nothing to be done - MASTER revisions are already created in the named graphs				
 		    	headerRevisionNumber = "MASTER";
+		    	newGraphName = graphName;
 			} else {
-				String newGraphName;
 				if (RevisionManagement.isBranch(graphName, revisionNumber)) {
 					newGraphName = RevisionManagement.getFullGraphName(graphName, revisionNumber);
 				} else {
@@ -341,10 +342,11 @@ public class Endpoint {
 					newGraphName = "RM-TEMP-" + graphName;
 					RevisionManagement.generateFullGraphOfRevision(graphName, revisionNumber, newGraphName);
 				}
-				queryM = m.replaceFirst("FROM <" + newGraphName + ">");
-				m = patternSelectFromPart.matcher(queryM);
 				headerRevisionNumber = revisionNumber;
 			}
+			queryM = m.replaceFirst("FROM <" + newGraphName + ">");
+			m = patternSelectFromPart.matcher(queryM);
+				
 		    // Respond with specified revision
 			responseBuilder.header(graphName + "-revision-number", headerRevisionNumber);
 		    responseBuilder.header(graphName + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
