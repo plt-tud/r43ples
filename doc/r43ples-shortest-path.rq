@@ -1,0 +1,108 @@
+SELECT ?link MIN(xsd:decimal(?pathElements1) + xsd:decimal(?pathElements2)) AS ?pathElementCountBothBranches
+WHERE {
+    {
+        # Query creates for each start revision of branch 1 the path element count
+        SELECT ?startRevision1 COUNT(?path1) as ?pathElements1
+        WHERE {
+            {
+                SELECT ?s ?startRevision1
+                WHERE {
+                    graph <r43ples-revisions> {
+                        ?s <http://www.w3.org/ns/prov#wasDerivedFrom> ?startRevision1 .
+                    }
+                }
+            }
+            OPTION ( TRANSITIVE,
+                     t_distinct,
+                     t_in(?s),
+                     t_out(?startRevision1),
+                     t_step (?s) as ?link1,
+                     t_step ('path_id') as ?path1,
+                     t_step ('step_no') as ?step1
+                    ) .
+            FILTER ( ?s = <exampleGraph-revision-1.0-1> )
+        } GROUP BY ?startRevision1
+    }
+    OPTIONAL
+    {
+        # Query creates for each start revision of branch 2 the path element count
+        SELECT ?startRevision2 COUNT(?path2) as ?pathElements2
+        WHERE {
+            {
+                SELECT ?s ?startRevision2
+                WHERE {
+                    graph <r43ples-revisions> {
+                        ?s <http://www.w3.org/ns/prov#wasDerivedFrom> ?startRevision2 .
+                    }
+                }
+            }
+            OPTION ( TRANSITIVE,
+                     t_distinct,
+                     t_in(?s),
+                     t_out(?startRevision2),
+                     t_step (?s) as ?link2,
+                     t_step ('path_id') as ?path2,
+                     t_step ('step_no') as ?step1
+                    ) .
+            FILTER ( ?s = <exampleGraph-revision-1.1-1> )
+          } GROUP BY ?startRevision2
+    }
+    OPTIONAL
+    {
+        # Query response contains all revisions which are on both paths (branch 1 and branch 2)
+        SELECT DISTINCT ?link1 AS ?link
+        WHERE {
+            {
+                # Query creates all possible paths for branch 1
+                SELECT ?link1 ?step1 ?path1
+                WHERE {
+                    {
+                        SELECT ?s ?o
+                        WHERE {
+                            graph <r43ples-revisions> {
+                                ?s <http://www.w3.org/ns/prov#wasDerivedFrom> ?o .
+                            }
+                        }
+                    }
+                    OPTION ( TRANSITIVE,
+                             t_distinct,
+                             t_in(?s),
+                             t_out(?o),
+                             t_step (?s) as ?link1,
+                             t_step ('path_id') as ?path1,
+                             t_step ('step_no') as ?step1
+                            ) .
+                    FILTER ( ?s = <exampleGraph-revision-1.0-1> )
+                }
+            }
+            OPTIONAL
+            {
+                # Query creates all possible paths for branch 2
+                SELECT ?link2 ?step2 ?path2
+                WHERE {
+                    {
+                        SELECT ?s ?o
+                        WHERE {
+                            graph <r43ples-revisions> {
+                                ?s <http://www.w3.org/ns/prov#wasDerivedFrom> ?o .
+                            }
+                        }
+                    }
+                    OPTION ( TRANSITIVE,
+                             t_distinct,
+                             t_in(?s),
+                             t_out(?o),
+                             t_step (?s) as ?link2,
+                             t_step ('path_id') as ?path2,
+                             t_step ('step_no') as ?step2
+                            ) .
+                    FILTER ( ?s = <exampleGraph-revision-1.1-1> )
+                }
+            }
+            FILTER ( ?link1 = ?link2 )
+        }
+    }
+    FILTER ( ?startRevision1 = ?startRevision2 && ?startRevision1 = ?link )
+} ORDER BY ?pathElementCountBothBranches
+LIMIT 1
+

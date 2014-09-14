@@ -91,7 +91,14 @@ SPARQL Interface
 		MESSAGE "test commit"
 		TAG GRAPH <test> REVISION "2" TO "v0.3-alpha"
 
-
+SPARQL Join option
+------------------
+There is a new option for R43ples which improves the performance. The necessary revision is not temporarily generated anymore.
+The SPARQL query is rewritten in such a way that the branch and the change sets are directly joined inside the query. This includes the order of the change sets.
+It is currently under development und further research. The option can be anabled by
+```
+#OPTION r43ples:SPARQL_JOIN
+```
 
 
 Algorithm
