@@ -11,6 +11,7 @@ import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 
 public class PreparationDBpediaTest {
@@ -37,7 +38,7 @@ public class PreparationDBpediaTest {
 				path, file_name, graph_name);
 		logger.info("Command to be executed on ISQL interface in Virtuoso:\n" + command);
 		// create revision information for instance data
-//		RevisionManagement.putGraphUnderVersionControl(graph_name);
+		RevisionManagement.putGraphUnderVersionControl(graph_name);
 		
 		String path_name_added;
 		String path_name_removed;
@@ -67,7 +68,7 @@ public class PreparationDBpediaTest {
 			ArrayList<String> list = new ArrayList<String>();
 			list.add(Integer.toString(i));
 			
-//			RevisionManagement.createNewRevision(graph_name, addedAsNTriples, removedAsNTriples, "test-user", "create revision " + i, list);	
+			RevisionManagement.createNewRevision(graph_name, addedAsNTriples, removedAsNTriples, "test-user", "create revision " + i, list);	
 		}
 	}
 
