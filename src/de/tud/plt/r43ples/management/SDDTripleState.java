@@ -7,10 +7,10 @@ package de.tud.plt.r43ples.management;
  *
  */
 public enum SDDTripleState {
-	ADDED("http://eatld.et.tu-dresden.de/sddo#Added", "http://eatld.et.tu-dresden.de/rpo#added"),
-	DELETED("http://eatld.et.tu-dresden.de/sddo#Deleted", "http://eatld.et.tu-dresden.de/rpo#removed"),
-	ORIGINAL("http://eatld.et.tu-dresden.de/sddo#Original", "http://eatld.et.tu-dresden.de/rpo#original"),
-	NOTINCLUDED("http://eatld.et.tu-dresden.de/sddo#NotIncluded", null);
+	ADDED("http://eatld.et.tu-dresden.de/sddo#added", "http://eatld.et.tu-dresden.de/rpo#added"),
+	DELETED("http://eatld.et.tu-dresden.de/sddo#deleted", "http://eatld.et.tu-dresden.de/rpo#removed"),
+	ORIGINAL("http://eatld.et.tu-dresden.de/sddo#original", "http://eatld.et.tu-dresden.de/rpo#original"),
+	NOTINCLUDED("http://eatld.et.tu-dresden.de/sddo#notIncluded", null);
 	
 	/** The SDD representation. **/
 	private String sddRepresentation;
