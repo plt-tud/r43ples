@@ -110,20 +110,26 @@ public class Endpoint {
 	@GET
 	@Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
 			MediaType.APPLICATION_SVG_XML, "text/vnd.graphviz" })
-	public final String getRevisionGraph(@HeaderParam("Accept") final String format_header,
+	public final Response getRevisionGraph(@HeaderParam("Accept") final String format_header,
 			@QueryParam("format") final String format_query, @QueryParam("graph") @DefaultValue("") final String graph) {
 		logger.info("Get Revision Graph");
 		String format = (format_query != null) ? format_query : format_header;
 		logger.info("format: " + format);
 
 		try {
-			if (format.contains(MediaType.TEXT_HTML) || format.contains("text/vnd.graphviz")) {
-				if (format.contains(MediaType.TEXT_HTML))
-					return GraphVizVisualisation.getGraphVizHtmlOutput(graph);
-				else
-					return GraphVizVisualisation.getGraphVizOutput(graph);
-			} else
-				return RevisionManagement.getRevisionInformation(graph, format);
+			ResponseBuilder response = Response.ok();
+			if (format.contains(MediaType.TEXT_HTML)) {
+				response.type(MediaType.TEXT_HTML);
+				response.entity(GraphVizVisualisation.getGraphVizHtmlOutput(graph));
+			}
+			else if (format.contains("text/vnd.graphviz")) {
+				response.type("text/vnd.graphviz");
+				response.entity(GraphVizVisualisation.getGraphVizOutput(graph));
+			} else {
+				response.type(format);
+				response.entity(RevisionManagement.getRevisionInformation(graph, format));
+			}
+			return response.build();
 		} catch (HttpException | IOException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException(e.getMessage());
@@ -673,8 +679,8 @@ public class Endpoint {
 			}
 
 			// Respond with next revision number
-			responseBuilder
-					.header(graphName + "-revision-number", RevisionManagement.getRevisionNumber(graphName, referenceName));
+			responseBuilder.header(graphName + "-revision-number", 
+					RevisionManagement.getRevisionNumber(graphName, referenceName));
 			responseBuilder.header(graphName + "-revision-number-of-MASTER",
 					RevisionManagement.getMasterRevisionNumber(graphName));
 
