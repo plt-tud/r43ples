@@ -10,7 +10,7 @@
 ###########################################################
 ###########################################################
 
-sdd:DefaultSDD a sddo:StructuralDefinitionGroup ;
+sdd:defaultSDD a sddo:StructuralDefinitionGroup ;
 	sddo:hasStructuralDefinition
 #		sdd:deleted-deleted ,
 		sdd:deleted-added ,

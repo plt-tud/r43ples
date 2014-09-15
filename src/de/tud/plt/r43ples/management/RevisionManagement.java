@@ -81,7 +81,7 @@ public class RevisionManagement {
 		// TODO Currently to every created graph the default SDD is referenced - provide possibility to choose SDD
 		queryContent += String.format(
 				"<%s> a rmo:Graph ;%n"
-				+ "sddo:hasDefaultSDD sdd:DefaultSDD .", 
+				+ "sddo:hasDefaultSDD sdd:defaultSDD .", 
 				graphName);
 
 		String queryRevision = prefixes + String.format("INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
