@@ -198,4 +198,35 @@ public class TestRevisionManagment {
 		Assert.assertEquals("2.0-1.1-0", revNumber4);
 	}
 	
+	@Test
+	public void test_insert_existing_triples() throws HttpException, IOException{
+		Endpoint ep = new Endpoint();
+        String result;
+        String expected;
+        String query_template = ""
+        		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
+        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
+        String format = "application/sparql-results+xml";
+		
+		ArrayList<String> list = new ArrayList<String>();
+		list.add("4");
+		
+		String insert_template = ""
+				+ "USER \"test_user\" %n"
+				+ "MESSAGE \"test commit message 5 (same as 4)\" %n"
+        		+ "INSERT { GRAPH <%s> REVISION \"4\" { %s } } %n"
+        		+ "DELETE { GRAPH <%s> REVISION \"4\" { %s } } ";
+		ep.sparql(format, null, String.format(insert_template, 
+				graph_test,	ResourceManagement.getContentFromResource("samples/test-delta-added-4.nt"), 
+				graph_test, ResourceManagement.getContentFromResource("samples/test-delta-removed-4.nt")));
+		
+        result = ep.sparql(format, null, String.format(query_template, 4)).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
+        Assert.assertEquals(expected, result);
+        
+        result = ep.sparql(format, null, String.format(query_template, 5)).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
+        Assert.assertEquals(expected, result);
+	}
+	
 }
