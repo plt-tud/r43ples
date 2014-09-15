@@ -1,3 +1,4 @@
+@prefix rmo: <http://eatld.et.tu-dresden.de/rmo#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
@@ -111,6 +112,8 @@
              rdfs:comment "Spezifiziert die Referenz zu der Revision im Branch A, in welcher der Status des korrespondierenden Tripels geaendert wurde."@de ,
                           "Specifies the reference to the revision in branch A in which the state of the corresponding triple was changed."@en ;
              
+             rdfs:range rmo:Revision ;
+             
              rdfs:domain :Difference .
 
 
@@ -124,6 +127,8 @@
              
              rdfs:comment "Spezifiziert die Referenz zu der Revision im Branch B, in welcher der Status des korrespondierenden Tripels geandert wurde."@de ,
                           "Specifies the reference to the revision in branch B in which the state of the corresponding triple was changed."@en ;
+             
+             rdfs:range rmo:Revision ;
              
              rdfs:domain :Difference .
 
