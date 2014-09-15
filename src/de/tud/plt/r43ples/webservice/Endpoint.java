@@ -336,10 +336,10 @@ public class Endpoint {
 		    	newGraphName = graphName;
 			} else {
 				if (RevisionManagement.isBranch(graphName, revisionNumber)) {
-					newGraphName = RevisionManagement.getFullGraphName(graphName, revisionNumber);
+					newGraphName = RevisionManagement.getReferenceGraph(graphName, revisionNumber);
 				} else {
 					// Respond with specified revision, therefore the revision must be generated - saved in graph <RM-TEMP-graphName>
-					newGraphName = "RM-TEMP-" + graphName;
+					newGraphName = graphName + "-temp";
 					RevisionManagement.generateFullGraphOfRevision(graphName, revisionNumber, newGraphName);
 				}
 				headerRevisionNumber = revisionNumber;
@@ -358,6 +358,78 @@ public class Endpoint {
 		return responseBuilder.entity(response).type(format).build();
 	}
 	
+	
+	/**
+	 * Produce the response for a INSERT or DELETE SPARQL query.
+	 * 
+	 * @param query the SPARQL query
+	 * @param format the result format
+	 * @return the response with HTTP header for every graph (revision number and MASTER revision number)
+	 * @throws IOException 
+	 * @throws HttpException 
+	 */
+	private Response produceInsertDeleteResponseAlternative(final String query, final String format) throws HttpException, IOException {
+		
+		ResponseBuilder responseBuilder = Response.created(URI.create(""));		
+		logger.info("Update detected");
+		
+		String user = extractUser(query);
+		String commitMessage = extractCommitMessage(query);
+		// if no commit message is declared use default message
+		if (commitMessage == null) {
+			commitMessage = "No commit message specified.";
+		}
+		Matcher m = patternUpdateRevisionQuery.matcher(query);
+		boolean found = m.find();
+		
+		if (!found) {
+			throw new InternalServerErrorException("Query contain errors:\n" + query);
+		}
+		
+	    String graphName = m.group("graph");
+	    String revisionName = m.group("revision"); //can contain revision numbers or reference names
+	    
+	    if (!RevisionManagement.isBranch(graphName, revisionName)) {
+			throw new InternalServerErrorException("Revision is not referenced by branch");
+		}
+	    
+	    String newRevisionNumber  = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
+	    String referenceFullGraph = RevisionManagement.getReferenceGraph(graphName, revisionName);
+
+	    // General variables
+ 		String dateString = RevisionManagement.getDateString();
+ 		String commitUri = graphName+"-commit-" + newRevisionNumber;
+ 		String revisionUri = graphName + "-revision-" + newRevisionNumber;
+ 		String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
+ 		String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
+ 		String personUri =  RevisionManagement.getUserName(user);
+	    
+	    
+ 		
+//	    String queryM = m.replaceFirst("FROM <" + newGraphName + ">");
+//		m = patternSelectFromPart.matcher(queryM);
+//		
+//
+//	    TripleStoreInterface.executeQueryWithAuthorization(queryM);
+//		
+//		
+//		
+//		
+//		// Execute SPARQL query
+//		String result = TripleStoreInterface.executeQueryWithAuthorization(queryM, format);
+//	    responseBuilder.entity(result); 
+		
+		// Respond with next revision number
+    	responseBuilder.header(graphName + "-revision-number", newRevisionNumber);
+		responseBuilder.header(graphName + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
+		logger.info("Respond with new revision number " + newRevisionNumber + ".");
+	
+		Response response = responseBuilder.build();
+		
+		return response;
+		
+		
+	}
 	
 	/**
 	 * Produce the response for a INSERT or DELETE SPARQL query.
@@ -394,7 +466,7 @@ public class Endpoint {
 			throw new InternalServerErrorException("Revision is not referenced by branch");
 		}
 	    
-	    String referenceFullGraph = RevisionManagement.getFullGraphName(graphName, revisionName);
+	    String referenceFullGraph = RevisionManagement.getReferenceGraph(graphName, revisionName);
 
 	    // Create the temporary graph and fill with reference full graph
 	    String graphUpdateTemp = graphName+"-temp";

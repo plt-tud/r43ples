@@ -301,7 +301,7 @@ public class RevisionManagement {
 		
 		// Copy branch to temporary graph
 		String number = list.pollFirst();
-		TripleStoreInterface.executeQueryWithAuthorization("COPY GRAPH <" + RevisionManagement.getFullGraphName(graphName, number) + "> TO GRAPH <" + tempGraphName + ">", "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization("COPY GRAPH <" + RevisionManagement.getReferenceGraph(graphName, number) + "> TO GRAPH <" + tempGraphName + ">", "HTML");
 		
 		// add- und delete-sets could be extracted from revision tree information
 		// hard coded variant is faster
@@ -387,12 +387,12 @@ public class RevisionManagement {
 	 * 
 	 * @param graphName the graph name
 	 * @param referenceIdentifier reference name or revision number
-	 * @return graph name of full graph for specified reference and graph
+	 * @return first graph name of full graph for specified reference and graph
 	 * @throws HttpException
 	 * @throws IOException
 	 */
 	public static String getReferenceGraph(final String graphName, final String referenceIdentifier) throws HttpException, IOException {
-		String query = prefixes + String.format(""
+		String query = prefix_rmo + String.format(""
 			+ "SELECT ?graph "
 			+ "FROM <%s>"
 			+ "WHERE {"
@@ -406,9 +406,6 @@ public class RevisionManagement {
 		ResultSet resultSet = ResultSetFactory.fromXML(result);
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
-			if (resultSet.hasNext()) {
-				throw new InternalServerErrorException("Identifier is not unique for specified graph name: " + referenceIdentifier);
-			}	
 			return qs.getResource("?graph").toString();
 		} else {
 			throw new InternalServerErrorException("No Revision or Reference found with identifier: " + referenceIdentifier);
@@ -641,31 +638,6 @@ public class RevisionManagement {
 			}
 		}
 		TripleStoreInterface.executeQueryWithAuthorization("INSERT IN GRAPH <" + graphName + "> { " + insert + "}", "HTML");
-	}
-	
-	
-	
-	/**
-	 * Returns the name of the full graph of revision of a graph if it is available.
-	 * @param graphName name of the revisioned graph
-	 * @param revisionName revision number or branch or tag name of the graph
-	 * @return name of the full graph of a revision of a graph
-	 * @throws AuthenticationException
-	 * @throws IOException
-	 */
-	public static String getFullGraphName(final String graphName, final String revisionName) throws HttpException, IOException {
-		String query = prefixes + String.format("SELECT ?graph { GRAPH <%s> { "
-				+ " ?rev a rmo:Revision; rmo:revisionOf <%s> . "
-				+ " ?ref a rmo:Reference; rmo:references ?rev; rmo:fullGraph ?graph ."
-				+ " { ?rev rmo:revisionNumber \"%s\"} UNION { ?ref rdfs:label \"%s\"} }} ",
-				Config.revision_graph, graphName, revisionName, revisionName);
-		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
-		if (ResultSetFactory.fromXML(result).hasNext()) {
-			QuerySolution qs = ResultSetFactory.fromXML(result).next();
-			return qs.getResource("?graph").toString();
-		} else {
-			return null;
-		}
 	}
 	
 	
