@@ -63,36 +63,36 @@ public class Endpoint {
 			"(?<type>SELECT|ASK).*WHERE\\s*\\{(?<where>.*)\\}", 
 			patternModifier);
 	private final Pattern patternSelectFromPart = Pattern.compile(
-			"FROM\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"",
+			"FROM\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
 			patternModifier);
 	
 	private final Pattern patternUpdateQuery = Pattern.compile(
-			"(?<action>INSERT|DELETE).*<(?<graph>.*)>",
+			"(?<action>INSERT|DELETE).*<(?<graph>[^>]*)>",
 			patternModifier);
 	private final Pattern patternUpdateRevisionQuery = Pattern.compile(
-			"(?<action>FROM|INTO|GRAPH)\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"", 
+			"(?<action>FROM|INTO|GRAPH)\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"", 
 			patternModifier);
 	private final Pattern patternUpdate2 = Pattern.compile(
-			"(?<action>INSERT|DELETE|WHERE)\\s*\\{\\s*GRAPH\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"",
+			"(?<action>INSERT|DELETE|WHERE)\\s*\\{\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
 			patternModifier);
 	private final Pattern patternGraph = Pattern.compile(
-			"GRAPH\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"",
+			"GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
 			patternModifier);
 
 	private final Pattern patternCreateGraph = Pattern.compile(
-			"CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>.*)>",
+			"CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
 			patternModifier);
 	private final Pattern patternDropGraph = Pattern.compile(
-			"DROP\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>.*)>",
+			"DROP\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
 			patternModifier);
 	private final Pattern patternBranchOrTagQuery = Pattern.compile(
-			"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"\\s*TO\\s*\"(?<name>.*)\"",
+			"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"\\s*TO\\s*\"(?<name>[^\"]*)\"",
 			patternModifier);
 	private final Pattern patternUser = Pattern.compile(
-			"USER\\s*\"(?<user>.*)\"",
+			"USER\\s*\"(?<user>[^\"]*)\"",
 			patternModifier);
 	private final Pattern patternCommitMessage = Pattern.compile(
-			"MESSAGE\\s*\"(?<message>.*)\"", 
+			"MESSAGE\\s*\"(?<message>[^\"]*)\"", 
 			patternModifier);
 	
 	@Context
