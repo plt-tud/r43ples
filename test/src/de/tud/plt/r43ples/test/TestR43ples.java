@@ -84,12 +84,12 @@ public class TestR43ples {
 		query = String.format(""
 				+ "USER \"shensel\" %n"
 				+ "MESSAGE \"Initial commit.\" %n"
-				+ "INSERT DATA INTO <%s> REVISION \"0\" %n"
+				+ "INSERT { GRAPH <%s> REVISION \"0\" %n"
 				+ "{"
 				+ "  <http://example.com/testS> <http://example.com/testP> \"A\". %n"
 				+ "  <http://example.com/testS> <http://example.com/testP> \"B\". %n"
 				+ "  <http://example.com/testS> <http://example.com/testP> \"C\". %n"
-				+ "}", graphName);
+				+ "} }", graphName);
 		logger.debug("Execute query: \n" + query);
 		logger.debug("Response: \n" + executeR43plesQuery(query));
 		
@@ -116,15 +116,15 @@ public class TestR43ples {
 		query = String.format(""
 				+ "USER \"shensel\" %n"
 				+ "MESSAGE \"First commit to B1.\" %n"
-				+ "INSERT DATA INTO <%s> REVISION \"B1\" %n"
+				+ "INSERT { GRAPH <%s> REVISION \"B1\" %n"
 				+ "{ %n"
 				+ "  <http://example.com/testS> <http://example.com/testP> \"D\". %n"
 				+ "  <http://example.com/testS> <http://example.com/testP> \"E\". %n"
-				+ "}"
-				+ "DELETE DATA FROM <%s> REVISION \"B1\" %n"
+				+ "} }"
+				+ "DELETE { GRAPH <%s> REVISION \"B1\" %n"
 				+ "{ %n"
 				+ "  <http://example.com/testS> <http://example.com/testP> \"A\". %n"
-				+ "}", graphName, graphName);
+				+ "} }", graphName, graphName);
 		logger.debug("Execute query: \n" + query);
 		logger.debug("Response: \n" + executeR43plesQuery(query));
 		
@@ -133,15 +133,15 @@ public class TestR43ples {
 		query = String.format(""
 				+ "USER \"shensel\" %n"
 				+ "MESSAGE \"First commit to B2.\" %n"
-				+ "INSERT DATA INTO <%s> REVISION \"B2\" %n"
+				+ "INSERT { GRAPH <%s> REVISION \"B2\" %n"
 				+ "{ %n"
 				+ "  <http://example.com/testS> <http://example.com/testP> \"D\". %n"
 				+ "  <http://example.com/testS> <http://example.com/testP> \"H\". %n"
-				+ "}"
-				+ "DELETE DATA FROM <%s> REVISION \"B2\" %n"
+				+ "} }"
+				+ "DELETE { GRAPH <%s> REVISION \"B2\" %n"
 				+ "{ %n"
 				+ "  <http://example.com/testS> <http://example.com/testP> \"C\". %n"
-				+ "}", graphName, graphName);
+				+ "} }", graphName, graphName);
 		logger.debug("Execute query: \n" + query);
 		logger.debug("Response: \n" + executeR43plesQuery(query));
 		
@@ -150,14 +150,14 @@ public class TestR43ples {
 		query = String.format(""
 				+ "USER \"shensel\" %n"
 				+ "MESSAGE \"Second commit to B1.\" %n"
-				+ "INSERT DATA INTO <%s> REVISION \"B1\" %n"
+				+ "INSERT { GRAPH <%s> REVISION \"B1\" %n"
 				+ "{ %n"
 				+ "  <http://example.com/testS> <http://example.com/testP> \"G\". %n"
-				+ "}"
-				+ "DELETE DATA FROM <%s> REVISION \"B1\" %n"
+				+ "} }"
+				+ "DELETE { GRAPH <%s> REVISION \"B1\" %n"
 				+ "{ %n"
 				+ "  <http://example.com/testS> <http://example.com/testP> \"D\". %n"
-				+ "}", graphName, graphName);
+				+ "} }", graphName, graphName);
 		logger.debug("Execute query: \n" + query);
 		logger.debug("Response: \n" + executeR43plesQuery(query));
 		
@@ -174,10 +174,10 @@ public class TestR43ples {
 		query = String.format(""
 				+ "USER \"shensel\" %n"
 				+ "MESSAGE \"Second commit to B2.\" %n"
-				+ "INSERT DATA INTO <%s> REVISION \"B2\" %n"
+				+ "INSERT { GRAPH <%s> REVISION \"B2\" %n"
 				+ "{ %n"
 				+ "  <http://example.com/testS> <http://example.com/testP> \"I\". %n"
-				+ "}", graphName);
+				+ "} }", graphName);
 		logger.debug("Execute query: \n" + query);
 		logger.debug("Response: \n" + executeR43plesQuery(query));
 		
@@ -209,13 +209,16 @@ public class TestR43ples {
 				+ "DELETE { GRAPH <%s> REVISION \"B2\" {"
 				+ " <http://example.com/testS> <http://example.com/testP> ?o."
 				+ "} } %n"
+				+ "WHERE { GRAPH <%s> REVISION \"B2\" {"
+				+ "	<http://example.com/testS> <http://example.com/testP> ?o"
+				+ "} } %n"
 				+ "INSERT { GRAPH <%s> REVISION \"B2\" {"
 				+ " <http://example.com/newTestS> <http://example.com/newTestP> ?o."
 				+ "} } %n"
 				+ "WHERE { GRAPH <%s> REVISION \"B2\" {"
 				+ "	<http://example.com/testS> <http://example.com/testP> ?o"
 				+ "} }", 
-				graphName, graphName, graphName);
+				graphName, graphName, graphName, graphName);
 		logger.debug("Execute query: \n" + query);
 		logger.debug("Response: \n" + executeR43plesQuery(query));
 		
