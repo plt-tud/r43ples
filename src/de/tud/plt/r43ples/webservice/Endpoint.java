@@ -69,10 +69,7 @@ public class Endpoint {
 	private final Pattern patternUpdateQuery = Pattern.compile(
 			"(?<action>INSERT|DELETE).*<(?<graph>[^>]*)>",
 			patternModifier);
-	private final Pattern patternUpdateRevisionQuery = Pattern.compile(
-			"(?<action>FROM|INTO|GRAPH)\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"", 
-			patternModifier);
-	private final Pattern patternUpdate2 = Pattern.compile(
+	private final Pattern patternUpdateRevision = Pattern.compile(
 			"(?<action>INSERT|DELETE|WHERE)\\s*\\{\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
 			patternModifier);
 	private final Pattern patternGraph = Pattern.compile(
@@ -189,7 +186,7 @@ public class Endpoint {
 						Service.class.getPackage().getImplementationVersion());
 				return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
 			} else {
-				return getServiceDescription(format);
+				return getServiceDescriptionResponse(format);
 			}
 		} else {
 			logger.info("SPARQL query was requested. Query: " + sparqlQuery);
@@ -210,20 +207,19 @@ public class Endpoint {
 				}
 
 				if (patternSelectQuery.matcher(sparqlQueryDecoded).find()) {
-					return produceSelectResponse(sparqlQueryDecoded, format);
+					return getSelectResponse(sparqlQueryDecoded, format);
 				}
 				if (patternUpdateQuery.matcher(sparqlQueryDecoded).find()) {
-					return produceInsertDeleteResponseAlternative(sparqlQueryDecoded, user, message, format);
-					// return produceInsertDeleteResponse(sparqlQueryDecoded, format);
+					return getUpdateResponse(sparqlQueryDecoded, user, message, format);
 				}
 				if (patternCreateGraph.matcher(sparqlQueryDecoded).find()) {
-					return produceCreateGraphResponse(sparqlQueryDecoded, format);
+					return getCreateGraphResponse(sparqlQueryDecoded, format);
 				}
 				if (patternDropGraph.matcher(sparqlQueryDecoded).find()) {
-					return produceDropGraphResponse(sparqlQueryDecoded, format);
+					return getDropGraphResponse(sparqlQueryDecoded, format);
 				}
 				if (patternBranchOrTagQuery.matcher(sparqlQueryDecoded).find()) {
-					return produceBranchOrTagResponse(sparqlQueryDecoded, user, message, format);
+					return getBranchOrTagResponse(sparqlQueryDecoded, user, message, format);
 				}
 				throw new InternalServerErrorException("No R43ples query detected");
 			} catch (HttpException | IOException e) {
@@ -285,7 +281,7 @@ public class Endpoint {
 	 * @throws ClientProtocolException
 	 * @throws IOException
 	 */
-	private Response getServiceDescription(final String format) {
+	private Response getServiceDescriptionResponse(final String format) {
 		logger.info("Service Description requested");
 		DefaultHttpClient client = new DefaultHttpClient();
 		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(Config.sparql_user, Config.sparql_password);
@@ -338,7 +334,7 @@ public class Endpoint {
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	private Response produceSelectResponse(final String query, final String format) throws HttpException, IOException {
+	private Response getSelectResponse(final String query, final String format) throws HttpException, IOException {
 		ResponseBuilder responseBuilder = Response.ok();
 		if (query.contains("#OPTION r43ples:SPARQL_JOIN")) {
 			try {
@@ -400,7 +396,11 @@ public class Endpoint {
 	 * Produce the response for a INSERT or DELETE SPARQL query.
 	 * 
 	 * @param query
-	 *            the SPARQL query
+	 *            the SPARQL query containing the update request
+	 * @param user
+	 * 			  user committing the update
+	 * @param commitMessage
+	 * 			  message describing the commit
 	 * @param format
 	 *            the result format
 	 * @return the response with HTTP header for every graph (revision number
@@ -408,7 +408,7 @@ public class Endpoint {
 	 * @throws IOException
 	 * @throws HttpException
 	 */
-	private Response produceInsertDeleteResponseAlternative(final String query, final String user, final String commitMessage,
+	private Response getUpdateResponse(final String query, final String user, final String commitMessage,
 			final String format) throws HttpException, IOException {
 
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
@@ -417,7 +417,7 @@ public class Endpoint {
 		// write to add and delete sets
 		// (replace graph names in query)
 		String queryM = query;
-		Matcher m = patternUpdate2.matcher(queryM);
+		Matcher m = patternUpdateRevision.matcher(queryM);
 		while (m.find()) {
 			String graphName = m.group("graph");
 			String revisionName = m.group("revision"); // can contain revision
@@ -440,7 +440,7 @@ public class Endpoint {
 				RevisionManagement.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
 				queryM = m.replaceFirst(String.format("WHERE { GRAPH <%s>", tempGraphName));
 			}
-			m = patternUpdate2.matcher(queryM);
+			m = patternUpdateRevision.matcher(queryM);
 		}
 
 		TripleStoreInterface.executeQueryWithAuthorization(queryM);
@@ -497,85 +497,6 @@ public class Endpoint {
 		return response;
 	}
 
-	/**
-	 * Produce the response for a INSERT or DELETE SPARQL query.
-	 * 
-	 * @param query
-	 *            the SPARQL query
-	 * @param format
-	 *            the result format
-	 * @return the response with HTTP header for every graph (revision number
-	 *         and MASTER revision number)
-	 * @throws IOException
-	 * @throws HttpException
-	 */
-	private Response produceInsertDeleteResponse(final String query, final String user, final String commitMessage,
-			final String format) throws HttpException, IOException {
-
-		ResponseBuilder responseBuilder = Response.created(URI.create(""));
-		logger.info("Update detected");
-
-		Matcher m = patternUpdateRevisionQuery.matcher(query);
-		boolean found = m.find();
-
-		if (!found) {
-			throw new InternalServerErrorException("Query contain errors:\n" + query);
-		}
-
-		String graphName = m.group("graph");
-		String revisionName = m.group("revision"); // can contain revision
-													// numbers or reference
-													// names
-
-		if (!RevisionManagement.isBranch(graphName, revisionName)) {
-			throw new InternalServerErrorException("Revision is not referenced by branch");
-		}
-
-		String referenceFullGraph = RevisionManagement.getReferenceGraph(graphName, revisionName);
-
-		// Create the temporary graph and fill with reference full graph
-		String graphUpdateTemp = graphName + "-temp";
-		TripleStoreInterface.executeQueryWithAuthorization("DROP SILENT GRAPH <" + graphUpdateTemp + ">", "HTML");
-		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <" + graphUpdateTemp + ">", "HTML");
-		TripleStoreInterface.executeQueryWithAuthorization("COPY <" + referenceFullGraph + "> TO <" + graphUpdateTemp + ">",
-				"HTML");
-
-		// Replace graph name in SPARQL query
-		// TODO: should also work with different graph names and revisions in
-		// one query
-		String query_replaced = m.replaceAll("${action} <" + graphUpdateTemp + ">");
-		logger.info("query replaced: " + query_replaced);
-
-		// Execute SPARQL query
-		responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(query_replaced, format));
-
-		// Create deltas for new revision
-		// Get all added triples
-		String queryAddedTriples = "CONSTRUCT {?s ?p ?o} WHERE {" + "  GRAPH <" + graphUpdateTemp + "> { ?s ?p ?o }"
-				+ "  FILTER NOT EXISTS { GRAPH <" + referenceFullGraph + "> { ?s ?p ?o } }" + " }";
-		String addedTriples = TripleStoreInterface.executeQueryWithAuthorization(queryAddedTriples, "text/plain");
-
-		// Get all removed triples
-		String queryRemovedTriples = "CONSTRUCT {?s ?p ?o} WHERE {" + "  GRAPH <" + referenceFullGraph + "> { ?s ?p ?o }"
-				+ "  FILTER NOT EXISTS { GRAPH <" + graphUpdateTemp + "> { ?s ?p ?o } }" + " }";
-		String removedTriples = TripleStoreInterface.executeQueryWithAuthorization(queryRemovedTriples, "text/plain");
-
-		ArrayList<String> list = new ArrayList<String>();
-		list.add(revisionName);
-
-		// Create new revision
-		String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user,
-				commitMessage, list);
-
-		// Respond with next revision number
-		responseBuilder.header(graphName + "-revision-number", newRevisionNumber);
-		responseBuilder.header(graphName + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
-		logger.info("Respond with new revision number " + newRevisionNumber + ".");
-
-		Response response = responseBuilder.build();
-
-		return response;
-	}
 
 	/**
 	 * Creates a graph under version control for command "CREATE GRAPH <?>"
@@ -587,7 +508,7 @@ public class Endpoint {
 	 * @throws IOException
 	 * @throws HttpException
 	 */
-	private Response produceCreateGraphResponse(final String query, final String format) throws IOException, HttpException {
+	private Response getCreateGraphResponse(final String query, final String format) throws IOException, HttpException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Graph creation detected");
 
@@ -620,7 +541,7 @@ public class Endpoint {
 	 * @throws IOException
 	 * @throws HttpException
 	 */
-	private Response produceDropGraphResponse(final String query, final String format) throws IOException, HttpException {
+	private Response getDropGraphResponse(final String query, final String format) throws IOException, HttpException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 
 		// Clear R43ples information for specified graphs
@@ -651,7 +572,7 @@ public class Endpoint {
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
-	private Response produceBranchOrTagResponse(final String sparqlQuery, final String user, final String commitMessage,
+	private Response getBranchOrTagResponse(final String sparqlQuery, final String user, final String commitMessage,
 			final String format) throws HttpException, IOException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Tag or branch creation detected");
