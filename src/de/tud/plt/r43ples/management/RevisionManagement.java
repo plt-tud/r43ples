@@ -814,7 +814,7 @@ public class RevisionManagement {
 		Date date = new Date();
 		DateFormat df = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH:mm:ss");
 		String dateString = df.format(date);
-		logger.info("Time stamp created: " + dateString);
+		logger.debug("Time stamp created: " + dateString);
 		return dateString;
 	}
 
