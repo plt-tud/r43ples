@@ -100,7 +100,8 @@ public class TripleStoreInterface {
 		
 		logger.debug("Hide all keywords in comments");
 		
-		logger.info("Execute query on SPARQL endpoint:"+ query);
+		logger.debug("Execute query on SPARQL endpoint:\n"+ query);
+		 
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
 			
@@ -110,8 +111,8 @@ public class TripleStoreInterface {
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
 		nameValuePairs.add(new BasicNameValuePair("format",format));
 		nameValuePairs.add(new BasicNameValuePair("query", query));
-		
-    	request.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+    	request.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
+    	request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
 		
 		//Execute Query
 		HttpResponse response = httpClient.execute(request);
