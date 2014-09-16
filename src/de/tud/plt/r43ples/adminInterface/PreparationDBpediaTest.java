@@ -1,12 +1,9 @@
 package de.tud.plt.r43ples.adminInterface;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 
@@ -31,45 +28,32 @@ public class PreparationDBpediaTest {
 
 		// load instance data to triplestore (dbpedia_2013_07_18.nt)
 		String file_name = "dbpedia_2013_07_18.nt";
-		String command = String.format(""
-				+ "ld_dir('%s', '%s', '%s');%n"
-				+ "select * from DB.DBA.load_list;%n"
-				+ "rdf_loader_run();",
-				path, file_name, graph_name);
-		logger.info("Command to be executed on ISQL interface in Virtuoso:\n" + command);
+		String command = String.format("ld_dir('%s', '%s', '%s');%n", path, file_name, graph_name);
+
 		// create revision information for instance data
 		RevisionManagement.putGraphUnderVersionControl(graph_name);
 		
-		String path_name_added;
-		String path_name_removed;
-		String addedAsNTriples;
-		String removedAsNTriples;
+		String user = "dbpedia-test";
 		
 		// insert changesets into R43ples
 		final int MAX_REV = 277;
-		for (int i=0; i <= 3; i++){
-//		for (int i=0; i <= MAX_REV; i++){
-			path_name_added = String.format("%s/%06d.added.nt", path, i);
-			try {
-				addedAsNTriples = FileUtils.readFileToString(new File(path_name_added));
-			} catch (FileNotFoundException e)
-			{
-				addedAsNTriples = "";
-			}
-			
-			path_name_removed = String.format("%s/%06d.removed.nt", path, i);
-			try {
-				removedAsNTriples = FileUtils.readFileToString(new File(path_name_removed));
-			}
-			catch (FileNotFoundException e) {
-				removedAsNTriples = "";
-			}
-			
+		for (int i=0; i <= MAX_REV; i++){
+			logger.info("Add revision to dbpedia: "+i);
+			String newRevisionNumber = String.format("%d",i +1);
+			String addSetGraphUri = graph_name + "-delta-added-" + newRevisionNumber;
+			String removeSetGraphUri = graph_name + "-delta-removed-" + newRevisionNumber;
 			ArrayList<String> list = new ArrayList<String>();
 			list.add(Integer.toString(i));
+			command += String.format("ld_dir('%s', '%06d.added.nt', '%s');%n", path, i, addSetGraphUri );
+			command += String.format("ld_dir('%s', '%06d.removed.nt', '%s');%n", path, i, removeSetGraphUri );
 			
-			RevisionManagement.createNewRevision(graph_name, addedAsNTriples, removedAsNTriples, "test-user", "create revision " + i, list);	
+			RevisionManagement.addMetaInformationForNewRevision(graph_name, user, "create revision " + newRevisionNumber, list,
+					newRevisionNumber, addSetGraphUri, removeSetGraphUri);	
 		}
+		
+		command += "select * from DB.DBA.load_list;\n"
+				+ "rdf_loader_run();";
+		logger.info("Command to be executed on ISQL interface in Virtuoso:\n" + command);
 	}
 
 }
