@@ -134,8 +134,14 @@ public class Endpoint {
 			"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"\\s*TO\\s*\"(?<name>.*)\"",
 			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
 	private final Pattern patternMergeQuery =  Pattern.compile(
-			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>.*)>\\s*BRANCH\\s*\"(?<branchNameA>.*)\"\\s*INTO\\s*\"(?<branchNameB>.*)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
-			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
+			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>.*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>.*)>)?\\s*BRANCH\\s*\"(?<branchNameA>.*)\"\\s*INTO\\s*\"(?<branchNameB>.*)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
+			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);//
+	
+	
+//	private final Pattern patternMergeQuery =  Pattern.compile(
+//			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*(GRAPH\\s*<(?<graph>.*)>\\s*)(SDD\\s*<(?<sdd>.*)>)?+\\s*BRANCH\\s*\"(?<branchNameA>.*)\"\\s*INTO\\s*\"(?<branchNameB>.*)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
+//			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);//(\\s*(?<sdd>SDD)?\\s*\\{(?<sddURI>.*)\\})?
+	
 	private final Pattern patternUser = Pattern.compile(
 			"USER\\s*\"(?<user>.*)\"",
 			Pattern.CASE_INSENSITIVE);
@@ -563,6 +569,8 @@ public class Endpoint {
 			
 			String action = m.group("action");
 			String graphName = m.group("graph");
+			String sdd = m.group("sdd");
+			String sddURI = m.group("sddURI");
 			String branchNameA = m.group("branchNameA");
 			String branchNameB = m.group("branchNameB");
 			String with = m.group("with");
@@ -573,6 +581,8 @@ public class Endpoint {
 			
 			logger.debug("action: " + action);
 			logger.debug("graph: " + graphName);
+			logger.debug("sdd: " + sdd);
+			logger.debug("sddURI: " + sddURI);
 			logger.debug("branchNameA: " + branchNameA);
 			logger.debug("branchNameB: " + branchNameB);
 			logger.debug("with: " + with);
@@ -580,28 +590,33 @@ public class Endpoint {
 			
 			// TODO check graph existence
 			
-			// TODO Check if A and B are different valid branches
-			// TODO Think about usage of branch (terminal nodes) only or possibility to merge any revision of different branch into another 
+			// TODO Check if A and B are different valid branches (it is only possible to merge terminal nodes)
 			
-			// TODO differ between MERGE query with specified SDD and without SDD			
-			// Query the referenced SDD
-			String querySDD = String.format(
-					  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
-					+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> %n"
-					+ "SELECT ?defaultSDD %n"
-					+ "FROM <%s> %n"
-					+ "WHERE { %n"
-					+ "	<%s> a rmo:Graph ;%n"
-					+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
-					+ "}", Config.revision_graph, graphName);
-			
-			String resultSDD = TripleStoreInterface.executeQueryWithAuthorization(querySDD, "XML");
-			String defaultSDDURI = "";
-			if (ResultSetFactory.fromXML(resultSDD).hasNext()) {
-				QuerySolution qs = ResultSetFactory.fromXML(resultSDD).next();
-				defaultSDDURI = qs.getResource("?defaultSDD").toString();
+			// Differ between MERGE query with specified SDD and without SDD			
+			String usedSDDURI = null;
+			if (sdd != null) {
+				// Specified SDD
+				usedSDDURI = sddURI;
 			} else {
-				throw new InternalServerErrorException("Error in revision graph! Selected graph <" + graphName + "> has no default SDD referenced.");
+				// Default SDD
+				// Query the referenced SDD
+				String querySDD = String.format(
+						  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
+						+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> %n"
+						+ "SELECT ?defaultSDD %n"
+						+ "FROM <%s> %n"
+						+ "WHERE { %n"
+						+ "	<%s> a rmo:Graph ;%n"
+						+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
+						+ "}", Config.revision_graph, graphName);
+				
+				String resultSDD = TripleStoreInterface.executeQueryWithAuthorization(querySDD, "XML");
+				if (ResultSetFactory.fromXML(resultSDD).hasNext()) {
+					QuerySolution qs = ResultSetFactory.fromXML(resultSDD).next();
+					usedSDDURI = qs.getResource("?defaultSDD").toString();
+				} else {
+					throw new InternalServerErrorException("Error in revision graph! Selected graph <" + graphName + "> has no default SDD referenced.");
+				}
 			}
 
 			// Get the common revision with shortest path
@@ -617,21 +632,21 @@ public class Endpoint {
 			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
 			
 			// Create difference model
-			MergeManagement.createDifferenceTripleModel(graphName, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI);
+			MergeManagement.createDifferenceTripleModel(graphName, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI);
 			
 			// Differ between the different merge queries
 			if ((action != null) && (action.equalsIgnoreCase("AUTO")) && (with == null) && (triples == null)) {
 				logger.info("AUTO MERGE query detected");
 				// Create the merged revision
-				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.AUTO, "");
+				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.AUTO, "");
 			} else if ((action != null) && (action.equalsIgnoreCase("MANUAL")) && (with != null) && (triples != null)) {
 				logger.info("MANUAL MERGE query detected");
 				// Create the merged revision
-				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.MANUAL, triples);
+				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.MANUAL, triples);
 			} else if ((action == null) && (with != null) && (triples != null)) {
 				logger.info("MERGE WITH query detected");
 				// Create the merged revision
-				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.WITH, triples);
+				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.WITH, triples);
 			} else if ((action == null) && (with == null) && (triples == null)) {
 				logger.info("MERGE query detected");
 				// Check if difference model contains conflicts
@@ -650,7 +665,7 @@ public class Endpoint {
 				} else {
 					// Difference model contains no conflicts
 					// Create the merged revision
-					newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, defaultSDDURI, MergeQueryTypeEnum.COMMON, "");
+					newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.COMMON, "");
 				}
 			} else {
 				throw new InternalServerErrorException("This is not a valid MERGE query: " + sparqlQuery);

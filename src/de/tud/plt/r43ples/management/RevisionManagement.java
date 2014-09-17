@@ -165,16 +165,16 @@ public class RevisionManagement {
 		query += String.format("DELETE FROM GRAPH <%s> { <%s> rmo:references <%s>. }%n", Config.revision_graph, branchName, oldRevisionUri);
 		query += String.format("INSERT IN GRAPH <%s> { <%s> rmo:references <%s>. }%n", Config.revision_graph, branchName, revisionUri);
 		
-		// Remove branch from which changes were merged, if available
-		if (usedRevisionNumber.size()>1){
-			String oldRevision2 = graphName + "-revision-" + usedRevisionNumber.get(1).toString();
-			String queryBranch2 = prefixes + String.format("SELECT ?branch ?graph WHERE{ ?branch a rmo:Branch; rmo:references <%s>; rmo:fullGraph ?graph. }", oldRevision2);
-			QuerySolution sol2 = ResultSetFactory.fromXML(TripleStoreInterface.executeQueryWithAuthorization(queryBranch2, "XML")).next();
-			String removeBranchUri = sol2.getResource("?branch").toString();
-			String removeBranchFullGraph = sol2.getResource("?graph").toString();
-			query += String.format("DELETE { GRAPH <%s> { <%s> ?p ?o. } } WHERE { GRAPH <%s> { <%s> ?p ?o. }}%n", Config.revision_graph, removeBranchUri, Config.revision_graph, removeBranchUri);
-			query += String.format("DROP SILENT GRAPH <%s>%n", removeBranchFullGraph);
-		}
+//		// Remove branch from which changes were merged, if available
+//		if (usedRevisionNumber.size()>1){
+//			String oldRevision2 = graphName + "-revision-" + usedRevisionNumber.get(1).toString();
+//			String queryBranch2 = prefixes + String.format("SELECT ?branch ?graph WHERE{ ?branch a rmo:Branch; rmo:references <%s>; rmo:fullGraph ?graph. }", oldRevision2);
+//			QuerySolution sol2 = ResultSetFactory.fromXML(TripleStoreInterface.executeQueryWithAuthorization(queryBranch2, "XML")).next();
+//			String removeBranchUri = sol2.getResource("?branch").toString();
+//			String removeBranchFullGraph = sol2.getResource("?graph").toString();
+//			query += String.format("DELETE { GRAPH <%s> { <%s> ?p ?o. } } WHERE { GRAPH <%s> { <%s> ?p ?o. }}%n", Config.revision_graph, removeBranchUri, Config.revision_graph, removeBranchUri);
+//			query += String.format("DROP SILENT GRAPH <%s>%n", removeBranchFullGraph);
+//		}
 		
 //		// Update full graph of branch
 //		query += String.format("DELETE FROM GRAPH <%s> {%n %s %n}%n", branchGraph, removedAsNTriples);
