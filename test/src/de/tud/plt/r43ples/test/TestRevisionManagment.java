@@ -5,9 +5,10 @@ import java.util.ArrayList;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.http.HttpException;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tud.plt.r43ples.management.Config;
@@ -21,12 +22,15 @@ import de.tud.plt.r43ples.webservice.Endpoint;
 public class TestRevisionManagment {
 	
 	final static String graph_test = "http://test_dataset_user";
+    final static String format = "application/sparql-results+xml";
+    Endpoint ep;
+	String result;
+	String expected;
 
-	@Before
-	public void setUp() throws HttpException, IOException, ConfigurationException{
+	@BeforeClass
+	public static void setUpBeforeClass() throws HttpException, IOException, ConfigurationException{
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
-		
 		
 		ArrayList<String> list = new ArrayList<String>();
 		list.add("0");
@@ -55,9 +59,14 @@ public class TestRevisionManagment {
 				"test_user", "test commit message 4", list);
 	}
 	
-	@After
-	public void tearDown() throws HttpException, IOException{
+	@AfterClass
+	public static void tearDown() throws HttpException, IOException{
 		RevisionManagement.purgeGraph(graph_test);
+	}
+	
+	@Before
+	public void setUp() {
+		ep = new Endpoint();
 	}
 	
 	@Test
@@ -68,7 +77,7 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void test_revision_uri() throws HttpException, IOException {
-		String a = RevisionManagement.getRevisionUri(graph_test, "master");
+		String a = RevisionManagement.getRevisionUri(graph_test, "4");
 		Assert.assertEquals("http://test_dataset_user-revision-4", a);
 	}
 	
@@ -80,13 +89,9 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void testSelectWithRewriting() throws IOException{
-		Endpoint ep = new Endpoint();
-        String result;
-        String expected;
         String query_template = "#OPTION r43ples:SPARQL_JOIN%n"
         		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
-        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
-        String format = "application/sparql-results+xml";
+        		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
         
         result = ep.sparql(format, null, String.format(query_template, 0)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev0.xml");
@@ -111,13 +116,9 @@ public class TestRevisionManagment {
 
 	@Test
 	public void testSelect() throws HttpException, IOException {
-		Endpoint ep = new Endpoint();
-        String result;
-        String expected;
         String query_template = ""
         		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
         		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
-        String format = "application/sparql-results+xml";
         
         result = ep.sparql(format, null, String.format(query_template, 0)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev0.xml");
@@ -142,10 +143,6 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void testSelect2Pattern() throws HttpException, IOException {
-		String format = "application/sparql-results+xml";
-		Endpoint ep = new Endpoint();
-		String result;
-		String expected;
 		String query = "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "
 				+ "FROM <"+ graph_test + "> REVISION \"%d\" "
@@ -200,13 +197,9 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void test_insert_existing_triples() throws HttpException, IOException{
-		Endpoint ep = new Endpoint();
-        String result;
-        String expected;
         String query_template = ""
         		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
         		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
-        String format = "application/sparql-results+xml";
 		
 		ArrayList<String> list = new ArrayList<String>();
 		list.add("4");

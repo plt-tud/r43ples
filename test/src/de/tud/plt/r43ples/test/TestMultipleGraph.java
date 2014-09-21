@@ -3,12 +3,9 @@
  */
 package de.tud.plt.r43ples.test;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.apache.commons.configuration.ConfigurationException;
 import org.apache.http.HttpException;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -35,7 +32,7 @@ public class TestMultipleGraph {
 	Endpoint ep;
 	String result;
 	String expected;
-	final String format = "application/sparql-results+xml";
+	final static String format = "application/sparql-results+xml";
 
 	/**
 	 * @throws java.lang.Exception
@@ -89,25 +86,16 @@ public class TestMultipleGraph {
 		RevisionManagement.purgeGraph(graph2);
 	}
 
-	/**
-	 * @throws java.lang.Exception
-	 */
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		ep = new Endpoint();
 	}
 
-	/**
-	 * @throws java.lang.Exception
-	 */
 	@After
-	public void tearDown() throws Exception {
+	public void tearDown() {
 	}
 
 	/**
-	 * Test method for
-	 * {@link de.tud.plt.r43ples.management.RevisionManagement#putGraphUnderVersionControl(java.lang.String)}
-	 * .
 	 * @throws IOException 
 	 */
 	@Test
