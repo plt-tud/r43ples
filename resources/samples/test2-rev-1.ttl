@@ -1,0 +1,8 @@
+@prefix : <http://test.com/> .
+
+:Adam :address "Adam St. 1".
+:Bob :address "Bob St. 1".
+:Carlos :address "Carlos St. 1".
+:Danny :address "Danny St. 1".
+:Emma :address "Emma St. 1".
+:Freddy :address "Freddy St. 1".
