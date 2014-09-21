@@ -522,14 +522,26 @@ public class MergeManagement {
 				+ "	} %n", graphNameRevisionProgressB, uriB, "%s");
 
 		String sparqlTemplateNotExistsRevisionA = String.format(
-				"FILTER NOT EXISTS {"
-				+ "%s"
-				+ "}", sparqlTemplateRevisionA);
+				  "FILTER NOT EXISTS { %n"
+				+ "	GRAPH <%s> { %n"
+				+ "		<%s> ?everything ?blankA . %n"
+				+ "			?blankA rdf:subject ?s . %n"
+				+ "			?blankA rdf:predicate ?p . %n"
+				+ "			?blankA rdf:object ?o . %n"
+				+ "			?blankA rmo:references ?revisionA . %n"
+				+ "	} %n"
+				+ "}", graphNameRevisionProgressA, uriA);
 		
 		String sparqlTemplateNotExistsRevisionB = String.format(
-				"FILTER NOT EXISTS {"
-				+ "%s"
-				+ "}", sparqlTemplateRevisionB);
+				  "FILTER NOT EXISTS { %n"
+				+ "	GRAPH <%s> { %n"
+				+ "		<%s> ?everything ?blankB . %n"
+				+ "			?blankB rdf:subject ?s . %n"
+				+ "			?blankB rdf:predicate ?p . %n"
+				+ "			?blankB rdf:object ?o . %n"
+				+ "			?blankB rmo:references ?revisionB . %n"
+				+ "	} %n"
+				+ "}", graphNameRevisionProgressB, uriB);
 		
 		// Get all structural definitions which are generating differences
 		String queryDifferingSD = String.format(
