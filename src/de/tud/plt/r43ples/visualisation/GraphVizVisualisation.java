@@ -47,7 +47,6 @@ public class GraphVizVisualisation {
 			newNode.setAttribute(Attribute.LABEL_ATTR, number+" | "+rev);
 			newNode.setAttribute(Attribute.SHAPE_ATTR, Attribute.RECORD_SHAPE);
 			graph.addNode(newNode);
-			
 		}		
 		
 		String query_edge = RevisionManagement.prefixes + String.format(""
@@ -90,6 +89,9 @@ public class GraphVizVisualisation {
 			String reference = qs.getLiteral("label").toString();
 			Node refNode = new Node(graph, reference);
 			refNode.setAttribute(Attribute.SHAPE_ATTR, Attribute.DIAMOND_SHAPE);
+			if (reference.equals("master")){
+				refNode.setAttribute(Attribute.COLOR_ATTR, "red");
+			}
 			Node revNode = graph.findNodeByName(rev);
 			graph.addEdge(new Edge(graph, refNode, revNode));
 		}
@@ -102,7 +104,7 @@ public class GraphVizVisualisation {
 
 	public static String getGraphVizHtmlOutput(String graphName) throws IOException, HttpException{
 		String html = ResourceManagement.getContentFromResource("webapp/graphvisualisation.html");
-		String content = String.format(html, getGraphVizOutput(graphName));
+		String content = String.format(html, graphName, getGraphVizOutput(graphName));
 		return content;
 	}	
 }

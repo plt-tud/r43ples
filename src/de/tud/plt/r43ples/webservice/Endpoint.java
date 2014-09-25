@@ -106,7 +106,7 @@ public class Endpoint {
 	@Path("revisiongraph")
 	@GET
 	@Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
-			MediaType.APPLICATION_SVG_XML, "text/vnd.graphviz" })
+			MediaType.APPLICATION_SVG_XML })
 	public final Response getRevisionGraph(@HeaderParam("Accept") final String format_header,
 			@QueryParam("format") final String format_query, @QueryParam("graph") @DefaultValue("") final String graph) {
 		logger.info("Get Revision Graph");
@@ -119,10 +119,7 @@ public class Endpoint {
 				response.type(MediaType.TEXT_HTML);
 				response.entity(GraphVizVisualisation.getGraphVizHtmlOutput(graph));
 			}
-			else if (format.contains("text/vnd.graphviz")) {
-				response.type("text/vnd.graphviz");
-				response.entity(GraphVizVisualisation.getGraphVizOutput(graph));
-			} else {
+			else {
 				response.type(format);
 				response.entity(RevisionManagement.getRevisionInformation(graph, format));
 			}
