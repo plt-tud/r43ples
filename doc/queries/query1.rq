@@ -1,5 +1,0 @@
-SELECT ?s ?p ?o
-FROM <http://test.com/r43ples-dataset>
-WHERE {
-  ?s ?p ?o.
-}

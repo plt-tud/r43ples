@@ -1,8 +1,0 @@
-PREFIX : <http://test.com/>
-
-SELECT ?o1 ?o2
-FROM <http://test.com/r43ples-dataset>
-WHERE {
-  ?s :knows ?o1, ?o2.
-  FILTER (?o1 != ?o2)
-}
