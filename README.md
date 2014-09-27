@@ -3,7 +3,7 @@ R43ples
 
 R43ples (Revision for triples) is Revision Management Tool for the Semantic Web.
 
-It is based on storing the differences of revisions of graphs in additional Named Graphs which are then referenced in a revision graph.
+It is based on storing the differences of revisions of graphs in additional Named Graphs which are then referenced in a revision graph. It provides an extended SPARQL interface which offers the possibility specify revision of named graphs which should be used for answering the query.
 
 [![Build Status](https://travis-ci.org/plt-tud/r43ples.png?branch=master)](https://travis-ci.org/plt-tud/r43ples)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/2125/badge.svg)](https://scan.coverity.com/projects/2125)
@@ -46,7 +46,7 @@ There is a command line admin interface which can be started separately. However
 
 Configuration
 -------------
-There is a configuration file named *r43ples.conf* where all parameters are configured.
+There is a configuration file named *resources/r43ples.conf* where all parameters are configured.
 * *sparql.endpoint* - SPARQL endpoint of triplestore which stores all information
 * *sparql.username* - username for connected SPARQL endpoint allowed to write data
 * *sparql.password* - password for specified user
@@ -54,6 +54,7 @@ There is a configuration file named *r43ples.conf* where all parameters are conf
 * *service.port* - port under which R43ples provides its services
 * *service.uri* - URI under which R43ples provides its services
 
+The logging configuration is stored in **resources/log4j.properties**
 
 SPARQL Interface
 ----------------
@@ -96,6 +97,7 @@ It is currently under development und further research. The option can be enable
 #OPTION r43ples:SPARQL_JOIN
 ```
 
+For details, have a look into the **doc** directory.
 
 
 Algorithm
@@ -127,3 +129,4 @@ def update_query(query_string):
         ...
 ```
     
+
