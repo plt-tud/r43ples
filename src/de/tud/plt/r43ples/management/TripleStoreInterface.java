@@ -98,8 +98,6 @@ public class TripleStoreInterface {
 	public static String executeQueryWithAuthorization(String query, String format) throws IOException, HttpException {
 		String result = null;
 		
-		logger.debug("Hide all keywords in comments");
-		
 		logger.debug("Execute query on SPARQL endpoint:\n"+ query);
 		 
 		DefaultHttpClient httpClient = new DefaultHttpClient();
