@@ -82,7 +82,7 @@
 
 	<target name="zip" depends="jar"
 		description="generate zip file including all binaries">
-		<zip destfile="${app.name}-${app.version}.zip" basedir="${jar.dir}" />
+		<zip destfile="${app.name}.zip" basedir="${jar.dir}" />
 	</target>
 
 	<target name="javadoc" depends="init" description="generate Javadoc documentation">
