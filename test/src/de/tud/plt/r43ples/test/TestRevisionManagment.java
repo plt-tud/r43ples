@@ -222,4 +222,34 @@ public class TestRevisionManagment {
         Assert.assertEquals(expected, result);
 	}
 	
+	@Test
+	public void test_minus() throws IOException {
+		String query = "PREFIX : <http://test.com/> "
+				+ "SELECT DISTINCT ?p1 ?p2 "
+				+ "FROM <"+ graph_test + "> REVISION \"%d\" "
+				+ "WHERE {"
+				+ "	?p1 :knows ?p2."
+				+ "	MINUS {?p1 :knows :Danny}"
+				+ "} ORDER BY ?p1 ?p2"; 
+		String option = "#OPTION r43ples:SPARQL_JOIN\n";
+		
+		expected = ResourceManagement.getContentFromResource("response-testMinus-rev2.xml");
+		result = ep.sparql(format, null, String.format(query,2)).getEntity().toString();
+		Assert.assertEquals(expected, result);
+		result = ep.sparql(format, null, option + String.format(query,2)).getEntity().toString();
+		Assert.assertEquals(expected, result);
+		
+		expected = ResourceManagement.getContentFromResource("response-testMinus-rev3.xml");
+		result = ep.sparql(format, null, String.format(query,3)).getEntity().toString();
+		Assert.assertEquals(expected, result);
+		result = ep.sparql(format, null, option + String.format(query,3)).getEntity().toString();
+		Assert.assertEquals(expected, result);
+		
+		expected = ResourceManagement.getContentFromResource("response-testMinus-rev4.xml");
+		result = ep.sparql(format, null, String.format(query,4)).getEntity().toString();
+		Assert.assertEquals(expected, result);
+		result = ep.sparql(format, null, option + String.format(query,4)).getEntity().toString();
+		Assert.assertEquals(expected, result);
+	}
+	
 }
