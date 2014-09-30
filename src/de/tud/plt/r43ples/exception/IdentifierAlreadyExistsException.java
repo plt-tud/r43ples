@@ -1,7 +1,7 @@
-package de.tud.plt.r43ples.management;
+package de.tud.plt.r43ples.exception;
 
 /**
- * Identifier already exists exception is thrown when name of branch or tag or ... already exists.
+ * Identifier already exists de.tud.plt.r43ples.exception is thrown when name of branch or tag or ... already exists.
  * 
  * @author Stephan Hensel
  *

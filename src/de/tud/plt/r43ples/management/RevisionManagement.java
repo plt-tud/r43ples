@@ -16,7 +16,9 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 
-import de.tud.plt.r43ples.webservice.InternalServerErrorException;
+import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
+import de.tud.plt.r43ples.exception.InternalServerErrorException;
+import de.tud.plt.r43ples.revisionTree.Tree;
 
 /**
  * This class provides methods for interaction with graphs.

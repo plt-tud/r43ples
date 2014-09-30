@@ -7,8 +7,8 @@ import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
 
-import de.tud.plt.r43ples.management.NodeSpecification;
-import de.tud.plt.r43ples.management.Tree;
+import de.tud.plt.r43ples.revisionTree.NodeSpecification;
+import de.tud.plt.r43ples.revisionTree.Tree;
 
 /**
  * Generates a yEd file with all revisions.

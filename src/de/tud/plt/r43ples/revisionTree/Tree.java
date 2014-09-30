@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.management;
+package de.tud.plt.r43ples.revisionTree;
 
 import java.util.HashMap;
 import java.util.LinkedList;
