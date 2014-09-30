@@ -590,7 +590,19 @@ public class Endpoint {
 			
 			// TODO check graph existence
 			
-			// TODO Check if A and B are different valid branches (it is only possible to merge terminal nodes)
+			// Check if A and B are different valid branches (it is only possible to merge terminal nodes)
+			if (!RevisionManagement.getRevisionNumber(graphName, branchNameA).equals(RevisionManagement.getRevisionNumber(graphName, branchNameB))) {
+				// Different branches specified
+				// Check if both are terminal nodes
+				if (!(RevisionManagement.isBranch(graphName, branchNameA) && RevisionManagement.isBranch(graphName, branchNameB))) {
+					// There are non terminal nodes used
+					throw new InternalServerErrorException("Non terminal nodes were used: " + sparqlQuery);
+				}
+			} else {
+				// Branches are equal - throw error
+				throw new InternalServerErrorException("Specified branches are equal: " + sparqlQuery);
+			}
+
 			
 			// Differ between MERGE query with specified SDD and without SDD			
 			String usedSDDURI = null;
@@ -670,6 +682,10 @@ public class Endpoint {
 			} else {
 				throw new InternalServerErrorException("This is not a valid MERGE query: " + sparqlQuery);
 			}
+			
+			// Return the revision number which were used (convert tag or branch identifier to revision number)
+			responseBuilder.header(graphName + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(graphName, branchNameA));
+			responseBuilder.header(graphName + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));			
 			
 			if (newRevisionNumber != null) {
 				// Respond with next revision number
