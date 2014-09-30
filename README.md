@@ -99,6 +99,12 @@ It is currently under development und further research. The option can be enable
 
 For details, have a look into the **doc** directory.
 
+It currently supports:
+* Multiple Graphs
+* Multiple TriplePath
+* FILTER
+* MINUS
+
 
 Algorithm
 -----------
