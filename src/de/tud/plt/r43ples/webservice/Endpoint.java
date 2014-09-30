@@ -337,9 +337,18 @@ public class Endpoint {
 				m = patternSelectFromPart.matcher(queryM);
 				headerRevisionNumber = revisionNumber;
 			}
+			
+		    // Remove the http:// of the graph name because it is not permitted that a header parameter contains a colon
+			String graphNameHeader = "";
+			if (graphName.startsWith("http://")) {
+				graphNameHeader = graphName.substring(7);
+			} else {
+				throw new InternalServerErrorException("Graph name is not supported: " + graphName);
+			}
+		    
 		    // Respond with specified revision
-			responseBuilder.header(graphName + "-revision-number", headerRevisionNumber);
-		    responseBuilder.header(graphName + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
+			responseBuilder.header(graphNameHeader + "-revision-number", headerRevisionNumber);
+		    responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
 		}
 		if (!found) {
 			logger.info("No R43ples SELECT query: "+queryM);
@@ -422,9 +431,17 @@ public class Endpoint {
 		// Create new revision
 		String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, list);
 		
+		// Remove the http:// of the graph name because it is not permitted that a header parameter contains a colon
+		String graphNameHeader = "";
+		if (graphName.startsWith("http://")) {
+			graphNameHeader = graphName.substring(7);
+		} else {
+			throw new InternalServerErrorException("Graph name is not supported: " + graphName);
+		}
+		
 		// Respond with next revision number
-    	responseBuilder.header(graphName + "-revision-number", newRevisionNumber);
-		responseBuilder.header(graphName + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
+    	responseBuilder.header(graphNameHeader + "-revision-number", newRevisionNumber);
+		responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
 		logger.info("Respond with new revision number " + newRevisionNumber + ".");
 	
 		Response response = responseBuilder.build();
@@ -456,8 +473,17 @@ public class Endpoint {
 			responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(querySparql, format));
 		    // Add R43ples information
 		    RevisionManagement.putGraphUnderVersionControl(graphName);
-	    	responseBuilder.header(graphName + "-revision-number", 0);
-			responseBuilder.header(graphName + "-revision-number-of-MASTER", 0);
+	    	
+			// Remove the http:// of the graph name because it is not permitted that a header parameter contains a colon
+			String graphNameHeader = "";
+			if (graphName.startsWith("http://")) {
+				graphNameHeader = graphName.substring(7);
+			} else {
+				throw new InternalServerErrorException("Graph name is not supported: " + graphName);
+			}
+		    
+		    responseBuilder.header(graphNameHeader + "-revision-number", 0);
+			responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", 0);
 		}
 		if (!found) {
 			throw new InternalServerErrorException("Query doesn't contain a correct CREATE query:\n"+query);
@@ -530,10 +556,18 @@ public class Endpoint {
 			} catch (IdentifierAlreadyExistsException e) {
 				responseBuilder = Response.status(Response.Status.CONFLICT);
 			}
+		    
+			// Remove the http:// of the graph name because it is not permitted that a header parameter contains a colon
+			String graphNameHeader = "";
+			if (graphName.startsWith("http://")) {
+				graphNameHeader = graphName.substring(7);
+			} else {
+				throw new InternalServerErrorException("Graph name is not supported: " + graphName);
+			}
 		    	
 	    	// Respond with next revision number
-		    responseBuilder.header(graphName + "-revision-number", RevisionManagement.getRevisionNumber(graphName, referenceName));
-	    	responseBuilder.header(graphName + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
+		    responseBuilder.header(graphNameHeader + "-revision-number", RevisionManagement.getRevisionNumber(graphName, referenceName));
+	    	responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
 		    
 		}
 		if (!foundEntry) {
@@ -683,14 +717,22 @@ public class Endpoint {
 				throw new InternalServerErrorException("This is not a valid MERGE query: " + sparqlQuery);
 			}
 			
+			// Remove the http:// of the graph name because it is not permitted that a header parameter contains a colon
+			String graphNameHeader = "";
+			if (graphName.startsWith("http://")) {
+				graphNameHeader = graphName.substring(7);
+			} else {
+				throw new InternalServerErrorException("Graph name is not supported: " + graphName);
+			}
+			
 			// Return the revision number which were used (convert tag or branch identifier to revision number)
-			responseBuilder.header(graphName + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(graphName, branchNameA));
-			responseBuilder.header(graphName + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));			
+			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(graphName, branchNameA));
+			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));			
 			
 			if (newRevisionNumber != null) {
 				// Respond with next revision number
-		    	responseBuilder.header(graphName + "-revision-number", newRevisionNumber);
-				responseBuilder.header(graphName + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
+		    	responseBuilder.header(graphNameHeader + "-revision-number", newRevisionNumber);
+				responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
 				logger.info("Respond with new revision number " + newRevisionNumber + ".");
 			}
 		}
