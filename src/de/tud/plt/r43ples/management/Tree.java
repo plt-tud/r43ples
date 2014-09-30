@@ -16,10 +16,14 @@ public class Tree {
 	
 	
 	/**
-	 * Add new node to tree or extend old node.
+	 * Add new node to tree.
 	 * 
-	 * @param node the node to create or change
-	 * @param predecessor the predecessor to add
+	 * @param revisionNumber 
+	 * 			revision number
+	 * @param revisionUri 
+	 * 			URI which specifies this revision
+	 * @param fullGraph
+	 * 			URI of the graph which holds a full copy if available
 	 */
 	public void addNode(String revisionNumber, String revisionUri, String fullGraph) {
 		NodeSpecification node = new NodeSpecification(revisionNumber, revisionUri, fullGraph);

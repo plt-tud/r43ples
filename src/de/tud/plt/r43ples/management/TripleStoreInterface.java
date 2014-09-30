@@ -64,7 +64,7 @@ public class TripleStoreInterface {
 	public static String executeQueryWithoutAuthorization(String query, String format) throws IOException {
 		URL url = null;
 		
-		url = new URL(endpoint+ "?query=" + URLEncoder.encode(query, "UTF-8") + "&format=" + URLEncoder.encode(format, "UTF-8") + "&timeout=0");
+		url = new URL(endpoint + "?query=" + URLEncoder.encode(query, "UTF-8") + "&format=" + URLEncoder.encode(format, "UTF-8") + "&timeout=0");
 		logger.debug(url.toString());
 
 		URLConnection con = null;

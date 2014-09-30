@@ -32,6 +32,11 @@ import com.hp.hpl.jena.sparql.syntax.ElementUnion;
 import com.hp.hpl.jena.sparql.util.ExprUtils;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+/**
+ * 
+ * @author mgraube
+ *
+ */
 public class SparqlRewriter {
 
 	/** The logger. **/
@@ -91,7 +96,7 @@ public class SparqlRewriter {
 		qe.setDistinct(true);
 		qe.setQueryPattern(eg_modified);
 		query_sparql = qe.serialize();
-		logger.info("Rewritten query: \n" + query_sparql);
+		logger.debug("Rewritten query: \n" + query_sparql);
 		return query_sparql;
 	}
 
@@ -99,9 +104,7 @@ public class SparqlRewriter {
 	 * @param expression_list_revision_path
 	 * @param expression_list_last_revision
 	 * @param eg_orginal
-	 * @param eg_modified
-	 * @param statement_i
-	 * @return
+	 * @return rewritten element group
 	 */
 	private static Element getRewrittenElementGroup(ExprList expression_list_revision_path,
 			ExprList expression_list_last_revision, ElementGroup eg_orginal) {
@@ -137,10 +140,8 @@ public class SparqlRewriter {
 	/**
 	 * @param expression_list_revision_path
 	 * @param expression_list_last_revision
-	 * @param eg_modified
-	 * @param statement_i
-	 * @param itPatternElts
-	 * @return
+	 * @param triplePath
+	 * @return rewritten triple path element
 	 */
 	private static Element getRewrittenTriplePath(ExprList expression_list_revision_path,
 			ExprList expression_list_last_revision, TriplePath triplePath) {

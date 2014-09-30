@@ -133,9 +133,7 @@ public class Endpoint {
 	/**
 	 * Provide information about revised graphs
 	 * 
-	 * @param graph
-	 *            Provide only information about this graph (if not null)
-	 * @return RDF model of revision information
+	 * @return list of graphs which are under revision control
 	 */
 	@Path("getRevisedGraphs")
 	@GET
@@ -180,7 +178,7 @@ public class Endpoint {
 			if (format.contains("text/html")) {
 				logger.info("SPARQL form requested");
 				String content = String.format(ResourceManagement.getContentFromResource("webapp/index.html"), 
-						Service.class.getPackage().getImplementationVersion());
+						Endpoint.class.getPackage().getImplementationVersion());
 				return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
 			} else {
 				return getServiceDescriptionResponse(format);

@@ -47,7 +47,7 @@ public class Service {
 		server.getServerConfiguration().addHttpHandler(
 		        new StaticHttpHandler("./resources/webapp/"), "/static/");
 		server.start();
-		logger.info(String.format("Server started -R43ples endpoint available under: %sr43ples/sparql", BASE_URI));
+		logger.info(String.format("Server started - R43ples endpoint available under: %sr43ples/sparql", BASE_URI));
 		
 		logger.info("Version: "+ Service.class.getPackage().getImplementationVersion());
 		

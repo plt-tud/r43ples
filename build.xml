@@ -61,7 +61,8 @@
 			<manifest>
 				<attribute name="Main-Class" value="${main.class}" />
 				<attribute name="Class-Path" value="${manifest.class.path}" />
-				<attribute name="Implementation-Version" value="${app.version} (${git.branch}:${git.commit})" />
+				<attribute name="Implementation-Version"
+					value="${app.version} (${git.branch}:${git.commit})" />
 			</manifest>
 			<fileset dir="${classes.dir}" />
 		</jar>
@@ -87,10 +88,29 @@
 
 	<target name="javadoc" depends="init" description="generate Javadoc documentation">
 		<mkdir dir="javadoc" />
-		<javadoc sourcepath="${src.dir}" destdir="javadoc" use="true"
+		<javadoc sourcepath="${src.dir}" destdir="javadoc"
 			private="true" classpathref="classpath" version="true" author="true"
 			windowtitle="${app.name} - Version ${app.version}" doctitle="${app.name} - Version ${app.version} (${git.commit})"
-			packagenames="*" />
+			packagenames="*">
+			<doclet name="org.umlgraph.doclet.UmlGraphDoc"
+				path="/home/mgraube/Desktop/UMLGraph-5.6_6.6-SNAPSHOT/UMLGraph-5.6_6.6-SNAPSHOT/lib/UmlGraph.jar">
+						<param name="-attributes" />
+	        	        <param name="-operations" />
+	        	        <param name="-qualify" />
+	        	        <param name="-types" />
+	        	        <param name="-visibility" />
+	        	        <param name="-inferdep" />
+	        	        <param name="-inferrel" />
+			</doclet>
+		</javadoc>
+		<apply executable="dot" dest="javadoc" parallel="false" verbose="true" failonerror="true">
+ 			<arg value="-Tpng" />
+			<arg value="-o" />
+			<targetfile />
+			<srcfile />
+			<fileset dir="javadoc" includes="*.dot" />
+			<mapper type="glob" from="*.dot" to="*.png" />
+		</apply>
 	</target>
 
 	<target name="test" depends="build">

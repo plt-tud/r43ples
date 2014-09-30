@@ -84,10 +84,7 @@ public class RevisionManagement {
 	 *            the title of the revision
 	 * @param usedRevisionNumber
 	 *            the number of the revision which is used for creation of the
-	 *            new
-	 * @param revisionName
-	 *            the revision name which was specified by the client (revision
-	 *            number, branch name or tag name)
+	 *            new revision
 	 * @return new revision number
 	 * @throws IOException
 	 * @throws AuthenticationException
@@ -138,13 +135,11 @@ public class RevisionManagement {
 	 *            the title of the revision
 	 * @param usedRevisionNumber
 	 *            the number of the revision which is used for creation of the
-	 *            new
-	 * @param revisionName
-	 *            the revision name which was specified by the client (revision
-	 *            number, branch name or tag name)
+	 *            new revision
 	 * @param addSetGraphUri
-	 * @param deleteSetGraphUri
-	 * @return new revision number
+	 * 			  name of the graph which holds the add set
+	 * @param removeSetGraphUri
+	 *            name of the graph which holds the delete set
 	 * @throws IOException
 	 * @throws AuthenticationException
 	 */
