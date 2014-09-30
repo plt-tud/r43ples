@@ -42,6 +42,7 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 import de.tud.plt.r43ples.visualisation.GraphVizVisualisation;
@@ -230,8 +231,8 @@ public class Endpoint {
 		final String graphName1 = "http://test.com/r43ples-dataset";
 		final String graphName2 = "http://test.com/r43ples-dataset-2";
 		try {
-			RevisionManagement.createSampleDataset1(graphName1);
-			RevisionManagement.createSampleDataset2(graphName2);
+			SampleDataSet.createSampleDataset1(graphName1);
+			SampleDataSet.createSampleDataset2(graphName2);
 		} catch (HttpException | IOException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException(e.getMessage());

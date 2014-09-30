@@ -15,6 +15,7 @@ import org.junit.Test;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 
@@ -30,7 +31,7 @@ public class TestSparqlRewriter {
 	public static void setUpBeforeClass() throws HttpException, IOException, ConfigurationException{
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
-		RevisionManagement.createSampleDataset1(graph_test);
+		SampleDataSet.createSampleDataset1(graph_test);
 	}
 	
 	@AfterClass
