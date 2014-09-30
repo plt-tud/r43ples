@@ -21,8 +21,8 @@ import de.tud.plt.r43ples.webservice.Endpoint;
 
 public class TestRevisionManagment {
 	
-	final static String graph_test = "http://test_dataset_user";
-    final static String format = "application/sparql-results+xml";
+	private final static String graph_test = "http://test_dataset_user";
+    private final static String format = "application/sparql-results+xml";
     Endpoint ep;
 	String result;
 	String expected;
@@ -31,32 +31,7 @@ public class TestRevisionManagment {
 	public static void setUpBeforeClass() throws HttpException, IOException, ConfigurationException{
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
-		
-		ArrayList<String> list = new ArrayList<String>();
-		list.add("0");
-		RevisionManagement.putGraphUnderVersionControl(graph_test);
-		RevisionManagement.createNewRevision(graph_test, 
-				ResourceManagement.getContentFromResource("samples/test-delta-added-1.nt"), 
-				ResourceManagement.getContentFromResource("samples/test-delta-removed-1.nt"),
-				"test_user", "test commit message 1", list);		
-		list.remove("0");
-		list.add("1");
-		RevisionManagement.createNewRevision(graph_test, 
-				ResourceManagement.getContentFromResource("samples/test-delta-added-2.nt"), 
-				ResourceManagement.getContentFromResource("samples/test-delta-removed-2.nt"),
-				"test_user", "test commit message 2", list);		
-		list.remove("1");
-		list.add("2");
-		RevisionManagement.createNewRevision(graph_test, 
-				ResourceManagement.getContentFromResource("samples/test-delta-added-3.nt"), 
-				ResourceManagement.getContentFromResource("samples/test-delta-removed-3.nt"),
-				"test_user", "test commit message 3", list);		
-		list.remove("2");
-		list.add("3");
-		RevisionManagement.createNewRevision(graph_test, 
-				ResourceManagement.getContentFromResource("samples/test-delta-added-4.nt"), 
-				ResourceManagement.getContentFromResource("samples/test-delta-removed-4.nt"),
-				"test_user", "test commit message 4", list);
+		RevisionManagement.createSampleDataset1(graph_test);
 	}
 	
 	@AfterClass

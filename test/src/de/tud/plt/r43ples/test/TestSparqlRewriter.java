@@ -12,8 +12,11 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
+import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SparqlRewriter;
+import de.tud.plt.r43ples.management.TripleStoreInterface;
 
 /**
  * @author mgraube
@@ -21,15 +24,18 @@ import de.tud.plt.r43ples.management.SparqlRewriter;
  */
 public class TestSparqlRewriter {
 
+	private final static String graph_test = "http://test_dataset_user";
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws HttpException, IOException, ConfigurationException{
-		TestRevisionManagment.setUpBeforeClass();
+		Config.readConfig("r43ples.conf");
+		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
+		RevisionManagement.createSampleDataset1(graph_test);
 	}
 	
 	@AfterClass
 	public static void tearDown() throws HttpException, IOException{
-		TestRevisionManagment.tearDown();
+		RevisionManagement.purgeGraph(graph_test);
 	}
 	
 	/**

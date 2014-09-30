@@ -41,7 +41,7 @@
 			<label for="query">Query Text</label><br />
 			<textarea name="query" id="query" cols="80" rows="20">
 SELECT * 
-FROM &lt;exampleGraph&gt; REVISION "MASTER"
+FROM &lt;http://test.com/r43ples-dataset&gt; REVISION "MASTER"
 WHERE {
 	?s ?p ?o. 
 }
@@ -58,7 +58,7 @@ WHERE {
 
 		<h2>Revision Information</h2>
 		<ul>
-			<li><a href="createTestDataset">Create test data set</a></li>
+			<li><a href="createSampleDataset">Create sample data set</a></li>
 			<li>
 				<form action="revisiongraph" method="get">
 					<select id="selectRevisedGraph" name="graph">
@@ -87,20 +87,21 @@ WHERE {
 		<div class="accordion">
 			<h3>Create Graph under Version Control</h3>
 			<pre>
-CREATE GRAPH &lt;test&gt;
+CREATE GRAPH &lt;http://test.com/r43ples-dataset&gt;
 </pre>
 
 			<h3>Select Query</h3>
 			<pre>SELECT * 
-FROM &lt;test&gt; REVISION "23"
+FROM &lt;http://test.com/r43ples-dataset&gt; REVISION "3"
 WHERE {
 	?s ?p ?o. 
 }</pre>
 
 			<h3>Select Query - Multiple Graphs</h3>
-			<pre>SELECT * 
-FROM &lt;test&gt; REVISION "MASTER"
-FROM &lt;test2&gt; REVISION "23"
+			<pre>#OPTION r43ples:SPARQL_JOIN
+SELECT ?s ?p ?o 
+FROM &lt;http://test.com/r43ples-dataset&gt; REVISION "MASTER"
+FROM &lt;http://test.com/r43ples-dataset-2&gt; REVISION "2"
 WHERE {
 	?s ?p ?o. 
 }</pre>
@@ -108,18 +109,18 @@ WHERE {
 			<h3>Update Query</h3>
 			<pre>USER "mgraube"
 MESSAGE "test commit"
-INSERT { GRAPH &lt;test&gt; REVISION "2"
+INSERT { GRAPH &lt;http://test.com/r43ples-dataset&gt; REVISION "4"
 {	&lt;a&gt; &lt;b&gt; &lt;c&gt; .	}}</pre>
 
 			<h3>Branching</h3>
 			<pre>USER "mgraube"
 MESSAGE "test commit"
-BRANCH GRAPH &lt;test&gt; REVISION "2" TO "unstable"</pre>
+BRANCH GRAPH &lt;http://test.com/r43ples-dataset&gt; REVISION "2" TO "unstable"</pre>
 
 			<h3>Tagging</h3>
 			<pre>USER "mgraube"
 MESSAGE "test commit"
-TAG GRAPH &lt;test&gt; REVISION "2" TO "v0.3-alpha"</pre>
+TAG GRAPH &lt;http://test.com/r43ples-dataset&gt; REVISION "2" TO "v0.3-alpha"</pre>
 		</div>
 	</div>
 

@@ -4,7 +4,6 @@
 package de.tud.plt.r43ples.test;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.apache.http.HttpException;
 import org.junit.After;
@@ -41,43 +40,8 @@ public class TestMultipleGraph {
 	public static void setUpBeforeClass() throws Exception {
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
-
-		RevisionManagement.putGraphUnderVersionControl(graph1);
-		RevisionManagement.putGraphUnderVersionControl(graph2);
-
-		ArrayList<String> list = new ArrayList<String>();
-		list.add("0");
-		RevisionManagement.createNewRevision(graph1,
-				ResourceManagement.getContentFromResource("samples/test-delta-added-1.nt"),
-				ResourceManagement.getContentFromResource("samples/test-delta-removed-1.nt"), "test_user",
-				"test commit message 1", list);
-		RevisionManagement.createNewRevision(graph2,
-				ResourceManagement.getContentFromResource("samples/test2-delta-added-1.nt"),
-				ResourceManagement.getContentFromResource("samples/test2-delta-removed-1.nt"), "test_user",
-				"test commit message 1", list);
-		list.remove("0");
-		list.add("1");
-		RevisionManagement.createNewRevision(graph1,
-				ResourceManagement.getContentFromResource("samples/test-delta-added-2.nt"),
-				ResourceManagement.getContentFromResource("samples/test-delta-removed-2.nt"), "test_user",
-				"test commit message 2", list);
-		RevisionManagement.createNewRevision(graph2,
-				ResourceManagement.getContentFromResource("samples/test2-delta-added-2.nt"),
-				ResourceManagement.getContentFromResource("samples/test2-delta-removed-2.nt"), "test_user",
-				"test commit message 2", list);
-		list.remove("1");
-		list.add("2");
-		RevisionManagement.createNewRevision(graph1,
-				ResourceManagement.getContentFromResource("samples/test-delta-added-3.nt"),
-				ResourceManagement.getContentFromResource("samples/test-delta-removed-3.nt"), "test_user",
-				"test commit message 3", list);
-		list.remove("2");
-		list.add("3");
-		RevisionManagement.createNewRevision(graph1,
-				ResourceManagement.getContentFromResource("samples/test-delta-added-4.nt"),
-				ResourceManagement.getContentFromResource("samples/test-delta-removed-4.nt"), "test_user",
-				"test commit message 4", list);
-
+		RevisionManagement.createSampleDataset1(graph1);
+		RevisionManagement.createSampleDataset2(graph2);
 	}
 
 	@AfterClass
@@ -99,7 +63,7 @@ public class TestMultipleGraph {
 	 * @throws IOException 
 	 */
 	@Test
-	public final void testPutGraphUnderVersionControl() throws IOException {
+	public final void testMultipleGraphsSparqlJoin() throws IOException {
 		String query_template = ""
 				+ "#OPTION r43ples:SPARQL_JOIN %n"
 				+ "PREFIX : <http://test.com/> %n"

@@ -226,46 +226,22 @@ public class Endpoint {
 		}
 	}
 
-	@Path("createTestDataset")
+	@Path("createSampleDataset")
 	@GET
-	public final String createTestDataset() {
-		ArrayList<String> list = new ArrayList<String>();
-		String graphName = "http://test.com/r43ples-dataset";
+	public final Response createSampleDataset() {
+		final String graphName1 = "http://test.com/r43ples-dataset";
+		final String graphName2 = "http://test.com/r43ples-dataset-2";
 		try {
-			RevisionManagement.putGraphUnderVersionControl(graphName);
-
-			list.add("0");
-			RevisionManagement.createNewRevision(graphName,
-					ResourceManagement.getContentFromResource("samples/test-delta-added-1.nt"),
-					ResourceManagement.getContentFromResource("samples/test-delta-removed-1.nt"), "test_user",
-					"test commit message 1", list);
-
-			list.remove("0");
-			list.add("1");
-			RevisionManagement.createNewRevision(graphName,
-					ResourceManagement.getContentFromResource("samples/test-delta-added-2.nt"),
-					ResourceManagement.getContentFromResource("samples/test-delta-removed-2.nt"), "test_user",
-					"test commit message 2", list);
-
-			list.remove("1");
-			list.add("2");
-			RevisionManagement.createNewRevision(graphName,
-					ResourceManagement.getContentFromResource("samples/test-delta-added-3.nt"),
-					ResourceManagement.getContentFromResource("samples/test-delta-removed-3.nt"), "test_user",
-					"test commit message 3", list);
-
-			list.remove("2");
-			list.add("3");
-			RevisionManagement.createNewRevision(graphName,
-					ResourceManagement.getContentFromResource("samples/test-delta-added-4.nt"),
-					ResourceManagement.getContentFromResource("samples/test-delta-removed-4.nt"), "test_user",
-					"test commit message 4", list);
+			RevisionManagement.createSampleDataset1(graphName1);
+			RevisionManagement.createSampleDataset2(graphName2);
 		} catch (HttpException | IOException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException(e.getMessage());
 		}
-
-		return "Test dataset successfully created in graph <" + graphName + ">";
+		String result = String.format(
+				"Test dataset 1 successfully created in graph: %s %n"
+				+ "Test dataset 2 successfully created in graph: %s %n", graphName1, graphName2);
+		return Response.ok().entity(result).build();
 	}
 
 	/**
