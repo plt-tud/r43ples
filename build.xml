@@ -88,23 +88,27 @@
 
 	<target name="javadoc" depends="init" description="generate Javadoc documentation">
 		<mkdir dir="javadoc" />
-		<javadoc sourcepath="${src.dir}" destdir="javadoc"
-			private="true" classpathref="classpath" version="true" author="true"
+		<javadoc sourcepath="${src.dir}" destdir="javadoc" private="true"
+			classpathref="classpath" version="true" author="true"
 			windowtitle="${app.name} - Version ${app.version}" doctitle="${app.name} - Version ${app.version} (${git.commit})"
-			packagenames="*">
-			<doclet name="org.umlgraph.doclet.UmlGraphDoc"
-				path="/home/mgraube/Desktop/UMLGraph-5.6_6.6-SNAPSHOT/UMLGraph-5.6_6.6-SNAPSHOT/lib/UmlGraph.jar">
-						<param name="-attributes" />
-	        	        <param name="-operations" />
-	        	        <param name="-qualify" />
-	        	        <param name="-types" />
-	        	        <param name="-visibility" />
-	        	        <param name="-inferdep" />
-	        	        <param name="-inferrel" />
+			packagenames="de.tud.plt.r43ples.*">
+			<doclet name="org.umlgraph.doclet.UmlGraphDoc" path="lib/UmlGraph.jar">
+				<param name="-operations" />
+				<param name="-qualify" />
+				<param name="-types" />
+				<param name="-visibility" />
+				<param name="-inferdep" />
+				<param name="-inferrel" />
+				<param name="-hide" value="java.*" />
+				<param name="-collpackages" value="java.util.*" />
+				<param name="-postfixpackage" />
+				<param name="-link"	value="http://java.sun.com/j2se/1.5.0/docs/guide/javadoc/doclet/spec" />
+				<param name="-link" value="http://java.sun.com/j2se/1.5/docs/api" />
 			</doclet>
 		</javadoc>
-		<apply executable="dot" dest="javadoc" parallel="false" verbose="true" failonerror="true">
- 			<arg value="-Tpng" />
+		<apply executable="dot" dest="javadoc" parallel="false" verbose="true"
+			failonerror="true">
+			<arg value="-Tpng" />
 			<arg value="-o" />
 			<targetfile />
 			<srcfile />
