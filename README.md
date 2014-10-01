@@ -32,64 +32,62 @@ Starting
 Ant is used for compiling and starting
 
     ant run
+    
+    
+Configuration
+-------------
+There is a configuration file named *resources/r43ples.conf* where all parameters are configured:
+
+* *sparql.endpoint* - SPARQL endpoint of triplestore which stores all information
+* *sparql.username* - username for connected SPARQL endpoint allowed to write data
+* *sparql.password* - password for specified user
+* *revision.graph* - named graph which is used by R43ples to store revision graph information
+* *service.port* - port under which R43ples provides its services
+* *service.uri* - URI under which R43ples provides its services
+
+The logging configuration is stored in *resources/log4j.properties*
 
 
 Interfaces
 ---------
 SPARQL endpoint is available at:
 
-	[uri]:[port]/r43ples/sparql
+    [uri]:[port]/r43ples/sparql
 
-It directly accepts SPARQL queries with HTTP GET parameters for **query** and **format**: 
+The endpoint directly accepts SPARQL queries with HTTP GET parameters for *query* and *format*: 
 
     [uri]:[port]/r43ples/sparql?query=[]&format=(HTML|JSON)
 
+There are some additional keywords which can be used to control the revisions of graphs:
 
-There is a command line admin interface which can be started separately. However, it is deprecated and will be removed in the future.
-
-
-Configuration
--------------
-There is a configuration file named *resources/r43ples.conf* where all parameters are configured.
-* *sparql.endpoint* - SPARQL endpoint of triplestore which stores all information
-* *sparql.username* - username for connected SPARQL endpoint allowed to write data
-* *sparql.password* - password for specified user
-* *revision.graph* - named graph which is used by R43plesto store revision graph information
-* *service.port* - port under which R43ples provides its services
-* *service.uri* - URI under which R43ples provides its services
-
-The logging configuration is stored in **resources/log4j.properties**
-
-SPARQL Interface
-----------------
 * Create graph
 
-		CREATE GRAPH <graph>
-		
+        CREATE GRAPH <graph>
+        
 * Select query
 
-		SELECT * FROM <graph> REVISION "23" WHERE {?s ?p ?o}
-		
+        SELECT * FROM <graph> REVISION "23" WHERE {?s ?p ?o}
+        
 * Update query
 
-		USER "mgraube" MESSAGE "test commit" 
-		INSERT {
-		    GRAPH <test> REVISION "2" {
-		        <a> <b> <c> .
-		    }
-		}
+        USER "mgraube" MESSAGE "test commit" 
+        INSERT {
+            GRAPH <test> REVISION "2" {
+                <a> <b> <c> .
+            }
+        }
 
 * Branching
 
-		USER "mgraube"
-		MESSAGE "test commit"
-		BRANCH GRAPH <test> REVISION "2" TO "unstable"
-		
+        USER "mgraube"
+        MESSAGE "test commit"
+        BRANCH GRAPH <test> REVISION "2" TO "unstable"
+        
 * Tagging
 
-		USER "mgraube"
-		MESSAGE "test commit"
-		TAG GRAPH <test> REVISION "2" TO "v0.3-alpha"
+        USER "mgraube"
+        MESSAGE "test commit"
+        TAG GRAPH <test> REVISION "2" TO "v0.3-alpha"
 
 
 SPARQL Join option
@@ -99,22 +97,25 @@ The SPARQL query is rewritten in such a way that the branch and the change sets 
 It is currently under development and further research.
 
 The option can be enabled by:
+
 ```
 OPTION r43ples:SPARQL_JOIN
 ```
 
 It currently supports:
+
 * Multiple Graphs
 * Multiple TriplePath
 * FILTER
 * MINUS
 
-For more details, have a look into the **doc** directory.
+For more details, have a look into the *doc/* directory.
 
 
 Algorithm
 -----------
-Without SPARQL Join option the algorithm are like the following
+Without SPARQL Join option the algorithms are very simple:
+    
 ```
 For each named graph 'g' in a query, a temporary graph 'TempGraph_g_r' is generated for the specified revision 'r' according to this formula ('g_x' = full materialized revision 'x' of graph 'g'):
     TempGraph_g_r = g_nearestBranch + SUM[revision i= nearestBranch to r]( deleteSet_g_i - addSet_g_i )
