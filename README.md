@@ -17,6 +17,8 @@ It provides a SPARQL endpoint where all queries have to be directed to.
 The SPARQL query defines whether only a revision is queried, or a new revision needs to be created. 
 Furthermore, the service provides an interface for revision management and the import or export of data from the Computer Aided Engineering tools.
 
+The javdoc can be found at [http://plt-tud.github.io/r43ples/javadoc/](http://plt-tud.github.io/r43ples/javadoc/).
+
 
 Dependencies
 ------------
@@ -136,4 +138,3 @@ def update_query(query_string):
         ...
 ```
     
-
