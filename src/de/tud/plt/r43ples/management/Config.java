@@ -4,6 +4,14 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
 
+/**
+ * General configuration handling.
+ * Stores all important configuration from R43ples.
+ * Can read from configuration file.
+ * 
+ * @author Markus Graube
+ *
+ */
 public class Config {
 	
 	public static String service_uri;
