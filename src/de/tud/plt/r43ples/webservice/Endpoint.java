@@ -134,7 +134,7 @@ public class Endpoint {
 			"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"\\s*TO\\s*\"(?<name>.*)\"",
 			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);
 	private final Pattern patternMergeQuery =  Pattern.compile(
-			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>.*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>.*)>)?\\s*BRANCH\\s*\"(?<branchNameA>.*)\"\\s*INTO\\s*\"(?<branchNameB>.*)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
+			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>.*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>.*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>.*?)\"\\s*INTO\\s*\"(?<branchNameB>.*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
 			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);//
 	
 	
