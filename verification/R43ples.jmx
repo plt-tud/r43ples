@@ -77,7 +77,7 @@
                   <collectionProp name="Arguments.arguments">
                     <elementProp name="query" elementType="HTTPArgument">
                       <boolProp name="HTTPArgument.always_encode">true</boolProp>
-                      <stringProp name="Argument.value">#OPTION r43ples:SPARQL_JOIN SELECT * FROM &lt;dataset-${dataset}-${changesize}&gt; REVISION &quot;${revision}&quot; WHERE { ?s ?p ?o.} LIMIT 10</stringProp>
+                      <stringProp name="Argument.value">OPTION r43ples:SPARQL_JOIN SELECT * FROM &lt;dataset-${dataset}-${changesize}&gt; REVISION &quot;${revision}&quot; WHERE { ?s ?p ?o.} LIMIT 10</stringProp>
                       <stringProp name="Argument.metadata">=</stringProp>
                       <boolProp name="HTTPArgument.use_equals">true</boolProp>
                       <stringProp name="Argument.name">query</stringProp>

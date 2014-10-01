@@ -65,7 +65,7 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void testSelectWithRewriting() throws IOException{
-        String query_template = "#OPTION r43ples:SPARQL_JOIN%n"
+        String query_template = "OPTION r43ples:SPARQL_JOIN%n"
         		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
         		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
         
@@ -127,7 +127,7 @@ public class TestRevisionManagment {
 				+ "	?p2 :knows ?t."
 				+ " FILTER (?p1!=?p2)"
 				+ "} ORDER BY ?p1 ?p2"; 
-		String option = "#OPTION r43ples:SPARQL_JOIN\n";
+		String option = "OPTION r43ples:SPARQL_JOIN\n";
 		
 		expected = ResourceManagement.getContentFromResource("response-test2Pattern-rev3.xml");
 		result = ep.sparql(format, null, String.format(query,3)).getEntity().toString();
@@ -207,7 +207,7 @@ public class TestRevisionManagment {
 				+ "	?p1 :knows ?p2."
 				+ "	MINUS {?p1 :knows :Danny}"
 				+ "} ORDER BY ?p1 ?p2"; 
-		String option = "#OPTION r43ples:SPARQL_JOIN\n";
+		String option = "OPTION r43ples:SPARQL_JOIN\n";
 		
 		expected = ResourceManagement.getContentFromResource("response-testMinus-rev2.xml");
 		result = ep.sparql(format, null, String.format(query,2)).getEntity().toString();

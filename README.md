@@ -96,18 +96,20 @@ SPARQL Join option
 ------------------
 There is a new option for R43ples which improves the performance. The necessary revision is not temporarily generated anymore.
 The SPARQL query is rewritten in such a way that the branch and the change sets are directly joined inside the query. This includes the order of the change sets.
-It is currently under development und further research. The option can be enabled by
-```
-#OPTION r43ples:SPARQL_JOIN
-```
+It is currently under development and further research.
 
-For details, have a look into the **doc** directory.
+The option can be enabled by:
+```
+OPTION r43ples:SPARQL_JOIN
+```
 
 It currently supports:
 * Multiple Graphs
 * Multiple TriplePath
 * FILTER
 * MINUS
+
+For more details, have a look into the **doc** directory.
 
 
 Algorithm

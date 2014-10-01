@@ -66,7 +66,7 @@ public class TestMultipleGraph {
 	@Test
 	public final void testMultipleGraphsSparqlJoin() throws IOException {
 		String query_template = ""
-				+ "#OPTION r43ples:SPARQL_JOIN %n"
+				+ "OPTION r43ples:SPARQL_JOIN %n"
 				+ "PREFIX : <http://test.com/> %n"
 				+ "SELECT ?address %n"
 				+ "FROM <" + graph1	+ "> REVISION \"%d\"%n" 

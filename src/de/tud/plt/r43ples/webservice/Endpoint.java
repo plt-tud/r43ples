@@ -309,9 +309,9 @@ public class Endpoint {
 	 */
 	private Response getSelectResponse(final String query, final String format) throws HttpException, IOException {
 		ResponseBuilder responseBuilder = Response.ok();
-		if (query.contains("#OPTION r43ples:SPARQL_JOIN")) {
+		if (query.contains("OPTION r43ples:SPARQL_JOIN")) {
 			try {
-				String query_rewritten = query.replace("#OPTION r43ples:SPARQL_JOIN", "");
+				String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
 				query_rewritten = SparqlRewriter.rewriteQuery(query_rewritten);
 				String result = TripleStoreInterface.executeQueryWithAuthorization(query_rewritten, format);
 				return responseBuilder.entity(result).type(format).build();
