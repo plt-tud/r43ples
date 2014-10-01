@@ -19,6 +19,7 @@ Furthermore, the service provides an interface for revision management and the i
 
 The javdoc can be found at [http://plt-tud.github.io/r43ples/javadoc/](http://plt-tud.github.io/r43ples/javadoc/).
 
+A running test server should be available under [http://eatld.et.tu-dresden.de:9998/r43ples/sparql](http://eatld.et.tu-dresden.de:9998/r43ples/sparql)
 
 Dependencies
 ------------
