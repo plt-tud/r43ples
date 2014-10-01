@@ -33,6 +33,8 @@ after_success:
     - git clone -b gh-pages --depth=10 https://$GITAUTH@github.com/plt-tud/r43ples
     - rm -rf r43ples/javadoc
     - cp -r javadoc r43ples/javadoc
+    - echo "---\n---\n" > r43ples/index.md
+    - cat README.md >> r43ples/index.md
     - cd r43ples/javadoc
     - git config --local user.email "r43ples-travis-ci@users.noreply.github.com"
     - git config --local user.name "r43ples travis-ci"
