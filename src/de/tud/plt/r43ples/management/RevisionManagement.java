@@ -586,15 +586,18 @@ public class RevisionManagement {
 	 */
 	public static void executeINSERT(final String graphName, final String dataSetAsNTriples) throws HttpException, IOException {
 
+		String insertQueryTemplate =  "INSERT IN GRAPH <%s> { %n"
+									+ "	%s %n"
+									+ "} %n";
+		
 		final int MAX_STATEMENTS = 200;
-		// Remove whitespace characters
-		String data = dataSetAsNTriples.replaceAll("\\s+","");
-		String[] lines = data.split("\\.\\s*<");
+		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
 		int counter = 0;
 		StringBuilder insert = new StringBuilder();
 		
 		for (int i=0; i < lines.length; i++) {
-			String sub = lines[i];
+			// Remove whitespace characters
+			String sub = lines[i].replaceAll("\\s+","");;
 			if (!sub.equals("") && !sub.startsWith("#")) {
 				if (!sub.startsWith("<")) {
 					sub = "<" + sub;
@@ -605,13 +608,13 @@ public class RevisionManagement {
 				insert.append('\n').append(sub);
 				counter++;
 				if (counter == MAX_STATEMENTS-1) {
-					TripleStoreInterface.executeQueryWithAuthorization("INSERT IN GRAPH <" + graphName + "> { " + insert + "}", "HTML");
+					TripleStoreInterface.executeQueryWithAuthorization(String.format(insertQueryTemplate, graphName, insert), "HTML");
 					counter = 0;
 					insert = new StringBuilder();
 				}
 			}
 		}
-		TripleStoreInterface.executeQueryWithAuthorization("INSERT IN GRAPH <" + graphName + "> { " + insert + "}", "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization(String.format(insertQueryTemplate, graphName, insert), "HTML");
 	}
 	
 	
@@ -625,15 +628,18 @@ public class RevisionManagement {
 	 */
 	public static void executeDELETE(final String graphName, final String dataSetAsNTriples) throws HttpException, IOException {
 
+		String deleteQueryTemplate =  "DELETE DATA FROM <%s> { %n"
+									+ "	%s %n"
+									+ "} %n";
+		
 		final int MAX_STATEMENTS = 200;
-		// Remove whitespace characters
-		String data = dataSetAsNTriples.replaceAll("\\s+","");
-		String[] lines = data.split("\\.\\s*<");
+		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
 		int counter = 0;
 		StringBuilder delete = new StringBuilder();
 		
 		for (int i=0; i < lines.length; i++) {
-			String sub = lines[i];
+			// Remove whitespace characters
+						String sub = lines[i].replaceAll("\\s+","");;
 			if (!sub.equals("") && !sub.startsWith("#")) {
 				if (!sub.startsWith("<")) {
 					sub = "<" + sub;
@@ -644,13 +650,13 @@ public class RevisionManagement {
 				delete.append('\n').append(sub);
 				counter++;
 				if (counter == MAX_STATEMENTS-1) {
-					TripleStoreInterface.executeQueryWithAuthorization("DELETE DATA FROM <" + graphName + "> { " + delete + "}", "HTML");
+					TripleStoreInterface.executeQueryWithAuthorization(String.format(deleteQueryTemplate, graphName, delete), "HTML");
 					counter = 0;
 					delete = new StringBuilder();
 				}
 			}
 		}
-		TripleStoreInterface.executeQueryWithAuthorization("DELETE DATA FROM <" + graphName + "> { " + delete + "}", "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization(String.format(deleteQueryTemplate, graphName, delete), "HTML");
 	}
 	
 	
