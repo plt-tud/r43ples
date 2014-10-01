@@ -30,7 +30,7 @@ before_install:
 after_success:
     - ./.coverity.sh
     - ant javadoc
-    - git clone -b gh-pages https://$GITAUTH@github.com/plt-tud/r43ples
+    - git clone -b gh-pages --depth=10 https://$GITAUTH@github.com/plt-tud/r43ples
     - rm -rf r43ples/javadoc
     - cp -r javadoc r43ples/javadoc
     - cd r43ples/javadoc

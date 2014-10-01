@@ -9,7 +9,7 @@ COMMITS=`git log --since=today.midnight --oneline | wc -l`
 
 if [[ "$COMMITS" -le "1" ]]; then
     #first commit a day - push changes to branch coverity_scan
-    git clone -b coverity_scan https://$GITAUTH@github.com/plt-tud/r43ples
+    git clone -b coverity_scan --depth=10 https://$GITAUTH@github.com/plt-tud/r43ples
     cd r43ples
     git fetch origin
     git merge origin/master
