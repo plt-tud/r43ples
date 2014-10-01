@@ -587,7 +587,9 @@ public class RevisionManagement {
 	public static void executeINSERT(final String graphName, final String dataSetAsNTriples) throws HttpException, IOException {
 
 		final int MAX_STATEMENTS = 200;
-		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
+		// Remove whitespace characters
+		String data = dataSetAsNTriples.replaceAll("\\s+","");
+		String[] lines = data.split("\\.\\s*<");
 		int counter = 0;
 		StringBuilder insert = new StringBuilder();
 		
@@ -624,7 +626,9 @@ public class RevisionManagement {
 	public static void executeDELETE(final String graphName, final String dataSetAsNTriples) throws HttpException, IOException {
 
 		final int MAX_STATEMENTS = 200;
-		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
+		// Remove whitespace characters
+		String data = dataSetAsNTriples.replaceAll("\\s+","");
+		String[] lines = data.split("\\.\\s*<");
 		int counter = 0;
 		StringBuilder delete = new StringBuilder();
 		
