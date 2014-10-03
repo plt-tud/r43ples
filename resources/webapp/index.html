@@ -8,7 +8,6 @@
 <script src="/static/jquery-ui.js"></script>
 <script type="text/javascript">
 	$(document).ready(function() {
-		$(".accordion").accordion();
 		var url = "getRevisedGraphs";
 		$.getJSON(url, function(data) {
 			var select = document.getElementById("selectRevisedGraph");
@@ -27,6 +26,15 @@
 			}
 		});
 	});
+</script>
+<script type="text/javascript">
+  $(function() {
+	$(".accordion").accordion();
+  	$(".accordion > h3").prepend("<button><</button> ");
+  	$(".accordion > h3 > button").click(function() {
+		$("#query").val($(this).parent().next().text());
+  	});
+  });
 </script>
 </head>
 <body>
