@@ -49,8 +49,8 @@ import de.tud.plt.r43ples.management.TripleStoreInterface;
 import de.tud.plt.r43ples.visualisation.GraphVizVisualisation;
 
 /**
- * Provides SPARQL endpoint via [host]:[port]/r43ples/ Supplies version
- * information, service description as well as SPARQL queries.
+ * Provides SPARQL endpoint via [host]:[port]/r43ples/.
+ * Supplies version information, service description as well as SPARQL queries.
  * 
  * @author Stephan Hensel
  * @author Markus Graube
@@ -96,6 +96,8 @@ public class Endpoint {
 	
 	@Context
 	private UriInfo uriInfo;
+	
+	/** default logger for this class */
 	private final static Logger logger = Logger.getLogger(Endpoint.class);
 
 	/**
@@ -226,6 +228,10 @@ public class Endpoint {
 		}
 	}
 
+	/**
+	 * Creates sample datasets
+	 * @return information provided as HTML response
+	 */
 	@Path("createSampleDataset")
 	@GET
 	public final Response createSampleDataset() {
@@ -244,9 +250,10 @@ public class Endpoint {
 		return Response.ok().entity(result).build();
 	}
 
+	
 	/**
 	 * Provides the SPARQL Endpoint description of the original sparql endpoint
-	 * with the additional R43ples feature (sd:feature) and replaces URIs.
+	 * with the additional R43ples feature (sd:feature) and replaced URIs.
 	 * 
 	 * @param format
 	 *            serialisation format of the service description
