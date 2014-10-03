@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
  * Provides a interface to the triple store with URI and port specified in the configuration file.
  *
  * @author Stephan Hensel
+ * @author Markus Graube
  *
  */
 public class TripleStoreInterface {

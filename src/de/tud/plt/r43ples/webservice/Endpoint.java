@@ -5,6 +5,8 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -148,7 +150,7 @@ public class Endpoint {
 		String format = (format_query != null) ? format_query : format_header;
 		logger.info("format: " + format);
 		try {
-			return RevisionManagement.getRevisedGraphs(format);
+			return RevisionManagement.getRevisedGraphsSparql(format);
 		} catch (HttpException | IOException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException(e.getMessage());
@@ -169,20 +171,29 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @return the response
 	 * @throws IOException
+	 * @throws HttpException 
 	 */
 	@Path("sparql")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle" })
 	public final Response sparql(@HeaderParam("Accept") final String formatHeader,
 			@QueryParam("format") final String formatQuery, @QueryParam("query") @DefaultValue("") final String sparqlQuery)
-			throws IOException {
+			throws IOException, HttpException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		logger.info("SPARQL requested with format: " + format);
 		if (sparqlQuery.equals("")) {
 			if (format.contains("text/html")) {
 				logger.info("SPARQL form requested");
+				List<String> graphList = RevisionManagement.getRevisedGraphs();
+				StringBuilder sb1 = new StringBuilder("<option value=\"\">(All)</option>\n");
+				StringBuilder sb2 = new StringBuilder("<option value=\"\">(None)</option>\n");
+				for (Iterator<String> opt = graphList.iterator(); opt.hasNext();) {
+					String graph = opt.next();
+					sb1.append(String.format("<option value=\"%1$s\">%1$s</option>%n", graph));
+					sb2.append(String.format("<option value=\"DROP GRAPH <%1$s>\">%1$s</option>%n", graph));
+				}
 				String content = String.format(ResourceManagement.getContentFromResource("webapp/index.html"), 
-						Endpoint.class.getPackage().getImplementationVersion());
+						Endpoint.class.getPackage().getImplementationVersion(), sb1.toString(), sb2.toString());
 				return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
 			} else {
 				return getServiceDescriptionResponse(format);

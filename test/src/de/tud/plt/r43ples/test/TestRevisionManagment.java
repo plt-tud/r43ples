@@ -64,7 +64,7 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void testSelectWithRewriting() throws IOException{
+	public void testSelectWithRewriting() throws IOException, HttpException{
         String query_template = "OPTION r43ples:SPARQL_JOIN%n"
         		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
         		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
@@ -199,7 +199,7 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void test_minus() throws IOException {
+	public void test_minus() throws IOException, HttpException {
 		String query = "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "
 				+ "FROM <"+ graph_test + "> REVISION \"%d\" "

@@ -727,12 +727,35 @@ public class RevisionManagement {
 	 * @throws IOException
 	 * @throws HttpException
 	 */
-	public static String getRevisedGraphs(final String format) throws HttpException, IOException {
+	public static String getRevisedGraphsSparql(final String format) throws HttpException, IOException {
 		String sparqlQuery = prefix_rmo
 				+ String.format("" + "SELECT DISTINCT ?graph " + "FROM <%s> " + "WHERE {"
 						+ "	?rev rmo:revisionOf ?graph." + "} ORDER BY ?graph", Config.revision_graph);
 		return TripleStoreInterface.executeQueryWithAuthorization(sparqlQuery, format);
 	}
+	
+
+	/**
+	 * Get revised graphs in R43ples.
+	 * 
+	 * @param format
+	 *            serialization of the response
+	 * @return String containing the SPARQL response in specified format
+	 * @throws IOException
+	 * @throws HttpException
+	 */
+	public static ArrayList<String> getRevisedGraphs() throws HttpException, IOException {
+		ArrayList<String> list = new ArrayList<String>();
+		String resultSparql = getRevisedGraphsSparql("XML");
+		ResultSet results = ResultSetFactory.fromXML(resultSparql);
+		while (results.hasNext()) {
+			QuerySolution qs = results.next();
+			list.add(qs.getResource("graph").toString());
+		}
+		return list;
+	}
+	
+	
 
 	/**
 	 * Deletes all information for a specific named graph including all full
@@ -861,7 +884,4 @@ public class RevisionManagement {
 		return resultASK.equals("true");
 	}
 
-	
-
-	
 }

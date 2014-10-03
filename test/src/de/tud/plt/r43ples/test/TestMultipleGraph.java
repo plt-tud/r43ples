@@ -62,9 +62,10 @@ public class TestMultipleGraph {
 
 	/**
 	 * @throws IOException 
+	 * @throws HttpException 
 	 */
 	@Test
-	public final void testMultipleGraphsSparqlJoin() throws IOException {
+	public final void testMultipleGraphsSparqlJoin() throws IOException, HttpException {
 		String query_template = ""
 				+ "OPTION r43ples:SPARQL_JOIN %n"
 				+ "PREFIX : <http://test.com/> %n"

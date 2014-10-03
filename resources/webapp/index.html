@@ -7,27 +7,6 @@
 <script src="/static/jquery-2.1.1.js"></script>
 <script src="/static/jquery-ui.js"></script>
 <script type="text/javascript">
-	$(document).ready(function() {
-		var url = "getRevisedGraphs";
-		$.getJSON(url, function(data) {
-			var select = document.getElementById("selectRevisedGraph");
-			var selectDrop = document.getElementById("dropRevisedGraph");
-			var options = data.results.bindings;
-			for (var i = 0; i < options.length; i++) {
-				var opt = options[i].graph.value;
-				var el = document.createElement("option");
-				el.textContent = opt;
-				el.value = opt;
-				select.appendChild(el);
-				var elDrop = document.createElement("option");
-				elDrop.textContent = opt;
-				elDrop.value = "DROP GRAPH <"+opt+">";
-				selectDrop.appendChild(elDrop);
-			}
-		});
-	});
-</script>
-<script type="text/javascript">
   $(function() {
 	$(".accordion").accordion();
   	$(".accordion > h3").prepend("<button><</button> ");
@@ -69,9 +48,7 @@ WHERE {
 			<li><a href="createSampleDataset">Create sample data set</a></li>
 			<li>
 				<form action="revisiongraph" method="get">
-					<select id="selectRevisedGraph" name="graph">
-						<option value="">(All)</option>
-					</select>
+					<select id="selectRevisedGraph" name="graph">%2$s</select>
 					<select name="format">
 						<option value="text/turtle">Turtle</option>
 						<option value="text/html">Graphical</option>
@@ -81,9 +58,7 @@ WHERE {
 			</li>
 			<li>
 				<form action="sparql" method="get">
-					<select id="dropRevisedGraph" name="query">
-						<option value="">(None)</option>
-					</select>
+					<select id="dropRevisedGraph" name="query">%3$s</select>
 					<input type="submit" value="Drop Graph" />
 				</form>
 			</li>
@@ -133,7 +108,7 @@ TAG GRAPH &lt;http://test.com/r43ples-dataset&gt; REVISION "2" TO "v0.3-alpha"</
 	</div>
 
 	<div id="footer">
-		2014 - Version %s | <a href="https://github.com/plt-tud/r43ples">R43ples@GitHub</a>
+		2014 - Version %1$s | <a href="https://github.com/plt-tud/r43ples">R43ples@GitHub</a>
 		| powered by <a href="https://jersey.java.net/">Jersey</a>
 	</div>
 
