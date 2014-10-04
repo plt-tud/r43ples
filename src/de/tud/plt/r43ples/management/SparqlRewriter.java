@@ -32,6 +32,8 @@ import com.hp.hpl.jena.sparql.syntax.ElementUnion;
 import com.hp.hpl.jena.sparql.util.ExprUtils;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import de.tud.plt.r43ples.revisionTree.NodeSpecification;
+
 /**
  * 
  * @author mgraube
@@ -70,13 +72,12 @@ public class SparqlRewriter {
 			String revisionNumber = m.group("revision");
 			m.reset();
 
-			LinkedList<String> list = RevisionManagement.getRevisionTree(graphName).getPathToRevisionWithUri(
-					revisionNumber);
+			LinkedList<NodeSpecification> list = RevisionManagement.getRevisionTree(graphName).getPathToRevision(revisionNumber);
 			logger.info("Path to revision: " + list.toString());
-			expression_list_last_revision.add(ExprUtils.nodeToExpr(NodeFactory.createURI(list.get(0))));
+			expression_list_last_revision.add(ExprUtils.nodeToExpr(NodeFactory.createURI(list.get(0).getRevisionUri())));
 			list.removeLast();
-			for (String string : list) {
-				expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(string)));
+			for (NodeSpecification ns : list) {
+				expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(ns.getRevisionUri())));
 			}
 
 			query_sparql = m.replaceFirst("");

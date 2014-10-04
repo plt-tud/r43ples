@@ -3,9 +3,10 @@ package de.tud.plt.r43ples.revisionTree;
 import java.util.ArrayList;
 
 /**
- * This class saves the predecessors and the successors of a node.
+ * The NodeSpecification class saves the predecessors and the successors of a node.
  * 
  * @author Stephan Hensel
+ * @author Markus Graube
  * 
  */
 public class NodeSpecification {

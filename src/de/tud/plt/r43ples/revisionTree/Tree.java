@@ -31,13 +31,13 @@ public class Tree {
 	}
 	
 	/**
-	 * Add new node to tree or extend old node.
+	 * Add edge between to nodes.
 	 * 
-	 * @param node the node to create or change
-	 * @param predecessor the predecessor to add
+	 * @param successor revision number of the successor node
+	 * @param predecessor revision number of the predecessor node
 	 */
-	public void addEdgeNode(String node, String predecessor) {
-		NodeSpecification nodeS = map.get(node);
+	public void addEdge(String successor, String predecessor) {
+		NodeSpecification nodeS = map.get(successor);
 		NodeSpecification nodeP = map.get(predecessor);
 		
 		nodeS.addPredecessor(nodeP);
@@ -50,48 +50,18 @@ public class Tree {
 	 * @param revisionNumber the revision number to calculate the path for
 	 * @return linked list with all revisions from specified revision number to referenced revision 
 	 */
-	public LinkedList<String> getPathToRevision(String revisionNumber) {
+	public LinkedList<NodeSpecification> getPathToRevision(String revisionNumber) {
 		// TODO: make path resolving more clever; not always using first successor but breadth-first search
-		LinkedList<String> list = new LinkedList<String>();
+		LinkedList<NodeSpecification> list = new LinkedList<NodeSpecification>();
 		NodeSpecification node = map.get(revisionNumber);
 		
 		// Add all revision numbers from specified revision to first found revision with a full graph
-		list.addFirst(node.getRevisionNumber());
+		list.addFirst(node);
 		while (node.getFullGraph().equals("")) {
 			node = node.getFirstSuccessor();
-			list.addFirst(node.getRevisionNumber());
+			list.addFirst(node);
 		}
 		return list;
-	}
-	
-	/**
-	 * Calculate the path from specified revision to a referenced revision.
-	 * 
-	 * @param revisionNumber the revision number to calculate the path for
-	 * @return linked list with all revisions from specified revision number to referenced revision 
-	 */
-	public LinkedList<String> getPathToRevisionWithUri(String revisionNumber) {
-		// TODO: make path resolving more clever; not always using first successor but breadth-first search
-		LinkedList<String> list = new LinkedList<String>();
-		NodeSpecification node = map.get(revisionNumber);
-		
-		// Add all revision numbers from specified revision to first found revision with a full graph
-		list.addFirst(node.getRevisionUri());
-		while (node.getFullGraph().equals("")) {
-			node = node.getFirstSuccessor();
-			list.addFirst(node.getRevisionUri());
-		}
-		return list;
-	}
-	
-	
-	/**
-	 * Get the map.
-	 * 
-	 * @return the map
-	 */
-	public HashMap<String, NodeSpecification> getMap() {
-		return map;
-	}
+	}	
 	
 }

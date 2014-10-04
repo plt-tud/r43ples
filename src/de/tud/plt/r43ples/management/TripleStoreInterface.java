@@ -25,7 +25,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 
 /** 
- * Provides a interface to the triple store with URI and port specified in the configuration file.
+ * Provides a interface to the triple store with URI and port specified via init method.
  *
  * @author Stephan Hensel
  * @author Markus Graube
@@ -42,6 +42,13 @@ public class TripleStoreInterface {
 	
 	/**
 	 * The constructor.
+	 * 
+	 * @param sparql_endpoint
+	 * 			URI of the endpoint which used be used for further queries
+	 * @param sparql_username
+	 * 			user name which should be used for authentication
+	 * @param sparql_password
+	 * 			password which should be used for authentication
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
@@ -55,7 +62,7 @@ public class TripleStoreInterface {
 	}
 	
 	/**
-	 * Executes a SPARQL-query against the triple store without authorization.
+	 * Executes a SPARQL query against the triple store without authorization.
 	 * 
 	 * @param query the SPARQL query
 	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
@@ -80,7 +87,14 @@ public class TripleStoreInterface {
 		
 	}
 	
-	
+	/**
+	 * Executes a SPARQL-query against the triple store with authorization.
+	 * 
+	 * @param query the SPARQL query
+	 * @return the result of the query in XML serialisation
+	 * @throws IOException 
+	 * @throws HttpException 
+	 */
 	public static String executeQueryWithAuthorization(String query) throws IOException, HttpException {
 		return executeQueryWithAuthorization(query, "XML");
 	}
@@ -92,7 +106,7 @@ public class TripleStoreInterface {
 	 * 
 	 * @param query the SPARQL query
 	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
-	 * @return the result of the query
+	 * @return the result of the query in the specified format
 	 * @throws IOException 
 	 * @throws HttpException 
 	 */

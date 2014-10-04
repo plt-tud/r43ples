@@ -18,6 +18,7 @@ import com.hp.hpl.jena.query.ResultSetFactory;
 
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalServerErrorException;
+import de.tud.plt.r43ples.revisionTree.NodeSpecification;
 import de.tud.plt.r43ples.revisionTree.Tree;
 
 /**
@@ -122,6 +123,24 @@ public class RevisionManagement {
 		TripleStoreInterface.executeQueryWithAuthorization(String.format("CREATE SILENT GRAPH <%s>%n",
 				removeSetGraphUri));
 		RevisionManagement.executeINSERT(removeSetGraphUri, removedAsNTriples);
+		
+		// Remove branch from which changes were merged, if available
+//		if (usedRevisionNumber.size() > 1) {
+//			String oldRevision2 = graphName + "-revision-" + usedRevisionNumber.get(1).toString();
+//			String queryBranch2 = prefixes
+//					+ String.format(
+//							"SELECT ?branch ?graph WHERE{ ?branch a rmo:Branch; rmo:references <%s>; rmo:fullGraph ?graph. }",
+//							oldRevision2);
+//			QuerySolution sol2 = ResultSetFactory.fromXML(
+//					TripleStoreInterface.executeQueryWithAuthorization(queryBranch2, "XML")).next();
+//			String removeBranchUri = sol2.getResource("?branch").toString();
+//			String removeBranchFullGraph = sol2.getResource("?graph").toString();
+//			String query = String.format(
+//					"DELETE { GRAPH <%s> { <%s> ?p ?o. } } WHERE { GRAPH <%s> { <%s> ?p ?o. }}%n",
+//					Config.revision_graph, removeBranchUri, Config.revision_graph, removeBranchUri);
+//			query += String.format("DROP SILENT GRAPH <%s>%n", removeBranchFullGraph);
+//			TripleStoreInterface.executeQueryWithAuthorization(query);
+//		}
 
 		return newRevisionNumber;
 	}
@@ -194,23 +213,6 @@ public class RevisionManagement {
 				Config.revision_graph, branchName, oldRevisionUri);
 		query += String.format("INSERT IN GRAPH <%s> { <%s> rmo:references <%s>. }%n", Config.revision_graph,
 				branchName, revisionUri);
-
-		// Remove branch from which changes were merged, if available
-		if (usedRevisionNumber.size() > 1) {
-			String oldRevision2 = graphName + "-revision-" + usedRevisionNumber.get(1).toString();
-			String queryBranch2 = prefixes
-					+ String.format(
-							"SELECT ?branch ?graph WHERE{ ?branch a rmo:Branch; rmo:references <%s>; rmo:fullGraph ?graph. }",
-							oldRevision2);
-			QuerySolution sol2 = ResultSetFactory.fromXML(
-					TripleStoreInterface.executeQueryWithAuthorization(queryBranch2, "XML")).next();
-			String removeBranchUri = sol2.getResource("?branch").toString();
-			String removeBranchFullGraph = sol2.getResource("?graph").toString();
-			query += String.format(
-					"DELETE { GRAPH <%s> { <%s> ?p ?o. } } WHERE { GRAPH <%s> { <%s> ?p ?o. }}%n",
-					Config.revision_graph, removeBranchUri, Config.revision_graph, removeBranchUri);
-			query += String.format("DROP SILENT GRAPH <%s>%n", removeBranchFullGraph);
-		}
 
 		// Execute queries
 		logger.info("Execute all queries updating the revision graph, full graph and change sets");
@@ -321,11 +323,11 @@ public class RevisionManagement {
 		TripleStoreInterface.executeQueryWithAuthorization("CREATE GRAPH <" + tempGraphName + ">", "HTML");
 
 		// Create path to revision
-		LinkedList<String> list = getRevisionTree(graphName).getPathToRevision(revisionNumber);
+		LinkedList<NodeSpecification> list = getRevisionTree(graphName).getPathToRevision(revisionNumber);
 		logger.info("Path to revision: " + list.toString());
 
 		// Copy branch to temporary graph
-		String number = list.pollFirst();
+		String number = list.pollFirst().getRevisionNumber();
 		TripleStoreInterface.executeQueryWithAuthorization(
 				"COPY GRAPH <" + RevisionManagement.getReferenceGraph(graphName, number) + "> TO GRAPH <"
 						+ tempGraphName + ">", "HTML");
@@ -338,13 +340,12 @@ public class RevisionManagement {
 			// Add data to temporary graph
 			TripleStoreInterface.executeQueryWithAuthorization("ADD GRAPH <" + graphName + "-delta-removed-"
 					+ number + "> TO GRAPH <" + tempGraphName + ">", "HTML");
-			// Remove data from temporary graph (no opposite of SPARQL ADD
-			// available)
+			// Remove data from temporary graph (no opposite of SPARQL ADD available)
 			TripleStoreInterface.executeQueryWithAuthorization("DELETE { GRAPH <" + tempGraphName
 					+ "> { ?s ?p ?o.} } WHERE { GRAPH <" + graphName + "-delta-added-" + number
 					+ "> {?s ?p ?o.}}", "HTML");
 
-			number = list.pollFirst();
+			number = list.pollFirst().getRevisionNumber();
 		}
 
 	}
@@ -498,11 +499,15 @@ public class RevisionManagement {
 
 		Tree tree = new Tree();
 		// create query
-		String queryRevisions = prefixes
-				+ String.format("SELECT ?uri ?revNumber ?fullGraph " + "FROM <%s> " + "WHERE {"
-						+ "?uri a rmo:Revision;" + "	rmo:revisionOf <%s>; "
+		String queryRevisions = prefixes + String.format(""
+						+ "SELECT ?uri ?revNumber ?fullGraph " 
+						+ "FROM <%s> " 
+						+ "WHERE {"
+						+ "?uri a rmo:Revision;" 
+						+ "	rmo:revisionOf <%s>; "
 						+ "	rmo:revisionNumber ?revNumber."
-						+ "OPTIONAL { ?branch rmo:references ?uri; rmo:fullGraph ?fullGraph.}" + " }",
+						+ "OPTIONAL { ?branch rmo:references ?uri; rmo:fullGraph ?fullGraph.}" 
+						+ "}",
 						Config.revision_graph, graphName);
 		String resultSparql = TripleStoreInterface.executeQueryWithAuthorization(queryRevisions, "XML");
 		ResultSet resultsCommits = ResultSetFactory.fromXML(resultSparql);
@@ -518,12 +523,16 @@ public class RevisionManagement {
 			tree.addNode(revisionNumber, revision, fullGraph);
 		}
 
-		String queryRevisionConnection = prefixes
-				+ String.format("SELECT ?revNumber ?preRevNumber " + "FROM <%s> " + "WHERE {"
-						+ "?rev a rmo:Revision;" + "	rmo:revisionOf <%s>; "
-						+ "	rmo:revisionNumber ?revNumber; " + "	prov:wasDerivedFrom ?preRev. "
-						+ "?preRev rmo:revisionNumber ?preRevNumber. " + " }", Config.revision_graph,
-						graphName);
+		String queryRevisionConnection = prefixes + String.format(""
+						+ "SELECT ?revNumber ?preRevNumber " 
+						+ "FROM <%s> " 
+						+ "WHERE {"
+						+ "?rev a rmo:Revision;" 
+						+ "	rmo:revisionOf <%s>; "
+						+ "	rmo:revisionNumber ?revNumber; " 
+						+ "	prov:wasDerivedFrom ?preRev. "
+						+ "?preRev rmo:revisionNumber ?preRevNumber. " 
+						+ " }", Config.revision_graph, graphName);
 		String resultSparqlConnection = TripleStoreInterface.executeQueryWithAuthorization(
 				queryRevisionConnection, "XML");
 		ResultSet resultRevConnection = ResultSetFactory.fromXML(resultSparqlConnection);
@@ -531,7 +540,7 @@ public class RevisionManagement {
 			QuerySolution qsCommits = resultRevConnection.next();
 			String revision = qsCommits.getLiteral("?revNumber").toString();
 			String preRevision = qsCommits.getLiteral("?preRevNumber").toString();
-			tree.addEdgeNode(revision, preRevision);
+			tree.addEdge(revision, preRevision);
 		}
 		return tree;
 	}
