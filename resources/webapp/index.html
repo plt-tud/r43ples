@@ -2,6 +2,7 @@
 <head>
 <title>R43ples - Revision Management for the Semantic Web</title>
 <meta name="author" content="Markus Graube">
+<link rel="icon" type="image/png" href="/static/images/r43ples-r-logo.png">
 <link href="/static/jquery-ui.css" rel="stylesheet" />
 <link href="/static/r43ples.css" rel="stylesheet" />
 <script src="/static/jquery-2.1.1.js"></script>
@@ -9,7 +10,7 @@
 <script type="text/javascript">
   $(function() {
 	$(".accordion").accordion();
-  	$(".accordion > h3").prepend("<button><</button> ");
+  	$(".accordion > h3").prepend("<button class='copy'><</button> ");
   	$(".accordion > h3 > button").click(function() {
 		$("#query").val($(this).parent().next().text());
   	});
@@ -25,6 +26,7 @@
 	<div id="query_form">
 		<h2>Query Form</h2>
 		<form action="/r43ples/sparql">
+		<fieldset>
 			<label for="query">Query Text</label><br />
 			<textarea name="query" id="query" cols="80" rows="20">
 SELECT * 
@@ -33,14 +35,19 @@ WHERE {
 	?s ?p ?o. 
 }
 	  </textarea>
-			<br /> <label for="format">Results Format</label> <select
-				name="format" id="name">
+			<br /> 
+			<label for="format">Results Format:</label>
+			<select	name="format" id="name">
 				<option value="text/html">HTML</option>
 				<option value="application/rdf+xml">RDF/XML</option>
 				<option value="text/turtle">Turtle</option>
 				<option value="application/json">JSON</option>
-			</select> <br /> <input type="submit" value="Run Query" /> <input type="reset"
-				value="Reset" />
+			</select>
+			<br />
+			<br /> 
+			<input type="submit" value="Run Query" />
+			<input type="reset"	value="Reset" />
+				</fieldset>
 		</form>
 
 		<h2>Revision Information</h2>

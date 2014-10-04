@@ -1,12 +1,30 @@
-body{
-		padding: 0;
-		width: 1200px;
-		margin:0px auto;
-	}
-	
+* {
+	margin: 0px;
+}
+
+body {
+	padding: 0;
+	width: 1200px;
+	margin: 0px auto;
+}
+
 #header {
-	margin-top: 2em;
-	}
+	padding-top: 2em;
+}
+
+h2 {
+	padding-top: 0.4em;
+	padding-bottom: 0.2em;
+}
+
+#header>h1 {
+	background-image: url("/static/images/r43ples-logo.png");
+	background-size: 250;
+	background-repeat: no-repeat;
+	overflow: hidden;
+	height: 0;
+	padding-top: 80px;
+}
 
 #query_form {
 	width: 700px;
@@ -15,13 +33,24 @@ body{
 
 #examples {
 	float: right;
-	width: 450px;
+	width: 475px;
+	padding-left: 25px;
 }
-	
+
 #footer {
 	padding-top: 2em;
 	clear: both;
 	width: 100%;
 	text-align: center;
 	font-size: 80%;
+}
+
+button.copy {
+	padding: 0;
+	margin: 0;
+	font-size: smaller;
+}
+
+fieldset {
+	background-color: rgb(230, 230, 230);
 }
