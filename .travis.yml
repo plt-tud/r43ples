@@ -4,17 +4,18 @@ jdk:
 
 env:
   global:
-   # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
-   #   via the "travis encrypt" command using the project repo's public key
-   - secure: "EWbOUn3lprcV7OiWMQLDUfR2kDyDHCvzPpUDNvoLG0YgdLpjymXgUGRuVdbiBdeiKER56WbkiZuNpqMyFoRQHozjjTvCHYrIofkwZJFK89GvvhxKKbkjS0XFS/3SiNytquhavF9TePX5CMqVb8KMqNVWzUtsTcFfhrgqni4QL2o="
-   - secure: "WHUbL9LOlJo5a/6TewBV7BZgfpUzDnEur0uI3n5KxmbxGPnlSUYyLoaRFF83Ukys3Mb0xjdleLrOCk+EA7VFMtsxADroHGmK5tSPJD/GGWUo+jdmk1/cETKlgpPvOFKG5Ui19ydqMexACMGnzcy9XoyYwOMyIO/ZbrVjdrq3VtI="
+    # Global variables encypted via "travis encryt"  using the project repo's public key
+    # encrypted COVERITY_SCAN_TOKEN
+    -  secure: "ed4oH5JO8IPEy12khiyQWajKv0NKwMqn2mOv7xxeJvlIWL06xVuW+j9OLcDQh5nMF06ZbcOuH/ctiwj5uweGPhyK4Sc59pd3k8L5FsnFzzvXddKHaLe+KagHMLDazCXcnf8H74mQyv5lkUkI9saUwhLZv6F+rn6tnayp6D++UKo="
+    # encrypted GITHUB_AUTH_TOKEN
+    - secure: "WHUbL9LOlJo5a/6TewBV7BZgfpUzDnEur0uI3n5KxmbxGPnlSUYyLoaRFF83Ukys3Mb0xjdleLrOCk+EA7VFMtsxADroHGmK5tSPJD/GGWUo+jdmk1/cETKlgpPvOFKG5Ui19ydqMexACMGnzcy9XoyYwOMyIO/ZbrVjdrq3VtI="
 
 
 addons:
   coverity_scan:
     project:
-      name: "plt-tud/r43ples"
-      description: "Revision Control for the Semantic Web"
+      name: plt-tud/r43ples
+      description: Revision Control for the Semantic Web
     notification_email: markus.graube@tu-dresden.de
     build_command_prepend:
     build_command: ant

@@ -88,7 +88,7 @@
 
 	<target name="javadoc" depends="init" description="generate Javadoc documentation">
 		<mkdir dir="javadoc" />
-		<javadoc sourcepath="${src.dir}" destdir="javadoc" private="true"
+		<javadoc sourcepath="${src.dir}" destdir="javadoc" private="true" use="true"
 			classpathref="classpath" version="true" author="true"
 			windowtitle="${app.name} - Version ${app.version}" doctitle="${app.name} - Version ${app.version} (${git.commit})"
 			packagenames="de.tud.plt.r43ples.*">
@@ -102,8 +102,6 @@
 				<param name="-hide" value="java.*" />
 				<param name="-collpackages" value="java.util.*" />
 				<param name="-postfixpackage" />
-				<param name="-link"	value="http://java.sun.com/j2se/1.5.0/docs/guide/javadoc/doclet/spec" />
-				<param name="-link" value="http://java.sun.com/j2se/1.5/docs/api" />
 			</doclet>
 		</javadoc>
 		<apply executable="dot" dest="javadoc" parallel="false" verbose="true"
