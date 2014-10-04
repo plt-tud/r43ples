@@ -6,7 +6,7 @@ env:
   global:
     # Global variables encypted via "travis encryt"  using the project repo's public key
     # encrypted COVERITY_SCAN_TOKEN
-    -  secure: "ed4oH5JO8IPEy12khiyQWajKv0NKwMqn2mOv7xxeJvlIWL06xVuW+j9OLcDQh5nMF06ZbcOuH/ctiwj5uweGPhyK4Sc59pd3k8L5FsnFzzvXddKHaLe+KagHMLDazCXcnf8H74mQyv5lkUkI9saUwhLZv6F+rn6tnayp6D++UKo="
+    - secure: "hhLVj2gO730WiEpase1qPR/r8eCiFbND9x+lfZqvP5AiDnv9UD2U/QZfg/EBocJySHb0xTE1WSP0VXYCM4qG8IovJaA1/0MxyWgh4JjdOD1xqjHxpOAJHAvnPoAhu1LO45+rClVS5tub7KaiDvYKcCHXVC07yQm3BRee6rwL75I="
     # encrypted GITHUB_AUTH_TOKEN
     - secure: "WHUbL9LOlJo5a/6TewBV7BZgfpUzDnEur0uI3n5KxmbxGPnlSUYyLoaRFF83Ukys3Mb0xjdleLrOCk+EA7VFMtsxADroHGmK5tSPJD/GGWUo+jdmk1/cETKlgpPvOFKG5Ui19ydqMexACMGnzcy9XoyYwOMyIO/ZbrVjdrq3VtI="
 
@@ -14,20 +14,39 @@ env:
 addons:
   coverity_scan:
     project:
-      name: plt-tud/r43ples
-      description: Revision Control for the Semantic Web
+      name: "plt-tud/r43ples"
+      description: "Build submitted via Travis CI"
     notification_email: markus.graube@tu-dresden.de
-    build_command_prepend:
-    build_command: ant
+    build_command_prepend: "ant clean"
+    build_command: "ant"
     branch_pattern: coverity_scan
 
-before_install:
+
+before_script:
     - sudo apt-get update -qq
     - sudo apt-get install -qq libc6 ibldap-2.4-2 libreadline6 libssl1.0.0
     - wget http://wwwpub.zih.tu-dresden.de/~mgraube/virtuoso-opensource_7.1_amd64.deb
     - sudo dpkg -i virtuoso-opensource_7.1_amd64.deb
 
+script:
+    - ant test
+
   
 after_success:
     - ./.coverity.sh
     - ./.update-gh-pages.sh
+    
+
+before_deploy:
+    - ant zip
+    
+deploy:
+    # deploy to GitHub releases for every tag
+  provider: releases
+  api_key:
+    secure: RHaHxxXNfD8GQBaEfKv2lmpcJK+FeOBt0N0Djz1loTY/VScOEQQRMpWWK7f3Z0O8D8fWKxRHjUKSM63OR7zo6JafIOQU1l/DzS+YK0Rt9NJuGm6MZHc5V32tf2CBBzS8hZJ6MKrCdPJb0WIP+w++zu64ccsFF9ZhWf7EYZ9BYug=
+  file: R43ples.zip
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
