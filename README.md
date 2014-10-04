@@ -17,7 +17,7 @@ It provides a SPARQL endpoint where all queries have to be directed to.
 The SPARQL query defines whether only a revision is queried, or a new revision needs to be created. 
 Furthermore, the service provides an interface for revision management and the import or export of data from the Computer Aided Engineering tools.
 
-The javdoc can be found at [http://plt-tud.github.io/r43ples/javadoc/](http://plt-tud.github.io/r43ples/javadoc/).
+The javadoc can be found at the [website](http://plt-tud.github.io/r43ples) under [http://plt-tud.github.io/r43ples/javadoc/](http://plt-tud.github.io/r43ples/javadoc/).
 
 A running test server should be available under [http://eatld.et.tu-dresden.de:9998/r43ples/sparql](http://eatld.et.tu-dresden.de:9998/r43ples/sparql)
 
@@ -27,11 +27,23 @@ Dependencies
 * Running Triplestore with SPARQL 1.1 endpoint (tested with Virtuoso 7)
 
 
-Starting
+Releases
 --------
-Ant is used for compiling and starting
+Releases are stored on [GitHub](https://github.com/plt-tud/r43ples/releases).
+They just have to be unzipped and started with Java
+
+	unzip R43ples.zip
+    java -jar R43ples.jar
+    
+Compiling
+---------
+Ant is used for compiling
 
     ant run
+    
+Releases can be be built with:
+
+    ant zip
     
     
 Configuration
