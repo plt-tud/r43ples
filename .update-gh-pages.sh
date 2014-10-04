@@ -8,7 +8,7 @@ COMMITS=`git log --since=today.midnight --oneline | wc -l`
 if [[ "$COMMITS" -le "1" ]]; then
     sudo apt-get install -qq graphviz
     ant javadoc
-    git clone -b gh-pages --depth=10 https://$GITAUTH@github.com/plt-tud/r43ples
+    git clone -b gh-pages https://$GITAUTH@github.com/plt-tud/r43ples
     rm -rf r43ples/javadoc
     cp -r javadoc r43ples/javadoc
     echo -e '---\nlayout: index\n---\n' > r43ples/index.md
