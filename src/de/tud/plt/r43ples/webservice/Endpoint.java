@@ -3,7 +3,6 @@ package de.tud.plt.r43ples.webservice;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -217,7 +216,8 @@ public class Endpoint {
 		} else {
 			logger.info("SPARQL query was requested. Query: " + sparqlQuery);
 			try {
-				String sparqlQueryDecoded = URLDecoder.decode(sparqlQuery, "UTF-8");
+				// TODO Check if sparqlQuery is every time decoded
+				String sparqlQueryDecoded = sparqlQuery;
 
 				String user = null;
 				Matcher userMatcher = patternUser.matcher(sparqlQueryDecoded);
