@@ -11,8 +11,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -157,6 +159,15 @@ public class Endpoint {
 		}
 	}
 
+	@Path("sparql")
+	@POST
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle" })
+	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
+			@FormParam("format") final String formatQuery, @FormParam("query") @DefaultValue("") final String sparqlQuery)
+			throws IOException, HttpException {
+		String format = (formatQuery != null) ? formatQuery : formatHeader;
+		return sparql(format, sparqlQuery);
+	}
 	/**
 	 * HTTP GET interface for query and update (e.g. SELECT, INSERT, DELETE).
 	 * Provides HTML form if no query is specified and HTML is requested
@@ -176,10 +187,15 @@ public class Endpoint {
 	@Path("sparql")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle" })
-	public final Response sparql(@HeaderParam("Accept") final String formatHeader,
+	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
 			@QueryParam("format") final String formatQuery, @QueryParam("query") @DefaultValue("") final String sparqlQuery)
 			throws IOException, HttpException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
+		return sparql(format, sparqlQuery);
+	}
+		
+	public final Response sparql(final String format, final String sparqlQuery)
+			throws IOException, HttpException {
 		logger.info("SPARQL requested with format: " + format);
 		if (sparqlQuery.equals("")) {
 			if (format.contains("text/html")) {
