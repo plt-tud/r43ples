@@ -70,7 +70,7 @@
 			<fileset dir="${lib.dir}" includes="**" />
 		</copy>
 		<copy todir="${jar.res.dir}" overwrite="true">
-			<fileset dir="${res.dir}" includes="**" />
+			<fileset dir="${res.dir}" includes="**" excludes="r43ples.conf" />
 		</copy>
 		<copy todir="${jar.dir}" overwrite="true">
 			<filelist dir="${basedir}" files="${dist.files}" />
