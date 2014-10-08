@@ -1,5 +1,8 @@
 package de.tud.plt.r43ples.test;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -235,7 +238,7 @@ public class TestR43ples {
 	
 	@Test public void testServiceDescription() throws IOException{
 		String result = executeR43plesQueryWithFormat("", "text/turtle");
-		Assert.assertNotEquals("", result);
+		Assert.assertThat(result, containsString("sd:r43ples"));
 	}
 	
 	
@@ -254,10 +257,14 @@ public class TestR43ples {
 				+ "CONSTRUCT {?s ?p ?o} "
 				+ "FROM <%s> REVISION \"1\""
 				+ "WHERE { ?s ?p ?o. }"
-				+ "ORDER BY ?s ?p ?o", graphName);
+				+ "ORDER BY ASC(?o)", graphName);
 		String result = executeR43plesQueryWithFormat(query, "text/turtle");
-		String expected = ResourceManagement.getContentFromResource("content-rev1.ttl");
-		Assert.assertEquals(expected, result);
+		
+		Assert.assertThat(result, containsString("\"A\""));
+		Assert.assertThat(result, containsString("\"B\""));
+		Assert.assertThat(result, containsString("\"C\""));
+		Assert.assertThat(result, not(containsString("\"D\"")));
+		Assert.assertThat(result, not(containsString("\"E\"")));
 	}
 	
 	/**

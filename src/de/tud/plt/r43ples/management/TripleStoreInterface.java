@@ -121,12 +121,8 @@ public class TripleStoreInterface {
 	 */
 	public static String executeQueryWithAuthorization(String query, String format) throws IOException, HttpException {
 		String result = null;
-		
-		logger.debug("Hide all keywords in comments");
-		// TODO: #20 fix issue when no line ending after these keywords
-		query = query.replace("USER", "#USER").replace("MESSAGE", "#MESSAGE").replace("REVISION", "#REVISION").replace("#REVISION-PROGRESS", "REVISION-PROGRESS");
-		
-		logger.debug("Execute query on SPARQL endpoint\n:"+ query);
+
+		logger.debug("Execute query on SPARQL endpoint:\n"+ query);
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
 			
