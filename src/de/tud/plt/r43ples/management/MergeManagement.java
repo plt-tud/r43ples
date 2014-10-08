@@ -25,8 +25,6 @@ import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
-import de.tud.plt.r43ples.develop.examples.CreateExampleGraph;
-
 /*
  * This class provides methods for merging branches.
  * *
@@ -36,7 +34,7 @@ import de.tud.plt.r43ples.develop.examples.CreateExampleGraph;
 public class MergeManagement {
 
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(CreateExampleGraph.class);
+	private static Logger logger = Logger.getLogger(MergeManagement.class);
 	/** The SPARQL prefixes. **/
 	private final static String prefix_rmo = "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> \n";
 	private final static String prefixes = "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
