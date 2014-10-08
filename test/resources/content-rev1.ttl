@@ -1,0 +1,4 @@
+@prefix ns0:	<http://example.com/> .
+ns0:testS	ns0:testP	"A" ,
+		"B" ,
+		"C" .

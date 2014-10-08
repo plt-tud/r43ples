@@ -71,7 +71,7 @@ public class Endpoint {
 	private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
 	
 	private final Pattern patternSelectQuery = Pattern.compile(
-			"(?<type>SELECT|ASK).*WHERE\\s*\\{(?<where>.*)\\}", 
+			"(?<type>SELECT|ASK|CONSTRUCT).*WHERE\\s*\\{(?<where>.*)\\}", 
 			patternModifier);
 	private final Pattern patternSelectFromPart = Pattern.compile(
 			"FROM\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",

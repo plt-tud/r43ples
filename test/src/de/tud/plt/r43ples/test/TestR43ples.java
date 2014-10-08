@@ -43,7 +43,7 @@ public class TestR43ples {
 	/** The endpoint. **/
 	private static String endpoint = "http://localhost:9998/r43ples/sparql";
 	/** The graph name. **/
-	private static String graphName = "exampleGraph";
+	private static String graphName = "http://exampleGraph.com/r43ples";
 	
 	
 	@Before
@@ -249,6 +249,17 @@ public class TestR43ples {
 		Assert.assertEquals(expected, result);
 	}
 	
+	@Test public void testConstructQuery() throws IOException {
+		String query = String.format(""
+				+ "CONSTRUCT {?s ?p ?o} "
+				+ "FROM <%s> REVISION \"1\""
+				+ "WHERE { ?s ?p ?o. }"
+				+ "ORDER BY ?s ?p ?o", graphName);
+		String result = executeR43plesQueryWithFormat(query, "text/turtle");
+		String expected = ResourceManagement.getContentFromResource("content-rev1.ttl");
+		Assert.assertEquals(expected, result);
+	}
+	
 	/**
 	 * Executes a SPARQL-query against the R43ples endpoint
 	 * 
@@ -257,7 +268,7 @@ public class TestR43ples {
 	 * @throws IOException 
 	 */
 	public static String executeR43plesQuery(String query) throws IOException {
-		return executeR43plesQueryWithFormat(query, "");
+		return executeR43plesQueryWithFormat(query, "application/xml");
 	}
 	
 	/**

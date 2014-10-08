@@ -48,7 +48,7 @@ public class TestSparqlRewriter {
 	public final void testRewriteQuery() throws HttpException, IOException {
 		String query = "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "
-				+ "FROM <http://test_dataset_user> REVISION \"2\""
+				+ "FROM <" + graph_test + "> REVISION \"2\""
 				+ "WHERE {"
 				+ "	?p1 :knows ?p2."
 				+ "	MINUS {?p1 :knows :Danny}"
