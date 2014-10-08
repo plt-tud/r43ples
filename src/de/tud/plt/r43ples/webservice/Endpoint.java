@@ -3,6 +3,7 @@ package de.tud.plt.r43ples.webservice;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -158,6 +159,19 @@ public class Endpoint {
 		}
 	}
 
+	/**
+	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * 
+	 * @param formatHeader
+	 *            format specified in the HTTP header
+	 * @param formatQuery
+	 *            format specified in the HTTP parameters
+	 * @param sparqlQuery
+	 *            the SPARQL query
+	 * @return the response
+	 * @throws IOException
+	 * @throws HttpException 
+	 */
 	@Path("sparql")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle" })
@@ -167,6 +181,8 @@ public class Endpoint {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		return sparql(format, sparqlQuery);
 	}
+	
+	
 	/**
 	 * HTTP GET interface for query and update (e.g. SELECT, INSERT, DELETE).
 	 * Provides HTML form if no query is specified and HTML is requested
@@ -190,12 +206,31 @@ public class Endpoint {
 			@QueryParam("format") final String formatQuery, @QueryParam("query") @DefaultValue("") final String sparqlQuery)
 			throws IOException, HttpException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
-		return sparql(format, sparqlQuery);
+		String sparqlQueryDecoded = URLDecoder.decode(sparqlQuery, "UTF-8");
+		return sparql(format, sparqlQueryDecoded);
 	}
 		
-	public final Response sparql(final String format, final String sparqlQuery)
+	
+	/**
+	 * Interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * Provides HTML form if no query is specified and HTML is requested
+	 * Provides Service Description if no query is specified and RDF
+	 * representation is requested
+	 * 
+	 * @param formatHeader
+	 *            format specified in the HTTP header
+	 * @param formatQuery
+	 *            format specified in the HTTP parameters
+	 * @param sparqlQueryDecoded
+	 *            decoded SPARQL query
+	 * @return the response
+	 * @throws IOException
+	 * @throws HttpException 
+	 */
+	public final Response sparql(final String format, final String sparqlQueryDecoded)
 			throws IOException, HttpException {
 		logger.info("SPARQL requested with format: " + format);
+		String sparqlQuery = sparqlQueryDecoded;
 		if (sparqlQuery.equals("")) {
 			if (format.contains("text/html")) {
 				logger.info("SPARQL form requested");
@@ -216,36 +251,33 @@ public class Endpoint {
 		} else {
 			logger.info("SPARQL query was requested. Query: " + sparqlQuery);
 			try {
-				// TODO Check if sparqlQuery is every time decoded
-				String sparqlQueryDecoded = sparqlQuery;
-
 				String user = null;
-				Matcher userMatcher = patternUser.matcher(sparqlQueryDecoded);
+				Matcher userMatcher = patternUser.matcher(sparqlQuery);
 				if (userMatcher.find()) {
 					user = userMatcher.group("user");
-					sparqlQueryDecoded = userMatcher.replaceAll("");
+					sparqlQuery = userMatcher.replaceAll("");
 				}
 				String message = null;
-				Matcher messageMatcher = patternCommitMessage.matcher(sparqlQueryDecoded);
+				Matcher messageMatcher = patternCommitMessage.matcher(sparqlQuery);
 				if (messageMatcher.find()) {
 					message = messageMatcher.group("message");
-					sparqlQueryDecoded = messageMatcher.replaceAll("");
+					sparqlQuery = messageMatcher.replaceAll("");
 				}
 
-				if (patternSelectQuery.matcher(sparqlQueryDecoded).find()) {
-					return getSelectResponse(sparqlQueryDecoded, format);
+				if (patternSelectQuery.matcher(sparqlQuery).find()) {
+					return getSelectResponse(sparqlQuery, format);
 				}
-				if (patternUpdateQuery.matcher(sparqlQueryDecoded).find()) {
-					return getUpdateResponse(sparqlQueryDecoded, user, message, format);
+				if (patternUpdateQuery.matcher(sparqlQuery).find()) {
+					return getUpdateResponse(sparqlQuery, user, message, format);
 				}
-				if (patternCreateGraph.matcher(sparqlQueryDecoded).find()) {
-					return getCreateGraphResponse(sparqlQueryDecoded, format);
+				if (patternCreateGraph.matcher(sparqlQuery).find()) {
+					return getCreateGraphResponse(sparqlQuery, format);
 				}
-				if (patternDropGraph.matcher(sparqlQueryDecoded).find()) {
-					return getDropGraphResponse(sparqlQueryDecoded, format);
+				if (patternDropGraph.matcher(sparqlQuery).find()) {
+					return getDropGraphResponse(sparqlQuery, format);
 				}
-				if (patternBranchOrTagQuery.matcher(sparqlQueryDecoded).find()) {
-					return getBranchOrTagResponse(sparqlQueryDecoded, user, message, format);
+				if (patternBranchOrTagQuery.matcher(sparqlQuery).find()) {
+					return getBranchOrTagResponse(sparqlQuery, user, message, format);
 				}
 				throw new InternalServerErrorException("No R43ples query detected");
 			} catch (HttpException | IOException e) {
