@@ -703,7 +703,7 @@ public class RevisionManagement {
 		
 		for (int i=0; i < lines.length; i++) {
 			// Remove whitespace characters
-			String sub = lines[i].replaceAll("\\s+","");;
+			String sub = lines[i].trim();
 			if (!sub.equals("") && !sub.startsWith("#")) {
 				if (!sub.startsWith("<")) {
 					sub = "<" + sub;
@@ -745,7 +745,7 @@ public class RevisionManagement {
 		
 		for (int i=0; i < lines.length; i++) {
 			// Remove whitespace characters
-			String sub = lines[i].replaceAll("\\s+","");;
+			String sub = lines[i].trim();
 			if (!sub.equals("") && !sub.startsWith("#")) {
 				if (!sub.startsWith("<")) {
 					sub = "<" + sub;
