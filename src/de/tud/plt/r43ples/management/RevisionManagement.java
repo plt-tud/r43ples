@@ -690,8 +690,7 @@ public class RevisionManagement {
 	 * @throws IOException
 	 * @throws HttpException
 	 */
-	public static void executeINSERT(final String graphName, final String dataSetAsNTriples)
-			throws HttpException, IOException {
+	public static void executeINSERT(final String graphName, final String dataSetAsNTriples) throws HttpException, IOException {
 
 		String insertQueryTemplate =  "INSERT IN GRAPH <%s> { %n"
 									+ "	%s %n"
@@ -701,8 +700,10 @@ public class RevisionManagement {
 		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
 		int counter = 0;
 		StringBuilder insert = new StringBuilder();
-		for (int i = 0; i < lines.length; i++) {
-			String sub = lines[i];
+		
+		for (int i=0; i < lines.length; i++) {
+			// Remove whitespace characters
+			String sub = lines[i].replaceAll("\\s+","");;
 			if (!sub.equals("") && !sub.startsWith("#")) {
 				if (!sub.startsWith("<")) {
 					sub = "<" + sub;
@@ -744,7 +745,7 @@ public class RevisionManagement {
 		
 		for (int i=0; i < lines.length; i++) {
 			// Remove whitespace characters
-						String sub = lines[i].replaceAll("\\s+","");;
+			String sub = lines[i].replaceAll("\\s+","");;
 			if (!sub.equals("") && !sub.startsWith("#")) {
 				if (!sub.startsWith("<")) {
 					sub = "<" + sub;
