@@ -37,11 +37,13 @@ public class RevisionManagement {
 	public static final String prefixes = "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
 			+ "PREFIX dc-terms: <http://purl.org/dc/terms/> \n" + prefix_rmo
 			+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
-			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n";
+			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
+			+ "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
+			+ "PREFIX sdd: <http://eatld.et.tu-dresden.de/sdd#> \n";
+
 
 	/**
-	 * Put existing graph under version control. existence of graph is not
-	 * checked.
+	 * Put existing graph under version control. Existence of graph is not checked.
 	 * 
 	 * @param graphName
 	 *            the graph name of the existing graph
@@ -58,17 +60,32 @@ public class RevisionManagement {
 		String removeSetGraphUri = graphName + "-delta-removed-" + revisionNumber;
 
 		// Create new revision
-		String queryContent = String.format("<%s> a rmo:Revision; " + "	rmo:revisionOf <%s>; "
-				+ "	rmo:deltaAdded <%s>; " + "	rmo:deltaRemoved <%s>; " + "	rmo:revisionNumber \"%s\". %n",
-				revisionUri, graphName, addSetGraphUri, removeSetGraphUri, revisionNumber);
-
-		// Add MASTER branch
-		queryContent += String.format("<%s> a rmo:Master, rmo:Branch, rmo:Reference;%n"
-				+ " rmo:fullGraph <%s>;%n" + "	rmo:references <%s>;%n" + "	rdfs:label \"master\".%n",
+		String queryContent = String.format(
+				  "<%s> a rmo:Revision ; %n"
+				+ "	rmo:revisionOf <%s> ; %n"
+				+ "	rmo:deltaAdded <%s> ; %n"
+				+ "	rmo:deltaRemoved <%s> ; %n"
+				+ "	rmo:revisionNumber \"%s\" ; %n"
+				+ "	rmo:revisionOfBranch <%s> . %n"
+				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, revisionNumber, graphName + "-master");
+		
+		// Add MASTER branch		
+		queryContent += String.format(
+				"<%s> a rmo:Master, rmo:Branch, rmo:Reference;%n"
+				+ " rmo:fullGraph <%s>;%n"
+				+ "	rmo:references <%s>;%n"
+				+ "	rdfs:label \"master\".%n",
 				graphName + "-master", graphName, revisionUri);
+		
+		// Add graph element
+		// TODO It is possible to add more information about the graph under revision control (e.g. label, comment, user, ...)
+		// TODO Currently to every created graph the default SDD is referenced - provide possibility to choose SDD
+		queryContent += String.format(
+				"<%s> a rmo:Graph ;%n"
+				+ "sddo:hasDefaultSDD sdd:defaultSDD .", 
+				graphName);
 
-		String queryRevision = prefix_rmo
-				+ String.format("INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
+		String queryRevision = prefixes + String.format("INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
 		TripleStoreInterface.executeQueryWithAuthorization(queryRevision, "HTML");
 	}
 
@@ -87,7 +104,9 @@ public class RevisionManagement {
 	 *            the title of the revision
 	 * @param usedRevisionNumber
 	 *            the number of the revision which is used for creation of the
-	 *            new revision
+	 *            new revision 
+	 *            (for creation of merged maximal two revision are  allowed
+	 *            - the first revision in array list specifies the branch where the merged revision will be created)
 	 * @return new revision number
 	 * @throws IOException
 	 * @throws AuthenticationException
@@ -172,6 +191,7 @@ public class RevisionManagement {
 		String personUri = getUserName(user);
 		String revisionUri = graphName + "-revision-" + newRevisionNumber;
 		String commitUri = graphName + "-commit-" + newRevisionNumber;
+		String branchUri = getReferenceUri(graphName, usedRevisionNumber.get(0));
 
 		// Create a new commit (activity)
 		StringBuilder queryContent = new StringBuilder(1000);
@@ -184,9 +204,14 @@ public class RevisionManagement {
 		}
 
 		// Create new revision
-		queryContent.append(String.format("<%s> a rmo:Revision; " + "	rmo:revisionOf <%s>; "
-				+ "	rmo:deltaAdded <%s>; " + "	rmo:deltaRemoved <%s>; " + "	rmo:revisionNumber \"%s\". %n",
-				revisionUri, graphName, addSetGraphUri, removeSetGraphUri, newRevisionNumber));
+		queryContent.append(String.format(
+				  "<%s> a rmo:Revision ; %n"
+				+ "	rmo:revisionOf <%s> ; %n"
+				+ "	rmo:deltaAdded <%s> ; %n"
+				+ "	rmo:deltaRemoved <%s> ; %n"
+				+ "	rmo:revisionNumber \"%s\" ; %n"
+				+ "	rmo:revisionOfBranch <%s> . %n"
+				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, newRevisionNumber, branchUri));
 		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
 			String revUri = getRevisionUri(graphName, iterator.next());
 			queryContent.append(String.format("<%s> prov:wasDerivedFrom <%s> .", revisionUri, revUri));
@@ -665,14 +690,17 @@ public class RevisionManagement {
 	 * @throws IOException
 	 * @throws HttpException
 	 */
-	private static void executeINSERT(final String graphName, final String dataSetAsNTriples)
+	public static void executeINSERT(final String graphName, final String dataSetAsNTriples)
 			throws HttpException, IOException {
 
+		String insertQueryTemplate =  "INSERT IN GRAPH <%s> { %n"
+									+ "	%s %n"
+									+ "} %n";
+		
 		final int MAX_STATEMENTS = 200;
 		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
 		int counter = 0;
 		StringBuilder insert = new StringBuilder();
-
 		for (int i = 0; i < lines.length; i++) {
 			String sub = lines[i];
 			if (!sub.equals("") && !sub.startsWith("#")) {
@@ -684,17 +712,59 @@ public class RevisionManagement {
 				}
 				insert.append('\n').append(sub);
 				counter++;
-				if (counter == MAX_STATEMENTS - 1) {
-					TripleStoreInterface.executeQueryWithAuthorization("INSERT IN GRAPH <" + graphName
-							+ "> { " + insert + "}", "HTML");
+				if (counter == MAX_STATEMENTS-1) {
+					TripleStoreInterface.executeQueryWithAuthorization(String.format(insertQueryTemplate, graphName, insert), "HTML");
 					counter = 0;
 					insert = new StringBuilder();
 				}
 			}
 		}
-		TripleStoreInterface.executeQueryWithAuthorization("INSERT IN GRAPH <" + graphName + "> { " + insert
-				+ "}", "HTML");
+		TripleStoreInterface.executeQueryWithAuthorization(String.format(insertQueryTemplate, graphName, insert), "HTML");
 	}
+	
+	
+	/**
+	 * Split huge DELETE statements into separate queries of up to fifty triple statements.
+	 * 
+	 * @param graphName the graph name
+	 * @param dataSetAsNTriples the data to insert as N-Triples
+	 * @throws IOException 
+	 * @throws HttpException 
+	 */
+	public static void executeDELETE(final String graphName, final String dataSetAsNTriples) throws HttpException, IOException {
+
+		String deleteQueryTemplate =  "DELETE DATA FROM <%s> { %n"
+									+ "	%s %n"
+									+ "} %n";
+		
+		final int MAX_STATEMENTS = 200;
+		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
+		int counter = 0;
+		StringBuilder delete = new StringBuilder();
+		
+		for (int i=0; i < lines.length; i++) {
+			// Remove whitespace characters
+						String sub = lines[i].replaceAll("\\s+","");;
+			if (!sub.equals("") && !sub.startsWith("#")) {
+				if (!sub.startsWith("<")) {
+					sub = "<" + sub;
+				}
+				if (i < lines.length - 1) {
+					sub = sub + ".";
+				}
+				delete.append('\n').append(sub);
+				counter++;
+				if (counter == MAX_STATEMENTS-1) {
+					TripleStoreInterface.executeQueryWithAuthorization(String.format(deleteQueryTemplate, graphName, delete), "HTML");
+					counter = 0;
+					delete = new StringBuilder();
+				}
+			}
+		}
+		TripleStoreInterface.executeQueryWithAuthorization(String.format(deleteQueryTemplate, graphName, delete), "HTML");
+	}
+	
+	
 
 	/**
 	 * Download complete revision information of R43ples from SPARQL endpoint.
@@ -892,5 +962,79 @@ public class RevisionManagement {
 
 		return resultASK.equals("true");
 	}
-
+	
+	
+	/**
+	 * Get the ADD set URI of a given revision URI.
+	 * 
+	 * @param revisionURI the revision URI
+	 * @param revisionGraph the revision graph
+	 * @return the ADD set URI, returns null when the revision URI does not exists or no ADD set is referenced by the revision URI
+	 * @throws HttpException 
+	 * @throws IOException 
+	 */
+	public static String getAddSetURI(String revisionURI, String revisionGraph) throws IOException, HttpException {
+		String query = String.format(
+			  "SELECT ?addSetURI \n"
+			+ "FROM <%s> \n"
+			+ "WHERE { \n"
+			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaAdded> ?addSetURI . \n"
+			+ "}", revisionGraph, revisionURI);
+		
+		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
+		
+		if (ResultSetFactory.fromXML(result).hasNext()) {
+			QuerySolution qs = ResultSetFactory.fromXML(result).next();
+			return qs.getResource("?addSetURI").toString();
+		} else {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Get the DELETE set URI of a given revision URI.
+	 * 
+	 * @param revisionURI the revision URI
+	 * @param revisionGraph the revision graph
+	 * @return the DELETE set URI, returns null when the revision URI does not exists or no DELETE set is referenced by the revision URI
+	 * @throws HttpException 
+	 * @throws IOException 
+	 */
+	public static String getDeleteSetURI(String revisionURI, String revisionGraph) throws IOException, HttpException {
+		String query = String.format(
+			  "SELECT ?deleteSetURI \n"
+			+ "FROM <%s> \n"
+			+ "WHERE { \n"
+			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaRemoved> ?deleteSetURI . \n"
+			+ "}", revisionGraph, revisionURI);
+		
+		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
+		
+		if (ResultSetFactory.fromXML(result).hasNext()) {
+			QuerySolution qs = ResultSetFactory.fromXML(result).next();
+			return qs.getResource("?deleteSetURI").toString();
+		} else {
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Get the content of a graph by execution of CONSTRUCT.
+	 * 
+	 * @param graphName the graphName
+	 * @return the constructed graph content as turtle
+	 * @throws HttpException 
+	 * @throws IOException 
+	 */
+	public static String getContentOfGraphByConstruct(String graphName) throws IOException, HttpException {
+		String query = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "FROM <%s> %n"
+				+ "WHERE {?s ?p ?o} %n", graphName);
+		
+		return TripleStoreInterface.executeQueryWithAuthorization(query, "TURTLE");		
+	}
+	
 }

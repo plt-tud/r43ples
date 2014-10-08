@@ -7,7 +7,7 @@ R43ples.zip
 *.log.*
 /resources/dataset
 /cov-int
-/dataset
+
 /yEdExport.graphml
 /bin/
 /test/TEST-*
