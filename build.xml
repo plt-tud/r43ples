@@ -121,7 +121,7 @@
 				<path refid="classpath" />
 				<pathelement location="${test.dir}/resources" />
 			</classpath>
-			<formatter type="xml" />
+			<formatter type="plain" usefile="false" />
 			<batchtest todir="${test.dir}">
 				<fileset dir="${test.dir}/src" includes="**/*Test*.java" />
 			</batchtest>
