@@ -28,13 +28,7 @@
 		<form action="/r43ples/sparql" method="post">
 		<fieldset>
 			<label for="query">Query Text</label><br />
-			<textarea name="query" id="query" cols="80" rows="20">
-SELECT * 
-FROM &lt;http://test.com/r43ples-dataset&gt; REVISION "MASTER"
-WHERE {
-	?s ?p ?o. 
-}
-	  </textarea>
+			<textarea name="query" id="query" cols="80" rows="20" placeholder="Insert R43ples/SPARQL query text or copy it from examples"></textarea>
 			<br /> 
 			<label for="format">Results Format:</label>
 			<select	name="format" id="name">
