@@ -1,0 +1,15 @@
+Source: r43ples
+Section: unknown
+Priority: extra
+Maintainer: Markus Graube <markus.graube@tu-dresden.de>
+Build-Depends: debhelper (>= 8.0.0), default-jdk, ant
+Standards-Version: 3.9.4
+Vcs-Git: https://github.com/plt-tud/r43ples.git
+
+Package: r43ples
+Section: misc
+Priority: extra
+Architecture: all
+Depends: virtuoso-opensource, default-jre-headless
+Description: Revision Control System for the Semantic Web
+ Notifies about SVN updates over DBUS notifications at defined time intervals.
