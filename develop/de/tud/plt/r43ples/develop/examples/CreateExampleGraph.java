@@ -10,7 +10,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 /**
- * Create an example graph of the following structure,
+ * Create an example graph of the following structure:
  * 
  *                  ADD: D,E              ADD: G
  *               +-----X---------------------X--------- (Branch B1)
