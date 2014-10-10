@@ -2,27 +2,38 @@
 <head>
 <title>R43ples - Revision Management for the Semantic Web</title>
 <meta name="author" content="Markus Graube">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/png" href="/static/images/r43ples-r-logo.png">
-<link href="/static/jquery-ui.css" rel="stylesheet" />
-<link href="/static/r43ples.css" rel="stylesheet" />
-<script src="/static/jquery-2.1.1.js"></script>
-<script src="/static/jquery-ui.js"></script>
+
+   <!-- Bootstrap -->
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    
+    <link href="/static/css/r43ples.css" rel="stylesheet" />
+<script src="/static/js/jquery-2.1.1.js"></script>
+<script src="/static/js/jquery-ui.js"></script>
+   <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/static/js/bootstrap.min.js"></script>
+    
 <script type="text/javascript">
   $(function() {
 	$(".accordion").accordion();
-  	$(".accordion > h3").prepend("<button class='copy'><</button> ");
-  	$(".accordion > h3 > button").click(function() {
+  	$(".accordion > h4").prepend("<button class='btn btn-sm copy'><span class='glyphicon glyphicon-new-window '></span></button> ");
+  	$(".accordion > h4 > button").click(function() {
 		$("#query").val($(this).parent().next().text());
   	});
   });
 </script>
 </head>
 <body>
+<div class="container">
 
-	<div id="header">
+	<div id="header" class="page-header">
 		<h1>R43ples - Revision Management for the Semantic Web</h1>
 	</div>
 
+<div class="row">
+<div class="col-md-8">
 	<div id="query_form">
 		<h2>Query Form</h2>
 		<form action="/r43ples/sparql">
@@ -71,23 +82,25 @@ WHERE {
 			</li>
 		</ul>
 	</div>
+</div>
 
+<div class="col-md-4">
 	<div id="examples">
 		<h2>Example queries</h2>
 		<div class="accordion">
-			<h3>Create Graph under Version Control</h3>
+			<h4>Create Graph under Version Control</h4>
 			<pre>
 CREATE GRAPH &lt;http://test.com/r43ples-dataset&gt;
 </pre>
 
-			<h3>Select Query</h3>
+			<h4>Select Query</h4>
 			<pre>SELECT * 
 FROM &lt;http://test.com/r43ples-dataset&gt; REVISION "3"
 WHERE {
 	?s ?p ?o. 
 }</pre>
 
-			<h3>Select Query - Multiple Graphs</h3>
+			<h4>Select Query - Multiple Graphs</h4>
 			<pre>OPTION r43ples:SPARQL_JOIN
 SELECT ?s ?p ?o 
 FROM &lt;http://test.com/r43ples-dataset&gt; REVISION "MASTER"
@@ -96,28 +109,36 @@ WHERE {
 	?s ?p ?o. 
 }</pre>
 
-			<h3>Update Query</h3>
+			<h4>Update Query</h4>
 			<pre>USER "mgraube"
 MESSAGE "test commit"
 INSERT { GRAPH &lt;http://test.com/r43ples-dataset&gt; REVISION "4"
 {	&lt;a&gt; &lt;b&gt; &lt;c&gt; .	}}</pre>
 
-			<h3>Branching</h3>
+			<h4>Branching</h4>
 			<pre>USER "mgraube"
 MESSAGE "test commit"
 BRANCH GRAPH &lt;http://test.com/r43ples-dataset&gt; REVISION "2" TO "unstable"</pre>
 
-			<h3>Tagging</h3>
+			<h4>Tagging</h4>
 			<pre>USER "mgraube"
 MESSAGE "test commit"
 TAG GRAPH &lt;http://test.com/r43ples-dataset&gt; REVISION "2" TO "v0.3-alpha"</pre>
 		</div>
 	</div>
+</div>
+</div>
 
-	<div id="footer">
-		2014 - Version %1$s | <a href="https://github.com/plt-tud/r43ples">R43ples@GitHub</a>
-		| powered by <a href="https://jersey.java.net/">Jersey</a>
+	<div id="footer" class="navbar-default navbar-fixed-bottom">
+	<div class="container">
+	<div class="span12">
+		<p class="navbar-text navbar-center">2014 - Version %1$s</p>
+		<p class="navbar-text logo"><a href="https://github.com/plt-tud/r43ples">R43ples@GitHub</a></p>
+		<p class="navbar-text">powered by <a href="https://jersey.java.net/">Jersey</a></p>
+	</div>
+	</div>
 	</div>
 
+</div>
 </body>
 </html>
