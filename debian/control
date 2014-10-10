@@ -1,15 +1,17 @@
 Source: r43ples
-Section: unknown
 Priority: extra
 Maintainer: Markus Graube <markus.graube@tu-dresden.de>
-Build-Depends: debhelper (>= 8.0.0), default-jdk, ant
-Standards-Version: 3.9.4
+Build-Depends: debhelper (>= 8.0.0), javahelper (>=0.25)
+Build-Depends-Indep: default-jdk, libtrove-java, ant
+Standards-Version: 3.9.5
 Vcs-Git: https://github.com/plt-tud/r43ples.git
+Section: utils
 
 Package: r43ples
 Section: misc
 Priority: extra
 Architecture: all
-Depends: virtuoso-opensource, default-jre-headless
+Depends: ${java:Depends}, ${misc:Depends}
+Recommends: ${java:Recommends}, virtuoso-opensource
 Description: Revision Control System for the Semantic Web
- Notifies about SVN updates over DBUS notifications at defined time intervals.
+ Adds a semantic revision control system to an exisiting triplestore with SPARQL interface (like virtuoso).

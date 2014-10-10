@@ -1,163 +1,171 @@
 #! /bin/sh
-#
-# virtuoso	OpenLink Virtuoso Open-Source Edition
-#
-#		Written by OpenLink Virtuoso Maintainer 
-#		<vos.admin@openlinksw.com>
-#
-# Version:	@(#)virtuoso 7.0.1	05-FEB-2014	vos.admin@openlinksw.com
-#
-
 ### BEGIN INIT INFO
-# Provides:		virtuoso
-# Required-Start: 	$syslog
-# Required-Stop: 	$syslog
-# Default-Start:	2 3 4 5
-# Default-Stop: 	0 1 6
-# Short-Description:	Start Virtuoso database server on startup
-# Description:		Start and stop the primary instance of Virtuoso running
-# 	in /var/lib/virtuoso/db/. The first time this runs, it loads the
-# 	Conductor administrative package.
+# Provides:          r43ples
+# Required-Start:    $remote_fs $syslog virtuoso
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: R43ples init script
+# Description:       Semantic Revision control systems
+#                    
 ### END INIT INFO
 
+# Author: Markus Graube <markus.graube@tu-dresden.de>
+#
 
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-DAEMON=/usr/bin/virtuoso-t
-NAME=virtuoso
-DESC="OpenLink Virtuoso Open-Source Edition"
-DBBASE=/var/lib/virtuoso/db
+# Do NOT "set -e"
 
-test -x $DAEMON || exit 0
+# PATH should only include /usr/* if it runs after the mountnfs.sh script
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+DESC="R4pl3s - Revision Control for the Semantic Web"
+NAME=r43ples
+#DAEMON=/usr/sbin/$NAME
+DAEMON=/usr/bin/java
+EXECPATH=/usr/share/r43ples
+DAEMON_USER=r43ples
+DAEMON_ARGS="-jar R43ples.jar"
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
 
-LOGDIR=/var/log/virtuoso-opensource
-PIDFILE=$DBBASE/$NAME.lck
-DODTIME=1                   # Time to wait for the server to die, in seconds
-                            # If this value is set too low you might not
-                            # let some servers to die gracefully and
-                            # 'restart' will not work
+# Exit if the package is not installed
+[ -x "$DAEMON" ] || exit 0
 
-# Include virtuoso-opensource defaults if available
-if [ -f /etc/default/virtuoso-opensource ] ; then
-	. /etc/default/virtuoso-opensource
-fi
+# Read configuration variable file if it is present
+[ -r /etc/default/$NAME ] && . /etc/default/$NAME
 
-set -e
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
 
-running_pid()
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.2-14) to ensure that this file is present
+# and status_of_proc is working.
+. /lib/lsb/init-functions
+
+#
+# Function that starts the daemon/service
+#
+do_start()
 {
-    # Check if a given process pid's cmdline matches a given name
-    pid=$1
-    name=$2
-    [ -z "$pid" ] && return 1
-    [ ! -d /proc/$pid ] &&  return 1
-    cmd=`cat /proc/$pid/cmdline | tr "\000" "\n"|head -n 1 |cut -d : -f 1`
-    # Is this the expected child?
-    [ "$cmd" != "$name" ] &&  return 1
-    return 0
+        # Return
+        #   0 if daemon has been started
+        #   1 if daemon was already running
+        #   2 if daemon could not be started
+        start-stop-daemon --start --quiet \
+                --pidfile $PIDFILE \
+                --chuid $DAEMON_USER \
+                --chdir $EXECPATH \
+                --exec $DAEMON \
+                --background \
+                --test > /dev/null \
+                || return 1
+        start-stop-daemon --start --quiet \
+                --background \
+                --pidfile $PIDFILE \
+                --chuid $DAEMON_USER \
+                --chdir $EXECPATH \
+                --exec $DAEMON \
+                -- $DAEMON_ARGS \
+                || return 2
+        # Add code here, if necessary, that waits for the process to be ready
+        # to handle requests from services started subsequently which depend
+        # on this one.  As a last resort, sleep for some time.
 }
 
-running()
+#
+# Function that stops the daemon/service
+#
+do_stop()
 {
-# Check if the process is running looking at /proc
-# (works for all users)
-
-    # No pidfile, probably no daemon present
-    [ ! -f "$PIDFILE" ] && return 1
-    # Obtain the pid and check it against the binary name
-    . $PIDFILE
-    pid="$VIRT_PID"
-    running_pid $pid $DAEMON || return 1
-    return 0
+        # Return
+        #   0 if daemon has been stopped
+        #   1 if daemon was already stopped
+        #   2 if daemon could not be stopped
+        #   other if a failure occurred
+        start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile $PIDFILE --name $NAME
+        RETVAL="$?"
+        [ "$RETVAL" = 2 ] && return 2
+        # Wait for children to finish too if this is a daemon that forks
+        # and if the daemon is only ever run from this initscript.
+        # If the above conditions are not satisfied then add some other code
+        # that waits for the process to drop all resources that could be
+        # needed by services started subsequently.  A last resort is to
+        # sleep for some time.
+        start-stop-daemon --stop --quiet --oknodo --retry=0/30/KILL/5 --exec $DAEMON
+        [ "$?" = 2 ] && return 2
+        # Many daemons don't delete their pidfiles when they exit.
+        rm -f $PIDFILE
+        return "$RETVAL"
 }
 
-force_stop() {
-# Forcefully kill the process
-    [ ! -f "$PIDFILE" ] && return
-    if running ; then
-        kill -15 $pid
-        # Is it really dead?
-        [ -n "$DODTIME" ] && sleep "$DODTIME"s
-        if running ; then
-            kill -9 $pid
-            [ -n "$DODTIME" ] && sleep "$DODTIME"s
-            if running ; then
-                echo "Cannot kill $LABEL (pid=$pid)!"
-                exit 1
-            fi
-        fi
-    fi
-    rm -f $PIDFILE
-    return 0
+#
+# Function that sends a SIGHUP to the daemon/service
+#
+do_reload() {
+        #
+        # If the daemon can reload its configuration without
+        # restarting (for example, when it is sent a SIGHUP),
+        # then implement that here.
+        #
+        start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE --name $NAME
+        return 0
 }
 
 case "$1" in
   start)
-	echo -n "Starting $DESC: "
-	cd "$DBBASE" || exit -1
-	$DAEMON -c $NAME +wait
-        if running ; then
-            echo "$NAME."
-        else
-            echo " ERROR."
-        fi
-	;;
+        [ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
+        do_start
+        case "$?" in
+                0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+                2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+        esac
+        ;;
   stop)
-	echo -n "Stopping $DESC: "
-	cd "$DBBASE" || exit -1
-	. ./virtuoso.lck
-	if running ; then
-	    kill $VIRT_PID
-	fi
-	echo "$NAME."
-	;;
-  force-stop)
-	echo -n "Forcefully stopping $DESC: "
-        force_stop
-        if ! running ; then
-            echo "$NAME."
-        else
-            echo " ERROR."
-        fi
-	;;
-  #reload)
-	#
-	#	If the daemon can reload its config files on the fly
-	#	for example by sending it SIGHUP, do it here.
-	#
-	#	If the daemon responds to changes in its config file
-	#	directly anyway, make this a do-nothing entry.
-	#
-	# echo "Reloading $DESC configuration files."
-	# start-stop-daemon --stop --signal 1 --quiet --pidfile \
-	#	/var/run/$NAME.pid --exec $DAEMON
-  #;;
-  force-reload)
-	#
-	#	If the "reload" option is implemented, move the "force-reload"
-	#	option to the "reload" entry above. If not, "force-reload" is
-	#	just the same as "restart" except that it does nothing if the
-	#   daemon isn't already running.
-	# check wether $DAEMON is running. If so, restart
-	start-stop-daemon --stop --test --quiet --pidfile \
-		/var/run/$NAME.pid --exec $DAEMON \
-	&& $0 restart \
-	|| exit 0
-	;;
+        [ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+        do_stop
+        case "$?" in
+                0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+                2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+        esac
+        ;;
   status)
-    echo -n "$LABEL is "
-    if running ;  then
-        echo "running"
-    else
-        echo " not running."
-        exit 1
-    fi
-    ;;
+        status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+        ;;
+  #reload|force-reload)
+        #
+        # If do_reload() is not implemented then leave this commented out
+        # and leave 'force-reload' as an alias for 'restart'.
+        #
+        #log_daemon_msg "Reloading $DESC" "$NAME"
+        #do_reload
+        #log_end_msg $?
+        #;;
+  restart|force-reload)
+        #
+        # If the "reload" option is implemented then remove the
+        # 'force-reload' alias
+        #
+        log_daemon_msg "Restarting $DESC" "$NAME"
+        do_stop
+        case "$?" in
+          0|1)
+                do_start
+                case "$?" in
+                        0) log_end_msg 0 ;;
+                        1) log_end_msg 1 ;; # Old process is still running
+                        *) log_end_msg 1 ;; # Failed to start
+                esac
+                ;;
+          *)
+                # Failed to stop
+                log_end_msg 1
+                ;;
+        esac
+        ;;
   *)
-	N=/etc/init.d/$NAME
-	# echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
-	echo "Usage: $N {start|stop|restart|force-reload|status|force-stop}" >&2
-	exit 1
-	;;
+        #echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
+        echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
+        exit 3
+        ;;
 esac
 
-exit 0
+:

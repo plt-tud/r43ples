@@ -11,3 +11,6 @@
 
 %:
 	dh $@ --with javahelper
+	
+override_dh_link:
+	dh_link usr/share/r43ples/R43ples.jar usr/bin/r43ples
