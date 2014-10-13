@@ -56,21 +56,26 @@ public class SparqlRewriter {
 
 	// TODO make instance variable
 	private static int statement_i = 0;
+	
+	private static final Pattern pattern = Pattern.compile("FROM\\s*<(?<graph>\\S*)>\\s*REVISION\\s*\"(?<revision>\\S*)\"", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
 
+	
+	
 	public static String rewriteQuery(final String query_r43ples) throws HttpException, IOException {
 
-		Pattern pattern = Pattern.compile("FROM\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>.*)\"");
-
+		statement_i = 0;
+		
 		ExprList expression_list_revision_path = new ExprList();
 		ExprList expression_list_last_revision = new ExprList();
-		// Node lastRevision = null;
 
 		Matcher m = pattern.matcher(query_r43ples);
 		String query_sparql = query_r43ples;
 		while (m.find()) {
 			String graphName = m.group("graph");
-			String revisionNumber = m.group("revision");
+			String referenceName = m.group("revision");
 			m.reset();
+			
+			String revisionNumber = RevisionManagement.getRevisionNumber(graphName, referenceName);
 
 			LinkedList<NodeSpecification> list = RevisionManagement.getRevisionTree(graphName).getPathToRevision(revisionNumber);
 			logger.info("Path to revision: " + list.toString());

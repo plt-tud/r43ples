@@ -103,8 +103,8 @@ public class Endpoint {
 			"MESSAGE\\s*\"(?<message>[^\"]*)\"", 
 			patternModifier);
 	private final Pattern patternMergeQuery =  Pattern.compile(
-			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>.*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>.*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>.*?)\"\\s*INTO\\s*\"(?<branchNameB>.*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
-			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);//
+			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
+			patternModifier);
 	
 	
 //	private final Pattern patternMergeQuery =  Pattern.compile(

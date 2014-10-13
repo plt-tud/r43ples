@@ -234,6 +234,17 @@ public class TestR43ples {
 		String result3 = executeR43plesQueryWithFormat(query, "application/xml");
 		String expected3 = ResourceManagement.getContentFromResource("response-1.1-3.xml");
 		Assert.assertEquals(expected3, result3);
+		
+		query = String.format(""
+						+ "OPTION r43ples:SPARQL_JOIN %n"
+						+ "SELECT ?s ?p ?o "
+						+ "FROM <%s> REVISION \"B1\" "
+						+ "FROM <%s> REVISION \"B2\" "
+						+ "WHERE { ?s ?p ?o. }"
+						+ "ORDER BY ?s ?p ?o", graphName, graphName);
+		String result4 = executeR43plesQueryWithFormat(query, "application/xml");
+		String expected4 = ResourceManagement.getContentFromResource("response-b1-b2.xml");
+		Assert.assertEquals(expected4, result4);
 	}
 	
 	@Test public void testServiceDescription() throws IOException{
