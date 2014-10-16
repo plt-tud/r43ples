@@ -107,11 +107,6 @@ public class Endpoint {
 			patternModifier);
 	
 	
-//	private final Pattern patternMergeQuery =  Pattern.compile(
-//			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*(GRAPH\\s*<(?<graph>.*)>\\s*)(SDD\\s*<(?<sdd>.*)>)?+\\s*BRANCH\\s*\"(?<branchNameA>.*)\"\\s*INTO\\s*\"(?<branchNameB>.*)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
-//			Pattern.DOTALL + Pattern.CASE_INSENSITIVE);//(\\s*(?<sdd>SDD)?\\s*\\{(?<sddURI>.*)\\})?
-
-	
 	@Context
 	private UriInfo uriInfo;
 	
