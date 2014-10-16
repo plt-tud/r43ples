@@ -47,7 +47,7 @@ public class CreateExampleGraphClasses {
 	/** The user. **/
 	private static String user = "shensel";
 	/** The initial content file path **/
-	private static String initialContentFilePath = "dataset/verification/ExampleGraphClasses_initial.triples";
+	private static String initialContentFilePath = "resources/verification/ExampleGraphClasses_initial.triples";
 	
 	
 	/**
