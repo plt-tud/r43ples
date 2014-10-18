@@ -1,0 +1,7 @@
+build/jar/lib /usr/share/r43ples
+build/jar/R43ples.jar /usr/share/r43ples
+build/jar/resources/samples /usr/share/r43ples/resources
+build/jar/resources/webapp /usr/share/r43ples/resources
+build/jar/resources/log4j.properties /usr/share/r43ples/resources
+build/jar/resources/r43ples.dist.conf /usr/share/r43ples/resources
+

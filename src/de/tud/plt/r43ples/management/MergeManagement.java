@@ -892,12 +892,11 @@ public class MergeManagement {
 	 * Read turtle file to jena model.
 	 * 
 	 * @param path the file path to the turtle file
-	 * @return the model
+	 * @return the jena model
 	 * @throws IOException
 	 */
 	public static Model readTurtleFileToJenaModel(String path) throws IOException {
-		Model model = null;
-		model = ModelFactory.createDefaultModel();
+		Model model = ModelFactory.createDefaultModel();
 		InputStream is = new BufferedInputStream(new FileInputStream(path));
 		model.read(is, null, "TURTLE");
 		is.close();

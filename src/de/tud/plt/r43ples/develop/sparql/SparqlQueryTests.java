@@ -35,7 +35,6 @@ import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
-import de.tud.plt.r43ples.develop.examples.CreateExampleGraph;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
@@ -49,7 +48,7 @@ import de.tud.plt.r43ples.management.TripleStoreInterface;
 public class SparqlQueryTests {
 
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(CreateExampleGraph.class);
+	private static Logger logger = Logger.getLogger(SparqlQueryTests.class);
 	/** The endpoint. **/
 	private static String endpoint = "http://localhost:8890/sparql-auth";
 	/** The revision graph. **/
