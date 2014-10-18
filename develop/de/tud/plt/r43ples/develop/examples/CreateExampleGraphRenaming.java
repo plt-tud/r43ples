@@ -7,26 +7,27 @@ import org.apache.log4j.Logger;
 /**
  * Create an example graph of the following structure:
  * 
- *                  ADD: D,E              ADD: G
+ *                  ADD: 2D               ADD: 1G
  *               +-----X---------------------X--------- (Branch B1)
- *               |  DEL: A                DEL: D
- * ADD: A,B,C    |
+ *               |  DEL: 1A               DEL: 2D
+ * ADD: 1A,1B,2C |
  * ---X----------+ (Master)
  * DEL: -        |
- *               |  ADD: D,H              ADD: I
+ *               |  ADD: 2D,2H            ADD: 2I
  *               +-----X---------------------X--------- (Branch B2)
- *                  DEL: C                DEL: -
+ *                  DEL: 2C               DEL: -
  * 
+ * Contains the renaming of 1A to 1G.
  * 
  * @author Stephan Hensel
  *
  */
-public class CreateExampleGraph {
+public class CreateExampleGraphRenaming {
 
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(CreateExampleGraph.class);
+	private static Logger logger = Logger.getLogger(CreateExampleGraphRenaming.class);
 	/** The graph name. **/
-	private static String graphName = "http://exampleGraph";
+	private static String graphName = "http://exampleGraphRenaming";
 	/** The user. **/
 	private static String user = "shensel";
 	
@@ -43,9 +44,9 @@ public class CreateExampleGraph {
 		ExampleGenerationManagement.createNewGraph(graphName);
 		
 		// Initial commit
-		String triples =  "<http://example.com/testS> <http://example.com/testP> \"A\". \n"
-						+ "<http://example.com/testS> <http://example.com/testP> \"B\". \n"
-						+ "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
+		String triples =  "<http://example.com/testS> <http://example.com/testP1> \"A\". \n"
+						+ "<http://example.com/testS> <http://example.com/testP1> \"B\". \n"
+						+ "<http://example.com/testS> <http://example.com/testP2> \"C\". \n";
 		
 		ExampleGenerationManagement.executeInsertQuery(user, "Initial commit", graphName, "0", triples);
 		
@@ -56,30 +57,29 @@ public class CreateExampleGraph {
 		ExampleGenerationManagement.createNewBranch(user, "Create a new branch B2", graphName, "1", "B2");
 		
 		// First commit to B1
-		String triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"D\". \n"
-								+ "<http://example.com/testS> <http://example.com/testP> \"E\". \n";
+		String triplesInsert =	  "<http://example.com/testS> <http://example.com/testP2> \"D\". \n";
 		
-		String triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"A\". \n";
+		String triplesDelete =	  "<http://example.com/testS> <http://example.com/testP1> \"A\". \n";
 		
 		ExampleGenerationManagement.executeInsertDeleteQuery(user, "First commit to B1", graphName, "B1", triplesInsert, triplesDelete);
 		
 		// First commit to B2
-		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"D\". \n"
-						+ "<http://example.com/testS> <http://example.com/testP> \"H\". \n";
+		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP2> \"D\". \n"
+						+ "<http://example.com/testS> <http://example.com/testP2> \"H\". \n";
 		
-		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
+		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP2> \"C\". \n";
 		
 		ExampleGenerationManagement.executeInsertDeleteQuery(user, "First commit to B2", graphName, "B2", triplesInsert, triplesDelete);
 		
 		// Second commit to B1
-		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"G\". \n";
+		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP1> \"G\". \n";
 		
-		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"D\". \n";
+		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP2> \"D\". \n";
 		
 		ExampleGenerationManagement.executeInsertDeleteQuery(user, "Second commit to B1", graphName, "B1", triplesInsert, triplesDelete);
 		
 		// Second commit to B2
-		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"I\". \n";
+		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP2> \"I\". \n";
 		
 		ExampleGenerationManagement.executeInsertQuery(user, "Second commit to B2", graphName, "B2", triplesInsert);
 		
