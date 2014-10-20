@@ -10,7 +10,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.NoSuchElementException;
 
 import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
@@ -24,6 +23,8 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+
+import de.tud.plt.r43ples.exception.InternalServerErrorException;
 
 /*
  * This class provides methods for merging branches.
@@ -282,7 +283,7 @@ public class MergeManagement {
 			String fullGraphName = "";
 			try {
 				fullGraphName = RevisionManagement.getReferenceGraph(graphName, firstRevisionNumber);
-			} catch (NoSuchElementException e) {
+			} catch (InternalServerErrorException e) {
 				// Create a temporary full graph
 				RevisionManagement.generateFullGraphOfRevision(graphName, firstRevisionNumber, "RM-TEMP-REVISION-PROGRESS-FIRSTREVISION");
 				fullGraphName = "RM-TEMP-REVISION-PROGRESS-FIRSTREVISION";
