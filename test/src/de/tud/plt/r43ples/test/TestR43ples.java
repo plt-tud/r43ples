@@ -14,31 +14,19 @@ import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
+import de.tud.plt.r43ples.management.SampleDataSet;
+import de.tud.plt.r43ples.management.TripleStoreInterface;
 import de.tud.plt.r43ples.webservice.Service;
 
-/**
- * Create an example graph of the following structure,
- * 
- *                  ADD: D,E              ADD: G
- *               +-----X---------------------X--------- (Branch B1)
- *               |  DEL: A                DEL: D
- * ADD: A,B,C    |
- * ---X----------+ (Master)
- * DEL: -        |
- *               |  ADD: D,H              ADD: I    ADD: J
- *               +-----X---------------------X---------X----- (Branch B2)
- *                  DEL: C                DEL: -    DEL: -
- * 
- * 
- * @author Stephan Hensel
- * @author Markus Graube
- *
- */
+
 public class TestR43ples {
 
 	/** The logger. */
@@ -49,13 +37,16 @@ public class TestR43ples {
 	private static String graphName = "http://exampleGraph.com/r43ples";
 	
 	
-	@Before
-	public void setUp() throws ConfigurationException, IOException, HttpException{
+	@BeforeClass
+	public static void setUp() throws ConfigurationException, IOException, HttpException{
+		Config.readConfig("r43ples.conf");
+		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
+		SampleDataSet.createSampleDataSetMerging(graphName);
 		Service.start();
 	}
 	
-	@After
-	public void tearDown() {
+	@AfterClass
+	public static void tearDown() {
 		Service.stop();
 	}
 	
@@ -70,143 +61,9 @@ public class TestR43ples {
 	@Test
 	public void testmain() throws IOException {
 		
-		// Purge silent example graph
-		logger.info("Purge silent example graph");
-		String query = String.format("DROP SILENT GRAPH <%s>", graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// Create new example graph
-		logger.info("Create new example graph");
-		query = String.format("CREATE SILENT GRAPH <%s>", graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// Initial commit
-		logger.info("Initial commit");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"Initial commit.\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"0\" %n"
-				+ "{"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"A\". %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"B\". %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"C\". %n"
-				+ "} }", graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// Create a new branch B1
-		logger.info("Create a new branch B1");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"Branch B1.\" %n"
-				+ "BRANCH GRAPH <%s> REVISION \"1\" TO \"B1\"", graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// Create a new branch B1
-		logger.info("Create a new branch B2");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"Branch B2.\" %n"
-				+ "BRANCH GRAPH <%s> REVISION \"1\" TO \"B2\"", graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// First commit to B1
-		logger.info("First commit to B1");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"First commit to B1.\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"B1\" %n"
-				+ "{ %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"D\". %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"E\". %n"
-				+ "} }"
-				+ "DELETE { GRAPH <%s> REVISION \"B1\" %n"
-				+ "{ %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"A\". %n"
-				+ "} }", graphName, graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// First commit to B2
-		logger.info("First commit to B2");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"First commit to B2.\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"B2\" %n"
-				+ "{ %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"D\". %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"H\". %n"
-				+ "} }"
-				+ "DELETE { GRAPH <%s> REVISION \"B2\" %n"
-				+ "{ %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"C\". %n"
-				+ "} }", graphName, graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// Second commit to B1
-		logger.info("Second commit to B1");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"Second commit to B1.\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"B1\" %n"
-				+ "{ %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"G\". %n"
-				+ "} }"
-				+ "DELETE { GRAPH <%s> REVISION \"B1\" %n"
-				+ "{ %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"D\". %n"
-				+ "} }", graphName, graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		query = String.format(""
-				+ "SELECT * FROM <%s> REVISION \"1.1-0\" "
-				+ "WHERE { ?s ?p ?o. }"
-				+ "ORDER BY ?s ?p ?o", graphName);
-		String result = executeR43plesQueryWithFormat(query, "application/xml");
-		String expected = ResourceManagement.getContentFromResource("response-1.1-0.xml");
-		Assert.assertEquals(expected, result);
-		
-		// Second commit to B2
-		logger.info("Second commit to B2");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"Second commit to B2.\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"B2\" %n"
-				+ "{ %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"I\". %n"
-				+ "} }", graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// Modify commit to B2
-		logger.info("Modify commit to B2");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"Modify commit to B2.\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"B2\" %n"
-				+ "{ <http://example.com/testS> <http://example.com/testP> \"J\". }"
-				+ "}", graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		query = String.format(""
-				+ "SELECT * FROM <%s> REVISION \"B2\" "
-				+ "WHERE { ?s ?p ?o. }"
-				+ "ORDER BY ?s ?p ?o", graphName);
-		String result2 = executeR43plesQueryWithFormat(query, "application/xml");
-		String expected2 = ResourceManagement.getContentFromResource("response-1.1-2.xml");
-		Assert.assertEquals(expected2, result2);
-		
-		
 		// restructure commit to B2
 		logger.info("Restructure commit to B2");
-		query = String.format(""
+		String query = String.format(""
 				+ "USER \"shensel\" %n"
 				+ "MESSAGE \"restructure commit to B2.\" %n"
 				+ "DELETE { GRAPH <%s> REVISION \"B2\" {"
