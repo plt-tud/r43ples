@@ -638,8 +638,8 @@ public class RevisionManagement {
 	public static String getNextRevisionNumberForLastRevisionNumber(final String graphName,
 			final String revisionNumber) {
 		if (revisionNumber.contains("-")) {
-			return revisionNumber.substring(0, revisionNumber.indexOf('-') + 1)
-					+ (Integer.parseInt(revisionNumber.substring(revisionNumber.indexOf('-') + 1,
+			return revisionNumber.substring(0, revisionNumber.lastIndexOf('-') + 1)
+					+ (Integer.parseInt(revisionNumber.substring(revisionNumber.lastIndexOf('-') + 1,
 							revisionNumber.length())) + 1);
 		} else {
 			return Integer.toString((Integer.parseInt(revisionNumber) + 1));
