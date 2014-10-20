@@ -12,24 +12,25 @@ import de.tud.plt.r43ples.management.TripleStoreInterface;
 /**
  * Create an example graph of the following structure:
  * 
- *                  ADD: D,E              ADD: G
+ *                  ADD: 2D               ADD: 1G
  *               +-----X---------------------X--------- (Branch B1)
- *               |  DEL: A                DEL: D
- * ADD: A,B,C    |
+ *               |  DEL: 1A               DEL: 2D
+ * ADD: 1A,1B,2C |
  * ---X----------+ (Master)
  * DEL: -        |
- *               |  ADD: D,H              ADD: I
+ *               |  ADD: 2D,2H            ADD: 2I
  *               +-----X---------------------X--------- (Branch B2)
- *                  DEL: C                DEL: -
+ *                  DEL: 2C               DEL: -
  * 
+ * Contains the renaming of 1A to 1G.
  * 
  * @author Stephan Hensel
  *
  */
-public class CreateExampleGraph {
+public class CreateExampleGraphRenaming {
 
 	/** The graph name. **/
-	private static String graphName = "http://exampleGraph";
+	private static String graphName = "http://exampleGraphRenaming";
 	
 	
 	/**
@@ -37,16 +38,13 @@ public class CreateExampleGraph {
 	 * 
 	 * @param args
 	 * @throws IOException 
-	 * @throws ConfigurationException 
-	 * @throws HttpException 
 	 */
 	public static void main(String[] args) throws IOException, ConfigurationException, HttpException {
 		
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
-		
-		SampleDataSet.createSampleDataSetMerging(graphName);
+	
+		SampleDataSet.createSampleDataSetRenaming(graphName);
 	}
 
 }
-
