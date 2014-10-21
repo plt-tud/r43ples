@@ -347,7 +347,34 @@ public class MergeManagement {
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
 						+ "	} \n"
-						+ "}",graphNameRevisionProgress, uri, uri, addSetURI);
+						+ "}", graphNameRevisionProgress, uri, uri, addSetURI);
+					
+					queryRevision += "\n";
+					
+					// Delete old entries (added)
+					queryRevision += String.format(
+						  "DELETE FROM GRAPH <%s> { \n"
+						+ "	<%s> rpo:added ?blank . \n"
+						+ "	?blank rdf:subject ?s . \n"
+						+ "	?blank rdf:predicate ?p . \n"
+						+ "	?blank rdf:object ?o . \n"
+						+ "	?blank rmo:references ?revision . \n"
+						+ "} \n"
+						+ "WHERE { \n"
+						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
+						+ "	WHERE { \n"
+						+ "		{ \n"
+						+ "			<%s> rpo:added ?blank . \n"
+						+ "			?blank rdf:subject ?s . \n"
+						+ "			?blank rdf:predicate ?p . \n"
+						+ "			?blank rdf:object ?o . \n"
+						+ "			?blank rmo:references ?revision . \n"
+						+ "		} \n"
+						+ "		GRAPH <%s> { \n"
+						+ "			?s ?p ?o \n"
+						+ "		} \n"
+						+ "	} \n"
+						+ "}", graphNameRevisionProgress, uri, uri, addSetURI);
 					
 					queryRevision += "\n";
 					
@@ -374,7 +401,7 @@ public class MergeManagement {
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
 						+ "	} \n"
-						+ "}",graphNameRevisionProgress, uri, uri, addSetURI);
+						+ "}", graphNameRevisionProgress, uri, uri, addSetURI);
 					
 					queryRevision += "\n";
 					
@@ -391,7 +418,7 @@ public class MergeManagement {
 						+ "} WHERE { \n"
 						+ "	GRAPH <%s> \n"
 						+ "		{ ?s ?p ?o . } \n"
-						+ "}",graphNameRevisionProgress, uri, revision, addSetURI);
+						+ "}", graphNameRevisionProgress, uri, revision, addSetURI);
 					
 					queryRevision += "\n \n";
 					
@@ -420,7 +447,7 @@ public class MergeManagement {
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
 						+ "	} \n"
-						+ "}",graphNameRevisionProgress, uri, uri, deleteSetURI);
+						+ "}", graphNameRevisionProgress, uri, uri, deleteSetURI);
 					
 					queryRevision += "\n";
 					
@@ -447,7 +474,34 @@ public class MergeManagement {
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
 						+ "	} \n"
-						+ "}",graphNameRevisionProgress, uri, uri, deleteSetURI);
+						+ "}", graphNameRevisionProgress, uri, uri, deleteSetURI);
+					
+					queryRevision += "\n";
+					
+					// Delete old entries (removed)
+					queryRevision += String.format(
+						  "DELETE FROM GRAPH <%s> { \n"
+						+ "	<%s> rpo:removed ?blank . \n"
+						+ "	?blank rdf:subject ?s . \n"
+						+ "	?blank rdf:predicate ?p . \n"
+						+ "	?blank rdf:object ?o . \n"
+						+ "	?blank rmo:references ?revision . \n"
+						+ "} \n"
+						+ "WHERE { \n"
+						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
+						+ "	WHERE { \n"
+						+ "		{ \n"
+						+ "			<%s> rpo:removed ?blank . \n"
+						+ "			?blank rdf:subject ?s . \n"
+						+ "			?blank rdf:predicate ?p . \n"
+						+ "			?blank rdf:object ?o . \n"
+						+ "			?blank rmo:references ?revision . \n"
+						+ "		} \n"
+						+ "		GRAPH <%s> { \n"
+						+ "			?s ?p ?o \n"
+						+ "		} \n"
+						+ "	} \n"
+						+ "}", graphNameRevisionProgress, uri, uri, deleteSetURI);
 					
 					queryRevision += "\n";
 					
@@ -464,7 +518,7 @@ public class MergeManagement {
 						+ "} WHERE { \n"
 						+ "	GRAPH <%s> \n"
 						+ "		{ ?s ?p ?o . } \n"
-						+ "}",graphNameRevisionProgress, uri, revision, deleteSetURI);
+						+ "}", graphNameRevisionProgress, uri, revision, deleteSetURI);
 				
 					// Execute the query which updates the revision progress by the current revision
 					TripleStoreInterface.executeQueryWithAuthorization(queryRevision, "HTML");
@@ -474,12 +528,8 @@ public class MergeManagement {
 					logger.error("ADD or DELETE set of " + revision + "does not exists.");
 				}
 				logger.info("Revision progress was created.");
-				
 			}
-			
-			
 		}
-		
 	}
 
 	
