@@ -64,6 +64,25 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
+	public void testSelectMaster() throws IOException, HttpException{
+        String query = "SELECT ?s ?p ?o "
+        		+ "FROM <"+graph_test+"> REVISION \"master\""
+        		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
+        
+        result = ep.sparql(format, query).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
+        Assert.assertEquals(expected, result);
+        
+        query = "SELECT ?s ?p ?o "
+        		+ "FROM <"+graph_test+"> REVISION \"MASTER\""
+        		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
+        
+        result = ep.sparql(format, query).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
+        Assert.assertEquals(expected, result);   
+	}
+	
+	@Test
 	public void testSelectWithRewriting() throws IOException, HttpException{
         String query_template = "OPTION r43ples:SPARQL_JOIN%n"
         		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"

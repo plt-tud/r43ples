@@ -9,14 +9,14 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -51,16 +51,33 @@ public class TestR43ples {
 	}
 	
 	
-	
-	/**
-	 * Main entry point. Create the example graph.
-	 * 
-	 * @param args
-	 * @throws IOException 
-	 */
 	@Test
-	public void testmain() throws IOException {
-		
+	public void testSelect() throws IOException {
+		String query = String.format(""
+				+ "SELECT * FROM <%s> REVISION \"B2\" "
+				+ "WHERE { ?s ?p ?o. }"
+				+ "ORDER BY ?s ?p ?o", graphName);
+		String result3 = executeR43plesQueryWithFormat(query, MediaType.APPLICATION_XML);
+		String expected3 = ResourceManagement.getContentFromResource("response-1.1-3.xml");
+		Assert.assertEquals(expected3, result3);
+	}
+	
+	
+	@Test
+	public void testSelectSparqlJoinOption() throws IOException{		
+		String query = String.format(""
+						+ "OPTION r43ples:SPARQL_JOIN %n"
+						+ "SELECT ?s ?p ?o "
+						+ "FROM <%s> REVISION \"B1\" "
+						+ "FROM <%s> REVISION \"B2\" "
+						+ "WHERE { ?s ?p ?o. }"
+						+ "ORDER BY ?s ?p ?o", graphName, graphName);
+		String result4 = executeR43plesQueryWithFormat(query, MediaType.APPLICATION_XML);
+		String expected4 = ResourceManagement.getContentFromResource("response-b1-b2.xml");
+		Assert.assertEquals(expected4, result4);
+	}
+	
+	@Test public void testRestructuring() throws IOException{
 		// restructure commit to B2
 		logger.info("Restructure commit to B2");
 		String query = String.format(""
@@ -81,32 +98,16 @@ public class TestR43ples {
 				graphName, graphName, graphName, graphName);
 		logger.debug("Execute query: \n" + query);
 		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-
-		
-		query = String.format(""
-				+ "SELECT * FROM <%s> REVISION \"B2\" "
-				+ "WHERE { ?s ?p ?o. }"
-				+ "ORDER BY ?s ?p ?o", graphName);
-		String result3 = executeR43plesQueryWithFormat(query, "application/xml");
-		String expected3 = ResourceManagement.getContentFromResource("response-1.1-3.xml");
-		Assert.assertEquals(expected3, result3);
-		
-		query = String.format(""
-						+ "OPTION r43ples:SPARQL_JOIN %n"
-						+ "SELECT ?s ?p ?o "
-						+ "FROM <%s> REVISION \"B1\" "
-						+ "FROM <%s> REVISION \"B2\" "
-						+ "WHERE { ?s ?p ?o. }"
-						+ "ORDER BY ?s ?p ?o", graphName, graphName);
-		String result4 = executeR43plesQueryWithFormat(query, "application/xml");
-		String expected4 = ResourceManagement.getContentFromResource("response-b1-b2.xml");
-		Assert.assertEquals(expected4, result4);
 	}
 	
 	@Test public void testServiceDescription() throws IOException{
 		String result = executeR43plesQueryWithFormat("", "text/turtle");
 		Assert.assertThat(result, containsString("sd:r43ples"));
+	}
+	
+	@Test public void testHtmlQueryForm() throws IOException{
+		String result = executeR43plesQueryWithFormat("", MediaType.TEXT_HTML);
+		Assert.assertThat(result, containsString("<form"));
 	}
 	
 	
@@ -115,7 +116,7 @@ public class TestR43ples {
 				+ "select * from <%s>"
 				+ "where { ?s ?p ?o. }"
 				+ "ORDER BY ?s ?p ?o", graphName);
-		String result = executeR43plesQueryWithFormat(query, "application/xml");
+		String result = executeR43plesQueryWithFormat(query, MediaType.APPLICATION_XML);
 		String expected = ResourceManagement.getContentFromResource("response-master.xml");
 		Assert.assertEquals(expected, result);
 	}
@@ -142,8 +143,8 @@ public class TestR43ples {
 	 * @return the result of the query
 	 * @throws IOException 
 	 */
-	public static String executeR43plesQuery(String query) throws IOException {
-		return executeR43plesQueryWithFormat(query, "application/xml");
+	private static String executeR43plesQuery(String query) throws IOException {
+		return executeR43plesQueryWithFormat(query, MediaType.APPLICATION_XML);
 	}
 	
 	/**
@@ -153,7 +154,7 @@ public class TestR43ples {
 	 * @return the result of the query
 	 * @throws IOException 
 	 */
-	public static String executeR43plesQueryWithFormat(String query, String format) throws IOException {
+	private static String executeR43plesQueryWithFormat(String query, String format) throws IOException {
 		URL url = null;
 		
 		url = new URL(endpoint+ "?query=" + URLEncoder.encode(query, "UTF-8")+ "&format=" + URLEncoder.encode(format, "UTF-8") );

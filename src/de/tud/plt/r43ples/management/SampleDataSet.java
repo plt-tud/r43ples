@@ -136,6 +136,8 @@ public class SampleDataSet {
 		triplesInsert = "<http://example.com/testS> <http://example.com/testP> \"J\". \n";
 		ExampleGenerationManagement.executeInsertQuery(user, "Third commit to B2", graphName, "B2",
 				triplesInsert);
+		
+		
 
 		logger.info("Example graph created.");
 	}

@@ -241,7 +241,7 @@ public class Endpoint {
 		logger.info("SPARQL requested with format: " + format);
 		String sparqlQuery = sparqlQueryDecoded;
 		if (sparqlQuery.equals("")) {
-			if (format.contains("text/html")) {
+			if (format.contains(MediaType.TEXT_HTML)) {
 				logger.info("SPARQL form requested");
 				List<String> graphList = RevisionManagement.getRevisedGraphs();
 				StringBuilder sb1 = new StringBuilder("<option value=\"\">(All)</option>\n");
