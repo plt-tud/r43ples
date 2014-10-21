@@ -7,8 +7,6 @@ import java.util.ArrayList;
 import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 
-import de.tud.plt.r43ples.develop.examples.ExampleGenerationManagement;
-
 public class SampleDataSet {
 
 	/** The logger. */

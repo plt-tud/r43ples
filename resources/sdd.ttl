@@ -129,7 +129,7 @@ sdd:notIncluded-added a sddo:StructuralDefinition ;
 	sddo:hasTripleStateA sddo:notIncluded ;
 	sddo:hasTripleStateB sddo:added ;
 	sddo:isConflicting "false"^^xsd:boolean ;
-	sddo:automaticResolutionState sddo:deleted .
+	sddo:automaticResolutionState sddo:added .
 
 # not possible
 #sdd:notIncluded-original a sddo:StructuralDefinition ;
