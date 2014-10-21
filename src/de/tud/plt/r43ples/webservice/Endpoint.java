@@ -283,7 +283,7 @@ public class Endpoint {
 					return getCreateGraphResponse(sparqlQuery, format);
 				}
 				if (patternMergeQuery.matcher(sparqlQueryDecoded).find()) {
-					return produceMergeResponse(sparqlQueryDecoded, format);
+					return getMergeResponse(sparqlQueryDecoded, format);
 				}
 				if (patternDropGraph.matcher(sparqlQuery).find()) {
 					return getDropGraphResponse(sparqlQuery, format);
@@ -306,18 +306,24 @@ public class Endpoint {
 	@Path("createSampleDataset")
 	@GET
 	public final Response createSampleDataset() {
-		final String graphName1 = "http://test.com/r43ples-dataset";
+		final String graphName1 = "http://test.com/r43ples-dataset-1";
 		final String graphName2 = "http://test.com/r43ples-dataset-2";
+		final String graphName3 = "http://test.com/r43ples-dataset-merging";
+		final String graphName4 = "http://test.com/r43ples-dataset-merging-classes";
+		final String graphName5 = "http://test.com/r43ples-dataset-renaming";
 		try {
 			SampleDataSet.createSampleDataset1(graphName1);
 			SampleDataSet.createSampleDataset2(graphName2);
+			SampleDataSet.createSampleDataSetMerging(graphName3);
+			SampleDataSet.createSampleDataSetMergingClasses(graphName4);
+			SampleDataSet.createSampleDataSetRenaming(graphName5);
 		} catch (HttpException | IOException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException(e.getMessage());
 		}
 		String result = String.format(
-				"Test dataset 1 successfully created in graph: %s %n"
-				+ "Test dataset 2 successfully created in graph: %s %n", graphName1, graphName2);
+				"Test datasets successfully created: <%s> <%s> <%s> <%s> <%s>"
+				, graphName1, graphName2, graphName3, graphName4, graphName5);
 		return Response.ok().entity(result).build();
 	}
 
@@ -685,7 +691,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	private Response produceMergeResponse(String sparqlQuery, String format) throws HttpException, IOException {
+	private Response getMergeResponse(String sparqlQuery, String format) throws HttpException, IOException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Merge creation detected");
 		String user = extractUser(sparqlQuery);
