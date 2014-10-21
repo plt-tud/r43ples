@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.develop.examples;
+package de.tud.plt.r43ples.develop;
 
 import java.io.IOException;
 
