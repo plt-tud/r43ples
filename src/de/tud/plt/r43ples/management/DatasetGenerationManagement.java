@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.develop.examples;
+package de.tud.plt.r43ples.management;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -16,10 +16,10 @@ import de.tud.plt.r43ples.webservice.Endpoint;
  * @author Stephan Hensel
  *
  */
-public class ExampleGenerationManagement {
+public class DatasetGenerationManagement {
 
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(ExampleGenerationManagement.class);
+	private static Logger logger = Logger.getLogger(DatasetGenerationManagement.class);
 	
 	private static Endpoint ep = new Endpoint();
 	
@@ -80,7 +80,7 @@ public class ExampleGenerationManagement {
 	 * @throws IOException
 	 * @throws HttpException 
 	 */
-	public static void executeInsertQuery(String user, String message, String graphName, String revision, String triples) throws IOException, HttpException {
+	 public static void executeInsertQuery(String user, String message, String graphName, String revision, String triples) throws IOException, HttpException {
 		logger.info(message);
 		String query = String.format(
 				  "USER \"%s\" %n"
