@@ -56,8 +56,8 @@ public class TestR43plesMerge {
 
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(TestR43plesMerge.class);
-	/** The endpoint. **/
-	private static String endpoint = "http://localhost:9998/r43ples/sparql";
+	/** The r43ples endpoint. **/
+	private static String r43ples_endpoint = "http://localhost:9998/r43ples/sparql";
 	/** The graph name. **/
 	private static String graphName = "http://exampleGraph.com/r43ples/merge";
 	/** The user. **/
@@ -507,7 +507,7 @@ public class TestR43plesMerge {
 
 	
 	/**
-	 * Executes a SPARQL-query against the R43ples endpoint
+	 * Executes a SPARQL-query against the R43ples r43ples_endpoint
 	 * 
 	 * @param query the SPARQL query
 	 * @return the result of the query
@@ -518,7 +518,7 @@ public class TestR43plesMerge {
 	}
 	
 	/**
-	 * Executes a SPARQL-query against the R43ples endpoint
+	 * Executes a SPARQL-query against the R43ples r43ples_endpoint
 	 * 
 	 * @param query the SPARQL query
 	 * @return the result of the query
@@ -529,7 +529,7 @@ public class TestR43plesMerge {
 		
 		URL url = null;
 		
-		url = new URL(endpoint+ "?query=" + URLEncoder.encode(query, "UTF-8")+ "&format=" + URLEncoder.encode(format, "UTF-8") );
+		url = new URL(r43ples_endpoint+ "?query=" + URLEncoder.encode(query, "UTF-8")+ "&format=" + URLEncoder.encode(format, "UTF-8") );
 		logger.debug(url.toString());
 
 		URLConnection con = null;
@@ -543,6 +543,7 @@ public class TestR43plesMerge {
 		return body;
 	}
 	
+	
 	/**
 	 * Executes a SPARQL-query against the triple store without authorization using HTTP-POST.
 	 * 
@@ -552,7 +553,7 @@ public class TestR43plesMerge {
 	 * @throws IOException 
 	 */
 	public static HttpResponse executeQueryWithoutAuthorizationPostResponse(String query, String format) throws IOException {
-		URL url = new URL(endpoint);
+		URL url = new URL(r43ples_endpoint);
 		Map<String,Object> params = new LinkedHashMap<>();
 		params.put("query", query);
 		params.put("format", format);
