@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.develop;
+package de.tud.plt.r43ples.examples;
 
 import java.io.IOException;
 import java.util.ArrayList;

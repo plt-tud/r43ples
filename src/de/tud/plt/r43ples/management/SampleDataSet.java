@@ -195,6 +195,25 @@ public class SampleDataSet {
 
 	}
 
+	
+	/**
+	 * Create an example graph of the following structure:
+	 * 
+	 *                  ADD: 2D               ADD: 1G
+	 *               +-----X---------------------X--------- (Branch B1)
+	 *               |  DEL: 1A               DEL: 2D
+	 * ADD: 1A,1B,2C |
+	 * ---X----------+ (Master)
+	 * DEL: -        |
+	 *               |  ADD: 2D,2H            ADD: 2I
+	 *               +-----X---------------------X--------- (Branch B2)
+	 *                  DEL: 2C               DEL: -
+	 * 
+	 * Contains the renaming of 1A to 1G.
+	 * 
+	 * @author Stephan Hensel
+	 *
+	 */
 	public static void createSampleDataSetRenaming(String graphName) throws IOException, HttpException {
 		/** The user. **/
 		String user = "shensel";
