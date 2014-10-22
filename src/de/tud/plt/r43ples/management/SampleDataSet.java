@@ -77,6 +77,8 @@ public class SampleDataSet {
 	 * 
 	 * @author Stephan Hensel
 	 * @author Markus Graube
+	 * @throws IOException
+	 * @throws HttpException
 	 *
 	 */
 	public static void createSampleDataSetMerging(String graphName) throws IOException, HttpException {
@@ -140,6 +142,14 @@ public class SampleDataSet {
 		logger.info("Example graph created.");
 	}
 
+	
+	/**
+	 * 
+	 * 
+	 * @param graphName the graph name
+	 * @throws IOException
+	 * @throws HttpException
+	 */
 	public static void createSampleDataSetMergingClasses(String graphName) throws IOException, HttpException {
 		/** The user. **/
 		String user = "shensel";
@@ -211,6 +221,10 @@ public class SampleDataSet {
 	 * 
 	 * Contains the renaming of 1A to 1G.
 	 * 
+	 * @param graphName the graph name
+	 * @throws IOException
+	 * @throws HttpException
+	 * 
 	 * @author Stephan Hensel
 	 *
 	 */
@@ -268,5 +282,150 @@ public class SampleDataSet {
 		logger.info("Example graph created.");
 	}
 
-
+	
+	/**
+	 * Create an example graph of the following structure:
+	 * 
+	 *                                              ADD: -      ADD: -                                                     
+	 *                                           +-----X-----------X-----------(Branch B1X)--+                            
+	 *                                           |  DEL: B      DEL: C                        \                              
+	 *                                           |                                             \                             
+	 *                  ADD: D,E       ADD: G    |        ADD: F                                \                          
+	 *               +-----X--------------X------+-----------X-----------------(Branch B1)-------+--+                       
+	 *               |  DEL: A         DEL: D             DEL: -                                     \                       
+	 *               |                                                                                \                      
+	 *               |                              ADD: J      ADD: C                                 \                     
+	 *               |                           +-----X-----------X-----------(Branch B2X)--+          \                                   
+	 *               |                           |  DEL: -      DEL: I                        \          \                  
+	 *               |                           |                                             \          \                  
+	 *               |  ADD: D,H       ADD: I    |  ADD: K,L    ADD: M                          \          \              
+	 *               +-----X--------------X------+-----X-----------X-----------(Branch B2)-------+----------+--+             
+	 *               |  DEL: C         DEL: -       DEL: I      DEL: -                                          \            
+	 *               |                                                                                           \           
+	 *               |                                                                                            \          
+	 * ADD: A,B,C    |          ADD: M,N            ADD: P,R,S                                                     \        
+	 * ---X----------+-------------X-------------------X-----------------------(MASTER)-----------------------------+--      
+	 * DEL: -                   DEL: C              DEL: M                                                                     
+	 * 
+	 * @param graphName the graph name
+	 * @throws IOException
+	 * @throws HttpException
+	 * 
+	 * @author Stephan Hensel
+	 *
+	 */
+	public static void createSampleDataSetComplexStructure(String graphName) throws IOException, HttpException {
+		/** The user. **/
+		String user = "shensel";
+		
+		// Create new example graph
+		DatasetGenerationManagement.createNewGraph(graphName);
+		
+		// Initial commit
+		String triples =  "<http://example.com/testS> <http://example.com/testP> \"A\". \n"
+						+ "<http://example.com/testS> <http://example.com/testP> \"B\". \n"
+						+ "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
+		
+		DatasetGenerationManagement.executeInsertQuery(user, "Initial commit", graphName, "0", triples);
+		
+		// Create a new branch B1
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, "1", "B1");
+		
+		// Create a new branch B2
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2", graphName, "1", "B2");
+		
+		// First commit to B1
+		String triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"D\". \n"
+								+ "<http://example.com/testS> <http://example.com/testP> \"E\". \n";
+		
+		String triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"A\". \n";
+		
+		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B1", graphName, "B1", triplesInsert, triplesDelete);
+		
+		// Second commit to B1
+		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"G\". \n";
+		
+		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"D\". \n";
+		
+		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Second commit to B1", graphName, "B1", triplesInsert, triplesDelete);
+		
+		// Create a new branch B1X
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1X", graphName, "B1", "B1X");
+		
+		// First commit to B1X
+		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"B\". \n";
+		
+		DatasetGenerationManagement.executeDeleteQuery(user, "First commit to B1X", graphName, "B1X", triplesDelete);
+		
+		// Second commit to B1X
+		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
+		
+		DatasetGenerationManagement.executeDeleteQuery(user, "Second commit to B1X", graphName, "B1X", triplesDelete);
+		
+		// Third commit to B1
+		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"F\". \n";
+		
+		DatasetGenerationManagement.executeInsertQuery(user, "Third commit to B1", graphName, "B1", triplesInsert);
+		
+		// First commit to B2
+		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"D\". \n"
+						+ "<http://example.com/testS> <http://example.com/testP> \"H\". \n";
+		
+		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
+		
+		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B2", graphName, "B2", triplesInsert, triplesDelete);
+		
+		// Second commit to B2
+		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"I\". \n";
+		
+		DatasetGenerationManagement.executeInsertQuery(user, "Second commit to B2", graphName, "B2", triplesInsert);
+		
+		// Create a new branch B2X
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2X", graphName, "B2", "B2X");
+		
+		// First commit to B2X
+		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"J\". \n";
+		
+		DatasetGenerationManagement.executeInsertQuery(user, "First commit to B2X", graphName, "B2X", triplesInsert);
+		
+		// Second commit to B2X
+		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
+		
+		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"I\". \n";
+		
+		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Second commit to B2X", graphName, "B2X", triplesInsert, triplesDelete);
+		
+		// Third commit to B2
+		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"K\". \n"
+						+ "<http://example.com/testS> <http://example.com/testP> \"L\". \n";
+		
+		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"I\". \n";
+		
+		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Third commit to B2", graphName, "B2", triplesInsert, triplesDelete);
+		
+		// Fourth commit to B2
+		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"M\". \n";
+		
+		DatasetGenerationManagement.executeInsertQuery(user, "Fourth commit to B2", graphName, "B2", triplesInsert);
+		
+		// Second commit to master
+		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"M\". \n"
+						+ "<http://example.com/testS> <http://example.com/testP> \"N\". \n";
+		
+		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
+		
+		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Second commit to MASTER", graphName, "master", triplesInsert, triplesDelete);
+		
+		// Third commit to master
+		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"P\". \n"
+						+ "<http://example.com/testS> <http://example.com/testP> \"R\". \n"
+						+ "<http://example.com/testS> <http://example.com/testP> \"S\". \n";
+		
+		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"M\". \n";
+		
+		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Third commit to MASTER", graphName, "master", triplesInsert, triplesDelete);
+		
+		logger.info("Example graph created.");
+	}
+	
 }

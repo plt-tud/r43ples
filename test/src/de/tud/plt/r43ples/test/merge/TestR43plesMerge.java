@@ -23,6 +23,7 @@ import org.xml.sax.SAXException;
 import static org.custommonkey.xmlunit.XMLAssert.*;
 import de.tud.plt.r43ples.management.DatasetGenerationManagement;
 import de.tud.plt.r43ples.management.HttpResponse;
+import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Service;
 
 /**
@@ -74,125 +75,8 @@ public class TestR43plesMerge {
 	@Before
 	public void setUp() throws ConfigurationException, IOException, HttpException{
 		Service.start();
-		createInitialDataSet();
-	}
-
-	
-	/**
-	 * Create the initial data set
-	 * 
-	 * @throws IOException
-	 * @throws HttpException 
-	 */
-	private void createInitialDataSet() throws IOException, HttpException {
-		// Create new example graph
-		DatasetGenerationManagement.createNewGraph(graphName);
-		
-		// Initial commit
-		String triples =  "<http://example.com/testS> <http://example.com/testP> \"A\". \n"
-						+ "<http://example.com/testS> <http://example.com/testP> \"B\". \n"
-						+ "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
-		
-		DatasetGenerationManagement.executeInsertQuery(user, "Initial commit", graphName, "0", triples);
-		
-		// Create a new branch B1
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, "1", "B1");
-		
-		// Create a new branch B2
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2", graphName, "1", "B2");
-		
-		// First commit to B1
-		String triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"D\". \n"
-								+ "<http://example.com/testS> <http://example.com/testP> \"E\". \n";
-		
-		String triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"A\". \n";
-		
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B1", graphName, "B1", triplesInsert, triplesDelete);
-		
-		// Second commit to B1
-		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"G\". \n";
-		
-		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"D\". \n";
-		
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Second commit to B1", graphName, "B1", triplesInsert, triplesDelete);
-		
-		// Create a new branch B1X
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1X", graphName, "B1", "B1X");
-		
-		// First commit to B1X
-		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"B\". \n";
-		
-		DatasetGenerationManagement.executeDeleteQuery(user, "First commit to B1X", graphName, "B1X", triplesDelete);
-		
-		// Second commit to B1X
-		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
-		
-		DatasetGenerationManagement.executeDeleteQuery(user, "Second commit to B1X", graphName, "B1X", triplesDelete);
-		
-		// Third commit to B1
-		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"F\". \n";
-		
-		DatasetGenerationManagement.executeInsertQuery(user, "Third commit to B1", graphName, "B1", triplesInsert);
-		
-		// First commit to B2
-		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"D\". \n"
-						+ "<http://example.com/testS> <http://example.com/testP> \"H\". \n";
-		
-		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
-		
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B2", graphName, "B2", triplesInsert, triplesDelete);
-		
-		// Second commit to B2
-		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"I\". \n";
-		
-		DatasetGenerationManagement.executeInsertQuery(user, "Second commit to B2", graphName, "B2", triplesInsert);
-		
-		// Create a new branch B2X
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2X", graphName, "B2", "B2X");
-		
-		// First commit to B2X
-		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"J\". \n";
-		
-		DatasetGenerationManagement.executeInsertQuery(user, "First commit to B2X", graphName, "B2X", triplesInsert);
-		
-		// Second commit to B2X
-		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
-		
-		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"I\". \n";
-		
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Second commit to B2X", graphName, "B2X", triplesInsert, triplesDelete);
-		
-		// Third commit to B2
-		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"K\". \n"
-						+ "<http://example.com/testS> <http://example.com/testP> \"L\". \n";
-		
-		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"I\". \n";
-		
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Third commit to B2", graphName, "B2", triplesInsert, triplesDelete);
-		
-		// Fourth commit to B2
-		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"M\". \n";
-		
-		DatasetGenerationManagement.executeInsertQuery(user, "Fourth commit to B2", graphName, "B2", triplesInsert);
-		
-		// Second commit to master
-		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"M\". \n"
-						+ "<http://example.com/testS> <http://example.com/testP> \"N\". \n";
-		
-		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
-		
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Second commit to MASTER", graphName, "master", triplesInsert, triplesDelete);
-		
-		// Third commit to master
-		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"P\". \n"
-						+ "<http://example.com/testS> <http://example.com/testP> \"R\". \n"
-						+ "<http://example.com/testS> <http://example.com/testP> \"S\". \n";
-		
-		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"M\". \n";
-		
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Third commit to MASTER", graphName, "master", triplesInsert, triplesDelete);
-		
-		logger.info("Example graph created.");
+		// Create the initial data set
+		SampleDataSet.createSampleDataSetComplexStructure(graphName);
 	}
 	
 	
@@ -200,33 +84,34 @@ public class TestR43plesMerge {
 	 * Test the created graph.
 	 * 
 	 * @throws IOException 
+	 * @throws SAXException 
 	 */
 	@Test
-	public void testCreatedGraph() throws IOException {
+	public void testCreatedGraph() throws IOException, SAXException {
 		// Test branch B1
-		String result1 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B1"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected1 = DatasetGenerationManagement.readFileToString("test/resources/merge/response-B1.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected1, result1);
+		String result1 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B1"), "application/xml");
+		String expected1 = DatasetGenerationManagement.readFileToString("test/resources/merge/response-B1.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected1, result1);
 		
 		// Test branch B1X
-		String result2 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B1X"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected2 = DatasetGenerationManagement.readFileToString("test/resources/merge/response-B1X.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected2, result2);
+		String result2 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B1X"), "application/xml");
+		String expected2 = DatasetGenerationManagement.readFileToString("test/resources/merge/response-B1X.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected2, result2);
 		
 		// Test branch B2
-		String result3 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected3 = DatasetGenerationManagement.readFileToString("test/resources/merge/response-B2.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected3, result3);
+		String result3 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2"), "application/xml");
+		String expected3 = DatasetGenerationManagement.readFileToString("test/resources/merge/response-B2.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected3, result3);
 		
 		// Test branch B2X
-		String result4 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2X"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected4 = DatasetGenerationManagement.readFileToString("test/resources/merge/response-B2X.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected4, result4);
+		String result4 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2X"), "application/xml");
+		String expected4 = DatasetGenerationManagement.readFileToString("test/resources/merge/response-B2X.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected4, result4);
 		
 		// Test branch MASTER
-		String result5 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "master"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected5 = DatasetGenerationManagement.readFileToString("test/resources/merge/response-MASTER.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected5, result5);
+		String result5 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "master"), "application/xml");
+		String expected5 = DatasetGenerationManagement.readFileToString("test/resources/merge/response-MASTER.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected5, result5);
 	}
 	
 	
@@ -253,27 +138,27 @@ public class TestR43plesMerge {
 		executeR43plesQueryWithFormat(createAutoMergeQuery(graphName, sdd, user, "Merge B2X into B2", "B2X", "B2"), "application/xml");
 		
 		// Test branch B2
-		String result2 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected2 = DatasetGenerationManagement.readFileToString("test/resources/merge/auto/response-B2-B2X-into-B2.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected2, result2);
+		String result2 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2"), "application/xml");
+		String expected2 = DatasetGenerationManagement.readFileToString("test/resources/merge/auto/response-B2-B2X-into-B2.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected2, result2);
 		
 		
 		// Merge B1 into B2
 		executeR43plesQueryWithFormat(createAutoMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"), "application/xml");
 		
 		// Test branch B2
-		String result3 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected3 = DatasetGenerationManagement.readFileToString("test/resources/merge/auto/response-B2-B1-into-B2.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected3, result3);
+		String result3 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2"), "application/xml");
+		String expected3 = DatasetGenerationManagement.readFileToString("test/resources/merge/auto/response-B2-B1-into-B2.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected3, result3);
 		
 		
 		// Merge B2 into MASTER
 		executeR43plesQueryWithFormat(createAutoMergeQuery(graphName, sdd, user, "Merge B2 into MASTER", "B2", "master"), "application/xml");
 		
 		// Test branch MASTER
-		String result4 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "master"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected4 = DatasetGenerationManagement.readFileToString("test/resources/merge/auto/response-MASTER-B2-into-MASTER.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected4, result4);
+		String result4 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "master"), "application/xml");
+		String expected4 = DatasetGenerationManagement.readFileToString("test/resources/merge/auto/response-MASTER-B2-into-MASTER.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected4, result4);
 	}
 	
 	
@@ -304,9 +189,9 @@ public class TestR43plesMerge {
 		Assert.assertEquals(queryExpected2, queryResult2.getBody().replace("\n", "").replace("\r", ""));
 		
 		// Test branch B2
-		String result2 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected2 = DatasetGenerationManagement.readFileToString("test/resources/merge/common/response-B2-B2X-into-B2.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected2, result2);
+		String result2 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2"), "application/xml");
+		String expected2 = DatasetGenerationManagement.readFileToString("test/resources/merge/common/response-B2-B2X-into-B2.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected2, result2);
 		
 		
 		// Merge B1 into B2
@@ -322,9 +207,9 @@ public class TestR43plesMerge {
 		Assert.assertEquals(queryExpected3_1, queryResult3_1.getBody().replace("\n", "").replace("\r", ""));
 
 		// Test branch B2
-		String result3 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected3 = DatasetGenerationManagement.readFileToString("test/resources/merge/common/response-B2-B1-into-B2.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected3, result3);
+		String result3 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2"), "application/xml");
+		String expected3 = DatasetGenerationManagement.readFileToString("test/resources/merge/common/response-B2-B1-into-B2.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected3, result3);
 
 		
 		// Merge B2 into MASTER
@@ -340,9 +225,9 @@ public class TestR43plesMerge {
 		Assert.assertEquals(queryExpected4_1, queryResult4_1.getBody().replace("\n", "").replace("\r", ""));
 		
 		// Test branch MASTER
-		String result4 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "master"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected4 =DatasetGenerationManagement.readFileToString("test/resources/merge/common/response-MASTER-B2-into-MASTER.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected4, result4);
+		String result4 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "master"), "application/xml");
+		String expected4 =DatasetGenerationManagement.readFileToString("test/resources/merge/common/response-MASTER-B2-into-MASTER.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected4, result4);
 	}
 	
 	
@@ -350,9 +235,10 @@ public class TestR43plesMerge {
 	 * Test MANUAL-MERGE.
 	 * 
 	 * @throws IOException 
+	 * @throws SAXException 
 	 */
 	@Test
-	public void testManualMerge() throws IOException {
+	public void testManualMerge() throws IOException, SAXException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
@@ -361,9 +247,9 @@ public class TestR43plesMerge {
 		
 		executeR43plesQueryWithFormat(createManualMergeQuery(graphName, sdd, user, "Merge B1X into B1", "B1X", "B1", triples), "application/xml");
 		// Test branch B1
-		String result1 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B1"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected1 = DatasetGenerationManagement.readFileToString("test/resources/merge/manual/response-B1-B1X-into-B1.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected1, result1);
+		String result1 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B1"), "application/xml");
+		String expected1 = DatasetGenerationManagement.readFileToString("test/resources/merge/manual/response-B1-B1X-into-B1.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected1, result1);
 		
 		
 		// Merge B2X into B2
@@ -372,9 +258,9 @@ public class TestR43plesMerge {
 		executeR43plesQueryWithFormat(createManualMergeQuery(graphName, sdd, user, "Merge B2X into B2", "B2X", "B2", triples), "application/xml");
 		
 		// Test branch B2
-		String result2 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected2 = DatasetGenerationManagement.readFileToString("test/resources/merge/manual/response-B2-B2X-into-B2.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected2, result2);
+		String result2 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2"), "application/xml");
+		String expected2 = DatasetGenerationManagement.readFileToString("test/resources/merge/manual/response-B2-B2X-into-B2.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected2, result2);
 		
 		
 		// Merge B1 into B2
@@ -384,9 +270,9 @@ public class TestR43plesMerge {
 		executeR43plesQueryWithFormat(createManualMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples), "application/xml");
 		
 		// Test branch B2
-		String result3 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected3 = DatasetGenerationManagement.readFileToString("test/resources/merge/manual/response-B2-B1-into-B2.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected3, result3);
+		String result3 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B2"), "application/xml");
+		String expected3 = DatasetGenerationManagement.readFileToString("test/resources/merge/manual/response-B2-B1-into-B2.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected3, result3);
 		
 		
 		// Merge B2 into MASTER
@@ -397,9 +283,9 @@ public class TestR43plesMerge {
 		executeR43plesQueryWithFormat(createManualMergeQuery(graphName, sdd, user, "Merge B2 into MASTER", "B2", "master", triples), "application/xml");
 		
 		// Test branch MASTER
-		String result4 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "master"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected4 = DatasetGenerationManagement.readFileToString("test/resources/merge/manual/response-MASTER-B2-into-MASTER.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected4, result4);
+		String result4 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "master"), "application/xml");
+		String expected4 = DatasetGenerationManagement.readFileToString("test/resources/merge/manual/response-MASTER-B2-into-MASTER.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected4, result4);
 	}
 	
 	

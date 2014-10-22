@@ -20,7 +20,7 @@ public class DatasetGenerationManagement {
 
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(DatasetGenerationManagement.class);
-	
+	/** The endpoint. **/
 	private static Endpoint ep = new Endpoint();
 	
 	
