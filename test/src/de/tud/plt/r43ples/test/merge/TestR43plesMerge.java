@@ -18,7 +18,9 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
+import static org.custommonkey.xmlunit.XMLAssert.*;
 import de.tud.plt.r43ples.management.DatasetGenerationManagement;
 import de.tud.plt.r43ples.management.HttpResponse;
 import de.tud.plt.r43ples.webservice.Service;
@@ -232,18 +234,19 @@ public class TestR43plesMerge {
 	 * Test AUTO-MERGE.
 	 * 
 	 * @throws IOException 
+	 * @throws SAXException 
 	 */
 	@Test
-	public void testAutoMerge() throws IOException {
+	public void testAutoMerge() throws IOException, SAXException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
 		// Merge B1X into B1
 		executeR43plesQueryWithFormat(createAutoMergeQuery(graphName, sdd, user, "Merge B1X into B1", "B1X", "B1"), "application/xml");
 		// Test branch B1
-		String result1 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B1"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected1 = DatasetGenerationManagement.readFileToString("test/resources/merge/auto/response-B1-B1X-into-B1.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected1, result1);
+		String result1 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B1"), "application/xml");
+		String expected1 = DatasetGenerationManagement.readFileToString("test/resources/merge/auto/response-B1-B1X-into-B1.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected1, result1);
 		
 		
 		// Merge B2X into B2
@@ -278,21 +281,21 @@ public class TestR43plesMerge {
 	 * Test common MERGE.
 	 * 
 	 * @throws IOException 
+	 * @throws SAXException 
 	 */
 	@Test
-	public void testCommonMerge() throws IOException {
+	public void testCommonMerge() throws IOException, SAXException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
 		// Merge B1X into B1
 		HttpResponse queryResult1 = executeQueryWithoutAuthorizationPostResponse(createCommonMergeQuery(graphName, sdd, user, "Merge B1X into B1", "B1X", "B1"), "application/xml");
-		String queryExpected1 = DatasetGenerationManagement.readFileToString("test/resources/merge/common/response-query-B1X-into-B1.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(queryExpected1, queryResult1.getBody().replace("\n", "").replace("\r", ""));
+		Assert.assertEquals("", queryResult1.getBody());
 		
 		// Test branch B1
-		String result1 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B1"), "application/xml").replace("\n", "").replace("\r", "");
-		String expected1 = DatasetGenerationManagement.readFileToString("test/resources/merge/common/response-B1-B1X-into-B1.xml", StandardCharsets.UTF_8).replace("\n", "").replace("\r", "");
-		Assert.assertEquals(expected1, result1);
+		String result1 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "B1"), "application/xml");
+		String expected1 = DatasetGenerationManagement.readFileToString("test/resources/merge/common/response-B1-B1X-into-B1.xml", StandardCharsets.UTF_8);
+		assertXMLEqual(expected1, result1);
 		
 		
 		// Merge B2X into B2
