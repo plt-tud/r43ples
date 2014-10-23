@@ -26,33 +26,7 @@ import de.tud.plt.r43ples.management.HttpResponse;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Service;
 
-/**
- * Create an example graph of the following structure:
- * 
- *                                              ADD: -      ADD: -                                                     
- *                                           +-----X-----------X-----------(Branch B1X)--+                            
- *                                           |  DEL: B      DEL: C                        \                              
- *                                           |                                             \                             
- *                  ADD: D,E       ADD: G    |        ADD: F                                \                          
- *               +-----X--------------X------+-----------X-----------------(Branch B1)-------+--+                       
- *               |  DEL: A         DEL: D             DEL: -                                     \                       
- *               |                                                                                \                      
- *               |                              ADD: J      ADD: C                                 \                     
- *               |                           +-----X-----------X-----------(Branch B2X)--+          \                                   
- *               |                           |  DEL: -      DEL: I                        \          \                  
- *               |                           |                                             \          \                  
- *               |  ADD: D,H       ADD: I    |  ADD: K,L    ADD: M                          \          \              
- *               +-----X--------------X------+-----X-----------X-----------(Branch B2)-------+----------+--+             
- *               |  DEL: C         DEL: -       DEL: I      DEL: -                                          \            
- *               |                                                                                           \           
- *               |                                                                                            \          
- * ADD: A,B,C    |          ADD: M,N            ADD: P,R,S                                                     \        
- * ---X----------+-------------X-------------------X-----------------------(MASTER)-----------------------------+--      
- * DEL: -                   DEL: C              DEL: M                                                                     
- * 
- * @author Stephan Hensel
- *
- */
+
 public class TestR43plesMerge {
 
 	/** The logger. */
@@ -78,6 +52,16 @@ public class TestR43plesMerge {
 		// Create the initial data set
 		SampleDataSet.createSampleDataSetComplexStructure(graphName);
 	}
+	
+	/**
+	 * Tear down.
+	 */
+	@After
+	public void tearDown() {
+		Service.stop();
+	}
+	
+	
 	
 	
 	/**
@@ -286,15 +270,6 @@ public class TestR43plesMerge {
 		String result4 = executeR43plesQueryWithFormat(createSelectQuery(graphName, "master"), "application/xml");
 		String expected4 = DatasetGenerationManagement.readFileToString("test/resources/merge/manual/response-MASTER-B2-into-MASTER.xml", StandardCharsets.UTF_8);
 		assertXMLEqual(expected4, result4);
-	}
-	
-	
-	/**
-	 * Tear down.
-	 */
-	@After
-	public void tearDown() {
-		Service.stop();
 	}
 	
 	
