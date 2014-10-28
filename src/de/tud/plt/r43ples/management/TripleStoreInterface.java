@@ -24,6 +24,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 
+
 /** 
  * Provides a interface to the triple store with URI and port specified via init method.
  *
@@ -168,7 +169,6 @@ public class TripleStoreInterface {
 		//Execute Query
 		return httpClient.execute(request);
 	}
-	
 	
 	
 }

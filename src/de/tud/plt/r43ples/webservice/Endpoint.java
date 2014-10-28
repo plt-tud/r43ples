@@ -2,6 +2,7 @@ package de.tud.plt.r43ples.webservice;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -410,19 +411,29 @@ public class Endpoint {
 	 * @throws AuthenticationException
 	 */
 	private Response getSelectResponse(final String query, final String format) throws HttpException, IOException {
-		ResponseBuilder responseBuilder = Response.ok();
 		if (query.contains("OPTION r43ples:SPARQL_JOIN")) {
-			try {
-				String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
-				query_rewritten = SparqlRewriter.rewriteQuery(query_rewritten);
-				String result = TripleStoreInterface.executeQueryWithAuthorization(query_rewritten, format);
-				return responseBuilder.entity(result).type(format).build();
-			} catch (Exception e) {
-				logger.error(e);
-				e.printStackTrace();
-				throw new InternalServerErrorException("Query contain errors:\n" + query);
-			}
+			ResponseBuilder responseBuilder = Response.ok();
+			String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
+			query_rewritten = SparqlRewriter.rewriteQuery(query_rewritten);
+			String result = TripleStoreInterface.executeQueryWithAuthorization(query_rewritten, format);
+			return responseBuilder.entity(result).type(format).build();
 		}
+		else {
+			return getSelectResponseClassic(query, format);
+		}
+	}
+
+
+	/**
+	 * @param query
+	 * @param format
+	 * @return
+	 * @throws HttpException
+	 * @throws IOException
+	 * @throws UnsupportedEncodingException
+	 */
+	private Response getSelectResponseClassic(final String query, final String format) throws HttpException, IOException, UnsupportedEncodingException {
+		ResponseBuilder responseBuilder = Response.ok();
 		String queryM = query;
 
 		Matcher m = patternSelectFromPart.matcher(queryM);
@@ -435,12 +446,12 @@ public class Endpoint {
 
 			// if no revision number is declared use the MASTER as default
 			if (revisionNumber == null) {
-				revisionNumber = "MASTER";
+				revisionNumber = "master";
 			}
 			String headerRevisionNumber;
-			if (revisionNumber.equalsIgnoreCase("MASTER")) {
+			if (revisionNumber.equalsIgnoreCase("master")) {
 				// Respond with MASTER revision - nothing to be done - MASTER revisions are already created in the named graphs
-				headerRevisionNumber = "MASTER";
+				headerRevisionNumber = "master";
 				newGraphName = graphName;
 			} else {
 				if (RevisionManagement.isBranch(graphName, revisionNumber)) {
@@ -471,6 +482,7 @@ public class Endpoint {
 		return responseBuilder.entity(response).type(format).build();
 	}
 
+	
 	/**
 	 * Produce the response for a INSERT or DELETE SPARQL query.
 	 * 
