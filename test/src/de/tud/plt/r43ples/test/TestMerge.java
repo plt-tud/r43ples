@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.test.merge;
+package de.tud.plt.r43ples.test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,10 +27,10 @@ import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Service;
 
 
-public class TestR43plesMerge {
+public class TestMerge {
 
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(TestR43plesMerge.class);
+	private static Logger logger = Logger.getLogger(TestMerge.class);
 	/** The r43ples endpoint. **/
 	private static String r43ples_endpoint = "http://localhost:9998/r43ples/sparql";
 	/** The graph name. **/
