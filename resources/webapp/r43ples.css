@@ -19,10 +19,10 @@ h2 {
 
 #header>h1 {
 	background-image: url("/static/images/r43ples-logo.png");
-	background-size: 250;
+	background-size: 250px;
 	background-repeat: no-repeat;
 	overflow: hidden;
-	height: 0;
+	height: 0px;
 	padding-top: 86px;
 }
 
