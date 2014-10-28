@@ -77,7 +77,8 @@ public class TestR43ples {
 		Assert.assertEquals(expected4, result4);
 	}
 	
-	@Test public void testRestructuring() throws IOException{
+	@Test
+	public void testRestructuring() throws IOException{
 		// restructure commit to B2
 		logger.info("Restructure commit to B2");
 		String query = String.format(""
@@ -100,18 +101,21 @@ public class TestR43ples {
 		logger.debug("Response: \n" + executeR43plesQuery(query));
 	}
 	
-	@Test public void testServiceDescription() throws IOException{
+	@Test
+	public void testServiceDescription() throws IOException{
 		String result = executeR43plesQueryWithFormat("", "text/turtle");
 		Assert.assertThat(result, containsString("sd:r43ples"));
 	}
 	
-	@Test public void testHtmlQueryForm() throws IOException{
+	@Test
+	public void testHtmlQueryForm() throws IOException{
 		String result = executeR43plesQueryWithFormat("", MediaType.TEXT_HTML);
 		Assert.assertThat(result, containsString("<form"));
 	}
 	
 	
-	@Test public void testSelectQueryWithoutRevision() throws IOException {
+	@Test
+	public void testSelectQueryWithoutRevision() throws IOException {
 		String query = String.format(""
 				+ "select * from <%s>"
 				+ "where { ?s ?p ?o. }"
@@ -121,7 +125,8 @@ public class TestR43ples {
 		Assert.assertEquals(expected, result);
 	}
 	
-	@Test public void testConstructQuery() throws IOException {
+	@Test
+	public void testConstructQuery() throws IOException {
 		String query = String.format(""
 				+ "CONSTRUCT {?s ?p ?o} "
 				+ "FROM <%s> REVISION \"1\""
@@ -135,6 +140,55 @@ public class TestR43ples {
 		Assert.assertThat(result, not(containsString("\"D\"")));
 		Assert.assertThat(result, not(containsString("\"E\"")));
 	}
+	
+	/**
+	 *  Test example queries from html site
+	 * @throws IOException 
+	 * @throws HttpException 
+	 */
+	@Test public void testExampleQueries() throws IOException, HttpException{
+		SampleDataSet.createSampleDataset1("http://test.com/r43ples-dataset-1");
+		SampleDataSet.createSampleDataset2("http://test.com/r43ples-dataset-2");
+		
+		String result = executeR43plesQuery("CREATE SILENT GRAPH <http://test.com/r43ples-dataset-1>");
+		Assert.assertThat(result, containsString("done"));
+		
+		result = executeR43plesQuery("SELECT * FROM <http://test.com/r43ples-dataset-1> REVISION \"3\" WHERE {	?s ?p ?o. }");
+		Assert.assertThat(result, containsString("http://test.com/Adam"));
+		
+		result = executeR43plesQuery("OPTION r43ples:SPARQL_JOIN \n"
+		+ "	SELECT ?s ?p ?o"
+		+ "	FROM <http://test.com/r43ples-dataset-1> REVISION \"master\""
+		+ "	FROM <http://test.com/r43ples-dataset-2> REVISION \"2\""
+		+ "	WHERE {"
+		+ "	?s ?p ?o."
+		+ "	}");
+		Assert.assertThat(result, containsString("http://test.com/Adam"));
+		
+		result = executeR43plesQuery(""
+		+ "USER \"mgraube\""
+		+ "MESSAGE \"test commit\""
+		+ "	INSERT { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"4\""
+		+ "	{	<a> <b> <c> .	}}");
+		
+		result = executeR43plesQuery(""
+		+ "USER \"mgraube\""
+		+ "MESSAGE \"test branch commit\""
+		+ "	BRANCH GRAPH <http://test.com/r43ples-dataset-1> REVISION \"2\" TO \"unstable\"");
+		
+		result = executeR43plesQuery(""
+		+ "USER \"mgraube\" "
+		+ "MESSAGE \"test tag commit\" "
+		+ "TAG GRAPH <http://test.com/r43ples-dataset-1> REVISION \"2\" TO \"v0.3-alpha\"");
+	
+	}
+		
+	
+	
+	
+	
+	
+	
 	
 	/**
 	 * Executes a SPARQL-query against the R43ples endpoint

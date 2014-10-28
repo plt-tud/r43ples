@@ -137,7 +137,7 @@ public class Endpoint {
 			throw new InternalServerErrorException(e.getMessage());
 		}
 		String result = String.format(
-				"Test datasets successfully created: <%s> <%s> <%s> <%s> <%s>"
+				"Test datasets successfully created: %s, %s, %s, %s, %s"
 				, graphName1, graphName2, graphName3, graphName4, graphName5);
 		return Response.ok().entity(result).build();
 	}
@@ -279,7 +279,6 @@ public class Endpoint {
 
 	/**
 	 * @param format
-	 * @param sparqlQueryDecoded
 	 * @param sparqlQuery
 	 * @return
 	 * @throws InternalServerErrorException
@@ -599,17 +598,23 @@ public class Endpoint {
 		while (m.find()) {
 			found = true;
 			String graphName = m.group("graph");
-			// Execute SPARQL query
+//			String silent = m.group("silent");
 			String querySparql = m.group();
-			responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(querySparql, format));
 			
-		    // Add R43ples information
-		    RevisionManagement.putGraphUnderVersionControl(graphName);
-	    	
-		    String 	graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			// Create graph
+			String result = TripleStoreInterface.executeQueryWithAuthorization(querySparql, format);
+		    responseBuilder.entity(result);
 		    
-		    responseBuilder.header(graphNameHeader + "-revision-number", 0);
-			responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", 0);
+		    if (RevisionManagement.getMasterRevisionNumber(graphName) == null)
+		    {
+			    // Add R43ples information
+			    RevisionManagement.putGraphUnderVersionControl(graphName);
+		    	
+			    String 	graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			    responseBuilder.header(graphNameHeader + "-revision-number", 0);
+				responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", 0);
+			}
+
 		}
 		if (!found) {
 			throw new InternalServerErrorException("Query doesn't contain a correct CREATE query:\n" + query);

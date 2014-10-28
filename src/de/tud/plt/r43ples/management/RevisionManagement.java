@@ -589,8 +589,13 @@ public class RevisionManagement {
 						Config.revision_graph, graphName);
 		String resultSparql = TripleStoreInterface.executeQueryWithAuthorization(queryString, "XML");
 		ResultSet results = ResultSetFactory.fromXML(resultSparql);
-		QuerySolution qs = results.next();
-		return qs.getLiteral("?revisionNumber").getString();
+		if (results.hasNext()){
+			QuerySolution qs = results.next();
+			return qs.getLiteral("?revisionNumber").getString();
+		}
+		else {
+			return null;
+		}
 	}
 
 	/**

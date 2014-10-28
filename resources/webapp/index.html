@@ -71,12 +71,12 @@
 		<div class="accordion">
 			<h3>Create Graph under Version Control</h3>
 			<pre>
-CREATE GRAPH &lt;http://test.com/r43ples-dataset&gt;
+CREATE SILENT GRAPH &lt;http://test.com/r43ples-dataset-new&gt;
 </pre>
 
 			<h3>Select Query</h3>
 			<pre>SELECT * 
-FROM &lt;http://test.com/r43ples-dataset&gt; REVISION "3"
+FROM &lt;http://test.com/r43ples-dataset-1&gt; REVISION "3"
 WHERE {
 	?s ?p ?o. 
 }</pre>
@@ -84,7 +84,7 @@ WHERE {
 			<h3>Select Query - Multiple Graphs</h3>
 			<pre>OPTION r43ples:SPARQL_JOIN
 SELECT ?s ?p ?o 
-FROM &lt;http://test.com/r43ples-dataset&gt; REVISION "MASTER"
+FROM &lt;http://test.com/r43ples-dataset-1&gt; REVISION "master"
 FROM &lt;http://test.com/r43ples-dataset-2&gt; REVISION "2"
 WHERE {
 	?s ?p ?o. 
@@ -93,18 +93,18 @@ WHERE {
 			<h3>Update Query</h3>
 			<pre>USER "mgraube"
 MESSAGE "test commit"
-INSERT { GRAPH &lt;http://test.com/r43ples-dataset&gt; REVISION "4"
+INSERT { GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "4"
 {	&lt;a&gt; &lt;b&gt; &lt;c&gt; .	}}</pre>
 
 			<h3>Branching</h3>
 			<pre>USER "mgraube"
-MESSAGE "test commit"
-BRANCH GRAPH &lt;http://test.com/r43ples-dataset&gt; REVISION "2" TO "unstable"</pre>
+MESSAGE "test branch commit"
+BRANCH GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "unstable"</pre>
 
 			<h3>Tagging</h3>
 			<pre>USER "mgraube"
-MESSAGE "test commit"
-TAG GRAPH &lt;http://test.com/r43ples-dataset&gt; REVISION "2" TO "v0.3-alpha"</pre>
+MESSAGE "test tag commit"
+TAG GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "v0.3-alpha"</pre>
 		</div>
 	</div>
 
