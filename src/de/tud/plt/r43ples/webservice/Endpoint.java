@@ -113,6 +113,36 @@ public class Endpoint {
 	/** default logger for this class */
 	private final static Logger logger = Logger.getLogger(Endpoint.class);
 
+	
+	/**
+	 * Creates sample datasets
+	 * @return information provided as HTML response
+	 */
+	@Path("createSampleDataset")
+	@GET
+	public final Response createSampleDataset() {
+		final String graphName1 = "http://test.com/r43ples-dataset-1";
+		final String graphName2 = "http://test.com/r43ples-dataset-2";
+		final String graphName3 = "http://test.com/r43ples-dataset-merging";
+		final String graphName4 = "http://test.com/r43ples-dataset-merging-classes";
+		final String graphName5 = "http://test.com/r43ples-dataset-renaming";
+		try {
+			SampleDataSet.createSampleDataset1(graphName1);
+			SampleDataSet.createSampleDataset2(graphName2);
+			SampleDataSet.createSampleDataSetMerging(graphName3);
+			SampleDataSet.createSampleDataSetMergingClasses(graphName4);
+			SampleDataSet.createSampleDataSetRenaming(graphName5);
+		} catch (HttpException | IOException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException(e.getMessage());
+		}
+		String result = String.format(
+				"Test datasets successfully created: <%s> <%s> <%s> <%s> <%s>"
+				, graphName1, graphName2, graphName3, graphName4, graphName5);
+		return Response.ok().entity(result).build();
+	}
+	
+	
 	/**
 	 * Provide revision information about R43ples system.
 	 * 
@@ -226,105 +256,94 @@ public class Endpoint {
 	 * Provides Service Description if no query is specified and RDF
 	 * representation is requested
 	 * 
-	 * @param formatHeader
-	 *            format specified in the HTTP header
-	 * @param formatQuery
-	 *            format specified in the HTTP parameters
+	 * @param format
+	 *            mime type for response format
 	 * @param sparqlQueryDecoded
 	 *            decoded SPARQL query
 	 * @return the response
 	 * @throws IOException
 	 * @throws HttpException 
 	 */
-	public final Response sparql(final String format, final String sparqlQueryDecoded)
+	public final Response sparql(final String format, final String sparqlQuery)
 			throws IOException, HttpException {
-		logger.info("SPARQL requested with format: " + format);
-		String sparqlQuery = sparqlQueryDecoded;
 		if (sparqlQuery.equals("")) {
 			if (format.contains(MediaType.TEXT_HTML)) {
-				logger.info("SPARQL form requested");
-				List<String> graphList = RevisionManagement.getRevisedGraphs();
-				StringBuilder sb1 = new StringBuilder("<option value=\"\">(All)</option>\n");
-				StringBuilder sb2 = new StringBuilder("<option value=\"\">(None)</option>\n");
-				for (Iterator<String> opt = graphList.iterator(); opt.hasNext();) {
-					String graph = opt.next();
-					sb1.append(String.format("<option value=\"%1$s\">%1$s</option>%n", graph));
-					sb2.append(String.format("<option value=\"DROP GRAPH <%1$s>\">%1$s</option>%n", graph));
-				}
-				String content = String.format(ResourceManagement.getContentFromResource("webapp/index.html"), 
-						Endpoint.class.getPackage().getImplementationVersion(), sb1.toString(), sb2.toString());
-				return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
+				return getHTMLResponse();
 			} else {
 				return getServiceDescriptionResponse(format);
 			}
 		} else {
-			logger.info("SPARQL query was requested. Query: " + sparqlQuery);
-			try {
-				String user = null;
-				Matcher userMatcher = patternUser.matcher(sparqlQuery);
-				if (userMatcher.find()) {
-					user = userMatcher.group("user");
-					sparqlQuery = userMatcher.replaceAll("");
-				}
-				String message = null;
-				Matcher messageMatcher = patternCommitMessage.matcher(sparqlQuery);
-				if (messageMatcher.find()) {
-					message = messageMatcher.group("message");
-					sparqlQuery = messageMatcher.replaceAll("");
-				}
-
-				if (patternSelectQuery.matcher(sparqlQuery).find()) {
-					return getSelectResponse(sparqlQuery, format);
-				}
-				if (patternUpdateQuery.matcher(sparqlQuery).find()) {
-					return getUpdateResponse(sparqlQuery, user, message, format);
-				}
-				if (patternCreateGraph.matcher(sparqlQuery).find()) {
-					return getCreateGraphResponse(sparqlQuery, format);
-				}
-				if (patternMergeQuery.matcher(sparqlQueryDecoded).find()) {
-					return getMergeResponse(sparqlQueryDecoded, format);
-				}
-				if (patternDropGraph.matcher(sparqlQuery).find()) {
-					return getDropGraphResponse(sparqlQuery, format);
-				}
-				if (patternBranchOrTagQuery.matcher(sparqlQuery).find()) {
-					return getBranchOrTagResponse(sparqlQuery, user, message, format);
-				}
-				throw new InternalServerErrorException("No R43ples query detected");
-			} catch (HttpException | IOException e) {
-				e.printStackTrace();
-				throw new InternalServerErrorException(e.getMessage());
-			}
+			return getSparqlResponse(format, sparqlQuery);
 		}
 	}
 
 	/**
-	 * Creates sample datasets
-	 * @return information provided as HTML response
+	 * @param format
+	 * @param sparqlQueryDecoded
+	 * @param sparqlQuery
+	 * @return
+	 * @throws InternalServerErrorException
 	 */
-	@Path("createSampleDataset")
-	@GET
-	public final Response createSampleDataset() {
-		final String graphName1 = "http://test.com/r43ples-dataset-1";
-		final String graphName2 = "http://test.com/r43ples-dataset-2";
-		final String graphName3 = "http://test.com/r43ples-dataset-merging";
-		final String graphName4 = "http://test.com/r43ples-dataset-merging-classes";
-		final String graphName5 = "http://test.com/r43ples-dataset-renaming";
+	private Response getSparqlResponse(final String format, String sparqlQuery) throws InternalServerErrorException {
+		logger.info("SPARQL query was requested. Query: " + sparqlQuery);
 		try {
-			SampleDataSet.createSampleDataset1(graphName1);
-			SampleDataSet.createSampleDataset2(graphName2);
-			SampleDataSet.createSampleDataSetMerging(graphName3);
-			SampleDataSet.createSampleDataSetMergingClasses(graphName4);
-			SampleDataSet.createSampleDataSetRenaming(graphName5);
+			String user = null;
+			Matcher userMatcher = patternUser.matcher(sparqlQuery);
+			if (userMatcher.find()) {
+				user = userMatcher.group("user");
+				sparqlQuery = userMatcher.replaceAll("");
+			}
+			String message = null;
+			Matcher messageMatcher = patternCommitMessage.matcher(sparqlQuery);
+			if (messageMatcher.find()) {
+				message = messageMatcher.group("message");
+				sparqlQuery = messageMatcher.replaceAll("");
+			}
+
+			if (patternSelectQuery.matcher(sparqlQuery).find()) {
+				return getSelectResponse(sparqlQuery, format);
+			}
+			if (patternUpdateQuery.matcher(sparqlQuery).find()) {
+				return getUpdateResponse(sparqlQuery, user, message, format);
+			}
+			if (patternCreateGraph.matcher(sparqlQuery).find()) {
+				return getCreateGraphResponse(sparqlQuery, format);
+			}
+			if (patternMergeQuery.matcher(sparqlQuery).find()) {
+				return getMergeResponse(sparqlQuery, user, message, format);
+			}
+			if (patternDropGraph.matcher(sparqlQuery).find()) {
+				return getDropGraphResponse(sparqlQuery, format);
+			}
+			if (patternBranchOrTagQuery.matcher(sparqlQuery).find()) {
+				return getBranchOrTagResponse(sparqlQuery, user, message, format);
+			}
+			throw new InternalServerErrorException("No R43ples query detected");
 		} catch (HttpException | IOException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException(e.getMessage());
 		}
-		String result = String.format(
-				"Test datasets successfully created: <%s> <%s> <%s> <%s> <%s>"
-				, graphName1, graphName2, graphName3, graphName4, graphName5);
-		return Response.ok().entity(result).build();
+	}
+
+	/**
+	 * @return
+	 * @throws HttpException
+	 * @throws IOException
+	 */
+	private Response getHTMLResponse() throws HttpException, IOException {
+		logger.info("SPARQL form requested");
+		List<String> graphList = RevisionManagement.getRevisedGraphs();
+		StringBuilder sb1 = new StringBuilder("<option value=\"\">(All)</option>\n");
+		StringBuilder sb2 = new StringBuilder("<option value=\"\">(None)</option>\n");
+		for (Iterator<String> opt = graphList.iterator(); opt.hasNext();) {
+			String graph = opt.next();
+			sb1.append(String.format("<option value=\"%1$s\">%1$s</option>%n", graph));
+			sb2.append(String.format("<option value=\"DROP GRAPH <%1$s>\">%1$s</option>%n", graph));
+		}
+		String version = Endpoint.class.getPackage().getImplementationVersion();
+		String content = String.format(ResourceManagement.getContentFromResource("webapp/index.html"), 
+				version, sb1.toString(), sb2.toString());
+		return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
 	}
 
 	
@@ -691,12 +710,10 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	private Response getMergeResponse(String sparqlQuery, String format) throws HttpException, IOException {
+	private Response getMergeResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws HttpException, IOException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Merge creation detected");
-		String user = extractUser(sparqlQuery);
-		String commitMessage = extractCommitMessage(sparqlQuery);
-		
+
 		// Add R43ples information
 		Matcher m = patternMergeQuery.matcher(sparqlQuery);
 		
@@ -838,33 +855,6 @@ public class Endpoint {
 			throw new InternalServerErrorException("Error in query: " + sparqlQuery);
 		
 		return responseBuilder.build();	
-	}
-
-	/** Extracts user out of query
-	 * @param query
-	 * @return user mentioned in a query
-	 * @throws InternalServerErrorException
-	 */
-	private String extractUser(final String query) {
-		Matcher userMatcher = patternUser.matcher(query);
-		if (userMatcher.find()) {
-			return userMatcher.group("user");
-		} else {
-			throw new InternalServerErrorException("No user specified");
-		}
-	}
-	
-	/** Extracts commit message out of query
-	 * @param query
-	 * @throws InternalServerErrorException
-	 */
-	private String extractCommitMessage(final String query) {
-		Matcher matcher = patternCommitMessage.matcher(query);
-		if (matcher.find()) {
-			return matcher.group("message");
-		} else {
-			throw new InternalServerErrorException("No commit message specified");
-		}
 	}
 	
 }
