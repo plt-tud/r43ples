@@ -1,7 +1,6 @@
 package de.tud.plt.r43ples.management;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 import org.apache.http.HttpException;
@@ -157,8 +156,7 @@ public class SampleDataSet {
 		String initialContentFilePath = "resources/verification/ExampleGraphClasses_initial.triples";
 
 		// Read initial content from file to string
-		String initialContent = DatasetGenerationManagement.readFileToString(initialContentFilePath,
-				StandardCharsets.UTF_8);
+		String initialContent = DatasetGenerationManagement.readFileToString(initialContentFilePath);
 
 		// Create new example graph
 		DatasetGenerationManagement.createNewGraph(graphName);

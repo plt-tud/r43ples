@@ -1,7 +1,7 @@
 package de.tud.plt.r43ples.management;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -188,13 +188,12 @@ public class DatasetGenerationManagement {
 	 * Read file to string.
 	 * 
 	 * @param path the path to read
-	 * @param encoding the encoding
 	 * @return the file content
 	 * @throws IOException
 	 */
-	public static String readFileToString(String path, Charset encoding) throws IOException {
+	public static String readFileToString(String path) throws IOException {
 		byte[] encoded = Files.readAllBytes(Paths.get(path));
-		return new String(encoded, encoding);
+		return new String(encoded, StandardCharsets.UTF_8);
 	}
 	
 }
