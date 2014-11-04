@@ -191,7 +191,7 @@ public class TestMerge {
 		Response queryResult4 = executeR43plesQueryResponse(createCommonMergeQuery(graphName, sdd, user, "Merge B2 into MASTER", "B2", "master"));
 		Assert.assertThat(queryResult4.getEntity().toString(), containsString("hasTripleStateB"));
 		
-		// Merge B1 into B2 (WITH)
+		// Merge B2 into MASTER (WITH)
 		triples = "<http://example.com/testS> <http://example.com/testP> \"M\". \n";
 		
 		Response queryResult4_1 = executeR43plesQueryResponse(createMergeWithQuery(graphName, sdd, user, "Merge B2 into MASTER", "B2", "master", triples));
