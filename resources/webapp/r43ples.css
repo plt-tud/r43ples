@@ -1,29 +1,19 @@
-* {
-	margin: 0px;
-}
-
 body {
-	padding: 0;
 	width: 1200px;
 	margin: 0px auto;
 }
 
 #header {
-	padding-top: 2em;
+	padding-top: 1em;
 }
 
-h2 {
-	padding-top: 0.4em;
+h1 {
+	padding-top: 0.5em;
 	padding-bottom: 0.2em;
 }
 
-#header>h1 {
-	background-image: url("/static/images/r43ples-logo.png");
-	background-size: 250px;
-	background-repeat: no-repeat;
-	overflow: hidden;
-	height: 0px;
-	padding-top: 86px;
+#header>img {
+	width: 300px;
 }
 
 #query_form {

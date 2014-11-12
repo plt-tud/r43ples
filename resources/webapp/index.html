@@ -2,7 +2,8 @@
 <head>
 <title>R43ples - Revision Management for the Semantic Web</title>
 <meta name="author" content="Markus Graube">
-<link rel="icon" type="image/png" href="/static/images/r43ples-r-logo.png">
+<meta name="description" content="R43ples web application">
+<link rel="icon" type="image/png" href="/static/images/r43ples-r-logo.v04.png">
 <link href="/static/jquery-ui.css" rel="stylesheet" />
 <link href="/static/r43ples.css" rel="stylesheet" />
 <script src="/static/jquery-2.1.1.js"></script>
@@ -10,8 +11,8 @@
 <script type="text/javascript">
   $(function() {
 	$(".accordion").accordion();
-  	$(".accordion > h3").prepend("<button class='copy'><</button> ");
-  	$(".accordion > h3 > button").click(function() {
+  	$(".accordion > h2").prepend("<button class='copy'><</button> ");
+  	$(".accordion > h2 > button").click(function() {
 		$("#query").val($(this).parent().next().text());
   	});
   });
@@ -20,11 +21,11 @@
 <body>
 
 	<div id="header">
-		<h1>R43ples - Revision Management for the Semantic Web</h1>
+		<img class="logo img-responsive" src="/static/images/r43ples-logo.v04.png" alt="R43ples logo">
 	</div>
 
 	<div id="query_form">
-		<h2>Query Form</h2>
+		<h1>Query Form</h1>
 		<form action="/r43ples/sparql" method="post">
 		<fieldset>
 			<label for="query">Query Text</label><br />
@@ -44,7 +45,7 @@
 				</fieldset>
 		</form>
 
-		<h2>Revision Information</h2>
+		<h1>Revision Information</h1>
 		<ul>
 			<li><a href="createSampleDataset">Create sample data set</a></li>
 			<li>
@@ -67,21 +68,21 @@
 	</div>
 
 	<div id="examples">
-		<h2>Example queries</h2>
+		<h1>Example queries</h1>
 		<div class="accordion">
-			<h3>Create Graph under Version Control</h3>
+			<h2>Create Graph under Version Control</h2>
 			<pre>
 CREATE SILENT GRAPH &lt;http://test.com/r43ples-dataset-new&gt;
 </pre>
 
-			<h3>Select Query</h3>
+			<h2>Select Query</h2>
 			<pre>SELECT * 
 FROM &lt;http://test.com/r43ples-dataset-1&gt; REVISION "3"
 WHERE {
 	?s ?p ?o. 
 }</pre>
 
-			<h3>Select Query - Multiple Graphs</h3>
+			<h2>Select Query - Multiple Graphs</h2>
 			<pre>OPTION r43ples:SPARQL_JOIN
 SELECT ?s ?p ?o 
 FROM &lt;http://test.com/r43ples-dataset-1&gt; REVISION "master"
@@ -90,18 +91,18 @@ WHERE {
 	?s ?p ?o. 
 }</pre>
 
-			<h3>Update Query</h3>
+			<h2>Update Query</h2>
 			<pre>USER "mgraube"
 MESSAGE "test commit"
 INSERT { GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "4"
 {	&lt;a&gt; &lt;b&gt; &lt;c&gt; .	}}</pre>
 
-			<h3>Branching</h3>
+			<h2>Branching</h2>
 			<pre>USER "mgraube"
 MESSAGE "test branch commit"
 BRANCH GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "unstable"</pre>
 
-			<h3>Tagging</h3>
+			<h2>Tagging</h2>
 			<pre>USER "mgraube"
 MESSAGE "test tag commit"
 TAG GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "v0.3-alpha"</pre>
