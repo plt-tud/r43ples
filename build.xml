@@ -28,10 +28,9 @@
 		<mkdir dir="${jar.dir}" />
 		<exec errorproperty="" executable="git" failifexecutionfails="false"
 			outputproperty="git.commit">
-			<arg value="describe" />
-			<arg value="--tags" />
-			<arg value="--always" />
-			<arg value="HEAD" />
+			<arg value="log" />
+			<arg value="--pretty=format:%h" />
+			<arg value="-1" />
 		</exec>
 		<exec errorproperty="" executable="git" failifexecutionfails="false"
 			outputproperty="git.branch">
