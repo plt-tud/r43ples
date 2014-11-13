@@ -23,14 +23,14 @@ addons:
 
 
 before_script:
-    # add LOD2 repository
-    - wget http://stack.lod2.eu/deb/lod2testing/lod2final-repository_1.34_all.deb
-    - sudo dpkg -i lod2final-repository_1.34_all.deb
+    ## add LOD2 repository
+    #- wget http://stack.lod2.eu/deb/lod2testing/lod2final-repository_1.34_all.deb
+    #- sudo dpkg -i lod2final-repository_1.34_all.deb
     - sudo apt-get update -qq
-    - sudo apt-get install -qq virtuoso-opensource
-    #- sudo apt-get install -qq libc6 ibldap-2.4-2 libreadline6 libssl1.0.0
-    #- wget "https://cloudstore.zih.tu-dresden.de/public.php?service=files&t=27bfa7d71ed6b9d3e3225da318cc4639&download" -O virtuoso.deb
-    #- sudo dpkg -i virtuoso.deb
+    #- sudo apt-get install -qq virtuoso-opensource
+    - sudo apt-get install -qq libc6 ibldap-2.4-2 libreadline6 libssl1.0.0
+    - wget "https://cloudstore.zih.tu-dresden.de/public.php?service=files&t=27bfa7d71ed6b9d3e3225da318cc4639&download" -O virtuoso.deb
+    - sudo dpkg -i virtuoso.deb
 
 script:
     - ant test
