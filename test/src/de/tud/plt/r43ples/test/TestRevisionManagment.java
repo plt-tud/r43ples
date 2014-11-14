@@ -53,8 +53,8 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void test_revision_uri() throws HttpException, IOException {
-		String a = RevisionManagement.getRevisionUri(graph_test, "4");
-		Assert.assertEquals("http://test_dataset_user-revision-4", a);
+		String uri = RevisionManagement.getRevisionUri(graph_test, "4");
+		Assert.assertEquals("http://test_dataset_user-revision-4", uri);
 	}
 	
 	@Test

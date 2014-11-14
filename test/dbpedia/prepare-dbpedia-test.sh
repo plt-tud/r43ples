@@ -28,7 +28,6 @@ split --number=l/100 -d dbpedia_2013_07_18.nt dbpedia_2013_07_18.split.
 #  void:distinctObjects 103060313 . 
 
 
-
 # download changesets
 wget -r -np -nd -nH -L -e robots=off -A "gz, html" http://live.dbpedia.org/changesets/2013/11/04/13/
 gunzip *.nt.gz

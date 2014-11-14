@@ -34,10 +34,10 @@ public class RevisionManagement {
 	private static Logger logger = Logger.getLogger(RevisionManagement.class);
 	/** The SPARQL prefixes. **/
 	public static final String prefix_rmo = "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> \n";
-	public static final String prefixes = "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
-			+ "PREFIX dc-terms: <http://purl.org/dc/terms/> \n" + prefix_rmo
-			+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
+	public static final String prefixes = prefix_rmo
 			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
+			+ "PREFIX dc-terms: <http://purl.org/dc/terms/> \n" 
+			+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
 			+ "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
 			+ "PREFIX sdd: <http://eatld.et.tu-dresden.de/sdd#> \n";
 
@@ -349,7 +349,6 @@ public class RevisionManagement {
 
 		// Create path to revision
 		LinkedList<NodeSpecification> list = getRevisionTree(graphName).getPathToRevision(revisionNumber);
-		logger.info("Path to revision: " + list.toString());
 
 		// Copy branch to temporary graph
 		String number = list.pollFirst().getRevisionNumber();
@@ -791,14 +790,19 @@ public class RevisionManagement {
 			sparqlQuery = String.format("CONSTRUCT" + "	{ ?s ?p ?o} " + "FROM <%s> " + "WHERE {"
 					+ "	?s ?p ?o." + "}", Config.revision_graph);
 		} else {
-			sparqlQuery = prefix_rmo
-					+ String.format("CONSTRUCT" + "	{ " + "		?revision ?r_p ?r_o. "
-							+ "		?reference ?ref_p ?ref_o. " + "		?commit	?c_p ?c_o. " + "	}" 
-							+ "FROM <%s> "
-							+ "WHERE {" + "	?revision rmo:revisionOf <%s>; ?r_p ?r_o. "
-							+ " OPTIONAL {?reference rmo:references ?revision; ?ref_p ?ref_o. }"
-							+ " OPTIONAL {?commit ?p ?revision; ?c_p ?c_o. }" + "}",
-							Config.revision_graph, graphName);
+			sparqlQuery = prefixes + String.format(""
+					+ "CONSTRUCT { " 
+					+ "		?revision ?r_p ?r_o. "
+					+ "		?reference ?ref_p ?ref_o. " 
+					+ "		?commit	?c_p ?c_o. " 
+					+ "	}" 
+					+ "FROM <%s> "
+					+ "WHERE {" 
+					+ "	?revision rmo:revisionOf <%s>; ?r_p ?r_o. "
+					+ " OPTIONAL {?reference rmo:references ?revision; ?ref_p ?ref_o. }"
+					+ " OPTIONAL {?commit prov:generated ?revision; ?c_p ?c_o. }" 
+					+ "}",
+					Config.revision_graph, graphName);
 		}
 		return TripleStoreInterface.executeQueryWithAuthorization(sparqlQuery, format);
 	}
@@ -870,15 +874,23 @@ public class RevisionManagement {
 			logger.debug("Graph deleted: " + graphName);
 		}
 		// Remove information from revision graph
-		String queryDelete = prefixes
-				+ String.format(
-						"DELETE { GRAPH <%s> {?s ?p ?o} } "
-								+ "WHERE {"
-								+ "  GRAPH <%s> {"
-								+ "    {?s a rmo:Revision; rmo:revisionOf <%s>;	?p ?o.}"
-								+ "    UNION {?s a rmo:Reference; rmo:references [rmo:revisionOf <%s>]; ?p ?o.}"
-								+ "    UNION {?s a rmo:Commit; prov:generated [rmo:revisionOf <%s>]; ?p ?o.}"
-								+ "} }", Config.revision_graph, Config.revision_graph, graph, graph, graph);
+		String queryDelete = prefixes + String.format(
+					   	"DELETE { "
+						+ "GRAPH <%s> {"
+					   	+ "		?revision ?r_p ?r_o. "
+						+ "		?reference ?ref_p ?ref_o. " 
+						+ "		?commit	?c_p ?c_o. " 
+						+ "		}"
+						+ "}" 
+						+ "WHERE {"
+						+ "	GRAPH <%s> {" 
+						+ "		?revision rmo:revisionOf <%s>; ?r_p ?r_o. "
+						+ " 	OPTIONAL {?reference rmo:references ?revision; ?ref_p ?ref_o. }"
+						+ " 	OPTIONAL {?commit prov:generated ?revision; ?c_p ?c_o. }"
+						+ "		}" 
+						+ "}"
+						, Config.revision_graph, Config.revision_graph, graph);
+		
 		TripleStoreInterface.executeQueryWithAuthorization(queryDelete, "XML");
 	}
 

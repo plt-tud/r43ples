@@ -40,7 +40,7 @@ public class DatasetGenerationManagement {
 		
 		// Create new example graph
 		logger.info("Create new example graph");
-		query = String.format("CREATE GRAPH <%s>", graphName);
+		query = String.format("CREATE SILENT GRAPH <%s>", graphName);
 		
 		logger.info("Execute query: \n" + query);
 		logger.info("Response: \n" + ep.sparql("HTML", query));
