@@ -28,14 +28,16 @@ Dependencies
 * Ant
 * Running Triplestore with SPARQL 1.1 endpoint (tested with [Virtuoso 7](https://github.com/openlink/virtuoso-opensource))
 
-
-    sudo apt-get install ant default-jdk
-    git checkout https://github.com/openlink/virtuoso-opensource.git
-    cd virtuoso-opensource
-    ./autogen.sh
-    ./configure
-    make
-    sudo make install
+```
+sudo apt-get install ant default-jdk
+# install virtuoso
+git checkout https://github.com/openlink/virtuoso-opensource.git
+cd virtuoso-opensource
+./autogen.sh
+./configure
+make
+sudo make install
+```
 
 Releases
 --------
