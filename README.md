@@ -25,15 +25,25 @@ A running test server should be available under [http://eatld.et.tu-dresden.de:9
 Dependencies
 ------------
 * JDK 1.7
-* Running Triplestore with SPARQL 1.1 endpoint (tested with Virtuoso 7)
+* Ant
+* Running Triplestore with SPARQL 1.1 endpoint (tested with [Virtuoso 7](https://github.com/openlink/virtuoso-opensource))
 
+
+    sudo apt-get install ant default-jdk
+    # install Virtuoso
+    git checkout https://github.com/openlink/virtuoso-opensource.git
+    cd virtuoso-opensource
+    ./autogen.sh
+    ./configure
+    make
+    sudo make install
 
 Releases
 --------
 Releases are stored on [GitHub](https://github.com/plt-tud/r43ples/releases).
 They just have to be unzipped and started with Java
 
-	unzip R43ples.zip
+    unzip R43ples.zip
     java -jar R43ples.jar
 
 Debian packages are going to be deployed soon.    
