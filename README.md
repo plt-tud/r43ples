@@ -30,7 +30,6 @@ Dependencies
 
 
     sudo apt-get install ant default-jdk
-    # install Virtuoso
     git checkout https://github.com/openlink/virtuoso-opensource.git
     cd virtuoso-opensource
     ./autogen.sh
