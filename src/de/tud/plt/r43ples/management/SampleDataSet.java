@@ -39,6 +39,12 @@ public class SampleDataSet {
 				ResourceManagement.getContentFromResource("samples/test-delta-added-4.nt"),
 				ResourceManagement.getContentFromResource("samples/test-delta-removed-4.nt"), "test_user",
 				"test commit message 4", list);
+		list.remove("3");
+		list.add("4");
+		RevisionManagement.createNewRevision(graph,
+				ResourceManagement.getContentFromResource("samples/test-delta-added-5.nt"),
+				ResourceManagement.getContentFromResource("samples/test-delta-removed-5.nt"), "test_user",
+				"test commit message 5", list);
 	}
 
 	public static void createSampleDataset2(String graph) throws HttpException, IOException {

@@ -84,6 +84,9 @@ public class Endpoint {
 	private final Pattern patternUpdateRevision = Pattern.compile(
 			"(?<action>INSERT|DELETE|WHERE)\\s*\\{\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
 			patternModifier);
+	private final Pattern patternEmptyGraphPattern = Pattern.compile(
+			"GRAPH\\s*<(?<graph>[^>]*)>\\s*\\{\\s*\\}",
+			patternModifier);
 	private final Pattern patternGraph = Pattern.compile(
 			"GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
 			patternModifier);
@@ -533,6 +536,10 @@ public class Endpoint {
 			}
 			m = patternUpdateRevision.matcher(queryM);
 		}
+		
+		// Remove empty insert clauses which otherwise will lead to errors
+		m= patternEmptyGraphPattern.matcher(queryM);
+		queryM = m.replaceAll("");
 
 		TripleStoreInterface.executeQueryWithAuthorization(queryM);
 

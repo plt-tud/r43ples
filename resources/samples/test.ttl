@@ -4,3 +4,4 @@
 :Adam :knows :Freddy.
 :Freddy :knows :Emma.
 :Carlos :knows :Danny.
+:Carlos :knows :Freddy.

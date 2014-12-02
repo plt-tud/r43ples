@@ -7,24 +7,24 @@ FROM eatld:r43ples-revisions
 where {
 	GRAPH ?g1 { ?s ?p ?o. }
 	{ 
-		<http://test.com/r43ples-dataset-master> rmo:fullGraph ?g1.
+		<http://test_dataset_user-master> rmo:fullGraph ?g1.
 	}
 	UNION
 	{	?rg1 a rmo:Revision.
   	  	?rg1 rmo:deltaRemoved ?g1.
-      	FILTER (?rg1 IN (<http://test.com/r43ples-dataset-revision-4>, <http://test.com/r43ples-dataset-revision-3>,  <http://test.com/r43ples-dataset-revision-2>))
+      	FILTER (?rg1 IN (<http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>,  <http://test_dataset_user-revision-2>))
     }
 	MINUS {
 		GRAPH ?gm1 { ?s ?p ?o }
 		?rm1 a rmo:Revision.
 		?rm1 rmo:deltaAdded ?gm1.
-		FILTER (?rm1 IN (<http://test.com/r43ples-dataset-revision-4>, <http://test.com/r43ples-dataset-revision-3>,  <http://test.com/r43ples-dataset-revision-2>))
+		FILTER (?rm1 IN (<http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>,  <http://test_dataset_user-revision-2>))
 		MINUS {
 			GRAPH ?gm1_old {?s ?p ?o.}
 			?rm1_old a rmo:Revision.
 			?rm1 prov:wasDerivedFrom+ ?rm1_old.
 			?rm1_old rmo:deltaRemoved ?gm1_old.		
-			FILTER (?rm1_old IN (<http://test.com/r43ples-dataset-revision-4>, <http://test.com/r43ples-dataset-revision-3>,  <http://test.com/r43ples-dataset-revision-2>))
+			FILTER (?rm1_old IN (<http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>,  <http://test_dataset_user-revision-2>))
 		}
 	}		
 }

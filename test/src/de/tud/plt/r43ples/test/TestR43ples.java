@@ -168,7 +168,7 @@ public class TestR43ples {
 		result = executeR43plesQuery(""
 		+ "USER \"mgraube\""
 		+ "MESSAGE \"test commit\""
-		+ "	INSERT { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"4\""
+		+ "	INSERT { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"5\""
 		+ "	{	<a> <b> <c> .	}}");
 		
 		result = executeR43plesQuery(""
