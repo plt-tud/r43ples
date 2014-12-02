@@ -2,8 +2,10 @@ package de.tud.plt.r43ples.webservice;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -11,8 +13,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -34,6 +38,8 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.log4j.Logger;
 
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.update.UpdateAction;
@@ -43,6 +49,8 @@ import com.hp.hpl.jena.update.UpdateRequest;
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalServerErrorException;
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.MergeManagement;
+import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
@@ -64,7 +72,7 @@ public class Endpoint {
 	private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
 	
 	private final Pattern patternSelectQuery = Pattern.compile(
-			"(?<type>SELECT|ASK).*WHERE\\s*\\{(?<where>.*)\\}", 
+			"(?<type>SELECT|ASK|CONSTRUCT).*WHERE\\s*\\{(?<where>.*)\\}", 
 			patternModifier);
 	private final Pattern patternSelectFromPart = Pattern.compile(
 			"FROM\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
@@ -95,6 +103,10 @@ public class Endpoint {
 	private final Pattern patternCommitMessage = Pattern.compile(
 			"MESSAGE\\s*\"(?<message>[^\"]*)\"", 
 			patternModifier);
+	private final Pattern patternMergeQuery =  Pattern.compile(
+			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
+			patternModifier);
+	
 	
 	@Context
 	private UriInfo uriInfo;
@@ -102,6 +114,36 @@ public class Endpoint {
 	/** default logger for this class */
 	private final static Logger logger = Logger.getLogger(Endpoint.class);
 
+	
+	/**
+	 * Creates sample datasets
+	 * @return information provided as HTML response
+	 */
+	@Path("createSampleDataset")
+	@GET
+	public final Response createSampleDataset() {
+		final String graphName1 = "http://test.com/r43ples-dataset-1";
+		final String graphName2 = "http://test.com/r43ples-dataset-2";
+		final String graphName3 = "http://test.com/r43ples-dataset-merging";
+		final String graphName4 = "http://test.com/r43ples-dataset-merging-classes";
+		final String graphName5 = "http://test.com/r43ples-dataset-renaming";
+		try {
+			SampleDataSet.createSampleDataset1(graphName1);
+			SampleDataSet.createSampleDataset2(graphName2);
+			SampleDataSet.createSampleDataSetMerging(graphName3);
+			SampleDataSet.createSampleDataSetMergingClasses(graphName4);
+			SampleDataSet.createSampleDataSetRenaming(graphName5);
+		} catch (HttpException | IOException e) {
+			e.printStackTrace();
+			throw new InternalServerErrorException(e.getMessage());
+		}
+		String result = String.format(
+				"Test datasets successfully created: %s, %s, %s, %s, %s"
+				, graphName1, graphName2, graphName3, graphName4, graphName5);
+		return Response.ok().entity(result).build();
+	}
+	
+	
 	/**
 	 * Provide revision information about R43ples system.
 	 * 
@@ -158,6 +200,30 @@ public class Endpoint {
 	}
 
 	/**
+	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * 
+	 * @param formatHeader
+	 *            format specified in the HTTP header
+	 * @param formatQuery
+	 *            format specified in the HTTP parameters
+	 * @param sparqlQuery
+	 *            the SPARQL query
+	 * @return the response
+	 * @throws IOException
+	 * @throws HttpException 
+	 */
+	@Path("sparql")
+	@POST
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle" })
+	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
+			@FormParam("format") final String formatQuery, @FormParam("query") @DefaultValue("") final String sparqlQuery)
+			throws IOException, HttpException {
+		String format = (formatQuery != null) ? formatQuery : formatHeader;
+		return sparql(format, sparqlQuery);
+	}
+		
+	
+	/**
 	 * HTTP GET interface for query and update (e.g. SELECT, INSERT, DELETE).
 	 * Provides HTML form if no query is specified and HTML is requested
 	 * Provides Service Description if no query is specified and RDF
@@ -176,89 +242,108 @@ public class Endpoint {
 	@Path("sparql")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle" })
-	public final Response sparql(@HeaderParam("Accept") final String formatHeader,
+	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
 			@QueryParam("format") final String formatQuery, @QueryParam("query") @DefaultValue("") final String sparqlQuery)
 			throws IOException, HttpException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
-		logger.info("SPARQL requested with format: " + format);
+		String sparqlQueryDecoded = URLDecoder.decode(sparqlQuery, "UTF-8");
+		return sparql(format, sparqlQueryDecoded);
+	}
+		
+	
+	/**
+	 * Interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * Provides HTML form if no query is specified and HTML is requested
+	 * Provides Service Description if no query is specified and RDF
+	 * representation is requested
+	 * 
+	 * @param format
+	 *            mime type for response format
+	 * @param sparqlQueryDecoded
+	 *            decoded SPARQL query
+	 * @return the response
+	 * @throws IOException
+	 * @throws HttpException 
+	 */
+	public final Response sparql(final String format, final String sparqlQuery)
+			throws IOException, HttpException {
 		if (sparqlQuery.equals("")) {
-			if (format.contains("text/html")) {
-				logger.info("SPARQL form requested");
-				List<String> graphList = RevisionManagement.getRevisedGraphs();
-				StringBuilder sb1 = new StringBuilder("<option value=\"\">(All)</option>\n");
-				StringBuilder sb2 = new StringBuilder("<option value=\"\">(None)</option>\n");
-				for (Iterator<String> opt = graphList.iterator(); opt.hasNext();) {
-					String graph = opt.next();
-					sb1.append(String.format("<option value=\"%1$s\">%1$s</option>%n", graph));
-					sb2.append(String.format("<option value=\"DROP GRAPH <%1$s>\">%1$s</option>%n", graph));
-				}
-				String content = String.format(ResourceManagement.getContentFromResource("webapp/index.html"), 
-						Endpoint.class.getPackage().getImplementationVersion(), sb1.toString(), sb2.toString());
-				return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
+			if (format.contains(MediaType.TEXT_HTML)) {
+				return getHTMLResponse();
 			} else {
 				return getServiceDescriptionResponse(format);
 			}
 		} else {
-			logger.info("SPARQL query was requested. Query: " + sparqlQuery);
-			try {
-				String sparqlQueryDecoded = URLDecoder.decode(sparqlQuery, "UTF-8");
-
-				String user = null;
-				Matcher userMatcher = patternUser.matcher(sparqlQueryDecoded);
-				if (userMatcher.find()) {
-					user = userMatcher.group("user");
-					sparqlQueryDecoded = userMatcher.replaceAll("");
-				}
-				String message = null;
-				Matcher messageMatcher = patternCommitMessage.matcher(sparqlQueryDecoded);
-				if (messageMatcher.find()) {
-					message = messageMatcher.group("message");
-					sparqlQueryDecoded = messageMatcher.replaceAll("");
-				}
-
-				if (patternSelectQuery.matcher(sparqlQueryDecoded).find()) {
-					return getSelectResponse(sparqlQueryDecoded, format);
-				}
-				if (patternUpdateQuery.matcher(sparqlQueryDecoded).find()) {
-					return getUpdateResponse(sparqlQueryDecoded, user, message, format);
-				}
-				if (patternCreateGraph.matcher(sparqlQueryDecoded).find()) {
-					return getCreateGraphResponse(sparqlQueryDecoded, format);
-				}
-				if (patternDropGraph.matcher(sparqlQueryDecoded).find()) {
-					return getDropGraphResponse(sparqlQueryDecoded, format);
-				}
-				if (patternBranchOrTagQuery.matcher(sparqlQueryDecoded).find()) {
-					return getBranchOrTagResponse(sparqlQueryDecoded, user, message, format);
-				}
-				throw new InternalServerErrorException("No R43ples query detected");
-			} catch (HttpException | IOException e) {
-				e.printStackTrace();
-				throw new InternalServerErrorException(e.getMessage());
-			}
+			return getSparqlResponse(format, sparqlQuery);
 		}
 	}
 
 	/**
-	 * Creates sample datasets
-	 * @return information provided as HTML response
+	 * @param format
+	 * @param sparqlQuery
+	 * @return
+	 * @throws InternalServerErrorException
 	 */
-	@Path("createSampleDataset")
-	@GET
-	public final Response createSampleDataset() {
-		final String graphName1 = "http://test.com/r43ples-dataset";
-		final String graphName2 = "http://test.com/r43ples-dataset-2";
+	private Response getSparqlResponse(final String format, String sparqlQuery) throws InternalServerErrorException {
+		logger.info("SPARQL query was requested. Query: " + sparqlQuery);
 		try {
-			SampleDataSet.createSampleDataset1(graphName1);
-			SampleDataSet.createSampleDataset2(graphName2);
+			String user = null;
+			Matcher userMatcher = patternUser.matcher(sparqlQuery);
+			if (userMatcher.find()) {
+				user = userMatcher.group("user");
+				sparqlQuery = userMatcher.replaceAll("");
+			}
+			String message = null;
+			Matcher messageMatcher = patternCommitMessage.matcher(sparqlQuery);
+			if (messageMatcher.find()) {
+				message = messageMatcher.group("message");
+				sparqlQuery = messageMatcher.replaceAll("");
+			}
+
+			if (patternSelectQuery.matcher(sparqlQuery).find()) {
+				return getSelectResponse(sparqlQuery, format);
+			}
+			if (patternUpdateQuery.matcher(sparqlQuery).find()) {
+				return getUpdateResponse(sparqlQuery, user, message, format);
+			}
+			if (patternCreateGraph.matcher(sparqlQuery).find()) {
+				return getCreateGraphResponse(sparqlQuery, format);
+			}
+			if (patternMergeQuery.matcher(sparqlQuery).find()) {
+				return getMergeResponse(sparqlQuery, user, message, format);
+			}
+			if (patternDropGraph.matcher(sparqlQuery).find()) {
+				return getDropGraphResponse(sparqlQuery, format);
+			}
+			if (patternBranchOrTagQuery.matcher(sparqlQuery).find()) {
+				return getBranchOrTagResponse(sparqlQuery, user, message, format);
+			}
+			throw new InternalServerErrorException("No R43ples query detected");
 		} catch (HttpException | IOException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException(e.getMessage());
 		}
-		String result = String.format(
-				"Test dataset 1 successfully created in graph: %s %n"
-				+ "Test dataset 2 successfully created in graph: %s %n", graphName1, graphName2);
-		return Response.ok().entity(result).build();
+	}
+
+	/**
+	 * @return
+	 * @throws HttpException
+	 * @throws IOException
+	 */
+	private Response getHTMLResponse() throws HttpException, IOException {
+		logger.info("SPARQL form requested");
+		List<String> graphList = RevisionManagement.getRevisedGraphs();
+		StringBuilder sb1 = new StringBuilder("<option value=\"\">(All)</option>\n");
+		StringBuilder sb2 = new StringBuilder("<option value=\"\">(None)</option>\n");
+		for (Iterator<String> opt = graphList.iterator(); opt.hasNext();) {
+			String graph = opt.next();
+			sb1.append(String.format("<option value=\"%1$s\">%1$s</option>%n", graph));
+			sb2.append(String.format("<option value=\"DROP GRAPH <%1$s>\">%1$s</option>%n", graph));
+		}
+		String version = Endpoint.class.getPackage().getImplementationVersion();
+		String content = String.format(ResourceManagement.getContentFromResource("webapp/index.html"), 
+				version, sb1.toString(), sb2.toString());
+		return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
 	}
 
 	
@@ -326,19 +411,29 @@ public class Endpoint {
 	 * @throws AuthenticationException
 	 */
 	private Response getSelectResponse(final String query, final String format) throws HttpException, IOException {
-		ResponseBuilder responseBuilder = Response.ok();
 		if (query.contains("OPTION r43ples:SPARQL_JOIN")) {
-			try {
-				String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
-				query_rewritten = SparqlRewriter.rewriteQuery(query_rewritten);
-				String result = TripleStoreInterface.executeQueryWithAuthorization(query_rewritten, format);
-				return responseBuilder.entity(result).type(format).build();
-			} catch (Exception e) {
-				logger.error(e);
-				e.printStackTrace();
-				throw new InternalServerErrorException("Query contain errors:\n" + query);
-			}
+			ResponseBuilder responseBuilder = Response.ok();
+			String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
+			query_rewritten = SparqlRewriter.rewriteQuery(query_rewritten);
+			String result = TripleStoreInterface.executeQueryWithAuthorization(query_rewritten, format);
+			return responseBuilder.entity(result).type(format).build();
 		}
+		else {
+			return getSelectResponseClassic(query, format);
+		}
+	}
+
+
+	/**
+	 * @param query
+	 * @param format
+	 * @return
+	 * @throws HttpException
+	 * @throws IOException
+	 * @throws UnsupportedEncodingException
+	 */
+	private Response getSelectResponseClassic(final String query, final String format) throws HttpException, IOException, UnsupportedEncodingException {
+		ResponseBuilder responseBuilder = Response.ok();
 		String queryM = query;
 
 		Matcher m = patternSelectFromPart.matcher(queryM);
@@ -351,12 +446,12 @@ public class Endpoint {
 
 			// if no revision number is declared use the MASTER as default
 			if (revisionNumber == null) {
-				revisionNumber = "MASTER";
+				revisionNumber = "master";
 			}
 			String headerRevisionNumber;
-			if (revisionNumber.equalsIgnoreCase("MASTER")) {
+			if (revisionNumber.equalsIgnoreCase("master")) {
 				// Respond with MASTER revision - nothing to be done - MASTER revisions are already created in the named graphs
-				headerRevisionNumber = "MASTER";
+				headerRevisionNumber = "master";
 				newGraphName = graphName;
 			} else {
 				if (RevisionManagement.isBranch(graphName, revisionNumber)) {
@@ -368,13 +463,17 @@ public class Endpoint {
 				}
 				headerRevisionNumber = revisionNumber;
 			}
+
 			queryM = m.replaceFirst("FROM <" + newGraphName + ">");
 			m = patternSelectFromPart.matcher(queryM);
 
-			// Respond with specified revision
-			responseBuilder.header(graphName + "-revision-number", headerRevisionNumber);
-			responseBuilder.header(graphName + "-revision-number-of-MASTER",
-					RevisionManagement.getMasterRevisionNumber(graphName));
+			
+		    // Remove the http:// of the graph name because it is not permitted that a header parameter contains a colon
+			String 	graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+		    
+		    // Respond with specified revision
+			responseBuilder.header(graphNameHeader + "-revision-number", headerRevisionNumber);
+		    responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
 		}
 		if (!found) {
 			logger.info("No R43ples SELECT query: " + queryM);
@@ -383,6 +482,7 @@ public class Endpoint {
 		return responseBuilder.entity(response).type(format).build();
 	}
 
+	
 	/**
 	 * Produce the response for a INSERT or DELETE SPARQL query.
 	 * 
@@ -475,10 +575,12 @@ public class Endpoint {
 			RevisionManagement.addMetaInformationForNewRevision(graphName, user, commitMessage, usedRevisionNumber,
 					newRevisionNumber, addSetGraphUri, removeSetGraphUri);
 
+			String 	graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			
 			// Respond with next revision number
-			responseBuilder.header(graphName + "-revision-number", newRevisionNumber);
-			responseBuilder.header(graphName + "-revision-number-of-MASTER", 
-					RevisionManagement.getMasterRevisionNumber(graphName));
+	    	responseBuilder.header(graphNameHeader + "-revision-number", newRevisionNumber);
+			responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
+			logger.info("Respond with new revision number " + newRevisionNumber + ".");
 			logger.info("Respond with new revision number " + newRevisionNumber);
 			queryM = m.replaceAll(String.format("GRAPH <%s> ", graphName));
 			m = patternGraph.matcher(queryM);
@@ -508,13 +610,23 @@ public class Endpoint {
 		while (m.find()) {
 			found = true;
 			String graphName = m.group("graph");
-			// Execute SPARQL query
+//			String silent = m.group("silent");
 			String querySparql = m.group();
-			responseBuilder.entity(TripleStoreInterface.executeQueryWithAuthorization(querySparql, format));
-			// Add R43ples information
-			RevisionManagement.putGraphUnderVersionControl(graphName);
-			responseBuilder.header(graphName + "-revision-number", 0);
-			responseBuilder.header(graphName + "-revision-number-of-MASTER", 0);
+			
+			// Create graph
+			String result = TripleStoreInterface.executeQueryWithAuthorization(querySparql, format);
+		    responseBuilder.entity(result);
+		    
+		    if (RevisionManagement.getMasterRevisionNumber(graphName) == null)
+		    {
+			    // Add R43ples information
+			    RevisionManagement.putGraphUnderVersionControl(graphName);
+		    	
+			    String 	graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			    responseBuilder.header(graphNameHeader + "-revision-number", 0);
+				responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", 0);
+			}
+
 		}
 		if (!found) {
 			throw new InternalServerErrorException("Query doesn't contain a correct CREATE query:\n" + query);
@@ -590,12 +702,12 @@ public class Endpoint {
 				responseBuilder = Response.status(Response.Status.CONFLICT);
 			}
 
-			// Respond with next revision number
-			responseBuilder.header(graphName + "-revision-number", 
-					RevisionManagement.getRevisionNumber(graphName, referenceName));
-			responseBuilder.header(graphName + "-revision-number-of-MASTER",
-					RevisionManagement.getMasterRevisionNumber(graphName));
-
+			String 	graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+		    	
+	    	// Respond with next revision number
+		    responseBuilder.header(graphNameHeader + "-revision-number", RevisionManagement.getRevisionNumber(graphName, referenceName));
+	    	responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
+		    
 		}
 		if (!foundEntry) {
 			throw new InternalServerErrorException("Error in query: " + sparqlQuery);
@@ -603,5 +715,163 @@ public class Endpoint {
 
 		return responseBuilder.build();
 	}
+	
+	
+	/** 
+	 * Creates a merge between the specified branches.
+	 * 
+	 * Using command: MERGE GRAPH <graphURI> BRANCH "branchNameA" INTO "branchNameB"
+	 * 
+	 * @param sparqlQuery the SPARQL query
+	 * @param format the result format
+	 * @throws IOException 
+	 * @throws AuthenticationException 
+	 */
+	private Response getMergeResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws HttpException, IOException {
+		ResponseBuilder responseBuilder = Response.created(URI.create(""));
+		logger.info("Merge creation detected");
 
+		// Add R43ples information
+		Matcher m = patternMergeQuery.matcher(sparqlQuery);
+		
+		boolean foundEntry = false;
+		while (m.find()) {
+			foundEntry = true;
+			String newRevisionNumber = null;
+			
+			String action = m.group("action");
+			String graphName = m.group("graph");
+			String sdd = m.group("sdd");
+			String sddURI = m.group("sddURI");
+			String branchNameA = m.group("branchNameA");
+			String branchNameB = m.group("branchNameB");
+			String with = m.group("with");
+			String triples = m.group("triples");
+			
+			String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
+			String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
+			
+			logger.debug("action: " + action);
+			logger.debug("graph: " + graphName);
+			logger.debug("sdd: " + sdd);
+			logger.debug("sddURI: " + sddURI);
+			logger.debug("branchNameA: " + branchNameA);
+			logger.debug("branchNameB: " + branchNameB);
+			logger.debug("with: " + with);
+			logger.debug("triples: " + triples);
+			
+			// TODO check graph existence
+			
+			// Check if A and B are different valid branches (it is only possible to merge terminal nodes)
+			if (!RevisionManagement.getRevisionNumber(graphName, branchNameA).equals(RevisionManagement.getRevisionNumber(graphName, branchNameB))) {
+				// Different branches specified
+				// Check if both are terminal nodes
+				if (!(RevisionManagement.isBranch(graphName, branchNameA) && RevisionManagement.isBranch(graphName, branchNameB))) {
+					// There are non terminal nodes used
+					throw new InternalServerErrorException("Non terminal nodes were used: " + sparqlQuery);
+				}
+			} else {
+				// Branches are equal - throw error
+				throw new InternalServerErrorException("Specified branches are equal: " + sparqlQuery);
+			}
+
+			
+			// Differ between MERGE query with specified SDD and without SDD			
+			String usedSDDURI = null;
+			if (sdd != null) {
+				// Specified SDD
+				usedSDDURI = sddURI;
+			} else {
+				// Default SDD
+				// Query the referenced SDD
+				String querySDD = String.format(
+						  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
+						+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> %n"
+						+ "SELECT ?defaultSDD %n"
+						+ "FROM <%s> %n"
+						+ "WHERE { %n"
+						+ "	<%s> a rmo:Graph ;%n"
+						+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
+						+ "}", Config.revision_graph, graphName);
+				
+				String resultSDD = TripleStoreInterface.executeQueryWithAuthorization(querySDD, "XML");
+				if (ResultSetFactory.fromXML(resultSDD).hasNext()) {
+					QuerySolution qs = ResultSetFactory.fromXML(resultSDD).next();
+					usedSDDURI = qs.getResource("?defaultSDD").toString();
+				} else {
+					throw new InternalServerErrorException("Error in revision graph! Selected graph <" + graphName + "> has no default SDD referenced.");
+				}
+			}
+
+			// Get the common revision with shortest path
+			String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionUriA, revisionUriB);
+			
+			// Create the revision progress for A and B
+			String graphNameA = "RM-REVISION-PROGRESS-A-" + graphName;
+			String graphNameB = "RM-REVISION-PROGRESS-B-" + graphName;
+			String uriA = "http://eatld.et.tu-dresden.de/branch-A";
+			String uriB = "http://eatld.et.tu-dresden.de/branch-B";
+			
+			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA), graphNameA, uriA);
+			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
+			
+			// Create difference model
+			MergeManagement.createDifferenceTripleModel(graphName, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI);
+			
+			// Differ between the different merge queries
+			if ((action != null) && (action.equalsIgnoreCase("AUTO")) && (with == null) && (triples == null)) {
+				logger.info("AUTO MERGE query detected");
+				// Create the merged revision
+				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.AUTO, "");
+			} else if ((action != null) && (action.equalsIgnoreCase("MANUAL")) && (with != null) && (triples != null)) {
+				logger.info("MANUAL MERGE query detected");
+				// Create the merged revision
+				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.MANUAL, triples);
+			} else if ((action == null) && (with != null) && (triples != null)) {
+				logger.info("MERGE WITH query detected");
+				// Create the merged revision
+				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.WITH, triples);
+			} else if ((action == null) && (with == null) && (triples == null)) {
+				logger.info("MERGE query detected");
+				// Check if difference model contains conflicts
+				String queryASK = String.format(
+						  "ASK { %n"
+						+ "	GRAPH <%s> { %n"
+						+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
+						+ "	} %n"
+						+ "}", "RM-DIFFERENCE-MODEL-" + graphName);
+				String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
+				if (resultASK.equals("true")) {
+					// Difference model contains conflicts
+					// Return the conflict model to the client
+					responseBuilder = Response.status(Response.Status.CONFLICT);
+					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct("RM-DIFFERENCE-MODEL-" + graphName));
+				} else {
+					// Difference model contains no conflicts
+					// Create the merged revision
+					newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.COMMON, "");
+				}
+			} else {
+				throw new InternalServerErrorException("This is not a valid MERGE query: " + sparqlQuery);
+			}
+			
+			String 	graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			
+			// Return the revision number which were used (convert tag or branch identifier to revision number)
+			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(graphName, branchNameA));
+			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));			
+			
+			if (newRevisionNumber != null) {
+				// Respond with next revision number
+		    	responseBuilder.header(graphNameHeader + "-revision-number", newRevisionNumber);
+				responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
+				logger.info("Respond with new revision number " + newRevisionNumber + ".");
+			}
+		}
+		if (!foundEntry)
+			throw new InternalServerErrorException("Error in query: " + sparqlQuery);
+		
+		return responseBuilder.build();	
+	}
+	
 }

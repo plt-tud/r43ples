@@ -24,6 +24,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
 
+
 /** 
  * Provides a interface to the triple store with URI and port specified via init method.
  *
@@ -59,6 +60,15 @@ public class TripleStoreInterface {
 			logger.info("Create revision graph");
 			executeQueryWithAuthorization("CREATE SILENT GRAPH <" + Config.revision_graph +">", "HTML");
 	 	}
+		
+		// Create SDD graph
+		if (!RevisionManagement.checkGraphExistence(Config.sdd_graph)){
+			logger.info("Create sdd graph");
+			executeQueryWithAuthorization("CREATE SILENT GRAPH <" + Config.revision_graph +">", "HTML");
+			// Insert default content into SDD graph
+			RevisionManagement.executeINSERT(Config.sdd_graph, MergeManagement.convertJenaModelToNTriple(MergeManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent)));
+	 	}
+		
 	}
 	
 	/**
@@ -100,7 +110,7 @@ public class TripleStoreInterface {
 	}
 
 	
-	/**
+    /**
 	 * Executes a SPARQL-query against the triple store with authorization.
 	 * (Based on the source code of the IAF device explorer - created by Sebastian Heinze.)
 	 * 
@@ -111,25 +121,10 @@ public class TripleStoreInterface {
 	 * @throws HttpException 
 	 */
 	public static String executeQueryWithAuthorization(String query, String format) throws IOException, HttpException {
-		String result = null;
-		
-		logger.debug("Execute query on SPARQL endpoint:\n"+ query);
-		 
-		DefaultHttpClient httpClient = new DefaultHttpClient();
-	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
-			
-	    HttpPost request = new HttpPost(endpoint);
-		
-		//set up HTTP Post Request (look at http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VOSSparqlProtocol for Protocol)
-		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-		nameValuePairs.add(new BasicNameValuePair("format",format));
-		nameValuePairs.add(new BasicNameValuePair("query", query));
-    	request.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
-    	request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-		
-		//Execute Query
-		HttpResponse response = httpClient.execute(request);
+		HttpResponse response = executeQueryWithAuthorizationResponse(query, format);
 		logger.debug("Statuscode: " + response.getStatusLine().getStatusCode());
+		
+		String result;
 		
 		InputStreamReader in = new InputStreamReader(response.getEntity().getContent());
 		try{
@@ -145,5 +140,35 @@ public class TripleStoreInterface {
 		}
 		return result;
 	}
+	
+	 /**
+	 * Executes a SPARQL-query against the triple store with authorization.
+	 * (Based on the source code of the IAF device explorer - created by Sebastian Heinze.)
+	 * 
+	 * @param query the SPARQL query
+	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
+	 * @return the result of the query in the specified format
+	 * @throws  
+	 * @throws IOException 
+	 * @throws HttpException 
+	 */
+	public static HttpResponse executeQueryWithAuthorizationResponse(String query, String format) throws IOException {
+		logger.debug("Execute query on SPARQL endpoint:\n"+ query);
+		DefaultHttpClient httpClient = new DefaultHttpClient();
+	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
+			
+	    HttpPost request = new HttpPost(endpoint);
+		
+		//set up HTTP Post Request (look at http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VOSSparqlProtocol for Protocol)
+		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+		nameValuePairs.add(new BasicNameValuePair("format",format));
+		nameValuePairs.add(new BasicNameValuePair("query", query));
+    	request.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
+    	request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+		
+		//Execute Query
+		return httpClient.execute(request);
+	}
+	
 	
 }

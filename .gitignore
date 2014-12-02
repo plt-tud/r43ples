@@ -3,11 +3,12 @@ R43ples.zip
 /javadoc/
 .settings
 /verification/*.csv
-*.log
-*.log.*
-/resources/dataset
+R43ples.log
+R43ples.log.*
+/resources/r43ples.conf
 /cov-int
-/dataset
+
 /yEdExport.graphml
 /bin/
 /test/TEST-*
+/target/

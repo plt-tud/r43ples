@@ -77,15 +77,15 @@ public class TestMultipleGraph {
 				+ "} %n"
 				+ "ORDER By ?address";
 
-		result = ep.sparql(format, null, String.format(query_template, 1, 1)).getEntity().toString();
+		result = ep.sparql(format, String.format(query_template, 1, 1)).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-1-1.xml");
 		Assert.assertEquals(expected, result);
 		
-		result = ep.sparql(format, null, String.format(query_template, 2, 1)).getEntity().toString();
+		result = ep.sparql(format, String.format(query_template, 2, 1)).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-2-1.xml");
 		Assert.assertEquals(expected, result);
 		
-		result = ep.sparql(format, null, String.format(query_template, 2, 2)).getEntity().toString();
+		result = ep.sparql(format, String.format(query_template, 2, 2)).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-2-2.xml");
 		Assert.assertEquals(expected, result);
 	}

@@ -1,0 +1,216 @@
+@prefix rmo: <http://eatld.et.tu-dresden.de/rmo#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix : <http://eatld.et.tu-dresden.de/rpo#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix swrlx: <http://www.w3.org/2003/11/swrlx#> .
+@prefix swrl: <http://www.w3.org/2003/11/swrl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl2: <http://www.w3.org/2006/12/owl2#> .
+@base <http://eatld.et.tu-dresden.de/rpo> .
+
+<http://eatld.et.tu-dresden.de/rpo> rdf:type owl:Ontology .
+
+
+#################################################################
+#
+#    Annotation properties
+#
+#################################################################
+
+
+
+
+#################################################################
+#
+#    Object Properties
+#
+#################################################################
+
+
+###  http://eatld.et.tu-dresden.de/rpo#added
+
+:added rdf:type owl:ObjectProperty ;
+       
+       rdfs:label "hinzugefuegt"@de ,
+                  "added"@en ;
+       
+       rdfs:comment "Definiert den aktuellen Tripelstatus - hinzugefuegt."@de ,
+                    "Defines the current triple state - added."@en ;
+       
+       rdfs:subPropertyOf :statement .
+
+
+
+###  http://eatld.et.tu-dresden.de/rpo#hasDifference
+
+:hasDifference rdf:type owl:ObjectProperty ;
+               
+               rdfs:label "hat Unterschied"@de ,
+                          "has difference"@en ;
+               
+               rdfs:comment "Spezifiziert die Unterschiede, die einer Unterschiedsgruppe zugeordnet sind."@de ,
+                            "Specifies the differences of a difference group."@en ;
+               
+               rdfs:range :Difference ;
+               
+               rdfs:domain :DifferenceGroup .
+
+
+
+###  http://eatld.et.tu-dresden.de/rpo#hasTriple
+
+:hasTriple rdf:type owl:ObjectProperty ;
+           
+           rdfs:label "hat Tripel"@de ,
+                      "has triple"@en ;
+           
+           rdfs:comment "Spezifiziert das unterschiedsbehaftete Tripel."@de ,
+                        "Specifies the triple which is differing."@en ;
+           
+           rdfs:domain :Difference .
+
+
+
+###  http://eatld.et.tu-dresden.de/rpo#notIncluded
+
+:notIncluded rdf:type owl:ObjectProperty ;
+             
+             rdfs:label "nicht enthalten"@de ,
+                        "not included"@en ;
+             
+             rdfs:comment "Definiert den aktuellen Tripelstatus - nicht enthalten."@de ,
+                          "Defines the current triple state - not included."@en ;
+             
+             rdfs:subPropertyOf :statement .
+
+
+
+###  http://eatld.et.tu-dresden.de/rpo#original
+
+:original rdf:type owl:ObjectProperty ;
+          
+          rdfs:label "original"@de ,
+                     "original"@en ;
+          
+          rdfs:comment "Definiert den aktuellen Tripelstatus - original."@de ,
+                       "Defines the current triple state - original."@en ;
+          
+          rdfs:subPropertyOf :statement .
+
+
+
+###  http://eatld.et.tu-dresden.de/rpo#referencesA
+
+:referencesA rdf:type owl:ObjectProperty ;
+             
+             rdfs:label "referenziert A"@de ,
+                        "references A"@en ;
+             
+             rdfs:comment "Spezifiziert die Referenz zu der Revision im Branch A, in welcher der Status des korrespondierenden Tripels geaendert wurde."@de ,
+                          "Specifies the reference to the revision in branch A in which the state of the corresponding triple was changed."@en ;
+             
+             rdfs:range rmo:Revision ;
+             
+             rdfs:domain :Difference .
+
+
+
+###  http://eatld.et.tu-dresden.de/rpo#referencesB
+
+:referencesB rdf:type owl:ObjectProperty ;
+             
+             rdfs:label "referenziert B"@de ,
+                        "references B"@en ;
+             
+             rdfs:comment "Spezifiziert die Referenz zu der Revision im Branch B, in welcher der Status des korrespondierenden Tripels geandert wurde."@de ,
+                          "Specifies the reference to the revision in branch B in which the state of the corresponding triple was changed."@en ;
+             
+             rdfs:range rmo:Revision ;
+             
+             rdfs:domain :Difference .
+
+
+
+###  http://eatld.et.tu-dresden.de/rpo#removed
+
+:removed rdf:type owl:ObjectProperty ;
+         
+         rdfs:label "Definiert den aktuellen Tripelstatus - geloescht."@de ,
+                    "geloescht"@de ,
+                    "removed"@en ;
+         
+         rdfs:comment "Defines the current triple state - removed."@en ;
+         
+         rdfs:subPropertyOf :statement .
+
+
+
+###  http://eatld.et.tu-dresden.de/rpo#statement
+
+:statement rdf:type owl:ObjectProperty ;
+           
+           rdfs:label "Statement"@de ,
+                      "statement"@en ;
+           
+           rdfs:comment "Elternobjekteigenschaft von hinzugefuegt, nicht enthalten, original und geloescht. Definiert den aktuellen Status eines Tripels im Revisionsverlauf."@de ,
+                        "Parent object properties of added, not included, original and removed. Defines the current state of a triple in the revision progress."@en ;
+           
+           rdfs:domain :RevisionProgress .
+
+
+
+
+
+#################################################################
+#
+#    Classes
+#
+#################################################################
+
+
+###  http://eatld.et.tu-dresden.de/rpo#Difference
+
+:Difference rdf:type owl:Class ;
+            
+            rdfs:label "Unterschied"@de ,
+                       "difference"@en ;
+            
+            rdfs:subClassOf owl:Thing ;
+            
+            rdfs:comment "Definiert ein sich unterscheidendes Tripel."@de ,
+                         "Defines a differing triple."@en .
+
+
+
+###  http://eatld.et.tu-dresden.de/rpo#DifferenceGroup
+
+:DifferenceGroup rdf:type owl:Class ;
+                 
+                 rdfs:label "Unterschiedsgruppe"@de ,
+                            "difference group"@en ;
+                 
+                 rdfs:subClassOf owl:Thing ;
+                 
+                 rdfs:comment "Definiert eine Gruppe von Unterschieden, die auf den gleichen Status basieren."@de ,
+                              "Defines a group of differences which are based on the same states."@en .
+
+
+
+###  http://eatld.et.tu-dresden.de/rpo#RevisionProgress
+
+:RevisionProgress rdf:type owl:Class ;
+                  
+                  rdfs:label "Revisionsverlauf"@de ,
+                             "revision progress"@en ;
+                  
+                  rdfs:comment "Definiert den Revisionsverlauf von allen hinzugefuegten, originalen und geloeschten Tripeln."@de ,
+                               "Defines the revision progress of of all added, original and removed triples."@en .
+
+
+
+
+###  Generated by the OWL API (version 3.2.0.1502) http://owlapi.sourceforge.net
+

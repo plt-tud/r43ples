@@ -1,41 +1,32 @@
 package de.tud.plt.r43ples.test;
 
+import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.not;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 
+import javax.ws.rs.core.MediaType;
+
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
+import de.tud.plt.r43ples.management.SampleDataSet;
+import de.tud.plt.r43ples.management.TripleStoreInterface;
 import de.tud.plt.r43ples.webservice.Service;
 
-/**
- * Create an example graph of the following structure,
- * 
- *                  ADD: D,E              ADD: G
- *               +-----X---------------------X--------- (Branch B1)
- *               |  DEL: A                DEL: D
- * ADD: A,B,C    |
- * ---X----------+ (Master)
- * DEL: -        |
- *               |  ADD: D,H              ADD: I    ADD: J
- *               +-----X---------------------X---------X----- (Branch B2)
- *                  DEL: C                DEL: -    DEL: -
- * 
- * 
- * @author Stephan Hensel
- * @author Markus Graube
- *
- */
+
 public class TestR43ples {
 
 	/** The logger. */
@@ -43,167 +34,54 @@ public class TestR43ples {
 	/** The endpoint. **/
 	private static String endpoint = "http://localhost:9998/r43ples/sparql";
 	/** The graph name. **/
-	private static String graphName = "exampleGraph";
+	private static String graphName = "http://exampleGraph.com/r43ples";
 	
 	
-	@Before
-	public void setUp() throws ConfigurationException, IOException, HttpException{
+	@BeforeClass
+	public static void setUp() throws ConfigurationException, IOException, HttpException{
+		Config.readConfig("r43ples.conf");
+		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
+		SampleDataSet.createSampleDataSetMerging(graphName);
 		Service.start();
 	}
 	
-	@After
-	public void tearDown() {
+	@AfterClass
+	public static void tearDown() {
 		Service.stop();
 	}
 	
 	
-	
-	/**
-	 * Main entry point. Create the example graph.
-	 * 
-	 * @param args
-	 * @throws IOException 
-	 */
 	@Test
-	public void testmain() throws IOException {
-		
-		// Purge silent example graph
-		logger.info("Purge silent example graph");
-		String query = String.format("DROP SILENT GRAPH <%s>", graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// Create new example graph
-		logger.info("Create new example graph");
-		query = String.format("CREATE SILENT GRAPH <%s>", graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// Initial commit
-		logger.info("Initial commit");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"Initial commit.\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"0\" %n"
-				+ "{"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"A\". %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"B\". %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"C\". %n"
-				+ "} }", graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// Create a new branch B1
-		logger.info("Create a new branch B1");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"Branch B1.\" %n"
-				+ "BRANCH GRAPH <%s> REVISION \"1\" TO \"B1\"", graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// Create a new branch B1
-		logger.info("Create a new branch B2");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"Branch B2.\" %n"
-				+ "BRANCH GRAPH <%s> REVISION \"1\" TO \"B2\"", graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// First commit to B1
-		logger.info("First commit to B1");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"First commit to B1.\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"B1\" %n"
-				+ "{ %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"D\". %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"E\". %n"
-				+ "} }"
-				+ "DELETE { GRAPH <%s> REVISION \"B1\" %n"
-				+ "{ %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"A\". %n"
-				+ "} }", graphName, graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// First commit to B2
-		logger.info("First commit to B2");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"First commit to B2.\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"B2\" %n"
-				+ "{ %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"D\". %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"H\". %n"
-				+ "} }"
-				+ "DELETE { GRAPH <%s> REVISION \"B2\" %n"
-				+ "{ %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"C\". %n"
-				+ "} }", graphName, graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// Second commit to B1
-		logger.info("Second commit to B1");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"Second commit to B1.\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"B1\" %n"
-				+ "{ %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"G\". %n"
-				+ "} }"
-				+ "DELETE { GRAPH <%s> REVISION \"B1\" %n"
-				+ "{ %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"D\". %n"
-				+ "} }", graphName, graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		query = String.format(""
-				+ "SELECT * FROM <%s> REVISION \"1.1-0\" "
-				+ "WHERE { ?s ?p ?o. }"
-				+ "ORDER BY ?s ?p ?o", graphName);
-		String result = executeR43plesQueryWithFormat(query, "application/xml");
-		String expected = ResourceManagement.getContentFromResource("response-1.1-0.xml");
-		Assert.assertEquals(expected, result);
-		
-		// Second commit to B2
-		logger.info("Second commit to B2");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"Second commit to B2.\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"B2\" %n"
-				+ "{ %n"
-				+ "  <http://example.com/testS> <http://example.com/testP> \"I\". %n"
-				+ "} }", graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		// Modify commit to B2
-		logger.info("Modify commit to B2");
-		query = String.format(""
-				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"Modify commit to B2.\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"B2\" %n"
-				+ "{ <http://example.com/testS> <http://example.com/testP> \"J\". }"
-				+ "}", graphName);
-		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-		query = String.format(""
+	public void testSelect() throws IOException {
+		String query = String.format(""
 				+ "SELECT * FROM <%s> REVISION \"B2\" "
 				+ "WHERE { ?s ?p ?o. }"
 				+ "ORDER BY ?s ?p ?o", graphName);
-		String result2 = executeR43plesQueryWithFormat(query, "application/xml");
-		String expected2 = ResourceManagement.getContentFromResource("response-1.1-2.xml");
-		Assert.assertEquals(expected2, result2);
-		
-		
+		String result3 = executeR43plesQueryWithFormat(query, MediaType.APPLICATION_XML);
+		String expected3 = ResourceManagement.getContentFromResource("response-1.1-3.xml");
+		Assert.assertEquals(expected3, result3);
+	}
+	
+	
+	@Test
+	public void testSelectSparqlJoinOption() throws IOException{		
+		String query = String.format(""
+						+ "OPTION r43ples:SPARQL_JOIN %n"
+						+ "SELECT ?s ?p ?o "
+						+ "FROM <%s> REVISION \"B1\" "
+						+ "FROM <%s> REVISION \"B2\" "
+						+ "WHERE { ?s ?p ?o. }"
+						+ "ORDER BY ?s ?p ?o", graphName, graphName);
+		String result4 = executeR43plesQueryWithFormat(query, MediaType.APPLICATION_XML);
+		String expected4 = ResourceManagement.getContentFromResource("response-b1-b2.xml");
+		Assert.assertEquals(expected4, result4);
+	}
+	
+	@Test
+	public void testRestructuring() throws IOException{
 		// restructure commit to B2
 		logger.info("Restructure commit to B2");
-		query = String.format(""
+		String query = String.format(""
 				+ "USER \"shensel\" %n"
 				+ "MESSAGE \"restructure commit to B2.\" %n"
 				+ "DELETE { GRAPH <%s> REVISION \"B2\" {"
@@ -221,34 +99,97 @@ public class TestR43ples {
 				graphName, graphName, graphName, graphName);
 		logger.debug("Execute query: \n" + query);
 		logger.debug("Response: \n" + executeR43plesQuery(query));
-		
-
-		
-		query = String.format(""
-				+ "SELECT * FROM <%s> REVISION \"B2\" "
-				+ "WHERE { ?s ?p ?o. }"
-				+ "ORDER BY ?s ?p ?o", graphName);
-		String result3 = executeR43plesQueryWithFormat(query, "application/xml");
-		String expected3 = ResourceManagement.getContentFromResource("response-1.1-3.xml");
-		Assert.assertEquals(expected3, result3);
 	}
 	
-	@Test public void testServiceDescription() throws IOException{
+	@Test
+	public void testServiceDescription() throws IOException{
 		String result = executeR43plesQueryWithFormat("", "text/turtle");
-		Assert.assertNotEquals("", result);
+		Assert.assertThat(result, containsString("sd:r43ples"));
+	}
+	
+	@Test
+	public void testHtmlQueryForm() throws IOException{
+		String result = executeR43plesQueryWithFormat("", MediaType.TEXT_HTML);
+		Assert.assertThat(result, containsString("<form"));
 	}
 	
 	
-	@Test public void testSelectQueryWithoutRevision() throws IOException {
+	@Test
+	public void testSelectQueryWithoutRevision() throws IOException {
 		String query = String.format(""
 				+ "select * from <%s>"
 				+ "where { ?s ?p ?o. }"
 				+ "ORDER BY ?s ?p ?o", graphName);
-		String result = executeR43plesQueryWithFormat(query, "application/xml");
+		String result = executeR43plesQueryWithFormat(query, MediaType.APPLICATION_XML);
 		String expected = ResourceManagement.getContentFromResource("response-master.xml");
 		Assert.assertEquals(expected, result);
 	}
 	
+	@Test
+	public void testConstructQuery() throws IOException {
+		String query = String.format(""
+				+ "CONSTRUCT {?s ?p ?o} "
+				+ "FROM <%s> REVISION \"1\""
+				+ "WHERE { ?s ?p ?o. }"
+				+ "ORDER BY ASC(?o)", graphName);
+		String result = executeR43plesQueryWithFormat(query, "text/turtle");
+		
+		Assert.assertThat(result, containsString("\"A\""));
+		Assert.assertThat(result, containsString("\"B\""));
+		Assert.assertThat(result, containsString("\"C\""));
+		Assert.assertThat(result, not(containsString("\"D\"")));
+		Assert.assertThat(result, not(containsString("\"E\"")));
+	}
+	
+	/**
+	 *  Test example queries from html site
+	 * @throws IOException 
+	 * @throws HttpException 
+	 */
+	@Test public void testExampleQueries() throws IOException, HttpException{
+		SampleDataSet.createSampleDataset1("http://test.com/r43ples-dataset-1");
+		SampleDataSet.createSampleDataset2("http://test.com/r43ples-dataset-2");
+		
+		String result = executeR43plesQuery("CREATE SILENT GRAPH <http://test.com/r43ples-dataset-1>");
+		Assert.assertThat(result, containsString("done"));
+		
+		result = executeR43plesQuery("SELECT * FROM <http://test.com/r43ples-dataset-1> REVISION \"3\" WHERE {	?s ?p ?o. }");
+		Assert.assertThat(result, containsString("http://test.com/Adam"));
+		
+		result = executeR43plesQuery("OPTION r43ples:SPARQL_JOIN \n"
+		+ "	SELECT ?s ?p ?o"
+		+ "	FROM <http://test.com/r43ples-dataset-1> REVISION \"master\""
+		+ "	FROM <http://test.com/r43ples-dataset-2> REVISION \"2\""
+		+ "	WHERE {"
+		+ "	?s ?p ?o."
+		+ "	}");
+		Assert.assertThat(result, containsString("http://test.com/Adam"));
+		
+		result = executeR43plesQuery(""
+		+ "USER \"mgraube\""
+		+ "MESSAGE \"test commit\""
+		+ "	INSERT { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"4\""
+		+ "	{	<a> <b> <c> .	}}");
+		
+		result = executeR43plesQuery(""
+		+ "USER \"mgraube\""
+		+ "MESSAGE \"test branch commit\""
+		+ "	BRANCH GRAPH <http://test.com/r43ples-dataset-1> REVISION \"2\" TO \"unstable\"");
+		
+		result = executeR43plesQuery(""
+		+ "USER \"mgraube\" "
+		+ "MESSAGE \"test tag commit\" "
+		+ "TAG GRAPH <http://test.com/r43ples-dataset-1> REVISION \"2\" TO \"v0.3-alpha\"");
+	
+	}
+		
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * Executes a SPARQL-query against the R43ples endpoint
 	 * 
@@ -256,8 +197,8 @@ public class TestR43ples {
 	 * @return the result of the query
 	 * @throws IOException 
 	 */
-	public static String executeR43plesQuery(String query) throws IOException {
-		return executeR43plesQueryWithFormat(query, "");
+	private static String executeR43plesQuery(String query) throws IOException {
+		return executeR43plesQueryWithFormat(query, MediaType.APPLICATION_XML);
 	}
 	
 	/**
@@ -267,7 +208,7 @@ public class TestR43ples {
 	 * @return the result of the query
 	 * @throws IOException 
 	 */
-	public static String executeR43plesQueryWithFormat(String query, String format) throws IOException {
+	private static String executeR43plesQueryWithFormat(String query, String format) throws IOException {
 		URL url = null;
 		
 		url = new URL(endpoint+ "?query=" + URLEncoder.encode(query, "UTF-8")+ "&format=" + URLEncoder.encode(format, "UTF-8") );

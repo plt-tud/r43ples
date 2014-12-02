@@ -12,7 +12,7 @@ import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.StaticHttpHandler;
 
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
-import com.sun.jersey.api.core.PackagesResourceConfig;
+import com.sun.jersey.api.core.ClassNamesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
 
 import de.tud.plt.r43ples.management.Config;
@@ -42,7 +42,7 @@ public class Service {
 		logger.info("Starting R43ples on grizzly...");
 		Config.readConfig("r43ples.conf");
 		URI BASE_URI = UriBuilder.fromUri(Config.service_uri).port(Config.service_port).build();
-		ResourceConfig rc = new PackagesResourceConfig("de.tud.plt.r43ples.webservice");
+		ResourceConfig rc = new ClassNamesResourceConfig("de.tud.plt.r43ples.webservice.Endpoint");
 		server = GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
 		server.getServerConfiguration().addHttpHandler(
 		        new StaticHttpHandler("./resources/webapp/"), "/static/");

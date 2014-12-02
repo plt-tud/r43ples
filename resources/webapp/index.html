@@ -2,134 +2,192 @@
 <head>
 <title>R43ples - Revision Management for the Semantic Web</title>
 <meta name="author" content="Markus Graube">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" type="image/png" href="/static/images/r43ples-r-logo.png">
+<meta name="description" content="R43ples web application">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="/static/images/r43ples-r-logo.v04.png">    
 
-   <!-- Bootstrap -->
+
+    <!-- Bootstrap core CSS -->
     <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
     
-    <link href="/static/css/r43ples.css" rel="stylesheet" />
-<script src="/static/js/jquery-2.1.1.js"></script>
-<script src="/static/js/jquery-ui.js"></script>
-   <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="/static/js/bootstrap.min.js"></script>
+    <!-- Custom styles for this template -->
+	<link href="/static/css/r43ples.css" rel="stylesheet" />
+	
+	<!--     Bootstrap core JavaScript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
     
-<script type="text/javascript">
+    
+	<script type="text/javascript">
   $(function() {
-	$(".accordion").accordion();
-  	$(".accordion > h4").prepend("<button class='btn btn-sm copy'><span class='glyphicon glyphicon-new-window '></span></button> ");
-  	$(".accordion > h4 > button").click(function() {
-		$("#query").val($(this).parent().next().text());
-  	});
+	 $i=1;
+	$(".accordion > div").addClass("panel panel-default");
+	$(".accordion > div").html(function() {
+ 		  var text =	"<div class='panel-heading btn btn-block' data-toggle='collapse' data-parent='.accordion' href='#collapse"+$i+"'>"+
+		  					"<h3 class='panel-title'>" + $(this).children("h3").text() + "</h3>" +
+	  					"</div>" +
+  						"<div id='collapse"+$i+"' class='panel-collapse collapse'>"+
+  							"<div class='panel-body'>" +
+  								"<pre>" + $(this).children("pre").html() + "</pre>" +
+  								"<button class='copy btn btn-default'><span class='glyphicon glyphicon-arrow-left'</span></button>" +	
+  							"</div>" +
+	  					"</div>";
+		  $i++;
+		  return text;
+	});
+	$(".accordion .panel-collapse").first().addClass("in");
+
+  	$(".accordion > div > div > div > button").click(function() {
+		$("#query").val($(this).prev().text());
+  	}); 
   });
 </script>
+
+
+
 </head>
 <body>
+
+<nav class="navbar navbar-default navbar-static-top" role="navigation">
+	<div class="container">  
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">  
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>  
+				<span class="icon-bar"></span>  
+				<span class="icon-bar"></span>  
+			</button>  
+			<a class="navbar-brand" href="#"><img height="65px" src="/static/images/r43ples-logo.v04.png" alt="R43ples logo"></a>
+			
+		</div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="#">Home</a></li>
+            <li><a href="http://plt-tud.github.io/r43ples/">About</a></li>
+            <li><a href="https://github.com/plt-tud/r43ples">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+	</div>  
+
+</nav>
+
 <div class="container">
 
-	<div id="header" class="page-header">
-		<h1>R43ples - Revision Management for the Semantic Web</h1>
-	</div>
-
 <div class="row">
-<div class="col-md-8">
+<div id="main" class="col-md-7">
 	<div id="query_form">
 		<h2>Query Form</h2>
-		<form action="/r43ples/sparql">
-		<fieldset>
-			<label for="query">Query Text</label><br />
-			<textarea name="query" id="query" cols="80" rows="20">
-SELECT * 
-FROM &lt;http://test.com/r43ples-dataset&gt; REVISION "MASTER"
-WHERE {
-	?s ?p ?o. 
-}
-	  </textarea>
-			<br /> 
-			<label for="format">Results Format:</label>
-			<select	name="format" id="name">
-				<option value="text/html">HTML</option>
-				<option value="application/rdf+xml">RDF/XML</option>
-				<option value="text/turtle">Turtle</option>
-				<option value="application/json">JSON</option>
-			</select>
-			<br />
-			<br /> 
-			<input type="submit" value="Run Query" />
-			<input type="reset"	value="Reset" />
-				</fieldset>
+		<form action="/r43ples/sparql" method="post" role="form" class="form">
+			<div class="form-group">
+				<label for="query">Query Text</label><br />
+				<textarea name="query" class="form-control" id="query"rows="16" placeholder="Insert R43ples/SPARQL query text or copy it from examples"></textarea>
+			</div>
+			<div class="form-group">
+				<label for="format">Results Format:</label>
+				<select	name="format" class="form-control" id="name">
+					<option value="text/html">HTML</option>
+					<option value="application/rdf+xml">RDF/XML</option>
+					<option value="text/turtle">Turtle</option>
+					<option value="application/json">JSON</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<input type="submit" class="btn btn-primary" value="Run Query" />
+				<input type="reset"	class="btn btn-warning" value="Reset" />
+			</div>
 		</form>
 
 		<h2>Revision Information</h2>
-		<ul>
-			<li><a href="createSampleDataset">Create sample data set</a></li>
-			<li>
-				<form action="revisiongraph" method="get">
-					<select id="selectRevisedGraph" name="graph">%2$s</select>
-					<select name="format">
+		<ul class="list-group">
+			<li class="list-group-item">
+				<form action="createSampleDataset" method="get" class="form-inline">
+					<select id="exampleGraph" class="form-control" name="Dataset">
+						<option>All</option>
+						<option>Dataset 1</option>
+						<option>Dataset 2</option>
+						<option>Dataset 3</option>
+						<option>Dataset 4</option>	
+					</select>
+					<input type="submit" class="btn btn-default" value="Create sample data set" />
+				</form>
+			</li>
+			<li class="list-group-item">
+				<form action="revisiongraph" method="get" class="form-inline">
+					<select id="selectRevisedGraph" class="form-control" name="graph">%2$s</select>
+					<select class="form-control" name="format">
 						<option value="text/turtle">Turtle</option>
 						<option value="text/html">Graphical</option>
 					</select>
-					<input type="submit" value="Get RevisionInformation" />
+					<input type="submit" class="btn btn-default" value="Get" />
 				</form>
 			</li>
-			<li>
-				<form action="sparql" method="get">
-					<select id="dropRevisedGraph" name="query">%3$s</select>
-					<input type="submit" value="Drop Graph" />
+			<li class="list-group-item">
+				<form action="sparql" method="get" class="form-inline">
+					<select id="dropRevisedGraph" class="form-control" name="query">%3$s</select>
+					<input type="submit" class="btn btn-default" value="Drop Graph" />
 				</form>
 			</li>
 		</ul>
 	</div>
 </div>
 
-<div class="col-md-4">
-	<div id="examples">
-		<h2>Example queries</h2>
-		<div class="accordion">
-			<h4>Create Graph under Version Control</h4>
-			<pre>
-CREATE GRAPH &lt;http://test.com/r43ples-dataset&gt;
-</pre>
+<div id="examples" class="col-md-5 panel-group accordion">
+	<h2>Example Queries</h2>
+    <div>
+			<h3>Create Graph under Version Control</h3>
+			<pre>CREATE SILENT GRAPH &lt;http://test.com/r43ples-dataset-new&gt;</pre><
+</div>
 
-			<h4>Select Query</h4>
+<div>
+			<h3>Select Query</h3>
 			<pre>SELECT * 
-FROM &lt;http://test.com/r43ples-dataset&gt; REVISION "3"
+FROM &lt;http://test.com/r43ples-dataset-1&gt; REVISION "3"
 WHERE {
 	?s ?p ?o. 
 }</pre>
+</div>
 
-			<h4>Select Query - Multiple Graphs</h4>
+<div>
+			<h3>Select Query - Multiple Graphs</h3>
 			<pre>OPTION r43ples:SPARQL_JOIN
 SELECT ?s ?p ?o 
-FROM &lt;http://test.com/r43ples-dataset&gt; REVISION "MASTER"
+FROM &lt;http://test.com/r43ples-dataset-1&gt; REVISION "master"
 FROM &lt;http://test.com/r43ples-dataset-2&gt; REVISION "2"
 WHERE {
 	?s ?p ?o. 
 }</pre>
+</div>
 
-			<h4>Update Query</h4>
+<div>
+			<h3>Update Query</h3>
 			<pre>USER "mgraube"
 MESSAGE "test commit"
-INSERT { GRAPH &lt;http://test.com/r43ples-dataset&gt; REVISION "4"
+INSERT { GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "4"
 {	&lt;a&gt; &lt;b&gt; &lt;c&gt; .	}}</pre>
+</div>
 
-			<h4>Branching</h4>
+<div>
+			<h3>Branching</h3>
 			<pre>USER "mgraube"
-MESSAGE "test commit"
-BRANCH GRAPH &lt;http://test.com/r43ples-dataset&gt; REVISION "2" TO "unstable"</pre>
-
-			<h4>Tagging</h4>
+MESSAGE "test branch commit"
+BRANCH GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "unstable"</pre>
+</div>
+<div>
+			<h3>Tagging</h3>
 			<pre>USER "mgraube"
-MESSAGE "test commit"
-TAG GRAPH &lt;http://test.com/r43ples-dataset&gt; REVISION "2" TO "v0.3-alpha"</pre>
+MESSAGE "test tag commit"
+TAG GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "v0.3-alpha"</pre>
 		</div>
 	</div>
-</div>
+	</div>
 </div>
 
-	<div id="footer" class="navbar-default navbar-fixed-bottom">
+</div>
+
+<div class="row">
+	<div id="footer" class="navbar-default">
 	<div class="container">
 	<div class="span12">
 		<p class="navbar-text navbar-center">2014 - Version %1$s</p>
@@ -138,7 +196,9 @@ TAG GRAPH &lt;http://test.com/r43ples-dataset&gt; REVISION "2" TO "v0.3-alpha"</
 	</div>
 	</div>
 	</div>
-
 </div>
+
+
+
 </body>
 </html>

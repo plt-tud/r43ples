@@ -14,9 +14,6 @@ if [[ "$COMMITS" -le "1" ]]; then
     echo -e '---\nlayout: index\n---\n' > r43ples/index.md
     cat README.md >> r43ples/index.md
     cd r43ples/javadoc
-    git config --local user.email "r43ples-travis-ci@users.noreply.github.com"
-    git config --local user.name "r43ples travis-ci"
-    git config --local push.default simple
     git add *
     git commit -am "javadoc updated by travis-ci"
     git push https://$GITAUTH@github.com/plt-tud/r43ples

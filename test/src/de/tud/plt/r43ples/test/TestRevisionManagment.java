@@ -53,8 +53,8 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void test_revision_uri() throws HttpException, IOException {
-		String a = RevisionManagement.getRevisionUri(graph_test, "4");
-		Assert.assertEquals("http://test_dataset_user-revision-4", a);
+		String uri = RevisionManagement.getRevisionUri(graph_test, "4");
+		Assert.assertEquals("http://test_dataset_user-revision-4", uri);
 	}
 	
 	@Test
@@ -64,28 +64,47 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
+	public void testSelectMaster() throws IOException, HttpException{
+        String query = "SELECT ?s ?p ?o "
+        		+ "FROM <"+graph_test+"> REVISION \"master\""
+        		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
+        
+        result = ep.sparql(format, query).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
+        Assert.assertEquals(expected, result);
+        
+        query = "SELECT ?s ?p ?o "
+        		+ "FROM <"+graph_test+"> REVISION \"MASTER\""
+        		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
+        
+        result = ep.sparql(format, query).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
+        Assert.assertEquals(expected, result);   
+	}
+	
+	@Test
 	public void testSelectWithRewriting() throws IOException, HttpException{
         String query_template = "OPTION r43ples:SPARQL_JOIN%n"
         		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
         		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
         
-        result = ep.sparql(format, null, String.format(query_template, 0)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 0)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev0.xml");
         Assert.assertEquals(expected, result);
         
-        result = ep.sparql(format, null, String.format(query_template, 1)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 1)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev1.xml");
         Assert.assertEquals(expected, result);
         
-        result = ep.sparql(format, null, String.format(query_template, 2)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 2)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev2.xml");
         Assert.assertEquals(expected, result);
         
-        result = ep.sparql(format, null, String.format(query_template, 3)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 3)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev3.xml");
         Assert.assertEquals(expected, result);
         
-        result = ep.sparql(format, null, String.format(query_template, 4)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 4)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
         Assert.assertEquals(expected, result);
 	}
@@ -96,23 +115,23 @@ public class TestRevisionManagment {
         		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
         		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
         
-        result = ep.sparql(format, null, String.format(query_template, 0)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 0)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev0.xml");
         Assert.assertEquals(expected, result);
         
-        result = ep.sparql(format, null, String.format(query_template, 1)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 1)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev1.xml");
         Assert.assertEquals(expected, result);
         
-        result = ep.sparql(format, null, String.format(query_template, 2)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 2)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev2.xml");
         Assert.assertEquals(expected, result);
         
-        result = ep.sparql(format, null, String.format(query_template, 3)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 3)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev3.xml");
         Assert.assertEquals(expected, result);
         
-        result = ep.sparql(format, null, String.format(query_template, 4)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 4)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
         Assert.assertEquals(expected, result);
 	}
@@ -130,15 +149,15 @@ public class TestRevisionManagment {
 		String option = "OPTION r43ples:SPARQL_JOIN\n";
 		
 		expected = ResourceManagement.getContentFromResource("response-test2Pattern-rev3.xml");
-		result = ep.sparql(format, null, String.format(query,3)).getEntity().toString();
+		result = ep.sparql(format, String.format(query,3)).getEntity().toString();
 		Assert.assertEquals(expected, result);
-		result = ep.sparql(format, null, option + String.format(query,3)).getEntity().toString();
+		result = ep.sparql(format, option + String.format(query,3)).getEntity().toString();
 		Assert.assertEquals(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("response-test2Pattern-rev4.xml");
-		result = ep.sparql(format, null, String.format(query,4)).getEntity().toString();
+		result = ep.sparql(format, String.format(query,4)).getEntity().toString();
 		Assert.assertEquals(expected, result);
-		result = ep.sparql(format, null, option + String.format(query,4)).getEntity().toString();
+		result = ep.sparql(format, option + String.format(query,4)).getEntity().toString();
 		Assert.assertEquals(expected, result);
 	}
 	
@@ -185,15 +204,15 @@ public class TestRevisionManagment {
 				+ "MESSAGE \"test commit message 5 (same as 4)\" %n"
         		+ "INSERT { GRAPH <%s> REVISION \"4\" { %s } } %n"
         		+ "DELETE { GRAPH <%s> REVISION \"4\" { %s } } ";
-		ep.sparql(format, null, String.format(insert_template, 
+		ep.sparql(format, String.format(insert_template, 
 				graph_test,	ResourceManagement.getContentFromResource("samples/test-delta-added-4.nt"), 
 				graph_test, ResourceManagement.getContentFromResource("samples/test-delta-removed-4.nt")));
 		
-        result = ep.sparql(format, null, String.format(query_template, 4)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 4)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
         Assert.assertEquals(expected, result);
         
-        result = ep.sparql(format, null, String.format(query_template, 5)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 5)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("response-test-rev4.xml");
         Assert.assertEquals(expected, result);
 	}
@@ -210,21 +229,21 @@ public class TestRevisionManagment {
 		String option = "OPTION r43ples:SPARQL_JOIN\n";
 		
 		expected = ResourceManagement.getContentFromResource("response-testMinus-rev2.xml");
-		result = ep.sparql(format, null, String.format(query,2)).getEntity().toString();
+		result = ep.sparql(format, String.format(query,2)).getEntity().toString();
 		Assert.assertEquals(expected, result);
-		result = ep.sparql(format, null, option + String.format(query,2)).getEntity().toString();
+		result = ep.sparql(format, option + String.format(query,2)).getEntity().toString();
 		Assert.assertEquals(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("response-testMinus-rev3.xml");
-		result = ep.sparql(format, null, String.format(query,3)).getEntity().toString();
+		result = ep.sparql(format, String.format(query,3)).getEntity().toString();
 		Assert.assertEquals(expected, result);
-		result = ep.sparql(format, null, option + String.format(query,3)).getEntity().toString();
+		result = ep.sparql(format, option + String.format(query,3)).getEntity().toString();
 		Assert.assertEquals(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("response-testMinus-rev4.xml");
-		result = ep.sparql(format, null, String.format(query,4)).getEntity().toString();
+		result = ep.sparql(format, String.format(query,4)).getEntity().toString();
 		Assert.assertEquals(expected, result);
-		result = ep.sparql(format, null, option + String.format(query,4)).getEntity().toString();
+		result = ep.sparql(format, option + String.format(query,4)).getEntity().toString();
 		Assert.assertEquals(expected, result);
 	}
 	
