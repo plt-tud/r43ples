@@ -7,20 +7,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/png" href="/static/images/r43ples-r-logo.v04.png">    
 
+<!-- Bootstrap core CSS -->
+<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+<link href="/static/css/bootstrap-theme.min.css" rel="stylesheet" >
 
-    <!-- Bootstrap core CSS -->
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+<!-- Custom styles for this template -->
+<link href="/static/css/r43ples.css" rel="stylesheet" />
+
+<!--     Bootstrap core JavaScript -->
+<script src="/static/js/jquery-2.1.1.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
     
-    <!-- Custom styles for this template -->
-	<link href="/static/css/r43ples.css" rel="stylesheet" />
-	
-	<!--     Bootstrap core JavaScript -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
-    
-    
-	<script type="text/javascript">
+<script type="text/javascript">
   $(function() {
 	 $i=1;
 	$(".accordion > div").addClass("panel panel-default");
@@ -38,8 +36,7 @@
 		  return text;
 	});
 	$(".accordion .panel-collapse").first().addClass("in");
-
-  	$(".accordion > div > div > div > button").click(function() {
+  	$(".copy").click(function() {
 		$("#query").val($(this).prev().text());
   	}); 
   });
@@ -100,6 +97,25 @@
 		</form>
 
 		<h2>Revision Information</h2>
+						<form action="createSampleDataset" method="get" class="form-inline">
+					<select id="exampleGraph" class="form-control" name="Dataset">
+						<option>All</option>
+						<option>Dataset 1</option>
+						<option>Dataset 2</option>
+						<option>Dataset 3</option>
+						<option>Dataset 4</option>	
+					</select>
+					<input type="submit" class="btn btn-default" value="Create sample data set" />
+				</form>
+				<form action="revisiongraph" method="get" class="form-inline">
+					<select id="selectRevisedGraph" class="form-control" name="graph">%2$s</select>
+					<select class="form-control" name="format">
+						<option value="text/turtle">Turtle</option>
+						<option value="text/html">Graphical</option>
+					</select>
+					<input type="submit" class="btn btn-default" value="Get" />
+				</form>
+				
 		<ul class="list-group">
 			<li class="list-group-item">
 				<form action="createSampleDataset" method="get" class="form-inline">
