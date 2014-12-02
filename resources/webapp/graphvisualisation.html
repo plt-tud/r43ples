@@ -2,9 +2,22 @@
 <head>
 	<title>R43ples - Revision Graph Visualisation of %1$s</title>
 	<meta name="author" content="Markus Graube">
-	<link href="/static/r43ples.css" rel="stylesheet" />
-	<script src="/static/jquery-2.1.1.js"></script>
-	<script src="/static/viz.js"></script>
+	<meta name="description" content="R43ples web application">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" type="image/png" href="/static/images/r43ples-r-logo.v04.png">    
+	
+	<!-- Bootstrap core CSS -->
+	<link href="/static/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/static/css/bootstrap-theme.min.css" rel="stylesheet" >
+	
+	<!-- Custom styles for this template -->
+	<link href="/static/css/r43ples.css" rel="stylesheet" />
+	
+	<!--     Bootstrap core JavaScript -->
+	<script src="/static/js/jquery-2.1.1.js"></script>
+	<script src="/static/js/bootstrap.min.js"></script>
+	<script src="/static/js/viz.js"></script>
 	<script>
 		$(document)
 				.ready(
@@ -18,9 +31,48 @@
 	</script>
 </head>
 	<body>
-	    <h1>R43ples - Revision Graph of %1$s</h1>
+	<nav class="navbar navbar-default navbar-static-top" role="navigation">
+	<div class="container">  
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">  
+				<span class="sr-only">Toggle navigation</span>
+				<span class="icon-bar"></span>  
+				<span class="icon-bar"></span>  
+				<span class="icon-bar"></span>  
+			</button>  
+			<a class="navbar-brand" href="sparql"><img height="65px" src="/static/images/r43ples-logo.v04.png" alt="R43ples logo"></a>
+		</div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="sparql">Home</a></li>
+            <li><a href="http://plt-tud.github.io/r43ples/">About</a></li>
+            <li><a href="https://github.com/plt-tud/r43ples">Contact</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+	</div>  
+
+</nav>
+
+<div class="container">
+	    <h1>Revision Graph of &lt;%1$s&gt;</h1>
 		<script type="text/vnd.graphviz" id="graph">%2$s</script>
-		<a id="graphDownload" href-lang='image/svg+xml' title='revisiongraph_%1$s.svg' download='revisiongraph_%1$s.svg'>Download as SVG</a><br/>
+		<a class="btn btn-default" id="graphDownload" href-lang='image/svg+xml' title='revisiongraph_%1$s.svg' download='revisiongraph_%1$s.svg'>Download as SVG</a><br/>
 		<div id="revisiongraph"></div>
+		
+</div>
+
+
+<div class="row">
+	<div id="footer" class="navbar-default">
+	<div class="container">
+	<div class="span12">
+		<p class="navbar-text navbar-center">2014 - Version %1$s</p>
+		<p class="navbar-text logo"><a href="https://github.com/plt-tud/r43ples">R43ples@GitHub</a></p>
+		<p class="navbar-text">powered by <a href="https://jersey.java.net/">Jersey</a></p>
+	</div>
+	</div>
+	</div>
+</div>
+
 	</body>
 </html>
