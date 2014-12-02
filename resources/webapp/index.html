@@ -50,15 +50,15 @@
 <nav class="navbar navbar-default navbar-static-top" role="navigation">
 	<div class="container">  
 		<div class="navbar-header">
+			<a class="navbar-brand" href="#"><img height="70px" src="/static/images/r43ples-logo.v04.png" alt="R43ples logo"></a>
 			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">  
 				<span class="sr-only">Toggle navigation</span>
 				<span class="icon-bar"></span>  
 				<span class="icon-bar"></span>  
 				<span class="icon-bar"></span>  
 			</button>  
-			<a class="navbar-brand" href="#"><img height="65px" src="/static/images/r43ples-logo.v04.png" alt="R43ples logo"></a>
-			
 		</div>
+		
         <div id="navbar" class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
             <li><a href="#">Home</a></li>
@@ -79,7 +79,7 @@
 		<form action="/r43ples/sparql" method="post" role="form" class="form">
 			<div class="form-group">
 				<label for="query">Query Text</label><br />
-				<textarea name="query" class="form-control" id="query"rows="16" placeholder="Insert R43ples/SPARQL query text or copy it from examples"></textarea>
+				<textarea name="query" class="form-control" id="query" rows="16" placeholder="Insert R43ples/SPARQL query text or copy it from examples"></textarea>
 			</div>
 			<div class="form-group">
 				<label for="format">Results Format:</label>
@@ -96,26 +96,7 @@
 			</div>
 		</form>
 
-		<h2>Revision Information</h2>
-						<form action="createSampleDataset" method="get" class="form-inline">
-					<select id="exampleGraph" class="form-control" name="Dataset">
-						<option>All</option>
-						<option>Dataset 1</option>
-						<option>Dataset 2</option>
-						<option>Dataset 3</option>
-						<option>Dataset 4</option>	
-					</select>
-					<input type="submit" class="btn btn-default" value="Create sample data set" />
-				</form>
-				<form action="revisiongraph" method="get" class="form-inline">
-					<select id="selectRevisedGraph" class="form-control" name="graph">%2$s</select>
-					<select class="form-control" name="format">
-						<option value="text/turtle">Turtle</option>
-						<option value="text/html">Graphical</option>
-					</select>
-					<input type="submit" class="btn btn-default" value="Get" />
-				</form>
-				
+		<h2>Revision Information</h2>			
 		<ul class="list-group">
 			<li class="list-group-item">
 				<form action="createSampleDataset" method="get" class="form-inline">
@@ -136,7 +117,7 @@
 						<option value="text/turtle">Turtle</option>
 						<option value="text/html">Graphical</option>
 					</select>
-					<input type="submit" class="btn btn-default" value="Get" />
+					<input type="submit" class="btn btn-default" value="Get Revision Graph" />
 				</form>
 			</li>
 			<li class="list-group-item">
