@@ -4,16 +4,15 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.grizzly.http.server.StaticHttpHandler;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.mvc.mustache.MustacheMvcFeature;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
@@ -43,7 +42,10 @@ public class Service {
 		Config.readConfig("r43ples.conf");
 		URI BASE_URI = new URI(Config.service_uri);
 	
-		ResourceConfig rc = new ResourceConfig().registerClasses(Endpoint.class);
+		ResourceConfig rc = new ResourceConfig()
+				.registerClasses(Endpoint.class)
+				.property(MustacheMvcFeature.TEMPLATE_BASE_PATH, "templates")
+				.register(MustacheMvcFeature.class);
 		server = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, rc);
 		server.getServerConfiguration().addHttpHandler(
 		        new CLStaticHttpHandler(Service.class.getClassLoader(),"webapp/"), "/static/");

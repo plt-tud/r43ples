@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -37,6 +38,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.log4j.Logger;
+import org.glassfish.jersey.server.mvc.Template;
+import org.glassfish.jersey.server.mvc.Viewable;
 
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSetFactory;
@@ -117,6 +120,16 @@ public class Endpoint {
 	/** default logger for this class */
 	private final static Logger logger = Logger.getLogger(Endpoint.class);
 
+	
+	@GET
+	@Path("test")
+	@Template(name="/index.mustache")
+	public HashMap get() {
+		HashMap<String, Object> scopes = new HashMap<String, Object>();
+	    scopes.put("name", "Mustache");
+	    scopes.put("feature", 12);
+		return scopes;
+	}
 	
 	/**
 	 * Creates sample datasets
