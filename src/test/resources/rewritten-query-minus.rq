@@ -1,0 +1,63 @@
+PREFIX  :     <http://test.com/>
+
+SELECT DISTINCT  ?p1 ?p2
+WHERE
+  { { { GRAPH ?g1
+          { ?p1  :knows  ?p2 .}
+        { ?ref1  <http://eatld.et.tu-dresden.de/rmo#references>  ?rev1 ;
+                 <http://eatld.et.tu-dresden.de/rmo#fullGraph>  ?g1 .
+          FILTER ( ?rev1 IN (<http://test_dataset_user-revision-5>) )
+        }
+        UNION
+          { ?rg1  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://eatld.et.tu-dresden.de/rmo#Revision> ;
+                  <http://eatld.et.tu-dresden.de/rmo#deltaRemoved>  ?g1 .
+            FILTER ( ?rg1 IN (<http://test_dataset_user-revision-5>, <http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>) )
+          }
+        MINUS
+          { GRAPH ?gm1
+              { ?p1  :knows  ?p2 .}
+            ?rm1  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://eatld.et.tu-dresden.de/rmo#Revision> ;
+                  <http://eatld.et.tu-dresden.de/rmo#deltaAdded>  ?gm1 .
+            FILTER ( ?rm1 IN (<http://test_dataset_user-revision-5>, <http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>) )
+            MINUS
+              { GRAPH ?gm1_old
+                  { ?p1  :knows  ?p2 .}
+                ?rm1_old <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://eatld.et.tu-dresden.de/rmo#Revision> .
+                ?rm1_old <http://eatld.et.tu-dresden.de/rmo#deltaRemoved> ?gm1_old .
+                ?rm1 (<http://www.w3.org/ns/prov#wasDerivedFrom>)+ ?rm1_old
+                FILTER ( ?rm1_old IN (<http://test_dataset_user-revision-5>, <http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>) )
+              }
+          }
+      }
+      MINUS
+        { { GRAPH ?g2
+              { ?p1  :knows  :Danny .}
+            { ?ref2  <http://eatld.et.tu-dresden.de/rmo#references>  ?rev2 ;
+                     <http://eatld.et.tu-dresden.de/rmo#fullGraph>  ?g2 .
+              FILTER ( ?rev2 IN (<http://test_dataset_user-revision-5>) )
+            }
+            UNION
+              { ?rg2  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://eatld.et.tu-dresden.de/rmo#Revision> ;
+                      <http://eatld.et.tu-dresden.de/rmo#deltaRemoved>  ?g2 .
+                FILTER ( ?rg2 IN (<http://test_dataset_user-revision-5>, <http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>) )
+              }
+            MINUS
+              { GRAPH ?gm2
+                  { ?p1  :knows  :Danny .}
+                ?rm2  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://eatld.et.tu-dresden.de/rmo#Revision> ;
+                      <http://eatld.et.tu-dresden.de/rmo#deltaAdded>  ?gm2 .
+                FILTER ( ?rm2 IN (<http://test_dataset_user-revision-5>, <http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>) )
+                MINUS
+                  { GRAPH ?gm2_old
+                      { ?p1  :knows  :Danny .}
+                    ?rm2_old <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://eatld.et.tu-dresden.de/rmo#Revision> .
+                    ?rm2_old <http://eatld.et.tu-dresden.de/rmo#deltaRemoved> ?gm2_old .
+                    ?rm2 (<http://www.w3.org/ns/prov#wasDerivedFrom>)+ ?rm2_old
+                    FILTER ( ?rm2_old IN (<http://test_dataset_user-revision-5>, <http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>) )
+                  }
+              }
+          }
+        }
+    }
+  }
+ORDER BY ?p1 ?p2
