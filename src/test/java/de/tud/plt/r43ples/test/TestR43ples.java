@@ -4,6 +4,7 @@ import static org.hamcrest.core.StringContains.containsString;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -37,7 +38,7 @@ public class TestR43ples {
 	
 	
 	@BeforeClass
-	public static void setUp() throws ConfigurationException, IOException, HttpException{
+	public static void setUp() throws ConfigurationException, IOException, HttpException, URISyntaxException{
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
 		SampleDataSet.createSampleDataSetMerging(graphName);

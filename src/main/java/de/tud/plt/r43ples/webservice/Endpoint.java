@@ -66,7 +66,7 @@ import de.tud.plt.r43ples.visualisation.GraphVizVisualisation;
  * @author Markus Graube
  * 
  */
-@Path("r43ples")
+@Path("/")
 public class Endpoint {
 
 	private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;

@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 public class Config {
 	
 	public static String service_uri;
-	public static int service_port;
 	public static String sparql_endpoint;
 	public static String sparql_user;
 	public static String sparql_password;
@@ -45,7 +44,6 @@ public class Config {
 		try {
 			config = new PropertiesConfiguration(configFilePath);
 			service_uri = config.getString("service.uri");
-			service_port = config.getInt("service.port");
 			
 			sparql_endpoint = config.getString("sparql.endpoint");
 			sparql_user = config.getString("sparql.username");
