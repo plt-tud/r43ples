@@ -220,6 +220,7 @@
     <url>http://plt-tud.github.io/r43ples/</url>
     <organization>
         <name>Technische Universität Dresden - Professur für Prozessleittechnik</name>
+        <url>http://www.et.tu-dresden.de/ifa/index.php?id=prozessleittechnik</url>
     </organization>
     <scm>
         <url>https://github.com/plt-tud/r43ples</url>
