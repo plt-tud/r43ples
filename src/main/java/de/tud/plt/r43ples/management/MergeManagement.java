@@ -948,7 +948,7 @@ public class MergeManagement {
 	 */
 	public static Model readTurtleFileToJenaModel(String path) throws IOException {
 		Model model = ModelFactory.createDefaultModel();
-		InputStream is = new BufferedInputStream(new FileInputStream(path));
+		InputStream is = ClassLoader.getSystemResourceAsStream(path);
 		model.read(is, null, "TURTLE");
 		is.close();
 		
