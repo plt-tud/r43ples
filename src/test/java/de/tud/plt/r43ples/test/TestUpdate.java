@@ -4,6 +4,7 @@ import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.ws.rs.core.Response;
 
@@ -18,6 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 import de.tud.plt.r43ples.webservice.Endpoint;
@@ -27,7 +29,8 @@ public class TestUpdate {
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(TestUpdate.class);
 	/** The graph name. **/
-	private static String graphName = "http://exampleGraph.com/r43ples";
+	private final static String graphName = "http://exampleGraph.com/r43ples";
+	private final static String graph_test = "http://test_dataset_user";
 	
 	final static String format = "application/sparql-results+xml";
 	
@@ -37,6 +40,7 @@ public class TestUpdate {
 	public static void setUpBeforeClass() throws Exception {
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
+		SampleDataSet.createSampleDataset1(graph_test);
 	}
 
 	@AfterClass
@@ -54,6 +58,32 @@ public class TestUpdate {
 	}
 
 
+	@Test
+	public void test_insert_existing_triples() throws HttpException, IOException{
+        String query_template = ""
+        		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
+        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
+		
+		ArrayList<String> list = new ArrayList<String>();
+		list.add("5");
+		
+		String insert_template = ""
+				+ "USER \"test_user\" %n"
+				+ "MESSAGE \"test commit message 6 (same as 5)\" %n"
+        		+ "INSERT { GRAPH <%s> REVISION \"5\" { %s } } %n"
+        		+ "DELETE { GRAPH <%s> REVISION \"5\" { %s } } ";
+		ep.sparql(format, String.format(insert_template, 
+				graph_test,	ResourceManagement.getContentFromResource("samples/test-delta-added-5.nt"), 
+				graph_test, ResourceManagement.getContentFromResource("samples/test-delta-removed-5.nt")));
+		
+        String result = ep.sparql(format, String.format(query_template, 6)).getEntity().toString();
+        String expected = ResourceManagement.getContentFromResource("response-test-rev5.xml");
+        Assert.assertEquals(expected, result);
+        
+        result = ep.sparql(format, String.format(query_template, 5)).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("response-test-rev5.xml");
+        Assert.assertEquals(expected, result);
+	}
 	
 	@Test
 	public void testRestructuring() throws IOException, HttpException{

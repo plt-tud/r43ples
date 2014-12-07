@@ -194,32 +194,6 @@ public class TestRevisionManagment {
 		Assert.assertEquals("2.0-1.1-0", revNumber4);
 	}
 	
-	@Test
-	public void test_insert_existing_triples() throws HttpException, IOException{
-        String query_template = ""
-        		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
-        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
-		
-		ArrayList<String> list = new ArrayList<String>();
-		list.add("5");
-		
-		String insert_template = ""
-				+ "USER \"test_user\" %n"
-				+ "MESSAGE \"test commit message 6 (same as 5)\" %n"
-        		+ "INSERT { GRAPH <%s> REVISION \"5\" { %s } } %n"
-        		+ "DELETE { GRAPH <%s> REVISION \"5\" { %s } } ";
-		ep.sparql(format, String.format(insert_template, 
-				graph_test,	ResourceManagement.getContentFromResource("samples/test-delta-added-5.nt"), 
-				graph_test, ResourceManagement.getContentFromResource("samples/test-delta-removed-5.nt")));
-		
-        result = ep.sparql(format, String.format(query_template, 6)).getEntity().toString();
-        expected = ResourceManagement.getContentFromResource("response-test-rev5.xml");
-        Assert.assertEquals(expected, result);
-        
-        result = ep.sparql(format, String.format(query_template, 5)).getEntity().toString();
-        expected = ResourceManagement.getContentFromResource("response-test-rev5.xml");
-        Assert.assertEquals(expected, result);
-	}
 	
 	@Test
 	public void test_minus() throws IOException, HttpException {
