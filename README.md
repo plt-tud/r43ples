@@ -24,11 +24,11 @@ A running test server should be available under [http://eatld.et.tu-dresden.de:9
 Dependencies
 ------------
 * JDK 1.7
-* Ant
+* Maven
 * Running Triplestore with SPARQL 1.1 endpoint (tested with [Virtuoso 7](https://github.com/openlink/virtuoso-opensource))
 
 ```
-sudo apt-get install ant default-jdk
+sudo apt-get install maven default-jdk
 # install virtuoso
 git checkout https://github.com/openlink/virtuoso-opensource.git
 cd virtuoso-opensource
@@ -53,11 +53,11 @@ Compiling
 ---------
 Ant is used for compiling
 
-    ant run
+    mvn exec:java
     
 Releases can be be built with:
 
-    ant zip
+    mvn assembly:single
     
     
 Configuration
@@ -184,6 +184,8 @@ Following libraries are used in R43ples:
 * [Jena ARQ](https://jena.apache.org/documentation/query/index.html) for processing SPARQL results
 * [Grappa](http://www2.research.att.com/~john/Grappa/) for creating GraphViz diagrams
 * [jQuery](http://jquery.com/) as JavaScript framework
+* Bootstrap
+* Mustache
 * [viz.js](http://mdaines.github.io/viz.js/example.html) as JavaScript framework for rendering GraphViz
  
 

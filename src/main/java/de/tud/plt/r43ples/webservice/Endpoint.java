@@ -8,8 +8,8 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +27,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.http.HttpException;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
@@ -39,8 +40,10 @@ import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFLanguages;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Template;
-import org.glassfish.jersey.server.mvc.Viewable;
 
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -52,9 +55,9 @@ import com.hp.hpl.jena.update.UpdateRequest;
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalServerErrorException;
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
-import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
@@ -117,19 +120,30 @@ public class Endpoint {
 	@Context
 	private UriInfo uriInfo;
 	
+	
+	private Map<String, Object> htmlMap;
+	 {
+		Map<String, Object> aMap = new HashMap<String, Object>();
+		aMap.put("git", GitRepositoryState.getGitRepositoryState());
+	    aMap.put("uriInfo", uriInfo);
+		htmlMap= aMap;
+	}
+		
+	
 	/** default logger for this class */
 	private final static Logger logger = Logger.getLogger(Endpoint.class);
 
 	
 	@GET
 	@Path("test")
-	@Template(name="/index.mustache")
-	public HashMap get() {
-		HashMap<String, Object> scopes = new HashMap<String, Object>();
-	    scopes.put("name", "Mustache");
-	    scopes.put("feature", 12);
-		return scopes;
+	@Template(name="/test.mustache")
+	public Map<String, Object> test() throws ConfigurationException {
+	    htmlMap.put("feature", 12);
+	    htmlMap.put("uriInfo", uriInfo);
+	    htmlMap.put("name", "Mustache");
+		return htmlMap;
 	}
+	
 	
 	/**
 	 * Creates sample datasets
@@ -137,7 +151,8 @@ public class Endpoint {
 	 */
 	@Path("createSampleDataset")
 	@GET
-	public final Response createSampleDataset() {
+	@Template(name = "/exampleDatasetGeneration.mustache")
+	public final List<String> createSampleDataset() {
 		final String graphName1 = "http://test.com/r43ples-dataset-1";
 		final String graphName2 = "http://test.com/r43ples-dataset-2";
 		final String graphName3 = "http://test.com/r43ples-dataset-merging";
@@ -153,10 +168,15 @@ public class Endpoint {
 			e.printStackTrace();
 			throw new InternalServerErrorException(e.getMessage());
 		}
-		String result = String.format(
-				"Test datasets successfully created: %s, %s, %s, %s, %s"
-				, graphName1, graphName2, graphName3, graphName4, graphName5);
-		return Response.ok().entity(result).build();
+		List<String> graphs = new ArrayList<>();
+		graphs.add(graphName1);
+		graphs.add(graphName2);
+		graphs.add(graphName3);
+		graphs.add(graphName4);
+		graphs.add(graphName5);
+
+	    htmlMap.put("graphs", graphs);
+		return graphs;
 	}
 	
 	
@@ -171,7 +191,7 @@ public class Endpoint {
 	@GET
 	@Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
 			MediaType.APPLICATION_SVG_XML })
-	public final Response getRevisionGraph(@HeaderParam("Accept") final String format_header,
+	public final Object getRevisionGraph(@HeaderParam("Accept") final String format_header,
 			@QueryParam("format") final String format_query, @QueryParam("graph") @DefaultValue("") final String graph) {
 		logger.info("Get Revision Graph");
 		String format = (format_query != null) ? format_query : format_header;
@@ -265,6 +285,16 @@ public class Endpoint {
 		String sparqlQueryDecoded = URLDecoder.decode(sparqlQuery, "UTF-8");
 		return sparql(format, sparqlQueryDecoded);
 	}
+	
+	
+	
+	@Path("merging")
+	@GET
+	@Template(name = "/merging.mustache")
+	public final Map<String, Object> getMerging() {
+		logger.info("Get Merging interface");
+		return htmlMap;
+	}
 		
 	
 	/**
@@ -349,16 +379,16 @@ public class Endpoint {
 	private Response getHTMLResponse() throws HttpException, IOException {
 		logger.info("SPARQL form requested");
 		List<String> graphList = RevisionManagement.getRevisedGraphs();
-		StringBuilder sb1 = new StringBuilder("<option value=\"\">(All)</option>\n");
-		StringBuilder sb2 = new StringBuilder("<option value=\"\">(None)</option>\n");
-		for (Iterator<String> opt = graphList.iterator(); opt.hasNext();) {
-			String graph = opt.next();
-			sb1.append(String.format("<option value=\"%1$s\">%1$s</option>%n", graph));
-			sb2.append(String.format("<option value=\"DROP GRAPH <%1$s>\">%1$s</option>%n", graph));
-		}
-		String version = Endpoint.class.getPackage().getImplementationVersion();
-		String content = String.format(ResourceManagement.getContentFromResource("webapp/index.html"), 
-				version, sb1.toString(), sb2.toString());
+		
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/endpoint.mustache");
+	    StringWriter sw = new StringWriter();
+	    
+	    htmlMap.put("graphList", graphList);
+	    mustache.execute(sw, htmlMap);		
+		
+		String content = sw.toString();
+		
 		return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
 	}
 

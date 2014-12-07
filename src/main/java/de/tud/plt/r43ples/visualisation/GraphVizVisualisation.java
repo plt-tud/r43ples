@@ -2,6 +2,8 @@ package de.tud.plt.r43ples.visualisation;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.http.HttpException;
 
@@ -10,13 +12,16 @@ import att.grappa.Edge;
 import att.grappa.Graph;
 import att.grappa.Node;
 
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 
 import de.tud.plt.r43ples.exception.InternalServerErrorException;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.ResourceManagement;
+import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 
@@ -102,9 +107,17 @@ public class GraphVizVisualisation {
 	    return sw.toString();
 	}
 
-	public static String getGraphVizHtmlOutput(String graphName) throws IOException, HttpException{
-		String html = ResourceManagement.getContentFromResource("webapp/graphvisualisation.html");
-		String content = String.format(html, graphName, getGraphVizOutput(graphName));
-		return content;
+	public static String getGraphVizHtmlOutput(String graphName) throws IOException, HttpException {
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/graphvisualisation.mustache");
+	    StringWriter sw = new StringWriter();
+	    
+	    Map<String, Object> scope = new HashMap<String, Object>();
+	    scope.put("graphName", graphName);
+	    scope.put("graphViz", getGraphVizOutput(graphName));
+	    scope.put("git", GitRepositoryState.getGitRepositoryState());
+	    
+	    mustache.execute(sw, scope);		
+		return sw.toString();
 	}	
 }

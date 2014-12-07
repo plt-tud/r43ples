@@ -17,8 +17,8 @@ addons:
       name: "plt-tud/r43ples"
       description: "Build submitted via Travis CI"
     notification_email: markus.graube@tu-dresden.de
-    build_command_prepend: "ant clean"
-    build_command: "ant"
+    build_command_prepend: "mvn clean"
+    build_command: "mvn compile"
     branch_pattern: coverity_scan
 
 
@@ -33,7 +33,7 @@ before_script:
     - sudo dpkg -i virtuoso.deb
 
 script:
-    - ant test
+    - mvn test
 
   
 after_success:
@@ -43,7 +43,7 @@ after_success:
     
 
 before_deploy:
-    - ant zip
+    - mvn assembly:assembly
     
 deploy:
     # deploy to GitHub releases for every tag
