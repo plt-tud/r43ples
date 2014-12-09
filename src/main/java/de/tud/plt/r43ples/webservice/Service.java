@@ -58,7 +58,7 @@ public class Service {
 	}
 	
 	public static void stop() {
-		server.stop();
+		server.shutdown();
 	}
 	
 }

@@ -19,11 +19,10 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="R4pl3s - Revision Control for the Semantic Web"
 NAME=r43ples
-#DAEMON=/usr/sbin/$NAME
 DAEMON=/usr/bin/java
 EXECPATH=/usr/share/r43ples
 DAEMON_USER=r43ples
-DAEMON_ARGS="-jar R43ples.jar"
+DAEMON_ARGS="-jar r43ples.jar"
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
