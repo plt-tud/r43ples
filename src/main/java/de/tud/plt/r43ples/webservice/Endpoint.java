@@ -287,7 +287,11 @@ public class Endpoint {
 	}
 	
 	
-	
+	/**
+	 * HTTP GET merging interface.
+	 * This is the HTML front end  for the merging functionalities of R43ples
+	 *
+	 */
 	@Path("merging")
 	@GET
 	@Template(name = "/merging.mustache")
@@ -305,7 +309,7 @@ public class Endpoint {
 	 * 
 	 * @param format
 	 *            mime type for response format
-	 * @param sparqlQueryDecoded
+	 * @param sparqlQuery
 	 *            decoded SPARQL query
 	 * @return the response
 	 * @throws IOException
@@ -326,8 +330,10 @@ public class Endpoint {
 
 	/**
 	 * @param format
+	 * 			requested mime type 
 	 * @param sparqlQuery
-	 * @return
+	 * 			string containing the SPARQL query
+	 * @return HTTP response of evaluating the sparql query 
 	 * @throws InternalServerErrorException
 	 */
 	private Response getSparqlResponse(final String format, String sparqlQuery) throws InternalServerErrorException {
@@ -372,7 +378,10 @@ public class Endpoint {
 	}
 
 	/**
-	 * @return
+	 * Get HTML response for standard sparql request form.
+	 * Using mustache templates. 
+	 * 
+	 * @return HTML response for SPARQL form
 	 * @throws HttpException
 	 * @throws IOException
 	 */

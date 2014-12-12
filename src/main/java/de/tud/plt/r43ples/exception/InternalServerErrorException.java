@@ -22,7 +22,8 @@ public class InternalServerErrorException extends WebApplicationException {
 	 * Create a HTTP 500 (Internal Server Error) de.tud.plt.r43ples.exception.
 	 */
 	public InternalServerErrorException() {
-		super(Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN).entity("Some error occured").build());
+		super(Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN)
+				.entity("Some error occured").build());
 	}
 
 	/**
@@ -32,9 +33,9 @@ public class InternalServerErrorException extends WebApplicationException {
 	 *            the String that is the entity of the 500 response.
 	 */
 	public InternalServerErrorException(String message) {
-		super(Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN).entity(message).build());
+		super(Response.status(Status.INTERNAL_SERVER_ERROR).type(MediaType.TEXT_PLAIN).entity(message)
+				.build());
 		logger.error(message);
 	}
- 
- 
+
 }

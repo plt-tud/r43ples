@@ -760,7 +760,7 @@ public class MergeManagement {
 	 * @param uriSDD the URI of the SDD
 	 * @param type the merge query type
 	 * @param triples the triples which are belonging to the current merge query in N-Triple serialization
-	 * @return 
+	 * @return new revision number
 	 * @throws HttpException
 	 * @throws IOException
 	 */

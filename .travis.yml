@@ -43,7 +43,7 @@ after_success:
     
 
 before_deploy:
-    - mvn assembly:assembly
+    - mvn assembly:single
     
 deploy:
     # deploy to GitHub releases for every tag

@@ -35,8 +35,9 @@ import com.hp.hpl.jena.vocabulary.RDF;
 import de.tud.plt.r43ples.revisionTree.NodeSpecification;
 
 /**
+ * Rewrites SPARQL queries in order to reflect old revisions.
  * 
- * @author mgraube
+ * @author Markus Graube
  *
  */
 public class SparqlRewriter {

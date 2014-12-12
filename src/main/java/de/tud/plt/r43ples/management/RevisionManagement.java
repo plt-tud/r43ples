@@ -9,7 +9,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.apache.http.HttpException;
-import org.apache.http.auth.AuthenticationException;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.QuerySolution;
@@ -825,11 +824,9 @@ public class RevisionManagement {
 	
 
 	/**
-	 * Get revised graphs in R43ples.
+	 * Get revised graphs in R43ples as list of string.
 	 * 
-	 * @param format
-	 *            serialization of the response
-	 * @return String containing the SPARQL response in specified format
+	 * @return list of strings containing the revised graphs of R43ples
 	 * @throws IOException
 	 * @throws HttpException
 	 */
