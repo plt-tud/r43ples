@@ -48,6 +48,7 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.update.UpdateAction;
 import com.hp.hpl.jena.update.UpdateFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
@@ -93,10 +94,9 @@ public class Endpoint {
 	private final Pattern patternEmptyGraphPattern = Pattern.compile(
 			"GRAPH\\s*<(?<graph>[^>]*)>\\s*\\{\\s*\\}",
 			patternModifier);
-	private final Pattern patternGraph = Pattern.compile(
+	private final Pattern patternGraphWithRevision = Pattern.compile(
 			"GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
 			patternModifier);
-
 	private final Pattern patternCreateGraph = Pattern.compile(
 			"CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
 			patternModifier);
@@ -471,12 +471,17 @@ public class Endpoint {
 			String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
 			query_rewritten = SparqlRewriter.rewriteQuery(query_rewritten);
 			String result = TripleStoreInterface.executeQueryWithAuthorization(query_rewritten, format);
-			return responseBuilder.entity(result).type(format).build();
+			responseBuilder.entity(result);
+			responseBuilder.type(format);
+			
+			responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeader(query));
+			return responseBuilder.build();
 		}
 		else {
 			return getSelectResponseClassic(query, format);
 		}
 	}
+
 
 
 	/**
@@ -596,7 +601,7 @@ public class Endpoint {
 		TripleStoreInterface.executeQueryWithAuthorization(queryM);
 
 		queryM = query;
-		m = patternGraph.matcher(queryM);
+		m = patternGraphWithRevision.matcher(queryM);
 		while (m.find()) {
 			String graphName = m.group("graph");
 			String revisionName = m.group("revision"); // can contain revision
@@ -642,7 +647,7 @@ public class Endpoint {
 			logger.info("Respond with new revision number " + newRevisionNumber + ".");
 			logger.info("Respond with new revision number " + newRevisionNumber);
 			queryM = m.replaceAll(String.format("GRAPH <%s> ", graphName));
-			m = patternGraph.matcher(queryM);
+			m = patternGraphWithRevision.matcher(queryM);
 		}
 
 		Response response = responseBuilder.build();

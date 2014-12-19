@@ -85,5 +85,15 @@ public class TestMergeManagement {
 		expected.add("exampleGraph-revision-1.1-1");
 		Assert.assertEquals(expected, path);
 	}
+	
+	@Test
+	public void testResponseHeader() throws IOException, HttpException {
+		String sparql = "SELECT *"
+				+ "FROM <exampleGraph>"
+				+ "WHERE { ?s ?p ?o}";
+				
+		String result = RevisionManagement.getResponseHeader(sparql);
+		Assert.assertEquals("", result);
+	}
 
 }

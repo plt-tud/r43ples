@@ -89,5 +89,26 @@ public class TestMultipleGraph {
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-2-2.xml");
 		Assert.assertEquals(expected, result);
 	}
+	
+	@Test
+	public void testResponseHeader() throws IOException, HttpException {
+		String sparql = "SELECT *"
+				+ "FROM <" + graph1 +">"
+				+ "WHERE { ?s ?p ?o}";
+				
+		String result = RevisionManagement.getResponseHeader(sparql);
+		Assert.assertEquals("", result);
+	}
+	
+	@Test
+	public void testResponseHeader2() throws IOException, HttpException {
+		String sparql = "SELECT *"
+				+ "FROM <" + graph1 +">"
+				+ "FROM <" + graph2 +">"
+				+ "WHERE { ?s ?p ?o}";
+				
+		String result = RevisionManagement.getResponseHeader(sparql);
+		Assert.assertEquals("", result);
+	}
 
 }
