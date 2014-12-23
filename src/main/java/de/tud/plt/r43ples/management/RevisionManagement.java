@@ -1061,7 +1061,7 @@ public class RevisionManagement {
 	 * @throws HttpException 
 	 * @throws IOException 
 	 */
-	public static String getResponseHeader(String query) throws IOException, HttpException {
+	public static String getResponseHeaderFromQuery(String query) throws IOException, HttpException {
 		final Pattern patternGraph = Pattern.compile(
 				"(GRAPH|FROM|INTO)\\s*<(?<graph>[^>]*)>\\s*",
 				Pattern.CASE_INSENSITIVE);
@@ -1076,7 +1076,11 @@ public class RevisionManagement {
 			if (!m.hitEnd())
 				graphNames.append(", ");			
 		}
+		return getResponseHeader(graphNames.toString());
 		
+	}
+	
+	public static String getResponseHeader(String graphList) throws IOException, HttpException {
 		String queryConstruct = RevisionManagement.prefixes + String.format(
 				  "CONSTRUCT {"
 				+ " ?ref a ?type;"
@@ -1094,7 +1098,7 @@ public class RevisionManagement {
 				+ "			rmo:revisionNumber ?number . %n"
 				+ "FILTER (?type IN (rmo:Tag, rmo:Master, rmo:Branch)) %n"
 				+ "FILTER (?graph IN (%s)) %n"
-				+ "}", Config.revision_graph, graphNames);
+				+ "}", Config.revision_graph, graphList);
 		String header = TripleStoreInterface.executeQueryWithAuthorization(queryConstruct, "TURTLE");
 		return header;
 	}

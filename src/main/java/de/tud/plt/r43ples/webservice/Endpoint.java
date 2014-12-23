@@ -48,7 +48,6 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.update.UpdateAction;
 import com.hp.hpl.jena.update.UpdateFactory;
 import com.hp.hpl.jena.update.UpdateRequest;
@@ -474,7 +473,7 @@ public class Endpoint {
 			responseBuilder.entity(result);
 			responseBuilder.type(format);
 			
-			responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeader(query));
+			responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(query));
 			return responseBuilder.build();
 		}
 		else {

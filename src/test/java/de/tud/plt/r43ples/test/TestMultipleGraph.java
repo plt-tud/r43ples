@@ -3,6 +3,7 @@
  */
 package de.tud.plt.r43ples.test;
 
+import static org.hamcrest.core.StringContains.containsString;
 import java.io.IOException;
 
 import org.apache.http.HttpException;
@@ -96,8 +97,8 @@ public class TestMultipleGraph {
 				+ "FROM <" + graph1 +">"
 				+ "WHERE { ?s ?p ?o}";
 				
-		String result = RevisionManagement.getResponseHeader(sparql);
-		Assert.assertEquals("", result);
+		String result = RevisionManagement.getResponseHeaderFromQuery(sparql);
+		Assert.assertThat(result, containsString("Master"));
 	}
 	
 	@Test
@@ -107,8 +108,8 @@ public class TestMultipleGraph {
 				+ "FROM <" + graph2 +">"
 				+ "WHERE { ?s ?p ?o}";
 				
-		String result = RevisionManagement.getResponseHeader(sparql);
-		Assert.assertEquals("", result);
+		String result = RevisionManagement.getResponseHeaderFromQuery(sparql);
+		Assert.assertThat(result, containsString("Master"));
 	}
 
 }
