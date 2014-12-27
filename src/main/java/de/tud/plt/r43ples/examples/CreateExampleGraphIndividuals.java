@@ -30,7 +30,7 @@ public class CreateExampleGraphIndividuals {
 	public static void main(String[] args) throws IOException, ConfigurationException, HttpException {
 		
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
+		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_update, Config.sparql_user, Config.sparql_password);
 				
 		SampleDataSet.createSampleDataSetMergingClasses(graphName);
 	}

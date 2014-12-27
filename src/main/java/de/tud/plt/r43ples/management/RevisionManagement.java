@@ -32,7 +32,8 @@ public class RevisionManagement {
 	/** The logger. **/
 	private static Logger logger = Logger.getLogger(RevisionManagement.class);
 	/** The SPARQL prefixes. **/
-	public static final String prefix_rmo = "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> \n";
+	public static final String prefix_rmo = "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#>\n"
+			+ "PREFIX rdfs: <http://www.w3.org/TR/rdf-schema/>\n";
 	public static final String prefixes = prefix_rmo
 			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
 			+ "PREFIX dc-terms: <http://purl.org/dc/terms/> \n" 
@@ -84,7 +85,7 @@ public class RevisionManagement {
 				+ "sddo:hasDefaultSDD sdd:defaultSDD .", 
 				graphName);
 
-		String queryRevision = prefixes + String.format("INSERT IN GRAPH <%s> {%s}", Config.revision_graph, queryContent);
+		String queryRevision = prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", Config.revision_graph, queryContent);
 		TripleStoreInterface.executeQueryWithAuthorization(queryRevision, "HTML");
 	}
 
@@ -127,7 +128,7 @@ public class RevisionManagement {
 
 		// Update full graph of branch
 		TripleStoreInterface.executeQueryWithAuthorization(String.format(
-				"DELETE FROM GRAPH <%s> {%n %s %n}%n", referenceGraph, removedAsNTriples));
+				"DELETE DATA { GRAPH <%s> {%n %s %n} }%n", referenceGraph, removedAsNTriples));
 		RevisionManagement.executeINSERT(referenceGraph, addedAsNTriples);
 
 		// Create new graph with delta-added-newRevisionNumber
@@ -216,8 +217,10 @@ public class RevisionManagement {
 			queryContent.append(String.format("<%s> prov:wasDerivedFrom <%s> .", revisionUri, revUri));
 		}
 		String query = prefixes
-				+ String.format("INSERT IN GRAPH <%s> { %s }%n", Config.revision_graph,
+				+ String.format("INSERT DATA { GRAPH <%s> { %s } }%n", Config.revision_graph,
 						queryContent.toString());
+		
+		TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
 
 		// Move branch to new revision
 		String branchIdentifier = usedRevisionNumber.get(0).toString();
@@ -233,14 +236,16 @@ public class RevisionManagement {
 				TripleStoreInterface.executeQueryWithAuthorization(queryBranch, "XML")).next();
 		String branchName = sol.getResource("?branch").toString();
 
-		query += String.format("DELETE FROM GRAPH <%s> { <%s> rmo:references <%s>. }%n",
+		query = prefixes + String.format("DELETE DATA { GRAPH <%s> { <%s> rmo:references <%s>. } }%n",
 				Config.revision_graph, branchName, oldRevisionUri);
-		query += String.format("INSERT IN GRAPH <%s> { <%s> rmo:references <%s>. }%n", Config.revision_graph,
-				branchName, revisionUri);
+		TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
+		
+		query = prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:references <%s>. } }%n",
+				Config.revision_graph, branchName, revisionUri);
+		TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
 
 		// Execute queries
-		logger.info("Execute all queries updating the revision graph, full graph and change sets");
-		TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
+		logger.info("Executed all queries updating the revision graph, full graph and change sets");
 	}
 
 	/**
@@ -300,7 +305,7 @@ public class RevisionManagement {
 
 			// Execute queries
 			String query = prefixes
-					+ String.format("INSERT IN GRAPH <%s> { %s }", Config.revision_graph, queryContent);
+					+ String.format("INSERT DATA { GRAPH <%s> { %s } }", Config.revision_graph, queryContent);
 			TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
 		}
 	}
@@ -319,7 +324,7 @@ public class RevisionManagement {
 	public static boolean checkGraphExistence(final String graphName) throws HttpException, IOException {
 		String query = "ASK { GRAPH <" + graphName + "> {?s ?p ?o} }";
 		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
-		return result.equals("true");
+		return result.indexOf("true") >= 0;
 	}
 
 	/**
@@ -616,7 +621,7 @@ public class RevisionManagement {
 						+ " <%s> rmo:references ?rev; prov:wasDerivedFrom ?rev ." + " }} ",
 						Config.revision_graph, referenceUri);
 		String resultASKBranch = TripleStoreInterface.executeQueryWithAuthorization(queryASKBranch, "HTML");
-		return resultASKBranch.equals("true");
+		return resultASKBranch.indexOf("true") >= 0;
 	}
 
 	public static String getNextRevisionNumber(final String graphName, final String revisionIdentifier)
@@ -695,9 +700,9 @@ public class RevisionManagement {
 	 */
 	public static void executeINSERT(final String graphName, final String dataSetAsNTriples) throws HttpException, IOException {
 
-		String insertQueryTemplate =  "INSERT IN GRAPH <%s> { %n"
+		String insertQueryTemplate =  "INSERT DATA { GRAPH <%s> { %n"
 									+ "	%s %n"
-									+ "} %n";
+									+ "} }%n";
 		
 		final int MAX_STATEMENTS = 200;
 		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
@@ -914,7 +919,7 @@ public class RevisionManagement {
 			String personUri = "http://eatld.et.tu-dresden.de/persons/" + user;
 			logger.debug("User does not exists. Create user " + personUri + ".");
 			query = prefixes
-					+ String.format("INSERT IN GRAPH <%s> { <%s> a prov:Person; rdfs:label \"%s\". }",
+					+ String.format("INSERT DATA { GRAPH <%s> { <%s> a prov:Person; rdfs:label \"%s\". } }",
 							Config.revision_graph, personUri, user);
 			TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
 			return personUri;
@@ -951,7 +956,7 @@ public class RevisionManagement {
 						+ " ?ref rmo:references ?rev ." + " ?rev rmo:revisionOf <%s> ." + " }} ",
 						Config.revision_graph, referenceName, graphName);
 		String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
-		return resultASK.equals("true");
+		return resultASK.indexOf("true") >= 0;
 	}
 
 	/**
@@ -975,7 +980,7 @@ public class RevisionManagement {
 						Config.revision_graph, graphName, identifier, identifier);
 		String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
 
-		return resultASK.equals("true");
+		return resultASK.indexOf("true") >= 0;
 	}
 	
 	

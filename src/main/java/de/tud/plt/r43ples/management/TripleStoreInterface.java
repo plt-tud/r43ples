@@ -37,8 +37,7 @@ public class TripleStoreInterface {
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(TripleStoreInterface.class);
 	private static String endpoint;
-
-
+	private static String endpoint_update;
 	
 	/**
 	 * The constructor.
@@ -52,9 +51,10 @@ public class TripleStoreInterface {
 	 * @throws IOException 
 	 * @throws AuthenticationException 
 	 */
-	public static void init(String sparql_endpoint, String sparql_username, String sparql_password) throws HttpException, IOException {
+	public static void init(String sparql_endpoint, String sparql_endpoint_update, String sparql_username, String sparql_password) throws HttpException, IOException {
 		credentials = new UsernamePasswordCredentials(sparql_username, sparql_password);
 		endpoint = sparql_endpoint;
+		endpoint_update = sparql_endpoint_update;
 		if (!RevisionManagement.checkGraphExistence(Config.revision_graph)){
 			logger.info("Create revision graph");
 			executeQueryWithAuthorization("CREATE SILENT GRAPH <" + Config.revision_graph +">", "HTML");
@@ -80,8 +80,13 @@ public class TripleStoreInterface {
 	 */
 	public static String executeQueryWithoutAuthorization(String query, String format) throws IOException {
 		URL url = null;
-		
-		url = new URL(endpoint + "?query=" + URLEncoder.encode(query, "UTF-8") + "&format=" + URLEncoder.encode(format, "UTF-8") + "&timeout=0");
+		String uri = endpoint;
+		String arg = "query=";
+		if(isUpdate(query)) {
+			uri = endpoint_update;
+			arg = "update=";
+		}
+		url = new URL(uri + "?" + arg + URLEncoder.encode(query, "UTF-8"));// + "&format=" + URLEncoder.encode(format, "UTF-8") + "&timeout=0");
 		logger.debug(url.toString());
 
 		URLConnection con = null;
@@ -155,18 +160,42 @@ public class TripleStoreInterface {
 		logger.debug("Execute query on SPARQL endpoint:\n"+ query);
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
-			
-	    HttpPost request = new HttpPost(endpoint);
+		
+	    String uri = endpoint;
+	    String arg = "query";
+		if(isUpdate(query)) {
+			uri = endpoint_update;
+			arg = "update";
+		}
+	    
+	    HttpPost request = new HttpPost(uri);
 		
 		//set up HTTP Post Request (look at http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VOSSparqlProtocol for Protocol)
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-		nameValuePairs.add(new BasicNameValuePair("format",format));
-		nameValuePairs.add(new BasicNameValuePair("query", query));
+		//nameValuePairs.add(new BasicNameValuePair("format",format));
+		nameValuePairs.add(new BasicNameValuePair(arg, query));
     	request.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
     	request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+    	if(format.equals("XML"))
+    		request.setHeader("Accept", "application/rdf+xml");
+    	else
+    		request.setHeader("Accept", "text");
 		
 		//Execute Query
 		return httpClient.execute(request);
+	}
+	
+	private static boolean isUpdate(String query) {
+		query = query.toLowerCase();
+		if(
+				(query.indexOf("select") == -1) &&
+				(query.indexOf("ask") == -1) &&
+				(query.indexOf("construct") == -1) &&
+				(query.indexOf("describe") == -1) &&
+				endpoint_update != "") {
+			return true;
+		}
+		return false;
 	}
 	
 	
