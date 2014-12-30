@@ -29,6 +29,7 @@ public class Config {
 			service_uri = config.getString("service.uri");
 
 			sparql_endpoint = config.getString("sparql.endpoint");
+			sparql_update = config.getString("sparql.endpoint_update");
 			sparql_user = config.getString("sparql.username");
 			sparql_password = config.getString("sparql.password");
 
@@ -53,6 +54,7 @@ public class Config {
 
 	public static String service_uri;
 	public static String sparql_endpoint;
+	public static String sparql_update;
 	public static String sparql_user;
 	public static String sparql_password;
 	public static String yed_filepath;
