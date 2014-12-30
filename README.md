@@ -27,10 +27,11 @@ Dependencies
 * Maven
 * Running Triplestore with SPARQL 1.1 endpoint (tested with [Virtuoso 7](https://github.com/openlink/virtuoso-opensource))
 
+Virtuoso 7 is currently only available for 64bit systems, Virtuoso 6.x does not work out of the box with r43ples
 ```
 sudo apt-get install maven default-jdk
 # install virtuoso
-git checkout https://github.com/openlink/virtuoso-opensource.git
+git clone https://github.com/openlink/virtuoso-opensource.git
 cd virtuoso-opensource
 ./autogen.sh
 ./configure
