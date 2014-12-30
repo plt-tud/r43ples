@@ -172,14 +172,18 @@ public class TripleStoreInterface {
 		
 		//set up HTTP Post Request (look at http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VOSSparqlProtocol for Protocol)
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-		//nameValuePairs.add(new BasicNameValuePair("format",format));
+    	
+		if(format.equals("HTML")) format="text";
+		if(format.equals("text/xml")) format="xml";
+		if(format.equals("application/json")) format = "json";
+		
+		format = format.toLowerCase();
+		
+		nameValuePairs.add(new BasicNameValuePair("output", format));
 		nameValuePairs.add(new BasicNameValuePair(arg, query));
     	request.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
     	request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-    	if(format.equals("XML"))
-    		request.setHeader("Accept", "application/rdf+xml");
-    	else
-    		request.setHeader("Accept", "text");
+
 		
 		//Execute Query
 		return httpClient.execute(request);

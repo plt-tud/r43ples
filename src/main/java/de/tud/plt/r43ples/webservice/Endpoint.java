@@ -159,9 +159,9 @@ public class Endpoint {
 		final String graphName4 = "http://test.com/r43ples-dataset-merging-classes";
 		final String graphName5 = "http://test.com/r43ples-dataset-renaming";
 		try {
-			SampleDataSet.createSampleDataset1(graphName1);
-			SampleDataSet.createSampleDataset2(graphName2);
-			SampleDataSet.createSampleDataSetMerging(graphName3);
+			//SampleDataSet.createSampleDataset1(graphName1);
+			//SampleDataSet.createSampleDataset2(graphName2);
+			//SampleDataSet.createSampleDataSetMerging(graphName3);
 			SampleDataSet.createSampleDataSetMergingClasses(graphName4);
 			SampleDataSet.createSampleDataSetRenaming(graphName5);
 		} catch (HttpException | IOException e) {
@@ -585,6 +585,9 @@ public class Endpoint {
 				String tempGraphName = graphName + "-temp";
 				RevisionManagement.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
 				queryM = m.replaceFirst(String.format("WHERE { GRAPH <%s>", tempGraphName));
+				//workaround for SPARQL 1.1 compliance
+				queryM = queryM.replaceAll("INSERT DATA", "INSERT");
+				queryM = queryM.replaceAll("DELETE DATA", "DELETE");
 			}
 			m = patternUpdateRevision.matcher(queryM);
 		}
