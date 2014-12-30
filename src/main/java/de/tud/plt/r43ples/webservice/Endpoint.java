@@ -598,6 +598,7 @@ public class Endpoint {
 		// Remove empty insert clauses which otherwise will lead to errors
 		m= patternEmptyGraphPattern.matcher(queryM);
 		queryM = m.replaceAll("");
+//		queryM = queryM.replaceAll("}\\s*INSERT", "}; INSERT");
 
 		TripleStoreInterface.executeQueryWithAuthorization(queryM);
 

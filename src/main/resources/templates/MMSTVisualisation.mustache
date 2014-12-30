@@ -18,9 +18,10 @@
     
 {{$content}}
 	    <h1>Revision Graph of &lt;{{graphName}}&gt;</h1>
-		<script type="text/vnd.graphviz" id="graph">{{& graphViz}}</script>
 		<a class="btn btn-default" id="graphDownload" href-lang='image/svg+xml' title='revisiongraph_{{graphName}}.svg' download='revisiongraph_{{graphName}}.svg'>Download as SVG</a><br/>
-		<div id="revisiongraph"></div>
+		<div id="revisiongraph">
+		{{{svg_content}}}
+		</div>
 {{/content}}
 
 

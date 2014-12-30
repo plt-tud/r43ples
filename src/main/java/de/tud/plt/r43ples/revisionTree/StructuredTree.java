@@ -2,7 +2,6 @@ package de.tud.plt.r43ples.revisionTree;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.http.HttpException;
@@ -73,5 +72,19 @@ public class StructuredTree {
 		
 		return t;
 	}
-
+	
+	public List<Commit> getCommits()
+	{
+		return commits;
+	}
+	
+	public List<Branch> getBranches()
+	{
+		return branches;
+	}
+	
+	public List<Tag> getTags()
+	{
+		return tags;
+	}
 }
