@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
@@ -44,16 +45,16 @@ public class MMSTVisualisation {
 		
 		// reverse commits list to begin with newest commit
 		List<Commit> commits = revisionTree.getCommits();
-		//Collections.reverse(commits);
+		Collections.reverse(commits);
 
 		// generic config for graph generation
 		int y_start = 20;
-		int lineheight = -20;
+		int lineheight = 20;
 		Font standardFont = new Font("Mono", Font.PLAIN, 16);
 		g.setFont(standardFont);
 		FontMetrics fm = g.getFontMetrics();
 		DateFormat df = DateFormat.getDateTimeInstance();
-		g.translate(0, -lineheight * commits.size());
+		//g.translate(0, -lineheight * commits.size());
 		
 		int maxX = 0;
 		int maxY = 0;
@@ -64,28 +65,55 @@ public class MMSTVisualisation {
 		
 		//lanes list saves last commit of graph lane
 		List<Commit> lanes = new LinkedList<Commit>();
+		//saves on which lane a commit was drawn
+		Map<Commit, Integer> commit_lane = new HashMap<Commit, Integer>();
 		
 		for (Commit c : commits) {
 			
 			//test whether existing lane available
 			int laneNumber = -1;
-			for(Commit pre : c.Predecessors) {
-				if(lanes.contains(pre)){
-					laneNumber = lanes.indexOf(pre);
-					//update lane
-					lanes.set(laneNumber, c);
+			for(Commit suc : c.Successors) {
+				if(laneNumber == -1 || laneNumber > lanes.indexOf(suc)) {
+					laneNumber = lanes.indexOf(suc);
+				}
+			}
+			for(Commit suc : c.Successors) {
+				if(lanes.contains(suc)){
+					
 					//draw connecting line
-					g.drawLine(25 + 20 * laneNumber, y_start + lineheight * (commits.indexOf(pre) + 1) - 5, 25 + 20 * laneNumber, y);
-					break;
+					g.drawLine(25 + 20 * lanes.indexOf(suc), y_start + lineheight * (commits.indexOf(suc) + 1) - 5, 25 + 20 * lanes.indexOf(suc), y - 5 - lineheight);
+					GeneralPath path = new GeneralPath();
+					path.moveTo(25 + 20 * laneNumber, y-5);
+					path.curveTo(25 + 20 * lanes.indexOf(suc), y-5, 25 + 20 * lanes.indexOf(suc), y-5, 25 + 20 * lanes.indexOf(suc), y - 5 - lineheight);
+					g.draw(path);
+				} else {
+					//merge
+					lanes.add(c);
+					laneNumber = lanes.indexOf(c);
+					
+					//draw connecting lines
+					//vertical line
+					g.drawLine(25 + 20 * laneNumber, y_start + lineheight * (commits.indexOf(suc) + 2) - 5, 25 + 20 * laneNumber, y - 5);
+					//horizontal merge connection
+					GeneralPath path = new GeneralPath();
+					path.moveTo(25 + 20 * laneNumber, y_start + lineheight * (commits.indexOf(suc) + 2) - 5);
+					path.curveTo(25 + 20 * laneNumber, y_start + lineheight * (commits.indexOf(suc) + 1) - 5, 25 + 20 * laneNumber, y_start + lineheight * (commits.indexOf(suc) + 1) - 5, 25 + 20 * commit_lane.get(suc), y_start + lineheight * (commits.indexOf(suc) + 1) - 5);
+					g.draw(path);
 				}
 			}
 			
-			//if no lane available, create new one
+			//if no lane available, create new one (no successing commit)
 			if(laneNumber < 0) {
 				lanes.add(c);
 				laneNumber = lanes.indexOf(c);
 			}
+			else {
+				//update lane
+				lanes.set(laneNumber, c);
+			}
 			
+			//save lane of current commit
+			commit_lane.put(c, laneNumber);
 			
 			// circle in front of commit
 			// TODO: color variable
@@ -162,7 +190,7 @@ public class MMSTVisualisation {
 		}
 		rightBorder += authorOffset + 20;
 		
-		g.setSVGCanvasSize(new Dimension(rightBorder, Math.abs(y-y_start)));
+		g.setSVGCanvasSize(new Dimension(rightBorder, Math.abs(y)));
 
 		Writer writer = new StringWriter();
 		g.stream(writer);
