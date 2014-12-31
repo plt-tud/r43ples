@@ -7,10 +7,8 @@
 		$(document)
 				.ready(
 						function() {
-							var data = document.getElementById("graph").innerHTML;
-							var svg = Viz(data, "svg");
+							var svg = document.getElementById("revisiongraph").innerHTML;
 							var b64 = btoa(svg);
-							$("#revisiongraph").append($(svg));
 							$("#graphDownload").attr("href", "data:image/svg+xml;base64," + b64);
 						});
 	</script>
