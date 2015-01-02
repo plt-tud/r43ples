@@ -173,10 +173,8 @@ public class CommitGraphView {
 		for (Commit suc : c.Successors) {
 			// test if there is a successor terminating a lane
 			if (terminalCommits.contains(suc)) {
-				// choose the lane with the biggest gap (longest straight line)
-				if (lane == -1
-						|| commits.indexOf(suc) < commits
-								.indexOf(terminalCommits.get(lane)))
+				// choose the lowest lane
+				if (lane == -1 || lane > terminalCommits.indexOf(suc))
 					lane = terminalCommits.indexOf(suc);
 			}
 		}
