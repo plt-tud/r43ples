@@ -54,7 +54,7 @@ public class Service {
 		
 		logger.info("Version: "+ Service.class.getPackage().getImplementationVersion());
 		
-		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
+		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_update, Config.sparql_user, Config.sparql_password);
 	}
 	
 	public static void stop() {

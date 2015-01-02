@@ -30,7 +30,7 @@ public class TestSparqlRewriter {
 	@BeforeClass
 	public static void setUpBeforeClass() throws HttpException, IOException, ConfigurationException{
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
+		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_update, Config.sparql_user, Config.sparql_password);
 		SampleDataSet.createSampleDataset1(graph_test);
 	}
 	

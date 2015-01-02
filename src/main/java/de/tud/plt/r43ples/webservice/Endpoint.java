@@ -159,9 +159,9 @@ public class Endpoint {
 		final String graphName4 = "http://test.com/r43ples-dataset-merging-classes";
 		final String graphName5 = "http://test.com/r43ples-dataset-renaming";
 		try {
-			SampleDataSet.createSampleDataset1(graphName1);
-			SampleDataSet.createSampleDataset2(graphName2);
-			SampleDataSet.createSampleDataSetMerging(graphName3);
+			//SampleDataSet.createSampleDataset1(graphName1);
+			//SampleDataSet.createSampleDataset2(graphName2);
+			//SampleDataSet.createSampleDataSetMerging(graphName3);
 			SampleDataSet.createSampleDataSetMergingClasses(graphName4);
 			SampleDataSet.createSampleDataSetRenaming(graphName5);
 		} catch (HttpException | IOException e) {
@@ -577,14 +577,17 @@ public class Endpoint {
 				throw new InternalServerErrorException("Revision is not referenced by branch");
 			}
 			if (action.equalsIgnoreCase("INSERT")) {
-				queryM = m.replaceFirst(String.format("INSERT { GRAPH <%s>", addSetGraphUri));
+				queryM = m.replaceFirst(String.format("INSERT DATA { GRAPH <%s>", addSetGraphUri));
 			} else if (action.equalsIgnoreCase("DELETE")) {
-				queryM = m.replaceFirst(String.format("INSERT { GRAPH <%s>", removeSetGraphUri));
+				queryM = m.replaceFirst(String.format("INSERT DATA { GRAPH <%s>", removeSetGraphUri));
 			} else if (action.equalsIgnoreCase("WHERE")) {
 				// TODO ersetze mit SPARQL JOIN
 				String tempGraphName = graphName + "-temp";
 				RevisionManagement.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
 				queryM = m.replaceFirst(String.format("WHERE { GRAPH <%s>", tempGraphName));
+				//workaround for SPARQL 1.1 compliance
+				queryM = queryM.replaceAll("INSERT DATA", "INSERT");
+				queryM = queryM.replaceAll("DELETE DATA", "DELETE");
 			}
 			m = patternUpdateRevision.matcher(queryM);
 		}
@@ -592,7 +595,10 @@ public class Endpoint {
 		// Remove empty insert clauses which otherwise will lead to errors
 		m= patternEmptyGraphPattern.matcher(queryM);
 		queryM = m.replaceAll("");
-
+		queryM = queryM.replaceAll("}(\\s*)INSERT", "}; INSERT");
+		queryM = queryM.replaceAll("}(\\s*)DELETE", "}; DELETE");
+		
+		
 		TripleStoreInterface.executeQueryWithAuthorization(queryM);
 
 		queryM = query;
@@ -616,7 +622,7 @@ public class Endpoint {
 							"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }", addSetGraphUri,
 							referenceFullGraph));
 			TripleStoreInterface.executeQueryWithAuthorization(String.format(
-					"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } MINUS { GRAPH <%s> { ?s ?p ?o. } } }",
+					"DELETE  { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } MINUS { GRAPH <%s> { ?s ?p ?o. } } }",
 					removeSetGraphUri, removeSetGraphUri, referenceFullGraph));
 
 			// merge change sets into reference graph
