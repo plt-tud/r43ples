@@ -58,17 +58,22 @@ public class StructuredTree {
 		ResultSet resultsCommits = ResultSetFactory.fromXML(resultSparql);
 		
 		//generate list of commits
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");		
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		while(resultsCommits.hasNext()) {
 			QuerySolution sol = resultsCommits.next();
 			try {
 				Commit commit = new Commit(
+						sol.get("commit").toString(),
 						sol.getLiteral("title").getString(),
 						df.parse(sol.getLiteral("time").toString()),
 						sol.getLiteral("authname").getString(),
 						sol.getLiteral("prev").getString(),
 						sol.getLiteral("next").getString());
-				t.commits.add(commit);
+				if(t.commits.contains(commit))
+				{
+					t.commits.get(t.commits.indexOf(commit)).getBaseRevisions().add(sol.getLiteral("prev").getString());
+				} else
+					t.commits.add(commit);
 			} catch (ParseException e) {
 				logger.error("Commit could not be parsed!", e);
 				e.printStackTrace();
@@ -78,9 +83,9 @@ public class StructuredTree {
 		//fill predecessor and successor lists of commits
 		for(Commit c : t.commits) {
 			for(Commit b : t.commits) {
-				if(c.getBaseRevision().equals(b.getNextRevision()))
+				if(c.getBaseRevisions().contains(b.getNextRevision()))
 					c.Predecessors.add(b);
-				else if(c.getNextRevision().equals(b.getBaseRevision()))
+				else if(b.getBaseRevisions().contains(c.getNextRevision()))
 					c.Successors.add(b);
 			}
 		}
