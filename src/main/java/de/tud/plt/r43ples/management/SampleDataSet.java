@@ -234,7 +234,7 @@ public class SampleDataSet {
 		/** The user. **/
 		String user = "shensel";
 		/** The initial content file path **/
-		String initialContentFilePath = "resources/verification/ExampleGraphClasses_initial.triples";
+		String initialContentFilePath = "verification/ExampleGraphClasses_initial.triples";
 
 		// Read initial content from file to string
 		String initialContent = DatasetGenerationManagement.readFileToString(initialContentFilePath);

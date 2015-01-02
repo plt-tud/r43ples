@@ -1,9 +1,9 @@
 package de.tud.plt.r43ples.management;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
@@ -192,8 +192,16 @@ public class DatasetGenerationManagement {
 	 * @throws IOException
 	 */
 	public static String readFileToString(String path) throws IOException {
-		byte[] encoded = Files.readAllBytes(Paths.get(path));
-		return new String(encoded, StandardCharsets.UTF_8);
+		StringBuilder string = new StringBuilder();
+		InputStream is = ClassLoader.getSystemResourceAsStream(path);
+		
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            string.append(line);
+        }
+		
+		return string.toString();
 	}
 	
 }
