@@ -1,19 +1,17 @@
 package de.tud.plt.r43ples.visualisation;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.geom.GeneralPath;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.text.DateFormat;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.apache.batik.dom.svg.SVGDOMImplementation;
@@ -54,86 +52,21 @@ public class MMSTVisualisation {
 		g.setFont(standardFont);
 		FontMetrics fm = g.getFontMetrics();
 		DateFormat df = DateFormat.getDateTimeInstance();
-		//g.translate(0, -lineheight * commits.size());
-		
-		int maxX = 0;
-		int maxY = 0;
+		g.translate(0, y_start + lineheight - 10);
 
-		// first iteration - graphical column
-		int messageOffset = 0;
-		int y = y_start + lineheight; //skip header line
+		g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT,
+				BasicStroke.JOIN_ROUND));
+		CommitGraphView graphView = new CommitGraphView(revisionTree);
+		graphView.drawGraph(g);
+		g.translate(0, -lineheight + 10);
 		
-		//lanes list saves last commit of graph lane
-		List<Commit> lanes = new LinkedList<Commit>();
-		//saves on which lane a commit was drawn
-		Map<Commit, Integer> commit_lane = new HashMap<Commit, Integer>();
-		
-		for (Commit c : commits) {
-			
-			//test whether existing lane available
-			int laneNumber = -1;
-			for(Commit suc : c.Successors) {
-				if(laneNumber == -1 || laneNumber > lanes.indexOf(suc)) {
-					laneNumber = lanes.indexOf(suc);
-				}
-			}
-			for(Commit suc : c.Successors) {
-				if(lanes.contains(suc)){
-					
-					//draw connecting line
-					g.drawLine(25 + 20 * lanes.indexOf(suc), y_start + lineheight * (commits.indexOf(suc) + 1) - 5, 25 + 20 * lanes.indexOf(suc), y - 5 - lineheight);
-					GeneralPath path = new GeneralPath();
-					path.moveTo(25 + 20 * laneNumber, y-5);
-					path.curveTo(25 + 20 * lanes.indexOf(suc), y-5, 25 + 20 * lanes.indexOf(suc), y-5, 25 + 20 * lanes.indexOf(suc), y - 5 - lineheight);
-					g.draw(path);
-				} else {
-					//merge
-					lanes.add(c);
-					laneNumber = lanes.indexOf(c);
-					
-					//draw connecting lines
-					//vertical line
-					g.drawLine(25 + 20 * laneNumber, y_start + lineheight * (commits.indexOf(suc) + 2) - 5, 25 + 20 * laneNumber, y - 5);
-					//horizontal merge connection
-					GeneralPath path = new GeneralPath();
-					path.moveTo(25 + 20 * laneNumber, y_start + lineheight * (commits.indexOf(suc) + 2) - 5);
-					path.curveTo(25 + 20 * laneNumber, y_start + lineheight * (commits.indexOf(suc) + 1) - 5, 25 + 20 * laneNumber, y_start + lineheight * (commits.indexOf(suc) + 1) - 5, 25 + 20 * commit_lane.get(suc), y_start + lineheight * (commits.indexOf(suc) + 1) - 5);
-					g.draw(path);
-				}
-			}
-			
-			//if no lane available, create new one (no successing commit)
-			if(laneNumber < 0) {
-				lanes.add(c);
-				laneNumber = lanes.indexOf(c);
-			}
-			else {
-				//update lane
-				lanes.set(laneNumber, c);
-			}
-			
-			//save lane of current commit
-			commit_lane.put(c, laneNumber);
-			
-			// circle in front of commit
-			// TODO: color variable
-			g.setColor(new Color(0x901010));
-			// TODO: x-position variable
-			g.fillOval(20 + 20 * laneNumber, y - 10, 10, 10);
-			
-			//calculate offset of next column
-			messageOffset = Math.max(messageOffset, 20 + 20 * laneNumber);
-
-			// advance to next line
-			y += lineheight;
-		}
-		messageOffset += 30;
-		
+		int messageOffset = (int) graphView.getDimension().getWidth() + 20;
 		
 		int timeOffset = 0;
-		y = y_start;
+		int y = 0;
 		
 		//header line
+		g.setColor(new Color(0x000000));
 		g.drawString("Commit Message", messageOffset, y);
 		timeOffset = fm.stringWidth("Commit Message");
 		y += lineheight;
@@ -142,7 +75,6 @@ public class MMSTVisualisation {
 			String message = c.getMessage();
 			
 			//infos of commit
-			g.setColor(new Color(0x000000));
 			g.drawString(message, messageOffset, y);
 			
 			//calculate offset of next column
@@ -153,7 +85,7 @@ public class MMSTVisualisation {
 		timeOffset += messageOffset + 20;
 		
 		int authorOffset = 0;
-		y = y_start;
+		y = 0;
 		
 		//header line
 		g.drawString("Time", timeOffset, y);
@@ -172,7 +104,7 @@ public class MMSTVisualisation {
 		authorOffset += timeOffset + 20;
 		
 		int rightBorder = 0;
-		y = y_start;
+		y = 0;
 		
 		//header line
 		g.drawString("Author", authorOffset, y);

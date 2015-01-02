@@ -47,7 +47,7 @@ public class StructuredTree {
 				+ "prov:generated ?revb;\n"
 				+ "prov:atTime ?time;\n"
 				+ "prov:wasAssociatedWith ?author.\n"
-				+ "?author rdfs:label ?authname.\n"
+				+ "OPTIONAL { ?author rdfs:label ?authname. }\n"
 				+ "?reva rmo:revisionNumber ?prev;"
 				+ "rmo:revisionOf <%s>.\n"
 				+ "?revb rmo:revisionNumber ?next.\n"
