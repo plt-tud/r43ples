@@ -102,7 +102,7 @@ public class CommitGraphView {
 
 				// calculate and set starting point
 				GeneralPath path = new GeneralPath();
-				int x = LaneWidth * (currentLane + 1) + CircleDiameter / 2;
+				int x = LaneWidth * currentLane + CircleDiameter / 2;
 				int y = LineHeight * currentLine + CircleDiameter / 2;
 				path.moveTo(x, y);
 
@@ -163,7 +163,7 @@ public class CommitGraphView {
 
 		// calculate dimensions
 		dimension = new Dimension();
-		dimension.setSize((maxLane + 1) * LaneWidth, commits.size()
+		dimension.setSize(maxLane * LaneWidth, commits.size()
 				* LineHeight);
 	}
 	
@@ -179,7 +179,7 @@ public class CommitGraphView {
 		
 		int x1 = (int) path.getCurrentPoint().getX();
 		int y1 = (int) path.getCurrentPoint().getY();
-		int x2 = LaneWidth * (lane + 1) + CircleDiameter / 2;
+		int x2 = LaneWidth * lane + CircleDiameter / 2;
 		int y2 = LineHeight * line + CircleDiameter / 2;
 
 		if (x1 == x2) {
@@ -194,7 +194,7 @@ public class CommitGraphView {
 	}
 
 	private void drawCircle(Graphics2D g, int line, int lane) {
-		g.fillOval(LaneWidth * (lane + 1), LineHeight * line, CircleDiameter,
+		g.fillOval(LaneWidth * lane, LineHeight * line, CircleDiameter,
 				CircleDiameter);
 	}
 
