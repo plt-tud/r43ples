@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import de.tud.plt.r43ples.revisionTree.Commit;
 import de.tud.plt.r43ples.revisionTree.StructuredTree;
@@ -35,9 +36,10 @@ public class CommitGraphView {
 	// saves terminal commits of lanes
 	private List<Commit> terminalCommits = new LinkedList<Commit>();
 	// saves on which lane a commit was drawn
-	Map<Commit, Integer> commit_lane = new HashMap<Commit, Integer>();
+	private Map<Commit, Integer> commit_lane = new HashMap<Commit, Integer>();
 	// saves non empty grid coordinates
-	List<GraphNode> nodes = new LinkedList<GraphNode>();
+	private List<GraphNode> nodes = new LinkedList<GraphNode>();
+	private Queue<Color> colorQueue;
 	
 	private List<Commit> commits;
 
@@ -61,6 +63,13 @@ public class CommitGraphView {
 
 	public CommitGraphView(StructuredTree tree) {
 		commits = tree.getCommits();
+		colorQueue = new LinkedList<Color>();
+		colorQueue.add(new Color(0.5f, 0.1f, 0.1f));
+		colorQueue.add(new Color(0.1f, 0.5f, 0.1f));
+		colorQueue.add(new Color(0.1f, 0.1f, 0.5f));
+		colorQueue.add(new Color(0.5f, 0.5f, 0.1f));
+		colorQueue.add(new Color(0.5f, 0.1f, 0.5f));
+		colorQueue.add(new Color(0.1f, 0.5f, 0.5f));
 	}
 	
 	public void drawGraph(Graphics2D g) {
@@ -68,19 +77,27 @@ public class CommitGraphView {
 		int currentLine = 0;
 		int maxLane = 0;
 		
+		Map<Commit, Color> commit_color = new HashMap<Commit, Color>();
+
 		for (Commit c : commits) {
 
 			// get lane for this commit
 			int currentLane = getLaneForCommit(c);
+
+			// find color
+			Color currentColor;
+			if (terminalCommits.get(currentLane) != c)
+				currentColor = commit_color.get(terminalCommits.get(currentLane));
+			else
+				currentColor = getNextColor();
+
 			// update memory
 			terminalCommits.set(currentLane, c);
 			commit_lane.put(c, currentLane);
+			commit_color.put(c, currentColor);
 			nodes.add(new GraphNode(currentLine, currentLane));
 
-			// draw circle
-			drawCircle(g, currentLine, currentLane);
-
-			// connect circle with any succeeding commits
+			// connect with any succeeding commits
 			for (Commit suc : c.Successors) {
 
 				// calculate and set starting point
@@ -88,6 +105,12 @@ public class CommitGraphView {
 				int x = LaneWidth * (currentLane + 1) + CircleDiameter / 2;
 				int y = LineHeight * currentLine + CircleDiameter / 2;
 				path.moveTo(x, y);
+
+				// set color
+				if (currentLane < commit_lane.get(suc))
+					g.setColor(commit_color.get(suc));
+				else
+					g.setColor(currentColor);
 
 				// get line and lane of successor
 				int endLine = commits.indexOf(suc);
@@ -119,13 +142,23 @@ public class CommitGraphView {
 						if (commits.indexOf(suc_pre) > line)
 							hasUnprocessedPredecessor = true;
 					}
-					if (!hasUnprocessedPredecessor)
+					if (!hasUnprocessedPredecessor) {
 						terminalCommits.remove(suc);
+					}
+
 				}
 			}
 
 			// advance to next line
 			currentLine++;
+		}
+
+		// draw circles
+		for (int l = 0; l < commits.size(); l++) {
+			Commit c = commits.get(l);
+			g.setColor(commit_color.get(c));
+			int lane = commit_lane.get(c);
+			drawCircle(g, l, lane);
 		}
 
 		// calculate dimensions
@@ -161,8 +194,6 @@ public class CommitGraphView {
 	}
 
 	private void drawCircle(Graphics2D g, int line, int lane) {
-		// TODO: make color variable
-		g.setColor(new Color(0x901010));
 		g.fillOval(LaneWidth * (lane + 1), LineHeight * line, CircleDiameter,
 				CircleDiameter);
 	}
@@ -186,5 +217,11 @@ public class CommitGraphView {
 		}
 
 		return lane;
+	}
+
+	private Color getNextColor() {
+		Color c = colorQueue.poll();
+		colorQueue.add(c);
+		return c;
 	}
 }

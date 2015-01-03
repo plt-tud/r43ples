@@ -54,8 +54,7 @@ public class MMSTVisualisation {
 		DateFormat df = DateFormat.getDateTimeInstance();
 		g.translate(0, y_start + lineheight - 10);
 
-		g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT,
-				BasicStroke.JOIN_ROUND));
+		g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
 		CommitGraphView graphView = new CommitGraphView(revisionTree);
 		graphView.drawGraph(g);
 		g.translate(0, -lineheight + 10);
