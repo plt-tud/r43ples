@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.http.HttpException;
@@ -28,13 +28,68 @@ public class StructuredTree {
 	private static Logger logger = Logger.getLogger(StructuredTree.class);
 
 	private StructuredTree() {
-		commits = new ArrayList<Commit>();
+		commits = new LinkedList<Commit>();
+		branches = new LinkedList<Branch>();
+		tags = new LinkedList<Tag>();
 	}
 
 	public static StructuredTree getTreeOfGraph(String graph) throws IOException, HttpException {
 		// new Tree
 		StructuredTree t = new StructuredTree();
+		t.updateCommits(graph);
+		t.updateBranches(graph);
 
+		return t;
+	}
+
+	private void updateBranches(String graph) {
+		//query all branches
+		String queryBranches = String.format(
+				RevisionManagement.prefixes
+						+ "SELECT ?title ?commit\n"
+						+ "FROM <%s>\n"
+						+ "WHERE {\n"
+						+ "?branch a rmo:Branch;\n"
+						+ "rdfs:label ?title;\n"
+						+ "rmo:references ?rev.\n"
+						+ "?rev rmo:revisionOf <%s>.\n"
+						+ "?commit a rmo:Commit;\n"
+						+ "prov:generated ?rev.\n"
+						+ "}", Config.revision_graph, graph);
+
+		String resultSparql;
+		try {
+			resultSparql = TripleStoreInterface.executeQueryWithAuthorization(queryBranches, "XML");
+		} catch (IOException | HttpException e1) {
+			e1.printStackTrace();
+			return;
+		}
+		ResultSet resultsBranches = ResultSetFactory.fromXML(resultSparql);
+
+		while (resultsBranches.hasNext()) {
+			QuerySolution sol = resultsBranches.next();
+			Branch b = new Branch(sol.getLiteral("title").toString(), commits.get(commits.indexOf(new Commit(sol.get(
+					"commit").toString()))));
+			branches.add(b);
+		}
+	}
+
+	public List<Commit> getCommits()
+	{
+		return commits;
+	}
+
+	public List<Branch> getBranches()
+	{
+		return branches;
+	}
+
+	public List<Tag> getTags()
+	{
+		return tags;
+	}
+
+	private void updateCommits(String graph) {
 		// query all commits
 		String queryCommits = String.format(
 				RevisionManagement.prefixes
@@ -54,7 +109,13 @@ public class StructuredTree {
 						+ "}",
 				Config.revision_graph,
 				graph);
-		String resultSparql = TripleStoreInterface.executeQueryWithAuthorization(queryCommits, "XML");
+		String resultSparql;
+		try {
+			resultSparql = TripleStoreInterface.executeQueryWithAuthorization(queryCommits, "XML");
+		} catch (IOException | HttpException e1) {
+			e1.printStackTrace();
+			return;
+		}
 		ResultSet resultsCommits = ResultSetFactory.fromXML(resultSparql);
 
 		// generate list of commits
@@ -62,28 +123,29 @@ public class StructuredTree {
 		while (resultsCommits.hasNext()) {
 			QuerySolution sol = resultsCommits.next();
 			try {
-				String authname = sol.getLiteral("authname") == null ? "" : sol.getLiteral("authname").getString();
-				Commit commit = new Commit(
-						sol.get("commit").toString(),
-						sol.getLiteral("title").getString(),
-						df.parse(sol.getLiteral("time").toString()),
-						authname,
-						sol.getLiteral("prev").getString(),
-						sol.getLiteral("next").getString());
-				if (t.commits.contains(commit))
+				Commit commit = new Commit(sol.get("commit").toString());
+				if (commits.contains(commit))
 				{
-					t.commits.get(t.commits.indexOf(commit)).getBaseRevisions().add(sol.getLiteral("prev").getString());
-				} else
-					t.commits.add(commit);
+					commits.get(commits.indexOf(commit)).getBaseRevisions().add(sol.getLiteral("prev").getString());
+				} else {
+					String authname = sol.getLiteral("authname") == null ? "" : sol.getLiteral("authname").getString();
+					Commit newCommit = new Commit(
+							sol.get("commit").toString(),
+							sol.getLiteral("title").getString(),
+							df.parse(sol.getLiteral("time").toString()),
+							authname,
+							sol.getLiteral("prev").getString(),
+							sol.getLiteral("next").getString());
+					commits.add(newCommit);
+				}
 			} catch (ParseException e) {
-				logger.error("Commit could not be parsed!", e);
-				e.printStackTrace();
+				logger.error("Commit could not be parsed!");
 			}
 		}
 
 		// fill predecessor and successor lists of commits
-		for (Commit c : t.commits) {
-			for (Commit b : t.commits) {
+		for (Commit c : commits) {
+			for (Commit b : commits) {
 				if (c.getBaseRevisions().contains(b.getNextRevision()))
 					c.Predecessors.add(b);
 				else if (b.getBaseRevisions().contains(c.getNextRevision()))
@@ -92,23 +154,6 @@ public class StructuredTree {
 		}
 
 		// sort list of commits by order of their occurrence
-		Collections.sort(t.commits);
-
-		return t;
-	}
-
-	public List<Commit> getCommits()
-	{
-		return commits;
-	}
-
-	public List<Branch> getBranches()
-	{
-		return branches;
-	}
-
-	public List<Tag> getTags()
-	{
-		return tags;
+		Collections.sort(commits);
 	}
 }

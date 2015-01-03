@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class Commit implements Comparable<Commit> {
-	private String url;
+	private String uri;
 	private String message;
 	private Date time;
 	private String author;
@@ -15,22 +15,31 @@ public class Commit implements Comparable<Commit> {
 	public List<Commit> Predecessors;
 	public List<Commit> Successors;
 	
-	
 	/**
-	 * @param message commit message
-	 * @param author author of the commit
-	 * @param baseRev name of revision this commit is based on
-	 * @param nextRev name of revision this commit generated
+	 * @param uri
+	 * @param message
+	 *            commit message
+	 * @param time
+	 *            time of execution
+	 * @param author
+	 *            author of the commit
+	 * @param baseRev
+	 *            name of revision this commit is based on
+	 * @param nextRev
+	 *            name of revision this commit generated
 	 */
-	public Commit(String url, String message, Date time, String author, String baseRev, String nextRev) {
-		this.url = url;
+	public Commit(String uri, String message, Date time, String author, String baseRev, String nextRev) {
+		this(uri);
 		this.message = message;
 		this.time = time;
 		this.author = author;
 		this.baseRev = new LinkedList<String>();
 		this.baseRev.add(baseRev);
 		this.nextRev = nextRev;
-		
+	}
+
+	public Commit(String uri) {
+		this.uri = uri;
 		Predecessors = new ArrayList<Commit>();
 		Successors = new ArrayList<Commit>();
 	}
@@ -73,7 +82,7 @@ public class Commit implements Comparable<Commit> {
 	public boolean equals(Object obj) {
 		if(obj instanceof Commit)
 		{
-			return ((Commit)obj).url.equals(this.url);
+			return ((Commit) obj).uri.equals(this.uri);
 		}
 		return false;
 	}
