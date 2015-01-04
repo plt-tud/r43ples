@@ -3,6 +3,7 @@
  */
 package de.tud.plt.r43ples.test;
 
+import static org.hamcrest.core.StringContains.containsString;
 import java.io.IOException;
 
 import org.apache.http.HttpException;
@@ -88,6 +89,27 @@ public class TestMultipleGraph {
 		result = ep.sparql(format, String.format(query_template, 2, 2)).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-2-2.xml");
 		Assert.assertEquals(expected, result);
+	}
+	
+	@Test
+	public void testResponseHeader() throws IOException, HttpException {
+		String sparql = "SELECT *"
+				+ "FROM <" + graph1 +">"
+				+ "WHERE { ?s ?p ?o}";
+				
+		String result = RevisionManagement.getResponseHeaderFromQuery(sparql);
+		Assert.assertThat(result, containsString("Master"));
+	}
+	
+	@Test
+	public void testResponseHeader2() throws IOException, HttpException {
+		String sparql = "SELECT *"
+				+ "FROM <" + graph1 +">"
+				+ "FROM <" + graph2 +">"
+				+ "WHERE { ?s ?p ?o}";
+				
+		String result = RevisionManagement.getResponseHeaderFromQuery(sparql);
+		Assert.assertThat(result, containsString("Master"));
 	}
 
 }

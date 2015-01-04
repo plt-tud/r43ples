@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
@@ -1050,6 +1052,55 @@ public class RevisionManagement {
 				+ "WHERE {?s ?p ?o} %n", graphName);
 		
 		return TripleStoreInterface.executeQueryWithAuthorization(query, "TURTLE");		
+	}
+	
+	
+	/**
+	 * @param query
+	 * @return
+	 * @throws HttpException 
+	 * @throws IOException 
+	 */
+	public static String getResponseHeaderFromQuery(String query) throws IOException, HttpException {
+		final Pattern patternGraph = Pattern.compile(
+				"(GRAPH|FROM|INTO)\\s*<(?<graph>[^>]*)>\\s*",
+				Pattern.CASE_INSENSITIVE);
+		
+		StringBuilder graphNames = new StringBuilder();
+		Matcher m = patternGraph.matcher(query);
+		m.find();
+		while (!m.hitEnd()) {
+			String graphName = m.group("graph");
+			graphNames.append("<"+graphName+">");
+			m.find();
+			if (!m.hitEnd())
+				graphNames.append(", ");			
+		}
+		return getResponseHeader(graphNames.toString());
+		
+	}
+	
+	public static String getResponseHeader(String graphList) throws IOException, HttpException {
+		String queryConstruct = RevisionManagement.prefixes + String.format(
+				  "CONSTRUCT {"
+				+ " ?ref a ?type;"
+				+ "		rdfs:label ?label;"
+				+ "		rmo:references ?rev."
+				+ " ?rev rmo:revisionOf ?graph;"
+				+ "			rmo:revisionNumber ?number . %n"
+				+ "} %n"
+				+ "FROM <%s> %n"
+				+ "WHERE {"
+				+ " ?ref a ?type;"
+				+ "		rdfs:label ?label;%n"
+				+ "		rmo:references ?rev."
+				+ " ?rev rmo:revisionOf ?graph;"
+				+ "			rmo:revisionNumber ?number . %n"
+				+ "FILTER (?type IN (rmo:Tag, rmo:Master, rmo:Branch)) %n"
+				+ "FILTER (?graph IN (%s)) %n"
+				+ "}", Config.revision_graph, graphList);
+		String header = TripleStoreInterface.executeQueryWithAuthorization(queryConstruct, "TURTLE");
+		return header;
 	}
 	
 }

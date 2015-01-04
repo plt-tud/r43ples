@@ -3,6 +3,8 @@
  */
 package de.tud.plt.r43ples.test;
 
+import static org.hamcrest.core.StringContains.containsString;
+
 import java.io.IOException;
 import java.util.LinkedList;
 
@@ -84,6 +86,16 @@ public class TestMergeManagement {
 		expected.add("exampleGraph-revision-1.1-0");
 		expected.add("exampleGraph-revision-1.1-1");
 		Assert.assertEquals(expected, path);
+	}
+	
+	@Test
+	public void testResponseHeader() throws IOException, HttpException {
+		String sparql = "SELECT * "
+				+ "FROM <exampleGraph>"
+				+ "WHERE { ?s ?p ?o}";
+				
+		String result = RevisionManagement.getResponseHeaderFromQuery(sparql);
+		Assert.assertThat(result, containsString("Master"));
 	}
 
 }
