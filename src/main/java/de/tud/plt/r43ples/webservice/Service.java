@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
@@ -45,7 +44,8 @@ public class Service {
 		ResourceConfig rc = new ResourceConfig()
 				.registerClasses(Endpoint.class)
 				.property(MustacheMvcFeature.TEMPLATE_BASE_PATH, "templates")
-				.register(MustacheMvcFeature.class);
+				.register(MustacheMvcFeature.class)
+				.register(ExceptionMapper.class);
 		server = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, rc);
 		server.getServerConfiguration().addHttpHandler(
 		        new CLStaticHttpHandler(Service.class.getClassLoader(),"webapp/"), "/static/");
