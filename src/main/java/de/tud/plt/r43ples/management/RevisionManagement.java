@@ -127,8 +127,10 @@ public class RevisionManagement {
 				newRevisionNumber, addSetGraphUri, removeSetGraphUri);
 
 		// Update full graph of branch
-		TripleStoreInterface.executeQueryWithAuthorization(String.format(
-				"DELETE DATA { GRAPH <%s> {%n %s %n} }%n", referenceGraph, removedAsNTriples));
+		if (!removedAsNTriples.isEmpty()) {
+			TripleStoreInterface.executeQueryWithAuthorization(String.format(
+					"DELETE DATA { GRAPH <%s> {%n %s %n} }%n", referenceGraph, removedAsNTriples));
+		}
 		RevisionManagement.executeINSERT(referenceGraph, addedAsNTriples);
 
 		// Create new graph with delta-added-newRevisionNumber
@@ -141,7 +143,9 @@ public class RevisionManagement {
 		logger.info("Create new graph with name " + removeSetGraphUri);
 		TripleStoreInterface.executeQueryWithAuthorization(String.format("CREATE SILENT GRAPH <%s>%n",
 				removeSetGraphUri));
-		RevisionManagement.executeINSERT(removeSetGraphUri, removedAsNTriples);
+		if (!removedAsNTriples.isEmpty()) {
+			RevisionManagement.executeINSERT(removeSetGraphUri, removedAsNTriples);
+		}
 		
 		// Remove branch from which changes were merged, if available
 //		if (usedRevisionNumber.size() > 1) {
@@ -324,7 +328,7 @@ public class RevisionManagement {
 	public static boolean checkGraphExistence(final String graphName) throws HttpException, IOException {
 		String query = "ASK { GRAPH <" + graphName + "> {?s ?p ?o} }";
 		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "HTML");
-		return result.indexOf("yes") >= 0;
+		return (result.indexOf("yes") >= 0 || result.indexOf("true") >= 0);
 	}
 
 	/**
@@ -621,7 +625,7 @@ public class RevisionManagement {
 						+ " <%s> rmo:references ?rev; prov:wasDerivedFrom ?rev ." + " }} ",
 						Config.revision_graph, referenceUri);
 		String resultASKBranch = TripleStoreInterface.executeQueryWithAuthorization(queryASKBranch, "HTML");
-		return resultASKBranch.indexOf("yes") >= 0;
+		return (resultASKBranch.indexOf("yes") >= 0 || resultASKBranch.indexOf("true") >= 0);
 	}
 
 	public static String getNextRevisionNumber(final String graphName, final String revisionIdentifier)
@@ -956,7 +960,7 @@ public class RevisionManagement {
 						+ " ?ref rmo:references ?rev ." + " ?rev rmo:revisionOf <%s> ." + " }} ",
 						Config.revision_graph, referenceName, graphName);
 		String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
-		return resultASK.indexOf("yes") >= 0;
+		return (resultASK.indexOf("yes") >= 0 || resultASK.indexOf("true") >= 0);
 	}
 
 	/**
@@ -980,7 +984,7 @@ public class RevisionManagement {
 						Config.revision_graph, graphName, identifier, identifier);
 		String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
 
-		return resultASK.indexOf("yes") >= 0;
+		return (resultASK.indexOf("yes") >= 0 || resultASK.indexOf("true") >= 0);
 	}
 	
 	
