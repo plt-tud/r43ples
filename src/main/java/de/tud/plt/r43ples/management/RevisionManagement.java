@@ -746,9 +746,7 @@ public class RevisionManagement {
 	 */
 	public static void executeDELETE(final String graphName, final String dataSetAsNTriples) throws HttpException, IOException {
 
-		String deleteQueryTemplate =  "DELETE DATA FROM <%s> { %n"
-									+ "	%s %n"
-									+ "} %n";
+		String deleteQueryTemplate =  "DELETE DATA { GRAPH <%s> { %s } }";
 		
 		final int MAX_STATEMENTS = 200;
 		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
