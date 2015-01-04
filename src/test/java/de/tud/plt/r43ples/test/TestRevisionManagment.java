@@ -37,7 +37,7 @@ public class TestRevisionManagment {
 	
 	@AfterClass
 	public static void tearDown() throws HttpException, IOException{
-	//	RevisionManagement.purgeGraph(graph_test);
+		RevisionManagement.purgeGraph(graph_test);
 	}
 	
 	@Before
