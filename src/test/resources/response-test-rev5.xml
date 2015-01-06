@@ -18,11 +18,6 @@
   <result>
    <binding name="s"><uri>http://test.com/Carlos</uri></binding>
    <binding name="p"><uri>http://test.com/knows</uri></binding>
-   <binding name="o"><uri>http://test.com/Danny</uri></binding>
-  </result>
-  <result>
-   <binding name="s"><uri>http://test.com/Carlos</uri></binding>
-   <binding name="p"><uri>http://test.com/knows</uri></binding>
    <binding name="o"><uri>http://test.com/Freddy</uri></binding>
   </result>
   <result>

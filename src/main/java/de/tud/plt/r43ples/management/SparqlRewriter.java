@@ -19,6 +19,7 @@ import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.expr.E_OneOf;
 import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
+import com.hp.hpl.jena.sparql.path.P_Alt;
 import com.hp.hpl.jena.sparql.path.P_Link;
 import com.hp.hpl.jena.sparql.path.P_OneOrMore1;
 import com.hp.hpl.jena.sparql.syntax.Element;
@@ -103,7 +104,7 @@ public class SparqlRewriter {
 		qe.setDistinct(true);
 		qe.setQueryPattern(eg_modified);
 		query_sparql = qe.serialize();
-		logger.debug("Rewritten query: \n" + query_sparql);
+		logger.info("Rewritten query: \n" + query_sparql);
 		return query_sparql;
 	}
 
@@ -154,40 +155,49 @@ public class SparqlRewriter {
 			ExprList expression_list_last_revision, TriplePath triplePath) {
 		{
 			ElementGroup eg_modified = new ElementGroup();
-			Node var_g1 = Var.alloc("g" + statement_i);
-			Node var_ref1 = Var.alloc("ref" + statement_i);
-			Node var_rev1 = Var.alloc("rev" + statement_i);
-			Node var_rg1 = Var.alloc("rg" + statement_i);
-			Node var_rm1 = Var.alloc("rm" + statement_i);
-			Node var_gm1 = Var.alloc("gm" + statement_i);
-			Node var_rm1_old = Var.alloc("rm" + statement_i + "_old");
-			Node var_gm1_old = Var.alloc("gm" + statement_i + "_old");
+			
+			
+			Node g_revision = NodeFactory.createURI(Config.revision_graph);
+			Node var_g_delete_set_full_graph = Var.alloc("g_delete_set_full_graph_" + statement_i);
+			Node var_reference = Var.alloc("reference_" + statement_i);
+			Node var_r_fullgraph = Var.alloc("r_fullgraph" + statement_i);
+			Node var_r_delete_set = Var.alloc("r_delete_set_" + statement_i);
+			Node var_r_add_set = Var.alloc("r_add_set_" + statement_i);
+			Node var_g_add_set = Var.alloc("g_add_set_" + statement_i);
+			Node var_r_delta_set_old = Var.alloc("r_delta_set_old_" + statement_i);
+			Node var_g_delta_set_old = Var.alloc("g_delta_set_old_" + statement_i);
 
-			ElementTriplesBlock block_g1 = new ElementTriplesBlock();
-			block_g1.addTriple(triplePath.asTriple());
-			ElementNamedGraph ng = new ElementNamedGraph(var_g1, block_g1);
+			ElementTriplesBlock block_triple_path = new ElementTriplesBlock();
+			block_triple_path.addTriple(triplePath.asTriple());
+			
+			ElementNamedGraph ng = new ElementNamedGraph(var_g_delete_set_full_graph, block_triple_path);
 
-			ElementGroup eg1 = new ElementGroup();
-			eg1.addTriplePattern(new Triple(var_ref1, rmo_references, var_rev1));
-			eg1.addTriplePattern(new Triple(var_ref1, rmo_fullGraph, var_g1));
-			eg1.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_rev1),
+			ElementGroup eg_fullgraph = new ElementGroup();
+			eg_fullgraph.addTriplePattern(new Triple(var_reference, rmo_references, var_r_fullgraph));
+			eg_fullgraph.addTriplePattern(new Triple(var_reference, rmo_fullGraph, var_g_delete_set_full_graph));
+			eg_fullgraph.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_fullgraph),
 					expression_list_last_revision)));
-
+			
 			eg_modified.addElement(ng);
-			eg_modified.addElement(eg1);
+
+			ElementGroup eg_union = new ElementGroup();
+			ElementNamedGraph ng_union = new ElementNamedGraph(g_revision, eg_union);
+			eg_modified.addElement(ng_union);
+			
+			eg_union.addElement(eg_fullgraph);
 
 			if (!expression_list_revision_path.isEmpty()) {
-				ElementGroup eg2 = new ElementGroup();
-				eg2.addTriplePattern(new Triple(var_rg1, RDF.type.asNode(), rmo_Revision));
-				eg2.addTriplePattern(new Triple(var_rg1, rmo_deltaRemoved, var_g1));
+				ElementGroup eg_delete_set = new ElementGroup();
+				eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, RDF.type.asNode(), rmo_Revision));
+				eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, rmo_deltaRemoved, var_g_delete_set_full_graph));
 				// add filter
 				// FILTER (?rg1 IN
 				// (<http://test.com/r43ples-dataset-revision-4>,
 				// <http://test.com/r43ples-dataset-revision-3>))
-				eg2.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_rg1),
+				eg_delete_set.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_delete_set),
 						expression_list_revision_path)));
 				ElementUnion union = new ElementUnion();
-				union.addElement(eg2);
+				union.addElement(eg_delete_set);
 
 				// First Minus part
 				// GRAPH ?gm1 { ?s ?p ?o }
@@ -198,10 +208,13 @@ public class SparqlRewriter {
 				// <http://test.com/r43ples-dataset-revision-3>))
 				ElementGroup eg_minus = new ElementGroup();
 				ElementMinus minus = new ElementMinus(eg_minus);
-				ElementNamedGraph ng1 = new ElementNamedGraph(var_gm1, block_g1);
-				eg_minus.addElement(ng1);
-				eg_minus.addTriplePattern(new Triple(var_rm1, RDF.type.asNode(), rmo_Revision));
-				eg_minus.addTriplePattern(new Triple(var_rm1, rmo_deltaAdded, var_gm1));
+				ElementNamedGraph ng_addset = new ElementNamedGraph(var_g_add_set, block_triple_path);
+				eg_minus.addElement(ng_addset);
+				ElementGroup eg_addset = new ElementGroup();
+				ElementNamedGraph ng_addset_revision_info = new ElementNamedGraph(g_revision, eg_addset);
+				eg_minus.addElement(ng_addset_revision_info);
+				eg_addset.addTriplePattern(new Triple(var_r_add_set, RDF.type.asNode(), rmo_Revision));
+				eg_addset.addTriplePattern(new Triple(var_r_add_set, rmo_deltaAdded, var_g_add_set));
 
 				ElementGroup eg_innerminus = new ElementGroup();
 				// GRAPH ?gm1_old {?s ?p ?o.}
@@ -212,22 +225,26 @@ public class SparqlRewriter {
 				// (<http://test.com/r43ples-dataset-revision-4>,
 				// <http://test.com/r43ples-dataset-revision-3>))
 				ElementMinus inner_minus = new ElementMinus(eg_innerminus);
-				ElementNamedGraph ng2 = new ElementNamedGraph(var_gm1_old, block_g1);
-				eg_innerminus.addElement(ng2);
+				ElementNamedGraph ng_delta_set_old = new ElementNamedGraph(var_g_delta_set_old, block_triple_path);
+				eg_innerminus.addElement(ng_delta_set_old);
 
-				ElementPathBlock ebp = new ElementPathBlock();
-				ebp.addTriplePath(new TriplePath(var_rm1_old, new P_Link(RDF.type.asNode()), rmo_Revision));
-				ebp.addTriplePath(new TriplePath(var_rm1_old, new P_Link(rmo_deltaRemoved), var_gm1_old));
-				ebp.addTriplePath(new TriplePath(var_rm1, new P_OneOrMore1(new P_Link(prov_wasDerivedFrom)),
-						var_rm1_old));
-				eg_innerminus.addElement(ebp);
+				ElementGroup eg_ebp = new ElementGroup();
+				ElementPathBlock ebp = new ElementPathBlock();				
+				ebp.addTriplePath(new TriplePath(var_r_delta_set_old, new P_Link(RDF.type.asNode()), rmo_Revision));
+				ebp.addTriplePath(new TriplePath(var_r_delta_set_old, new P_Alt(new P_Link(rmo_deltaRemoved), new P_Link(rmo_deltaAdded)), var_g_delta_set_old));
+				ebp.addTriplePath(new TriplePath(var_r_add_set, new P_OneOrMore1(new P_Link(prov_wasDerivedFrom)),
+						var_r_delta_set_old));
+				eg_ebp.addElement(ebp);
+				ElementNamedGraph ng_delta_set_old_revision_info = new ElementNamedGraph(g_revision, eg_ebp);
+				eg_innerminus.addElement(ng_delta_set_old_revision_info);
 
-				eg_innerminus.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_rm1_old),
+				eg_ebp.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_delta_set_old),
 						expression_list_revision_path)));
-				eg_minus.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_rm1),
+				eg_addset.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_add_set),
 						expression_list_revision_path)));
 				eg_minus.addElement(inner_minus);
-				eg_modified.addElement(union);
+				eg_union.addElement(union);
+				
 				eg_modified.addElement(minus);
 			}
 			return eg_modified;
