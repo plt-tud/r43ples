@@ -230,11 +230,14 @@ public class RevisionManagement {
 		String branchIdentifier = usedRevisionNumber.get(0).toString();
 		String oldRevisionUri = getRevisionUri(graphName, branchIdentifier);
 
-		String queryBranch = prefixes
-				+ String.format("" + "SELECT ?branch " + "FROM <%s>" + "WHERE {" + "	?branch a rmo:Branch; "
-						+ "		rmo:references <%s>."
-						+ "	{?branch rdfs:label \"%s\"} UNION {<%s> rmo:revisionNumber \"%s\"}" + "}",
-						Config.revision_graph, oldRevisionUri, branchIdentifier, oldRevisionUri,
+		String queryBranch = prefixes + String.format("" 
+					+ "SELECT ?branch " 
+					+ "WHERE { GRAPH <%s> {" 
+					+ "	?branch a rmo:Branch; "
+					+ "		rmo:references <%s>."
+					+ "	{?branch rdfs:label \"%s\"} UNION {<%s> rmo:revisionNumber \"%s\"}" 
+					+ "} }",
+					Config.revision_graph, oldRevisionUri, branchIdentifier, oldRevisionUri,
 						branchIdentifier);
 		QuerySolution sol = ResultSetFactory.fromXML(
 				TripleStoreInterface.executeQueryWithAuthorization(queryBranch, "XML")).next();
@@ -466,12 +469,15 @@ public class RevisionManagement {
 	 */
 	public static String getReferenceGraph(final String graphName, final String referenceIdentifier)
 			throws HttpException, IOException {
-		String query = prefix_rmo
-				+ String.format("" + "SELECT ?graph " + "FROM <%s>" + "WHERE {" + "	?ref a rmo:Reference; "
-						+ "		rmo:references ?rev;" + "		rmo:fullGraph ?graph."
-						+ " ?rev a rmo:Revision; rmo:revisionOf <%s>."
-						+ "	{?ref rdfs:label \"%s\"} UNION {?rev rmo:revisionNumber \"%s\"}" + "}",
-						Config.revision_graph, graphName, referenceIdentifier, referenceIdentifier);
+		String query = prefix_rmo + String.format("" 
+			+ "SELECT ?graph " 
+			+ "WHERE { GRAPH  <%s> {" 
+			+ "	?ref a rmo:Reference; "
+			+ "		rmo:references ?rev;" 
+			+ "		rmo:fullGraph ?graph."
+			+ " ?rev a rmo:Revision; rmo:revisionOf <%s>."
+			+ "	{?ref rdfs:label \"%s\"} UNION {?rev rmo:revisionNumber \"%s\"}" 
+			+ "} }", Config.revision_graph, graphName, referenceIdentifier, referenceIdentifier);
 		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
 		ResultSet resultSet = ResultSetFactory.fromXML(result);
 		if (resultSet.hasNext()) {
@@ -499,9 +505,9 @@ public class RevisionManagement {
 		String query = prefix_rmo
 				+ String.format(
 						"SELECT ?revNumber WHERE { GRAPH <%s> {"
-								+ "	?rev a rmo:Revision; rmo:revisionNumber ?revNumber; rmo:revisionOf <%s>."
-								+ "	{?rev rmo:revisionNumber \"%s\".} UNION {?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%s\".}"
-								+ "} }", Config.revision_graph, graphName, referenceName, referenceName);
+						+ "	?rev a rmo:Revision; rmo:revisionNumber ?revNumber; rmo:revisionOf <%s>."
+						+ "	{?rev rmo:revisionNumber \"%s\".} UNION {?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%s\".}"
+						+ "} }", Config.revision_graph, graphName, referenceName, referenceName);
 		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
 		ResultSet resultSet = ResultSetFactory.fromXML(result);
 		if (resultSet.hasNext()) {
@@ -533,13 +539,13 @@ public class RevisionManagement {
 		// create query
 		String queryRevisions = prefixes + String.format(""
 						+ "SELECT ?uri ?revNumber ?fullGraph " 
-						+ "FROM <%s> " 
 						+ "WHERE {"
-						+ "?uri a rmo:Revision;" 
-						+ "	rmo:revisionOf <%s>; "
-						+ "	rmo:revisionNumber ?revNumber."
-						+ "OPTIONAL { ?branch rmo:references ?uri; rmo:fullGraph ?fullGraph.}" 
-						+ "}",
+						+ "GRAPH <%s> {"
+						+ "	?uri a rmo:Revision;" 
+						+ "		rmo:revisionOf <%s>; "
+						+ "		rmo:revisionNumber ?revNumber."
+						+ "	OPTIONAL { ?branch rmo:references ?uri; rmo:fullGraph ?fullGraph.}" 
+						+ "} }",
 						Config.revision_graph, graphName);
 		String resultSparql = TripleStoreInterface.executeQueryWithAuthorization(queryRevisions, "XML");
 		ResultSet resultsCommits = ResultSetFactory.fromXML(resultSparql);
@@ -556,15 +562,14 @@ public class RevisionManagement {
 		}
 
 		String queryRevisionConnection = prefixes + String.format(""
-						+ "SELECT ?revNumber ?preRevNumber " 
-						+ "FROM <%s> " 
-						+ "WHERE {"
-						+ "?rev a rmo:Revision;" 
+						+ "SELECT ?revNumber ?preRevNumber "  
+						+ "WHERE { GRAPH <%s> {"
+						+ " ?rev a rmo:Revision;" 
 						+ "	rmo:revisionOf <%s>; "
 						+ "	rmo:revisionNumber ?revNumber; " 
 						+ "	prov:wasDerivedFrom ?preRev. "
 						+ "?preRev rmo:revisionNumber ?preRevNumber. " 
-						+ " }", Config.revision_graph, graphName);
+						+ "} }", Config.revision_graph, graphName);
 		String resultSparqlConnection = TripleStoreInterface.executeQueryWithAuthorization(
 				queryRevisionConnection, "XML");
 		ResultSet resultRevConnection = ResultSetFactory.fromXML(resultSparqlConnection);
@@ -589,11 +594,12 @@ public class RevisionManagement {
 	public static String getMasterRevisionNumber(final String graphName) throws HttpException, IOException {
 		logger.info("Get MASTER revision number of graph " + graphName);
 
-		String queryString = prefix_rmo
-				+ String.format("SELECT ?revisionNumber " + "FROM <%s> " + "WHERE {"
-						+ "	?master a rmo:Master; rmo:references ?revision . "
-						+ "	?revision rmo:revisionNumber ?revisionNumber; rmo:revisionOf <%s> . " + "}",
-						Config.revision_graph, graphName);
+		String queryString = prefix_rmo	+ String.format(""
+				+ "SELECT ?revisionNumber "  
+				+ "WHERE { GRAPH <%s> {"
+				+ "	?master a rmo:Master; rmo:references ?revision . "
+				+ "	?revision rmo:revisionNumber ?revisionNumber; rmo:revisionOf <%s> . " 
+				+ "} }", Config.revision_graph, graphName);
 		String resultSparql = TripleStoreInterface.executeQueryWithAuthorization(queryString, "XML");
 		ResultSet results = ResultSetFactory.fromXML(resultSparql);
 		if (results.hasNext()){
@@ -622,7 +628,8 @@ public class RevisionManagement {
 		String referenceUri = getReferenceUri(graphName, referenceIdentifier);
 		String queryASKBranch = prefixes
 				+ String.format("ASK { GRAPH <%s> { "
-						+ " <%s> rmo:references ?rev; prov:wasDerivedFrom ?rev ." + " }} ",
+						+ " <%s> rmo:references ?rev; prov:wasDerivedFrom ?rev ." 
+						+ " }} ",
 						Config.revision_graph, referenceUri);
 		String resultASKBranch = TripleStoreInterface.executeQueryWithAuthorization(queryASKBranch, "HTML");
 		return (resultASKBranch.indexOf("yes") >= 0 || resultASKBranch.indexOf("true") >= 0);
@@ -678,12 +685,14 @@ public class RevisionManagement {
 		final int MAX_TRIES = 99;
 		while (ii < MAX_TRIES) {
 			newRevisionNumber = revisionNumber + "." + ii + "-0";
-			String queryASK = prefixes
-					+ String.format("" + "ASK { GRAPH <%s> { " + " ?rev a rmo:Revision;"
-							+ "		rmo:revisionOf <%s>;" + "		rmo:revisionNumber \"%s\"}}",
+			String queryASK = prefixes	+ String.format("" 
+					+ "ASK { GRAPH <%s> { " 
+					+ " ?rev a rmo:Revision;"
+					+ "		rmo:revisionOf <%s>;" 
+					+ "		rmo:revisionNumber \"%s\"}}",
 							Config.revision_graph, graphName, newRevisionNumber);
 			String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
-			if (resultASK.indexOf("false") >= 0) {
+			if (resultASK.indexOf("false") >= 0 || resultASK.indexOf("no") >= 0) {
 				return newRevisionNumber;
 			}
 			ii++;
@@ -793,8 +802,12 @@ public class RevisionManagement {
 			throws HttpException, IOException {
 		String sparqlQuery;
 		if (graphName.equals("")) {
-			sparqlQuery = String.format("CONSTRUCT" + "	{ ?s ?p ?o} " + "FROM <%s> " + "WHERE {"
-					+ "	?s ?p ?o." + "}", Config.revision_graph);
+			sparqlQuery = String.format(""
+					+ "CONSTRUCT" 
+					+ "	{ ?s ?p ?o} " 
+					+ "WHERE { GRAPH <%s> {"
+					+ "	?s ?p ?o." 
+					+ "} }", Config.revision_graph);
 		} else {
 			sparqlQuery = prefixes + String.format(""
 					+ "CONSTRUCT { " 
@@ -802,12 +815,11 @@ public class RevisionManagement {
 					+ "		?reference ?ref_p ?ref_o. " 
 					+ "		?commit	?c_p ?c_o. " 
 					+ "	}" 
-					+ "FROM <%s> "
-					+ "WHERE {" 
+					+ "WHERE { GRAPH <%s> { " 
 					+ "	?revision rmo:revisionOf <%s>; ?r_p ?r_o. "
 					+ " OPTIONAL {?reference rmo:references ?revision; ?ref_p ?ref_o. }"
 					+ " OPTIONAL {?commit prov:generated ?revision; ?c_p ?c_o. }" 
-					+ "}",
+					+ "} }",
 					Config.revision_graph, graphName);
 		}
 		return TripleStoreInterface.executeQueryWithAuthorization(sparqlQuery, format);
@@ -824,8 +836,11 @@ public class RevisionManagement {
 	 */
 	public static String getRevisedGraphsSparql(final String format) throws HttpException, IOException {
 		String sparqlQuery = prefix_rmo
-				+ String.format("" + "SELECT DISTINCT ?graph " + "FROM <%s> " + "WHERE {"
-						+ "	?rev rmo:revisionOf ?graph." + "} ORDER BY ?graph", Config.revision_graph);
+				+ String.format("" 
+						+ "SELECT DISTINCT ?graph " 
+						+ "WHERE {"
+						+ " GRAPH <%s> { ?rev rmo:revisionOf ?graph. }" 
+						+ "} ORDER BY ?graph", Config.revision_graph);
 		return TripleStoreInterface.executeQueryWithAuthorization(sparqlQuery, format);
 	}
 	
@@ -863,11 +878,13 @@ public class RevisionManagement {
 		logger.info("Purge graph " + graph + " and all related R43ples information.");
 		// Drop all full graphs as well as add and delete sets which are related
 		// to specified graph
-		String query = prefixes
-				+ String.format("SELECT DISTINCT ?graph FROM <%s> WHERE {" + "		?rev rmo:revisionOf <%s>."
-						+ " 	{?rev rmo:deltaAdded ?graph}" + " UNION {?rev rmo:deltaRemoved ?graph}"
-						+ " UNION {?ref rmo:references ?rev; rmo:fullGraph ?graph}" + "}",
-						Config.revision_graph, graph);
+		String query = prefixes	+ String.format(""
+				+ "SELECT DISTINCT ?graph WHERE { GRAPH <%s> {" 
+				+ "		?rev rmo:revisionOf <%s>."
+				+ " 	{?rev rmo:deltaAdded ?graph}" 
+				+ " UNION {?rev rmo:deltaRemoved ?graph}"
+				+ " UNION {?ref rmo:references ?rev; rmo:fullGraph ?graph}" 
+				+ "} }", Config.revision_graph, graph);
 		String graphInformation = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
 		ResultSet results = ResultSetFactory.fromXML(graphInformation);
 		while (results.hasNext()) {
@@ -997,11 +1014,10 @@ public class RevisionManagement {
 	 */
 	public static String getAddSetURI(String revisionURI, String revisionGraph) throws IOException, HttpException {
 		String query = String.format(
-			  "SELECT ?addSetURI \n"
-			+ "FROM <%s> \n"
-			+ "WHERE { \n"
-			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaAdded> ?addSetURI . \n"
-			+ "}", revisionGraph, revisionURI);
+			  "SELECT ?addSetURI %n"
+			+ "WHERE { GRAPH <%s> {%n"
+			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaAdded> ?addSetURI . %n"
+			+ "} }", revisionGraph, revisionURI);
 		
 		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
 		
@@ -1026,10 +1042,9 @@ public class RevisionManagement {
 	public static String getDeleteSetURI(String revisionURI, String revisionGraph) throws IOException, HttpException {
 		String query = String.format(
 			  "SELECT ?deleteSetURI \n"
-			+ "FROM <%s> \n"
-			+ "WHERE { \n"
+		    + "WHERE { GRAPH <%s> {%n"
 			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaRemoved> ?deleteSetURI . \n"
-			+ "}", revisionGraph, revisionURI);
+			+ "} }", revisionGraph, revisionURI);
 		
 		String result = TripleStoreInterface.executeQueryWithAuthorization(query, "XML");
 		
@@ -1053,8 +1068,7 @@ public class RevisionManagement {
 	public static String getContentOfGraphByConstruct(String graphName) throws IOException, HttpException {
 		String query = String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
-				+ "FROM <%s> %n"
-				+ "WHERE {?s ?p ?o} %n", graphName);
+				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
 		
 		return TripleStoreInterface.executeQueryWithAuthorization(query, "TURTLE");		
 	}
