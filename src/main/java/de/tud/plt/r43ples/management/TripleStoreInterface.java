@@ -125,6 +125,14 @@ public class TripleStoreInterface {
 	 * @throws HttpException 
 	 */
 	public static String executeQueryWithAuthorization(String query, String format) throws IOException, HttpException {
+		
+		if(format.equals("HTML")) format="text";
+		if(format.equals("text/xml")) format="xml";
+		if(format.equals("text/html")) format="text";
+		if(format.equals("application/json")) format = "json";
+		
+		format = format.toLowerCase();
+		
 		HttpResponse response = executeQueryWithAuthorizationResponse(query, format);
 		logger.debug("Statuscode: " + response.getStatusLine().getStatusCode());
 		
@@ -175,6 +183,7 @@ public class TripleStoreInterface {
     	
 		if(format.equals("HTML")) format="text";
 		if(format.equals("text/xml")) format="xml";
+		if(format.equals("text/html")) format="text";
 		if(format.equals("application/json")) format = "json";
 		
 		format = format.toLowerCase();
