@@ -181,6 +181,8 @@ public class TripleStoreInterface {
 		//set up HTTP Post Request (look at http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VOSSparqlProtocol for Protocol)
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
     	
+		// format adaptations for jena fuseki
+		if(format.equals("text/html")) format="text";
 		if(format.equals("HTML")) format="text";
 		if(format.equals("text/xml")) format="xml";
 		if(format.equals("text/html")) format="text";
