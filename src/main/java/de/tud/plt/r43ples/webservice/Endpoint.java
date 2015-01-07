@@ -500,7 +500,7 @@ public class Endpoint {
 		while (m.find()) {
 			found = true;
 			String graphName = m.group("graph");
-			String revisionNumber = m.group("revision");
+			String revisionNumber = m.group("revision").toLowerCase();
 			String newGraphName;
 
 			// if no revision number is declared use the MASTER as default
@@ -570,9 +570,9 @@ public class Endpoint {
 		Matcher m = patternUpdateRevision.matcher(queryM);
 		while (m.find()) {
 			String graphName = m.group("graph");
-			String revisionName = m.group("revision"); // can contain revision
-														// numbers or reference
-														// names
+			String revisionName = m.group("revision").toLowerCase(); 	// can contain revision
+																		// numbers or reference
+																		// names
 			String action = m.group("action");
 			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
 			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
@@ -603,9 +603,9 @@ public class Endpoint {
 		m = patternGraphWithRevision.matcher(queryM);
 		while (m.find()) {
 			String graphName = m.group("graph");
-			String revisionName = m.group("revision"); // can contain revision
-														// numbers or reference
-														// names
+			String revisionName = m.group("revision").toLowerCase();	// can contain revision
+																		// numbers or reference
+																		// names
 			// General variables
 			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
 			String referenceFullGraph = RevisionManagement.getReferenceGraph(graphName, revisionName);
@@ -751,8 +751,8 @@ public class Endpoint {
 			foundEntry = true;
 			String action = m.group("action");
 			String graphName = m.group("graph");
-			String revisionNumber = m.group("revision");
-			String referenceName = m.group("name");
+			String revisionNumber = m.group("revision").toLowerCase();
+			String referenceName = m.group("name").toLowerCase();
 			try {
 				if (action.equals("TAG")) {
 					RevisionManagement.createReference("tag", graphName, revisionNumber, referenceName, user, commitMessage);
@@ -806,8 +806,8 @@ public class Endpoint {
 			String graphName = m.group("graph");
 			String sdd = m.group("sdd");
 			String sddURI = m.group("sddURI");
-			String branchNameA = m.group("branchNameA");
-			String branchNameB = m.group("branchNameB");
+			String branchNameA = m.group("branchNameA").toLowerCase();
+			String branchNameB = m.group("branchNameB").toLowerCase();
 			String with = m.group("with");
 			String triples = m.group("triples");
 			
