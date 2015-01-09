@@ -29,15 +29,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.AuthenticationException;
-import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.jena.riot.Lang;
-import org.apache.jena.riot.RDFLanguages;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Template;
 
@@ -45,12 +38,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSetFactory;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.update.UpdateAction;
-import com.hp.hpl.jena.update.UpdateFactory;
-import com.hp.hpl.jena.update.UpdateRequest;
+import com.hp.hpl.jena.query.ResultSet;
 
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalServerErrorException;
@@ -412,43 +400,46 @@ public class Endpoint {
 	 * @throws IOException
 	 */
 	private Response getServiceDescriptionResponse(final String format) {
-		logger.info("Service Description requested");
-		DefaultHttpClient client = new DefaultHttpClient();
-		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(Config.sparql_user, Config.sparql_password);
-		client.getCredentialsProvider().setCredentials(new AuthScope(null, -1, null), credentials);
-		HttpGet request = new HttpGet(Config.sparql_endpoint);
-		request.setHeader("Accept", "text/turtle");
-		try {
-			HttpResponse response = client.execute(request);
-
-			Model model = ModelFactory.createDefaultModel();
-			model.read(response.getEntity().getContent(), null, Lang.TURTLE.getName());
-
-			UpdateRequest srequest = UpdateFactory.create(""
-					+ "PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
-					+ "DELETE { ?s ?p ?o.} " 
-					+ "INSERT { <" + uriInfo.getAbsolutePath() + "> ?p ?o.} "
-					+ "WHERE { ?s a sd:Service; ?p ?o.} ");
-			UpdateAction.execute(srequest, model);
-			srequest = UpdateFactory.create(""
-					+ "PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
-					+ "DELETE { ?s sd:url ?url.} " 
-					+ "INSERT { ?s sd:url <" + uriInfo.getAbsolutePath() + ">.} "
-					+ "WHERE { ?s sd:url ?url.} ");
-			UpdateAction.execute(srequest, model);
-			srequest = UpdateFactory.create(""
-					+ "PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
-					+ "INSERT { ?s sd:feature sd:r43ples.} " 
-					+ "WHERE { ?s a sd:Service.} ");
-			UpdateAction.execute(srequest, model);
-
-			StringWriter sw = new StringWriter();
-			model.write(sw, RDFLanguages.nameToLang(format).getName());
-			return Response.ok().entity(sw.toString()).build();
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new InternalServerErrorException(e.getMessage());
-		}
+		// TODO
+		return null;
+		
+//		logger.info("Service Description requested");
+//		DefaultHttpClient client = new DefaultHttpClient();
+//		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(Config.sparql_user, Config.sparql_password);
+//		client.getCredentialsProvider().setCredentials(new AuthScope(null, -1, null), credentials);
+//		HttpGet request = new HttpGet(Config.sparql_endpoint);
+//		request.setHeader("Accept", "text/turtle");
+//		try {
+//			HttpResponse response = client.execute(request);
+//
+//			Model model = ModelFactory.createDefaultModel();
+//			model.read(response.getEntity().getContent(), null, Lang.TURTLE.getName());
+//
+//			UpdateRequest srequest = UpdateFactory.create(""
+//					+ "PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
+//					+ "DELETE { ?s ?p ?o.} " 
+//					+ "INSERT { <" + uriInfo.getAbsolutePath() + "> ?p ?o.} "
+//					+ "WHERE { ?s a sd:Service; ?p ?o.} ");
+//			UpdateAction.execute(srequest, model);
+//			srequest = UpdateFactory.create(""
+//					+ "PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
+//					+ "DELETE { ?s sd:url ?url.} " 
+//					+ "INSERT { ?s sd:url <" + uriInfo.getAbsolutePath() + ">.} "
+//					+ "WHERE { ?s sd:url ?url.} ");
+//			UpdateAction.execute(srequest, model);
+//			srequest = UpdateFactory.create(""
+//					+ "PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
+//					+ "INSERT { ?s sd:feature sd:r43ples.} " 
+//					+ "WHERE { ?s a sd:Service.} ");
+//			UpdateAction.execute(srequest, model);
+//
+//			StringWriter sw = new StringWriter();
+//			model.write(sw, RDFLanguages.nameToLang(format).getName());
+//			return Response.ok().entity(sw.toString()).build();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			throw new InternalServerErrorException(e.getMessage());
+//		}
 	}
 
 	/**
@@ -469,7 +460,8 @@ public class Endpoint {
 			ResponseBuilder responseBuilder = Response.ok();
 			String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
 			query_rewritten = SparqlRewriter.rewriteQuery(query_rewritten);
-			String result = TripleStoreInterface.executeQueryWithAuthorization(query_rewritten, format);
+			// FIXME format maybe not correct
+			String result = TripleStoreInterface.executeSelectQuery(query_rewritten, format);
 			responseBuilder.entity(result);
 			responseBuilder.type(format);
 			
@@ -537,7 +529,8 @@ public class Endpoint {
 		if (!found) {
 			logger.info("No R43ples SELECT query: " + queryM);
 		}
-		String response = TripleStoreInterface.executeQueryWithAuthorization(queryM, format);
+		// FIXME format maybe not correct
+		String response = TripleStoreInterface.executeSelectQuery(queryM, format);
 		return responseBuilder.entity(response).type(format).build();
 	}
 
@@ -597,7 +590,7 @@ public class Endpoint {
 		m= patternEmptyGraphPattern.matcher(queryM);
 		queryM = m.replaceAll("");
 
-		TripleStoreInterface.executeQueryWithAuthorization(queryM);
+		TripleStoreInterface.executeUpdateQuery(queryM);
 
 		queryM = query;
 		m = patternGraphWithRevision.matcher(queryM);
@@ -615,20 +608,19 @@ public class Endpoint {
 			// remove doubled data
 			// (already existing triples in add set; not existing triples in
 			// delete set)
-			TripleStoreInterface
-					.executeQueryWithAuthorization(String.format(
+			TripleStoreInterface.executeUpdateQuery(String.format(
 							"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }", addSetGraphUri,
 							referenceFullGraph));
-			TripleStoreInterface.executeQueryWithAuthorization(String.format(
+			TripleStoreInterface.executeUpdateQuery(String.format(
 					"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } MINUS { GRAPH <%s> { ?s ?p ?o. } } }",
 					removeSetGraphUri, removeSetGraphUri, referenceFullGraph));
 
 			// merge change sets into reference graph
 			// (copy add set to reference graph; remove delete set from reference graph)
-			TripleStoreInterface.executeQueryWithAuthorization(String.format(
+			TripleStoreInterface.executeUpdateQuery(String.format(
 						"INSERT { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }",
 						referenceFullGraph,	addSetGraphUri));
-			TripleStoreInterface.executeQueryWithAuthorization(String.format(
+			TripleStoreInterface.executeUpdateQuery(String.format(
 					"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }", 
 					referenceFullGraph,	removeSetGraphUri));
 
@@ -677,7 +669,10 @@ public class Endpoint {
 			String querySparql = m.group();
 			
 			// Create graph
-			String result = TripleStoreInterface.executeQueryWithAuthorization(querySparql, format);
+			// FIXME format maybe not correct
+			// TODO Currently format and corresponding result is removed
+			String result = "";
+			TripleStoreInterface.executeUpdateQuery(querySparql/*, format*/);
 		    responseBuilder.entity(result);
 		    
 		    if (RevisionManagement.getMasterRevisionNumber(graphName) == null)
@@ -857,9 +852,9 @@ public class Endpoint {
 						+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
 						+ "}", Config.revision_graph, graphName);
 				
-				String resultSDD = TripleStoreInterface.executeQueryWithAuthorization(querySDD, "XML");
-				if (ResultSetFactory.fromXML(resultSDD).hasNext()) {
-					QuerySolution qs = ResultSetFactory.fromXML(resultSDD).next();
+				ResultSet resultSetSDD = TripleStoreInterface.executeSelectQuery(querySDD);
+				if (resultSetSDD.hasNext()) {
+					QuerySolution qs = resultSetSDD.next();
 					usedSDDURI = qs.getResource("?defaultSDD").toString();
 				} else {
 					throw new InternalServerErrorException("Error in revision graph! Selected graph <" + graphName + "> has no default SDD referenced.");
@@ -903,8 +898,7 @@ public class Endpoint {
 						+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
 						+ "	} %n"
 						+ "}", "RM-DIFFERENCE-MODEL-" + graphName);
-				String resultASK = TripleStoreInterface.executeQueryWithAuthorization(queryASK, "HTML");
-				if (resultASK.equals("true")) {
+				if (TripleStoreInterface.executeAskQuery(queryASK)) {
 					// Difference model contains conflicts
 					// Return the conflict model to the client
 					responseBuilder = Response.status(Response.Status.CONFLICT);

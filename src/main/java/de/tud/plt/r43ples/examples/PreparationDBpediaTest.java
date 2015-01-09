@@ -24,7 +24,7 @@ public class PreparationDBpediaTest {
 		String graph_name = "http://dbpedia.org";
 		
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
+		TripleStoreInterface.init(Config.database_directory);
 
 		// load instance data to triplestore (dbpedia_2013_07_18.nt)
 		String file_name = "dbpedia_2013_07_18.nt";

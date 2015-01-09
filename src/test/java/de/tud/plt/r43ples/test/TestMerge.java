@@ -40,7 +40,7 @@ public class TestMerge {
 	@Before
 	public void setUp() throws ConfigurationException, IOException, HttpException{
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
+		TripleStoreInterface.init(Config.database_directory);
 		// Create the initial data set
 		SampleDataSet.createSampleDataSetComplexStructure(graphName);
 	}

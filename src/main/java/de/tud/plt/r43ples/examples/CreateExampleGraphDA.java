@@ -34,7 +34,7 @@ public class CreateExampleGraphDA {
 	public static void main(String[] args) throws IOException, ConfigurationException, HttpException {
 		
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
+		TripleStoreInterface.init(Config.database_directory);
 		
 		SampleDataSet.createSampleDataSetDA(graphName);
 	}

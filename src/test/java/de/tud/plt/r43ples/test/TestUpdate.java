@@ -30,7 +30,7 @@ public class TestUpdate {
 	private static Logger logger = Logger.getLogger(TestUpdate.class);
 	/** The graph name. **/
 	private final static String graphName = "http://exampleGraph.com/r43ples";
-	private final static String graph_test = "http://test_dataset_user";
+	private final static String graph_test = "http://test-dataset-user";
 	
 	final static String format = "application/sparql-results+xml";
 	
@@ -39,7 +39,7 @@ public class TestUpdate {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
+		TripleStoreInterface.init(Config.database_directory);
 		SampleDataSet.createSampleDataset1(graph_test);
 	}
 

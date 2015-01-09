@@ -31,7 +31,7 @@ public class TestRevisionManagment {
 	@BeforeClass
 	public static void setUpBeforeClass() throws HttpException, IOException, ConfigurationException{
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.sparql_endpoint, Config.sparql_user, Config.sparql_password);
+		TripleStoreInterface.init(Config.database_directory);
 		SampleDataSet.createSampleDataset1(graph_test);
 	}
 	

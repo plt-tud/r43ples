@@ -13,6 +13,7 @@ public class SampleDataSet {
 
 	public static void createSampleDataset1(String graph) throws HttpException, IOException {
 		RevisionManagement.purgeGraph(graph);
+//		TripleStoreInterface.executeUpdateQuery("CREATE GRAPH <" + graph + ">");
 		RevisionManagement.putGraphUnderVersionControl(graph);
 
 		ArrayList<String> list = new ArrayList<String>();

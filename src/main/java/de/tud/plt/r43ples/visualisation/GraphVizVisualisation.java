@@ -17,7 +17,6 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFactory;
 
 import de.tud.plt.r43ples.exception.InternalServerErrorException;
 import de.tud.plt.r43ples.management.Config;
@@ -39,8 +38,7 @@ public class GraphVizVisualisation {
 				+ "		rmo:revisionNumber ?number."
 				+ "}", Config.revision_graph, namedGraph );
 		
-		String result_nodes = TripleStoreInterface.executeQueryWithAuthorization(query_nodes);
-		ResultSet resultSet_nodes = ResultSetFactory.fromXML(result_nodes);
+		ResultSet resultSet_nodes = TripleStoreInterface.executeSelectQuery(query_nodes);
 		if (!resultSet_nodes.hasNext())
 			throw new InternalServerErrorException("Specified graph '"+namedGraph +"' does not have any revision");
 		
@@ -64,8 +62,7 @@ public class GraphVizVisualisation {
 				+ "		prov:wasDerivedFrom ?revision."
 				+ "}", Config.revision_graph, namedGraph );
 		
-		String result_edge = TripleStoreInterface.executeQueryWithAuthorization(query_edge);
-		ResultSet resultSet_edge = ResultSetFactory.fromXML(result_edge);
+		ResultSet resultSet_edge = TripleStoreInterface.executeSelectQuery(query_edge);
 		while (resultSet_edge.hasNext()) {
 			QuerySolution qs = resultSet_edge.next();
 			String rev = qs.getResource("revision").toString();
@@ -86,8 +83,7 @@ public class GraphVizVisualisation {
 				+ "		rdfs:label ?label."
 				+ "}", Config.revision_graph, namedGraph );
 		
-		String result_reference = TripleStoreInterface.executeQueryWithAuthorization(query_reference);
-		ResultSet resultSet_reference = ResultSetFactory.fromXML(result_reference);
+		ResultSet resultSet_reference = TripleStoreInterface.executeSelectQuery(query_reference);
 		while (resultSet_reference.hasNext()) {
 			QuerySolution qs = resultSet_reference.next();
 			String rev = qs.getResource("revision").toString();
