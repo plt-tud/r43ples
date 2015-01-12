@@ -119,33 +119,41 @@ public class CommitGraphView {
 				int lane = currentLane;
 				int line;
 				for (line = currentLine; line > endLine + 1; line--) {
-					// find lane
-					while (nodes.contains(new GraphNode(line - 1, lane)))
-						lane++;
-					while (!nodes.contains(new GraphNode(line - 1, lane - 1))
-							&& lane > currentLane)
-						lane--;
+					if(terminalCommits.contains(suc)) {
+						lane = terminalCommits.indexOf(suc);
+					} else {
+						// find lane
+						while (nodes.contains(new GraphNode(line - 1, lane)))
+							lane++;
+						while (!nodes.contains(new GraphNode(line - 1, lane - 1))
+								&& lane > currentLane)
+							lane--;
+					}
 
 					// drawConnection
 					drawConnectionTo(g, path, line - 1, lane);
 					nodes.add(new GraphNode(line - 1, lane));
 					maxLane = Math.max(maxLane, lane);
 				}
+				maxLane = Math.max(maxLane, lane);
 				drawConnectionTo(g, path, endLine, endLane);
 				g.draw(path);
-
+			}
+			
+			//search for lanes which are now free again (after branching)
+			for(Commit suc : c.Successors) {
 				if (terminalCommits.contains(suc)) {
 					// if successor has no more unprocessed predecessors then
 					// clear lane
 					boolean hasUnprocessedPredecessor = false;
 					for (Commit suc_pre : suc.Predecessors) {
-						if (commits.indexOf(suc_pre) > line)
+						if (commits.indexOf(suc_pre) > currentLine)
 							hasUnprocessedPredecessor = true;
 					}
 					if (!hasUnprocessedPredecessor) {
 						terminalCommits.remove(suc);
 					}
-
+	
 				}
 			}
 

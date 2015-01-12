@@ -96,13 +96,12 @@ public class MMSTVisualisation {
 					int width = g.getFontMetrics().stringWidth(name);
 					g.translate(messageOffset, y);
 					g.setColor(new Color(0.5f, 0.1f, 0.1f));
-					g.fillRoundRect(0, -fm.getAscent(), width + 4, (int) rect.getHeight(), 5, 5);
+					g.fillRoundRect(branchesWidth, -fm.getAscent(), width + 6, (int) rect.getHeight(), 5, 5);
 					g.setColor(Color.WHITE);
-					g.drawString(name, 2, 0);
+					g.drawString(name, branchesWidth + 2, 0);
 					g.translate(-messageOffset, -y);
-					branchesWidth += rect.getWidth();
+					branchesWidth += rect.getWidth() + 10;
 				}
-				branchesWidth += 10;
 			}
 			g.setColor(Color.BLACK);
 			
