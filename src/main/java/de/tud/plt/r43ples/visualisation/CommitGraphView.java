@@ -117,18 +117,19 @@ public class CommitGraphView {
 				int endLane = commit_lane.get(suc);
 
 				int lane = currentLane;
+				//if successor is a terminal commit, initialize the lane
+				if(terminalCommits.contains(suc))
+					lane = terminalCommits.indexOf(suc);
+				
 				int line;
 				for (line = currentLine; line > endLine + 1; line--) {
-					if(terminalCommits.contains(suc)) {
-						lane = terminalCommits.indexOf(suc);
-					} else {
-						// find lane
-						while (nodes.contains(new GraphNode(line - 1, lane)))
-							lane++;
-						while (!nodes.contains(new GraphNode(line - 1, lane - 1))
-								&& lane > currentLane)
-							lane--;
-					}
+					// find path
+					while (nodes.contains(new GraphNode(line - 1, lane)))
+						lane++;
+					while (!nodes.contains(new GraphNode(line - 1, lane - 1)) &&
+							lane > terminalCommits.indexOf(suc)
+							&& lane > currentLane)
+						lane--;
 
 					// drawConnection
 					drawConnectionTo(g, path, line - 1, lane);
