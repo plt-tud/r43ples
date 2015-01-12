@@ -7,7 +7,6 @@ import java.net.URISyntaxException;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
@@ -46,11 +45,10 @@ public class Service {
 	 * 
 	 * @param args
 	 * @throws ConfigurationException
-	 * @throws IOException
-	 * @throws HttpException
 	 * @throws URISyntaxException
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) throws ConfigurationException, IOException, HttpException, URISyntaxException {
+	public static void main(String[] args) throws ConfigurationException, URISyntaxException, IOException {
 		start();
 		while(true);
 	}
@@ -60,11 +58,10 @@ public class Service {
 	 * Starts the server. It is possible to enable a secure connection.
 	 * 
 	 * @throws ConfigurationException
-	 * @throws IOException
-	 * @throws HttpException
 	 * @throws URISyntaxException
+	 * @throws IOException 
 	 */
-	public static void start() throws ConfigurationException, IOException, HttpException, URISyntaxException {
+	public static void start() throws ConfigurationException, URISyntaxException, IOException {
 		logger.info("Starting R43ples on grizzly...");
 		Config.readConfig("r43ples.conf");
 		URI BASE_URI = null;

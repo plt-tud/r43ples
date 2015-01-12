@@ -5,10 +5,8 @@ package de.tud.plt.r43ples.test;
 
 import static org.hamcrest.core.StringContains.containsString;
 
-import java.io.IOException;
 import java.util.LinkedList;
 
-import org.apache.http.HttpException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -63,22 +61,18 @@ public class TestMergeManagement {
 
 	/**
 	 * Test method for {@link de.tud.plt.r43ples.management.MergeManagement#getCommonRevisionWithShortestPath(java.lang.String, java.lang.String)}.
-	 * @throws HttpException 
-	 * @throws IOException 
 	 */
 	@Test
-	public final void testGetCommonRevisionWithShortestPath() throws IOException, HttpException {
+	public final void testGetCommonRevisionWithShortestPath() {
 		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath("exampleGraph-revision-1.0-1", "exampleGraph-revision-1.1-1");
 		Assert.assertEquals("exampleGraph-revision-1", commonRevision);
 	}
 
 	/**
 	 * Test method for {@link de.tud.plt.r43ples.management.MergeManagement#getPathBetweenStartAndTargetRevision(java.lang.String, java.lang.String)}.
-	 * @throws HttpException 
-	 * @throws IOException 
 	 */
 	@Test
-	public final void testGetPathBetweenStartAndTargetRevision() throws IOException, HttpException {
+	public final void testGetPathBetweenStartAndTargetRevision() {
 		LinkedList<String> path = MergeManagement.getPathBetweenStartAndTargetRevision("exampleGraph-revision-0", "exampleGraph-revision-1.1-1");
 		LinkedList<String> expected = new LinkedList<String>();
 		expected.add("exampleGraph-revision-0");
@@ -89,7 +83,7 @@ public class TestMergeManagement {
 	}
 	
 	@Test
-	public void testResponseHeader() throws IOException, HttpException {
+	public void testResponseHeader() {
 		String sparql = "SELECT * "
 				+ "FROM <exampleGraph>"
 				+ "WHERE { ?s ?p ?o}";

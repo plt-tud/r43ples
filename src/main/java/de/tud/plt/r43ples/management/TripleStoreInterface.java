@@ -1,9 +1,8 @@
 package de.tud.plt.r43ples.management;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
-import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.Dataset;
@@ -39,10 +38,9 @@ public class TripleStoreInterface {
 	 * The constructor.
 	 * 
 	 * @param databaseDirectory the database directory of TDB
-	 * @throws HttpException
-	 * @throws IOException
+	 * @throws UnsupportedEncodingException 
 	 */
-	public static void init(String databaseDirectory) throws HttpException, IOException {
+	public static void init(String databaseDirectory) throws UnsupportedEncodingException {
 
 		// Initialize the database
 		dataset = TDBFactory.createDataset(databaseDirectory);
@@ -92,10 +90,14 @@ public class TripleStoreInterface {
 		try {
 			QueryExecution qExec = QueryExecutionFactory.create(selectQueryString, dataset);
 			ResultSet results = qExec.execSelect();
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			// FIXME Add format selection
-			ResultSetFormatter.out(baos, results);
-			return baos.toString();
+			if (format.equals("application/sparql-results+xml"))
+				return ResultSetFormatter.asXMLString(results);
+			else {
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				ResultSetFormatter.out(baos, results);
+				return baos.toString();
+			}
 		} finally {
 			dataset.end();
 		}
@@ -165,6 +167,7 @@ public class TripleStoreInterface {
 	 * @param updateQueryString the UPDATE query
 	 */
 	public static void executeUpdateQuery(String updateQueryString) {
+		logger.info(updateQueryString);
 		dataset.begin(ReadWrite.WRITE);
 		try {
 			GraphStore graphStore = GraphStoreFactory.create(dataset) ;
@@ -174,6 +177,9 @@ public class TripleStoreInterface {
 		    proc.execute() ;
 
 		    dataset.commit();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			dataset.end();
 		}

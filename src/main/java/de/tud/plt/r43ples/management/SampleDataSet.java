@@ -3,7 +3,6 @@ package de.tud.plt.r43ples.management;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 
 public class SampleDataSet {
@@ -11,7 +10,7 @@ public class SampleDataSet {
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(SampleDataSet.class);
 
-	public static void createSampleDataset1(String graph) throws HttpException, IOException {
+	public static void createSampleDataset1(String graph)  {
 		RevisionManagement.purgeGraph(graph);
 //		TripleStoreInterface.executeUpdateQuery("CREATE GRAPH <" + graph + ">");
 		RevisionManagement.putGraphUnderVersionControl(graph);
@@ -48,7 +47,7 @@ public class SampleDataSet {
 				"test commit message 5", list);
 	}
 
-	public static void createSampleDataset2(String graph) throws HttpException, IOException {
+	public static void createSampleDataset2(String graph) {
 		RevisionManagement.purgeGraph(graph);
 		RevisionManagement.putGraphUnderVersionControl(graph);
 
@@ -83,11 +82,9 @@ public class SampleDataSet {
 	 * 
 	 * @author Stephan Hensel
 	 * @author Markus Graube
-	 * @throws IOException
-	 * @throws HttpException
 	 *
 	 */
-	public static void createSampleDataSetMerging(String graphName) throws IOException, HttpException {
+	public static void createSampleDataSetMerging(String graphName) {
 		/** The user. **/
 		String user = "shensel";
 
@@ -165,11 +162,9 @@ public class SampleDataSet {
 	 * Used in diploma thesis of Stephan Hensel.
 	 * 
 	 * @author Stephan Hensel
-	 * @throws IOException
-	 * @throws HttpException
 	 *
 	 */
-	public static void createSampleDataSetDA(String graphName) throws IOException, HttpException {
+	public static void createSampleDataSetDA(String graphName) {
 		/** The user. **/
 		String user = "shensel";
 
@@ -229,9 +224,8 @@ public class SampleDataSet {
 	 * 
 	 * @param graphName the graph name
 	 * @throws IOException
-	 * @throws HttpException
 	 */
-	public static void createSampleDataSetMergingClasses(String graphName) throws IOException, HttpException {
+	public static void createSampleDataSetMergingClasses(String graphName) throws IOException {
 		/** The user. **/
 		String user = "shensel";
 		/** The initial content file path **/
@@ -303,12 +297,11 @@ public class SampleDataSet {
 	 * 
 	 * @param graphName the graph name
 	 * @throws IOException
-	 * @throws HttpException
 	 * 
 	 * @author Stephan Hensel
 	 *
 	 */
-	public static void createSampleDataSetRenaming(String graphName) throws IOException, HttpException {
+	public static void createSampleDataSetRenaming(String graphName) throws IOException {
 		/** The user. **/
 		String user = "shensel";
 
@@ -388,13 +381,11 @@ public class SampleDataSet {
 	 * DEL: -                   DEL: C              DEL: M                                                                     
 	 * 
 	 * @param graphName the graph name
-	 * @throws IOException
-	 * @throws HttpException
 	 * 
 	 * @author Stephan Hensel
 	 *
 	 */
-	public static void createSampleDataSetComplexStructure(String graphName) throws IOException, HttpException {
+	public static void createSampleDataSetComplexStructure(String graphName) {
 		/** The user. **/
 		String user = "shensel";
 		

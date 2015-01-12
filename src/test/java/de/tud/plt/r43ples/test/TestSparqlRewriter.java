@@ -3,10 +3,9 @@
  */
 package de.tud.plt.r43ples.test;
 
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.http.HttpException;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -28,24 +27,22 @@ public class TestSparqlRewriter {
 	private final static String graph_test = "http://test_dataset_user";
 	
 	@BeforeClass
-	public static void setUpBeforeClass() throws HttpException, IOException, ConfigurationException{
+	public static void setUpBeforeClass() throws ConfigurationException, UnsupportedEncodingException{
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.database_directory);
 		SampleDataSet.createSampleDataset1(graph_test);
 	}
 	
 	@AfterClass
-	public static void tearDown() throws HttpException, IOException{
+	public static void tearDown() {
 		RevisionManagement.purgeGraph(graph_test);
 	}
 	
 	/**
 	 * Test method for {@link de.tud.plt.r43ples.management.SparqlRewriter#rewriteQuery(java.lang.String)}.
-	 * @throws IOException 
-	 * @throws HttpException 
 	 */
 	@Test
-	public final void testRewriteQuery() throws HttpException, IOException {
+	public final void testRewriteQuery() {
 		String query = "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "
 				+ "FROM <" + graph_test + "> REVISION \"2\""

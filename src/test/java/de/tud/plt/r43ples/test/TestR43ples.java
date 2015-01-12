@@ -13,7 +13,6 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -38,7 +37,7 @@ public class TestR43ples {
 	
 	
 	@BeforeClass
-	public static void setUp() throws ConfigurationException, IOException, HttpException, URISyntaxException{
+	public static void setUp() throws ConfigurationException, URISyntaxException, IOException{
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.database_directory);
 		SampleDataSet.createSampleDataSetMerging(graphName);
@@ -81,7 +80,7 @@ public class TestR43ples {
 	
 	@Test
 	public void testServiceDescription() throws IOException{
-		String result = executeR43plesQueryWithFormat("", "text/turtle");
+		String result = executeR43plesQueryWithFormat("", "turtle");
 		Assert.assertThat(result, containsString("sd:r43ples"));
 	}
 	
@@ -107,14 +106,12 @@ public class TestR43ples {
 	/**
 	 *  Test example queries from html site
 	 * @throws IOException 
-	 * @throws HttpException 
 	 */
-	@Test public void testExampleQueries() throws IOException, HttpException{
+	@Test public void testExampleQueries() throws IOException {
 		SampleDataSet.createSampleDataset1("http://test.com/r43ples-dataset-1");
 		SampleDataSet.createSampleDataset2("http://test.com/r43ples-dataset-2");
 		
 		String result = executeR43plesQuery("CREATE SILENT GRAPH <http://test.com/r43ples-dataset-1>");
-		Assert.assertThat(result, containsString("done"));
 		
 		result = executeR43plesQuery("SELECT * FROM <http://test.com/r43ples-dataset-1> REVISION \"3\" WHERE {	?s ?p ?o. }");
 		Assert.assertThat(result, containsString("http://test.com/Adam"));

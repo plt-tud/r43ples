@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.webservice.Endpoint;
@@ -28,10 +27,8 @@ public class DatasetGenerationManagement {
 	 * Create new graph.
 	 * 
 	 * @param graphName the graph name
-	 * @throws IOException
-	 * @throws HttpException 
 	 */
-	public static void createNewGraph(String graphName) throws IOException, HttpException {
+	public static void createNewGraph(String graphName) {
 		// Purge silent example graph
 		logger.info("Purge silent example graph");
 		String query = String.format("DROP SILENT GRAPH <%s>", graphName);
@@ -55,10 +52,8 @@ public class DatasetGenerationManagement {
 	 * @param graphName the graph name
 	 * @param revision the revision
 	 * @param branchName the branch name
-	 * @throws IOException
-	 * @throws HttpException 
 	 */
-	public static void createNewBranch(String user, String message, String graphName, String revision, String branchName) throws IOException, HttpException {
+	public static void createNewBranch(String user, String message, String graphName, String revision, String branchName) {
 		logger.info(message);
 		String query = String.format(""
 				+ "USER \"%s\" \n"
@@ -77,15 +72,13 @@ public class DatasetGenerationManagement {
 	 * @param graphName the graph name
 	 * @param revision the revision
 	 * @param triples the triples to insert
-	 * @throws IOException
-	 * @throws HttpException 
 	 */
-	 public static void executeInsertQuery(String user, String message, String graphName, String revision, String triples) throws IOException, HttpException {
+	 public static void executeInsertQuery(String user, String message, String graphName, String revision, String triples) {
 		logger.info(message);
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"%s\" %n"
+				+ "INSERT DATA { GRAPH <%s> REVISION \"%s\" %n"
 				+ "	{ %n"
 				+ "	  %s %n"
 				+ "	} %n"
@@ -103,10 +96,8 @@ public class DatasetGenerationManagement {
 	 * @param graphName the graph name
 	 * @param revision the revision
 	 * @param triples the triples to delete
-	 * @throws IOException
-	 * @throws HttpException 
 	 */
-	public static void executeDeleteQuery(String user, String message, String graphName, String revision, String triples) throws IOException, HttpException {
+	public static void executeDeleteQuery(String user, String message, String graphName, String revision, String triples) {
 		logger.info(message);
 		String query = String.format(
 				  "USER \"%s\" %n"
@@ -129,10 +120,8 @@ public class DatasetGenerationManagement {
 	 * @param graphName the graph name
 	 * @param revision the revision
 	 * @param triples the triples to delete
-	 * @throws IOException
-	 * @throws HttpException 
 	 */
-	public static void executeDeleteWhereQuery(String user, String message, String graphName, String revision, String triples) throws IOException, HttpException {
+	public static void executeDeleteWhereQuery(String user, String message, String graphName, String revision, String triples) {
 		logger.info(message);
 		String query = String.format(
 				  "USER \"%s\" %n"
@@ -161,20 +150,18 @@ public class DatasetGenerationManagement {
 	 * @param revision the revision
 	 * @param triplesInsert the triples to insert
 	 * @param triplesDelete the triples to delete
-	 * @throws IOException
-	 * @throws HttpException 
 	 */
-	public static void executeInsertDeleteQuery(String user, String message, String graphName, String revision, String triplesInsert, String triplesDelete) throws IOException, HttpException {
+	public static void executeInsertDeleteQuery(String user, String message, String graphName, String revision, String triplesInsert, String triplesDelete) {
 		logger.info(message);
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"%s\" %n"
+				+ "INSERT DATA { GRAPH <%s> REVISION \"%s\" %n"
 				+ "	{ %n"
 				+ "	  %s %n"
 				+ "	} %n"
-				+ "} %n"
-				+ "DELETE { GRAPH <%s> REVISION \"%s\" %n"
+				+ "} ; %n"
+				+ "DELETE DATA { GRAPH <%s> REVISION \"%s\" %n"
 				+ "	{ %n"
 				+ "	  %s %n"
 				+ "	} %n"

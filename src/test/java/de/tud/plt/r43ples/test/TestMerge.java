@@ -4,11 +4,11 @@ import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.hamcrest.core.StringContains.containsString;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.http.HttpException;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,11 +34,10 @@ public class TestMerge {
 	 * Set up.
 	 * 
 	 * @throws ConfigurationException
-	 * @throws IOException
-	 * @throws HttpException
+	 * @throws UnsupportedEncodingException 
 	 */
 	@Before
-	public void setUp() throws ConfigurationException, IOException, HttpException{
+	public void setUp() throws ConfigurationException, UnsupportedEncodingException {
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.database_directory);
 		// Create the initial data set
@@ -60,10 +59,9 @@ public class TestMerge {
 	 * 
 	 * @throws IOException 
 	 * @throws SAXException 
-	 * @throws HttpException 
 	 */
 	@Test
-	public void testCreatedGraph() throws IOException, SAXException, HttpException {
+	public void testCreatedGraph() throws IOException, SAXException {
 		// Test branch B1
 		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B1"));
 		String expected1 = ResourceManagement.getContentFromResource("merge/response-B1.xml");
@@ -96,10 +94,9 @@ public class TestMerge {
 	 * 
 	 * @throws IOException 
 	 * @throws SAXException 
-	 * @throws HttpException 
 	 */
 	@Test
-	public void testAutoMerge() throws IOException, SAXException, HttpException {
+	public void testAutoMerge() throws SAXException, IOException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
@@ -144,10 +141,9 @@ public class TestMerge {
 	 * 
 	 * @throws IOException 
 	 * @throws SAXException 
-	 * @throws HttpException 
 	 */
 	@Test
-	public void testCommonMerge() throws IOException, SAXException, HttpException {
+	public void testCommonMerge() throws IOException, SAXException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
@@ -209,10 +205,9 @@ public class TestMerge {
 	 * 
 	 * @throws IOException 
 	 * @throws SAXException 
-	 * @throws HttpException 
 	 */
 	@Test
-	public void testManualMerge() throws IOException, SAXException, HttpException {
+	public void testManualMerge() throws IOException, SAXException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
@@ -362,10 +357,8 @@ public class TestMerge {
 	 * 
 	 * @param query the SPARQL query
 	 * @return the result of the query
-	 * @throws IOException 
-	 * @throws HttpException 
 	 */
-	public static String executeR43plesQuery(String query) throws IOException, HttpException {
+	public static String executeR43plesQuery(String query) {
 		return executeR43plesQueryWithFormat(query, "application/xml");
 	}
 	
@@ -375,10 +368,8 @@ public class TestMerge {
 	 * @param query the SPARQL query
 	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
 	 * @return the result of the query
-	 * @throws IOException 
-	 * @throws HttpException 
 	 */
-	public static String executeR43plesQueryWithFormat(String query, String format) throws IOException, HttpException {
+	public static String executeR43plesQueryWithFormat(String query, String format) {
 		Endpoint ep = new Endpoint();
 		Response response = ep.sparql(format, query);
 		if (response.getEntity()!=null)
@@ -393,10 +384,8 @@ public class TestMerge {
 	 * 
 	 * @param query the SPARQL query
 	 * @return the response
-	 * @throws IOException 
-	 * @throws HttpException 
 	 */
-	public static Response executeR43plesQueryResponse(String query) throws IOException, HttpException {
+	public static Response executeR43plesQueryResponse(String query) {
 		Endpoint ep = new Endpoint();
 		return ep.sparql("application/xml", query);
 	}

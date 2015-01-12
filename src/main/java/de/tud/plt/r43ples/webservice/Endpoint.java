@@ -28,8 +28,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.http.HttpException;
-import org.apache.http.auth.AuthenticationException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Template;
@@ -76,7 +74,7 @@ public class Endpoint {
 			"(?<action>INSERT|DELETE).*<(?<graph>[^>]*)>",
 			patternModifier);
 	private final Pattern patternUpdateRevision = Pattern.compile(
-			"(?<action>INSERT|DELETE|WHERE)\\s*\\{\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
+			"(?<action>INSERT|DELETE|WHERE)(\\s*DATA){0,1}\\s*\\{\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
 			patternModifier);
 	private final Pattern patternEmptyGraphPattern = Pattern.compile(
 			"GRAPH\\s*<(?<graph>[^>]*)>\\s*\\{\\s*\\}",
@@ -151,7 +149,7 @@ public class Endpoint {
 			SampleDataSet.createSampleDataSetMerging(graphName3);
 			SampleDataSet.createSampleDataSetMergingClasses(graphName4);
 			SampleDataSet.createSampleDataSetRenaming(graphName5);
-		} catch (HttpException | IOException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException(e.getMessage());
 		}
@@ -184,21 +182,16 @@ public class Endpoint {
 		String format = (format_query != null) ? format_query : format_header;
 		logger.info("format: " + format);
 
-		try {
-			ResponseBuilder response = Response.ok();
-			if (format.contains(MediaType.TEXT_HTML)) {
-				response.type(MediaType.TEXT_HTML);
-				response.entity(GraphVizVisualisation.getGraphVizHtmlOutput(graph));
-			}
-			else {
-				response.type(format);
-				response.entity(RevisionManagement.getRevisionInformation(graph, format));
-			}
-			return response.build();
-		} catch (HttpException | IOException e) {
-			e.printStackTrace();
-			throw new InternalServerErrorException(e.getMessage());
+		ResponseBuilder response = Response.ok();
+		if (format.contains(MediaType.TEXT_HTML)) {
+			response.type(MediaType.TEXT_HTML);
+			response.entity(GraphVizVisualisation.getGraphVizHtmlOutput(graph));
 		}
+		else {
+			response.type(format);
+			response.entity(RevisionManagement.getRevisionInformation(graph, format));
+		}
+		return response.build();
 	}
 
 	/**
@@ -214,12 +207,7 @@ public class Endpoint {
 		logger.info("Get Revised Graphs");
 		String format = (format_query != null) ? format_query : format_header;
 		logger.info("format: " + format);
-		try {
-			return RevisionManagement.getRevisedGraphsSparql(format);
-		} catch (HttpException | IOException e) {
-			e.printStackTrace();
-			throw new InternalServerErrorException(e.getMessage());
-		}
+		return RevisionManagement.getRevisedGraphsSparql(format);
 	}
 
 	/**
@@ -232,15 +220,12 @@ public class Endpoint {
 	 * @param sparqlQuery
 	 *            the SPARQL query
 	 * @return the response
-	 * @throws IOException
-	 * @throws HttpException 
 	 */
 	@Path("sparql")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle" })
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("format") final String formatQuery, @FormParam("query") @DefaultValue("") final String sparqlQuery)
-			throws IOException, HttpException {
+			@FormParam("format") final String formatQuery, @FormParam("query") @DefaultValue("") final String sparqlQuery) {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		return sparql(format, sparqlQuery);
 	}
@@ -259,15 +244,13 @@ public class Endpoint {
 	 * @param sparqlQuery
 	 *            the SPARQL query
 	 * @return the response
-	 * @throws IOException
-	 * @throws HttpException 
+	 * @throws UnsupportedEncodingException 
 	 */
 	@Path("sparql")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle" })
 	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
-			@QueryParam("format") final String formatQuery, @QueryParam("query") @DefaultValue("") final String sparqlQuery)
-			throws IOException, HttpException {
+			@QueryParam("format") final String formatQuery, @QueryParam("query") @DefaultValue("") final String sparqlQuery) throws UnsupportedEncodingException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		String sparqlQueryDecoded = URLDecoder.decode(sparqlQuery, "UTF-8");
 		return sparql(format, sparqlQueryDecoded);
@@ -299,11 +282,8 @@ public class Endpoint {
 	 * @param sparqlQuery
 	 *            decoded SPARQL query
 	 * @return the response
-	 * @throws IOException
-	 * @throws HttpException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery)
-			throws IOException, HttpException {
+	public final Response sparql(final String format, final String sparqlQuery) {
 		if (sparqlQuery.equals("")) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
@@ -358,7 +338,7 @@ public class Endpoint {
 				return getBranchOrTagResponse(sparqlQuery, user, message, format);
 			}
 			throw new InternalServerErrorException("No R43ples query detected");
-		} catch (HttpException | IOException e) {
+		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			throw new InternalServerErrorException(e.getMessage());
 		}
@@ -369,10 +349,8 @@ public class Endpoint {
 	 * Using mustache templates. 
 	 * 
 	 * @return HTML response for SPARQL form
-	 * @throws HttpException
-	 * @throws IOException
 	 */
-	private Response getHTMLResponse() throws HttpException, IOException {
+	private Response getHTMLResponse() {
 		logger.info("SPARQL form requested");
 		List<String> graphList = RevisionManagement.getRevisedGraphs();
 		
@@ -452,10 +430,9 @@ public class Endpoint {
 	 *            the result format
 	 * @return the response with HTTP header for every graph (revision number
 	 *         and MASTER revision number)
-	 * @throws IOException
-	 * @throws AuthenticationException
+	 * @throws UnsupportedEncodingException 
 	 */
-	private Response getSelectResponse(final String query, final String format) throws HttpException, IOException {
+	private Response getSelectResponse(final String query, final String format) throws UnsupportedEncodingException {
 		if (query.contains("OPTION r43ples:SPARQL_JOIN")) {
 			ResponseBuilder responseBuilder = Response.ok();
 			String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
@@ -479,11 +456,9 @@ public class Endpoint {
 	 * @param query
 	 * @param format
 	 * @return
-	 * @throws HttpException
-	 * @throws IOException
 	 * @throws UnsupportedEncodingException
 	 */
-	private Response getSelectResponseClassic(final String query, final String format) throws HttpException, IOException, UnsupportedEncodingException {
+	private Response getSelectResponseClassic(final String query, final String format) throws UnsupportedEncodingException {
 		ResponseBuilder responseBuilder = Response.ok();
 		String queryM = query;
 
@@ -548,11 +523,10 @@ public class Endpoint {
 	 *            the result format
 	 * @return the response with HTTP header for every graph (revision number
 	 *         and MASTER revision number)
-	 * @throws IOException
-	 * @throws HttpException
+	 * @throws UnsupportedEncodingException 
 	 */
 	private Response getUpdateResponse(final String query, final String user, final String commitMessage,
-			final String format) throws HttpException, IOException {
+			final String format) throws UnsupportedEncodingException {
 
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Update detected");
@@ -571,12 +545,12 @@ public class Endpoint {
 			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
 			String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
 			if (!RevisionManagement.isBranch(graphName, revisionName)) {
-				throw new InternalServerErrorException("Revision is not referenced by branch");
+				throw new InternalServerErrorException("Revision is not referenced by a branch");
 			}
 			if (action.equalsIgnoreCase("INSERT")) {
-				queryM = m.replaceFirst(String.format("INSERT { GRAPH <%s>", addSetGraphUri));
+				queryM = m.replaceFirst(String.format("INSERT DATA { GRAPH <%s>", addSetGraphUri));
 			} else if (action.equalsIgnoreCase("DELETE")) {
-				queryM = m.replaceFirst(String.format("INSERT { GRAPH <%s>", removeSetGraphUri));
+				queryM = m.replaceFirst(String.format("INSERT DATA { GRAPH <%s>", removeSetGraphUri));
 			} else if (action.equalsIgnoreCase("WHERE")) {
 				// TODO ersetze mit SPARQL JOIN
 				String tempGraphName = graphName + "-temp";
@@ -653,10 +627,9 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @param format
 	 *            the result format
-	 * @throws IOException
-	 * @throws HttpException
+	 * @throws UnsupportedEncodingException 
 	 */
-	private Response getCreateGraphResponse(final String query, final String format) throws IOException, HttpException {
+	private Response getCreateGraphResponse(final String query, final String format) throws UnsupportedEncodingException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Graph creation detected");
 
@@ -699,10 +672,8 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @param format
 	 *            the result format
-	 * @throws IOException
-	 * @throws HttpException
 	 */
-	private Response getDropGraphResponse(final String query, final String format) throws IOException, HttpException {
+	private Response getDropGraphResponse(final String query, final String format) {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 
 		// Clear R43ples information for specified graphs
@@ -730,11 +701,10 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @param format
 	 *            the result format
-	 * @throws IOException
-	 * @throws AuthenticationException
+	 * @throws UnsupportedEncodingException 
 	 */
 	private Response getBranchOrTagResponse(final String sparqlQuery, final String user, final String commitMessage,
-			final String format) throws HttpException, IOException {
+			final String format) throws UnsupportedEncodingException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Tag or branch creation detected");
 
@@ -782,10 +752,9 @@ public class Endpoint {
 	 * 
 	 * @param sparqlQuery the SPARQL query
 	 * @param format the result format
-	 * @throws IOException 
-	 * @throws AuthenticationException 
+	 * @throws UnsupportedEncodingException 
 	 */
-	private Response getMergeResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws HttpException, IOException {
+	private Response getMergeResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws UnsupportedEncodingException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Merge creation detected");
 

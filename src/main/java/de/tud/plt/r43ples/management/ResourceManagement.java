@@ -7,19 +7,17 @@ import java.io.StringWriter;
 import org.apache.commons.io.IOUtils;
 
 public class ResourceManagement {
-	public static String getContentFromResource(String resourceName) throws IOException{
+	public static String getContentFromResource(String resourceName) {
 		InputStream is = ClassLoader.getSystemResourceAsStream(resourceName);
 		StringWriter sw = new StringWriter();
 		try {
 			IOUtils.copy(is, sw, "UTF-8");
-			return sw.toString();
-		} catch (IOException e) {
-			return "";
-		}
-		finally {
+			String result = sw.toString();
 			is.close();
 			sw.close();
-		}
-		
+			return result;
+		} catch (IOException e) {
+			return "";
+		}		
 	}
 }

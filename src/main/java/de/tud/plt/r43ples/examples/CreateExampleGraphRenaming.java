@@ -3,7 +3,6 @@ package de.tud.plt.r43ples.examples;
 import java.io.IOException;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.http.HttpException;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.SampleDataSet;
@@ -22,7 +21,7 @@ public class CreateExampleGraphRenaming {
 	 * @param args
 	 * @throws IOException 
 	 */
-	public static void main(String[] args) throws IOException, ConfigurationException, HttpException {
+	public static void main(String[] args) throws ConfigurationException, IOException {
 		
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.database_directory);

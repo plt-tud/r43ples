@@ -1,11 +1,8 @@
 package de.tud.plt.r43ples.visualisation;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.http.HttpException;
 
 import att.grappa.Attribute;
 import att.grappa.Edge;
@@ -27,7 +24,7 @@ import de.tud.plt.r43ples.management.TripleStoreInterface;
 
 public class GraphVizVisualisation {
 	
-	public static String getGraphVizOutput(String namedGraph) throws IOException, HttpException {
+	public static String getGraphVizOutput(String namedGraph) {
 		Graph graph =  new Graph("RevisionGraph of " + namedGraph);
 		String query_nodes = RevisionManagement.prefixes + String.format(""
 				+ "SELECT DISTINCT ?revision ?number "
@@ -103,7 +100,7 @@ public class GraphVizVisualisation {
 	    return sw.toString();
 	}
 
-	public static String getGraphVizHtmlOutput(String graphName) throws IOException, HttpException {
+	public static String getGraphVizHtmlOutput(String graphName) {
 		MustacheFactory mf = new DefaultMustacheFactory();
 	    Mustache mustache = mf.compile("templates/graphvisualisation.mustache");
 	    StringWriter sw = new StringWriter();

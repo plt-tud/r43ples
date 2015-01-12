@@ -1,9 +1,8 @@
 package de.tud.plt.r43ples.examples;
 
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.http.HttpException;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.SampleDataSet;
@@ -20,11 +19,10 @@ public class CreateExampleGraph {
 	 * Main entry point. Create the example graph.
 	 * 
 	 * @param args
-	 * @throws IOException 
 	 * @throws ConfigurationException 
-	 * @throws HttpException 
+	 * @throws UnsupportedEncodingException 
 	 */
-	public static void main(String[] args) throws IOException, ConfigurationException, HttpException {
+	public static void main(String[] args) throws ConfigurationException, UnsupportedEncodingException {
 		
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.database_directory);

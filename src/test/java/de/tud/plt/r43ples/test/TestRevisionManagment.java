@@ -1,10 +1,9 @@
 package de.tud.plt.r43ples.test;
 
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.http.HttpException;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,21 +21,21 @@ import de.tud.plt.r43ples.webservice.Endpoint;
 
 public class TestRevisionManagment {
 	
-	private final static String graph_test = "http://test_dataset_user";
+	private final static String graph_test = "http://test.com/dataset_user";
     private final static String format = "application/sparql-results+xml";
     Endpoint ep;
 	String result;
 	String expected;
 
 	@BeforeClass
-	public static void setUpBeforeClass() throws HttpException, IOException, ConfigurationException{
+	public static void setUpBeforeClass() throws ConfigurationException, UnsupportedEncodingException{
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.database_directory);
 		SampleDataSet.createSampleDataset1(graph_test);
 	}
 	
 	@AfterClass
-	public static void tearDown() throws HttpException, IOException{
+	public static void tearDown() {
 		RevisionManagement.purgeGraph(graph_test);
 	}
 	
@@ -46,25 +45,25 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void test_reference_uri() throws HttpException, IOException {
+	public void test_reference_uri() {
 		String res = RevisionManagement.getReferenceUri(graph_test, "master");
 		Assert.assertEquals("http://test_dataset_user-master", res);
 	}
 	
 	@Test
-	public void test_revision_uri() throws HttpException, IOException {
+	public void test_revision_uri() {
 		String uri = RevisionManagement.getRevisionUri(graph_test, "4");
 		Assert.assertEquals("http://test_dataset_user-revision-4", uri);
 	}
 	
 	@Test
-	public void test_master_number() throws HttpException, IOException {
+	public void test_master_number() {
 		String revNumberMaster = RevisionManagement.getMasterRevisionNumber(graph_test);
 		Assert.assertEquals("5", revNumberMaster);
 	}
 	
 	@Test
-	public void testSelectMaster() throws IOException, HttpException{
+	public void testSelectMaster() {
         String query = "SELECT ?s ?p ?o "
         		+ "FROM <"+graph_test+"> REVISION \"master\""
         		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
@@ -83,7 +82,7 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void testSelectWithRewriting() throws IOException, HttpException{
+	public void testSelectWithRewriting() {
         String query_template = "OPTION r43ples:SPARQL_JOIN%n"
         		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
         		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
@@ -110,7 +109,7 @@ public class TestRevisionManagment {
 	}
 
 	@Test
-	public void testSelect() throws HttpException, IOException {
+	public void testSelect() {
         String query_template = ""
         		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
         		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
@@ -141,7 +140,7 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void testSelect2Pattern() throws HttpException, IOException {
+	public void testSelect2Pattern() {
 		String query = "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "
 				+ "FROM <"+ graph_test + "> REVISION \"%d\" "
@@ -161,7 +160,7 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void testSelect2Pattern_sparql_join() throws HttpException, IOException {
+	public void testSelect2Pattern_sparql_join() {
 		String query = "OPTION r43ples:SPARQL_JOIN\n"
 				+ "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "
@@ -183,7 +182,7 @@ public class TestRevisionManagment {
 	
 	
 	@Test
-	public void testBranching() throws HttpException, IOException, IdentifierAlreadyExistsException {
+	public void testBranching() throws IdentifierAlreadyExistsException {
 		RevisionManagement.createReference("branch", graph_test, "2", "testBranch", "test_user", "branching as junit test");
 		ArrayList<String> usedRevisionNumber = new ArrayList<String>();
 		usedRevisionNumber.add("testBranch");
@@ -212,7 +211,7 @@ public class TestRevisionManagment {
 	
 	
 	@Test
-	public void test_minus() throws IOException, HttpException {
+	public void test_minus() {
 		String query = "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "
 				+ "FROM <"+ graph_test + "> REVISION \"%d\" "
@@ -235,7 +234,7 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void test_minus_sparql_join() throws IOException, HttpException {
+	public void test_minus_sparql_join() {
 		String query = "OPTION r43ples:SPARQL_JOIN\n"
 				+ "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "

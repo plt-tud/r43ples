@@ -1,12 +1,10 @@
 package de.tud.plt.r43ples.management;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.graph.Node;
@@ -63,7 +61,7 @@ public class SparqlRewriter {
 
 	
 	
-	public static String rewriteQuery(final String query_r43ples) throws HttpException, IOException {
+	public static String rewriteQuery(final String query_r43ples) {
 
 		statement_i = 0;
 		

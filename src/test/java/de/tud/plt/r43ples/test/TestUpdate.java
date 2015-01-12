@@ -3,13 +3,11 @@ package de.tud.plt.r43ples.test;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -48,7 +46,7 @@ public class TestUpdate {
 	}
 
 	@Before
-	public void setUp() throws HttpException, IOException, ConfigurationException{
+	public void setUp() throws  ConfigurationException{
 		SampleDataSet.createSampleDataSetMerging(graphName);
 		ep = new Endpoint();
 	}
@@ -59,7 +57,7 @@ public class TestUpdate {
 
 
 	@Test
-	public void test_insert_existing_triples() throws HttpException, IOException{
+	public void test_insert_existing_triples() {
         String query_template = ""
         		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
         		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
@@ -86,7 +84,7 @@ public class TestUpdate {
 	}
 	
 	@Test
-	public void testRestructuring() throws IOException, HttpException{
+	public void testRestructuring() {
 		// restructure commit to B2
 		logger.info("Restructure commit to B2");
 		String query = String.format(""
@@ -110,7 +108,7 @@ public class TestUpdate {
 	}
 	
 	@Test
-	public void testConstructQuery() throws HttpException, IOException {
+	public void testConstructQuery() {
 		String query = String.format(""
 				+ "CONSTRUCT {?s ?p ?o} "
 				+ "FROM <%s> REVISION \"1\""

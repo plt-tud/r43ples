@@ -4,9 +4,7 @@
 package de.tud.plt.r43ples.test;
 
 import static org.hamcrest.core.StringContains.containsString;
-import java.io.IOException;
 
-import org.apache.http.HttpException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -47,7 +45,7 @@ public class TestMultipleGraph {
 	}
 
 	@AfterClass
-	public static void tearDownafterClass() throws HttpException, IOException {
+	public static void tearDownafterClass() {
 		RevisionManagement.purgeGraph(graph1);
 		RevisionManagement.purgeGraph(graph2);
 	}
@@ -62,11 +60,9 @@ public class TestMultipleGraph {
 	}
 
 	/**
-	 * @throws IOException 
-	 * @throws HttpException 
 	 */
 	@Test
-	public final void testMultipleGraphsSparqlJoin() throws IOException, HttpException {
+	public final void testMultipleGraphsSparqlJoin() {
 		String query_template = ""
 				+ "OPTION r43ples:SPARQL_JOIN %n"
 				+ "PREFIX : <http://test.com/> %n"
@@ -92,7 +88,7 @@ public class TestMultipleGraph {
 	}
 	
 	@Test
-	public void testResponseHeader() throws IOException, HttpException {
+	public void testResponseHeader() {
 		String sparql = "SELECT *"
 				+ "FROM <" + graph1 +">"
 				+ "WHERE { ?s ?p ?o}";
@@ -102,7 +98,7 @@ public class TestMultipleGraph {
 	}
 	
 	@Test
-	public void testResponseHeader2() throws IOException, HttpException {
+	public void testResponseHeader2() {
 		String sparql = "SELECT *"
 				+ "FROM <" + graph1 +">"
 				+ "FROM <" + graph2 +">"

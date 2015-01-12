@@ -1,6 +1,5 @@
 package de.tud.plt.r43ples.management;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,7 +9,6 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.QuerySolution;
@@ -49,10 +47,8 @@ public class RevisionManagement {
 	 * 
 	 * @param graphName
 	 *            the graph name of the existing graph
-	 * @throws IOException
-	 * @throws HttpException
 	 */
-	public static void putGraphUnderVersionControl(final String graphName) throws HttpException, IOException {
+	public static void putGraphUnderVersionControl(final String graphName) {
 		logger.info("Put existing graph under version control with the name " + graphName);
 
 		// General variables
@@ -111,12 +107,10 @@ public class RevisionManagement {
 	 *            (for creation of merged maximal two revision are  allowed
 	 *            - the first revision in array list specifies the branch where the merged revision will be created)
 	 * @return new revision number
-	 * @throws IOException
-	 * @throws AuthenticationException
 	 */
 	public static String createNewRevision(final String graphName, final String addedAsNTriples,
 			final String removedAsNTriples, final String user, final String commitMessage,
-			final ArrayList<String> usedRevisionNumber) throws HttpException, IOException {
+			final ArrayList<String> usedRevisionNumber) {
 		logger.info("Start creation of new revision!");
 
 		// General variables
@@ -183,13 +177,10 @@ public class RevisionManagement {
 	 * 			  name of the graph which holds the add set
 	 * @param removeSetGraphUri
 	 *            name of the graph which holds the delete set
-	 * @throws IOException
-	 * @throws AuthenticationException
 	 */
 	public static void addMetaInformationForNewRevision(final String graphName, final String user,
 			final String commitMessage, final ArrayList<String> usedRevisionNumber,
-			final String newRevisionNumber, final String addSetGraphUri, final String removeSetGraphUri)
-			throws HttpException, IOException {
+			final String newRevisionNumber, final String addSetGraphUri, final String removeSetGraphUri) {
 		String dateString = getDateString();
 		String personUri = getUserName(user);
 		String revisionUri = graphName + "-revision-" + newRevisionNumber;
@@ -262,13 +253,11 @@ public class RevisionManagement {
 	 *            user who performs this reference generation
 	 * @param message
 	 *            message describing intent of this command
-	 * @throws IOException
 	 * @throws IdentifierAlreadyExistsException
-	 * @throws AuthenticationException
 	 */
 	public static void createReference(final String referenceType, final String graphName,
 			final String revisionNumber, final String newReferenceName, final String user,
-			final String message) throws HttpException, IOException, IdentifierAlreadyExistsException {
+			final String message) throws IdentifierAlreadyExistsException {
 		logger.info("Start creation of new " + referenceType);
 
 		// Check branch existence
@@ -316,10 +305,8 @@ public class RevisionManagement {
 	 *            the graph name
 	 * @return boolean value if specified graph exists and contains at least one
 	 *         triple elsewhere it will return false
-	 * @throws IOException
-	 * @throws AuthenticationException
 	 */
-	public static boolean checkGraphExistence(final String graphName) throws HttpException, IOException {
+	public static boolean checkGraphExistence(final String graphName){
 		String query = "ASK { GRAPH <" + graphName + "> {?s ?p ?o} }";
 		return TripleStoreInterface.executeAskQuery(query);
 	}
@@ -334,11 +321,9 @@ public class RevisionManagement {
 	 *            revision number or revision name to build content for
 	 * @param tempGraphName
 	 *            the graph where the temporary graph is stored
-	 * @throws IOException
-	 * @throws AuthenticationException
 	 */
 	public static void generateFullGraphOfRevision(final String graphName, final String revisionName,
-			final String tempGraphName) throws HttpException, IOException {
+			final String tempGraphName) {
 		logger.info("Rebuild whole content of revision " + revisionName + " of graph <" + graphName
 				+ "> into temporary graph <" + tempGraphName + ">");
 		String revisionNumber = getRevisionNumber(graphName, revisionName);
@@ -382,11 +367,8 @@ public class RevisionManagement {
 	 * @param revisionIdentifier
 	 *            reference name or revision number
 	 * @return URI of identified revision
-	 * @throws HttpException
-	 * @throws IOException
 	 */
-	public static String getRevisionUri(final String graphName, final String revisionIdentifier)
-			throws HttpException, IOException {
+	public static String getRevisionUri(final String graphName, final String revisionIdentifier) {
 		String query = prefixes
 				+ String.format(
 						"SELECT ?rev WHERE { GRAPH <%s> {"
@@ -417,11 +399,8 @@ public class RevisionManagement {
 	 * @param referenceIdentifier
 	 *            reference name or revision number
 	 * @return URI of identified revision
-	 * @throws HttpException
-	 * @throws IOException
 	 */
-	public static String getReferenceUri(final String graphName, final String referenceIdentifier)
-			throws HttpException, IOException {
+	public static String getReferenceUri(final String graphName, final String referenceIdentifier) {
 		String query = prefixes
 				+ String.format("SELECT ?ref " + "WHERE { GRAPH <%s> {"
 						+ "	?ref a rmo:Reference; rmo:references ?rev."
@@ -451,11 +430,8 @@ public class RevisionManagement {
 	 * @param referenceIdentifier
 	 *            reference name or revision number
 	 * @return first graph name of full graph for specified reference and graph
-	 * @throws HttpException
-	 * @throws IOException
 	 */
-	public static String getReferenceGraph(final String graphName, final String referenceIdentifier)
-			throws HttpException, IOException {
+	public static String getReferenceGraph(final String graphName, final String referenceIdentifier) {
 		String query = prefixes
 				+ String.format("" + "SELECT ?graph " + "FROM <%s>" + "WHERE {" + "	?ref a rmo:Reference; "
 						+ "		rmo:references ?rev;" + "		rmo:fullGraph ?graph."
@@ -480,11 +456,8 @@ public class RevisionManagement {
 	 * @param referenceName
 	 *            the reference name
 	 * @return the revision number of given reference name
-	 * @throws HttpException
-	 * @throws IOException
 	 */
-	public static String getRevisionNumber(final String graphName, final String referenceName)
-			throws HttpException, IOException {
+	public static String getRevisionNumber(final String graphName, final String referenceName) {
 		String query = prefixes
 				+ String.format(
 						"SELECT ?revNumber WHERE { GRAPH <%s> {"
@@ -511,10 +484,8 @@ public class RevisionManagement {
 	 * @param graphName
 	 *            the graph name
 	 * @return the revision tree
-	 * @throws IOException
-	 * @throws AuthenticationException
 	 */
-	public static Tree getRevisionTree(final String graphName) throws HttpException, IOException {
+	public static Tree getRevisionTree(final String graphName) {
 		logger.info("Start creation of revision tree of graph " + graphName + "!");
 
 		Tree tree = new Tree();
@@ -568,10 +539,8 @@ public class RevisionManagement {
 	 * @param graphName
 	 *            the graph name
 	 * @return the MASTER revision number
-	 * @throws IOException
-	 * @throws AuthenticationException
 	 */
-	public static String getMasterRevisionNumber(final String graphName) throws HttpException, IOException {
+	public static String getMasterRevisionNumber(final String graphName) {
 		logger.info("Get MASTER revision number of graph " + graphName);
 
 		String queryString = prefixes
@@ -598,11 +567,8 @@ public class RevisionManagement {
 	 *            the reference identifier which was specified by the client
 	 *            (branch name or tag name)
 	 * @return true when it is an empty branch
-	 * @throws HttpException
-	 * @throws IOException
 	 */
-	private static boolean isBranchEmpty(final String graphName, final String referenceIdentifier)
-			throws IOException, HttpException {
+	private static boolean isBranchEmpty(final String graphName, final String referenceIdentifier) {
 		String referenceUri = getReferenceUri(graphName, referenceIdentifier);
 		String queryASKBranch = prefixes
 				+ String.format("ASK { GRAPH <%s> { "
@@ -611,8 +577,7 @@ public class RevisionManagement {
 		return TripleStoreInterface.executeAskQuery(queryASKBranch);
 	}
 
-	public static String getNextRevisionNumber(final String graphName, final String revisionIdentifier)
-			throws HttpException, IOException {
+	public static String getNextRevisionNumber(final String graphName, final String revisionIdentifier) {
 		String revisionNumber = getRevisionNumber(graphName, revisionIdentifier);
 		if (isBranchEmpty(graphName, revisionIdentifier)) {
 			return getRevisionNumberForNewBranch(graphName, revisionNumber);
@@ -649,11 +614,8 @@ public class RevisionManagement {
 	 * @param revisionNumber
 	 *            the revision number of the revision which should be branched
 	 * @return the revision number of the new branch
-	 * @throws IOException
-	 * @throws AuthenticationException
 	 */
-	public static String getRevisionNumberForNewBranch(final String graphName, final String revisionNumber)
-			throws HttpException, IOException {
+	public static String getRevisionNumberForNewBranch(final String graphName, final String revisionNumber) {
 		logger.info("Get the revision number for a new branch of graph " + graphName
 				+ " and revision number " + revisionNumber);
 		int ii = 0;
@@ -682,10 +644,8 @@ public class RevisionManagement {
 	 *            the graph name
 	 * @param dataSetAsNTriples
 	 *            the data to insert as N-Triples
-	 * @throws IOException
-	 * @throws HttpException
 	 */
-	public static void executeINSERT(final String graphName, final String dataSetAsNTriples) throws HttpException, IOException {
+	public static void executeINSERT(final String graphName, final String dataSetAsNTriples) {
 
 //		String insertQueryTemplate =  "INSERT IN GRAPH <%s> { %n"
 //									+ "	%s %n"
@@ -728,11 +688,9 @@ public class RevisionManagement {
 	 * Split huge DELETE statements into separate queries of up to fifty triple statements.
 	 * 
 	 * @param graphName the graph name
-	 * @param dataSetAsNTriples the data to insert as N-Triples
-	 * @throws IOException 
-	 * @throws HttpException 
+	 * @param dataSetAsNTriples the data to insert as N-Triples 
 	 */
-	public static void executeDELETE(final String graphName, final String dataSetAsNTriples) throws HttpException, IOException {
+	public static void executeDELETE(final String graphName, final String dataSetAsNTriples) {
 
 		String deleteQueryTemplate =  "DELETE DATA FROM <%s> { %n"
 									+ "	%s %n"
@@ -776,11 +734,8 @@ public class RevisionManagement {
 	 * @param format
 	 *            serialization of the RDF model
 	 * @return String containing the RDF model in the specified serialization
-	 * @throws IOException
-	 * @throws HttpException
 	 */
-	public static String getRevisionInformation(final String graphName, final String format)
-			throws HttpException, IOException {
+	public static String getRevisionInformation(final String graphName, final String format) {
 		String sparqlQuery;
 		if (graphName.equals("")) {
 			sparqlQuery = String.format("CONSTRUCT" + "	{ ?s ?p ?o} " + "FROM <%s> " + "WHERE {"
@@ -810,10 +765,8 @@ public class RevisionManagement {
 	 * @param format
 	 *            serialization of the response
 	 * @return String containing the SPARQL response in specified format
-	 * @throws IOException
-	 * @throws HttpException
 	 */
-	public static String getRevisedGraphsSparql(final String format) throws HttpException, IOException {
+	public static String getRevisedGraphsSparql(final String format) {
 		String sparqlQuery = prefixes
 				+ String.format("" + "SELECT DISTINCT ?graph " + "FROM <%s> " + "WHERE {"
 						+ "	?rev rmo:revisionOf ?graph." + "} ORDER BY ?graph", Config.revision_graph);
@@ -826,10 +779,8 @@ public class RevisionManagement {
 	 * Get revised graphs in R43ples.
 	 * 
 	 * @return result set
-	 * @throws IOException
-	 * @throws HttpException
 	 */
-	public static ResultSet getRevisedGraphsSparql() throws HttpException, IOException {
+	public static ResultSet getRevisedGraphsSparql() {
 		String sparqlQuery = prefixes
 				+ String.format("" + "SELECT DISTINCT ?graph " + "FROM <%s> " + "WHERE {"
 						+ "	?rev rmo:revisionOf ?graph." + "} ORDER BY ?graph", Config.revision_graph);
@@ -841,10 +792,8 @@ public class RevisionManagement {
 	 * Get revised graphs in R43ples as list of string.
 	 * 
 	 * @return list of strings containing the revised graphs of R43ples
-	 * @throws IOException
-	 * @throws HttpException
 	 */
-	public static ArrayList<String> getRevisedGraphs() throws HttpException, IOException {
+	public static ArrayList<String> getRevisedGraphs() {
 		ArrayList<String> list = new ArrayList<String>();
 		ResultSet results = getRevisedGraphsSparql();;
 		while (results.hasNext()) {
@@ -862,10 +811,8 @@ public class RevisionManagement {
 	 * 
 	 * @param graph
 	 *            graph to be purged
-	 * @throws HttpException
-	 * @throws IOException
 	 */
-	public static void purgeGraph(final String graph) throws HttpException, IOException {
+	public static void purgeGraph(final String graph) {
 		logger.info("Purge graph " + graph + " and all related R43ples information.");
 		// Drop all full graphs as well as add and delete sets which are related
 		// to specified graph
@@ -906,10 +853,8 @@ public class RevisionManagement {
 	 * @param user
 	 *            name as string
 	 * @return URI of person
-	 * @throws HttpException
-	 * @throws IOException
 	 */
-	public static String getUserName(final String user) throws HttpException, IOException {
+	public static String getUserName(final String user) {
 		// When user does not already exists - create new
 
 		String query = prefixes
@@ -951,11 +896,8 @@ public class RevisionManagement {
 	 * @param referenceName
 	 *            the branch name to check
 	 * @return true when branch already exists elsewhere false
-	 * @throws HttpException
-	 * @throws IOException
 	 */
-	private static boolean checkReferenceNameExistence(final String graphName, final String referenceName)
-			throws IOException, HttpException {
+	private static boolean checkReferenceNameExistence(final String graphName, final String referenceName) {
 		String queryASK = prefixes
 				+ String.format("ASK { GRAPH <%s> { " + " ?ref a rmo:Reference; rdfs:label \"%s\". "
 						+ " ?ref rmo:references ?rev ." + " ?rev rmo:revisionOf <%s> ." + " }} ",
@@ -972,11 +914,8 @@ public class RevisionManagement {
 	 * @param identifier
 	 *            revision number or branch or tag name of the graph
 	 * @return true if specified revision of the graph is a branch
-	 * @throws HttpException
-	 * @throws IOException
 	 */
-	public static boolean isBranch(final String graphName, final String identifier) throws HttpException,
-			IOException {
+	public static boolean isBranch(final String graphName, final String identifier) {
 		String queryASK = prefixes
 				+ String.format("ASK { GRAPH <%s> { " + " ?rev a rmo:Revision; rmo:revisionOf <%s>. "
 						+ " ?ref a rmo:Reference; rmo:references ?rev ."
@@ -992,10 +931,8 @@ public class RevisionManagement {
 	 * @param revisionURI the revision URI
 	 * @param revisionGraph the revision graph
 	 * @return the ADD set URI, returns null when the revision URI does not exists or no ADD set is referenced by the revision URI
-	 * @throws HttpException 
-	 * @throws IOException 
 	 */
-	public static String getAddSetURI(String revisionURI, String revisionGraph) throws IOException, HttpException {
+	public static String getAddSetURI(String revisionURI, String revisionGraph) {
 		String query = String.format(
 			  "SELECT ?addSetURI \n"
 			+ "FROM <%s> \n"
@@ -1020,10 +957,8 @@ public class RevisionManagement {
 	 * @param revisionURI the revision URI
 	 * @param revisionGraph the revision graph
 	 * @return the DELETE set URI, returns null when the revision URI does not exists or no DELETE set is referenced by the revision URI
-	 * @throws HttpException 
-	 * @throws IOException 
 	 */
-	public static String getDeleteSetURI(String revisionURI, String revisionGraph) throws IOException, HttpException {
+	public static String getDeleteSetURI(String revisionURI, String revisionGraph) {
 		String query = String.format(
 			  "SELECT ?deleteSetURI \n"
 			+ "FROM <%s> \n"
@@ -1047,10 +982,8 @@ public class RevisionManagement {
 	 * 
 	 * @param graphName the graphName
 	 * @return the constructed graph content as turtle
-	 * @throws HttpException 
-	 * @throws IOException 
 	 */
-	public static String getContentOfGraphByConstruct(String graphName) throws IOException, HttpException {
+	public static String getContentOfGraphByConstruct(String graphName) {
 		String query = String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
 				+ "FROM <%s> %n"
@@ -1063,10 +996,8 @@ public class RevisionManagement {
 	/**
 	 * @param query
 	 * @return
-	 * @throws HttpException 
-	 * @throws IOException 
 	 */
-	public static String getResponseHeaderFromQuery(String query) throws IOException, HttpException {
+	public static String getResponseHeaderFromQuery(String query) {
 		final Pattern patternGraph = Pattern.compile(
 				"(GRAPH|FROM|INTO)\\s*<(?<graph>[^>]*)>\\s*",
 				Pattern.CASE_INSENSITIVE);
@@ -1085,7 +1016,7 @@ public class RevisionManagement {
 		
 	}
 	
-	public static String getResponseHeader(String graphList) throws IOException, HttpException {
+	public static String getResponseHeader(String graphList) {
 		String queryConstruct = RevisionManagement.prefixes + String.format(
 				  "CONSTRUCT {"
 				+ " ?ref a ?type;"

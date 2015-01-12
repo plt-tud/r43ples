@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.Query;
@@ -54,10 +53,8 @@ public class MergeManagement {
 	 * @param revision1 the first revision should be a terminal branch node
 	 * @param revision2 the second revision should be a terminal branch node
 	 * @return the nearest common revision
-	 * @throws IOException
-	 * @throws HttpException 
 	 */
-	public static String getCommonRevisionWithShortestPath(String revision1, String revision2) throws IOException, HttpException {
+	public static String getCommonRevisionWithShortestPath(String revision1, String revision2) {
 		
 		logger.info("Get the common revision of <" + revision1 + "> and <" + revision2 + "> which has the shortest path.");
 		
@@ -191,10 +188,8 @@ public class MergeManagement {
 	 * @param startRevision the start revision
 	 * @param targetRevision the target revision
 	 * @return linked list with all revisions from start revision to target revision
-	 * @throws HttpException 
-	 * @throws IOException 
 	 */
-	public static LinkedList<String> getPathBetweenStartAndTargetRevision(String startRevision, String targetRevision) throws IOException, HttpException {
+	public static LinkedList<String> getPathBetweenStartAndTargetRevision(String startRevision, String targetRevision) {
 		
 		logger.info("Calculate the shortest path from revision <" + startRevision + "> to <" + targetRevision + "> .");
 		String query = String.format(
@@ -242,10 +237,8 @@ public class MergeManagement {
 	 * @param list the linked list with all revisions from start revision to target revision
 	 * @param graphNameRevisionProgress the graph name of the revision progress
 	 * @param uri the URI of the revision progress
-	 * @throws IOException
-	 * @throws HttpException
 	 */
-	public static void createRevisionProgress(LinkedList<String> list, String graphNameRevisionProgress, String uri) throws IOException, HttpException {
+	public static void createRevisionProgress(LinkedList<String> list, String graphNameRevisionProgress, String uri) {
 		logger.info("Create the revision progress of " + uri + " in graph " + graphNameRevisionProgress + ".");
 		
 		logger.info("Create the revision progress graph with the name: \n" + graphNameRevisionProgress);
@@ -531,7 +524,7 @@ public class MergeManagement {
 	}
 
 	
-	/*
+	/**
 	 * Create the difference triple model which contains all differing triples.
 	 * 
 	 * @param graphName the graph name
@@ -541,10 +534,8 @@ public class MergeManagement {
 	 * @param graphNameRevisionProgressB the graph name of the revision progress of branch B
 	 * @param uriB the URI of the revision progress of branch B
 	 * @param uriSDD the URI of the SDD to use
-	 * @throws HttpException 
-	 * @throws IOException 
 	 */
-	public static void createDifferenceTripleModel(String graphName, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD) throws IOException, HttpException {
+	public static void createDifferenceTripleModel(String graphName, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD){
 		
 		logger.info("Create the difference triple model");
 		TripleStoreInterface.executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameDifferenceTripleModel));
@@ -757,10 +748,8 @@ public class MergeManagement {
 	 * @param type the merge query type
 	 * @param triples the triples which are belonging to the current merge query in N-Triple serialization
 	 * @return new revision number
-	 * @throws HttpException
-	 * @throws IOException
 	 */
-	public static String createMergedRevision(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type, String triples) throws HttpException, IOException {
+	public static String createMergedRevision(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type, String triples) {
 		 
 		// Create an empty temporary graph which will contain the merged full content
 		String graphNameOfMerged = "RM-MERGED-TEMP-" + graphName;
@@ -936,13 +925,18 @@ public class MergeManagement {
 	 * 
 	 * @param path the file path to the turtle file
 	 * @return the jena model
-	 * @throws IOException
 	 */
-	public static Model readTurtleFileToJenaModel(String path) throws IOException {
+	public static Model readTurtleFileToJenaModel(String path) {
 		Model model = ModelFactory.createDefaultModel();
 		InputStream is = ClassLoader.getSystemResourceAsStream(path);
 		model.read(is, null, "TURTLE");
-		is.close();
+		try {
+			is.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 		
 		return model;
 	}
@@ -953,14 +947,18 @@ public class MergeManagement {
 	 * 
 	 * @param triples the triples in N-Triple serialization
 	 * @return the model
-	 * @throws IOException
 	 */
-	public static Model readNTripleStringToJenaModel(String triples) throws IOException {
+	public static Model readNTripleStringToJenaModel(String triples) {
 		Model model = null;
 		model = ModelFactory.createDefaultModel();
 		InputStream is = new ByteArrayInputStream(triples.getBytes());
 		model.read(is, null, "N-TRIPLE");
-		is.close();
+		try {
+			is.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		return model;
 	}
@@ -986,10 +984,8 @@ public class MergeManagement {
 	 * Create a new graph. When graph already exists it will be dropped.
 	 * 
 	 * @param graphname the graph name
-	 * @throws IOException
-	 * @throws HttpException
 	 */
-	private static void createNewGraph(String graphName) throws IOException, HttpException {
+	private static void createNewGraph(String graphName) {
 		logger.info("Create new graph with the name: " + graphName + ".");
 		TripleStoreInterface.executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphName));
 		TripleStoreInterface.executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphName));
