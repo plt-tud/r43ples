@@ -3,7 +3,6 @@ package de.tud.plt.r43ples.visualisation;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
@@ -63,8 +62,7 @@ public class MMSTVisualisation {
 		// generic config for graph generation
 		int y_start = 20;
 		int lineheight = 20;
-		Font standardFont = new Font("Mono", Font.PLAIN, 16);
-		g.setFont(standardFont);
+		g.setFont(g.getFont().deriveFont(16f));
 		FontMetrics fm = g.getFontMetrics();
 		DateFormat df = DateFormat.getDateTimeInstance();
 		g.translate(0, y_start + lineheight - 10);
@@ -93,10 +91,12 @@ public class MMSTVisualisation {
 			if (branch_index.containsKey(c)) {
 				for (Branch b : branch_index.get(c)) {
 					String name = b.getName();
+
 					Rectangle2D rect = g.getFontMetrics().getStringBounds(name, g);
+					int width = g.getFontMetrics().stringWidth(name);
 					g.translate(messageOffset, y);
 					g.setColor(new Color(0.5f, 0.1f, 0.1f));
-					g.fillRoundRect(0, -fm.getAscent(), (int) rect.getWidth() + 4, (int) rect.getHeight(), 5, 5);
+					g.fillRoundRect(0, -fm.getAscent(), width + 4, (int) rect.getHeight(), 5, 5);
 					g.setColor(Color.WHITE);
 					g.drawString(name, 2, 0);
 					g.translate(-messageOffset, -y);
