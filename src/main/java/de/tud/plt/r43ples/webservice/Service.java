@@ -87,6 +87,29 @@ public class Service {
 
 			server.start();
 		
+//			TODO currently secure endpoint is not available
+//			ResourceConfig rc = new ResourceConfig()
+//				.registerClasses(Endpoint.class)
+//				.property(MustacheMvcFeature.TEMPLATE_BASE_PATH, "templates")
+//				.register(MustacheMvcFeature.class)
+//				.register(ExceptionMapper.class);
+//	
+//			SSLContextConfigurator sslCon = new SSLContextConfigurator();
+//			sslCon.setKeyStoreFile(Config.ssl_keystore);
+//			sslCon.setKeyStorePass(Config.ssl_password);
+//	
+//			server = GrizzlyHttpServerFactory.createHttpServer(
+//					BASE_URI, 
+//					rc, 
+//					true, 
+//					new SSLEngineConfigurator(sslCon).setClientMode(false).setNeedClientAuth(false)
+//			);
+//	
+//			server.getServerConfiguration().addHttpHandler(
+//			        new StaticHttpHandler("webapp/"), "/static/");
+//	
+//			server.start();			
+			
 			logger.info("Connection is secure.");
 		} else {
 			BASE_URI = UriBuilder.fromUri(Config.service_uri).port(Config.service_port).path("r43ples").build();
