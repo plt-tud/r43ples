@@ -463,7 +463,7 @@ public class RevisionManagement {
 						"SELECT ?revNumber WHERE { GRAPH <%s> {"
 								+ "	?rev a rmo:Revision; rmo:revisionNumber ?revNumber; rmo:revisionOf <%s>."
 								+ "	{?rev rmo:revisionNumber \"%s\".} UNION {?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%s\".}"
-								+ "} }", Config.revision_graph, graphName, referenceName, referenceName.toLowerCase());
+								+ "} }", Config.revision_graph, graphName, referenceName, referenceName);
 		ResultSet resultSet = TripleStoreInterface.executeSelectQuery(query);
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
