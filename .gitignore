@@ -11,3 +11,4 @@ r43ples.conf
 /bin/
 /target/
 /.externalToolBuilders/
+/database/
