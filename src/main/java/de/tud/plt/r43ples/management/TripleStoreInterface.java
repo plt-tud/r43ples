@@ -11,6 +11,7 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.ReadWrite;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFormatter;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.update.GraphStore;
 import com.hp.hpl.jena.update.GraphStoreFactory;
@@ -91,13 +92,17 @@ public class TripleStoreInterface {
 			QueryExecution qExec = QueryExecutionFactory.create(selectQueryString, dataset);
 			ResultSet results = qExec.execSelect();
 			// FIXME Add format selection
-			if (format.equals("application/sparql-results+xml"))
-				return ResultSetFormatter.asXMLString(results);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			if (format.equals("application/sparql-results+xml") || format.equals("application/xml") )
+				ResultSetFormatter.outputAsXML(baos, results);
+			else if (format.equals("text/turtle") )
+				ResultSetFormatter.outputAsRDF(baos, "Turtle", results);
+			else if (format.equals("application/json") )
+				ResultSetFormatter.outputAsJSON(baos, results);
 			else {
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				ResultSetFormatter.out(baos, results);
-				return baos.toString();
 			}
+			return baos.toString();
 		} finally {
 			dataset.end();
 		}
@@ -116,13 +121,35 @@ public class TripleStoreInterface {
 		try {
 			QueryExecution qExec = QueryExecutionFactory.create(constructQueryString, dataset);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			qExec.execConstruct().write(baos, format);
-		    return baos.toString();
+			Model result = qExec.execConstruct();
+			format=format.toLowerCase();
+			
+			if (format.contains("xml") )
+				result.write(baos, "RDF/XML");
+			else if (format.contains("turtle") )
+				result.write(baos, "Turtle");
+			else {
+				result.write(baos);
+			}
+			return baos.toString();
 		} finally {
 			dataset.end();
 		}
 	}
 	
+	public static String formatOutput(ResultSet results, String format){
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		if (format.equals("application/sparql-results+xml") || format.equals("application/xml") )
+			ResultSetFormatter.outputAsXML(baos, results);
+		else if (format.equals("text/turtle") )
+			ResultSetFormatter.outputAsRDF(baos, "Turtle", results);
+		else if (format.equals("application/json") )
+			ResultSetFormatter.outputAsJSON(baos, results);
+		else {
+			ResultSetFormatter.out(baos, results);
+		}
+		return baos.toString();
+	}
 	
 	/**
 	 * Executes a DESCRIBE query.

@@ -72,7 +72,7 @@ public class SparqlRewriter {
 		String query_sparql = query_r43ples;
 		while (m.find()) {
 			String graphName = m.group("graph");
-			String referenceName = m.group("revision");
+			String referenceName = m.group("revision").toLowerCase();
 			m.reset();
 			
 			String revisionNumber = RevisionManagement.getRevisionNumber(graphName, referenceName);

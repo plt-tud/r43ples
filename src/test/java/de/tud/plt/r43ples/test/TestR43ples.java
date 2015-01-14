@@ -3,21 +3,26 @@ package de.tud.plt.r43ples.test;
 import static org.hamcrest.core.StringContains.containsString;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLEncoder;
+import java.util.ArrayList;
 
 import javax.ws.rs.core.MediaType;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.io.IOUtils;
-import org.apache.log4j.Logger;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
@@ -28,8 +33,6 @@ import de.tud.plt.r43ples.webservice.Service;
 
 public class TestR43ples {
 
-	/** The logger. */
-	private static Logger logger = Logger.getLogger(TestR43ples.class);
 	/** The endpoint. **/
 	private static String endpoint = "http://localhost:9998/r43ples/sparql";
 	/** The graph name. **/
@@ -38,6 +41,8 @@ public class TestR43ples {
 	
 	@BeforeClass
 	public static void setUp() throws ConfigurationException, URISyntaxException, IOException{
+		XMLUnit.setIgnoreWhitespace(true);
+		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.database_directory);
 		SampleDataSet.createSampleDataSetMerging(graphName);
@@ -51,19 +56,19 @@ public class TestR43ples {
 	
 	
 	@Test
-	public void testSelect() throws IOException {
+	public void testSelect() throws IOException, SAXException {
 		String query = String.format(""
 				+ "SELECT * FROM <%s> REVISION \"B2\" "
 				+ "WHERE { ?s ?p ?o. }"
 				+ "ORDER BY ?s ?p ?o", graphName);
-		String result3 = executeR43plesQueryWithFormat(query, MediaType.APPLICATION_XML);
+		String result3 = executeR43plesQuery(query);
 		String expected3 = ResourceManagement.getContentFromResource("response-1.1-3.xml");
-		Assert.assertEquals(expected3, result3);
+		TestRevisionManagment.testXMLSimilar(expected3, result3);
 	}
 	
 	
 	@Test
-	public void testSelectSparqlJoinOption() throws IOException{		
+	public void testSelectSparqlJoinOption() throws IOException, SAXException{		
 		String query = String.format(""
 						+ "OPTION r43ples:SPARQL_JOIN %n"
 						+ "SELECT ?s ?p ?o "
@@ -71,16 +76,16 @@ public class TestR43ples {
 						+ "FROM <%s> REVISION \"B2\" "
 						+ "WHERE { ?s ?p ?o. }"
 						+ "ORDER BY ?s ?p ?o", graphName, graphName);
-		String result4 = executeR43plesQueryWithFormat(query, MediaType.APPLICATION_XML);
+		String result4 = executeR43plesQuery(query);
 		String expected4 = ResourceManagement.getContentFromResource("response-b1-b2.xml");
-		Assert.assertEquals(expected4, result4);
+		TestRevisionManagment.testXMLSimilar(expected4, result4);
 	}
 	
 
 	
 	@Test
 	public void testServiceDescription() throws IOException{
-		String result = executeR43plesQueryWithFormat("", "turtle");
+		String result = executeR43plesQueryWithFormat("", "text/turtle");
 		Assert.assertThat(result, containsString("sd:r43ples"));
 	}
 	
@@ -92,14 +97,14 @@ public class TestR43ples {
 	
 	
 	@Test
-	public void testSelectQueryWithoutRevision() throws IOException {
+	public void testSelectQueryWithoutRevision() throws IOException, SAXException {
 		String query = String.format(""
 				+ "select * from <%s>"
 				+ "where { ?s ?p ?o. }"
 				+ "ORDER BY ?s ?p ?o", graphName);
-		String result = executeR43plesQueryWithFormat(query, MediaType.APPLICATION_XML);
+		String result = executeR43plesQuery(query);
 		String expected = ResourceManagement.getContentFromResource("response-master.xml");
-		Assert.assertEquals(expected, result);
+		TestRevisionManagment.testXMLSimilar(expected, result);
 	}
 	
 	
@@ -158,7 +163,7 @@ public class TestR43ples {
 	 * @throws IOException 
 	 */
 	private static String executeR43plesQuery(String query) throws IOException {
-		return executeR43plesQueryWithFormat(query, MediaType.APPLICATION_XML);
+		return executeR43plesQueryWithFormat(query, "application/sparql-results+xml");
 	}
 	
 	/**
@@ -169,20 +174,23 @@ public class TestR43ples {
 	 * @throws IOException 
 	 */
 	private static String executeR43plesQueryWithFormat(String query, String format) throws IOException {
-		URL url = null;
+		DefaultHttpClient httpClient = new DefaultHttpClient();
 		
-		url = new URL(endpoint+ "?query=" + URLEncoder.encode(query, "UTF-8")+ "&format=" + URLEncoder.encode(format, "UTF-8") );
-		logger.debug(url.toString());
+	    HttpPost request = new HttpPost(endpoint);
+		
+		//set up HTTP Post Request (look at http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VOSSparqlProtocol for Protocol)
+	    ArrayList<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
+		nameValuePairs.add(new BasicNameValuePair("format",format));
+		nameValuePairs.add(new BasicNameValuePair("query", query));
+    	request.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
+    	request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+		
+    	HttpResponse response = httpClient.execute(request);
 
-		URLConnection con = null;
-		InputStream in = null;
-		con = url.openConnection();
-		in = con.getInputStream();
+		InputStreamReader in = new InputStreamReader(response.getEntity().getContent());
+		String result = IOUtils.toString(in);
+		return result;
 	
-		String encoding = con.getContentEncoding();
-		encoding = (encoding == null) ? "UTF-8" : encoding;
-		String body = IOUtils.toString(in, encoding);
-		return body;
 	}
 
 }

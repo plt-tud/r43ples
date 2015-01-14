@@ -223,7 +223,7 @@ public class Endpoint {
 	 */
 	@Path("sparql")
 	@POST
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle" })
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("format") final String formatQuery, @FormParam("query") @DefaultValue("") final String sparqlQuery) {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
@@ -248,7 +248,7 @@ public class Endpoint {
 	 */
 	@Path("sparql")
 	@GET
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle" })
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
 			@QueryParam("format") final String formatQuery, @QueryParam("query") @DefaultValue("") final String sparqlQuery) throws UnsupportedEncodingException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
@@ -378,10 +378,26 @@ public class Endpoint {
 	 * @throws IOException
 	 */
 	private Response getServiceDescriptionResponse(final String format) {
-		// TODO
-		return null;
+		logger.info("Service Description requested");
+		String body =String.format("@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> . %n"
+				+ "@prefix ns3:	<http://www.w3.org/ns/formats/> .%n"
+				+ "@prefix sd:	<http://www.w3.org/ns/sparql-service-description#> .%n"
+				+ "<%1$s>	rdf:type	sd:Service ;%n"
+				+ "	sd:endpoint	ns1:sparql ;%n"
+				+ "	sd:feature	sd:r43ples ;"
+				+ "	sd:resultFormat	ns3:SPARQL_Results_JSON ,%n"
+				+ "		ns3:SPARQL_Results_XML ,%n"
+				+ "		ns3:Turtle ,%n"
+				+ "		ns3:N-Triples ,%n"
+				+ "		ns3:N3 ,%n"
+				+ "		ns3:RDF_XML ,%n"
+				+ "		ns3:SPARQL_Results_CSV ,%n"
+				+ "		ns3:RDFa ;%n"
+				+ "	sd:supportedLanguage	sd:SPARQL10Query, sd:SPARQL11Query, sd:SPARQL11Query, sd:SPARQL11Update, sd:R43plesQuery  ;%n"
+				+ "	sd:url	<%1$s> .%n", uriInfo.getAbsolutePath()) ;
+		return Response.ok().entity(body).build();
 		
-//		logger.info("Service Description requested");
+
 //		DefaultHttpClient client = new DefaultHttpClient();
 //		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(Config.sparql_user, Config.sparql_password);
 //		client.getCredentialsProvider().setCredentials(new AuthScope(null, -1, null), credentials);
