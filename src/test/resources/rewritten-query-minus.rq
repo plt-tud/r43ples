@@ -7,13 +7,13 @@ WHERE
         GRAPH <http://eatld.et.tu-dresden.de/r43ples-revisions>
           { { ?reference_1  <http://eatld.et.tu-dresden.de/rmo#references>  ?r_fullgraph1 ;
                         <http://eatld.et.tu-dresden.de/rmo#fullGraph>  ?g_delete_set_full_graph_1 .
-              FILTER ( ?r_fullgraph1 IN (<http://test_dataset_user-revision-5>) )
+              FILTER ( ?r_fullgraph1 IN (:dataset1-revision-5) )
             }
             UNION
               { ?r_delete_set_1
                           <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://eatld.et.tu-dresden.de/rmo#Revision> ;
                           <http://eatld.et.tu-dresden.de/rmo#deltaRemoved>  ?g_delete_set_full_graph_1 .
-                FILTER ( ?r_delete_set_1 IN (<http://test_dataset_user-revision-5>, <http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>) )
+                FILTER ( ?r_delete_set_1 IN (:dataset1-revision-5, :dataset1-revision-4, :dataset1-revision-3) )
               }
           }
         MINUS
@@ -22,7 +22,7 @@ WHERE
             GRAPH <http://eatld.et.tu-dresden.de/r43ples-revisions>
               { ?r_add_set_1  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://eatld.et.tu-dresden.de/rmo#Revision> ;
                           <http://eatld.et.tu-dresden.de/rmo#deltaAdded>  ?g_add_set_1 .
-                FILTER ( ?r_add_set_1 IN (<http://test_dataset_user-revision-5>, <http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>) )
+                FILTER ( ?r_add_set_1 IN (:dataset1-revision-5, :dataset1-revision-4, :dataset1-revision-3) )
               }
             MINUS
               { GRAPH ?g_delta_set_old_1
@@ -31,7 +31,7 @@ WHERE
                   { ?r_delta_set_old_1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://eatld.et.tu-dresden.de/rmo#Revision> .
                     ?r_delta_set_old_1 <http://eatld.et.tu-dresden.de/rmo#deltaRemoved>|<http://eatld.et.tu-dresden.de/rmo#deltaAdded> ?g_delta_set_old_1 .
                     ?r_add_set_1 (<http://www.w3.org/ns/prov#wasDerivedFrom>)+ ?r_delta_set_old_1
-                    FILTER ( ?r_delta_set_old_1 IN (<http://test_dataset_user-revision-5>, <http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>) )
+                    FILTER ( ?r_delta_set_old_1 IN (:dataset1-revision-5, :dataset1-revision-4, :dataset1-revision-3) )
                   }
               }
           }
@@ -42,13 +42,13 @@ WHERE
             GRAPH <http://eatld.et.tu-dresden.de/r43ples-revisions>
               { { ?reference_2  <http://eatld.et.tu-dresden.de/rmo#references>  ?r_fullgraph2 ;
                             <http://eatld.et.tu-dresden.de/rmo#fullGraph>  ?g_delete_set_full_graph_2 .
-                  FILTER ( ?r_fullgraph2 IN (<http://test_dataset_user-revision-5>) )
+                  FILTER ( ?r_fullgraph2 IN (:dataset1-revision-5) )
                 }
                 UNION
                   { ?r_delete_set_2
                               <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://eatld.et.tu-dresden.de/rmo#Revision> ;
                               <http://eatld.et.tu-dresden.de/rmo#deltaRemoved>  ?g_delete_set_full_graph_2 .
-                    FILTER ( ?r_delete_set_2 IN (<http://test_dataset_user-revision-5>, <http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>) )
+                    FILTER ( ?r_delete_set_2 IN (:dataset1-revision-5, :dataset1-revision-4, :dataset1-revision-3) )
                   }
               }
             MINUS
@@ -57,7 +57,7 @@ WHERE
                 GRAPH <http://eatld.et.tu-dresden.de/r43ples-revisions>
                   { ?r_add_set_2  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://eatld.et.tu-dresden.de/rmo#Revision> ;
                               <http://eatld.et.tu-dresden.de/rmo#deltaAdded>  ?g_add_set_2 .
-                    FILTER ( ?r_add_set_2 IN (<http://test_dataset_user-revision-5>, <http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>) )
+                    FILTER ( ?r_add_set_2 IN (:dataset1-revision-5, :dataset1-revision-4, :dataset1-revision-3) )
                   }
                 MINUS
                   { GRAPH ?g_delta_set_old_2
@@ -66,7 +66,7 @@ WHERE
                       { ?r_delta_set_old_2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://eatld.et.tu-dresden.de/rmo#Revision> .
                         ?r_delta_set_old_2 <http://eatld.et.tu-dresden.de/rmo#deltaRemoved>|<http://eatld.et.tu-dresden.de/rmo#deltaAdded> ?g_delta_set_old_2 .
                         ?r_add_set_2 (<http://www.w3.org/ns/prov#wasDerivedFrom>)+ ?r_delta_set_old_2
-                        FILTER ( ?r_delta_set_old_2 IN (<http://test_dataset_user-revision-5>, <http://test_dataset_user-revision-4>, <http://test_dataset_user-revision-3>) )
+                        FILTER ( ?r_delta_set_old_2 IN (:dataset1-revision-5, :dataset1-revision-4, :dataset1-revision-3) )
                       }
                   }
               }

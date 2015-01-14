@@ -19,12 +19,12 @@ import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 
 /**
- * @author mgraube
+ * @author Markus Graube
  *
  */
 public class TestSparqlRewriter {
 
-	private final static String graph_test = "http://test_dataset_user";
+	private final static String graph_test = "http://test.com/dataset1";
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, UnsupportedEncodingException{
