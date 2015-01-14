@@ -26,6 +26,8 @@ import de.tud.plt.r43ples.management.TripleStoreInterface;
  */
 public class TestMergeManagement {
 
+	final static String graph = "http://exampleGraph.com/merging";
+	
 	/**
 	 * @throws java.lang.Exception
 	 */
@@ -33,7 +35,7 @@ public class TestMergeManagement {
 	public static void setUpBeforeClass() throws Exception {
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.database_directory);
-		SampleDataSet.createSampleDataSetMerging("exampleGraph");
+		SampleDataSet.createSampleDataSetMerging(graph);
 	}
 
 	/**
@@ -41,7 +43,7 @@ public class TestMergeManagement {
 	 */
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		RevisionManagement.purgeGraph("exampleGraph");
+		RevisionManagement.purgeGraph(graph);
 	}
 
 	/**
@@ -64,8 +66,8 @@ public class TestMergeManagement {
 	 */
 	@Test
 	public final void testGetCommonRevisionWithShortestPath() {
-		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath("exampleGraph-revision-1.0-1", "exampleGraph-revision-1.1-1");
-		Assert.assertEquals("exampleGraph-revision-1", commonRevision);
+		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(graph+"-revision-1.0-1", graph+"-revision-1.1-1");
+		Assert.assertEquals(graph+"-revision-1", commonRevision);
 	}
 
 	/**
@@ -73,19 +75,19 @@ public class TestMergeManagement {
 	 */
 	@Test
 	public final void testGetPathBetweenStartAndTargetRevision() {
-		LinkedList<String> path = MergeManagement.getPathBetweenStartAndTargetRevision("exampleGraph-revision-0", "exampleGraph-revision-1.1-1");
+		LinkedList<String> path = MergeManagement.getPathBetweenStartAndTargetRevision(graph+"-revision-0", graph+"-revision-1.1-1");
 		LinkedList<String> expected = new LinkedList<String>();
-		expected.add("exampleGraph-revision-0");
-		expected.add("exampleGraph-revision-1");
-		expected.add("exampleGraph-revision-1.1-0");
-		expected.add("exampleGraph-revision-1.1-1");
+		expected.add(graph+"-revision-0");
+		expected.add(graph+"-revision-1");
+		expected.add(graph+"-revision-1.1-0");
+		expected.add(graph+"-revision-1.1-1");
 		Assert.assertEquals(expected, path);
 	}
 	
 	@Test
 	public void testResponseHeader() {
 		String sparql = "SELECT * "
-				+ "FROM <exampleGraph>"
+				+ "FROM <"+graph+">"
 				+ "WHERE { ?s ?p ?o}";
 				
 		String result = RevisionManagement.getResponseHeaderFromQuery(sparql);
