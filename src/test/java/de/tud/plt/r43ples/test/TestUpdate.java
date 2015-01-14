@@ -3,18 +3,21 @@ package de.tud.plt.r43ples.test;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
+import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
@@ -36,6 +39,8 @@ public class TestUpdate {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		XMLUnit.setIgnoreWhitespace(true);
+		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.database_directory);
 		SampleDataSet.createSampleDataset1(graph_test);
@@ -57,7 +62,7 @@ public class TestUpdate {
 
 
 	@Test
-	public void test_insert_existing_triples() {
+	public void test_insert_existing_triples() throws SAXException, IOException {
         String query_template = ""
         		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
         		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
@@ -71,16 +76,16 @@ public class TestUpdate {
         		+ "INSERT { GRAPH <%s> REVISION \"5\" { %s } } %n"
         		+ "DELETE { GRAPH <%s> REVISION \"5\" { %s } } ";
 		ep.sparql(format, String.format(insert_template, 
-				graph_test,	ResourceManagement.getContentFromResource("samples/test-delta-added-5.nt"), 
-				graph_test, ResourceManagement.getContentFromResource("samples/test-delta-removed-5.nt")));
+				graph_test,	ResourceManagement.getContentFromResource("samples/dataset1/added-5.nt"), 
+				graph_test, ResourceManagement.getContentFromResource("samples/dataset1/removed-5.nt")));
 		
         String result = ep.sparql(format, String.format(query_template, 6)).getEntity().toString();
-        String expected = ResourceManagement.getContentFromResource("response-test-rev5.xml");
-        Assert.assertEquals(expected, result);
+        String expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev5.xml");
+        TestRevisionManagment.testXMLSimilar(expected, result);
         
         result = ep.sparql(format, String.format(query_template, 5)).getEntity().toString();
-        expected = ResourceManagement.getContentFromResource("response-test-rev5.xml");
-        Assert.assertEquals(expected, result);
+        expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev5.xml");
+        TestRevisionManagment.testXMLSimilar(expected, result);
 	}
 	
 	@Test

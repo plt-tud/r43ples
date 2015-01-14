@@ -63,7 +63,7 @@ public class Endpoint {
 
 	private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
 	
-	private final Pattern patternSelectQuery = Pattern.compile(
+	private final Pattern patternSelectAskConstructQuery = Pattern.compile(
 			"(?<type>SELECT|ASK|CONSTRUCT).*WHERE\\s*\\{(?<where>.*)\\}", 
 			patternModifier);
 	private final Pattern patternSelectFromPart = Pattern.compile(
@@ -319,8 +319,8 @@ public class Endpoint {
 				sparqlQuery = messageMatcher.replaceAll("");
 			}
 
-			if (patternSelectQuery.matcher(sparqlQuery).find()) {
-				return getSelectResponse(sparqlQuery, format);
+			if (patternSelectAskConstructQuery.matcher(sparqlQuery).find()) {
+				return getSelectConstructAskResponse(sparqlQuery, format);
 			}
 			if (patternUpdateQuery.matcher(sparqlQuery).find()) {
 				return getUpdateResponse(sparqlQuery, user, message, format);
@@ -396,48 +396,10 @@ public class Endpoint {
 				+ "	sd:supportedLanguage	sd:SPARQL10Query, sd:SPARQL11Query, sd:SPARQL11Query, sd:SPARQL11Update, sd:R43plesQuery  ;%n"
 				+ "	sd:url	<%1$s> .%n", uriInfo.getAbsolutePath()) ;
 		return Response.ok().entity(body).build();
-		
-
-//		DefaultHttpClient client = new DefaultHttpClient();
-//		UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(Config.sparql_user, Config.sparql_password);
-//		client.getCredentialsProvider().setCredentials(new AuthScope(null, -1, null), credentials);
-//		HttpGet request = new HttpGet(Config.sparql_endpoint);
-//		request.setHeader("Accept", "text/turtle");
-//		try {
-//			HttpResponse response = client.execute(request);
-//
-//			Model model = ModelFactory.createDefaultModel();
-//			model.read(response.getEntity().getContent(), null, Lang.TURTLE.getName());
-//
-//			UpdateRequest srequest = UpdateFactory.create(""
-//					+ "PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
-//					+ "DELETE { ?s ?p ?o.} " 
-//					+ "INSERT { <" + uriInfo.getAbsolutePath() + "> ?p ?o.} "
-//					+ "WHERE { ?s a sd:Service; ?p ?o.} ");
-//			UpdateAction.execute(srequest, model);
-//			srequest = UpdateFactory.create(""
-//					+ "PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
-//					+ "DELETE { ?s sd:url ?url.} " 
-//					+ "INSERT { ?s sd:url <" + uriInfo.getAbsolutePath() + ">.} "
-//					+ "WHERE { ?s sd:url ?url.} ");
-//			UpdateAction.execute(srequest, model);
-//			srequest = UpdateFactory.create(""
-//					+ "PREFIX sd:    <http://www.w3.org/ns/sparql-service-description#>"
-//					+ "INSERT { ?s sd:feature sd:r43ples.} " 
-//					+ "WHERE { ?s a sd:Service.} ");
-//			UpdateAction.execute(srequest, model);
-//
-//			StringWriter sw = new StringWriter();
-//			model.write(sw, RDFLanguages.nameToLang(format).getName());
-//			return Response.ok().entity(sw.toString()).build();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			throw new InternalServerErrorException(e.getMessage());
-//		}
 	}
 
 	/**
-	 * Produce the response for a SELECT SPARQL query. can handle multiple
+	 * Produce the response for a SELECT, ASK or CONSTRUCT SPARQL query. can handle multiple
 	 * graphs
 	 * 
 	 * @param query
@@ -448,13 +410,13 @@ public class Endpoint {
 	 *         and MASTER revision number)
 	 * @throws UnsupportedEncodingException 
 	 */
-	private Response getSelectResponse(final String query, final String format) throws UnsupportedEncodingException {
+	private Response getSelectConstructAskResponse(final String query, final String format) throws UnsupportedEncodingException {
 		if (query.contains("OPTION r43ples:SPARQL_JOIN")) {
 			ResponseBuilder responseBuilder = Response.ok();
 			String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
 			query_rewritten = SparqlRewriter.rewriteQuery(query_rewritten);
 			// FIXME format maybe not correct
-			String result = TripleStoreInterface.executeSelectQuery(query_rewritten, format);
+			String result = TripleStoreInterface.executeSelectConstructAskQuery(query_rewritten, format);
 			responseBuilder.entity(result);
 			responseBuilder.type(format);
 			
@@ -462,10 +424,9 @@ public class Endpoint {
 			return responseBuilder.build();
 		}
 		else {
-			return getSelectResponseClassic(query, format);
+			return getSelectConstructAskResponseClassic(query, format);
 		}
 	}
-
 
 
 	/**
@@ -474,7 +435,7 @@ public class Endpoint {
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
-	private Response getSelectResponseClassic(final String query, final String format) throws UnsupportedEncodingException {
+	private Response getSelectConstructAskResponseClassic(final String query, final String format) throws UnsupportedEncodingException {
 		ResponseBuilder responseBuilder = Response.ok();
 		String queryM = query;
 
@@ -521,7 +482,7 @@ public class Endpoint {
 			logger.info("No R43ples SELECT query: " + queryM);
 		}
 		// FIXME format maybe not correct
-		String response = TripleStoreInterface.executeSelectQuery(queryM, format);
+		String response = TripleStoreInterface.executeSelectConstructAskQuery(queryM, format);
 		return responseBuilder.entity(response).type(format).build();
 	}
 

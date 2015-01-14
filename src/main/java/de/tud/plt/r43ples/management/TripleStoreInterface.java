@@ -2,6 +2,7 @@ package de.tud.plt.r43ples.management;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -60,6 +61,31 @@ public class TripleStoreInterface {
 	 	}
 		
 	}
+	
+	
+	public static String executeSelectConstructAskQuery(String sparqlQuery, String format) {
+		final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
+		final Pattern patternSelectQuery = Pattern.compile(
+				"SELECT.*WHERE\\s*\\{(?<where>.*)\\}", 
+				patternModifier);
+		final Pattern patternAskQuery = Pattern.compile(
+				"ASK.*WHERE\\s*\\{(?<where>.*)\\}", 
+				patternModifier);
+		final Pattern patternConstructQuery = Pattern.compile(
+				"CONSTRUCT.*WHERE\\s*\\{(?<where>.*)\\}", 
+				patternModifier);
+		
+		if (patternSelectQuery.matcher(sparqlQuery).find())
+			return executeSelectQuery(sparqlQuery, format);
+		else if (patternAskQuery.matcher(sparqlQuery).find())
+			return executeAskQuery(sparqlQuery)?"true":"false";
+		else if (patternConstructQuery.matcher(sparqlQuery).find())
+			return executeConstructQuery(sparqlQuery, format);
+		else
+			return executeSelectQuery(sparqlQuery, format);
+		
+	}
+	
 	
 	
 	/**
@@ -186,7 +212,6 @@ public class TripleStoreInterface {
 			dataset.end();
 		}
 	}
-	
 	
 	/**
 	 * Executes an UPDATE query.
