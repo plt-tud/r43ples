@@ -41,8 +41,6 @@ public class Config {
 	public static String sdd_graph_defaultContent;
 	
 	// Visualisation settings
-	/** Path to the yEd output file. **/
-	public static String yed_filepath;
 	/** The visualization file path. **/
 	public static String visualisation_path;
 	/** The logger. **/
@@ -73,8 +71,7 @@ public class Config {
 			
 			sdd_graph = config.getString("sdd.graph");
 			sdd_graph_defaultContent = config.getString("sdd.graph.defaultContent");
-			
-			yed_filepath = config.getString("yEd.filePath");
+
 			visualisation_path = config.getString("visualisation.path");
 		} catch (ConfigurationException e) {
 			logger.warn("Could not read configuration file '" + configFilePath + "'. Switch to 'r43ples.dist.conf'.");
