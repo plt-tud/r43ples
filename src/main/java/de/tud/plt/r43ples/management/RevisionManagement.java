@@ -647,10 +647,6 @@ public class RevisionManagement {
 	 */
 	public static void executeINSERT(final String graphName, final String dataSetAsNTriples) {
 
-//		String insertQueryTemplate =  "INSERT IN GRAPH <%s> { %n"
-//									+ "	%s %n"
-//									+ "} %n";
-		
 		String insertQueryTemplate =  "INSERT DATA { GRAPH <%s> { %n"
 				+ "	%s %n"
 				+ "} } ; %n";
