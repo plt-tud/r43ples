@@ -10,11 +10,11 @@ It provides different revisions of named graphs via a SPARQL interface. All info
 [![Ohloh Project Status](https://www.ohloh.net/p/r43ples/widgets/project_thin_badge.gif)](https://www.ohloh.net/p/r43ples)
 
 
-This project provides a proxy service for revision management of named graphs in a triple store.
-The service is attached to an existing SPARQL endpoint of a Triple Store and acts as another endpoint both for normal SPARQL queries
+This project provides an enhanced SPARQL endpoint for revision management of named graphs.
+R43ples uses an internal Jena TDB is attached to an existing SPARQL endpoint of a Triple Store and acts as another endpoint both for normal SPARQL queries
 as well as for revision-enhanced SPARQL queries, named R43ples queries.
 The R43ples endpoint allows to specify revisions which should be queried for each named graph used inside a SPARQL query.
-The R43ples proxy itself doesn't store any data but completely relies on the attached triplestore.
+The whole revision information is stored in additional graphs in the attached Jena TDB.
 
 The javadoc can be found at the [website](http://plt-tud.github.io/r43ples) under [http://plt-tud.github.io/r43ples/javadoc/](http://plt-tud.github.io/r43ples/javadoc/).
 
@@ -25,17 +25,9 @@ Dependencies
 ------------
 * JDK 1.7
 * Maven
-* Running Triplestore with SPARQL 1.1 endpoint (tested with [Virtuoso 7](https://github.com/openlink/virtuoso-opensource))
 
 ```
 sudo apt-get install maven default-jdk
-# install virtuoso
-git checkout https://github.com/openlink/virtuoso-opensource.git
-cd virtuoso-opensource
-./autogen.sh
-./configure
-make
-sudo make install
 ```
 
 Releases
@@ -180,12 +172,13 @@ Used libraries and frameworks
 Following libraries are used in R43ples:
 
 * [Jersey](https://jersey.java.net/) for RestFul web services in Java
-* [Grizzly]() as web server
+* [Grizzly](https://grizzly.java.net/) as web server
 * [Jena ARQ](https://jena.apache.org/documentation/query/index.html) for processing SPARQL results
+* [Jena TDB](https://jena.apache.org/documentation/tdb/index.html) as triplestore
 * [Grappa](http://www2.research.att.com/~john/Grappa/) for creating GraphViz diagrams
 * [jQuery](http://jquery.com/) as JavaScript framework
-* Bootstrap
-* Mustache
+* [Bootstrap](http://getbootstrap.com/)
+* [Mustache](https://mustache.github.io/) as template engine
 * [viz.js](http://mdaines.github.io/viz.js/example.html) as JavaScript framework for rendering GraphViz
  
 
