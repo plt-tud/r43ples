@@ -1,9 +1,9 @@
-<sparql xmlns="http://www.w3.org/2005/sparql-results#" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/sw/DataAccess/rf1/result2.xsd">
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
  <head>
   <variable name="p1"/>
   <variable name="p2"/>
  </head>
- <results distinct="false" ordered="true">
+ <results>
   <result>
    <binding name="p1"><uri>http://test.com/Adam</uri></binding>
    <binding name="p2"><uri>http://test.com/Emma</uri></binding>
