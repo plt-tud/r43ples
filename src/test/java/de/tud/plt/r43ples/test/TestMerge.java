@@ -9,6 +9,7 @@ import java.io.UnsupportedEncodingException;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.configuration.ConfigurationException;
+import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -38,6 +39,8 @@ public class TestMerge {
 	 */
 	@Before
 	public void setUp() throws ConfigurationException, UnsupportedEncodingException {
+		XMLUnit.setIgnoreWhitespace(true);
+		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.database_directory);
 		// Create the initial data set

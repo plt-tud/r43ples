@@ -21,7 +21,7 @@ import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 
 /**
- * @author mgraube
+ * @author Markus Graube
  *
  */
 public class TestMergeManagement {

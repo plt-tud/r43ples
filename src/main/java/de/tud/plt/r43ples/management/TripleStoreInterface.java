@@ -148,14 +148,13 @@ public class TripleStoreInterface {
 			QueryExecution qExec = QueryExecutionFactory.create(constructQueryString, dataset);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			Model result = qExec.execConstruct();
-			format=format.toLowerCase();
 			
-			if (format.contains("xml") )
+			if (format.toLowerCase().contains("xml") )
 				result.write(baos, "RDF/XML");
-			else if (format.contains("turtle") )
+			else if (format.toLowerCase().contains("turtle") )
 				result.write(baos, "Turtle");
 			else {
-				result.write(baos);
+				result.write(baos, format);
 			}
 			return baos.toString();
 		} finally {
@@ -219,12 +218,30 @@ public class TripleStoreInterface {
 	 * @param updateQueryString the UPDATE query
 	 */
 	public static void executeUpdateQuery(String updateQueryString) {
-		logger.info(updateQueryString);
 		dataset.begin(ReadWrite.WRITE);
 		try {
 			GraphStore graphStore = GraphStoreFactory.create(dataset) ;
 
 		    UpdateRequest request = UpdateFactory.create(updateQueryString) ;
+		    UpdateProcessor proc = UpdateExecutionFactory.create(request, graphStore) ;
+		    proc.execute() ;
+
+		    dataset.commit();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			dataset.end();
+		}
+	}
+
+
+	public static void executeCreateGraph(String graph) {
+		dataset.begin(ReadWrite.WRITE);
+		try {
+			GraphStore graphStore = GraphStoreFactory.create(dataset) ;
+
+		    UpdateRequest request = UpdateFactory.create("CREATE GRAPH <"+graph+">") ;
 		    UpdateProcessor proc = UpdateExecutionFactory.create(request, graphStore) ;
 		    proc.execute() ;
 

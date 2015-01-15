@@ -664,7 +664,7 @@ public class RevisionManagement {
 
 		String insertQueryTemplate =  "INSERT DATA { GRAPH <%s> { %n"
 				+ "	%s %n"
-				+ "} } ; %n";
+				+ "} }";
 		
 		final int MAX_STATEMENTS = 200;
 		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
@@ -835,7 +835,8 @@ public class RevisionManagement {
 		// Drop all full graphs as well as add and delete sets which are related
 		// to specified graph
 		String query = prefixes	+ String.format(""
-				+ "SELECT DISTINCT ?graph WHERE { GRAPH <%s> {" 
+				+ "SELECT DISTINCT ?graph "
+				+ "WHERE { GRAPH <%s> {" 
 				+ "		?rev rmo:revisionOf <%s>."
 				+ " 	{?rev rmo:deltaAdded ?graph}" 
 				+ " UNION {?rev rmo:deltaRemoved ?graph}"
@@ -937,7 +938,9 @@ public class RevisionManagement {
 	 */
 	public static boolean isBranch(final String graphName, final String identifier) {
 		String queryASK = prefixes
-				+ String.format("ASK { GRAPH <%s> { " + " ?rev a rmo:Revision; rmo:revisionOf <%s>. "
+				+ String.format(""
+						+ "ASK { GRAPH <%s> { " 
+						+ " ?rev a rmo:Revision; rmo:revisionOf <%s>. "
 						+ " ?ref a rmo:Reference; rmo:references ?rev ."
 						+ " { ?rev rmo:revisionNumber \"%s\"} UNION { ?ref rdfs:label \"%s\"} }} ",
 						Config.revision_graph, graphName, identifier, identifier);
@@ -979,9 +982,9 @@ public class RevisionManagement {
 	 */
 	public static String getDeleteSetURI(String revisionURI, String revisionGraph) {
 		String query = String.format(
-			  "SELECT ?deleteSetURI \n"
+			  "SELECT ?deleteSetURI %n"
 		    + "WHERE { GRAPH <%s> {%n"
-			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaRemoved> ?deleteSetURI . \n"
+			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaRemoved> ?deleteSetURI . %n"
 			+ "} }", revisionGraph, revisionURI);
 		
 		ResultSet results = TripleStoreInterface.executeSelectQuery(query);
@@ -1042,8 +1045,7 @@ public class RevisionManagement {
 				+ " ?rev rmo:revisionOf ?graph;"
 				+ "			rmo:revisionNumber ?number . %n"
 				+ "} %n"
-				+ "FROM <%s> %n"
-				+ "WHERE {"
+				+ "WHERE { GRAPH <%s> { "
 				+ " ?ref a ?type;"
 				+ "		rdfs:label ?label;%n"
 				+ "		rmo:references ?rev."
@@ -1051,7 +1053,7 @@ public class RevisionManagement {
 				+ "			rmo:revisionNumber ?number . %n"
 				+ "FILTER (?type IN (rmo:Tag, rmo:Master, rmo:Branch)) %n"
 				+ "FILTER (?graph IN (%s)) %n"
-				+ "}", Config.revision_graph, graphList);
+				+ "} }", Config.revision_graph, graphList);
 		String header = TripleStoreInterface.executeConstructQuery(queryConstruct, FileUtils.langTurtle);
 		return header;
 	}

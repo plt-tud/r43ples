@@ -811,8 +811,9 @@ public class Endpoint {
 			String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionUriA, revisionUriB);
 			
 			// Create the revision progress for A and B
-			String graphNameA = "RM-REVISION-PROGRESS-A-" + graphName;
-			String graphNameB = "RM-REVISION-PROGRESS-B-" + graphName;
+			String graphNameA = graphName + "-RM-REVISION-PROGRESS-A";
+			String graphNameB = graphName + "-RM-REVISION-PROGRESS-B";
+			String graphNameDiff = graphName + "-RM-DIFFERENCE-MODEL";
 			String uriA = "http://eatld.et.tu-dresden.de/branch-A";
 			String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 			
@@ -820,21 +821,21 @@ public class Endpoint {
 			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
 			
 			// Create difference model
-			MergeManagement.createDifferenceTripleModel(graphName, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI);
+			MergeManagement.createDifferenceTripleModel(graphName,  graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI);
 			
 			// Differ between the different merge queries
 			if ((action != null) && (action.equalsIgnoreCase("AUTO")) && (with == null) && (triples == null)) {
 				logger.info("AUTO MERGE query detected");
 				// Create the merged revision
-				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.AUTO, "");
+				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.AUTO, "");
 			} else if ((action != null) && (action.equalsIgnoreCase("MANUAL")) && (with != null) && (triples != null)) {
 				logger.info("MANUAL MERGE query detected");
 				// Create the merged revision
-				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.MANUAL, triples);
+				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.MANUAL, triples);
 			} else if ((action == null) && (with != null) && (triples != null)) {
 				logger.info("MERGE WITH query detected");
 				// Create the merged revision
-				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.WITH, triples);
+				newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.WITH, triples);
 			} else if ((action == null) && (with == null) && (triples == null)) {
 				logger.info("MERGE query detected");
 				// Check if difference model contains conflicts
@@ -843,16 +844,16 @@ public class Endpoint {
 						+ "	GRAPH <%s> { %n"
 						+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
 						+ "	} %n"
-						+ "}", "RM-DIFFERENCE-MODEL-" + graphName);
+						+ "}", graphNameDiff);
 				if (TripleStoreInterface.executeAskQuery(queryASK)) {
 					// Difference model contains conflicts
 					// Return the conflict model to the client
 					responseBuilder = Response.status(Response.Status.CONFLICT);
-					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct("RM-DIFFERENCE-MODEL-" + graphName));
+					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff));
 				} else {
 					// Difference model contains no conflicts
 					// Create the merged revision
-					newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, "RM-DIFFERENCE-MODEL-" + graphName, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.COMMON, "");
+					newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.COMMON, "");
 				}
 			} else {
 				throw new InternalServerErrorException("This is not a valid MERGE query: " + sparqlQuery);
