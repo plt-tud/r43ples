@@ -149,12 +149,12 @@ public class MergeManagement {
 			String graphName = "";
 
 			String query = String.format(
-				  "SELECT ?number ?graph \n"
-				+ "FROM <%s> \n"
-				+ "WHERE { \n"
-				+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#revisionNumber> ?number . \n"
-				+ " <%s> <http://eatld.et.tu-dresden.de/rmo#revisionOf> ?graph . \n"
-				+ "}", Config.revision_graph, firstRevision, firstRevision);
+				  "SELECT ?number ?graph %n"
+				+ "WHERE { %n"
+				+ "	GRAPH <%s> { %n"
+				+ "		<%s> <http://eatld.et.tu-dresden.de/rmo#revisionNumber> ?number . %n"
+				+ " 	<%s> <http://eatld.et.tu-dresden.de/rmo#revisionOf> ?graph . %n"
+				+ "} }", Config.revision_graph, firstRevision, firstRevision);
 			
 			ResultSet results = TripleStoreInterface.executeSelectQuery(query);
 			
