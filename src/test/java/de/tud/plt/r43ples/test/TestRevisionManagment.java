@@ -33,7 +33,6 @@ public class TestRevisionManagment {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, UnsupportedEncodingException{
-		
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.conf");
@@ -268,7 +267,7 @@ public class TestRevisionManagment {
 		testXMLSimilar(expected, result);
 	}
 	
-	public void testXMLSimilar(String expected, String actual) throws SAXException, IOException {
+	public static void testXMLSimilar(String expected, String actual) throws SAXException, IOException {
 		Diff myDiff = new Diff(expected, actual);
 		Assert.assertTrue("XML strings not identical: " + myDiff.toString(),	myDiff.similar());
 		}

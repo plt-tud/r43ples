@@ -2,6 +2,7 @@ package de.tud.plt.r43ples.management;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -11,6 +12,7 @@ import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.ReadWrite;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFormatter;
+import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.update.GraphStore;
 import com.hp.hpl.jena.update.GraphStoreFactory;
@@ -61,6 +63,31 @@ public class TripleStoreInterface {
 	}
 	
 	
+	public static String executeSelectConstructAskQuery(String sparqlQuery, String format) {
+		final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
+		final Pattern patternSelectQuery = Pattern.compile(
+				"SELECT.*WHERE\\s*\\{(?<where>.*)\\}", 
+				patternModifier);
+		final Pattern patternAskQuery = Pattern.compile(
+				"ASK.*WHERE\\s*\\{(?<where>.*)\\}", 
+				patternModifier);
+		final Pattern patternConstructQuery = Pattern.compile(
+				"CONSTRUCT.*WHERE\\s*\\{(?<where>.*)\\}", 
+				patternModifier);
+		
+		if (patternSelectQuery.matcher(sparqlQuery).find())
+			return executeSelectQuery(sparqlQuery, format);
+		else if (patternAskQuery.matcher(sparqlQuery).find())
+			return executeAskQuery(sparqlQuery)?"true":"false";
+		else if (patternConstructQuery.matcher(sparqlQuery).find())
+			return executeConstructQuery(sparqlQuery, format);
+		else
+			return executeSelectQuery(sparqlQuery, format);
+		
+	}
+	
+	
+	
 	/**
 	 * Executes a SELECT query.
 	 * 
@@ -91,13 +118,17 @@ public class TripleStoreInterface {
 			QueryExecution qExec = QueryExecutionFactory.create(selectQueryString, dataset);
 			ResultSet results = qExec.execSelect();
 			// FIXME Add format selection
-			if (format.equals("application/sparql-results+xml"))
-				return ResultSetFormatter.asXMLString(results);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			if (format.equals("application/sparql-results+xml") || format.equals("application/xml") )
+				ResultSetFormatter.outputAsXML(baos, results);
+			else if (format.equals("text/turtle") )
+				ResultSetFormatter.outputAsRDF(baos, "Turtle", results);
+			else if (format.equals("application/json") )
+				ResultSetFormatter.outputAsJSON(baos, results);
 			else {
-				ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				ResultSetFormatter.out(baos, results);
-				return baos.toString();
 			}
+			return baos.toString();
 		} finally {
 			dataset.end();
 		}
@@ -116,13 +147,35 @@ public class TripleStoreInterface {
 		try {
 			QueryExecution qExec = QueryExecutionFactory.create(constructQueryString, dataset);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			qExec.execConstruct().write(baos, format);
-		    return baos.toString();
+			Model result = qExec.execConstruct();
+			format=format.toLowerCase();
+			
+			if (format.contains("xml") )
+				result.write(baos, "RDF/XML");
+			else if (format.contains("turtle") )
+				result.write(baos, "Turtle");
+			else {
+				result.write(baos);
+			}
+			return baos.toString();
 		} finally {
 			dataset.end();
 		}
 	}
 	
+	public static String formatOutput(ResultSet results, String format){
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		if (format.equals("application/sparql-results+xml") || format.equals("application/xml") )
+			ResultSetFormatter.outputAsXML(baos, results);
+		else if (format.equals("text/turtle") )
+			ResultSetFormatter.outputAsRDF(baos, "Turtle", results);
+		else if (format.equals("application/json") )
+			ResultSetFormatter.outputAsJSON(baos, results);
+		else {
+			ResultSetFormatter.out(baos, results);
+		}
+		return baos.toString();
+	}
 	
 	/**
 	 * Executes a DESCRIBE query.
@@ -159,7 +212,6 @@ public class TripleStoreInterface {
 			dataset.end();
 		}
 	}
-	
 	
 	/**
 	 * Executes an UPDATE query.

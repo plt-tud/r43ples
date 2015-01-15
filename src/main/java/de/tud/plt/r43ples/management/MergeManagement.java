@@ -58,123 +58,31 @@ public class MergeManagement {
 		
 		logger.info("Get the common revision of <" + revision1 + "> and <" + revision2 + "> which has the shortest path.");
 		
-		// TODO use new query
 		String query = String.format(
-			  "# Query selects the revision which is on both paths (branch 1 and branch 2) and has the minimal path element count \n"
-			+ "SELECT ?link MIN(xsd:decimal(?pathElements1) + xsd:decimal(?pathElements2)) AS ?pathElementCountBothBranches \n"
-			+ "WHERE { \n"
-			+ "	{ \n"
-			+ "		# Query creates for each start revision of branch 1 the path element count \n"
-			+ "		SELECT ?startRevision1 COUNT(?path1) as ?pathElements1 \n"
-			+ "		WHERE { \n"
-			+ "			{ \n"
-			+ "				SELECT ?s ?startRevision1 \n"
-			+ "				WHERE { \n"
-			+ "					graph <%s> { \n"
-			+ "						?s <http://www.w3.org/ns/prov#wasDerivedFrom> ?startRevision1 . \n"
-			+ "					} \n"
-			+ "				} \n"
-			+ "			} \n"
-			+ "			OPTION ( TRANSITIVE, \n"
-			+ "					 t_distinct, \n"
-			+ "					 t_in(?s), \n"
-			+ "					 t_out(?startRevision1), \n"
-			+ "					 t_step (?s) as ?link1, \n"
-			+ "					 t_step ('path_id') as ?path1, \n"
-			+ "					 t_step ('step_no') as ?step1 \n"
-			+ "					) . \n"
-			+ "			FILTER ( ?s = <%s> ) \n"
-			+ "		} GROUP BY ?startRevision1 \n"
-			+ "	} \n"
-			+ "	OPTIONAL \n"
-			+ "	{ \n"
-			+ "		# Query creates for each start revision of branch 2 the path element count \n"
-			+ "		SELECT ?startRevision2 COUNT(?path2) as ?pathElements2 \n"
-			+ "		WHERE { \n"
-			+ "			{ \n"
-			+ "				SELECT ?s ?startRevision2 \n"
-			+ "				WHERE { \n"
-			+ "					graph <%s> { \n"
-			+ "						?s <http://www.w3.org/ns/prov#wasDerivedFrom> ?startRevision2 . \n"
-			+ "					} \n"
-			+ "				} \n"
-			+ "			} \n"
-			+ "			OPTION ( TRANSITIVE, \n"
-			+ "					 t_distinct, \n"
-			+ "					 t_in(?s), \n"
-			+ "					 t_out(?startRevision2), \n"
-			+ "					 t_step (?s) as ?link2, \n"
-			+ "					 t_step ('path_id') as ?path2, \n"
-			+ "					 t_step ('step_no') as ?step1 \n"
-			+ "					) . \n"
-			+ "			FILTER ( ?s = <%s> ) \n"
-			+ "		  } GROUP BY ?startRevision2 \n"
-			+ "	} \n"
-			+ "	OPTIONAL \n"
-			+ "	{ \n"
-			+ "		# Query response contains all revisions which are on both paths (branch 1 and branch 2) \n"
-			+ "		SELECT DISTINCT ?link1 AS ?link \n"
-			+ "		WHERE { \n"
-			+ "			{ \n"
-			+ "				# Query creates all possible paths for branch 1 \n"
-			+ "				SELECT ?link1 ?step1 ?path1 \n"
-			+ "				WHERE { \n"
-			+ "					{ \n"
-			+ "						SELECT ?s ?o \n"
-			+ "						WHERE { \n"
-			+ "							graph <%s> { \n"
-			+ "								?s <http://www.w3.org/ns/prov#wasDerivedFrom> ?o . \n"
-			+ "							} \n"
-			+ "						} \n"
-			+ "					} \n"
-			+ "					OPTION ( TRANSITIVE, \n"
-			+ "							 t_distinct, \n"
-			+ "							 t_in(?s), \n"
-			+ "							 t_out(?o), \n"
-			+ "							 t_step (?s) as ?link1, \n"
-			+ "							 t_step ('path_id') as ?path1, \n"
-			+ "							 t_step ('step_no') as ?step1 \n"
-			+ "							) . \n"
-			+ "					FILTER ( ?s = <%s> ) \n"
-			+ "				} \n"
-			+ "			} \n"
-			+ "			OPTIONAL \n"
-			+ "			{ \n"
-			+ "				# Query creates all possible paths for branch 2 \n"
-			+ "				SELECT ?link2 ?step2 ?path2 \n"
-			+ "				WHERE { \n"
-			+ "					{ \n"
-			+ "						SELECT ?s ?o \n"
-			+ "						WHERE { \n"
-			+ "							graph <%s> { \n"
-			+ "								?s <http://www.w3.org/ns/prov#wasDerivedFrom> ?o . \n"
-			+ "							} \n"
-			+ "						} \n"
-			+ "					} \n"
-			+ "					OPTION ( TRANSITIVE, \n"
-			+ "							 t_distinct, \n"
-			+ "							 t_in(?s), \n"
-			+ "							 t_out(?o), \n"
-			+ "							 t_step (?s) as ?link2, \n"
-			+ "							 t_step ('path_id') as ?path2, \n"
-			+ "							 t_step ('step_no') as ?step2 \n"
-			+ "							) . \n"
-			+ "					FILTER ( ?s = <%s> ) \n"
-			+ "				} \n"
-			+ "			} \n"
-			+ "			FILTER ( ?link1 = ?link2 ) \n"
-			+ "		} \n"
-			+ "	} \n"
-			+ "	FILTER ( ?startRevision1 = ?startRevision2 && ?startRevision1 = ?link ) \n"
-			+ "} ORDER BY ?pathElementCountBothBranches \n"
-			+ "LIMIT 1", Config.revision_graph, revision1, Config.revision_graph, revision2, Config.revision_graph, revision1, Config.revision_graph, revision2);
-		
+			  "PREFIX prov: <http://www.w3.org/ns/prov#> "
+			  + "SELECT DISTINCT ?revision "
+			  + "WHERE { "
+			  + "    GRAPH <%s> {"
+			  + "        ?branch1 prov:wasDerivedFrom+ ?revision ."
+			  + "        ?branch2 prov:wasDerivedFrom+ ?revision ."
+			  + "        FILTER NOT EXISTS {"
+			  + "            ?next prov:wasDerivedFrom ?revision."
+			  + "            ?branch1 prov:wasDerivedFrom+ ?next ."
+			  + "            ?branch2 prov:wasDerivedFrom+ ?next ."
+			  + "        }"
+			  + "        FILTER ( ?branch1 = <%s> )"
+			  + "        FILTER ( ?branch2 = <%s> )"
+			  + "    }"
+			  + "}"
+			  + "LIMIT 1",
+			  Config.revision_graph, revision1, revision2);
+		logger.info(query);
 		ResultSet results = TripleStoreInterface.executeSelectQuery(query);
 		
 		if (results.hasNext()) {
 			QuerySolution qs = results.next();
 			logger.info("Common revision found.");
-			return qs.getResource("?link").toString();
+			return qs.getResource("?revision").toString();
 		}
 		
 		logger.info("No common revision could be found.");
@@ -193,28 +101,14 @@ public class MergeManagement {
 		
 		logger.info("Calculate the shortest path from revision <" + startRevision + "> to <" + targetRevision + "> .");
 		String query = String.format(
-			  "# Query creates shortest path between start and target revision \n"
-			+ "SELECT ?link ?step \n"
-			+ "WHERE { \n"
-			+ "	{ \n"
-			+ "		SELECT ?s ?o \n"
-			+ "		WHERE { \n"
-			+ "			graph <%s> { \n"
-			+ "				?s <http://www.w3.org/ns/prov#wasDerivedFrom> ?o . \n"
-			+ "			} \n"
-			+ "		} \n"
-			+ "	} \n"
-			+ "	OPTION ( TRANSITIVE, \n"
-			+ "			 t_distinct, \n"
-			+ "			 t_in(?s), \n"
-			+ "			 t_out(?o), \n"
-			+ "			 t_shortest_only, \n"
-			+ "			 t_step (?s) as ?link, \n"
-			+ "			 t_step ('path_id') as ?path, \n"
-			+ "			 t_step ('step_no') as ?step \n"
-			+ "			) . \n"
-			+ "	FILTER ( ?s = <%s> && ?o = <%s> ) \n"
-			+ "}  ORDER BY ?step", Config.revision_graph, targetRevision, startRevision);
+			  "PREFIX prov: <http://www.w3.org/ns/prov#> %n"
+			+ "SELECT DISTINCT ?revision %n"
+			+ "WHERE { %n"
+			+ "	GRAPH <%s> { %n"
+			+ "		<%s> prov:wasDerivedFrom* ?revision."
+			+ "		?revision prov:wasDerivedFrom* ?startRevision."
+			+ " }"
+			+ "}", Config.revision_graph, targetRevision, startRevision);
 		
 		LinkedList<String> list = new LinkedList<String>();
 		
@@ -222,7 +116,7 @@ public class MergeManagement {
 
 		while (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
-			String resource = qs.getResource("?link").toString();
+			String resource = qs.getResource("?revision").toString();
 			logger.info("Path element: \n" + resource);
 			list.addFirst(resource);
 		}
