@@ -2,6 +2,6 @@
 :: go to your java installation directory 
 
 cd C:\Program Files\Java\jre7\bin
-keytool -genkey -alias r43ples -keypass r43ples -keystore C:\keystoreR43ples -keyalgRSA
+keytool -genkey -alias r43ples -keypass r43ples -keystore C:\keystoreR43ples -keyalg RSA
 
 :: enter identification: r43ples - PLT - TUD - DD - SN - DE
