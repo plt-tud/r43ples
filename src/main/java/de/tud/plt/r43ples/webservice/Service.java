@@ -3,6 +3,7 @@ package de.tud.plt.r43ples.webservice;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -66,6 +67,8 @@ public class Service {
 		Config.readConfig("r43ples.conf");
 		URI BASE_URI = null;
 	
+		ClassLoader classLoader = Service.class.getClassLoader();
+		
 		// Choose if the endpoint should be SSL secured
 		if (Config.service_secure) {
 			BASE_URI = UriBuilder.fromUri(Config.service_uri.replaceFirst("http://", "https://")).port(Config.service_port).path("r43ples").build();
@@ -77,8 +80,12 @@ public class Service {
 				.register(ExceptionMapper.class);
 
 			SSLContextConfigurator sslCon = new SSLContextConfigurator();
-			sslCon.setKeyStoreFile(Config.ssl_keystore);
+			sslCon.setKeyStoreFile(Paths.get(classLoader.getResource(Config.ssl_keystore).toURI()).toString());
 			sslCon.setKeyStorePass(Config.ssl_password);
+			sslCon.setTrustStoreFile(Paths.get(classLoader.getResource(Config.ssl_keystore).toURI()).toString());
+			sslCon.setTrustStorePass(Config.ssl_password);
+			
+			logger.info("SSL context validated: " + Boolean.toString(sslCon.validateConfiguration()));
 	
 			server = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, rc, true, new SSLEngineConfigurator(sslCon, false, false, false));
 
