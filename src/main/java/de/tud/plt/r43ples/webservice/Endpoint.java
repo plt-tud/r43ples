@@ -183,6 +183,7 @@ public class Endpoint {
 		logger.info("format: " + format);
 
 		ResponseBuilder response = Response.ok();
+		// TODO format
 		if (format.contains(MediaType.TEXT_HTML)) {
 			response.type(MediaType.TEXT_HTML);
 			response.entity(GraphVizVisualisation.getGraphVizHtmlOutput(graph));
@@ -205,6 +206,7 @@ public class Endpoint {
 	public final String getRevisedGraphs(@HeaderParam("Accept") final String format_header,
 			@QueryParam("format") @DefaultValue("application/json") final String format_query) {
 		logger.info("Get Revised Graphs");
+		// TODO format
 		String format = (format_query != null) ? format_query : format_header;
 		logger.info("format: " + format);
 		return RevisionManagement.getRevisedGraphsSparql(format);
@@ -226,6 +228,7 @@ public class Endpoint {
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("format") final String formatQuery, @FormParam("query") @DefaultValue("") final String sparqlQuery) {
+		// TODO format
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		return sparql(format, sparqlQuery);
 	}
@@ -251,6 +254,7 @@ public class Endpoint {
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
 			@QueryParam("format") final String formatQuery, @QueryParam("query") @DefaultValue("") final String sparqlQuery) throws UnsupportedEncodingException {
+		// TODO format
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		String sparqlQueryDecoded = URLDecoder.decode(sparqlQuery, "UTF-8");
 		return sparql(format, sparqlQueryDecoded);
