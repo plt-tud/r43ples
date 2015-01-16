@@ -43,7 +43,7 @@ public class TestR43ples {
 	public static void setUp() throws ConfigurationException, URISyntaxException, IOException{
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
-		Config.readConfig("r43ples.conf");
+		Config.readConfig("r43ples.test.conf");
 		TripleStoreInterface.init(Config.database_directory);
 		SampleDataSet.createSampleDataSetMerging(graphName);
 		Service.start();
