@@ -51,7 +51,8 @@ public class Service {
 	 */
 	public static void main(String[] args) throws ConfigurationException, URISyntaxException, IOException {
 		start();
-		while(true);
+		System.in.read();
+		stop();
 	}
 
 	
@@ -115,6 +116,7 @@ public class Service {
 		}
 		
 		logger.info(String.format("Server started - R43ples endpoint available under: %s/sparql", BASE_URI));
+		logger.info("Press enter to quit the server");
 		
 		logger.info("Version: "+ Service.class.getPackage().getImplementationVersion());
 		
@@ -126,6 +128,8 @@ public class Service {
 	 * Stops the server.
 	 */
 	public static void stop() {
+		logger.info("Server shutdown ...");
+		TripleStoreInterface.close();
 		server.shutdown();
 	}
 	

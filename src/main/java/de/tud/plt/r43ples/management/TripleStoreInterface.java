@@ -31,7 +31,7 @@ import com.hp.hpl.jena.update.UpdateRequest;
 public class TripleStoreInterface {
 
 	/** The TDB dataset. **/
-	public static Dataset dataset;
+	private static Dataset dataset;
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(TripleStoreInterface.class);
 	
@@ -58,9 +58,14 @@ public class TripleStoreInterface {
 			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
 			// Insert default content into SDD graph
 			RevisionManagement.executeINSERT(Config.sdd_graph, MergeManagement.convertJenaModelToNTriple(MergeManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent)));
-	 	}
-		
+	 	}		
 	}
+	
+	public static void close() {
+		dataset.close();
+	}
+	
+	
 	
 	
 	public static String executeSelectConstructAskQuery(String sparqlQuery, String format) {
