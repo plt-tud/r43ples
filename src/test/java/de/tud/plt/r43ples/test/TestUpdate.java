@@ -2,6 +2,7 @@ package de.tud.plt.r43ples.test;
 
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -81,11 +82,11 @@ public class TestUpdate {
 		
         String result = ep.sparql(format, String.format(query_template, 6)).getEntity().toString();
         String expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev5.xml");
-        TestRevisionManagment.testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
         
         result = ep.sparql(format, String.format(query_template, 5)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev5.xml");
-        TestRevisionManagment.testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
 	}
 	
 	@Test

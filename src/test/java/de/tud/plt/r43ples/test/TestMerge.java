@@ -117,6 +117,7 @@ public class TestMerge {
 		// Test branch B2
 		String result2 = executeR43plesQuery(createSelectQuery(graphName, "B2"));
 		String expected2 = ResourceManagement.getContentFromResource("merge/auto/response-B2-B2X-into-B2.xml");
+		Assert.assertEquals(expected2, result2);
 		assertXMLEqual(expected2, result2);
 		
 		

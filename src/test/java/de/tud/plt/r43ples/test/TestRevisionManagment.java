@@ -1,11 +1,12 @@
 package de.tud.plt.r43ples.test;
 
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -76,7 +77,7 @@ public class TestRevisionManagment {
         
         result = ep.sparql(format, query).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev5.xml");
-        testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
         
         query = "SELECT ?s ?p ?o "
         		+ "FROM <"+graph_test+"> REVISION \"MASTER\""
@@ -84,7 +85,7 @@ public class TestRevisionManagment {
         
         result = ep.sparql(format, query).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev5.xml");
-        testXMLSimilar(expected, result);   
+        assertXMLEqual(expected, result);   
 	}
 	
 	@Test
@@ -95,27 +96,27 @@ public class TestRevisionManagment {
         
         result = ep.sparql(format, String.format(query_template, 0)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev0.xml");
-        testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
         
         result = ep.sparql(format, String.format(query_template, 1)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev1.xml");
-        testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
         
         result = ep.sparql(format, String.format(query_template, 2)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev2.xml");
-        testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
         
         result = ep.sparql(format, String.format(query_template, 3)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev3.xml");
-        testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
         
         result = ep.sparql(format, String.format(query_template, 4)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev4.xml");
-        testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
         
         result = ep.sparql(format, String.format(query_template, 5)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev5.xml");
-        testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
 	}
 
 	@Test
@@ -126,27 +127,27 @@ public class TestRevisionManagment {
         
         result = ep.sparql(format, String.format(query_template, 0)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev0.xml");
-        testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
         
         result = ep.sparql(format, String.format(query_template, 1)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev1.xml");
-        testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
         
         result = ep.sparql(format, String.format(query_template, 2)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev2.xml");
-        testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
         
         result = ep.sparql(format, String.format(query_template, 3)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev3.xml");
-        testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
         
         result = ep.sparql(format, String.format(query_template, 4)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev4.xml");
-        testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
         
         result = ep.sparql(format, String.format(query_template, 5)).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev5.xml");
-        testXMLSimilar(expected, result);
+        assertXMLEqual(expected, result);
 	}
 	
 	@Test
@@ -162,11 +163,11 @@ public class TestRevisionManagment {
 		
 		expected = ResourceManagement.getContentFromResource("2patterns/response-rev3.xml");
 		result = ep.sparql(format, String.format(query,3)).getEntity().toString();
-		testXMLSimilar(expected, result);
+		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("2patterns/response-rev4.xml");
 		result = ep.sparql(format, String.format(query,4)).getEntity().toString();
-		testXMLSimilar(expected, result);
+		assertXMLEqual(expected, result);
 	}
 	
 	@Test
@@ -183,11 +184,11 @@ public class TestRevisionManagment {
 		
 		expected = ResourceManagement.getContentFromResource("2patterns/response-rev3.xml");
 		result = ep.sparql(format, String.format(query,3)).getEntity().toString();
-		testXMLSimilar(expected, result);
+		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("2patterns/response-rev4.xml");
 		result = ep.sparql(format, String.format(query,4)).getEntity().toString();
-		testXMLSimilar(expected, result);
+		assertXMLEqual(expected, result);
 	}
 	
 	
@@ -232,15 +233,15 @@ public class TestRevisionManagment {
 		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev2.xml");
 		result = ep.sparql(format, String.format(query,2)).getEntity().toString();
-		testXMLSimilar(expected, result);
+		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev3.xml");
 		result = ep.sparql(format, String.format(query,3)).getEntity().toString();
-		testXMLSimilar(expected, result);
+		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev4.xml");
 		result = ep.sparql(format, String.format(query,4)).getEntity().toString();
-		testXMLSimilar(expected, result);
+		assertXMLEqual(expected, result);
 	}
 	
 	@Test
@@ -256,21 +257,15 @@ public class TestRevisionManagment {
 		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev2.xml");
 		result = ep.sparql(format, String.format(query,2)).getEntity().toString();
-		testXMLSimilar(expected, result);
+		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev3.xml");
 		result = ep.sparql(format, String.format(query,3)).getEntity().toString();
-		testXMLSimilar(expected, result);
+		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev4.xml");
 		result = ep.sparql(format, String.format(query,4)).getEntity().toString();
-		testXMLSimilar(expected, result);
+		assertXMLEqual(expected, result);
 	}
-	
-	public static void testXMLSimilar(String expected, String actual) throws SAXException, IOException {
-		Diff myDiff = new Diff(expected, actual);
-		Assert.assertTrue("XML strings not identical: " + myDiff.toString(),	myDiff.similar());
-		}
-
 	
 }

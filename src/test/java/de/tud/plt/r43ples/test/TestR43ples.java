@@ -1,6 +1,7 @@
 package de.tud.plt.r43ples.test;
 
 import static org.hamcrest.core.StringContains.containsString;
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -42,7 +43,6 @@ public class TestR43ples {
 	@BeforeClass
 	public static void setUp() throws ConfigurationException, URISyntaxException, IOException{
 		XMLUnit.setIgnoreWhitespace(true);
-		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
 		TripleStoreInterface.init(Config.database_directory);
 		SampleDataSet.createSampleDataSetMerging(graphName);
@@ -63,7 +63,7 @@ public class TestR43ples {
 				+ "ORDER BY ?s ?p ?o", graphName);
 		String result3 = executeR43plesQuery(query);
 		String expected3 = ResourceManagement.getContentFromResource("response-1.1-3.xml");
-		TestRevisionManagment.testXMLSimilar(expected3, result3);
+		assertXMLEqual(expected3, result3);
 	}
 	
 	
@@ -78,7 +78,7 @@ public class TestR43ples {
 						+ "ORDER BY ?s ?p ?o", graphName, graphName);
 		String result4 = executeR43plesQuery(query);
 		String expected4 = ResourceManagement.getContentFromResource("response-b1-b2.xml");
-		TestRevisionManagment.testXMLSimilar(expected4, result4);
+		assertXMLEqual(expected4, result4);
 	}
 	
 
@@ -104,7 +104,7 @@ public class TestR43ples {
 				+ "ORDER BY ?s ?p ?o", graphName);
 		String result = executeR43plesQuery(query);
 		String expected = ResourceManagement.getContentFromResource("response-master.xml");
-		TestRevisionManagment.testXMLSimilar(expected, result);
+		assertXMLEqual(expected, result);
 	}
 	
 	
