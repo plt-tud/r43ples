@@ -49,10 +49,16 @@ public class Service {
 	 * @throws URISyntaxException
 	 * @throws IOException 
 	 */
-	public static void main(String[] args) throws ConfigurationException, URISyntaxException, IOException {
-		start();
-		System.in.read();
-		stop();
+	public static void main(String[] args) {
+		try {
+			Config.readConfig("r43ples.conf");
+			start();
+			logger.info("Press enter to quit the server");
+			System.in.read();
+		} catch (Exception e) {
+			e.printStackTrace();
+			stop();
+		}
 	}
 
 	
@@ -65,14 +71,13 @@ public class Service {
 	 */
 	public static void start() throws ConfigurationException, URISyntaxException, IOException {
 		logger.info("Starting R43ples on grizzly...");
-		Config.readConfig("r43ples.conf");
 		URI BASE_URI = null;
 	
 		ClassLoader classLoader = Service.class.getClassLoader();
 		
 		// Choose if the endpoint should be SSL secured
 		if (Config.service_secure) {
-			BASE_URI = UriBuilder.fromUri(Config.service_uri.replaceFirst("http://", "https://")).port(Config.service_port).path("r43ples").build();
+			BASE_URI = UriBuilder.fromUri(Config.service_uri).port(Config.service_port).path("r43ples").build();
 		
 			ResourceConfig rc = new ResourceConfig()
 				.registerClasses(Endpoint.class)
@@ -116,7 +121,6 @@ public class Service {
 		}
 		
 		logger.info(String.format("Server started - R43ples endpoint available under: %s/sparql", BASE_URI));
-		logger.info("Press enter to quit the server");
 		
 		logger.info("Version: "+ Service.class.getPackage().getImplementationVersion());
 		

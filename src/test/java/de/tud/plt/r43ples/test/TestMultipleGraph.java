@@ -4,13 +4,18 @@
 package de.tud.plt.r43ples.test;
 
 import static org.hamcrest.core.StringContains.containsString;
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 
+import java.io.IOException;
+
+import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
@@ -38,6 +43,7 @@ public class TestMultipleGraph {
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
+		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.database_directory);
 		SampleDataSet.createSampleDataset1(graph1);
@@ -60,9 +66,11 @@ public class TestMultipleGraph {
 	}
 
 	/**
+	 * @throws IOException 
+	 * @throws SAXException 
 	 */
 	@Test
-	public final void testMultipleGraphsSparqlJoin() {
+	public final void testMultipleGraphsSparqlJoin() throws SAXException, IOException {
 		String query_template = ""
 				+ "OPTION r43ples:SPARQL_JOIN %n"
 				+ "PREFIX : <http://test.com/> %n"
@@ -70,21 +78,22 @@ public class TestMultipleGraph {
 				+ "FROM <" + graph1	+ "> REVISION \"%d\"%n" 
 				+ "FROM <" + graph2	+ "> REVISION \"%d\"%n"
 				+ "WHERE {"
-				+ "	:Adam :knows [ :address ?address ]"
+				+ "	:Adam :knows ?a."
+				+ " ?a :address ?address."
 				+ "} %n"
 				+ "ORDER By ?address";
 
 		result = ep.sparql(format, String.format(query_template, 1, 1)).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-1-1.xml");
-		Assert.assertEquals(expected, result);
+		assertXMLEqual(expected, result);
 		
 		result = ep.sparql(format, String.format(query_template, 2, 1)).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-2-1.xml");
-		Assert.assertEquals(expected, result);
+		assertXMLEqual(expected, result);
 		
 		result = ep.sparql(format, String.format(query_template, 2, 2)).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-2-2.xml");
-		Assert.assertEquals(expected, result);
+		assertXMLEqual(expected, result);
 	}
 	
 	@Test

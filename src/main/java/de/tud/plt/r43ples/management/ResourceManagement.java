@@ -1,23 +1,17 @@
 package de.tud.plt.r43ples.management;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
 
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.FileUtils;
 
 public class ResourceManagement {
 	public static String getContentFromResource(String resourceName) {
-		InputStream is = ClassLoader.getSystemResourceAsStream(resourceName);
-		StringWriter sw = new StringWriter();
 		try {
-			IOUtils.copy(is, sw, "UTF-8");
-			String result = sw.toString();
-			is.close();
-			sw.close();
-			return result;
+			return FileUtils.readFileToString(new File(ResourceManagement.class.getClassLoader().getResource(resourceName).getFile()));
 		} catch (IOException e) {
-			return "";
-		}		
+			e.printStackTrace();
+			return null;
+		}	
 	}
 }
