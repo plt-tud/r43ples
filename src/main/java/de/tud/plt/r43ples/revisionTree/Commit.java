@@ -12,6 +12,7 @@ public class Commit implements Comparable<Commit> {
 	private String author;
 	private List<String> baseRev;
 	private String nextRev;
+	private Branch branch;
 	public List<Commit> Predecessors;
 	public List<Commit> Successors;
 	
@@ -62,6 +63,14 @@ public class Commit implements Comparable<Commit> {
 	
 	public String getNextRevision() {
 		return nextRev;
+	}
+
+	public Branch getBranch() {
+		return branch;
+	}
+
+	public void setBranch(Branch branch) {
+		this.branch = branch;
 	}
 
 	@Override

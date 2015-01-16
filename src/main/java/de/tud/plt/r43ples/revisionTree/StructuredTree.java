@@ -5,8 +5,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpException;
 import org.apache.log4j.Logger;
@@ -25,12 +27,14 @@ public class StructuredTree {
 	private List<Tag> tags;
 	private List<Commit> commits;
 
+	private static Map<Commit, String> commit_branch_tmp;
 	private static Logger logger = Logger.getLogger(StructuredTree.class);
 
 	private StructuredTree() {
 		commits = new LinkedList<Commit>();
 		branches = new LinkedList<Branch>();
 		tags = new LinkedList<Tag>();
+		commit_branch_tmp = new HashMap<Commit, String>();
 	}
 
 	public static StructuredTree getTreeOfGraph(String graph) throws IOException, HttpException {
@@ -39,6 +43,12 @@ public class StructuredTree {
 		t.updateCommits(graph);
 		t.updateBranches(graph);
 
+		// link commits to branches
+		for(Commit c : t.commits) {
+			//get branch of commit
+			Branch b = t.branches.get(t.branches.indexOf(new Branch(commit_branch_tmp.get(c))));
+			c.setBranch(b);
+		}
 		return t;
 	}
 
@@ -46,7 +56,7 @@ public class StructuredTree {
 		//query all branches
 		String queryBranches = String.format(
 				RevisionManagement.prefixes
-						+ "SELECT ?title ?commit\n"
+						+ "SELECT ?branch ?title ?commit\n"
 						+ "FROM <%s>\n"
 						+ "WHERE {\n"
 						+ "?branch a rmo:Branch;\n"
@@ -68,7 +78,8 @@ public class StructuredTree {
 
 		while (resultsBranches.hasNext()) {
 			QuerySolution sol = resultsBranches.next();
-			Branch b = new Branch(sol.getLiteral("title").toString(), commits.get(commits.indexOf(new Commit(sol.get(
+			Branch b = new Branch(sol.get("branch").toString(), sol.getLiteral("title").toString(), commits.get(commits
+					.indexOf(new Commit(sol.get(
 					"commit").toString()))));
 			branches.add(b);
 		}
@@ -93,7 +104,7 @@ public class StructuredTree {
 		// query all commits
 		String queryCommits = String.format(
 				RevisionManagement.prefixes
-						+ "SELECT ?commit ?time ?prev ?next ?title ?authname\n"
+						+ "SELECT ?commit ?time ?prev ?next ?title ?authname ?branch\n"
 						+ "FROM <%s>\n"
 						+ "WHERE {\n"
 						+ "?commit a rmo:Commit;\n"
@@ -105,7 +116,8 @@ public class StructuredTree {
 						+ "OPTIONAL { ?author rdfs:label ?authname. }\n"
 						+ "?reva rmo:revisionNumber ?prev;"
 						+ "rmo:revisionOf <%s>.\n"
-						+ "?revb rmo:revisionNumber ?next.\n"
+						+ "?revb rmo:revisionNumber ?next;"
+						+ "rmo:revisionOfBranch ?branch.\n"
 						+ "}",
 				Config.revision_graph,
 				graph);
@@ -124,10 +136,15 @@ public class StructuredTree {
 			QuerySolution sol = resultsCommits.next();
 			try {
 				Commit commit = new Commit(sol.get("commit").toString());
+				// commit can be multiple times in solution set because of
+				// multiple "prov:used" attributes
 				if (commits.contains(commit))
 				{
+					// if commit is already in list, just add new base revision
+					// to existing commit
 					commits.get(commits.indexOf(commit)).getBaseRevisions().add(sol.getLiteral("prev").getString());
 				} else {
+					// generate new commit object
 					String authname = sol.getLiteral("authname") == null ? "" : sol.getLiteral("authname").getString();
 					Commit newCommit = new Commit(
 							sol.get("commit").toString(),
@@ -136,6 +153,9 @@ public class StructuredTree {
 							authname,
 							sol.getLiteral("prev").getString(),
 							sol.getLiteral("next").getString());
+					// save branch uri in Map to set branch reference later
+					// after branches were generated
+					commit_branch_tmp.put(newCommit, sol.get("branch").toString());
 					commits.add(newCommit);
 				}
 			} catch (ParseException e) {

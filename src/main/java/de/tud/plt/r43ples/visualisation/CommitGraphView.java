@@ -30,13 +30,13 @@ public class CommitGraphView {
 	/**
 	 * Horizontal distance between commits respective branches
 	 */
-	public int LaneWidth = 15;
+	public int ColumnWidth = 15;
 	
 	private Dimension2D dimension;
 	// saves terminal commits of lanes
 	private List<Commit> terminalCommits = new LinkedList<Commit>();
 	// saves on which lane a commit was drawn
-	private Map<Commit, Integer> commit_lane = new HashMap<Commit, Integer>();
+	private Map<Commit, Integer> commit_column = new HashMap<Commit, Integer>();
 	// saves non empty grid coordinates
 	private List<GraphNode> nodes = new LinkedList<GraphNode>();
 	private Queue<Color> colorQueue;
@@ -82,81 +82,63 @@ public class CommitGraphView {
 		for (Commit c : commits) {
 
 			// get lane for this commit
-			int currentLane = getLaneForCommit(c);
+			int currentColumn = getLaneForCommit(c);
 
 			// find color
 			Color currentColor;
-			if (terminalCommits.get(currentLane) != c)
-				currentColor = commit_color.get(terminalCommits.get(currentLane));
+			if (terminalCommits.get(currentColumn) != c)
+				currentColor = commit_color.get(terminalCommits.get(currentColumn));
 			else
 				currentColor = getNextColor();
-
-			// update memory
-			terminalCommits.set(currentLane, c);
-			commit_lane.put(c, currentLane);
-			commit_color.put(c, currentColor);
-			nodes.add(new GraphNode(currentLine, currentLane));
 
 			// connect with any succeeding commits
 			for (Commit suc : c.Successors) {
 
 				// calculate and set starting point
 				GeneralPath path = new GeneralPath();
-				int x = LaneWidth * currentLane + CircleDiameter / 2;
+				int x = ColumnWidth * currentColumn + CircleDiameter / 2;
 				int y = LineHeight * currentLine + CircleDiameter / 2;
 				path.moveTo(x, y);
 
 				// set color
-				if (currentLane < commit_lane.get(suc))
+				if (currentColumn < commit_column.get(suc))
 					g.setColor(commit_color.get(suc));
 				else
 					g.setColor(currentColor);
 
 				// get line and lane of successor
 				int endLine = commits.indexOf(suc);
-				int endLane = commit_lane.get(suc);
+				int endLane = commit_column.get(suc);
 
-				int lane = currentLane;
-				//if successor is a terminal commit, initialize the lane
-				if(terminalCommits.contains(suc))
-					lane = terminalCommits.indexOf(suc);
-				
+				// find column for connection line
+				int column = currentColumn; // fallback
+				if (terminalCommits.contains(suc)) {
+					// if successor terminates a column, use his column
+					column = terminalCommits.indexOf(suc);
+				} else if (!terminalCommits.contains(c)) {
+					// if successor is not terminating a column and current
+					// commit is not the first commit of his column, use new
+					// column
+					column = terminalCommits.size();
+					terminalCommits.add(null);
+				}
 				int line;
 				for (line = currentLine; line > endLine + 1; line--) {
-					// find path
-					while (nodes.contains(new GraphNode(line - 1, lane)))
-						lane++;
-					while (!nodes.contains(new GraphNode(line - 1, lane - 1)) &&
-							lane > terminalCommits.indexOf(suc)
-							&& lane > currentLane)
-						lane--;
-
 					// drawConnection
-					drawConnectionTo(g, path, line - 1, lane);
-					nodes.add(new GraphNode(line - 1, lane));
-					maxLane = Math.max(maxLane, lane);
+					drawConnectionTo(g, path, line - 1, column);
+					nodes.add(new GraphNode(line - 1, column));
+					maxLane = Math.max(maxLane, column);
 				}
-				maxLane = Math.max(maxLane, lane);
+				maxLane = Math.max(maxLane, column);
 				drawConnectionTo(g, path, endLine, endLane);
 				g.draw(path);
 			}
 			
-			//search for lanes which are now free again (after branching)
-			for(Commit suc : c.Successors) {
-				if (terminalCommits.contains(suc)) {
-					// if successor has no more unprocessed predecessors then
-					// clear lane
-					boolean hasUnprocessedPredecessor = false;
-					for (Commit suc_pre : suc.Predecessors) {
-						if (commits.indexOf(suc_pre) > currentLine)
-							hasUnprocessedPredecessor = true;
-					}
-					if (!hasUnprocessedPredecessor) {
-						terminalCommits.remove(suc);
-					}
-	
-				}
-			}
+			// update memory
+			terminalCommits.set(currentColumn, c);
+			commit_column.put(c, currentColumn);
+			commit_color.put(c, currentColor);
+			nodes.add(new GraphNode(currentLine, currentColumn));
 
 			// advance to next line
 			currentLine++;
@@ -166,13 +148,13 @@ public class CommitGraphView {
 		for (int l = 0; l < commits.size(); l++) {
 			Commit c = commits.get(l);
 			g.setColor(commit_color.get(c));
-			int lane = commit_lane.get(c);
+			int lane = commit_column.get(c);
 			drawCircle(g, l, lane);
 		}
 
 		// calculate dimensions
 		dimension = new Dimension();
-		dimension.setSize(maxLane * LaneWidth, commits.size()
+		dimension.setSize(maxLane * ColumnWidth, commits.size()
 				* LineHeight);
 	}
 	
@@ -188,7 +170,7 @@ public class CommitGraphView {
 		
 		int x1 = (int) path.getCurrentPoint().getX();
 		int y1 = (int) path.getCurrentPoint().getY();
-		int x2 = LaneWidth * lane + CircleDiameter / 2;
+		int x2 = ColumnWidth * lane + CircleDiameter / 2;
 		int y2 = LineHeight * line + CircleDiameter / 2;
 
 		if (x1 == x2) {
@@ -203,7 +185,7 @@ public class CommitGraphView {
 	}
 
 	private void drawCircle(Graphics2D g, int line, int lane) {
-		g.fillOval(LaneWidth * lane, LineHeight * line, CircleDiameter,
+		g.fillOval(ColumnWidth * lane, LineHeight * line, CircleDiameter,
 				CircleDiameter);
 	}
 
@@ -216,10 +198,15 @@ public class CommitGraphView {
 				// choose the lowest lane
 				if (lane == -1 || lane > terminalCommits.indexOf(suc))
 					lane = terminalCommits.indexOf(suc);
+				// but always choose the lane with the same branch if existing
+				if (suc.getBranch().equals(c.getBranch())) {
+					lane = terminalCommits.indexOf(suc);
+					break;
+				}
 			}
 		}
 
-		// no successor terminates a lane, add new lane
+		// no column found, add new column
 		if (lane == -1) {
 			terminalCommits.add(c);
 			lane = terminalCommits.indexOf(c);
