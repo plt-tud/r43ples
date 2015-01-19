@@ -124,7 +124,7 @@ public class TripleStoreInterface {
 			ResultSet results = qExec.execSelect();
 			// FIXME Add format selection
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			if (format.equals("application/sparql-results+xml") || format.equals("application/xml") )
+			if (format.equals("application/sparql-results+xml") || format.equals("application/xml") || format.equals("text/xml"))
 				ResultSetFormatter.outputAsXML(baos, results);
 			else if (format.equals("text/turtle") )
 				ResultSetFormatter.outputAsRDF(baos, "Turtle", results);
