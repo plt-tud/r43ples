@@ -350,18 +350,16 @@ public class RevisionManagement {
 				"COPY GRAPH <" + RevisionManagement.getReferenceGraph(graphName, number) + "> TO GRAPH <"
 						+ tempGraphName + ">");
 
-		// add- und delete-sets could be extracted from revision tree
-		// information
-		// hard coded variant is faster
-
 		while (!list.isEmpty()) {
+			// add- und delete-sets could be extracted from revision tree information
+			// hard coded variant is faster
 			String graph_removed = graphName + "-delta-removed-"+ number;
 			String graph_added   = graphName + "-delta-added-"+ number;
 			// Add data to temporary graph
 			if (RevisionManagement.checkGraphExistence(graph_removed))
 				TripleStoreInterface.executeUpdateQuery("ADD GRAPH <" + graph_removed + "> TO GRAPH <" + tempGraphName + ">");
 			// Remove data from temporary graph (no opposite of SPARQL ADD available)
-			if (RevisionManagement.checkGraphExistence(graph_removed))
+			if (RevisionManagement.checkGraphExistence(graph_added))
 				TripleStoreInterface.executeUpdateQuery(  "DELETE { GRAPH <" + tempGraphName+ "> { ?s ?p ?o.} }"
 														+ "WHERE  { GRAPH <" + graph_added	+ "> { ?s ?p ?o.} }");
 

@@ -13,6 +13,7 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -32,17 +33,25 @@ public class TestMerge {
 	
 	
 	/**
-	 * Set up.
+	 * Initialize TestClass
 	 * 
 	 * @throws ConfigurationException
-	 * @throws UnsupportedEncodingException 
+	 * @throws UnsupportedEncodingException
 	 */
-	@Before
-	public void setUp() throws ConfigurationException, UnsupportedEncodingException {
+	@BeforeClass
+	public static void setUpBeforeClass() throws ConfigurationException, UnsupportedEncodingException {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterface.init(Config.database_directory);
+	}
+	
+	/**
+	 * Set up.
+	
+	 */
+	@Before
+	public void setUp() {
 		// Create the initial data set
 		SampleDataSet.createSampleDataSetComplexStructure(graphName);
 	}
@@ -117,7 +126,6 @@ public class TestMerge {
 		// Test branch B2
 		String result2 = executeR43plesQuery(createSelectQuery(graphName, "B2"));
 		String expected2 = ResourceManagement.getContentFromResource("merge/auto/response-B2-B2X-into-B2.xml");
-		Assert.assertEquals(expected2, result2);
 		assertXMLEqual(expected2, result2);
 		
 		
@@ -377,7 +385,7 @@ public class TestMerge {
 		Endpoint ep = new Endpoint();
 		Response response = ep.sparql(format, query);
 		if (response.getEntity()!=null)
-			return ep.sparql(format, query).getEntity().toString();
+			return response.getEntity().toString();
 		else
 			return "";
 	}
