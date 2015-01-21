@@ -355,13 +355,15 @@ public class RevisionManagement {
 		// hard coded variant is faster
 
 		while (!list.isEmpty()) {
+			String graph_removed = graphName + "-delta-removed-"+ number;
+			String graph_added   = graphName + "-delta-added-"+ number;
 			// Add data to temporary graph
-			TripleStoreInterface.executeUpdateQuery("ADD GRAPH <" + graphName + "-delta-removed-"
-					+ number + "> TO GRAPH <" + tempGraphName + ">");
+			if (RevisionManagement.checkGraphExistence(graph_removed))
+				TripleStoreInterface.executeUpdateQuery("ADD GRAPH <" + graph_removed + "> TO GRAPH <" + tempGraphName + ">");
 			// Remove data from temporary graph (no opposite of SPARQL ADD available)
-			TripleStoreInterface.executeUpdateQuery("DELETE { GRAPH <" + tempGraphName
-					+ "> { ?s ?p ?o.} } WHERE { GRAPH <" + graphName + "-delta-added-" + number
-					+ "> {?s ?p ?o.}}");
+			if (RevisionManagement.checkGraphExistence(graph_removed))
+				TripleStoreInterface.executeUpdateQuery(  "DELETE { GRAPH <" + tempGraphName+ "> { ?s ?p ?o.} }"
+														+ "WHERE  { GRAPH <" + graph_added	+ "> { ?s ?p ?o.} }");
 
 			number = list.pollFirst().getRevisionNumber();
 		}
@@ -455,8 +457,7 @@ public class RevisionManagement {
 			QuerySolution qs = resultSet.next();
 			return qs.getResource("?graph").toString();
 		} else {
-			throw new InternalServerErrorException("No Revision or Reference found with identifier: "
-					+ referenceIdentifier);
+			throw new InternalServerErrorException("No reference graph found for graph <"+graphName+"> and identifier \""+ referenceIdentifier+"\"");
 		}
 	}
 
