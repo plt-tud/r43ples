@@ -57,6 +57,8 @@ public class Service {
 			System.in.read();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+		finally {
 			stop();
 		}
 	}
