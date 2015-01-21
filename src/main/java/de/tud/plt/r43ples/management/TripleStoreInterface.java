@@ -1,6 +1,7 @@
 package de.tud.plt.r43ples.management;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.regex.Pattern;
 
@@ -14,6 +15,7 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.tdb.TDBFactory;
+import com.hp.hpl.jena.tdb.base.file.Location;
 import com.hp.hpl.jena.update.GraphStore;
 import com.hp.hpl.jena.update.GraphStoreFactory;
 import com.hp.hpl.jena.update.UpdateExecutionFactory;
@@ -43,9 +45,17 @@ public class TripleStoreInterface {
 	 * @throws UnsupportedEncodingException 
 	 */
 	public static void init(String databaseDirectory) throws UnsupportedEncodingException {
-
+		
+		// if the directory does not exist, create it
+		Location location = new Location(databaseDirectory);
+		File theDir = new File(location.getDirectoryPath());
+		if (!theDir.exists()) {
+			logger.info("creating directory: " + theDir.toString());
+		    theDir.mkdirs();
+		  }
+		
 		// Initialize the database
-		dataset = TDBFactory.createDataset(databaseDirectory);
+		dataset = TDBFactory.createDataset(location);
 
 		if (!RevisionManagement.checkGraphExistence(Config.revision_graph)){
 			logger.info("Create revision graph");
