@@ -622,7 +622,7 @@ public class Endpoint {
 			
 			// Create graph
 			String result = "";
-			TripleStoreInterface.executeUpdateQuery(querySparql/*, format*/);
+			TripleStoreInterface.executeUpdateQuery(querySparql);
 		    responseBuilder.entity(result);
 		    
 		    if (RevisionManagement.getMasterRevisionNumber(graphName) == null)
@@ -764,19 +764,21 @@ public class Endpoint {
 			logger.debug("with: " + with);
 			logger.debug("triples: " + triples);
 			
-			// TODO check graph existence
+			if (!RevisionManagement.checkGraphExistence(graphName)){
+				logger.error("Graph <"+graphName+"> does not exist.");
+				throw new InternalServerErrorException("Graph <"+graphName+"> does not exist.");
+			}
+				
 			
-			// Check if A and B are different valid branches (it is only possible to merge terminal nodes)
-			if (!RevisionManagement.getRevisionNumber(graphName, branchNameA).equals(RevisionManagement.getRevisionNumber(graphName, branchNameB))) {
-				// Different branches specified
-				// Check if both are terminal nodes
-				if (!(RevisionManagement.isBranch(graphName, branchNameA) && RevisionManagement.isBranch(graphName, branchNameB))) {
-					// There are non terminal nodes used
-					throw new InternalServerErrorException("Non terminal nodes were used: " + sparqlQuery);
-				}
-			} else {
+			// Check if A and B are different revisions
+			if (RevisionManagement.getRevisionNumber(graphName, branchNameA).equals(RevisionManagement.getRevisionNumber(graphName, branchNameB))) {
 				// Branches are equal - throw error
 				throw new InternalServerErrorException("Specified branches are equal: " + sparqlQuery);
+			}
+			
+			// Check if both are terminal nodes
+			if (!(RevisionManagement.isBranch(graphName, branchNameA) && RevisionManagement.isBranch(graphName, branchNameB))) {
+				throw new InternalServerErrorException("Non terminal nodes were used: " + sparqlQuery);
 			}
 
 			
@@ -793,10 +795,10 @@ public class Endpoint {
 						+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> %n"
 						+ "SELECT ?defaultSDD %n"
 						+ "FROM <%s> %n"
-						+ "WHERE { %n"
+						+ "WHERE { GRAPH <%s> {	%n"
 						+ "	<%s> a rmo:Graph ;%n"
 						+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
-						+ "}", Config.revision_graph, graphName);
+						+ "} }", Config.revision_graph, graphName);
 				
 				ResultSet resultSetSDD = TripleStoreInterface.executeSelectQuery(querySDD);
 				if (resultSetSDD.hasNext()) {
