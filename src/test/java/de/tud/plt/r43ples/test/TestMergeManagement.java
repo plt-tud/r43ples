@@ -84,6 +84,19 @@ public class TestMergeManagement {
 		Assert.assertEquals(expected, path);
 	}
 	
+	/**
+	 * Test method for {@link de.tud.plt.r43ples.management.MergeManagement#getPathBetweenStartAndTargetRevision(java.lang.String, java.lang.String)}.
+	 */
+	@Test
+	public final void testGetPathBetweenStartAndTargetRevision2() {
+		LinkedList<String> path = MergeManagement.getPathBetweenStartAndTargetRevision(graph+"-revision-1", graph+"-revision-1.0-1");
+		LinkedList<String> expected = new LinkedList<String>();
+		expected.add(graph+"-revision-1");
+		expected.add(graph+"-revision-1.0-0");
+		expected.add(graph+"-revision-1.0-1");
+		Assert.assertEquals(expected, path);
+	}
+	
 	@Test
 	public void testResponseHeader() {
 		String sparql = "SELECT * "

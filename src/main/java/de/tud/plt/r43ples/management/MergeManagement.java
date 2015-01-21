@@ -105,7 +105,7 @@ public class MergeManagement {
 			+ "WHERE { %n"
 			+ "	GRAPH <%s> { %n"
 			+ "		<%s> prov:wasDerivedFrom* ?revision."
-			+ "		?revision prov:wasDerivedFrom* ?startRevision."
+			+ "		?revision prov:wasDerivedFrom* <%s>."
 			+ " }"
 			+ "}", Config.revision_graph, targetRevision, startRevision);
 		
@@ -116,7 +116,7 @@ public class MergeManagement {
 		while (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
 			String resource = qs.getResource("?revision").toString();
-			logger.info("Path element: \n" + resource);
+			logger.info("Path element: " + resource);
 			list.addFirst(resource);
 		}
 
@@ -134,7 +134,6 @@ public class MergeManagement {
 	public static void createRevisionProgress(LinkedList<String> list, String graphNameRevisionProgress, String uri) {
 		logger.info("Create the revision progress of " + uri + " in graph " + graphNameRevisionProgress + ".");
 		
-		logger.info("Create the revision progress graph with the name: " + graphNameRevisionProgress);
 		TripleStoreInterface.executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameRevisionProgress));
 		TripleStoreInterface.executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphNameRevisionProgress));
 		Iterator<String> iteList = list.iterator();
@@ -169,7 +168,7 @@ public class MergeManagement {
 				fullGraphName = RevisionManagement.getReferenceGraph(graphName, firstRevisionNumber);
 			} catch (InternalServerErrorException e) {
 				// Create a temporary full graph
-				fullGraphName = "RM-TEMP-REVISION-PROGRESS-FIRSTREVISION";
+				fullGraphName = graphName+"RM-TEMP-REVISION-PROGRESS-FULLGRAPH";
 				RevisionManagement.generateFullGraphOfRevision(graphName, firstRevisionNumber, fullGraphName);
 			}
 			
@@ -194,7 +193,7 @@ public class MergeManagement {
 			
 			// Drop the temporary full graph
 			logger.info("Drop the temporary full graph.");
-			TripleStoreInterface.executeUpdateQuery("DROP SILENT GRAPH <RM-TEMP-REVISION-PROGRESS-FIRSTREVISION>");
+			TripleStoreInterface.executeUpdateQuery("DROP SILENT GRAPH <"+fullGraphName+">");
 			
 			// Update content by current add and delete set - remove old entries
 			while (iteList.hasNext()) {
@@ -839,8 +838,7 @@ public class MergeManagement {
 	 * @return the model
 	 */
 	public static Model readNTripleStringToJenaModel(String triples) {
-		Model model = null;
-		model = ModelFactory.createDefaultModel();
+		Model model = ModelFactory.createDefaultModel();
 		InputStream is = new ByteArrayInputStream(triples.getBytes());
 		model.read(is, null, "N-TRIPLE");
 		try {
