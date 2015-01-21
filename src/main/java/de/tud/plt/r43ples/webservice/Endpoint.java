@@ -419,7 +419,6 @@ public class Endpoint {
 			ResponseBuilder responseBuilder = Response.ok();
 			String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
 			query_rewritten = SparqlRewriter.rewriteQuery(query_rewritten);
-			// FIXME format maybe not correct
 			String result = TripleStoreInterface.executeSelectConstructAskQuery(query_rewritten, format);
 			responseBuilder.entity(result);
 			responseBuilder.type(format);
@@ -485,7 +484,6 @@ public class Endpoint {
 		if (!found) {
 			logger.info("No R43ples SELECT query: " + queryM);
 		}
-		// FIXME format maybe not correct
 		String response = TripleStoreInterface.executeSelectConstructAskQuery(queryM, format);
 		return responseBuilder.entity(response).type(format).build();
 	}
@@ -623,8 +621,6 @@ public class Endpoint {
 			String querySparql = m.group();
 			
 			// Create graph
-			// FIXME format maybe not correct
-			// TODO Currently format and corresponding result is removed
 			String result = "";
 			TripleStoreInterface.executeUpdateQuery(querySparql/*, format*/);
 		    responseBuilder.entity(result);

@@ -50,7 +50,6 @@ public class GitRepositoryState {
 		try {
 			config = new PropertiesConfiguration("git.properties");
 		} catch (ConfigurationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return null;
 		}

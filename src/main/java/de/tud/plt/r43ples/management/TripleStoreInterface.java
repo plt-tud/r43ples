@@ -122,7 +122,6 @@ public class TripleStoreInterface {
 		try {
 			QueryExecution qExec = QueryExecutionFactory.create(selectQueryString, dataset);
 			ResultSet results = qExec.execSelect();
-			// FIXME Add format selection
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			if (format.equals("application/sparql-results+xml") || format.equals("application/xml") || format.equals("text/xml"))
 				ResultSetFormatter.outputAsXML(baos, results);

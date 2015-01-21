@@ -767,7 +767,6 @@ public class RevisionManagement {
 					+ "} }",
 					Config.revision_graph, graphName);
 		}
-		//FIXME convert format of original SPARQL query to constant field of FileUtils
 		return TripleStoreInterface.executeConstructQuery(sparqlQuery, format);
 	}
 
