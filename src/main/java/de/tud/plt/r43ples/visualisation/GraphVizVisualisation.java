@@ -28,12 +28,11 @@ public class GraphVizVisualisation {
 		Graph graph =  new Graph("RevisionGraph of " + namedGraph);
 		String query_nodes = RevisionManagement.prefixes + String.format(""
 				+ "SELECT DISTINCT ?revision ?number "
-				+ "FROM <%s> "
-				+ "WHERE {"
+				+ "WHERE { GRAPH <%s> {"
 				+ " ?revision a rmo:Revision;"
 				+ "		rmo:revisionOf <%s>;"
 				+ "		rmo:revisionNumber ?number."
-				+ "}", Config.revision_graph, namedGraph );
+				+ "} }", Config.revision_graph, namedGraph );
 		
 		ResultSet resultSet_nodes = TripleStoreInterface.executeSelectQuery(query_nodes);
 		if (!resultSet_nodes.hasNext())
@@ -51,13 +50,12 @@ public class GraphVizVisualisation {
 		
 		String query_edge = RevisionManagement.prefixes + String.format(""
 				+ "SELECT DISTINCT ?revision ?next_revision "
-				+ "FROM <%s> "
-				+ "WHERE {"
+				+ "WHERE { GRAPH <%s> {"
 				+ " ?revision a rmo:Revision;"
 				+ "		rmo:revisionOf <%s>."
 				+ "	?next_revision a rmo:Revision;"
 				+ "		prov:wasDerivedFrom ?revision."
-				+ "}", Config.revision_graph, namedGraph );
+				+ "} }", Config.revision_graph, namedGraph );
 		
 		ResultSet resultSet_edge = TripleStoreInterface.executeSelectQuery(query_edge);
 		while (resultSet_edge.hasNext()) {
@@ -71,14 +69,13 @@ public class GraphVizVisualisation {
 		
 		String query_reference = RevisionManagement.prefixes + String.format(""
 				+ "SELECT DISTINCT ?revision ?label "
-				+ "FROM <%s> "
-				+ "WHERE {"
+				+ "WHERE { GRAPH <%s> {"
 				+ " ?revision a rmo:Revision;"
 				+ "		rmo:revisionOf <%s>."
 				+ "	?reference a rmo:Reference;"
 				+ "		rmo:references ?revision;"
 				+ "		rdfs:label ?label."
-				+ "}", Config.revision_graph, namedGraph );
+				+ "} }", Config.revision_graph, namedGraph );
 		
 		ResultSet resultSet_reference = TripleStoreInterface.executeSelectQuery(query_reference);
 		while (resultSet_reference.hasNext()) {

@@ -794,7 +794,6 @@ public class Endpoint {
 						  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
 						+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> %n"
 						+ "SELECT ?defaultSDD %n"
-						+ "FROM <%s> %n"
 						+ "WHERE { GRAPH <%s> {	%n"
 						+ "	<%s> a rmo:Graph ;%n"
 						+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
