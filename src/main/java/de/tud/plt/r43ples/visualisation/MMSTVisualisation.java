@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -62,25 +63,58 @@ public class MMSTVisualisation {
 		// generic config for graph generation
 		int y_start = 20;
 		int lineheight = 20;
+		int totalHeight = y_start + lineheight * commits.size();
 		g.setFont(g.getFont().deriveFont(16f));
 		FontMetrics fm = g.getFontMetrics();
-		DateFormat df = DateFormat.getDateTimeInstance();
-		g.translate(0, y_start + lineheight - 10);
+		DateFormat dayFormat = new SimpleDateFormat("d");
+		DateFormat monthFormat = new SimpleDateFormat("MMM");
 
+		int y = y_start;
+
+		// header line
+		g.drawString("Time", 0, y);
+		y += lineheight;
+
+		String oldMonth = "";
+		String oldDay = "";
+		g.setColor(new Color(0x222222));
+		g.fillRect(0, 0, 35, totalHeight);
+		g.setColor(new Color(0x444444));
+		g.fillRect(35, 0, 25, totalHeight);
+		g.setColor(new Color(0));
+		g.drawLine(35, 0, 35, totalHeight);
+		g.setColor(new Color(0xffffff));
+
+		for (Commit c : commits) {
+			String month = monthFormat.format(c.getTime());
+			String day = dayFormat.format(c.getTime());
+			if (!month.equals(oldMonth)) {
+				g.drawString(month, 3, y);
+				oldMonth = month;
+			}
+			if (!day.equals(oldDay)) {
+				g.drawString(day, 38, y);
+				oldDay = day;
+			}
+			y += lineheight;
+		}
+		g.setColor(Color.BLACK);
+
+		g.translate(75, y_start + lineheight - 10);
 		g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
 		CommitGraphView graphView = new CommitGraphView(revisionTree);
 		graphView.drawGraph(g);
-		g.translate(0, -lineheight + 10);
+		g.translate(-75, -lineheight + 10);
 		
-		int messageOffset = (int) graphView.getDimension().getWidth() + 20;
+		int messageOffset = (int) graphView.getDimension().getWidth() + 20 + 75;
 		
-		int timeOffset = 0;
-		int y = 0;
+		int authorOffset = 0;
+		y = 0;
 		
 		//header line
 		g.setColor(new Color(0x000000));
 		g.drawString("Commit Message", messageOffset, y);
-		timeOffset = fm.stringWidth("Commit Message");
+		authorOffset = fm.stringWidth("Commit Message");
 		y += lineheight;
 		
 		for(Commit c : commits) {
@@ -109,30 +143,11 @@ public class MMSTVisualisation {
 			g.drawString(message, messageOffset + branchesWidth, y);
 			
 			//calculate offset of next column
-			timeOffset = Math.max(timeOffset, branchesWidth + fm.stringWidth(message));
+			authorOffset = Math.max(authorOffset, branchesWidth + fm.stringWidth(message));
 			
 			y += lineheight;
 		}
-		timeOffset += messageOffset + 20;
-		
-		int authorOffset = 0;
-		y = 0;
-		
-		//header line
-		g.drawString("Time", timeOffset, y);
-		authorOffset = fm.stringWidth("Time");
-		y += lineheight;
-		
-		for(Commit c : commits) {
-			String time = df.format(c.getTime());
-			g.drawString(time, timeOffset, y);
-			
-			//calculate offset of next column
-			authorOffset = Math.max(authorOffset, fm.stringWidth(time));
-			
-			y += lineheight;
-		}
-		authorOffset += timeOffset + 20;
+		authorOffset += messageOffset + 20;
 		
 		int rightBorder = 0;
 		y = 0;
@@ -141,7 +156,7 @@ public class MMSTVisualisation {
 		g.drawString("Author", authorOffset, y);
 		rightBorder = fm.stringWidth("Author");
 		y += lineheight;
-		
+
 		for(Commit c : commits) {
 			String author = c.getAuthor();
 			g.drawString(author, authorOffset, y);

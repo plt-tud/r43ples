@@ -46,8 +46,12 @@ public class StructuredTree {
 		// link commits to branches
 		for(Commit c : t.commits) {
 			//get branch of commit
-			Branch b = t.branches.get(t.branches.indexOf(new Branch(commit_branch_tmp.get(c))));
-			c.setBranch(b);
+			if (commit_branch_tmp.containsKey(c)) {
+				Branch b = t.branches.get(t.branches.indexOf(new Branch(commit_branch_tmp.get(c))));
+				c.setBranch(b);
+			}
+			else
+				c.setBranch(t.branches.get(0));
 		}
 		return t;
 	}
@@ -79,8 +83,7 @@ public class StructuredTree {
 		while (resultsBranches.hasNext()) {
 			QuerySolution sol = resultsBranches.next();
 			Branch b = new Branch(sol.get("branch").toString(), sol.getLiteral("title").toString(), commits.get(commits
-					.indexOf(new Commit(sol.get(
-					"commit").toString()))));
+					.indexOf(new Commit(sol.get("commit").toString()))));
 			branches.add(b);
 		}
 	}
@@ -116,8 +119,8 @@ public class StructuredTree {
 						+ "OPTIONAL { ?author rdfs:label ?authname. }\n"
 						+ "?reva rmo:revisionNumber ?prev;"
 						+ "rmo:revisionOf <%s>.\n"
-						+ "?revb rmo:revisionNumber ?next;"
-						+ "rmo:revisionOfBranch ?branch.\n"
+						+ "?revb rmo:revisionNumber ?next."
+						+ "OPTIONAL { ?revb rmo:revisionOfBranch ?branch. }\n"
 						+ "}",
 				Config.revision_graph,
 				graph);
@@ -155,7 +158,8 @@ public class StructuredTree {
 							sol.getLiteral("next").getString());
 					// save branch uri in Map to set branch reference later
 					// after branches were generated
-					commit_branch_tmp.put(newCommit, sol.get("branch").toString());
+					if (sol.get("branch") != null)
+						commit_branch_tmp.put(newCommit, sol.get("branch").toString());
 					commits.add(newCommit);
 				}
 			} catch (ParseException e) {
