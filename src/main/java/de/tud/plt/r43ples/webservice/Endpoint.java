@@ -261,6 +261,17 @@ public class Endpoint {
 	}
 	
 	
+	@Path("debug")
+	@GET
+	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws UnsupportedEncodingException {
+		if (sparqlQuery.equals("")) {
+			return getHTMLDebugResponse();
+		} else {
+			return getSparqlDebugResponse(sparqlQuery);
+		}
+	}
+	
+	
 	/**
 	 * HTTP GET merging interface.
 	 * This is the HTML front end  for the merging functionalities of R43ples
@@ -299,6 +310,40 @@ public class Endpoint {
 		}
 	}
 
+	
+	/**
+	 * get sparql interface direct on TDB interface
+	 * @param sparqlQuery
+	 * 			string containing the SPARQL query
+	 * @return HTTP response of evaluating the sparql query 
+	 */
+	private String getSparqlDebugResponse(final String sparqlQuery) {
+		logger.info("Debug query was requested. Query: " + sparqlQuery);
+		
+		String result = TripleStoreInterface.executeSelectConstructAskQuery(sparqlQuery, "text/html");
+		return result;
+	}
+	
+	
+	/**
+	 * Get HTML debug response for standard sparql request form.
+	 * Using mustache templates. 
+	 * 
+	 * @return HTML response for SPARQL form
+	 */
+	private String getHTMLDebugResponse() {		
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/debug.mustache");
+	    StringWriter sw = new StringWriter();
+	    htmlMap.put("revisionGraph", Config.revision_graph);
+	    mustache.execute(sw, htmlMap);		
+		
+		String content = sw.toString();
+		return content;
+	}
+	
+	
+	
 	/**
 	 * @param format
 	 * 			requested mime type 
