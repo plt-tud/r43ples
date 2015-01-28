@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.Dataset;
@@ -139,8 +140,13 @@ public class TripleStoreInterface {
 				ResultSetFormatter.outputAsRDF(baos, "Turtle", results);
 			else if (format.equals("application/json") )
 				ResultSetFormatter.outputAsJSON(baos, results);
+			else if (format.equals("text/plain") ) {
+				ResultSetFormatter.out(baos, results);
+				return baos.toString();
+			}
 			else {
 				ResultSetFormatter.out(baos, results);
+				return "<pre>"+StringEscapeUtils.escapeHtml(baos.toString())+"</pre>";
 			}
 			return baos.toString();
 		} finally {
