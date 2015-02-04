@@ -63,7 +63,7 @@ public class MMSTVisualisation {
 		// generic config for graph generation
 		int y_start = 20;
 		int lineheight = 20;
-		int totalHeight = y_start + lineheight * commits.size();
+		int totalHeight = y_start + lineheight * commits.size() + 10;
 		g.setFont(g.getFont().deriveFont(16f));
 		FontMetrics fm = g.getFontMetrics();
 		DateFormat dayFormat = new SimpleDateFormat("d");
@@ -89,7 +89,8 @@ public class MMSTVisualisation {
 			String month = monthFormat.format(c.getTime());
 			String day = dayFormat.format(c.getTime());
 			if (!month.equals(oldMonth)) {
-				g.drawString(month, 3, y);
+				g.drawString(month, 3
+						, y);
 				oldMonth = month;
 			}
 			if (!day.equals(oldDay)) {
@@ -168,7 +169,7 @@ public class MMSTVisualisation {
 		}
 		rightBorder += authorOffset + 20;
 		
-		g.setSVGCanvasSize(new Dimension(rightBorder, Math.abs(y)));
+		g.setSVGCanvasSize(new Dimension(rightBorder, totalHeight));
 
 		Writer writer = new StringWriter();
 		g.stream(writer);
