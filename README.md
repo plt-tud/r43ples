@@ -84,7 +84,10 @@ There are some additional keywords which can be used to control the revisions of
         
 * Select query
 
-        SELECT * FROM <graph> REVISION "23" WHERE {?s ?p ?o}
+        SELECT * 
+        WHERE { 
+        	GRAPH <graph> REVISION "23" {?s ?p ?o}
+    	}
         
 * Update query
 
@@ -181,5 +184,3 @@ Following libraries are used in R43ples:
 * [Mustache](https://mustache.github.io/) as template engine
 * [viz.js](http://mdaines.github.io/viz.js/example.html) as JavaScript framework for rendering GraphViz
  
-
-    

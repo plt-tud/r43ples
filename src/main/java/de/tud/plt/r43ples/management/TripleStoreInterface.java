@@ -3,6 +3,7 @@ package de.tud.plt.r43ples.management;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang.StringEscapeUtils;
@@ -15,6 +16,7 @@ import com.hp.hpl.jena.query.ReadWrite;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.shared.NoWriterForLangException;
 import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.tdb.base.file.Location;
 import com.hp.hpl.jena.update.GraphStore;
@@ -174,7 +176,14 @@ public class TripleStoreInterface {
 			else if (format.toLowerCase().contains("turtle") )
 				result.write(baos, "Turtle");
 			else {
-				result.write(baos, format);
+				try {
+					result.write(baos, format);
+				}
+				catch (NoWriterForLangException e) {
+					
+					result.write(baos, "Turtle");
+					return "<pre>"+StringEscapeUtils.escapeHtml(baos.toString())+"</pre>";
+				}
 			}
 			return baos.toString();
 		} finally {
@@ -272,6 +281,13 @@ public class TripleStoreInterface {
 		} finally {
 			dataset.end();
 		}
+	}
+
+	public static Object getGraphs() {
+		dataset.begin(ReadWrite.READ);
+		Iterator<String> list = dataset.listNames();
+		dataset.end();
+		return list;
 	}
 	
 }

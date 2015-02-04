@@ -67,7 +67,7 @@ public class Endpoint {
 			"(?<type>SELECT|ASK|CONSTRUCT).*WHERE\\s*\\{(?<where>.*)\\}", 
 			patternModifier);
 	private final Pattern patternSelectFromPart = Pattern.compile(
-			"FROM\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
+			"(?<type>FROM|GRAPH)\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
 			patternModifier);
 	
 	private final Pattern patternUpdateQuery = Pattern.compile(
@@ -319,9 +319,12 @@ public class Endpoint {
 	 */
 	private String getSparqlDebugResponse(final String sparqlQuery) {
 		logger.info("Debug query was requested. Query: " + sparqlQuery);
-		
-		String result = TripleStoreInterface.executeSelectConstructAskQuery(sparqlQuery, "text/html");
-		return result;
+		if (sparqlQuery.contains("INSERT")) {
+			TripleStoreInterface.executeUpdateQuery(sparqlQuery);
+			return "Query executed";
+		}
+		else
+			return TripleStoreInterface.executeSelectConstructAskQuery(sparqlQuery, "text/html");
 	}
 	
 	
@@ -335,6 +338,7 @@ public class Endpoint {
 		MustacheFactory mf = new DefaultMustacheFactory();
 	    Mustache mustache = mf.compile("templates/debug.mustache");
 	    StringWriter sw = new StringWriter();
+	    htmlMap.put("graphs", TripleStoreInterface.getGraphs());
 	    htmlMap.put("revisionGraph", Config.revision_graph);
 	    mustache.execute(sw, htmlMap);		
 		
@@ -492,6 +496,7 @@ public class Endpoint {
 		while (m.find()) {
 			found = true;
 			String graphName = m.group("graph");
+			String type = m.group("type");
 			String revisionNumber = m.group("revision").toLowerCase();
 			String newGraphName;
 
@@ -515,7 +520,7 @@ public class Endpoint {
 				headerRevisionNumber = revisionNumber;
 			}
 
-			queryM = m.replaceFirst("FROM <" + newGraphName + ">");
+			queryM = m.replaceFirst(type + " <" + newGraphName + ">");
 			m = patternSelectFromPart.matcher(queryM);
 
 			

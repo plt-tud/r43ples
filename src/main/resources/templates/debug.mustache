@@ -22,6 +22,16 @@ WHERE { GRAPH <{{revisionGraph}}>
 				<input type="reset"	class="btn btn-warning" value="Reset" />
 			</div>
 		</form>
+	</div>
+</div>
+<div id="main" class="col-md-7">
+	<h2>Existing graphs in triplestore</h2>
+	<ul>
+		{{#graphs}}
+		 <li>{{toString}}</li>
+		{{/graphs}}
+		</ul>
+</div>
 {{/content}}
 
 {{/templates/super}}
