@@ -27,7 +27,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.configuration.ConfigurationException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Template;
@@ -117,17 +116,6 @@ public class Endpoint {
 	
 	/** default logger for this class */
 	private final static Logger logger = Logger.getLogger(Endpoint.class);
-
-	
-	@GET
-	@Path("test")
-	@Template(name="/test.mustache")
-	public Map<String, Object> test() throws ConfigurationException {
-	    htmlMap.put("feature", 12);
-	    htmlMap.put("uriInfo", uriInfo);
-	    htmlMap.put("name", "Mustache");
-		return htmlMap;
-	}
 	
 	
 	/**
@@ -192,7 +180,7 @@ public class Endpoint {
 			MediaType.APPLICATION_SVG_XML })
 	public final Object getRevisionGraph(@HeaderParam("Accept") final String format_header,
 			@QueryParam("format") final String format_query, @QueryParam("graph") @DefaultValue("") final String graph) {
-		logger.info("Get Revision Graph");
+		logger.info("Get Revision Graph: " + graph);
 		String format = (format_query != null) ? format_query : format_header;
 		logger.info("format: " + format);
 
