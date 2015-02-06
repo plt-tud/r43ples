@@ -175,6 +175,8 @@ public class TripleStoreInterface {
 				result.write(baos, "RDF/XML");
 			else if (format.toLowerCase().contains("turtle") )
 				result.write(baos, "Turtle");
+			else if (format.toLowerCase().contains("json") )
+				result.write(baos, "RDF/JSON");
 			else {
 				try {
 					result.write(baos, format);
