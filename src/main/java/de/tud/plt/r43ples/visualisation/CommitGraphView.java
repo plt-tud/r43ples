@@ -32,34 +32,16 @@ public class CommitGraphView {
 	 */
 	public int ColumnWidth = 15;
 	
+	// dimensions of this graph, is null until drawn
 	private Dimension2D dimension;
 	// saves terminal commits of columns
 	private List<Commit> terminalCommits = new LinkedList<Commit>();
 	// saves on which column a commit was drawn
 	private Map<Commit, Integer> commit_column = new HashMap<Commit, Integer>();
-	// saves non empty grid coordinates
-	private List<GraphNode> nodes = new LinkedList<GraphNode>();
+	// holds colors of branches, is cycled
 	private Queue<Color> colorQueue;
-	
+	// list of commits
 	private List<Commit> commits;
-
-	private class GraphNode {
-		public int Line;
-		public int column;
-
-		public GraphNode(int line, int column) {
-			this.Line = line;
-			this.column = column;
-		}
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof GraphNode) {
-				GraphNode node = (GraphNode) obj;
-				return node.Line == Line && node.column == column;
-			}
-			return super.equals(obj);
-		}
-	}
 
 	public CommitGraphView(StructuredTree tree) {
 		commits = tree.getCommits();
@@ -128,7 +110,6 @@ public class CommitGraphView {
 				for (line = currentLine; line > endLine + 1; line--) {
 					// drawConnection
 					drawConnectionTo(g, path, line - 1, column);
-					nodes.add(new GraphNode(line - 1, column));
 					maxColumn = Math.max(maxColumn, column);
 				}
 				maxColumn = Math.max(maxColumn, column);
@@ -140,7 +121,6 @@ public class CommitGraphView {
 			terminalCommits.set(currentColumn, c);
 			commit_column.put(c, currentColumn);
 			commit_color.put(c, currentColor);
-			nodes.add(new GraphNode(currentLine, currentColumn));
 
 			// advance to next line
 			currentLine++;
@@ -198,24 +178,35 @@ public class CommitGraphView {
 		// test if there is a successor of same branch terminating a column
 		for (Commit suc : c.Successors) {
 			if (terminalCommits.contains(suc) && suc.getBranch().equals(c.getBranch())) {
-					column = terminalCommits.indexOf(suc);
-					break;
+				return terminalCommits.indexOf(suc);
 			}
 		}
 
 		// test for reusable columns
 		for (Commit term : terminalCommits) {
 			boolean isReusable = true;
+
+			// test whether terminal commit has predecessors not yet drawn
 			for (Commit term_pre : term.Predecessors) {
 				if (commits.indexOf(term_pre) > commits.indexOf(c)) {
 					isReusable = false;
 					break;
 				}
+				// test whether current commit has successors that would lead to
+				// overlapping
+				for (Commit suc : c.Successors) {
+					if (!terminalCommits.contains(suc) && (commits.indexOf(suc) < commits.indexOf(term_pre))) {
+						isReusable = false;
+						break;
+					}
+				}
+				if (!isReusable)
+					break;
 			}
+
 			if (isReusable)
 			{
-				column = terminalCommits.indexOf(term);
-				break;
+				return terminalCommits.indexOf(term);
 			}
 		}
 
