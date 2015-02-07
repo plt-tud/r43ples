@@ -1,5 +1,6 @@
 package de.tud.plt.r43ples.visualisation;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -58,6 +59,7 @@ public class CommitGraphView {
 
 		int currentLine = 0;
 		int maxColumn = 0;
+		g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
 		
 		Map<Commit, Color> commit_color = new HashMap<Commit, Color>();
 

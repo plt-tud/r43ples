@@ -1,18 +1,11 @@
 package de.tud.plt.r43ples.visualisation;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +21,6 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.management.GitRepositoryState;
-import de.tud.plt.r43ples.revisionTree.Branch;
 import de.tud.plt.r43ples.revisionTree.Commit;
 import de.tud.plt.r43ples.revisionTree.StructuredTree;
 
@@ -48,128 +40,37 @@ public class MMSTVisualisation {
 		List<Commit> commits = revisionTree.getCommits();
 		Collections.reverse(commits);
 
-		// generate branches index
-		Map<Commit, List<Branch>> branch_index = new HashMap<Commit, List<Branch>>();
-		for (Branch b : revisionTree.getBranches()) {
-			if (branch_index.containsKey(b.getReference()))
-				branch_index.get(b.getReference()).add(b);
-			else {
-				List<Branch> list = new LinkedList<Branch>();
-				list.add(b);
-				branch_index.put(b.getReference(), list);
-			}
-		}
-
 		// generic config for graph generation
 		int y_start = 20;
 		int lineheight = 20;
 		int totalHeight = y_start + lineheight * commits.size() + 10;
-		g.setFont(g.getFont().deriveFont(16f));
-		FontMetrics fm = g.getFontMetrics();
-		DateFormat dayFormat = new SimpleDateFormat("d");
-		DateFormat monthFormat = new SimpleDateFormat("MMM");
 
-		int y = y_start;
+		// translate to first text-baseline
+		g.translate(0, y_start);
 
-		// header line
-		g.drawString("Time", 0, y);
-		y += lineheight;
+		TimeLineView timeView = new TimeLineView(revisionTree);
+		timeView.draw(g);
 
-		String oldMonth = "";
-		String oldDay = "";
-		g.setColor(new Color(0x222222));
-		g.fillRect(0, 0, 35, totalHeight);
-		g.setColor(new Color(0x444444));
-		g.fillRect(35, 0, 25, totalHeight);
-		g.setColor(new Color(0));
-		g.drawLine(35, 0, 35, totalHeight);
-		g.setColor(new Color(0xffffff));
+		g.translate(75, 10);
 
-		for (Commit c : commits) {
-			String month = monthFormat.format(c.getTime());
-			String day = dayFormat.format(c.getTime());
-			if (!month.equals(oldMonth)) {
-				g.drawString(month, 3
-						, y);
-				oldMonth = month;
-			}
-			if (!day.equals(oldDay)) {
-				g.drawString(day, 38, y);
-				oldDay = day;
-			}
-			y += lineheight;
-		}
-		g.setColor(Color.BLACK);
-
-		g.translate(75, y_start + lineheight - 10);
-		g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
 		CommitGraphView graphView = new CommitGraphView(revisionTree);
 		graphView.drawGraph(g);
-		g.translate(-75, -lineheight + 10);
-		
-		int messageOffset = (int) graphView.getDimension().getWidth() + 20 + 75;
-		
-		int authorOffset = 0;
-		y = 0;
-		
-		//header line
-		g.setColor(new Color(0x000000));
-		g.drawString("Commit Message", messageOffset, y);
-		authorOffset = fm.stringWidth("Commit Message");
-		y += lineheight;
-		
-		for(Commit c : commits) {
-			String message = c.getMessage();
 
-			// draw branches
-			int branchesWidth = 0;
-			if (branch_index.containsKey(c)) {
-				for (Branch b : branch_index.get(c)) {
-					String name = b.getName();
+		g.translate(graphView.getDimension().getWidth() + 20, -10);
 
-					Rectangle2D rect = g.getFontMetrics().getStringBounds(name, g);
-					int width = g.getFontMetrics().stringWidth(name);
-					g.translate(messageOffset, y);
-					g.setColor(new Color(0.5f, 0.1f, 0.1f));
-					g.fillRoundRect(branchesWidth, -fm.getAscent(), width + 6, (int) rect.getHeight(), 5, 5);
-					g.setColor(Color.WHITE);
-					g.drawString(name, branchesWidth + 2, 0);
-					g.translate(-messageOffset, -y);
-					branchesWidth += rect.getWidth() + 10;
-				}
-			}
-			g.setColor(Color.BLACK);
-			
-			//infos of commit
-			g.drawString(message, messageOffset + branchesWidth, y);
-			
-			//calculate offset of next column
-			authorOffset = Math.max(authorOffset, branchesWidth + fm.stringWidth(message));
-			
-			y += lineheight;
-		}
-		authorOffset += messageOffset + 20;
+		MessagesTableView msgView = new MessagesTableView(revisionTree);
+		msgView.draw(g);
 		
-		int rightBorder = 0;
-		y = 0;
-		
-		//header line
-		g.drawString("Author", authorOffset, y);
-		rightBorder = fm.stringWidth("Author");
-		y += lineheight;
+		g.translate(-graphView.getDimension().getWidth() - 20 - 75, 0);
 
-		for(Commit c : commits) {
-			String author = c.getAuthor();
-			g.drawString(author, authorOffset, y);
-			
-			//calculate offset of next column
-			rightBorder = Math.max(rightBorder, fm.stringWidth(author));
-			
-			y += lineheight;
-		}
-		rightBorder += authorOffset + 20;
-		
-		g.setSVGCanvasSize(new Dimension(rightBorder, totalHeight));
+		// calculate overall width
+		int totalWidth = (int) (75 + graphView.getDimension().getWidth() + 20 + msgView.getDimension().getWidth());
+
+		// draw header line
+		int offset = g.getFontMetrics(msgView.TextFont).getDescent();
+		g.drawLine(0, offset, totalWidth, offset);
+
+		g.setSVGCanvasSize(new Dimension(totalWidth, totalHeight));
 
 		Writer writer = new StringWriter();
 		g.stream(writer);

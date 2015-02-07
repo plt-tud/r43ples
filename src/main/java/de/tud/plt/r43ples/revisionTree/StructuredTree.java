@@ -42,6 +42,7 @@ public class StructuredTree {
 		StructuredTree t = new StructuredTree();
 		t.updateCommits(graph);
 		t.updateBranches(graph);
+		t.updateTags(graph);
 
 		// link commits to branches
 		for(Commit c : t.commits) {
@@ -85,6 +86,38 @@ public class StructuredTree {
 			Branch b = new Branch(sol.get("branch").toString(), sol.getLiteral("title").toString(), commits.get(commits
 					.indexOf(new Commit(sol.get("commit").toString()))));
 			branches.add(b);
+		}
+	}
+
+	private void updateTags(String graph) {
+		// query all tags
+		String queryBranches = String.format(
+				RevisionManagement.prefixes
+						+ "SELECT ?tag ?title ?commit\n"
+						+ "FROM <%s>\n"
+						+ "WHERE {\n"
+						+ "?tag a rmo:Tag;\n"
+						+ "rdfs:label ?title;\n"
+						+ "rmo:references ?rev.\n"
+						+ "?rev rmo:revisionOf <%s>.\n"
+						+ "?commit a rmo:Commit;\n"
+						+ "prov:generated ?rev.\n"
+						+ "}", Config.revision_graph, graph);
+
+		String resultSparql;
+		try {
+			resultSparql = TripleStoreInterface.executeQueryWithAuthorization(queryBranches, "XML");
+		} catch (IOException | HttpException e1) {
+			e1.printStackTrace();
+			return;
+		}
+		ResultSet resultsTags = ResultSetFactory.fromXML(resultSparql);
+
+		while (resultsTags.hasNext()) {
+			QuerySolution sol = resultsTags.next();
+			Tag t = new Tag(sol.get("tag").toString(), sol.getLiteral("title").toString(), commits.get(commits
+					.indexOf(new Commit(sol.get("commit").toString()))));
+			tags.add(t);
 		}
 	}
 
