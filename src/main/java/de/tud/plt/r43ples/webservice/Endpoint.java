@@ -47,7 +47,7 @@ import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
-import de.tud.plt.r43ples.visualisation.GraphVizVisualisation;
+import de.tud.plt.r43ples.visualisation.VisualisationD3;
 
 /**
  * Provides SPARQL endpoint via [host]:[port]/r43ples/.
@@ -188,7 +188,7 @@ public class Endpoint {
 		// TODO format
 		if (format.contains(MediaType.TEXT_HTML)) {
 			response.type(MediaType.TEXT_HTML);
-			response.entity(GraphVizVisualisation.getGraphVizHtmlOutput(graph));
+			response.entity(VisualisationD3.getGraphVizHtmlOutput2(graph));
 		}
 		else {
 			response.type(format);
