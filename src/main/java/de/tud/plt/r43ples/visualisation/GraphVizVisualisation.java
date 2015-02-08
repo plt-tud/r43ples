@@ -17,7 +17,6 @@ import com.hp.hpl.jena.query.ResultSet;
 
 import de.tud.plt.r43ples.exception.InternalServerErrorException;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 
@@ -105,9 +104,9 @@ public class GraphVizVisualisation {
 	    Map<String, Object> scope = new HashMap<String, Object>();
 	    scope.put("graphName", graphName);
 	    scope.put("graphViz", getGraphVizOutput(graphName));
-	    scope.put("git", GitRepositoryState.getGitRepositoryState());
 	    
 	    mustache.execute(sw, scope);		
 		return sw.toString();
-	}	
+	}
+
 }
