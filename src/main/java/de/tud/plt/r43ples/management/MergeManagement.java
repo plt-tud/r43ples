@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -101,14 +102,16 @@ public class MergeManagement {
 		logger.info("Calculate the shortest path from revision <" + startRevision + "> to <" + targetRevision + "> .");
 		String query = String.format(
 			  "PREFIX prov: <http://www.w3.org/ns/prov#> %n"
-			+ "SELECT DISTINCT ?revision %n"
+			+ "SELECT DISTINCT ?revision ?previousRevision %n"
 			+ "WHERE { %n"
 			+ "	GRAPH <%s> { %n"
 			+ "		<%s> prov:wasDerivedFrom* ?revision."
 			+ "		?revision prov:wasDerivedFrom* <%s>."
+			+ "		?revision prov:wasDerivedFrom ?previousRevision."
 			+ " }"
 			+ "}", Config.revision_graph, targetRevision, startRevision);
 		
+		HashMap<String, String> resultMap = new HashMap<String, String>();
 		LinkedList<String> list = new LinkedList<String>();
 		
 		ResultSet resultSet = TripleStoreInterface.executeSelectQuery(query);
@@ -116,9 +119,23 @@ public class MergeManagement {
 		while (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
 			String resource = qs.getResource("?revision").toString();
-			logger.info("Path element: " + resource);
-			list.addFirst(resource);
+			String previousResource = null;
+			if (qs.getResource("?previousRevision") != null) {
+				previousResource = qs.getResource("?previousRevision").toString();
+			}
+			resultMap.put(resource, previousResource);
 		}
+		
+		// Sort the result map -> sorted list of path elements
+		String currentPathElement = targetRevision;
+		for (int i = 0; i < resultMap.size(); i++) {
+			list.addFirst(currentPathElement);
+			currentPathElement = resultMap.get(currentPathElement);
+		}
+		
+		// TODO Check the occurrence of NULL values!
+		// Remove null values
+		list.remove(null);
 
 		return list;
 	}
@@ -499,8 +516,8 @@ public class MergeManagement {
 			String currentTripleStateB = qs.getResource("?tripleStateB").toString();
 			// Will return an integer value because virtuoso stores boolean internal as integer
 			String currentConflictState = qs.getLiteral("?conflict").toString();
-			// Convert integer to boolean to use it in the next query correctly
-			if (currentConflictState.equals("1^^http://www.w3.org/2001/XMLSchema#integer")) {
+//TODO check it	TDB returns value not as an integer	but without ""	// Convert integer to boolean to use it in the next query correctly
+			if (currentConflictState.equals("true^^http://www.w3.org/2001/XMLSchema#integer")) {
 				currentConflictState = "\"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>";
 			} else {
 				currentConflictState = "\"false\"^^<http://www.w3.org/2001/XMLSchema#boolean>";
