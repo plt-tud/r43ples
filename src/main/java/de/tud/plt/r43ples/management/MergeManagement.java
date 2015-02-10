@@ -254,10 +254,8 @@ public class MergeManagement {
 						+ "	?blank rdf:object ?o . \n"
 						+ "	?blank rmo:references ?revision . \n"
 						+ "} } \n"
-						+ "WHERE { \n"
-						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
-						+ "	WHERE { GRAPH <%s> \n"
-						+ "		{ \n"
+						+ "WHERE { "
+						+ "		GRAPH <%s> { \n"
 						+ "			<%s> rpo:original ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
 						+ "			?blank rdf:predicate ?p . \n"
@@ -267,7 +265,6 @@ public class MergeManagement {
 						+ "		GRAPH <%s> { \n"
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
-						+ "	} \n"
 						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
 					
 					queryRevision += "\n";
@@ -281,10 +278,8 @@ public class MergeManagement {
 						+ "	?blank rdf:object ?o . \n"
 						+ "	?blank rmo:references ?revision . \n"
 						+ "} } \n"
-						+ "WHERE { \n"
-						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
-						+ "	WHERE { GRAPH <%s> \n"
-						+ "		{ \n"
+						+ "WHERE { "
+						+ "		GRAPH <%s> { \n"
 						+ "			<%s> rpo:added ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
 						+ "			?blank rdf:predicate ?p . \n"
@@ -294,7 +289,6 @@ public class MergeManagement {
 						+ "		GRAPH <%s> { \n"
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
-						+ "	} \n"
 						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
 					
 					queryRevision += "\n";
@@ -308,10 +302,8 @@ public class MergeManagement {
 						+ "	?blank rdf:object ?o . \n"
 						+ "	?blank rmo:references ?revision . \n"
 						+ "} } \n"
-						+ "WHERE { \n"
-						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
-						+ "	WHERE { GRAPH <%s> \n"
-						+ "		{ \n"
+						+ "WHERE { "
+						+ "		GRAPH <%s> { \n"
 						+ "			<%s> rpo:removed ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
 						+ "			?blank rdf:predicate ?p . \n"
@@ -321,7 +313,6 @@ public class MergeManagement {
 						+ "		GRAPH <%s> { \n"
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
-						+ "	} \n"
 						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
 					
 					queryRevision += "\n";
@@ -354,10 +345,8 @@ public class MergeManagement {
 						+ "	?blank rdf:object ?o . \n"
 						+ "	?blank rmo:references ?revision . \n"
 						+ "} } \n"
-						+ "WHERE { \n"
-						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
-						+ "	WHERE { GRAPH <%s> \n"
-						+ "		{ \n"
+						+ "WHERE { "
+						+ "		GRAPH <%s> { \n"
 						+ "			<%s> rpo:original ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
 						+ "			?blank rdf:predicate ?p . \n"
@@ -367,7 +356,6 @@ public class MergeManagement {
 						+ "		GRAPH <%s> { \n"
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
-						+ "	} \n"
 						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
 					
 					queryRevision += "\n";
@@ -381,10 +369,8 @@ public class MergeManagement {
 						+ "	?blank rdf:object ?o . \n"
 						+ "	?blank rmo:references ?revision . \n"
 						+ "} } \n"
-						+ "WHERE { \n"
-						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
-						+ "	WHERE { GRAPH <%s> \n"
-						+ "		{ \n"
+						+ "WHERE { "
+						+ "		GRAPH <%s> { \n"
 						+ "			<%s> rpo:added ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
 						+ "			?blank rdf:predicate ?p . \n"
@@ -394,7 +380,6 @@ public class MergeManagement {
 						+ "		GRAPH <%s> { \n"
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
-						+ "	} \n"
 						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
 					
 					queryRevision += "\n";
@@ -408,10 +393,8 @@ public class MergeManagement {
 						+ "	?blank rdf:object ?o . \n"
 						+ "	?blank rmo:references ?revision . \n"
 						+ "} } \n"
-						+ "WHERE { \n"
-						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
-						+ "	WHERE { GRAPH <%s> \n"
-						+ "		{ \n"
+						+ "WHERE { "
+						+ "		GRAPH <%s> { \n"
 						+ "			<%s> rpo:removed ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
 						+ "			?blank rdf:predicate ?p . \n"
@@ -421,7 +404,6 @@ public class MergeManagement {
 						+ "		GRAPH <%s> { \n"
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
-						+ "	} \n"
 						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
 					
 					queryRevision += "\n";
