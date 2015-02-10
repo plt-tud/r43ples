@@ -537,8 +537,8 @@ public class MergeManagement {
 			String currentTripleStateB = qs.getResource("?tripleStateB").toString();
 			// Will return an integer value because virtuoso stores boolean internal as integer
 			String currentConflictState = qs.getLiteral("?conflict").toString();
-//TODO check it	TDB returns value not as an integer	but without ""	// Convert integer to boolean to use it in the next query correctly
-			if (currentConflictState.equals("true^^http://www.w3.org/2001/XMLSchema#integer")) {
+			// TDB returns boolean value without "" -> add it to use it in the next query correctly
+			if (currentConflictState.equals("true^^http://www.w3.org/2001/XMLSchema#boolean")) {
 				currentConflictState = "\"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>";
 			} else {
 				currentConflictState = "\"false\"^^<http://www.w3.org/2001/XMLSchema#boolean>";
