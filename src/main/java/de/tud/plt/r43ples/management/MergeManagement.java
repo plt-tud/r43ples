@@ -107,7 +107,7 @@ public class MergeManagement {
 			+ "	GRAPH <%s> { %n"
 			+ "		<%s> prov:wasDerivedFrom* ?revision."
 			+ "		?revision prov:wasDerivedFrom* <%s>."
-			+ "		?revision prov:wasDerivedFrom ?previousRevision."
+			+ "		OPTIONAL{?revision prov:wasDerivedFrom ?previousRevision}"
 			+ " }"
 			+ "}", Config.revision_graph, targetRevision, startRevision);
 		
