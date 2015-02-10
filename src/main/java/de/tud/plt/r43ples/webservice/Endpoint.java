@@ -47,7 +47,7 @@ import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
-import de.tud.plt.r43ples.visualisation.GraphVizVisualisation;
+import de.tud.plt.r43ples.visualisation.MMSTVisualisation;
 
 /**
  * Provides SPARQL endpoint via [host]:[port]/r43ples/.
@@ -185,12 +185,10 @@ public class Endpoint {
 		logger.info("format: " + format);
 
 		ResponseBuilder response = Response.ok();
-		// TODO format
 		if (format.contains(MediaType.TEXT_HTML)) {
 			response.type(MediaType.TEXT_HTML);
-			response.entity(GraphVizVisualisation.getGraphVizHtmlOutput(graph));
-		}
-		else {
+			response.entity(MMSTVisualisation.getHtmlOutput(graph));
+		} else {
 			response.type(format);
 			response.entity(RevisionManagement.getRevisionInformation(graph, format));
 		}
@@ -594,6 +592,7 @@ public class Endpoint {
 		// Remove empty insert clauses which otherwise will lead to errors
 		m= patternEmptyGraphPattern.matcher(queryM);
 		queryM = m.replaceAll("");
+//		queryM = queryM.replaceAll("}\\s*INSERT", "}; INSERT");
 
 		TripleStoreInterface.executeUpdateQuery(queryM);
 

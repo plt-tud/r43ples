@@ -178,7 +178,6 @@ Following libraries are used in R43ples:
 * [Grizzly](https://grizzly.java.net/) as web server
 * [Jena ARQ](https://jena.apache.org/documentation/query/index.html) for processing SPARQL results
 * [Jena TDB](https://jena.apache.org/documentation/tdb/index.html) as triplestore
-* [Grappa](http://www2.research.att.com/~john/Grappa/) for creating GraphViz diagrams
 * [jQuery](http://jquery.com/) as JavaScript framework
 * [Bootstrap](http://getbootstrap.com/)
 * [Mustache](https://mustache.github.io/) as template engine
