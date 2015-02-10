@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -101,23 +102,60 @@ public class MergeManagement {
 		logger.info("Calculate the shortest path from revision <" + startRevision + "> to <" + targetRevision + "> .");
 		String query = String.format(
 			  "PREFIX prov: <http://www.w3.org/ns/prov#> %n"
-			+ "SELECT DISTINCT ?revision %n"
+			+ "SELECT DISTINCT ?revision ?previousRevision %n"
 			+ "WHERE { %n"
 			+ "	GRAPH <%s> { %n"
 			+ "		<%s> prov:wasDerivedFrom* ?revision."
 			+ "		?revision prov:wasDerivedFrom* <%s>."
+			+ "		?revision prov:wasDerivedFrom ?previousRevision."
 			+ " }"
 			+ "}", Config.revision_graph, targetRevision, startRevision);
 		
+		HashMap<String, ArrayList<String>> resultMap = new HashMap<String, ArrayList<String>>();
 		LinkedList<String> list = new LinkedList<String>();
 		
 		ResultSet resultSet = TripleStoreInterface.executeSelectQuery(query);
 
+		// Path element counter
+		int counterLength = 0;
+		
 		while (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
 			String resource = qs.getResource("?revision").toString();
-			logger.info("Path element: " + resource);
-			list.addFirst(resource);
+			String previousResource = null;
+			if (qs.getResource("?previousRevision") != null) {
+				previousResource = qs.getResource("?previousRevision").toString();
+			}
+			if (resultMap.containsKey(resource)) {
+				resultMap.get(resource).add(previousResource);
+			} else {
+				ArrayList<String> arrayList = new ArrayList<String>();
+				counterLength++;
+				arrayList.add(previousResource);
+				resultMap.put(resource, arrayList);
+			}
+		}
+		
+		// Sort the result map -> sorted list of path elements
+		// A merged revision can have two predecessors -> it is important to choose the right predecessor revision according to the selected path
+		String currentPathElement = targetRevision;
+		for (int i = 0; i < counterLength; i++) {
+			list.addFirst(currentPathElement);
+			
+			// Check if start revision was already reached
+			if (currentPathElement.equals(startRevision)) {
+				return list;
+			}
+			
+			if (resultMap.get(currentPathElement).size() > 1) {
+				if (resultMap.containsKey(resultMap.get(currentPathElement).get(0))) {
+					currentPathElement = resultMap.get(currentPathElement).get(0);
+				} else {
+					currentPathElement = resultMap.get(currentPathElement).get(1);
+				}
+			} else {
+				currentPathElement = resultMap.get(currentPathElement).get(0);
+			}
 		}
 
 		return list;
@@ -218,7 +256,7 @@ public class MergeManagement {
 						+ "} } \n"
 						+ "WHERE { \n"
 						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
-						+ "	WHERE { \n"
+						+ "	WHERE { GRAPH <%s> \n"
 						+ "		{ \n"
 						+ "			<%s> rpo:original ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
@@ -230,7 +268,7 @@ public class MergeManagement {
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
 						+ "	} \n"
-						+ "};", graphNameRevisionProgress, uri, uri, addSetURI);
+						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
 					
 					queryRevision += "\n";
 					
@@ -245,7 +283,7 @@ public class MergeManagement {
 						+ "} } \n"
 						+ "WHERE { \n"
 						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
-						+ "	WHERE { \n"
+						+ "	WHERE { GRAPH <%s> \n"
 						+ "		{ \n"
 						+ "			<%s> rpo:added ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
@@ -257,7 +295,7 @@ public class MergeManagement {
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
 						+ "	} \n"
-						+ "};", graphNameRevisionProgress, uri, uri, addSetURI);
+						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
 					
 					queryRevision += "\n";
 					
@@ -272,7 +310,7 @@ public class MergeManagement {
 						+ "} } \n"
 						+ "WHERE { \n"
 						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
-						+ "	WHERE { \n"
+						+ "	WHERE { GRAPH <%s> \n"
 						+ "		{ \n"
 						+ "			<%s> rpo:removed ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
@@ -284,7 +322,7 @@ public class MergeManagement {
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
 						+ "	} \n"
-						+ "};", graphNameRevisionProgress, uri, uri, addSetURI);
+						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
 					
 					queryRevision += "\n";
 					
@@ -318,7 +356,7 @@ public class MergeManagement {
 						+ "} } \n"
 						+ "WHERE { \n"
 						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
-						+ "	WHERE { \n"
+						+ "	WHERE { GRAPH <%s> \n"
 						+ "		{ \n"
 						+ "			<%s> rpo:original ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
@@ -330,7 +368,7 @@ public class MergeManagement {
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
 						+ "	} \n"
-						+ "};", graphNameRevisionProgress, uri, uri, deleteSetURI);
+						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
 					
 					queryRevision += "\n";
 					
@@ -345,7 +383,7 @@ public class MergeManagement {
 						+ "} } \n"
 						+ "WHERE { \n"
 						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
-						+ "	WHERE { \n"
+						+ "	WHERE { GRAPH <%s> \n"
 						+ "		{ \n"
 						+ "			<%s> rpo:added ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
@@ -357,7 +395,7 @@ public class MergeManagement {
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
 						+ "	} \n"
-						+ "};", graphNameRevisionProgress, uri, uri, deleteSetURI);
+						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
 					
 					queryRevision += "\n";
 					
@@ -372,7 +410,7 @@ public class MergeManagement {
 						+ "} } \n"
 						+ "WHERE { \n"
 						+ "	SELECT ?blank ?s ?p ?o ?revision \n"
-						+ "	WHERE { \n"
+						+ "	WHERE { GRAPH <%s> \n"
 						+ "		{ \n"
 						+ "			<%s> rpo:removed ?blank . \n"
 						+ "			?blank rdf:subject ?s . \n"
@@ -384,7 +422,7 @@ public class MergeManagement {
 						+ "			?s ?p ?o \n"
 						+ "		} \n"
 						+ "	} \n"
-						+ "};", graphNameRevisionProgress, uri, uri, deleteSetURI);
+						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
 					
 					queryRevision += "\n";
 					
@@ -499,8 +537,8 @@ public class MergeManagement {
 			String currentTripleStateB = qs.getResource("?tripleStateB").toString();
 			// Will return an integer value because virtuoso stores boolean internal as integer
 			String currentConflictState = qs.getLiteral("?conflict").toString();
-			// Convert integer to boolean to use it in the next query correctly
-			if (currentConflictState.equals("1^^http://www.w3.org/2001/XMLSchema#integer")) {
+			// TDB returns boolean value without "" -> add it to use it in the next query correctly
+			if (currentConflictState.equals("true^^http://www.w3.org/2001/XMLSchema#boolean")) {
 				currentConflictState = "\"true\"^^<http://www.w3.org/2001/XMLSchema#boolean>";
 			} else {
 				currentConflictState = "\"false\"^^<http://www.w3.org/2001/XMLSchema#boolean>";
