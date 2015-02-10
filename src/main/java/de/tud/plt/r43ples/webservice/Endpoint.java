@@ -48,6 +48,7 @@ import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 import de.tud.plt.r43ples.visualisation.MMSTVisualisation;
+import de.tud.plt.r43ples.visualisation.VisualisationD3;
 
 /**
  * Provides SPARQL endpoint via [host]:[port]/r43ples/.
@@ -185,10 +186,13 @@ public class Endpoint {
 		logger.info("format: " + format);
 
 		ResponseBuilder response = Response.ok();
-		if (format.contains(MediaType.TEXT_HTML)) {
+		if (format.equals("batik")) {
 			response.type(MediaType.TEXT_HTML);
 			response.entity(MMSTVisualisation.getHtmlOutput(graph));
-		} else {
+		} else if (format.equals("d3")) {
+			response.entity(VisualisationD3.getHtmlOutput(graph));
+		}
+		else {
 			response.type(format);
 			response.entity(RevisionManagement.getRevisionInformation(graph, format));
 		}
