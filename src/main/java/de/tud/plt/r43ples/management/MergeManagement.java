@@ -111,11 +111,14 @@ public class MergeManagement {
 			+ " }"
 			+ "}", Config.revision_graph, targetRevision, startRevision);
 		
-		HashMap<String, String> resultMap = new HashMap<String, String>();
+		HashMap<String, ArrayList<String>> resultMap = new HashMap<String, ArrayList<String>>();
 		LinkedList<String> list = new LinkedList<String>();
 		
 		ResultSet resultSet = TripleStoreInterface.executeSelectQuery(query);
 
+		// Path element counter
+		int counterLength = 0;
+		
 		while (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
 			String resource = qs.getResource("?revision").toString();
@@ -123,19 +126,37 @@ public class MergeManagement {
 			if (qs.getResource("?previousRevision") != null) {
 				previousResource = qs.getResource("?previousRevision").toString();
 			}
-			resultMap.put(resource, previousResource);
+			if (resultMap.containsKey(resource)) {
+				resultMap.get(resource).add(previousResource);
+			} else {
+				ArrayList<String> arrayList = new ArrayList<String>();
+				counterLength++;
+				arrayList.add(previousResource);
+				resultMap.put(resource, arrayList);
+			}
 		}
 		
 		// Sort the result map -> sorted list of path elements
+		// A merged revision can have two predecessors -> it is important to choose the right predecessor revision according to the selected path
 		String currentPathElement = targetRevision;
-		for (int i = 0; i < resultMap.size(); i++) {
+		for (int i = 0; i < counterLength; i++) {
 			list.addFirst(currentPathElement);
-			currentPathElement = resultMap.get(currentPathElement);
+			
+			// Check if start revision was already reached
+			if (currentPathElement.equals(startRevision)) {
+				return list;
+			}
+			
+			if (resultMap.get(currentPathElement).size() > 1) {
+				if (resultMap.containsKey(resultMap.get(currentPathElement).get(0))) {
+					currentPathElement = resultMap.get(currentPathElement).get(0);
+				} else {
+					currentPathElement = resultMap.get(currentPathElement).get(1);
+				}
+			} else {
+				currentPathElement = resultMap.get(currentPathElement).get(0);
+			}
 		}
-		
-		// TODO Check the occurrence of NULL values!
-		// Remove null values
-		list.remove(null);
 
 		return list;
 	}
