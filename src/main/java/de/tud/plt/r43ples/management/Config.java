@@ -19,12 +19,12 @@ public class Config {
 	public static String database_directory;
 	
 	// Service settings
-	/** The service URI. **/
-	public static String service_uri;
+	/** The service host. **/
+	public static String service_host;
 	/** The service port. **/
 	public static int service_port;
-	/** Parameter to secure the service. **/
-	public static boolean service_secure;
+	/** The service path. **/
+	public static String service_path;
 
 	// SSL settings
 	/** The SSL keystore path. **/
@@ -60,9 +60,9 @@ public class Config {
 			
 			database_directory = config.getString("database.directory");
 			
-			service_uri = config.getString("service.uri");
+			service_host = config.getString("service.host");
 			service_port = config.getInt("service.port");
-			service_secure = config.getBoolean("service.secure");
+			service_path = config.getString("service.path");
 			
 			ssl_keystore = config.getString("ssl.keystore");
 			ssl_password = config.getString("ssl.password");

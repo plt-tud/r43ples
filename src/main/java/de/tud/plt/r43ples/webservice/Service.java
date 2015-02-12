@@ -3,9 +3,6 @@ package de.tud.plt.r43ples.webservice;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Paths;
-
-import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
@@ -74,55 +71,39 @@ public class Service {
 	 */
 	public static void start() throws ConfigurationException, URISyntaxException, IOException {
 		logger.info("Starting R43ples on grizzly...");
-		URI BASE_URI = null;
-	
-		ClassLoader classLoader = Service.class.getClassLoader();
+		URI BASE_URI;
 		
-		// Choose if the endpoint should be SSL secured
-		if (Config.service_secure) {
-			BASE_URI = UriBuilder.fromUri(Config.service_uri).port(Config.service_port).path("r43ples").build();
+		ResourceConfig rc = new ResourceConfig()
+			.registerClasses(Endpoint.class)
+			.property(MustacheMvcFeature.TEMPLATE_BASE_PATH, "templates")
+			.register(MustacheMvcFeature.class)
+			.register(ExceptionMapper.class);
 		
-			ResourceConfig rc = new ResourceConfig()
-				.registerClasses(Endpoint.class)
-				.property(MustacheMvcFeature.TEMPLATE_BASE_PATH, "templates")
-				.register(MustacheMvcFeature.class)
-				.register(ExceptionMapper.class);
-
-			SSLContextConfigurator sslCon = new SSLContextConfigurator();
-			sslCon.setKeyStoreFile(Paths.get(classLoader.getResource(Config.ssl_keystore).toURI()).toString());
+		SSLContextConfigurator sslCon =  new SSLContextConfigurator();
+		
+		// Try to initialize SSL keys
+		if (Config.ssl_keystore != null && Config.ssl_password != null) {
+			sslCon.setKeyStoreFile(Config.ssl_keystore);
 			sslCon.setKeyStorePass(Config.ssl_password);
-			sslCon.setTrustStoreFile(Paths.get(classLoader.getResource(Config.ssl_keystore).toURI()).toString());
+			sslCon.setTrustStoreFile(Config.ssl_keystore);
 			sslCon.setTrustStorePass(Config.ssl_password);
-			
-			logger.info("SSL context validated: " + Boolean.toString(sslCon.validateConfiguration()));
-	
-			server = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, rc, true, new SSLEngineConfigurator(sslCon, false, false, false));
-
-			server.getServerConfiguration().addHttpHandler(
-			        new CLStaticHttpHandler(Service.class.getClassLoader(),"webapp/"), "/static/");
-
-			server.start();
-			
-			logger.info("Connection is secure.");
-		} else {
-			BASE_URI = UriBuilder.fromUri(Config.service_uri).port(Config.service_port).path("r43ples").build();
-			
-			ResourceConfig rc = new ResourceConfig()
-				.registerClasses(Endpoint.class)
-				.property(MustacheMvcFeature.TEMPLATE_BASE_PATH, "templates")
-				.register(MustacheMvcFeature.class)
-				.register(ExceptionMapper.class);
-			
-			server = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, rc);
-			
-			server.getServerConfiguration().addHttpHandler(
-			        new CLStaticHttpHandler(Service.class.getClassLoader(),"webapp/"), "/static/");
-			
-			server.start();
-			
-			logger.info("Connection is not secure.");
 		}
 		
+		if (sslCon.validateConfiguration()) {
+			logger.info("SSL context validated");
+			BASE_URI = new URI("https", null, Config.service_host, Config.service_port, Config.service_path, null, null);
+			server = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, rc, true, new SSLEngineConfigurator(sslCon, false, false, false));		
+		} else {
+			logger.info("SSL context not validated");
+			BASE_URI = new URI("http", null, Config.service_host, Config.service_port, Config.service_path, null, null);
+			server = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, rc);			
+		}
+		
+		server.getServerConfiguration().addHttpHandler(
+		        new CLStaticHttpHandler(Service.class.getClassLoader(),"webapp/"), "/static/");
+
+		server.start();
+
 		logger.info(String.format("Server started - R43ples endpoint available under: %s/sparql", BASE_URI));
 		
 		String version = Service.class.getPackage().getImplementationVersion();
