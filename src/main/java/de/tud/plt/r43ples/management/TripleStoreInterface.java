@@ -82,6 +82,7 @@ public class TripleStoreInterface {
 	
 	
 	public static String executeSelectConstructAskQuery(String sparqlQuery, String format) {
+		logger.debug("Query: " + sparqlQuery);
 		final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
 		final Pattern patternSelectQuery = Pattern.compile(
 				"SELECT.*WHERE\\s*\\{(?<where>.*)\\}", 
@@ -92,16 +93,17 @@ public class TripleStoreInterface {
 		final Pattern patternConstructQuery = Pattern.compile(
 				"CONSTRUCT.*WHERE\\s*\\{(?<where>.*)\\}", 
 				patternModifier);
-		
+		String result;
 		if (patternSelectQuery.matcher(sparqlQuery).find())
-			return executeSelectQuery(sparqlQuery, format);
+			result = executeSelectQuery(sparqlQuery, format);
 		else if (patternAskQuery.matcher(sparqlQuery).find())
-			return executeAskQuery(sparqlQuery)?"true":"false";
+			result = executeAskQuery(sparqlQuery)?"true":"false";
 		else if (patternConstructQuery.matcher(sparqlQuery).find())
-			return executeConstructQuery(sparqlQuery, format);
+			result = executeConstructQuery(sparqlQuery, format);
 		else
-			return executeSelectQuery(sparqlQuery, format);
-		
+			result = executeSelectQuery(sparqlQuery, format);
+		logger.debug("Response: " + result);
+		return result;
 	}
 	
 	
@@ -131,29 +133,23 @@ public class TripleStoreInterface {
 	 * @return result set
 	 */
 	public static String executeSelectQuery(String selectQueryString, String format) {
-		dataset.begin(ReadWrite.READ);
-		try {
-			QueryExecution qExec = QueryExecutionFactory.create(selectQueryString, dataset);
-			ResultSet results = qExec.execSelect();
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			if (format.equals("application/sparql-results+xml") || format.equals("application/xml") || format.equals("text/xml"))
-				ResultSetFormatter.outputAsXML(baos, results);
-			else if (format.equals("text/turtle") )
-				ResultSetFormatter.outputAsRDF(baos, "Turtle", results);
-			else if (format.equals("application/json") )
-				ResultSetFormatter.outputAsJSON(baos, results);
-			else if (format.equals("text/plain") ) {
-				ResultSetFormatter.out(baos, results);
-				return baos.toString();
-			}
-			else {
-				ResultSetFormatter.out(baos, results);
-				return "<pre>"+StringEscapeUtils.escapeHtml(baos.toString())+"</pre>";
-			}
+		ResultSet results = executeSelectQuery(selectQueryString);
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		if (format.equals("application/sparql-results+xml") || format.equals("application/xml") || format.equals("text/xml"))
+			ResultSetFormatter.outputAsXML(baos, results);
+		else if (format.equals("text/turtle") )
+			ResultSetFormatter.outputAsRDF(baos, "Turtle", results);
+		else if (format.equals("application/json") )
+			ResultSetFormatter.outputAsJSON(baos, results);
+		else if (format.equals("text/plain") ) {
+			ResultSetFormatter.out(baos, results);
 			return baos.toString();
-		} finally {
-			dataset.end();
 		}
+		else {
+			ResultSetFormatter.out(baos, results);
+			return "<pre>"+StringEscapeUtils.escapeHtml(baos.toString())+"</pre>";
+		}
+		return baos.toString();
 	}
 	
 	
@@ -165,6 +161,7 @@ public class TripleStoreInterface {
 	 * @return formatted result
 	 */
 	public static String executeConstructQuery(String constructQueryString, String format) {
+		logger.debug("Query: " + constructQueryString);
 		dataset.begin(ReadWrite.READ);
 		try {
 			QueryExecution qExec = QueryExecutionFactory.create(constructQueryString, dataset);
@@ -187,24 +184,11 @@ public class TripleStoreInterface {
 					return "<pre>"+StringEscapeUtils.escapeHtml(baos.toString())+"</pre>";
 				}
 			}
+			logger.debug("Result: " + baos.toString());
 			return baos.toString();
 		} finally {
 			dataset.end();
 		}
-	}
-	
-	public static String formatOutput(ResultSet results, String format){
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		if (format.equals("application/sparql-results+xml") || format.equals("application/xml") )
-			ResultSetFormatter.outputAsXML(baos, results);
-		else if (format.equals("text/turtle") )
-			ResultSetFormatter.outputAsRDF(baos, "Turtle", results);
-		else if (format.equals("application/json") )
-			ResultSetFormatter.outputAsJSON(baos, results);
-		else {
-			ResultSetFormatter.out(baos, results);
-		}
-		return baos.toString();
 	}
 	
 	/**
@@ -215,6 +199,7 @@ public class TripleStoreInterface {
 	 * @return formatted result
 	 */
 	public static String executeDescribeQuery(String describeQueryString, String format) {
+		logger.debug("Query: " + describeQueryString);
 		dataset.begin(ReadWrite.READ);
 		try {
 			QueryExecution qExec = QueryExecutionFactory.create(describeQueryString, dataset);
@@ -249,10 +234,10 @@ public class TripleStoreInterface {
 	 * @param updateQueryString the UPDATE query
 	 */
 	public static void executeUpdateQuery(String updateQueryString) {
+		logger.debug("Query:" + updateQueryString);
 		dataset.begin(ReadWrite.WRITE);
 		try {
 			GraphStore graphStore = GraphStoreFactory.create(dataset) ;
-
 		    UpdateRequest request = UpdateFactory.create(updateQueryString) ;
 		    UpdateProcessor proc = UpdateExecutionFactory.create(request, graphStore) ;
 		    proc.execute() ;
