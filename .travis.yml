@@ -50,16 +50,4 @@ deploy:
   on:
     tags: true
     all_branches: true
-    
-after_deploy:
-    - git clone -b gh-pages https://$GITAUTH@github.com/plt-tud/r43ples
-    - cp -r R43ples.zip r43ples/
-    - cd r43ples
-    - git config --local user.email "r43ples-travis-ci@users.noreply.github.com"
-    - git config --local user.name "r43ples travis-ci"
-    - git config --local push.default simple
-    - git add R43ples.zip
-    - git commit -am "new release on gh-pages updated by travis-ci"
-    - git push https://$GITAUTH@github.com/plt-tud/r43ples
-    - cd ..
-    - rm -rf r43ples
+
