@@ -74,8 +74,8 @@ public class TestUpdate {
 		String insert_template = ""
 				+ "USER \"test_user\" %n"
 				+ "MESSAGE \"test commit message 6 (same as 5)\" %n"
-        		+ "INSERT { GRAPH <%s> REVISION \"5\" { %s } } %n"
-        		+ "DELETE { GRAPH <%s> REVISION \"5\" { %s } } ";
+        		+ "INSERT DATA { GRAPH <%s> REVISION \"5\" { %s } }; %n"
+        		+ "DELETE DATA { GRAPH <%s> REVISION \"5\" { %s } } ";
 		ep.sparql(format, String.format(insert_template, 
 				graph_test,	ResourceManagement.getContentFromResource("samples/dataset1/added-5.nt"), 
 				graph_test, ResourceManagement.getContentFromResource("samples/dataset1/removed-5.nt")));
@@ -90,27 +90,39 @@ public class TestUpdate {
 	}
 	
 	@Test
-	public void testRestructuring() {
+	public void testRestructuring() throws SAXException, IOException {
+		String query = "SELECT ?s ?p ?o FROM <"+graphName+"> REVISION \"B2\"\n"
+        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
+		String result = ep.sparql(format, query).getEntity().toString();
+        String expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2.xml");
+        assertXMLEqual(expected, result);
+        
 		// restructure commit to B2
 		logger.info("Restructure commit to B2");
-		String query = String.format(""
+		query = String.format(""
 				+ "USER \"shensel\" %n"
 				+ "MESSAGE \"restructure commit to B2.\" %n"
-				+ "DELETE { GRAPH <%s> REVISION \"B2\" {"
-				+ " <http://example.com/testS> <http://example.com/testP> ?o."
+				+ "INSERT { GRAPH <%s> REVISION \"B2\" {"
+				+ " <http://example.com/newTestS> <http://example.com/newTestP> ?o."
 				+ "} } %n"
 				+ "WHERE { GRAPH <%s> REVISION \"B2\" {"
 				+ "	<http://example.com/testS> <http://example.com/testP> ?o"
-				+ "} } %n"
-				+ "INSERT { GRAPH <%s> REVISION \"B2\" {"
-				+ " <http://example.com/newTestS> <http://example.com/newTestP> ?o."
+				+ "} };"
+				+ "DELETE { GRAPH <%s> REVISION \"B2\" {"
+				+ " <http://example.com/testS> <http://example.com/testP> ?o."
 				+ "} } %n"
 				+ "WHERE { GRAPH <%s> REVISION \"B2\" {"
 				+ "	<http://example.com/testS> <http://example.com/testP> ?o"
 				+ "} }", 
 				graphName, graphName, graphName, graphName);
 		logger.debug("Execute query: \n" + query);
-		logger.debug("Response: \n" + ep.sparql(format, query));
+		result = ep.sparql(format, query).toString();
+		
+		query = "SELECT ?s ?p ?o FROM <"+graphName+"> REVISION \"B2\"\n"
+        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
+		result = ep.sparql(format, query).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2-restructured.xml");
+        assertXMLEqual(expected, result);
 	}
 	
 	@Test

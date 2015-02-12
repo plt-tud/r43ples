@@ -102,7 +102,7 @@ public class DatasetGenerationManagement {
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
-				+ "DELETE { GRAPH <%s> REVISION \"%s\" %n"
+				+ "DELETE DATA { GRAPH <%s> REVISION \"%s\" %n"
 				+ "	{ %n"
 				+ "	  %s %n"
 				+ "	} %n"

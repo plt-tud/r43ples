@@ -74,7 +74,7 @@ public class Endpoint {
 			"(?<action>INSERT|DELETE).*<(?<graph>[^>]*)>",
 			patternModifier);
 	private final Pattern patternUpdateRevision = Pattern.compile(
-			"(?<action>INSERT|DELETE|WHERE)(\\s*DATA){0,1}\\s*\\{\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
+			"(?<action>INSERT|DELETE|WHERE)(?<data>\\s*DATA){0,1}\\s*\\{\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
 			patternModifier);
 	private final Pattern patternEmptyGraphPattern = Pattern.compile(
 			"GRAPH\\s*<(?<graph>[^>]*)>\\s*\\{\\s*\\}",
@@ -574,6 +574,10 @@ public class Endpoint {
 																		// numbers or reference
 																		// names
 			String action = m.group("action");
+			String data = m.group("data");
+			if (data == null)
+				data = "";
+			
 			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
 			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
 			String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
@@ -581,9 +585,9 @@ public class Endpoint {
 				throw new InternalServerErrorException("Revision is not referenced by a branch");
 			}
 			if (action.equalsIgnoreCase("INSERT")) {
-				queryM = m.replaceFirst(String.format("INSERT DATA { GRAPH <%s>", addSetGraphUri));
+				queryM = m.replaceFirst(String.format("INSERT %s { GRAPH <%s>", data, addSetGraphUri));
 			} else if (action.equalsIgnoreCase("DELETE")) {
-				queryM = m.replaceFirst(String.format("INSERT DATA { GRAPH <%s>", removeSetGraphUri));
+				queryM = m.replaceFirst(String.format("INSERT %s { GRAPH <%s>", data, removeSetGraphUri));
 			} else if (action.equalsIgnoreCase("WHERE")) {
 				// TODO ersetze mit SPARQL JOIN
 				String tempGraphName = graphName + "-temp";
@@ -596,7 +600,6 @@ public class Endpoint {
 		// Remove empty insert clauses which otherwise will lead to errors
 		m= patternEmptyGraphPattern.matcher(queryM);
 		queryM = m.replaceAll("");
-//		queryM = queryM.replaceAll("}\\s*INSERT", "}; INSERT");
 
 		TripleStoreInterface.executeUpdateQuery(queryM);
 
@@ -643,8 +646,7 @@ public class Endpoint {
 			// Respond with next revision number
 	    	responseBuilder.header(graphNameHeader + "-revision-number", newRevisionNumber);
 			responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
-			logger.info("Respond with new revision number " + newRevisionNumber + ".");
-			logger.info("Respond with new revision number " + newRevisionNumber);
+			logger.debug("Respond with new revision number " + newRevisionNumber + ".");
 			queryM = m.replaceAll(String.format("GRAPH <%s> ", graphName));
 			m = patternGraphWithRevision.matcher(queryM);
 		}
@@ -925,7 +927,7 @@ public class Endpoint {
 				// Respond with next revision number
 		    	responseBuilder.header(graphNameHeader + "-revision-number", newRevisionNumber);
 				responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
-				logger.info("Respond with new revision number " + newRevisionNumber + ".");
+				logger.debug("Respond with new revision number " + newRevisionNumber + ".");
 			}
 		}
 		if (!foundEntry)
