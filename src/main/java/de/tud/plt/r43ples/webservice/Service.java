@@ -20,6 +20,7 @@ import org.glassfish.jersey.server.mvc.mustache.MustacheMvcFeature;
 import com.hp.hpl.jena.query.Dataset;
 
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.TripleStoreInterface;
 
 
@@ -124,7 +125,11 @@ public class Service {
 		
 		logger.info(String.format("Server started - R43ples endpoint available under: %s/sparql", BASE_URI));
 		
-		logger.info("Version: "+ Service.class.getPackage().getImplementationVersion());
+		String version = Service.class.getPackage().getImplementationVersion();
+		if (version==null){
+			version = "Commit: " +GitRepositoryState.getGitRepositoryState().commitIdAbbrev;
+		}
+		logger.info("Version: "+ version);
 		
 		TripleStoreInterface.init(Config.database_directory);
 	}

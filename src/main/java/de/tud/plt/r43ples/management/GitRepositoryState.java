@@ -8,28 +8,29 @@ public class GitRepositoryState {
 	
 	private static GitRepositoryState gitRepositoryState = null;
 
-	 String branch;                  // =${git.branch}
-	 String tags;                    // =${git.tags} // comma separated tag names
-	 String describe;                // =${git.commit.id.describe}
-	 String describeShort;           // =${git.commit.id.describe-short}
-	 String commitId;                // =${git.commit.id}
-	 String commitIdAbbrev;          // =${git.commit.id.abbrev}
-	 String buildUserName;           // =${git.build.user.name}
-	 String buildUserEmail;          // =${git.build.user.email}
-	 String buildTime;               // =${git.build.time}
-	 String commitUserName;          // =${git.commit.user.name}
-	 String commitUserEmail;         // =${git.commit.user.email}
-	 String commitMessageFull;       // =${git.commit.message.full}
-	 String commitMessageShort;      // =${git.commit.message.short}
-	 String commitTime;              // =${git.commit.time}
+	public String branch;                  // =${git.branch}
+	public String tags;                    // =${git.tags} // comma separated tag names
+	public String describe;                // =${git.commit.id.describe}
+	public String describeShort;           // =${git.commit.id.describe-short}
+	public String commitId;                // =${git.commit.id}
+	public String commitIdAbbrev;          // =${git.commit.id.abbrev}
+	public String buildUserName;           // =${git.build.user.name}
+	public String buildUserEmail;          // =${git.build.user.email}
+	public String buildTime;               // =${git.build.time}
+	public String commitUserName;          // =${git.commit.user.name}
+	public String commitUserEmail;         // =${git.commit.user.email}
+	public String commitMessageFull;       // =${git.commit.message.full}
+	public String commitMessageShort;      // =${git.commit.message.short}
+	public String commitTime;              // =${git.commit.time}
 
-	public GitRepositoryState(PropertiesConfiguration properties)
+	private GitRepositoryState(PropertiesConfiguration properties)
 	{
 	   this.branch = properties.getString("git.branch");
 	   this.tags = properties.getString("git.tags");
 	   this.describe = properties.getString("git.commit.id.describe");
 	   this.describeShort = properties.getString("git.commit.id.describe-short");
 	   this.commitId = properties.getString("git.commit.id");
+	   this.commitIdAbbrev = properties.getString("git.commit.id.abbrev");
 	   this.buildUserName = properties.getString("git.build.user.name");
 	   this.buildUserEmail = properties.getString("git.build.user.email");
 	   this.buildTime = properties.getString("git.build.time");

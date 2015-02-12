@@ -35,33 +35,33 @@ Releases
 Releases are stored on [GitHub](https://github.com/plt-tud/r43ples/releases).
 They just have to be unzipped and started with Java
 
-    unzip R43ples.zip
-    java -jar R43ples.jar
+    java -jar r43ples-*-with-dependencies.jar
 
-Debian packages are going to be deployed soon.    
-
+    
+Debian packages are going to be deployed soon. 
 
 Compiling
 ---------
-Ant is used for compiling
+Maven is used for compiling
 
     mvn exec:java
     
 Releases can be be built with:
 
     mvn assembly:single
-    
-    
+
+Debian packages can be built with:
+
+    mvn package:jdeb
 Configuration
 -------------
-There is a configuration file named *resources/r43ples.conf* where all parameters are configured:
+There is a configuration file named *resources/r43ples.conf*. The most important ones are the following:
 
-* *sparql.endpoint* - SPARQL endpoint of triplestore which stores all information
-* *sparql.username* - username for connected SPARQL endpoint allowed to write data
-* *sparql.password* - password for specified user
-* *revision.graph* - named graph which is used by R43ples to store revision graph information
+* *database.directory* - directory for Jena TDB database
 * *service.port* - port under which R43ples provides its services
 * *service.uri* - URI under which R43ples provides its services
+* *revision.graph* - named graph which is used by R43ples to store revision graph information
+* *sdd.graph* - named graph for storing the SDD
 
 The logging configuration is stored in *resources/log4j.properties*
 
@@ -179,7 +179,6 @@ Following libraries are used in R43ples:
 * [Jena ARQ](https://jena.apache.org/documentation/query/index.html) for processing SPARQL results
 * [Jena TDB](https://jena.apache.org/documentation/tdb/index.html) as triplestore
 * [jQuery](http://jquery.com/) as JavaScript framework
-* [Bootstrap](http://getbootstrap.com/)
+* [Bootstrap](http://getbootstrap.com/) as HTML, CSS and JS framework
 * [Mustache](https://mustache.github.io/) as template engine
-* [viz.js](http://mdaines.github.io/viz.js/example.html) as JavaScript framework for rendering GraphViz
  

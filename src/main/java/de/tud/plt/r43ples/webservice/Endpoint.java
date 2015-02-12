@@ -109,8 +109,8 @@ public class Endpoint {
 	private Map<String, Object> htmlMap;
 	 {
 		Map<String, Object> aMap = new HashMap<String, Object>();
+		aMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
 		aMap.put("git", GitRepositoryState.getGitRepositoryState());
-	    aMap.put("uriInfo", uriInfo);
 		htmlMap= aMap;
 	}
 		
