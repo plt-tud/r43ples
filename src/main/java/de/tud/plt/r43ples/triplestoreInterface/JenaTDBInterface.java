@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.management;
+package de.tud.plt.r43ples.triplestoreInterface;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -31,14 +31,15 @@ import com.hp.hpl.jena.update.UpdateRequest;
  * Provides a interface to the TDB triple store.
  *
  * @author Stephan Hensel
+ * @author Markus Graube
  *
  */
-public class TripleStoreInterface {
+public class JenaTDBInterface extends TripleStoreInterface {
 
 	/** The TDB dataset. **/
 	private static Dataset dataset;
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(TripleStoreInterface.class);
+	private static Logger logger = Logger.getLogger(JenaTDBInterface.class);
 	
 
 	/**
@@ -47,7 +48,7 @@ public class TripleStoreInterface {
 	 * @param databaseDirectory the database directory of TDB
 	 * @throws UnsupportedEncodingException 
 	 */
-	public static void init(String databaseDirectory) throws UnsupportedEncodingException {
+	public JenaTDBInterface(String databaseDirectory) throws UnsupportedEncodingException {
 		
 		// if the directory does not exist, create it
 		Location location = new Location(databaseDirectory);
@@ -60,28 +61,17 @@ public class TripleStoreInterface {
 		// Initialize the database
 		dataset = TDBFactory.createDataset(location);
 
-		if (!RevisionManagement.checkGraphExistence(Config.revision_graph)){
-			logger.info("Create revision graph");
-			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
-	 	}
 		
-		// Create SDD graph
-		if (!RevisionManagement.checkGraphExistence(Config.sdd_graph)){
-			logger.info("Create sdd graph");
-			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
-			// Insert default content into SDD graph
-			RevisionManagement.executeINSERT(Config.sdd_graph, MergeManagement.convertJenaModelToNTriple(MergeManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent)));
-	 	}		
 	}
 	
-	public static void close() {
+	public void close() {
 		dataset.close();
 	}
 	
 	
 	
 	
-	public static String executeSelectConstructAskQuery(String sparqlQuery, String format) {
+	public String executeSelectConstructAskQuery(String sparqlQuery, String format) {
 		logger.debug("Query: " + sparqlQuery);
 		final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
 		final Pattern patternSelectQuery = Pattern.compile(
@@ -114,7 +104,7 @@ public class TripleStoreInterface {
 	 * @param selectQueryString the SELECT query
 	 * @return result set
 	 */
-	public static ResultSet executeSelectQuery(String selectQueryString) {
+	public ResultSet executeSelectQuery(String selectQueryString) {
 		dataset.begin(ReadWrite.READ);
 		try {
 			QueryExecution qExec = QueryExecutionFactory.create(selectQueryString, dataset);
@@ -132,7 +122,7 @@ public class TripleStoreInterface {
 	 * @param format the format
 	 * @return result set
 	 */
-	public static String executeSelectQuery(String selectQueryString, String format) {
+	public String executeSelectQuery(String selectQueryString, String format) {
 		ResultSet results = executeSelectQuery(selectQueryString);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		if (format.equals("application/sparql-results+xml") || format.equals("application/xml") || format.equals("text/xml"))
@@ -160,7 +150,7 @@ public class TripleStoreInterface {
 	 * @param format the result format
 	 * @return formatted result
 	 */
-	public static String executeConstructQuery(String constructQueryString, String format) {
+	public String executeConstructQuery(String constructQueryString, String format) {
 		logger.debug("Query: " + constructQueryString);
 		dataset.begin(ReadWrite.READ);
 		try {
@@ -198,7 +188,7 @@ public class TripleStoreInterface {
 	 * @param format the result format
 	 * @return formatted result
 	 */
-	public static String executeDescribeQuery(String describeQueryString, String format) {
+	public String executeDescribeQuery(String describeQueryString, String format) {
 		logger.debug("Query: " + describeQueryString);
 		dataset.begin(ReadWrite.READ);
 		try {
@@ -218,7 +208,7 @@ public class TripleStoreInterface {
 	 * @param askQueryString the ASK query
 	 * @return boolean result of ASK query
 	 */
-	public static boolean executeAskQuery(String askQueryString) {
+	public boolean executeAskQuery(String askQueryString) {
 		dataset.begin(ReadWrite.READ);
 		try {
 			QueryExecution qe = QueryExecutionFactory.create(askQueryString, dataset);
@@ -233,7 +223,7 @@ public class TripleStoreInterface {
 	 * 
 	 * @param updateQueryString the UPDATE query
 	 */
-	public static void executeUpdateQuery(String updateQueryString) {
+	public void executeUpdateQuery(String updateQueryString) {
 		logger.debug("Query:" + updateQueryString);
 		dataset.begin(ReadWrite.WRITE);
 		try {
@@ -252,7 +242,7 @@ public class TripleStoreInterface {
 	}
 
 
-	public static void executeCreateGraph(String graph) {
+	public void executeCreateGraph(String graph) {
 		dataset.begin(ReadWrite.WRITE);
 		try {
 			GraphStore graphStore = GraphStoreFactory.create(dataset) ;
@@ -270,7 +260,7 @@ public class TripleStoreInterface {
 		}
 	}
 
-	public static Object getGraphs() {
+	public Iterator<String> getGraphs() {
 		dataset.begin(ReadWrite.READ);
 		Iterator<String> list = dataset.listNames();
 		dataset.end();

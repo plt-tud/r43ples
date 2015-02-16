@@ -23,7 +23,7 @@ import org.xml.sax.SAXException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.management.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
 public class TestUpdate {
@@ -43,12 +43,13 @@ public class TestUpdate {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.database_directory);
+		TripleStoreInterfaceFactory.createInterface();
 		SampleDataSet.createSampleDataset1(graph_test);
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
+		TripleStoreInterfaceFactory.close();
 	}
 
 	@Before

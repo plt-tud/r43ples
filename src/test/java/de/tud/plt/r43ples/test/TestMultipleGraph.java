@@ -21,7 +21,7 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.management.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
 /**
@@ -45,7 +45,7 @@ public class TestMultipleGraph {
 	public static void setUpBeforeClass() throws Exception {
 		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.database_directory);
+		TripleStoreInterfaceFactory.createInterface();
 		SampleDataSet.createSampleDataset1(graph1);
 		SampleDataSet.createSampleDataset2(graph2);
 	}
@@ -54,6 +54,7 @@ public class TestMultipleGraph {
 	public static void tearDownafterClass() {
 		RevisionManagement.purgeGraph(graph1);
 		RevisionManagement.purgeGraph(graph2);
+		TripleStoreInterfaceFactory.close();
 	}
 
 	@Before

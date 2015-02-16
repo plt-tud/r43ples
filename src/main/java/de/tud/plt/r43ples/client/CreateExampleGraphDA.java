@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.examples;
+package de.tud.plt.r43ples.client;
 
 import java.io.UnsupportedEncodingException;
 
@@ -6,10 +6,16 @@ import org.apache.commons.configuration.ConfigurationException;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.management.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 
 
-public class CreateExampleGraph {
+/**
+ * Create an example graph.
+ * 
+ * @author Stephan Hensel
+ *
+ */
+public class CreateExampleGraphDA {
 
 	/** The graph name. **/
 	private static String graphName = "http://exampleGraph";
@@ -17,6 +23,7 @@ public class CreateExampleGraph {
 	
 	/**
 	 * Main entry point. Create the example graph.
+	 * Used in diploma thesis of Stephan Hensel.
 	 * 
 	 * @param args
 	 * @throws ConfigurationException 
@@ -25,8 +32,8 @@ public class CreateExampleGraph {
 	public static void main(String[] args) throws ConfigurationException, UnsupportedEncodingException {
 		
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.database_directory);
+		TripleStoreInterfaceFactory.createInterface();
 		
-		SampleDataSet.createSampleDataSetMerging(graphName);
+		SampleDataSet.createSampleDataSetDA(graphName);
 	}
 }

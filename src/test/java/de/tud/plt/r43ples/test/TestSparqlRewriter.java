@@ -16,7 +16,7 @@ import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
-import de.tud.plt.r43ples.management.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 
 /**
  * @author Markus Graube
@@ -29,13 +29,14 @@ public class TestSparqlRewriter {
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, UnsupportedEncodingException{
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.database_directory);
+		TripleStoreInterfaceFactory.createInterface();
 		SampleDataSet.createSampleDataset1(graph_test);
 	}
 	
 	@AfterClass
 	public static void tearDown() {
 		RevisionManagement.purgeGraph(graph_test);
+		TripleStoreInterfaceFactory.close();
 	}
 	
 	/**
