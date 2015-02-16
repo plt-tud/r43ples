@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.examples;
+package de.tud.plt.r43ples.client;
 
 import java.util.ArrayList;
 

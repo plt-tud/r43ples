@@ -14,8 +14,11 @@ import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.mvc.mustache.MustacheMvcFeature;
 
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
 import com.hp.hpl.jena.query.Dataset;
 
+import de.tud.plt.r43ples.client.R43plesArgs;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
@@ -48,8 +51,29 @@ public class Service {
 	 * @throws IOException 
 	 */
 	public static void main(String[] args) {
+		
+		
+		// command-line-parser: JCommander-1.29
+		R43plesArgs jci = new R43plesArgs();
+		JCommander jc = new JCommander(jci);
+
+		// wrong input => display usage
 		try {
-			Config.readConfig("r43ples.conf");
+			jc.parse(args);
+		} catch (ParameterException e) {
+			jc.usage();
+			System.err.println(e.toString());
+			System.exit(0);
+		}
+		
+		if (jci.help) {
+			jc.usage();
+			System.exit(0);
+		}
+		
+		logger.debug("config: " + jci.config);
+		try {
+			Config.readConfig(jci.config);
 			start();
 			logger.info("Press enter to quit the server");
 			System.in.read();

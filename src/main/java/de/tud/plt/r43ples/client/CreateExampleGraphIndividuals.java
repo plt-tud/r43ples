@@ -1,4 +1,6 @@
-package de.tud.plt.r43ples.examples;
+package de.tud.plt.r43ples.client;
+
+import java.io.IOException;
 
 import org.apache.commons.configuration.ConfigurationException;
 
@@ -7,32 +9,32 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 
-
 /**
- * Create an example graph.
+ * Create an example graph which contains individuals.
  * 
  * @author Stephan Hensel
  *
  */
-public class CreateExampleGraphDA {
+public class CreateExampleGraphIndividuals {
 
 	/** The graph name. **/
-	private static String graphName = "http://exampleGraph";
+	private static String graphName = "http://exampleGraphIndividuals";
 	
 	
 	/**
 	 * Main entry point. Create the example graph.
-	 * Used in diploma thesis of Stephan Hensel.
 	 * 
 	 * @param args
 	 * @throws ConfigurationException 
 	 * @throws InternalErrorException 
+	 * @throws IOException 
 	 */
-	public static void main(String[] args) throws ConfigurationException, InternalErrorException {
+	public static void main(String[] args) throws ConfigurationException, IOException, InternalErrorException {
 		
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterfaceFactory.createInterface();
-		
-		SampleDataSet.createSampleDataSetDA(graphName);
+				
+		SampleDataSet.createSampleDataSetMergingClasses(graphName);
 	}
+	
 }

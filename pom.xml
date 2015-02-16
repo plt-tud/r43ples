@@ -391,7 +391,7 @@
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
 						<configuration>
-							<mainClass>de.tud.plt.r43ples.examples.ConsoleClient</mainClass>
+							<mainClass>de.tud.plt.r43ples.client.ConsoleClient</mainClass>
 						</configuration>
 					</plugin>
 				</plugins>
