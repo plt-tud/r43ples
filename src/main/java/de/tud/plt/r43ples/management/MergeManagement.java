@@ -23,6 +23,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.FileUtils;
 
 import de.tud.plt.r43ples.exception.InternalServerErrorException;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 
 /**
  * This class provides methods for merging branches.
@@ -77,7 +78,7 @@ public class MergeManagement {
 			  + "}"
 			  + "LIMIT 1",
 			  Config.revision_graph, revision1, revision2);
-		ResultSet results = TripleStoreInterface.executeSelectQuery(query);
+		ResultSet results = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
 		
 		if (results.hasNext()) {
 			QuerySolution qs = results.next();
@@ -114,7 +115,7 @@ public class MergeManagement {
 		HashMap<String, ArrayList<String>> resultMap = new HashMap<String, ArrayList<String>>();
 		LinkedList<String> list = new LinkedList<String>();
 		
-		ResultSet resultSet = TripleStoreInterface.executeSelectQuery(query);
+		ResultSet resultSet = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
 
 		// Path element counter
 		int counterLength = 0;
@@ -172,8 +173,8 @@ public class MergeManagement {
 	public static void createRevisionProgress(LinkedList<String> list, String graphNameRevisionProgress, String uri) {
 		logger.info("Create the revision progress of " + uri + " in graph " + graphNameRevisionProgress + ".");
 		
-		TripleStoreInterface.executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameRevisionProgress));
-		TripleStoreInterface.executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphNameRevisionProgress));
+		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameRevisionProgress));
+		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphNameRevisionProgress));
 		Iterator<String> iteList = list.iterator();
 		
 		if (iteList.hasNext()) {
@@ -192,7 +193,7 @@ public class MergeManagement {
 				+ " 	<%s> <http://eatld.et.tu-dresden.de/rmo#revisionOf> ?graph . %n"
 				+ "} }", Config.revision_graph, firstRevision, firstRevision);
 			
-			ResultSet results = TripleStoreInterface.executeSelectQuery(query);
+			ResultSet results = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
 			
 			if (results.hasNext()) {
 				QuerySolution qs = results.next();
@@ -227,11 +228,11 @@ public class MergeManagement {
 				+ "}",graphNameRevisionProgress,uri, firstRevision, fullGraphName);
 		
 			// Execute the query which generates the initial content
-			TripleStoreInterface.executeUpdateQuery(queryInitial);
+			TripleStoreInterfaceFactory.get().executeUpdateQuery(queryInitial);
 			
 			// Drop the temporary full graph
 			logger.info("Drop the temporary full graph.");
-			TripleStoreInterface.executeUpdateQuery("DROP SILENT GRAPH <"+fullGraphName+">");
+			TripleStoreInterfaceFactory.get().executeUpdateQuery("DROP SILENT GRAPH <"+fullGraphName+">");
 			
 			// Update content by current add and delete set - remove old entries
 			while (iteList.hasNext()) {
@@ -424,7 +425,7 @@ public class MergeManagement {
 						+ "}", graphNameRevisionProgress, uri, revision, deleteSetURI);
 				
 					// Execute the query which updates the revision progress by the current revision
-					TripleStoreInterface.executeUpdateQuery(queryRevision);
+					TripleStoreInterfaceFactory.get().executeUpdateQuery(queryRevision);
 
 				} else {
 					//TODO Error management - is needed when a ADD or DELETE set is not referenced in the current implementation this error should not occur
@@ -450,8 +451,8 @@ public class MergeManagement {
 	public static void createDifferenceTripleModel(String graphName, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD){
 		
 		logger.info("Create the difference triple model");
-		TripleStoreInterface.executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameDifferenceTripleModel));
-		TripleStoreInterface.executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphNameDifferenceTripleModel));
+		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameDifferenceTripleModel));
+		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphNameDifferenceTripleModel));
 		
 		// Templates for revision A and B
 		String sparqlTemplateRevisionA = String.format(
@@ -510,7 +511,7 @@ public class MergeManagement {
 				+ "} } %n", Config.sdd_graph, uriSDD);
 				
 		// Iterate over all differing combination URIs
-		ResultSet resultSetDifferences = TripleStoreInterface.executeSelectQuery(queryDifferingSD);
+		ResultSet resultSetDifferences = TripleStoreInterfaceFactory.get().executeSelectQuery(queryDifferingSD);
 		while (resultSetDifferences.hasNext()) {
 			QuerySolution qs = resultSetDifferences.next();
 
@@ -579,7 +580,7 @@ public class MergeManagement {
 					+ "} %n", querySelectPart, sparqlQueryRevisionA, sparqlQueryRevisionB);
 					
 			// Iterate over all triples
-			ResultSet resultSetTriples = TripleStoreInterface.executeSelectQuery(query);
+			ResultSet resultSetTriples = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
 			while (resultSetTriples.hasNext()) {
 				QuerySolution qsQuery = resultSetTriples.next();
 				
@@ -636,7 +637,7 @@ public class MergeManagement {
 									object,
 									referencesAB);
 				
-				TripleStoreInterface.executeUpdateQuery(queryTriple);
+				TripleStoreInterfaceFactory.get().executeUpdateQuery(queryTriple);
 			}
 		}
 	}
@@ -677,7 +678,7 @@ public class MergeManagement {
 		} else {	
 			// Copy graph B to temporary merged graph
 			String queryCopy = String.format("COPY <%s> TO <%s>", graphNameOfBranchB, graphNameOfMerged);
-			TripleStoreInterface.executeUpdateQuery(queryCopy);
+			TripleStoreInterfaceFactory.get().executeUpdateQuery(queryCopy);
 			
 			// Get the triples from branch A which should be added to/removed from the merged revision
 			String triplesToAdd = "";
@@ -695,7 +696,7 @@ public class MergeManagement {
 					+ "} }", graphNameDifferenceTripleModel);
 	
 			// Iterate over all difference groups
-			ResultSet resultSetDifferenceGroups = TripleStoreInterface.executeSelectQuery(queryDifferenceGroup);
+			ResultSet resultSetDifferenceGroups = TripleStoreInterfaceFactory.get().executeSelectQuery(queryDifferenceGroup);
 			while (resultSetDifferenceGroups.hasNext()) {
 				QuerySolution qsCurrentDifferenceGroup = resultSetDifferenceGroups.next();
 	
@@ -720,7 +721,7 @@ public class MergeManagement {
 						+ "} }", graphNameDifferenceTripleModel, currentDifferencGroupURI);
 				
 				// Iterate over all differences (triples)
-				ResultSet resultSetDifferences = TripleStoreInterface.executeSelectQuery(queryDifference);
+				ResultSet resultSetDifferences = TripleStoreInterfaceFactory.get().executeSelectQuery(queryDifference);
 				while (resultSetDifferences.hasNext()) {
 					QuerySolution qsCurrentDifference = resultSetDifferences.next();
 					
@@ -785,7 +786,7 @@ public class MergeManagement {
 				+ "	} %n"
 				+ "}", graphNameOfMerged, graphNameOfBranchA);
 		
-		String addedTriples = TripleStoreInterface.executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
+		String addedTriples = TripleStoreInterfaceFactory.get().executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
 		
 		queryAddedTriples = String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
@@ -796,7 +797,7 @@ public class MergeManagement {
 				+ "	} %n"
 				+ "}", graphNameOfMerged, graphNameOfBranchB);
 
-		addedTriples += TripleStoreInterface.executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
+		addedTriples += TripleStoreInterfaceFactory.get().executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
 		
 		// Get all removed triples (concatenate all triples which are in A but not in MERGED and all triples which are in B but not in MERGED)
 		String queryRemovedTriples = String.format(
@@ -808,7 +809,7 @@ public class MergeManagement {
 				+ "	} %n"
 				+ "}", graphNameOfBranchA, graphNameOfMerged);
 		
-		String removedTriples = TripleStoreInterface.executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
+		String removedTriples = TripleStoreInterfaceFactory.get().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
 		
 		queryRemovedTriples = String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
@@ -819,7 +820,7 @@ public class MergeManagement {
 				+ "	} %n"
 				+ "}", graphNameOfBranchB, graphNameOfMerged);
 		
-		removedTriples += TripleStoreInterface.executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
+		removedTriples += TripleStoreInterfaceFactory.get().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
 
 		// Create list with the 2 predecessors - the order is important - fist item will specify the branch were the new merged revision will be created
 		ArrayList<String> usedRevisionNumbers = new ArrayList<String>();
@@ -895,8 +896,8 @@ public class MergeManagement {
 	 */
 	private static void createNewGraph(String graphName) {
 		logger.info("Create new graph with the name: " + graphName + ".");
-		TripleStoreInterface.executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphName));
-		TripleStoreInterface.executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphName));
+		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphName));
+		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphName));
 	}
 	
 	

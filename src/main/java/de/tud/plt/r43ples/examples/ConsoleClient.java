@@ -13,7 +13,8 @@ import com.beust.jcommander.ParameterException;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.management.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 
 public class ConsoleClient {
 
@@ -48,11 +49,11 @@ public class ConsoleClient {
 		logger.info("delete set file: " +  jci.delete_set);
 		
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.database_directory);
+		TripleStoreInterface triplestore = TripleStoreInterfaceFactory.createInterface();
 		
 		
 		if (jci.create) {
-			TripleStoreInterface.executeCreateGraph(jci.graph);
+			triplestore.executeCreateGraph(jci.graph);
 			RevisionManagement.putGraphUnderVersionControl(jci.graph);
 		}
 		

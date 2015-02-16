@@ -6,7 +6,7 @@ import org.apache.commons.configuration.ConfigurationException;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.management.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 
 
 public class CreateExampleGraph {
@@ -25,7 +25,7 @@ public class CreateExampleGraph {
 	public static void main(String[] args) throws ConfigurationException, UnsupportedEncodingException {
 		
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.database_directory);
+		TripleStoreInterfaceFactory.createInterface();
 		
 		SampleDataSet.createSampleDataSetMerging(graphName);
 	}

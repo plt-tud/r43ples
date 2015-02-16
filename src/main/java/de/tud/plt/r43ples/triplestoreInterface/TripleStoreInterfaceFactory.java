@@ -1,0 +1,86 @@
+package de.tud.plt.r43ples.triplestoreInterface;
+
+import java.io.UnsupportedEncodingException;
+
+import org.apache.jena.atlas.logging.Log;
+import org.apache.log4j.Logger;
+
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.MergeManagement;
+import de.tud.plt.r43ples.management.RevisionManagement;
+
+public class TripleStoreInterfaceFactory {
+	
+	private static TripleStoreInterface triplestore;
+	/** The logger */
+	private static Logger logger = Logger.getLogger(TripleStoreInterface.class);
+	
+	public static TripleStoreInterface get() {
+		return triplestore;
+	}
+	
+	/** Create interface according to Config
+	 * can be a Jena TDB Interface or a Virtuoso interface
+	 * 
+	 * @return triplestoreinterface
+	 */
+	public static TripleStoreInterface createInterface() {
+		if (Config.database_directory != null)
+			triplestore = createJenaTDBInterface(Config.database_directory);
+		else
+			triplestore = createVirtuosoInterface(Config.database_directory);
+		init();
+		return triplestore;
+	}
+
+	
+	public static TripleStoreInterface createJenaTDBInterface(String databaseDirectory) {
+		if (triplestore==null) {
+			try {
+				triplestore = new JenaTDBInterface(databaseDirectory);
+			} catch (UnsupportedEncodingException e) {
+				Log.warn("TripleStoreInterface", e.toString());
+				e.printStackTrace();
+				return null;
+			}
+			return triplestore;
+		}
+		else
+			return triplestore;
+	}
+	
+	public static TripleStoreInterface createVirtuosoInterface(String link) {
+		if (triplestore!=null) {
+			triplestore = new VirtuosoInterface();
+			return triplestore;
+		}
+		else
+			return null;
+	}
+	
+	
+	private static void init() {
+		if (!RevisionManagement.checkGraphExistence(Config.revision_graph)){
+			logger.info("Create revision graph");
+			triplestore.executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
+	 	}
+		
+		// Create SDD graph
+		if (!RevisionManagement.checkGraphExistence(Config.sdd_graph)){
+			logger.info("Create sdd graph");
+			triplestore.executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
+			// Insert default content into SDD graph
+			try {
+				RevisionManagement.executeINSERT(Config.sdd_graph, MergeManagement.convertJenaModelToNTriple(MergeManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent)));
+			} catch (UnsupportedEncodingException e) {
+				logger.error("Couldn't create SDD graph: " + e.getMessage());
+			}
+	 	}		
+	}
+
+	public static void close(){
+		triplestore.close();
+		triplestore = null;
+	}
+
+}

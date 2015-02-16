@@ -16,7 +16,7 @@ import com.hp.hpl.jena.query.ResultSet;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.management.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 
 public class StructuredTree {
 
@@ -68,7 +68,7 @@ public class StructuredTree {
 						+ "prov:generated ?rev.\n"
 						+ "} }", Config.revision_graph, graph);
 
-		ResultSet resultsBranches = TripleStoreInterface.executeSelectQuery(queryBranches);
+		ResultSet resultsBranches = TripleStoreInterfaceFactory.get().executeSelectQuery(queryBranches);
 
 		while (resultsBranches.hasNext()) {
 			QuerySolution sol = resultsBranches.next();
@@ -92,7 +92,7 @@ public class StructuredTree {
 						+ "prov:generated ?rev.\n"
 						+ "} }", Config.revision_graph, graph);
 
-		ResultSet resultsTags = TripleStoreInterface.executeSelectQuery(queryBranches);
+		ResultSet resultsTags = TripleStoreInterfaceFactory.get().executeSelectQuery(queryBranches);
 
 		while (resultsTags.hasNext()) {
 			QuerySolution sol = resultsTags.next();
@@ -138,7 +138,7 @@ public class StructuredTree {
 				Config.revision_graph,
 				graph);
 		
-		ResultSet resultsCommits = TripleStoreInterface.executeSelectQuery(queryCommits);
+		ResultSet resultsCommits = TripleStoreInterfaceFactory.get().executeSelectQuery(queryCommits);
 
 		// generate list of commits
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");

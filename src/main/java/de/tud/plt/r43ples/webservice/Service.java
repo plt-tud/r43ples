@@ -18,7 +18,7 @@ import com.hp.hpl.jena.query.Dataset;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.GitRepositoryState;
-import de.tud.plt.r43ples.management.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 
 
 /**
@@ -70,6 +70,8 @@ public class Service {
 	 * @throws IOException 
 	 */
 	public static void start() throws ConfigurationException, URISyntaxException, IOException {
+		TripleStoreInterfaceFactory.createInterface();
+		
 		logger.info("Starting R43ples on grizzly...");
 		URI BASE_URI;
 		
@@ -111,8 +113,6 @@ public class Service {
 			version = "Commit: " +GitRepositoryState.getGitRepositoryState().commitIdAbbrev;
 		}
 		logger.info("Version: "+ version);
-		
-		TripleStoreInterface.init(Config.database_directory);
 	}
 	
 	
@@ -121,7 +121,7 @@ public class Service {
 	 */
 	public static void stop() {
 		logger.info("Server shutdown ...");
-		TripleStoreInterface.close();
+		TripleStoreInterfaceFactory.close();
 		server.shutdown();
 	}
 	

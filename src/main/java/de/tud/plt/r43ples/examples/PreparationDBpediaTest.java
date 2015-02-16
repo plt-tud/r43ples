@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.management.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 
 public class PreparationDBpediaTest {
 
@@ -23,7 +23,7 @@ public class PreparationDBpediaTest {
 		String graph_name = "http://dbpedia.org";
 		
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterface.init(Config.database_directory);
+		TripleStoreInterfaceFactory.createInterface();
 
 		// load instance data to triplestore (dbpedia_2013_07_18.nt)
 		String file_name = "dbpedia_2013_07_18.nt";

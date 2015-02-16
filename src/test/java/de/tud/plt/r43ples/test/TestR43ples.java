@@ -28,7 +28,6 @@ import org.xml.sax.SAXException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.management.TripleStoreInterface;
 import de.tud.plt.r43ples.webservice.Service;
 
 
@@ -44,9 +43,8 @@ public class TestR43ples {
 	public static void setUp() throws ConfigurationException, URISyntaxException, IOException{
 		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.test.conf");
-		TripleStoreInterface.init(Config.database_directory);
-		SampleDataSet.createSampleDataSetMerging(graphName);
 		Service.start();
+		SampleDataSet.createSampleDataSetMerging(graphName);
 	}
 	
 	@AfterClass
