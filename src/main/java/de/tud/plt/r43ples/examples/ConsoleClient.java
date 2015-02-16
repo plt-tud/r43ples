@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
@@ -21,7 +22,7 @@ public class ConsoleClient {
 	private static Logger logger = Logger
 			.getLogger(ConsoleClient.class);
 
-	public static void main(String[] args) throws ConfigurationException, IOException {
+	public static void main(String[] args) throws ConfigurationException, IOException, InternalErrorException {
 		
 		
 		// command-line-parser: JCommander-1.29

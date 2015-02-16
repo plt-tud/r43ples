@@ -22,7 +22,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.FileUtils;
 
-import de.tud.plt.r43ples.exception.InternalServerErrorException;
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 
 /**
@@ -169,8 +169,9 @@ public class MergeManagement {
 	 * @param list the linked list with all revisions from start revision to target revision
 	 * @param graphNameRevisionProgress the graph name of the revision progress
 	 * @param uri the URI of the revision progress
+	 * @throws InternalErrorException 
 	 */
-	public static void createRevisionProgress(LinkedList<String> list, String graphNameRevisionProgress, String uri) {
+	public static void createRevisionProgress(LinkedList<String> list, String graphNameRevisionProgress, String uri) throws InternalErrorException {
 		logger.info("Create the revision progress of " + uri + " in graph " + graphNameRevisionProgress + ".");
 		
 		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameRevisionProgress));
@@ -205,7 +206,7 @@ public class MergeManagement {
 			String fullGraphName = "";
 			try {
 				fullGraphName = RevisionManagement.getReferenceGraph(graphName, firstRevisionNumber);
-			} catch (InternalServerErrorException e) {
+			} catch (InternalErrorException e) {
 				// Create a temporary full graph
 				fullGraphName = graphName+"RM-TEMP-REVISION-PROGRESS-FULLGRAPH";
 				RevisionManagement.generateFullGraphOfRevision(graphName, firstRevisionNumber, fullGraphName);
@@ -660,8 +661,9 @@ public class MergeManagement {
 	 * @param type the merge query type
 	 * @param triples the triples which are belonging to the current merge query in N-Triple serialization
 	 * @return new revision number
+	 * @throws InternalErrorException 
 	 */
-	public static String createMergedRevision(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type, String triples) {
+	public static String createMergedRevision(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type, String triples) throws InternalErrorException {
 		 
 		// Create an empty temporary graph which will contain the merged full content
 		String graphNameOfMerged = graphName + "-RM-MERGED-TEMP";
@@ -878,14 +880,18 @@ public class MergeManagement {
 	 * 
 	 * @param model the jena model
 	 * @return the string which contains the N-Triples
-	 * @throws UnsupportedEncodingException
 	 */
-	public static String convertJenaModelToNTriple(Model model) throws UnsupportedEncodingException {
+	public static String convertJenaModelToNTriple(Model model) {
 			
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		model.write(os, "N-TRIPLES");
 		
-		return new String(os.toByteArray(), "UTF-8");
+		try {
+			return new String(os.toByteArray(), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return "";
+		}
 	}
 	
 	

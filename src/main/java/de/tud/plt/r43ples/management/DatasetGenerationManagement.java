@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 
 import org.apache.log4j.Logger;
 
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
 /**
@@ -27,8 +28,9 @@ public class DatasetGenerationManagement {
 	 * Create new graph.
 	 * 
 	 * @param graphName the graph name
+	 * @throws InternalErrorException 
 	 */
-	public static void createNewGraph(String graphName) {
+	public static void createNewGraph(String graphName) throws InternalErrorException {
 		// Purge silent example graph
 		logger.info("Purge silent example graph");
 		String query = String.format("DROP SILENT GRAPH <%s>", graphName);
@@ -52,8 +54,9 @@ public class DatasetGenerationManagement {
 	 * @param graphName the graph name
 	 * @param revision the revision
 	 * @param branchName the branch name
+	 * @throws InternalErrorException 
 	 */
-	public static void createNewBranch(String user, String message, String graphName, String revision, String branchName) {
+	public static void createNewBranch(String user, String message, String graphName, String revision, String branchName) throws InternalErrorException {
 		logger.info(message);
 		String query = String.format(""
 				+ "USER \"%s\" \n"
@@ -72,8 +75,9 @@ public class DatasetGenerationManagement {
 	 * @param graphName the graph name
 	 * @param revision the revision
 	 * @param triples the triples to insert
+	 * @throws InternalErrorException 
 	 */
-	 public static void executeInsertQuery(String user, String message, String graphName, String revision, String triples) {
+	 public static void executeInsertQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
 		logger.info(message);
 		String query = String.format(
 				  "USER \"%s\" %n"
@@ -96,8 +100,9 @@ public class DatasetGenerationManagement {
 	 * @param graphName the graph name
 	 * @param revision the revision
 	 * @param triples the triples to delete
+	 * @throws InternalErrorException 
 	 */
-	public static void executeDeleteQuery(String user, String message, String graphName, String revision, String triples) {
+	public static void executeDeleteQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
 		logger.info(message);
 		String query = String.format(
 				  "USER \"%s\" %n"
@@ -120,8 +125,9 @@ public class DatasetGenerationManagement {
 	 * @param graphName the graph name
 	 * @param revision the revision
 	 * @param triples the triples to delete
+	 * @throws InternalErrorException 
 	 */
-	public static void executeDeleteWhereQuery(String user, String message, String graphName, String revision, String triples) {
+	public static void executeDeleteWhereQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
 		logger.info(message);
 		String query = String.format(
 				  "USER \"%s\" %n"
@@ -150,8 +156,9 @@ public class DatasetGenerationManagement {
 	 * @param revision the revision
 	 * @param triplesInsert the triples to insert
 	 * @param triplesDelete the triples to delete
+	 * @throws InternalErrorException 
 	 */
-	public static void executeInsertDeleteQuery(String user, String message, String graphName, String revision, String triplesInsert, String triplesDelete) {
+	public static void executeInsertDeleteQuery(String user, String message, String graphName, String revision, String triplesInsert, String triplesDelete) throws InternalErrorException {
 		logger.info(message);
 		String query = String.format(
 				  "USER \"%s\" %n"

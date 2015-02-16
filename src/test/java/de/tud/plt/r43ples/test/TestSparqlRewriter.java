@@ -3,14 +3,13 @@
  */
 package de.tud.plt.r43ples.test;
 
-import java.io.UnsupportedEncodingException;
-
 import org.apache.commons.configuration.ConfigurationException;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
@@ -27,7 +26,7 @@ public class TestSparqlRewriter {
 	private final static String graph_test = "http://test.com/dataset1";
 	
 	@BeforeClass
-	public static void setUpBeforeClass() throws ConfigurationException, UnsupportedEncodingException{
+	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException{
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterfaceFactory.createInterface();
 		SampleDataSet.createSampleDataset1(graph_test);
@@ -41,9 +40,10 @@ public class TestSparqlRewriter {
 	
 	/**
 	 * Test method for {@link de.tud.plt.r43ples.management.SparqlRewriter#rewriteQuery(java.lang.String)}.
+	 * @throws InternalErrorException 
 	 */
 	@Test
-	public final void testRewriteQuery() {
+	public final void testRewriteQuery() throws InternalErrorException {
 		String query = "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "
 				+ "FROM <" + graph_test + "> REVISION \"2\""

@@ -17,6 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
@@ -69,9 +70,10 @@ public class TestMultipleGraph {
 	/**
 	 * @throws IOException 
 	 * @throws SAXException 
+	 * @throws InternalErrorException 
 	 */
 	@Test
-	public final void testMultipleGraphsSparqlJoin() throws SAXException, IOException {
+	public final void testMultipleGraphsSparqlJoin() throws SAXException, IOException, InternalErrorException {
 		String query_template = ""
 				+ "OPTION r43ples:SPARQL_JOIN %n"
 				+ "PREFIX : <http://test.com/> %n"

@@ -31,6 +31,7 @@ import com.hp.hpl.jena.sparql.syntax.ElementUnion;
 import com.hp.hpl.jena.sparql.util.ExprUtils;
 import com.hp.hpl.jena.vocabulary.RDF;
 
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.revisionTree.NodeSpecification;
 
 /**
@@ -61,7 +62,7 @@ public class SparqlRewriter {
 
 	
 	
-	public static String rewriteQuery(final String query_r43ples) {
+	public static String rewriteQuery(final String query_r43ples) throws InternalErrorException {
 
 		statement_i = 0;
 		

@@ -38,7 +38,8 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
-import de.tud.plt.r43ples.exception.InternalServerErrorException;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.MergeManagement;
@@ -122,11 +123,13 @@ public class Endpoint {
 	/**
 	 * Creates sample datasets
 	 * @return information provided as HTML response
+	 * @throws IOException 
+	 * @throws InternalErrorException 
 	 */
 	@Path("createSampleDataset")
 	@GET
 	@Template(name = "/exampleDatasetGeneration.mustache")
-	public final List<String> createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) {
+	public final List<String> createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws IOException, InternalErrorException {
 		final String graph_dataset1 = "http://test.com/r43ples-dataset-1";
 		final String graph_dataset2 = "http://test.com/r43ples-dataset-2";
 		final String graph_dataset_merging = "http://test.com/r43ples-dataset-merging";
@@ -134,34 +137,29 @@ public class Endpoint {
 		final String graph_dataset_renaming = "http://test.com/r43ples-dataset-renaming";
 		final String graph_dataset_complex_structure = "http://test.com/r43ples-dataset-complex-structure";
 		List<String> graphs = new ArrayList<>();
-		try {
-			if (graph.equals(graph_dataset1) || graph.equals("all")){
-				SampleDataSet.createSampleDataset1(graph_dataset1);
-				graphs.add(graph_dataset1);
-			}
-			if (graph.equals(graph_dataset2) || graph.equals("all")){
-				SampleDataSet.createSampleDataset2(graph_dataset2);
-				graphs.add(graph_dataset2);
-			}
-			if (graph.equals(graph_dataset_merging) || graph.equals("all")){
-				SampleDataSet.createSampleDataSetMerging(graph_dataset_merging);
-				graphs.add(graph_dataset_merging);
-			}
-			if (graph.equals(graph_dataset_merging_classes) || graph.equals("all")){
-				SampleDataSet.createSampleDataSetMergingClasses(graph_dataset_merging_classes);
-				graphs.add(graph_dataset_merging_classes);
-			}
-			if (graph.equals(graph_dataset_renaming) || graph.equals("all")){
-				SampleDataSet.createSampleDataSetRenaming(graph_dataset_renaming);
-				graphs.add(graph_dataset_renaming);
-			}
-			if (graph.equals(graph_dataset_complex_structure) || graph.equals("all")){
-				SampleDataSet.createSampleDataSetComplexStructure(graph_dataset_complex_structure);
-				graphs.add(graph_dataset_complex_structure);
-			}
-		}catch (IOException e) {
-			e.printStackTrace();
-			throw new InternalServerErrorException(e.getMessage());
+		if (graph.equals(graph_dataset1) || graph.equals("all")){
+			SampleDataSet.createSampleDataset1(graph_dataset1);
+			graphs.add(graph_dataset1);
+		}
+		if (graph.equals(graph_dataset2) || graph.equals("all")){
+			SampleDataSet.createSampleDataset2(graph_dataset2);
+			graphs.add(graph_dataset2);
+		}
+		if (graph.equals(graph_dataset_merging) || graph.equals("all")){
+			SampleDataSet.createSampleDataSetMerging(graph_dataset_merging);
+			graphs.add(graph_dataset_merging);
+		}
+		if (graph.equals(graph_dataset_merging_classes) || graph.equals("all")){
+			SampleDataSet.createSampleDataSetMergingClasses(graph_dataset_merging_classes);
+			graphs.add(graph_dataset_merging_classes);
+		}
+		if (graph.equals(graph_dataset_renaming) || graph.equals("all")){
+			SampleDataSet.createSampleDataSetRenaming(graph_dataset_renaming);
+			graphs.add(graph_dataset_renaming);
+		}
+		if (graph.equals(graph_dataset_complex_structure) || graph.equals("all")){
+			SampleDataSet.createSampleDataSetComplexStructure(graph_dataset_complex_structure);
+			graphs.add(graph_dataset_complex_structure);
 		}
 	    htmlMap.put("graphs", graphs);
 		return graphs;
@@ -226,12 +224,13 @@ public class Endpoint {
 	 * @param sparqlQuery
 	 *            the SPARQL query
 	 * @return the response
+	 * @throws InternalErrorException 
 	 */
 	@Path("sparql")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("format") final String formatQuery, @FormParam("query") @DefaultValue("") final String sparqlQuery) {
+			@FormParam("format") final String formatQuery, @FormParam("query") @DefaultValue("") final String sparqlQuery) throws InternalErrorException {
 		// TODO format
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		return sparql(format, sparqlQuery);
@@ -251,23 +250,30 @@ public class Endpoint {
 	 * @param sparqlQuery
 	 *            the SPARQL query
 	 * @return the response
-	 * @throws UnsupportedEncodingException 
+	 * @throws InternalErrorException 
 	 */
 	@Path("sparql")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
-			@QueryParam("format") final String formatQuery, @QueryParam("query") @DefaultValue("") final String sparqlQuery) throws UnsupportedEncodingException {
+			@QueryParam("format") final String formatQuery, @QueryParam("query") @DefaultValue("") final String sparqlQuery) throws InternalErrorException {
 		// TODO format
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
-		String sparqlQueryDecoded = URLDecoder.decode(sparqlQuery, "UTF-8");
+		
+		String sparqlQueryDecoded;
+		try {
+			sparqlQueryDecoded = URLDecoder.decode(sparqlQuery, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			sparqlQueryDecoded = sparqlQuery;
+		}
 		return sparql(format, sparqlQueryDecoded);
 	}
 	
 	
 	@Path("debug")
 	@GET
-	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws UnsupportedEncodingException {
+	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) {
 		if (sparqlQuery.equals("")) {
 			return getHTMLDebugResponse();
 		} else {
@@ -301,8 +307,9 @@ public class Endpoint {
 	 * @param sparqlQuery
 	 *            decoded SPARQL query
 	 * @return the response
+	 * @throws InternalErrorException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery) {
+	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException {
 		if (sparqlQuery.equals("")) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
@@ -358,47 +365,42 @@ public class Endpoint {
 	 * @param sparqlQuery
 	 * 			string containing the SPARQL query
 	 * @return HTTP response of evaluating the sparql query 
-	 * @throws InternalServerErrorException
+	 * @throws InternalErrorException
 	 */
-	private Response getSparqlResponse(final String format, String sparqlQuery) throws InternalServerErrorException {
+	private Response getSparqlResponse(final String format, String sparqlQuery) throws InternalErrorException {
 		logger.info("SPARQL query was requested. Query: " + sparqlQuery);
-		try {
-			String user = null;
-			Matcher userMatcher = patternUser.matcher(sparqlQuery);
-			if (userMatcher.find()) {
-				user = userMatcher.group("user");
-				sparqlQuery = userMatcher.replaceAll("");
-			}
-			String message = null;
-			Matcher messageMatcher = patternCommitMessage.matcher(sparqlQuery);
-			if (messageMatcher.find()) {
-				message = messageMatcher.group("message");
-				sparqlQuery = messageMatcher.replaceAll("");
-			}
-
-			if (patternSelectAskConstructQuery.matcher(sparqlQuery).find()) {
-				return getSelectConstructAskResponse(sparqlQuery, format);
-			}
-			if (patternUpdateQuery.matcher(sparqlQuery).find()) {
-				return getUpdateResponse(sparqlQuery, user, message, format);
-			}
-			if (patternCreateGraph.matcher(sparqlQuery).find()) {
-				return getCreateGraphResponse(sparqlQuery, format);
-			}
-			if (patternMergeQuery.matcher(sparqlQuery).find()) {
-				return getMergeResponse(sparqlQuery, user, message, format);
-			}
-			if (patternDropGraph.matcher(sparqlQuery).find()) {
-				return getDropGraphResponse(sparqlQuery, format);
-			}
-			if (patternBranchOrTagQuery.matcher(sparqlQuery).find()) {
-				return getBranchOrTagResponse(sparqlQuery, user, message, format);
-			}
-			throw new InternalServerErrorException("No R43ples query detected");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			throw new InternalServerErrorException(e.getMessage());
+		String user = null;
+		Matcher userMatcher = patternUser.matcher(sparqlQuery);
+		if (userMatcher.find()) {
+			user = userMatcher.group("user");
+			sparqlQuery = userMatcher.replaceAll("");
 		}
+		String message = null;
+		Matcher messageMatcher = patternCommitMessage.matcher(sparqlQuery);
+		if (messageMatcher.find()) {
+			message = messageMatcher.group("message");
+			sparqlQuery = messageMatcher.replaceAll("");
+		}
+
+		if (patternSelectAskConstructQuery.matcher(sparqlQuery).find()) {
+			return getSelectConstructAskResponse(sparqlQuery, format);
+		}
+		if (patternUpdateQuery.matcher(sparqlQuery).find()) {
+			return getUpdateResponse(sparqlQuery, user, message, format);
+		}
+		if (patternCreateGraph.matcher(sparqlQuery).find()) {
+			return getCreateGraphResponse(sparqlQuery, format);
+		}
+		if (patternMergeQuery.matcher(sparqlQuery).find()) {
+			return getMergeResponse(sparqlQuery, user, message, format);
+		}
+		if (patternDropGraph.matcher(sparqlQuery).find()) {
+			return getDropGraphResponse(sparqlQuery, format);
+		}
+		if (patternBranchOrTagQuery.matcher(sparqlQuery).find()) {
+			return getBranchOrTagResponse(sparqlQuery, user, message, format);
+		}
+		throw new QueryErrorException("No R43ples query detected");
 	}
 
 	/**
@@ -465,9 +467,9 @@ public class Endpoint {
 	 *            the result format
 	 * @return the response with HTTP header for every graph (revision number
 	 *         and MASTER revision number)
-	 * @throws UnsupportedEncodingException 
+	 * @throws InternalErrorException 
 	 */
-	private Response getSelectConstructAskResponse(final String query, final String format) throws UnsupportedEncodingException {
+	private Response getSelectConstructAskResponse(final String query, final String format) throws InternalErrorException {
 		if (query.contains("OPTION r43ples:SPARQL_JOIN")) {
 			ResponseBuilder responseBuilder = Response.ok();
 			String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
@@ -489,9 +491,9 @@ public class Endpoint {
 	 * @param query
 	 * @param format
 	 * @return
-	 * @throws UnsupportedEncodingException
+	 * @throws InternalErrorException 
 	 */
-	private Response getSelectConstructAskResponseClassic(final String query, final String format) throws UnsupportedEncodingException {
+	private Response getSelectConstructAskResponseClassic(final String query, final String format) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.ok();
 		String queryM = query;
 
@@ -529,7 +531,13 @@ public class Endpoint {
 
 			
 		    // Remove the http:// of the graph name because it is not permitted that a header parameter contains a colon
-			String 	graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			String graphNameHeader;
+			try {
+				graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				graphNameHeader = graphName;
+			}
 		    
 		    // Respond with specified revision
 			responseBuilder.header(graphNameHeader + "-revision-number", headerRevisionNumber);
@@ -556,10 +564,10 @@ public class Endpoint {
 	 *            the result format
 	 * @return the response with HTTP header for every graph (revision number
 	 *         and MASTER revision number)
-	 * @throws UnsupportedEncodingException 
+	 * @throws InternalErrorException 
 	 */
 	private Response getUpdateResponse(final String query, final String user, final String commitMessage,
-			final String format) throws UnsupportedEncodingException {
+			final String format) throws InternalErrorException {
 
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Update detected");
@@ -582,7 +590,7 @@ public class Endpoint {
 			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
 			String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
 			if (!RevisionManagement.isBranch(graphName, revisionName)) {
-				throw new InternalServerErrorException("Revision is not referenced by a branch");
+				throw new InternalErrorException("Revision is not referenced by a branch");
 			}
 			if (action.equalsIgnoreCase("INSERT")) {
 				queryM = m.replaceFirst(String.format("INSERT %s { GRAPH <%s>", data, addSetGraphUri));
@@ -641,7 +649,13 @@ public class Endpoint {
 			RevisionManagement.addMetaInformationForNewRevision(graphName, user, commitMessage, usedRevisionNumber,
 					newRevisionNumber, addSetGraphUri, removeSetGraphUri);
 
-			String 	graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			String graphNameHeader;
+			try {
+				graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				graphNameHeader = graphName;
+			}
 			
 			// Respond with next revision number
 	    	responseBuilder.header(graphNameHeader + "-revision-number", newRevisionNumber);
@@ -663,9 +677,9 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @param format
 	 *            the result format
-	 * @throws UnsupportedEncodingException 
+	 * @throws InternalErrorException 
 	 */
-	private Response getCreateGraphResponse(final String query, final String format) throws UnsupportedEncodingException {
+	private Response getCreateGraphResponse(final String query, final String format) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Graph creation detected");
 
@@ -687,14 +701,20 @@ public class Endpoint {
 			    // Add R43ples information
 			    RevisionManagement.putGraphUnderVersionControl(graphName);
 		    	
-			    String 	graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			    String graphNameHeader;
+				try {
+					graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+					graphNameHeader = graphName;
+				}
 			    responseBuilder.header(graphNameHeader + "-revision-number", 0);
 				responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", 0);
 			}
 
 		}
 		if (!found) {
-			throw new InternalServerErrorException("Query doesn't contain a correct CREATE query:\n" + query);
+			throw new QueryErrorException("Query doesn't contain a correct CREATE query:\n" + query);
 		}
 		return responseBuilder.build();
 	}
@@ -706,8 +726,9 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @param format
 	 *            the result format
+	 * @throws InternalErrorException 
 	 */
-	private Response getDropGraphResponse(final String query, final String format) {
+	private Response getDropGraphResponse(final String query, final String format) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 
 		// Clear R43ples information for specified graphs
@@ -719,7 +740,7 @@ public class Endpoint {
 			RevisionManagement.purgeGraph(graphName);
 		}
 		if (!found) {
-			throw new InternalServerErrorException("Query contain errors:\n" + query);
+			throw new QueryErrorException("Query contain errors:\n" + query);
 		}
 		responseBuilder.status(Response.Status.OK);
 		responseBuilder.entity("Successful: " + query);
@@ -735,10 +756,10 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @param format
 	 *            the result format
-	 * @throws UnsupportedEncodingException 
+	 * @throws InternalErrorException 
 	 */
 	private Response getBranchOrTagResponse(final String sparqlQuery, final String user, final String commitMessage,
-			final String format) throws UnsupportedEncodingException {
+			final String format) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Tag or branch creation detected");
 
@@ -758,13 +779,19 @@ public class Endpoint {
 				} else if (action.equals("BRANCH")) {
 					RevisionManagement.createReference("branch", graphName, revisionNumber, referenceName, user, commitMessage);
 				} else {
-					throw new InternalServerErrorException("Error in query: " + sparqlQuery);
+					throw new QueryErrorException("Error in query: " + sparqlQuery);
 				}
 			} catch (IdentifierAlreadyExistsException e) {
 				responseBuilder = Response.status(Response.Status.CONFLICT);
 			}
 
-			String 	graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			String graphNameHeader;
+			try {
+				graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				graphNameHeader = graphName;
+			}
 		    	
 	    	// Respond with next revision number
 		    responseBuilder.header(graphNameHeader + "-revision-number", RevisionManagement.getRevisionNumber(graphName, referenceName));
@@ -772,7 +799,7 @@ public class Endpoint {
 		    
 		}
 		if (!foundEntry) {
-			throw new InternalServerErrorException("Error in query: " + sparqlQuery);
+			throw new QueryErrorException("Error in query: " + sparqlQuery);
 		}
 
 		return responseBuilder.build();
@@ -786,9 +813,9 @@ public class Endpoint {
 	 * 
 	 * @param sparqlQuery the SPARQL query
 	 * @param format the result format
-	 * @throws UnsupportedEncodingException 
+	 * @throws InternalErrorException 
 	 */
-	private Response getMergeResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws UnsupportedEncodingException {
+	private Response getMergeResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Merge creation detected");
 
@@ -823,19 +850,19 @@ public class Endpoint {
 			
 			if (!RevisionManagement.checkGraphExistence(graphName)){
 				logger.error("Graph <"+graphName+"> does not exist.");
-				throw new InternalServerErrorException("Graph <"+graphName+"> does not exist.");
+				throw new InternalErrorException("Graph <"+graphName+"> does not exist.");
 			}
 				
 			
 			// Check if A and B are different revisions
 			if (RevisionManagement.getRevisionNumber(graphName, branchNameA).equals(RevisionManagement.getRevisionNumber(graphName, branchNameB))) {
 				// Branches are equal - throw error
-				throw new InternalServerErrorException("Specified branches are equal: " + sparqlQuery);
+				throw new InternalErrorException("Specified branches are equal: " + sparqlQuery);
 			}
 			
 			// Check if both are terminal nodes
 			if (!(RevisionManagement.isBranch(graphName, branchNameA) && RevisionManagement.isBranch(graphName, branchNameB))) {
-				throw new InternalServerErrorException("Non terminal nodes were used: " + sparqlQuery);
+				throw new InternalErrorException("Non terminal nodes were used: " + sparqlQuery);
 			}
 
 			
@@ -861,7 +888,7 @@ public class Endpoint {
 					QuerySolution qs = resultSetSDD.next();
 					usedSDDURI = qs.getResource("?defaultSDD").toString();
 				} else {
-					throw new InternalServerErrorException("Error in revision graph! Selected graph <" + graphName + "> has no default SDD referenced.");
+					throw new InternalErrorException("Error in revision graph! Selected graph <" + graphName + "> has no default SDD referenced.");
 				}
 			}
 
@@ -914,10 +941,17 @@ public class Endpoint {
 					newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.COMMON, "");
 				}
 			} else {
-				throw new InternalServerErrorException("This is not a valid MERGE query: " + sparqlQuery);
+				throw new InternalErrorException("This is not a valid MERGE query: " + sparqlQuery);
 			}
 			
-			String 	graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			String graphNameHeader;
+			try {
+				graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				graphNameHeader = graphName;
+			}
+			
 			
 			// Return the revision number which were used (convert tag or branch identifier to revision number)
 			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(graphName, branchNameA));
@@ -931,7 +965,7 @@ public class Endpoint {
 			}
 		}
 		if (!foundEntry)
-			throw new InternalServerErrorException("Error in query: " + sparqlQuery);
+			throw new InternalErrorException("Error in query: " + sparqlQuery);
 		
 		return responseBuilder.build();	
 	}

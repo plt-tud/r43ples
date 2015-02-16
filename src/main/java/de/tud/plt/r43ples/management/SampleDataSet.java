@@ -5,12 +5,14 @@ import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
+import de.tud.plt.r43ples.exception.InternalErrorException;
+
 public class SampleDataSet {
 
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(SampleDataSet.class);
 
-	public static void createSampleDataset1(String graph)  {
+	public static void createSampleDataset1(String graph) throws InternalErrorException  {
 		RevisionManagement.purgeGraph(graph);
 		RevisionManagement.putGraphUnderVersionControl(graph);
 
@@ -46,7 +48,7 @@ public class SampleDataSet {
 				"test commit message 5", list);
 	}
 
-	public static void createSampleDataset2(String graph) {
+	public static void createSampleDataset2(String graph) throws InternalErrorException {
 		RevisionManagement.purgeGraph(graph);
 		RevisionManagement.putGraphUnderVersionControl(graph);
 
@@ -81,9 +83,10 @@ public class SampleDataSet {
 	 * 
 	 * @author Stephan Hensel
 	 * @author Markus Graube
+	 * @throws InternalErrorException 
 	 *
 	 */
-	public static void createSampleDataSetMerging(String graphName) {
+	public static void createSampleDataSetMerging(String graphName) throws InternalErrorException {
 		/** The user. **/
 		String user = "shensel";
 
@@ -161,9 +164,10 @@ public class SampleDataSet {
 	 * Used in diploma thesis of Stephan Hensel.
 	 * 
 	 * @author Stephan Hensel
+	 * @throws InternalErrorException 
 	 *
 	 */
-	public static void createSampleDataSetDA(String graphName) {
+	public static void createSampleDataSetDA(String graphName) throws InternalErrorException {
 		/** The user. **/
 		String user = "shensel";
 
@@ -223,8 +227,9 @@ public class SampleDataSet {
 	 * 
 	 * @param graphName the graph name
 	 * @throws IOException
+	 * @throws InternalErrorException 
 	 */
-	public static void createSampleDataSetMergingClasses(String graphName) throws IOException {
+	public static void createSampleDataSetMergingClasses(String graphName) throws IOException, InternalErrorException {
 		/** The user. **/
 		String user = "shensel";
 		/** The initial content file path **/
@@ -298,9 +303,10 @@ public class SampleDataSet {
 	 * @throws IOException
 	 * 
 	 * @author Stephan Hensel
+	 * @throws InternalErrorException 
 	 *
 	 */
-	public static void createSampleDataSetRenaming(String graphName) throws IOException {
+	public static void createSampleDataSetRenaming(String graphName) throws IOException, InternalErrorException {
 		/** The user. **/
 		String user = "shensel";
 
@@ -382,9 +388,10 @@ public class SampleDataSet {
 	 * @param graphName the graph name
 	 * 
 	 * @author Stephan Hensel
+	 * @throws InternalErrorException 
 	 *
 	 */
-	public static void createSampleDataSetComplexStructure(String graphName) {
+	public static void createSampleDataSetComplexStructure(String graphName) throws InternalErrorException {
 		/** The user. **/
 		String user = "shensel";
 		

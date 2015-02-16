@@ -1,9 +1,8 @@
 package de.tud.plt.r43ples.examples;
 
-import java.io.UnsupportedEncodingException;
-
 import org.apache.commons.configuration.ConfigurationException;
 
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
@@ -27,9 +26,9 @@ public class CreateExampleGraphDA {
 	 * 
 	 * @param args
 	 * @throws ConfigurationException 
-	 * @throws UnsupportedEncodingException 
+	 * @throws InternalErrorException 
 	 */
-	public static void main(String[] args) throws ConfigurationException, UnsupportedEncodingException {
+	public static void main(String[] args) throws ConfigurationException, InternalErrorException {
 		
 		Config.readConfig("r43ples.conf");
 		TripleStoreInterfaceFactory.createInterface();

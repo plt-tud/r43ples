@@ -16,7 +16,7 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.util.FileUtils;
 
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
-import de.tud.plt.r43ples.exception.InternalServerErrorException;
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.revisionTree.NodeSpecification;
 import de.tud.plt.r43ples.revisionTree.Tree;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
@@ -108,10 +108,11 @@ public class RevisionManagement {
 	 *            (for creation of merged maximal two revision are  allowed
 	 *            - the first revision in array list specifies the branch where the merged revision will be created)
 	 * @return new revision number
+	 * @throws InternalErrorException 
 	 */
 	public static String createNewRevision(final String graphName, final String addedAsNTriples,
 			final String removedAsNTriples, final String user, final String commitMessage,
-			final ArrayList<String> usedRevisionNumber) {
+			final ArrayList<String> usedRevisionNumber) throws InternalErrorException {
 		logger.info("Start creation of new revision!");
 
 		// General variables
@@ -182,10 +183,11 @@ public class RevisionManagement {
 	 * 			  name of the graph which holds the add set
 	 * @param removeSetGraphUri
 	 *            name of the graph which holds the delete set
+	 * @throws InternalErrorException 
 	 */
 	public static void addMetaInformationForNewRevision(final String graphName, final String user,
 			final String commitMessage, final ArrayList<String> usedRevisionNumber,
-			final String newRevisionNumber, final String addSetGraphUri, final String removeSetGraphUri) {
+			final String newRevisionNumber, final String addSetGraphUri, final String removeSetGraphUri) throws InternalErrorException {
 		String dateString = getDateString();
 		String personUri = getUserName(user);
 		String revisionUri = graphName + "-revision-" + newRevisionNumber;
@@ -263,11 +265,11 @@ public class RevisionManagement {
 	 *            user who performs this reference generation
 	 * @param message
 	 *            message describing intent of this command
-	 * @throws IdentifierAlreadyExistsException
+	 * @throws InternalErrorException 
 	 */
 	public static void createReference(final String referenceType, final String graphName,
 			final String revisionNumber, final String newReferenceName, final String user,
-			final String message) throws IdentifierAlreadyExistsException {
+			final String message) throws InternalErrorException {
 		logger.info("Start creation of new " + referenceType);
 
 		// Check branch existence
@@ -331,9 +333,10 @@ public class RevisionManagement {
 	 *            revision number or revision name to build content for
 	 * @param tempGraphName
 	 *            the graph where the temporary graph is stored
+	 * @throws InternalErrorException 
 	 */
 	public static void generateFullGraphOfRevision(final String graphName, final String revisionName,
-			final String tempGraphName) {
+			final String tempGraphName) throws InternalErrorException {
 		logger.info("Rebuild whole content of revision " + revisionName + " of graph <" + graphName
 				+ "> into temporary graph <" + tempGraphName + ">");
 		String revisionNumber = getRevisionNumber(graphName, revisionName);
@@ -377,8 +380,9 @@ public class RevisionManagement {
 	 * @param revisionIdentifier
 	 *            reference name or revision number
 	 * @return URI of identified revision
+	 * @throws InternalErrorException 
 	 */
-	public static String getRevisionUri(final String graphName, final String revisionIdentifier) {
+	public static String getRevisionUri(final String graphName, final String revisionIdentifier) throws InternalErrorException {
 		String query = prefixes
 				+ String.format(
 						"SELECT ?rev WHERE { GRAPH <%s> {"
@@ -391,12 +395,12 @@ public class RevisionManagement {
 			QuerySolution qs = resultSet.next();
 			if (resultSet.hasNext()) {
 				logger.error("Identifier not unique: " + revisionIdentifier);
-				throw new InternalServerErrorException("Identifier not unique: " + revisionIdentifier);
+				throw new InternalErrorException("Identifier not unique: " + revisionIdentifier);
 			}
 			return qs.getResource("?rev").toString();
 		} else {
 			logger.error("No Revision or Reference found with identifier: " + revisionIdentifier);
-			throw new InternalServerErrorException("No Revision or Reference found with identifier: "
+			throw new InternalErrorException("No Revision or Reference found with identifier: "
 					+ revisionIdentifier);
 		}
 	}
@@ -409,8 +413,9 @@ public class RevisionManagement {
 	 * @param referenceIdentifier
 	 *            reference name or revision number
 	 * @return URI of identified revision
+	 * @throws InternalErrorException 
 	 */
-	public static String getReferenceUri(final String graphName, final String referenceIdentifier) {
+	public static String getReferenceUri(final String graphName, final String referenceIdentifier) throws InternalErrorException {
 		String query = prefixes
 				+ String.format("SELECT ?ref " + "WHERE { GRAPH <%s> {"
 						+ "	?ref a rmo:Reference; rmo:references ?rev."
@@ -421,12 +426,12 @@ public class RevisionManagement {
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
 			if (resultSet.hasNext()) {
-				throw new InternalServerErrorException("Identifier is not unique for specified graph name: "
+				throw new InternalErrorException("Identifier is not unique for specified graph name: "
 						+ referenceIdentifier);
 			}
 			return qs.getResource("?ref").toString();
 		} else {
-			throw new InternalServerErrorException("No Revision or Reference found with identifier: "
+			throw new InternalErrorException("No Revision or Reference found with identifier: "
 					+ referenceIdentifier);
 		}
 	}
@@ -440,8 +445,9 @@ public class RevisionManagement {
 	 * @param referenceIdentifier
 	 *            reference name or revision number
 	 * @return first graph name of full graph for specified reference and graph
+	 * @throws InternalErrorException 
 	 */
-	public static String getReferenceGraph(final String graphName, final String referenceIdentifier) {
+	public static String getReferenceGraph(final String graphName, final String referenceIdentifier) throws InternalErrorException {
 		String query = prefixes + String.format("" 
 				+ "SELECT ?graph " 
 				+ "WHERE { GRAPH  <%s> {" 
@@ -456,7 +462,7 @@ public class RevisionManagement {
 			QuerySolution qs = resultSet.next();
 			return qs.getResource("?graph").toString();
 		} else {
-			throw new InternalServerErrorException("No reference graph found for graph <"+graphName+"> and identifier \""+ referenceIdentifier+"\"");
+			throw new InternalErrorException("No reference graph found for graph <"+graphName+"> and identifier \""+ referenceIdentifier+"\"");
 		}
 	}
 
@@ -468,8 +474,9 @@ public class RevisionManagement {
 	 * @param referenceName
 	 *            the reference name
 	 * @return the revision number of given reference name
+	 * @throws InternalErrorException 
 	 */
-	public static String getRevisionNumber(final String graphName, final String referenceName) {
+	public static String getRevisionNumber(final String graphName, final String referenceName) throws InternalErrorException {
 		String query = prefixes
 				+ String.format(
 						"SELECT ?revNumber WHERE { GRAPH <%s> {"
@@ -480,11 +487,11 @@ public class RevisionManagement {
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
 			if (resultSet.hasNext()) {
-				throw new InternalServerErrorException("Identifier not unique: " + referenceName);
+				throw new InternalErrorException("Identifier not unique: " + referenceName);
 			}
 			return qs.getLiteral("?revNumber").toString();
 		} else {
-			throw new InternalServerErrorException("No Revision or Reference found with identifier: "
+			throw new InternalErrorException("No Revision or Reference found with identifier: "
 					+ referenceName);
 		}
 	}
@@ -579,8 +586,9 @@ public class RevisionManagement {
 	 *            the reference identifier which was specified by the client
 	 *            (branch name or tag name)
 	 * @return true when it is an empty branch
+	 * @throws InternalErrorException 
 	 */
-	private static boolean isBranchEmpty(final String graphName, final String referenceIdentifier) {
+	private static boolean isBranchEmpty(final String graphName, final String referenceIdentifier) throws InternalErrorException {
 		String referenceUri = getReferenceUri(graphName, referenceIdentifier);
 		String queryASKBranch = prefixes
 				+ String.format("ASK { GRAPH <%s> { "
@@ -590,7 +598,7 @@ public class RevisionManagement {
 		return TripleStoreInterfaceFactory.get().executeAskQuery(queryASKBranch);
 	}
 
-	public static String getNextRevisionNumber(final String graphName, final String revisionIdentifier) {
+	public static String getNextRevisionNumber(final String graphName, final String revisionIdentifier) throws InternalErrorException {
 		String revisionNumber = getRevisionNumber(graphName, revisionIdentifier);
 		if (isBranchEmpty(graphName, revisionIdentifier)) {
 			return getRevisionNumberForNewBranch(graphName, revisionNumber);

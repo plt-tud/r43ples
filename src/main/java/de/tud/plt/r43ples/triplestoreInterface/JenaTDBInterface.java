@@ -2,7 +2,6 @@ package de.tud.plt.r43ples.triplestoreInterface;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
@@ -46,9 +45,8 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	 * The constructor.
 	 * 
 	 * @param databaseDirectory the database directory of TDB
-	 * @throws UnsupportedEncodingException 
 	 */
-	public JenaTDBInterface(String databaseDirectory) throws UnsupportedEncodingException {
+	public JenaTDBInterface(String databaseDirectory) {
 		
 		// if the directory does not exist, create it
 		Location location = new Location(databaseDirectory);

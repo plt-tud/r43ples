@@ -25,6 +25,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
@@ -40,7 +41,7 @@ public class TestR43ples {
 	
 	
 	@BeforeClass
-	public static void setUp() throws ConfigurationException, URISyntaxException, IOException{
+	public static void setUp() throws ConfigurationException, URISyntaxException, IOException, InternalErrorException{
 		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.test.conf");
 		Service.start();
@@ -109,8 +110,9 @@ public class TestR43ples {
 	/**
 	 *  Test example queries from html site
 	 * @throws IOException 
+	 * @throws InternalErrorException 
 	 */
-	@Test public void testExampleQueries() throws IOException {
+	@Test public void testExampleQueries() throws IOException, InternalErrorException {
 		SampleDataSet.createSampleDataset1("http://test.com/r43ples-dataset-1");
 		SampleDataSet.createSampleDataset2("http://test.com/r43ples-dataset-2");
 		

@@ -1,11 +1,11 @@
 package de.tud.plt.r43ples.examples;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
@@ -15,7 +15,7 @@ public class PreparationDBpediaTest {
 	private static Logger logger = Logger
 			.getLogger(PreparationDBpediaTest.class);
 
-	public static void main(String[] args) throws ConfigurationException, UnsupportedEncodingException {
+	public static void main(String[] args) throws ConfigurationException, InternalErrorException {
 		logger.info("Create DBpedia dataset");
 		
 		String path = args[0];

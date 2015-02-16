@@ -3,7 +3,6 @@ package de.tud.plt.r43ples.test;
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 
 import org.apache.commons.configuration.ConfigurationException;
@@ -15,7 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
@@ -33,7 +32,7 @@ public class TestRevisionManagment {
 	String expected;
 
 	@BeforeClass
-	public static void setUpBeforeClass() throws ConfigurationException, UnsupportedEncodingException{
+	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException{
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.conf");
@@ -53,13 +52,13 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void test_reference_uri() {
+	public void test_reference_uri() throws InternalErrorException {
 		String res = RevisionManagement.getReferenceUri(graph_test, "master");
 		Assert.assertEquals(graph_test+"-master", res);
 	}
 	
 	@Test
-	public void test_revision_uri() {
+	public void test_revision_uri() throws InternalErrorException {
 		String uri = RevisionManagement.getRevisionUri(graph_test, "4");
 		Assert.assertEquals(graph_test+"-revision-4", uri);
 	}
@@ -71,7 +70,7 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void testSelectMaster() throws SAXException, IOException {
+	public void testSelectMaster() throws SAXException, IOException, InternalErrorException {
         String query = "SELECT ?s ?p ?o "
         		+ "FROM <"+graph_test+"> REVISION \"master\""
         		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
@@ -90,7 +89,7 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void testSelectWithRewriting() throws SAXException, IOException {
+	public void testSelectWithRewriting() throws SAXException, IOException, InternalErrorException {
         String query_template = "OPTION r43ples:SPARQL_JOIN%n"
         		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
         		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
@@ -121,7 +120,7 @@ public class TestRevisionManagment {
 	}
 
 	@Test
-	public void testSelect() throws SAXException, IOException {
+	public void testSelect() throws SAXException, IOException, InternalErrorException {
         String query_template = ""
         		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
         		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
@@ -152,7 +151,7 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void testSelect2Pattern() throws SAXException, IOException {
+	public void testSelect2Pattern() throws SAXException, IOException, InternalErrorException {
 		String query = "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "
 				+ "FROM <"+ graph_test + "> REVISION \"%d\" "
@@ -172,7 +171,7 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void testSelect2Pattern_sparql_join() throws SAXException, IOException {
+	public void testSelect2Pattern_sparql_join() throws SAXException, IOException, InternalErrorException {
 		String query = "OPTION r43ples:SPARQL_JOIN\n"
 				+ "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "
@@ -194,7 +193,7 @@ public class TestRevisionManagment {
 	
 	
 	@Test
-	public void testBranching() throws IdentifierAlreadyExistsException {
+	public void testBranching() throws InternalErrorException {
 		RevisionManagement.createReference("branch", graph_test, "2", "testBranch", "test_user", "branching as junit test");
 		ArrayList<String> usedRevisionNumber = new ArrayList<String>();
 		usedRevisionNumber.add("testBranch");
@@ -223,7 +222,7 @@ public class TestRevisionManagment {
 	
 	
 	@Test
-	public void test_minus() throws SAXException, IOException {
+	public void test_minus() throws SAXException, IOException, InternalErrorException {
 		String query = "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "
 				+ "FROM <"+ graph_test + "> REVISION \"%d\" "
@@ -246,7 +245,7 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void test_minus_sparql_join() throws SAXException, IOException {
+	public void test_minus_sparql_join() throws SAXException, IOException, InternalErrorException {
 		String query = "OPTION r43ples:SPARQL_JOIN\n"
 				+ "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "

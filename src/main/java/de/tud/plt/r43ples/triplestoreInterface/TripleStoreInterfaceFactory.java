@@ -1,8 +1,5 @@
 package de.tud.plt.r43ples.triplestoreInterface;
 
-import java.io.UnsupportedEncodingException;
-
-import org.apache.jena.atlas.logging.Log;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.management.Config;
@@ -36,13 +33,7 @@ public class TripleStoreInterfaceFactory {
 	
 	public static TripleStoreInterface createJenaTDBInterface(String databaseDirectory) {
 		if (triplestore==null) {
-			try {
-				triplestore = new JenaTDBInterface(databaseDirectory);
-			} catch (UnsupportedEncodingException e) {
-				Log.warn("TripleStoreInterface", e.toString());
-				e.printStackTrace();
-				return null;
-			}
+			triplestore = new JenaTDBInterface(databaseDirectory);
 			return triplestore;
 		}
 		else
@@ -70,11 +61,7 @@ public class TripleStoreInterfaceFactory {
 			logger.info("Create sdd graph");
 			triplestore.executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
 			// Insert default content into SDD graph
-			try {
-				RevisionManagement.executeINSERT(Config.sdd_graph, MergeManagement.convertJenaModelToNTriple(MergeManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent)));
-			} catch (UnsupportedEncodingException e) {
-				logger.error("Couldn't create SDD graph: " + e.getMessage());
-			}
+			RevisionManagement.executeINSERT(Config.sdd_graph, MergeManagement.convertJenaModelToNTriple(MergeManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent)));
 	 	}		
 	}
 
