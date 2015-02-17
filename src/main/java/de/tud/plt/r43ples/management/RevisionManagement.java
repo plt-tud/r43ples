@@ -820,7 +820,7 @@ public class RevisionManagement {
 	 */
 	public static ArrayList<String> getRevisedGraphs() {
 		ArrayList<String> list = new ArrayList<String>();
-		ResultSet results = getRevisedGraphsSparql();;
+		ResultSet results = getRevisedGraphsSparql();
 		while (results.hasNext()) {
 			QuerySolution qs = results.next();
 			list.add(qs.getResource("graph").toString());

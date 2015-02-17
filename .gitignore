@@ -1,13 +1,12 @@
-/build/
-R43ples.zip
-.settings
-/verification/*.csv
-R43ples.log
-R43ples.log.*
-r43ples.conf
-/cov-int
+build/
+cov-int/
+bin/
+target/
+database/
 
-/bin/
-/target/
-/.externalToolBuilders/
-/database/
+.settings
+.externalToolBuilders/
+
+r43ples.conf
+r43ples.log*
+
