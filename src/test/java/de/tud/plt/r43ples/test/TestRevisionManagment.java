@@ -35,7 +35,7 @@ public class TestRevisionManagment {
 	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException{
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
-		Config.readConfig("r43ples.conf");
+		Config.readConfig("r43ples.test.conf");
 		TripleStoreInterfaceFactory.createInterface();
 		SampleDataSet.createSampleDataset1(graph_test);
 	}
