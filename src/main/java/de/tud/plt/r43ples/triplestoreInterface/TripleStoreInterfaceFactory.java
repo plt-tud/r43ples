@@ -55,7 +55,7 @@ public class TripleStoreInterfaceFactory {
 	
 	public static TripleStoreInterface createVirtuosoHttpInterface(String virtuoso_url, String virtuoso_user, String virtuoso_password) {
 		if (triplestore==null) {
-			triplestore = new VirtuosoHttp(virtuoso_url, virtuoso_user, virtuoso_password);
+			triplestore = new VirtuosoHttpInterface(virtuoso_url, virtuoso_user, virtuoso_password);
 			return triplestore;
 		}
 		else

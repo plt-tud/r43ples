@@ -36,11 +36,11 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
  * @author Markus Graube
  *
  */
-public class VirtuosoHttp extends TripleStoreInterface {
+public class VirtuosoHttpInterface extends TripleStoreInterface {
 
 	private static UsernamePasswordCredentials credentials;
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(VirtuosoHttp.class);
+	private static Logger logger = Logger.getLogger(VirtuosoHttpInterface.class);
 	private static String endpoint;
 
 
@@ -55,7 +55,7 @@ public class VirtuosoHttp extends TripleStoreInterface {
 	 * @param sparql_password
 	 * 			password which should be used for authentication
 	 */
-	public VirtuosoHttp(String sparql_endpoint, String sparql_username, String sparql_password) {
+	public VirtuosoHttpInterface(String sparql_endpoint, String sparql_username, String sparql_password) {
 		credentials = new UsernamePasswordCredentials(sparql_username, sparql_password);
 		endpoint = sparql_endpoint;		
 	}
