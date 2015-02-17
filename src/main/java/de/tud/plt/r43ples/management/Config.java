@@ -16,7 +16,11 @@ import org.apache.log4j.Logger;
 public class Config {
 
 	// Database settings
-	public static String database_directory;
+	public static String jena_tdb_directory;
+	
+	public static String virtuoso_url;
+	public static String virtuoso_user;
+	public static String virtuoso_password;
 	
 	// Service settings
 	/** The service host. **/
@@ -58,7 +62,11 @@ public class Config {
 		try {
 			config = new PropertiesConfiguration(configFilePath);
 			
-			database_directory = config.getString("database.directory");
+			jena_tdb_directory = config.getString("jena.tdb.directory");
+			
+			virtuoso_url = config.getString("virtuoso.url");
+			virtuoso_user = config.getString("virtuoso.user");
+			virtuoso_password = config.getString("virtuoso.password");
 			
 			service_host = config.getString("service.host");
 			service_port = config.getInt("service.port");

@@ -849,13 +849,21 @@ public class RevisionManagement {
 				+ " UNION {?rev rmo:deltaRemoved ?graph}"
 				+ " UNION {?ref rmo:references ?rev; rmo:fullGraph ?graph}" 
 				+ "} }", Config.revision_graph, graph);
+		
+//		query = "SELECT DISTINCT ?graph WHERE { GRAPH ?graph { ?s ?p ?o } } limit 100";
+				
 		ResultSet results = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
+		logger.info(results.toString());
 		while (results.hasNext()) {
 			QuerySolution qs = results.next();
-			String graphName = qs.getResource("?graph").toString();
-			TripleStoreInterfaceFactory.get().executeUpdateQuery("DROP SILENT GRAPH <" + graphName + ">");
-			logger.debug("Graph deleted: " + graphName);
+			logger.info(qs.toString());
+			if (qs.contains("?graph")) {
+					String graphName = qs.getResource("graph").toString();
+					TripleStoreInterfaceFactory.get().executeUpdateQuery("DROP SILENT GRAPH <" + graphName + ">");
+					logger.debug("Graph deleted: " + graphName);
+			}
 		}
+		
 		// Remove information from revision graph
 		String queryDelete = prefixes + String.format(
 					   	"DELETE { "

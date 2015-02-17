@@ -1,11 +1,8 @@
 package de.tud.plt.r43ples.triplestoreInterface;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.Iterator;
-import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.Dataset;
@@ -13,9 +10,7 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.ReadWrite;
 import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.shared.NoWriterForLangException;
 import com.hp.hpl.jena.tdb.TDBFactory;
 import com.hp.hpl.jena.tdb.base.file.Location;
 import com.hp.hpl.jena.update.GraphStore;
@@ -68,34 +63,6 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	
 	
 	
-	
-	public String executeSelectConstructAskQuery(String sparqlQuery, String format) {
-		logger.debug("Query: " + sparqlQuery);
-		final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
-		final Pattern patternSelectQuery = Pattern.compile(
-				"SELECT.*WHERE\\s*\\{(?<where>.*)\\}", 
-				patternModifier);
-		final Pattern patternAskQuery = Pattern.compile(
-				"ASK.*WHERE\\s*\\{(?<where>.*)\\}", 
-				patternModifier);
-		final Pattern patternConstructQuery = Pattern.compile(
-				"CONSTRUCT.*WHERE\\s*\\{(?<where>.*)\\}", 
-				patternModifier);
-		String result;
-		if (patternSelectQuery.matcher(sparqlQuery).find())
-			result = executeSelectQuery(sparqlQuery, format);
-		else if (patternAskQuery.matcher(sparqlQuery).find())
-			result = executeAskQuery(sparqlQuery)?"true":"false";
-		else if (patternConstructQuery.matcher(sparqlQuery).find())
-			result = executeConstructQuery(sparqlQuery, format);
-		else
-			result = executeSelectQuery(sparqlQuery, format);
-		logger.debug("Response: " + result);
-		return result;
-	}
-	
-	
-	
 	/**
 	 * Executes a SELECT query.
 	 * 
@@ -114,86 +81,37 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	
 	
 	/**
-	 * Executes a SELECT query.
-	 * 
-	 * @param selectQueryString the SELECT query
-	 * @param format the format
-	 * @return result set
-	 */
-	public String executeSelectQuery(String selectQueryString, String format) {
-		ResultSet results = executeSelectQuery(selectQueryString);
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		if (format.equals("application/sparql-results+xml") || format.equals("application/xml") || format.equals("text/xml"))
-			ResultSetFormatter.outputAsXML(baos, results);
-		else if (format.equals("text/turtle") )
-			ResultSetFormatter.outputAsRDF(baos, "Turtle", results);
-		else if (format.equals("application/json") )
-			ResultSetFormatter.outputAsJSON(baos, results);
-		else if (format.equals("text/plain") ) {
-			ResultSetFormatter.out(baos, results);
-			return baos.toString();
-		}
-		else {
-			ResultSetFormatter.out(baos, results);
-			return "<pre>"+StringEscapeUtils.escapeHtml(baos.toString())+"</pre>";
-		}
-		return baos.toString();
-	}
-	
-	
-	/**
 	 * Executes a CONSTRUCT query.
 	 * 
 	 * @param constructQueryString the CONSTRUCT query
-	 * @param format the result format
-	 * @return formatted result
+	 * @return model
 	 */
-	public String executeConstructQuery(String constructQueryString, String format) {
-		logger.debug("Query: " + constructQueryString);
+	@Override
+	public Model executeConstructQuery(String constructQueryString) {
 		dataset.begin(ReadWrite.READ);
 		try {
 			QueryExecution qExec = QueryExecutionFactory.create(constructQueryString, dataset);
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			Model result = qExec.execConstruct();
-			
-			if (format.toLowerCase().contains("xml") )
-				result.write(baos, "RDF/XML");
-			else if (format.toLowerCase().contains("turtle") )
-				result.write(baos, "Turtle");
-			else if (format.toLowerCase().contains("json") )
-				result.write(baos, "RDF/JSON");
-			else {
-				try {
-					result.write(baos, format);
-				}
-				catch (NoWriterForLangException e) {
-					
-					result.write(baos, "Turtle");
-					return "<pre>"+StringEscapeUtils.escapeHtml(baos.toString())+"</pre>";
-				}
-			}
-			logger.debug("Result: " + baos.toString());
-			return baos.toString();
+			return qExec.execConstruct();
 		} finally {
 			dataset.end();
 		}
 	}
 	
+	
+	
 	/**
 	 * Executes a DESCRIBE query.
 	 * 
-	 * @param describeQueryString the CONSTRUCT query
-	 * @param format the result format
-	 * @return formatted result
+	 * @param describeQueryString the DESCRIBE query
+	 * @return model
 	 */
-	public String executeDescribeQuery(String describeQueryString, String format) {
+	@Override
+	public Model executeDescribeQuery(String describeQueryString) {
 		logger.debug("Query: " + describeQueryString);
 		dataset.begin(ReadWrite.READ);
 		try {
 			QueryExecution qExec = QueryExecutionFactory.create(describeQueryString, dataset);
-			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			qExec.execDescribe().write(baos, format);
-		    return baos.toString();
+			return qExec.execDescribe();
 		} finally {
 			dataset.end();
 		}

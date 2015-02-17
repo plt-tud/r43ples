@@ -22,10 +22,14 @@ public class TripleStoreInterfaceFactory {
 	 * @return triplestoreinterface
 	 */
 	public static TripleStoreInterface createInterface() {
-		if (Config.database_directory != null)
-			triplestore = createJenaTDBInterface(Config.database_directory);
-		else
-			triplestore = createVirtuosoInterface(Config.database_directory);
+		if (Config.jena_tdb_directory != null)
+			triplestore = createJenaTDBInterface(Config.jena_tdb_directory);
+		else if (Config.virtuoso_url != null)
+			triplestore = createVirtuosoHttpInterface(Config.virtuoso_url, Config.virtuoso_user, Config.virtuoso_password);
+		else {
+			logger.error("No database specified in config");
+			System.exit(1);
+		}
 		init();
 		return triplestore;
 	}
@@ -40,9 +44,18 @@ public class TripleStoreInterfaceFactory {
 			return triplestore;
 	}
 	
-	public static TripleStoreInterface createVirtuosoInterface(String link) {
-		if (triplestore!=null) {
-			triplestore = new VirtuosoInterface();
+	public static TripleStoreInterface createVirtuosoInterface(String virtuoso_url, String virtuoso_user, String virtuoso_password) {
+		if (triplestore==null) {
+			triplestore = new VirtuosoInterface(virtuoso_url, virtuoso_user, virtuoso_password);
+			return triplestore;
+		}
+		else
+			return null;
+	}
+	
+	public static TripleStoreInterface createVirtuosoHttpInterface(String virtuoso_url, String virtuoso_user, String virtuoso_password) {
+		if (triplestore==null) {
+			triplestore = new VirtuosoHttp(virtuoso_url, virtuoso_user, virtuoso_password);
 			return triplestore;
 		}
 		else
