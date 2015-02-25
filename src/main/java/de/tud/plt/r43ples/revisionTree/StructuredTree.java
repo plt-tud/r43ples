@@ -58,14 +58,14 @@ public class StructuredTree {
 		//query all branches
 		String queryBranches = String.format(
 				RevisionManagement.prefixes
-						+ "SELECT ?branch ?title ?commit\n"
-						+ "WHERE { GRAPH <%s> { \n"
-						+ "?branch a rmo:Branch;\n"
-						+ "rdfs:label ?title;\n"
-						+ "rmo:references ?rev.\n"
-						+ "?rev rmo:revisionOf <%s>.\n"
-						+ "?commit a rmo:Commit;\n"
-						+ "prov:generated ?rev.\n"
+						+ "SELECT ?branch ?title ?commit%n"
+						+ "WHERE { GRAPH <%s> { %n"
+						+ "?branch a rmo:Branch;%n"
+						+ "rdfs:label ?title;%n"
+						+ "rmo:references ?rev.%n"
+						+ "?rev rmo:revisionOf <%s>.%n"
+						+ "?commit a rmo:Commit;%n"
+						+ "prov:generated ?rev.%n"
 						+ "} }", Config.revision_graph, graph);
 
 		ResultSet resultsBranches = TripleStoreInterfaceFactory.get().executeSelectQuery(queryBranches);
@@ -82,14 +82,14 @@ public class StructuredTree {
 		// query all tags
 		String queryBranches = String.format(
 				RevisionManagement.prefixes
-						+ "SELECT ?tag ?title ?commit\n"
-						+ "WHERE { GRAPH <%s> {\n"
-						+ "?tag a rmo:Tag;\n"
-						+ "rdfs:label ?title;\n"
-						+ "rmo:references ?rev.\n"
-						+ "?rev rmo:revisionOf <%s>.\n"
-						+ "?commit a rmo:Commit;\n"
-						+ "prov:generated ?rev.\n"
+						+ "SELECT ?tag ?title ?commit%n"
+						+ "WHERE { GRAPH <%s> {%n"
+						+ "?tag a rmo:Tag;%n"
+						+ "rdfs:label ?title;%n"
+						+ "rmo:references ?rev.%n"
+						+ "?rev rmo:revisionOf <%s>.%n"
+						+ "?commit a rmo:Commit;%n"
+						+ "prov:generated ?rev.%n"
 						+ "} }", Config.revision_graph, graph);
 
 		ResultSet resultsTags = TripleStoreInterfaceFactory.get().executeSelectQuery(queryBranches);
@@ -121,19 +121,19 @@ public class StructuredTree {
 		// query all commits
 		String queryCommits = String.format(
 				RevisionManagement.prefixes
-						+ "SELECT ?commit ?time ?prev ?next ?title ?authname ?branch\n"
-						+ "WHERE { GRAPH <%s> {\n"
-						+ "?commit a rmo:Commit;\n"
-						+ "dc-terms:title ?title;\n"
-						+ "prov:used ?reva;\n"
-						+ "prov:generated ?revb;\n"
-						+ "prov:atTime ?time;\n"
-						+ "prov:wasAssociatedWith ?author.\n"
-						+ "OPTIONAL { ?author rdfs:label ?authname. }\n"
+						+ "SELECT ?commit ?time ?prev ?next ?title ?authname ?branch%n"
+						+ "WHERE { GRAPH <%s> {%n"
+						+ "?commit a rmo:Commit;%n"
+						+ "dc-terms:title ?title;%n"
+						+ "prov:used ?reva;%n"
+						+ "prov:generated ?revb;%n"
+						+ "prov:atTime ?time;%n"
+						+ "prov:wasAssociatedWith ?author.%n"
+						+ "OPTIONAL { ?author rdfs:label ?authname. }%n"
 						+ "?reva rmo:revisionNumber ?prev;"
-						+ "rmo:revisionOf <%s>.\n"
+						+ "rmo:revisionOf <%s>.%n"
 						+ "?revb rmo:revisionNumber ?next."
-						+ "OPTIONAL { ?revb rmo:revisionOfBranch ?branch. }\n"
+						+ "OPTIONAL { ?revb rmo:revisionOfBranch ?branch. }%n"
 						+ "} }",
 				Config.revision_graph,
 				graph);

@@ -6,7 +6,12 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-
+/**
+ * 
+ * @author Stephan Hensel
+ * @author Markus Graube
+ *
+ */
 public class SampleDataSet {
 
 	/** The logger. */
@@ -81,8 +86,6 @@ public class SampleDataSet {
 	 *                  DEL: C                DEL: -    DEL: -
 	 * 
 	 * 
-	 * @author Stephan Hensel
-	 * @author Markus Graube
 	 * @throws InternalErrorException 
 	 *
 	 */
@@ -227,10 +230,6 @@ public class SampleDataSet {
 	 * 
 	 * @param graphName the graph name
 	 * @throws IOException
-	 * 
-	 * @author Stephan Hensel
-	 * @throws InternalErrorException 
-	 *
 	 */
 	public static void createSampleDataSetRenaming(String graphName) throws IOException, InternalErrorException {
 		/** The user. **/
@@ -312,10 +311,6 @@ public class SampleDataSet {
 	 * DEL: -                   DEL: C              DEL: M                                                                     
 	 * 
 	 * @param graphName the graph name
-	 * 
-	 * @author Stephan Hensel
-	 * @throws InternalErrorException 
-	 *
 	 */
 	public static void createSampleDataSetComplexStructure(String graphName) throws InternalErrorException {
 		/** The user. **/

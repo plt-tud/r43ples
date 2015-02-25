@@ -140,7 +140,6 @@ public class VirtuosoHttpInterface extends TripleStoreInterface {
 
 	@Override
 	protected void close() {
-		// TODO Auto-generated method stub
 		
 	}
 

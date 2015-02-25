@@ -284,7 +284,7 @@ public class RevisionManagement {
 			String dateString = getDateString();
 			String commitUri = graphName + "-commit-" + referenceType + "-" + newReferenceName;
 			String referenceUri = graphName + "-" + referenceType + "-" + newReferenceName;
-			String referenceTypUri = (referenceType.equals("tag")) ? "rmo:Tag" : "rmo:Branch";
+			String referenceTypUri = referenceType.equals("tag") ? "rmo:Tag" : "rmo:Branch";
 			String revisionUri = getRevisionUri(graphName, revisionNumber);
 			String personUri = getUserName(user);
 
@@ -741,7 +741,6 @@ public class RevisionManagement {
 						+ "WHERE {"
 						+ " GRAPH <%s> { ?rev rmo:revisionOf ?graph. }" 
 						+ "} ORDER BY ?graph", Config.revision_graph);
-		// FIXME format maybe not correct
 		return TripleStoreInterfaceFactory.get().executeSelectQuery(sparqlQuery, format);
 	}
 	
@@ -975,9 +974,9 @@ public class RevisionManagement {
 	}
 	
 	
-	/**
-	 * @param query
-	 * @return
+	/** Creates an RDF description for the revision tree of the graphs specified in the given SPARQL query
+	 * @param query SPARQL query
+	 * @return RDF string containing information for graphs specified in query 
 	 */
 	public static String getResponseHeaderFromQuery(String query) {
 		final Pattern patternGraph = Pattern.compile(

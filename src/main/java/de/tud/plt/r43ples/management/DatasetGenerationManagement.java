@@ -60,9 +60,9 @@ public class DatasetGenerationManagement {
 	public static void createNewBranch(String user, String message, String graphName, String revision, String branchName) throws InternalErrorException {
 		logger.info(message);
 		String query = String.format(""
-				+ "USER \"%s\" \n"
-				+ "MESSAGE \"%s\" \n"
-				+ "BRANCH GRAPH <%s> REVISION \"%s\" TO \"%s\" \n", user, message, graphName, revision, branchName);
+				+ "USER \"%s\" %n"
+				+ "MESSAGE \"%s\" %n"
+				+ "BRANCH GRAPH <%s> REVISION \"%s\" TO \"%s\"", user, message, graphName, revision, branchName);
 		logger.info("Execute query: \n" + query);
 		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
 	}
@@ -188,7 +188,9 @@ public class DatasetGenerationManagement {
 	 */
 	public static String readFileToString(String path) throws IOException {
 		InputStream is = ClassLoader.getSystemResourceAsStream(path);
-		return IOUtils.toString(is);
+		String result = IOUtils.toString(is);
+		is.close();
+		return result;
 	}
 	
 }

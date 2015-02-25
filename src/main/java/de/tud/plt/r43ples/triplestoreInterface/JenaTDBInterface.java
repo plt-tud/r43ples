@@ -48,7 +48,10 @@ public class JenaTDBInterface extends TripleStoreInterface {
 		File theDir = new File(location.getDirectoryPath());
 		if (!theDir.exists()) {
 			logger.info("creating directory: " + theDir.toString());
-		    theDir.mkdirs();
+		    if (theDir.mkdirs())
+		    	logger.info("Directory successfully created");
+		    else
+		    	logger.error("Could not create directory");
 		  }
 		
 		// Initialize the database
@@ -57,6 +60,7 @@ public class JenaTDBInterface extends TripleStoreInterface {
 		
 	}
 	
+	@Override
 	public void close() {
 		dataset.close();
 	}
@@ -69,6 +73,7 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	 * @param selectQueryString the SELECT query
 	 * @return result set
 	 */
+	@Override
 	public ResultSet executeSelectQuery(String selectQueryString) {
 		dataset.begin(ReadWrite.READ);
 		try {
@@ -124,6 +129,7 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	 * @param askQueryString the ASK query
 	 * @return boolean result of ASK query
 	 */
+	@Override
 	public boolean executeAskQuery(String askQueryString) {
 		dataset.begin(ReadWrite.READ);
 		try {
@@ -139,6 +145,7 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	 * 
 	 * @param updateQueryString the UPDATE query
 	 */
+	@Override
 	public void executeUpdateQuery(String updateQueryString) {
 		logger.debug("Query:" + updateQueryString);
 		dataset.begin(ReadWrite.WRITE);
@@ -156,8 +163,9 @@ public class JenaTDBInterface extends TripleStoreInterface {
 			dataset.end();
 		}
 	}
+	
 
-
+	@Override
 	public void executeCreateGraph(String graph) {
 		dataset.begin(ReadWrite.WRITE);
 		try {
@@ -176,6 +184,7 @@ public class JenaTDBInterface extends TripleStoreInterface {
 		}
 	}
 
+	@Override
 	public Iterator<String> getGraphs() {
 		dataset.begin(ReadWrite.READ);
 		Iterator<String> list = dataset.listNames();

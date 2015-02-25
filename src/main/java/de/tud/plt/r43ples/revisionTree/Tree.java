@@ -34,7 +34,6 @@ public class Tree {
 	 * 
 	 * @param graphName
 	 *            the graph name
-	 * @return the revision tree
 	 */
 	public Tree (final String graphName) {
 		logger.info("Start creation of revision tree of graph " + graphName + "!");

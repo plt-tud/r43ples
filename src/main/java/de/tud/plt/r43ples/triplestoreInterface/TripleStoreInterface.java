@@ -49,7 +49,6 @@ public abstract class TripleStoreInterface {
 	 * Executes a SELECT query.
 	 * 
 	 * @param selectQueryString the SELECT query
-	 * @param format the format
 	 * @return result set
 	 */
 	public abstract ResultSet executeSelectQuery(String selectQueryString) ;
