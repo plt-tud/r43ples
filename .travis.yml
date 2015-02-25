@@ -31,7 +31,6 @@ script:
 
 
 after_success:
-    - ./.configure-git.sh
     - ./.coverity.sh
     - ./.update-gh-pages.sh
     

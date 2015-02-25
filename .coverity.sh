@@ -9,6 +9,11 @@ COMMITS=`git log --since=today.midnight --oneline | wc -l`
 
 if [[ "$COMMITS" -le "1" ]]; then
     #first commit a day - push changes to branch coverity_scan
+    
+    git config --global user.email "r43ples-travis-ci@users.noreply.github.com"
+    git config --global user.name "r43ples travis-ci"
+    git config --global push.default simple 
+
     git clone -b coverity_scan https://$GITAUTH@github.com/plt-tud/r43ples
     cd r43ples
     git fetch origin
