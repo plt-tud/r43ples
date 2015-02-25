@@ -1,0 +1,145 @@
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ns1: <http://eatld.et.tu-dresden.de/mso/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://eatld.et.tu-dresden.de/batch/A3A5R26TZU> a ns1:Site ;
+    rdfs:label "TUDPLT"@en ;
+    ns1:comosUid "A3A5R26TZU"@en ;
+    ns1:hasProcessCell <http://eatld.et.tu-dresden.de/batch/A3A5R03UZU> ;
+    ns1:plantID "=TUDPLT"@en ;
+    rdfs:comment "Batch-Anlage"@en .
+
+<http://eatld.et.tu-dresden.de/batch/A3A5R03UZU> a ns1:ProcessCell ;
+    rdfs:label "A1"@en ;
+    ns1:comosUid "A3A5R03UZU"@en ;
+    ns1:hasUnit <http://eatld.et.tu-dresden.de/batch/A3A5R03YZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R042ZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R046ZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R07QZU> ;
+    ns1:isPartOfSite <http://eatld.et.tu-dresden.de/batch/A3A5R26TZU> ;
+    ns1:plantID "=TUDPLT.A1"@en ;
+    ns1:rfid "E00401005EBC779F"@en ;
+    rdfs:comment "Multi-Purpose plant"@en .
+
+<http://eatld.et.tu-dresden.de/batch/A3A5R03YZU> a ns1:Unit ;
+    rdfs:label "T1"@en ;
+    ns1:comosUid "A3A5R03YZU"@en ;
+    ns1:hasEquipment <http://eatld.et.tu-dresden.de/batch/A3A5R01LZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R01TZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R01VZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R021ZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R027ZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R02IZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R04CZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R04PZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R04QZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R06DZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R06GZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R06HZU> ;
+    ns1:isPartOfProcessCell <http://eatld.et.tu-dresden.de/batch/A3A5R03UZU> ;
+    ns1:plantID "=TUDPLT.A1.T1"@en ;
+    ns1:rfid "E004010078375CED"@en ;
+    rdfs:comment "Subplant reactant storage"@en .
+
+<http://eatld.et.tu-dresden.de/batch/A3A5R042ZU> a ns1:Unit ;
+    rdfs:label "T2"@en ;
+    ns1:comosUid "A3A5R042ZU"@en ;
+    ns1:hasEquipment <http://eatld.et.tu-dresden.de/batch/A3A5R028ZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R029ZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R02DZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R02FZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R02GZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R02JZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R031ZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R035ZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R04XZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R054ZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R06MZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R06NZU> ;
+    ns1:isPartOfProcessCell <http://eatld.et.tu-dresden.de/batch/A3A5R03UZU> ;
+    ns1:plantID "=TUDPLT.A1.T2"@en ;
+    ns1:rfid "E004010078375CF4"@en ;
+    rdfs:comment "Subplant reaction"@en .
+	
+<http://eatld.et.tu-dresden.de/batch/A3A5R046ZU> a ns1:Unit ;
+    rdfs:label "T3"@en ;
+    ns1:comosUid "A3A5R046ZU"@en ;
+    ns1:hasEquipment <http://eatld.et.tu-dresden.de/batch/A3A5R01RZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R01XZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R033ZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R036ZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R05OZU>,
+        <http://eatld.et.tu-dresden.de/batch/A3A5R05PZU> ;
+    ns1:isPartOfProcessCell <http://eatld.et.tu-dresden.de/batch/A3A5R03UZU> ;
+    ns1:plantID "=TUDPLT.A1.T3"@en ;
+    ns1:rfid "E004010078378029"@en ;
+    rdfs:comment "Subplant product storage"@en .
+	
+<http://eatld.et.tu-dresden.de/batch/A3A5R01LZU> a ns1:Armature,
+        ns1:Device ;
+    rdfs:label "V004"@en ;
+    ns1:aggregateState "Liquid"@en ;
+    ns1:chemicalShortcut "H2O"@en ;
+    ns1:comosUid "A3A5R01LZU"@en ;
+    ns1:deviceType "bürkert Type 6011"@en ;
+    ns1:drive "Magnet"@en ;
+    ns1:hasAllowableOperatingPressure <http://eatld.et.tu-dresden.de/batch/A3A5R01LZU_AllowableOperatingPressure> ;
+    ns1:hasAllowableOperatingTemperature <http://eatld.et.tu-dresden.de/batch/A3A5R01LZU_AllowableOperatingTemperature> ;
+    ns1:hasDesignPressure <http://eatld.et.tu-dresden.de/batch/A3A5R01LZU_DesignPressure> ;
+    ns1:hasDesignTemperature <http://eatld.et.tu-dresden.de/batch/A3A5R01LZU_DesignTemperature> ;
+    ns1:isPartOfUnit <http://eatld.et.tu-dresden.de/batch/A3A5R03YZU> ;
+    ns1:medium "Water/steam"@en ;
+    ns1:plantID "=TUDPLT.A1.T1-V004"@en ;
+    ns1:positionFeedback "No"@en ;
+    ns1:rfid "E004010078375CD1"@en ;
+    ns1:safetyPosition "Normal"@en ;
+    rdfs:comment "Globe valve"@en .
+	
+<http://eatld.et.tu-dresden.de/batch/A3A5R01TZU> a ns1:Armature,
+        ns1:Device ;
+    rdfs:label "V002"@en ;
+    ns1:aggregateState "Liquid"@en ;
+    ns1:chemicalShortcut "H2O"@en ;
+    ns1:comosUid "A3A5R01TZU"@en ;
+    ns1:deviceType "bürkert Type 6011"@en ;
+    ns1:drive "Magnet"@en ;
+    ns1:hasAllowableOperatingPressure <http://eatld.et.tu-dresden.de/batch/A3A5R01TZU_AllowableOperatingPressure> ;
+    ns1:hasAllowableOperatingTemperature <http://eatld.et.tu-dresden.de/batch/A3A5R01TZU_AllowableOperatingTemperature> ;
+    ns1:hasDesignPressure <http://eatld.et.tu-dresden.de/batch/A3A5R01TZU_DesignPressure> ;
+    ns1:hasDesignTemperature <http://eatld.et.tu-dresden.de/batch/A3A5R01TZU_DesignTemperature> ;
+    ns1:isPartOfUnit <http://eatld.et.tu-dresden.de/batch/A3A5R03YZU> ;
+    ns1:medium "Water/steam"@en ;
+    ns1:plantID "=TUDPLT.A1.T1-V002"@en ;
+    ns1:positionFeedback "No"@en ;
+    ns1:rfid "E004010078375CC3"@en ;
+    ns1:safetyPosition "Normal"@en ;
+    rdfs:comment "Globe valve"@en .
+
+<http://eatld.et.tu-dresden.de/batch/A3A5R06GZU> a ns1:Device,
+        ns1:Machine ;
+    rdfs:label "P002"@en ;
+    ns1:comosUid "A3A5R06GZU"@en ;
+    ns1:deviceType "LAING DDC 1-plusT"@en ;
+    ns1:drive "Motor"@en ;
+    ns1:hasAllowedOperatingPressure <http://eatld.et.tu-dresden.de/batch/A3A5R06GZU_AllowedOperatingPressure> ;
+    ns1:hasAllowedOperatingTemperature <http://eatld.et.tu-dresden.de/batch/A3A5R06GZU_AllowedOperatingTemperature> ;
+    ns1:hasDeliveryVolume <http://eatld.et.tu-dresden.de/batch/A3A5R06GZU_DeliveryVolume> ;
+    ns1:hasDrive <http://eatld.et.tu-dresden.de/batch/A3A5R06GZU_DriveSpecification> ;
+    ns1:hasMaxPumpPressure <http://eatld.et.tu-dresden.de/batch/A3A5R06GZU_MaxPumpPressure> ;
+    ns1:hasMaxTemperature <http://eatld.et.tu-dresden.de/batch/A3A5R06GZU_MaxTemperature> ;
+    ns1:hasOperatingDeliveryHeight <http://eatld.et.tu-dresden.de/batch/A3A5R06GZU_OperatingDeliveryHeight> ;
+    ns1:hasProceedingPressure <http://eatld.et.tu-dresden.de/batch/A3A5R06GZU_ProceedingPressure> ;
+    ns1:hasProceedingTemperature <http://eatld.et.tu-dresden.de/batch/A3A5R06GZU_ProceedingTemperature> ;
+    ns1:hasQuality <http://eatld.et.tu-dresden.de/batch/A3A5R06GZU_Quality> ;
+    ns1:isConnectedTo <http://eatld.et.tu-dresden.de/batch/A3A5R06OZU_Quality> ;
+    ns1:isPartOfUnit <http://eatld.et.tu-dresden.de/batch/A3A5R03YZU> ;
+    ns1:medium "Water/steam"@en ;
+    ns1:plantID "=TUDPLT.A1.T1P002"@en ;
+    ns1:rfid "E004010078375CBC"@en ;
+    rdfs:comment "Rotary pump"@en .

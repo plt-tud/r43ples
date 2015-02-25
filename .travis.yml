@@ -17,36 +17,36 @@ addons:
       name: "plt-tud/r43ples"
       description: "Build submitted via Travis CI"
     notification_email: markus.graube@tu-dresden.de
-    build_command_prepend: "ant clean"
-    build_command: "ant"
+    build_command_prepend: "mvn clean"
+    build_command: "mvn compile"
     branch_pattern: coverity_scan
 
 
 before_script:
-    - sudo apt-get update -qq
-    - sudo apt-get install -qq libc6 ibldap-2.4-2 libreadline6 libssl1.0.0
-    - wget http://wwwpub.zih.tu-dresden.de/~mgraube/virtuoso-opensource_7.1_amd64.deb
-    - sudo dpkg -i virtuoso-opensource_7.1_amd64.deb
+    #- wget "https://cloudstore.zih.tu-dresden.de/public.php?service=files&t=27bfa7d71ed6b9d3e3225da318cc4639&download" -O virtuoso.deb
+    #- sudo dpkg -i virtuoso.deb
 
 script:
-    - ant test
+    - mvn test
 
-  
+
 after_success:
     - ./.coverity.sh
     - ./.update-gh-pages.sh
     
 
 before_deploy:
-    - ant zip
+    - mvn assembly:single
+    - cp target/r43ples-*-with-dependencies.jar target/r43ples.jar
     
 deploy:
     # deploy to GitHub releases for every tag
   provider: releases
   api_key:
     secure: RHaHxxXNfD8GQBaEfKv2lmpcJK+FeOBt0N0Djz1loTY/VScOEQQRMpWWK7f3Z0O8D8fWKxRHjUKSM63OR7zo6JafIOQU1l/DzS+YK0Rt9NJuGm6MZHc5V32tf2CBBzS8hZJ6MKrCdPJb0WIP+w++zu64ccsFF9ZhWf7EYZ9BYug=
-  file: R43ples.zip
+  file: target/r43ples.jar
   skip_cleanup: true
   on:
     tags: true
     all_branches: true
+

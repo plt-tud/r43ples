@@ -1,0 +1,13 @@
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+ <head>
+  <variable name="address"/>
+ </head>
+ <results>
+  <result>
+   <binding name="address"><literal>Bob St. 2</literal></binding>
+  </result>
+  <result>
+   <binding name="address"><literal>Emma St. 2</literal></binding>
+  </result>
+ </results>
+</sparql>

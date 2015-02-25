@@ -1,0 +1,18 @@
+{{<templates/super}}
+
+{{$content}}
+<div class="row">
+<div id="main" class="col-md-7">
+	<h2>Internal Error</h2>
+	<h3>Message</h3>
+	{{ error.toString }}
+	<h3>Stacktrace</h3>
+	{{# error.stackTrace }}
+	  {{ toString }}
+	{{/ error.stackTrace }}
+	
+</div>
+</div>
+{{/content}}
+
+{{/templates/super}}

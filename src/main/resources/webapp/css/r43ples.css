@@ -1,0 +1,15 @@
+.navbar-static-top {
+	padding-bottom: 15px;
+}
+
+.navbar-toggle {
+	margin-top: 35px;
+}
+
+#navbar {
+	margin-top: 27px;
+} 
+
+#query {
+	resize: vertical;
+}

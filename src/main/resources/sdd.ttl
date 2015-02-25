@@ -1,0 +1,147 @@
+# SDD - Structural Difference Definition
+
+@prefix sddo:	<http://eatld.et.tu-dresden.de/sddo#> .
+@prefix sdd:	<http://eatld.et.tu-dresden.de/sdd#> .
+@prefix xsd:	<http://www.w3.org/2001/XMLSchema#> .
+
+###########################################################
+###########################################################
+# Default SDD
+###########################################################
+###########################################################
+
+sdd:defaultSDD a sddo:StructuralDefinitionGroup ;
+	sddo:hasStructuralDefinition
+#		sdd:deleted-deleted ,
+		sdd:deleted-added ,
+		sdd:deleted-original ,
+#		sdd:deleted-notIncluded ,
+		sdd:added-deleted ,
+#		sdd:added-added ,
+#		sdd:added-original ,
+		sdd:added-notIncluded ,
+		sdd:original-deleted ,
+#		sdd:original-added ,
+#		sdd:original-original ,
+#		sdd:notIncluded-deleted ,
+		sdd:notIncluded-added .
+
+
+###########################################################
+# Deleted - X definitions
+###########################################################
+
+#sdd:deleted-deleted a sddo:StructuralDefinition ;
+#	sddo:hasTripleStateA sddo:deleted ;
+#	sddo:hasTripleStateB sddo:deleted ;
+#	sddo:isConflicting "false"^^xsd:boolean ;
+#	sddo:automaticResolutionState sddo:deleted .
+	
+sdd:deleted-added a sddo:StructuralDefinition ;
+	sddo:hasTripleStateA sddo:deleted ;
+	sddo:hasTripleStateB sddo:added ;
+	sddo:isConflicting "true"^^xsd:boolean ;
+	sddo:automaticResolutionState sddo:deleted .
+
+sdd:deleted-original a sddo:StructuralDefinition ;
+	sddo:hasTripleStateA sddo:deleted ;
+	sddo:hasTripleStateB sddo:original ;
+	sddo:isConflicting "false"^^xsd:boolean ;
+	sddo:automaticResolutionState sddo:deleted .
+	
+#sdd:deleted-notIncluded a sddo:StructuralDefinition ;
+#	sddo:hasTripleStateA sddo:deleted ;
+#	sddo:hasTripleStateB sddo:notIncluded ;
+#	sddo:isConflicting "false"^^xsd:boolean ;
+#	sddo:automaticResolutionState sddo:deleted .
+	
+
+###########################################################
+# Added - X definitions
+###########################################################
+
+sdd:added-deleted a sddo:StructuralDefinition ;
+	sddo:hasTripleStateA sddo:added ;
+	sddo:hasTripleStateB sddo:deleted ;
+	sddo:isConflicting "true"^^xsd:boolean ;
+	sddo:automaticResolutionState sddo:added .
+	
+#sdd:added-added a sddo:StructuralDefinition ;
+#	sddo:hasTripleStateA sddo:added ;
+#	sddo:hasTripleStateB sddo:added ;
+#	sddo:isConflicting "false"^^xsd:boolean ;
+#	sddo:automaticResolutionState sddo:added .
+
+#sdd:added-original a sddo:StructuralDefinition ;
+#	sddo:hasTripleStateA sddo:added ;
+#	sddo:hasTripleStateB sddo:original ;
+#	sddo:isConflicting "false"^^xsd:boolean ;
+#	sddo:automaticResolutionState sddo:added .
+	
+sdd:added-notIncluded a sddo:StructuralDefinition ;
+	sddo:hasTripleStateA sddo:added ;
+	sddo:hasTripleStateB sddo:notIncluded ;
+	sddo:isConflicting "false"^^xsd:boolean ;
+	sddo:automaticResolutionState sddo:added .
+	
+	
+###########################################################
+# Original - X definitions
+###########################################################
+
+sdd:original-deleted a sddo:StructuralDefinition ;
+	sddo:hasTripleStateA sddo:original ;
+	sddo:hasTripleStateB sddo:deleted ;
+	sddo:isConflicting "false"^^xsd:boolean ;
+	sddo:automaticResolutionState sddo:added .
+	
+#sdd:original-added a sddo:StructuralDefinition ;
+#	sddo:hasTripleStateA sddo:original ;
+#	sddo:hasTripleStateB sddo:added ;
+#	sddo:isConflicting "false"^^xsd:boolean ;
+#	sddo:automaticResolutionState sddo:added .
+
+#sdd:original-original a sddo:StructuralDefinition ;
+#	sddo:hasTripleStateA sddo:original ;
+#	sddo:hasTripleStateB sddo:original ;
+#	sddo:isConflicting "false"^^xsd:boolean ;
+#	sddo:automaticResolutionState sddo:added .
+
+# not possible	
+#sdd:original-notIncluded a sddo:StructuralDefinition ;
+#	sddo:hasTripleStateA sddo:original ;
+#	sddo:hasTripleStateB sddo:notIncluded ;
+#	sddo:isConflicting "false"^^xsd:boolean ;
+#	sddo:automaticResolutionState sddo:added .
+
+
+###########################################################
+# Original - X definitions
+###########################################################
+
+#sdd:notIncluded-deleted a sddo:StructuralDefinition ;
+#	sddo:hasTripleStateA sddo:notIncluded ;
+#	sddo:hasTripleStateB sddo:deleted ;
+#	sddo:isConflicting "false"^^xsd:boolean ;
+#	sddo:automaticResolutionState sddo:deleted .
+	
+sdd:notIncluded-added a sddo:StructuralDefinition ;
+	sddo:hasTripleStateA sddo:notIncluded ;
+	sddo:hasTripleStateB sddo:added ;
+	sddo:isConflicting "false"^^xsd:boolean ;
+	sddo:automaticResolutionState sddo:added .
+
+# not possible
+#sdd:notIncluded-original a sddo:StructuralDefinition ;
+#	sddo:hasTripleStateA sddo:notIncluded ;
+#	sddo:hasTripleStateB sddo:original ;
+#	sddo:isConflicting "false"^^xsd:boolean ;
+#	sddo:automaticResolutionState sddo:added .
+
+# makes no sense	
+#sdd:notIncluded-notIncluded a sddo:StructuralDefinition ;
+#	sddo:hasTripleStateA sddo:notIncluded ;
+#	sddo:hasTripleStateB sddo:notIncluded ;
+#	sddo:isConflicting "false"^^xsd:boolean ;
+#	sddo:automaticResolutionState sddo:deleted .
+	

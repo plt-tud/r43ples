@@ -1,0 +1,15 @@
+{{<templates/super}}
+
+{{$content}}
+ Following example data sets have been generating including a revision graph:
+
+<ul>
+ 	{{#iterator}}
+	<li>{{toString}}</li>
+	{{/iterator}}
+</ul>
+
+<a class="btn btn-default" href="sparql">Back to Endpoint</a>
+{{/content}}
+
+{{/templates/super}}

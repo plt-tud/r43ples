@@ -1,49 +1,67 @@
 R43ples
 =======
 
-R43ples (Revision for triples) is Revision Management Tool for the Semantic Web.
+R43ples (Revision for triples) is an open source Revision Management Tool for the Semantic Web.
 
-It is based on storing the differences of revisions of graphs in additional Named Graphs which are then referenced in a revision graph. It provides an extended SPARQL interface which offers the possibility specify revision of named graphs which should be used for answering the query.
+It provides different revisions of named graphs via a SPARQL interface. All information about revisions, changes, commits, branches and tags are stored in additional named graphs beside the original graph in an attached external triple store.
 
 [![Build Status](https://travis-ci.org/plt-tud/r43ples.png?branch=master)](https://travis-ci.org/plt-tud/r43ples)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/2125/badge.svg)](https://scan.coverity.com/projects/2125)
 [![Ohloh Project Status](https://www.ohloh.net/p/r43ples/widgets/project_thin_badge.gif)](https://www.ohloh.net/p/r43ples)
 
 
-This project provides a service for revision management of named graphs in a triple store.
-The service can be interconnected in front of an existing SPARQL endpoint of a Triple Store. 
-This service in the associated Triple Store creates and manages a revision management of graphs. 
-It provides a SPARQL endpoint where all queries have to be directed to. 
-The SPARQL query defines whether only a revision is queried, or a new revision needs to be created. 
-Furthermore, the service provides an interface for revision management and the import or export of data from the Computer Aided Engineering tools.
+This project provides an enhanced SPARQL endpoint for revision management of named graphs.
+R43ples uses an internal Jena TDB is attached to an existing SPARQL endpoint of a Triple Store and acts as another endpoint both for normal SPARQL queries
+as well as for revision-enhanced SPARQL queries, named R43ples queries.
+The R43ples endpoint allows to specify revisions which should be queried for each named graph used inside a SPARQL query.
+The whole revision information is stored in additional graphs in the attached Jena TDB.
 
-The javdoc can be found at [http://plt-tud.github.io/r43ples/javadoc/](http://plt-tud.github.io/r43ples/javadoc/).
+The javadoc can be found at the [website](http://plt-tud.github.io/r43ples) under [http://plt-tud.github.io/r43ples/site/apidocs/](http://plt-tud.github.io/r43ples/site/apidocs/).
 
 A running test server should be available under [http://eatld.et.tu-dresden.de:9998/r43ples/sparql](http://eatld.et.tu-dresden.de:9998/r43ples/sparql)
+
 
 Dependencies
 ------------
 * JDK 1.7
-* Running Triplestore with SPARQL 1.1 endpoint (tested with Virtuoso 7)
+* Maven
 
+```
+sudo apt-get install maven default-jdk
+```
 
-Starting
+Releases
 --------
-Ant is used for compiling and starting
+Releases are stored on [GitHub](https://github.com/plt-tud/r43ples/releases).
+They just have to be unzipped and started with Java
 
-    ant run
+    java -jar r43ples-*-with-dependencies.jar
+
     
+Debian packages are going to be deployed soon. 
+
+Compiling
+---------
+Maven is used for compiling
+
+    mvn exec:java
     
+Releases can be be built with:
+
+    mvn assembly:single
+
+Debian packages can be built with:
+
+    mvn package:jdeb
 Configuration
 -------------
-There is a configuration file named *resources/r43ples.conf* where all parameters are configured:
+There is a configuration file named *resources/r43ples.conf*. The most important ones are the following:
 
-* *sparql.endpoint* - SPARQL endpoint of triplestore which stores all information
-* *sparql.username* - username for connected SPARQL endpoint allowed to write data
-* *sparql.password* - password for specified user
-* *revision.graph* - named graph which is used by R43ples to store revision graph information
+* *database.directory* - directory for Jena TDB database
 * *service.port* - port under which R43ples provides its services
 * *service.uri* - URI under which R43ples provides its services
+* *revision.graph* - named graph which is used by R43ples to store revision graph information
+* *sdd.graph* - named graph for storing the SDD
 
 The logging configuration is stored in *resources/log4j.properties*
 
@@ -66,7 +84,10 @@ There are some additional keywords which can be used to control the revisions of
         
 * Select query
 
-        SELECT * FROM <graph> REVISION "23" WHERE {?s ?p ?o}
+        SELECT * 
+        WHERE { 
+        	GRAPH <graph> REVISION "23" {?s ?p ?o}
+    	}
         
 * Update query
 
@@ -88,6 +109,12 @@ There are some additional keywords which can be used to control the revisions of
         USER "mgraube"
         MESSAGE "test commit"
         TAG GRAPH <test> REVISION "2" TO "v0.3-alpha"
+
+* Merging
+
+		USER "mgraube"
+		MESSAGE "merge example"
+		MERGE GRAPH <test> BRANCH "branch-1" INTO "branch-2"
 
 
 SPARQL Join option
@@ -141,4 +168,17 @@ def update_query(query_string):
         execQuery("ADD GRAPH "+ rev.delete_set_graph+" TO GRAPH <tmp-"+graph+"-"+revision+">")
         ...
 ```
-    
+
+
+Used libraries and frameworks
+------------------------------
+Following libraries are used in R43ples:
+
+* [Jersey](https://jersey.java.net/) for RestFul web services in Java
+* [Grizzly](https://grizzly.java.net/) as web server
+* [Jena ARQ](https://jena.apache.org/documentation/query/index.html) for processing SPARQL results
+* [Jena TDB](https://jena.apache.org/documentation/tdb/index.html) as triplestore
+* [jQuery](http://jquery.com/) as JavaScript framework
+* [Bootstrap](http://getbootstrap.com/) as HTML, CSS and JS framework
+* [Mustache](https://mustache.github.io/) as template engine
+ 
