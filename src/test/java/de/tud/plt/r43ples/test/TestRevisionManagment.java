@@ -3,7 +3,6 @@ package de.tud.plt.r43ples.test;
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -194,27 +193,22 @@ public class TestRevisionManagment {
 	@Test
 	public void testBranching() throws InternalErrorException {
 		RevisionManagement.createReference("branch", graph_test, "2", "testBranch", "test_user", "branching as junit test");
-		ArrayList<String> usedRevisionNumber = new ArrayList<String>();
-		usedRevisionNumber.add("testBranch");
-		RevisionManagement.createNewRevision(graph_test, "<a> <b> <c>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+
+		RevisionManagement.createNewRevision(graph_test, "<a> <b> <c>", "", "test_user", "test_commitMessage", "testBranch");
 		String revNumber = RevisionManagement.getRevisionNumber(graph_test, "testBranch");
 		Assert.assertEquals("2.0-0", revNumber);
 		
-		RevisionManagement.createNewRevision(graph_test, "<a> <b> <d>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		RevisionManagement.createNewRevision(graph_test, "<a> <b> <d>", "", "test_user", "test_commitMessage", "testBranch");
 		String revNumber2 = RevisionManagement.getRevisionNumber(graph_test, "testBranch");
 		Assert.assertEquals("2.0-1", revNumber2);
 		
 		RevisionManagement.createReference("branch", graph_test, "2.0-1", "testBranch2", "test_user", "branching as junit test");
-		usedRevisionNumber.clear();
-		usedRevisionNumber.add("testBranch2");
-		RevisionManagement.createNewRevision(graph_test, "<a> <b> <e>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		RevisionManagement.createNewRevision(graph_test, "<a> <b> <e>", "", "test_user", "test_commitMessage", "testBranch2");
 		String revNumber3 = RevisionManagement.getRevisionNumber(graph_test, "testBranch2");
 		Assert.assertEquals("2.0-1.0-0", revNumber3);
 		
 		RevisionManagement.createReference("branch", graph_test, "2.0-1", "testBranch2a", "test_user", "branching as junit test");
-		usedRevisionNumber.clear();
-		usedRevisionNumber.add("testBranch2a");
-		RevisionManagement.createNewRevision(graph_test, "<a> <b> <f>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		RevisionManagement.createNewRevision(graph_test, "<a> <b> <f>", "", "test_user", "test_commitMessage", "testBranch2a");
 		String revNumber4 = RevisionManagement.getRevisionNumber(graph_test, "testBranch2a");
 		Assert.assertEquals("2.0-1.1-0", revNumber4);
 	}

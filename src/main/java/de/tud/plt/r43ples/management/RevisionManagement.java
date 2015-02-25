@@ -88,9 +88,36 @@ public class RevisionManagement {
 		
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryRevision);
 	}
-
+	
+	
 	/**
 	 * Create a new revision.
+	 * 
+	 * @param graphName
+	 *            the graph name
+	 * @param addedAsNTriples
+	 *            the data set of added triples as N-Triples
+	 * @param removedAsNTriples
+	 *            the data set of removed triples as N-Triples
+	 * @param user
+	 *            the user name who creates the revision
+	 * @param commitMessage
+	 *            the title of the revision
+	 * @param usedRevisionNumber
+	 *            the number of the revision which is used for creation of the
+	 *            new revision 
+	 * @return new revision number
+	 * @throws InternalErrorException 
+	 */
+	public static String createNewRevision(final String graphName, final String addedAsNTriples, final String removedAsNTriples,
+			final String user, final String commitMessage, final String usedRevisionNumber) throws InternalErrorException {
+		ArrayList<String> list = new ArrayList<String>();
+		list.add(usedRevisionNumber);
+		return createNewRevision(graphName, addedAsNTriples, removedAsNTriples, user, commitMessage, list);
+	}
+
+	/**
+	 * Create a new revision with multiple prior revisions
 	 * 
 	 * @param graphName
 	 *            the graph name
@@ -126,23 +153,27 @@ public class RevisionManagement {
 				newRevisionNumber, addSetGraphUri, removeSetGraphUri);
 
 		// Update full graph of branch
-		if (!removedAsNTriples.isEmpty()) {
+		if (removedAsNTriples!=null && !removedAsNTriples.isEmpty()) {
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
 					"DELETE DATA { GRAPH <%s> {%n %s %n} }%n", referenceGraph, removedAsNTriples));
 		}
-		RevisionManagement.executeINSERT(referenceGraph, addedAsNTriples);
+		if (addedAsNTriples!=null && !addedAsNTriples.isEmpty()) {
+			RevisionManagement.executeINSERT(referenceGraph, addedAsNTriples);
+		}
 
 		// Create new graph with delta-added-newRevisionNumber
-		logger.info("Create new graph with name " + addSetGraphUri);
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
+		if (addedAsNTriples!=null && !addedAsNTriples.isEmpty()) {
+			logger.info("Create new graph with name " + addSetGraphUri);
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
 				addSetGraphUri));
-		RevisionManagement.executeINSERT(addSetGraphUri, addedAsNTriples);
+			RevisionManagement.executeINSERT(addSetGraphUri, addedAsNTriples);
+		}
 
 		// Create new graph with delta-removed-newRevisionNumber
-		logger.info("Create new graph with name " + removeSetGraphUri);
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
-				removeSetGraphUri));
-		if (!removedAsNTriples.isEmpty()) {
+		if (removedAsNTriples!=null && !removedAsNTriples.isEmpty()) {
+			logger.info("Create new graph with name " + removeSetGraphUri);
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
+					removeSetGraphUri));
 			RevisionManagement.executeINSERT(removeSetGraphUri, removedAsNTriples);
 		}
 		
@@ -1018,5 +1049,7 @@ public class RevisionManagement {
 		String header = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryConstruct, FileUtils.langTurtle);
 		return header;
 	}
+
+
 	
 }

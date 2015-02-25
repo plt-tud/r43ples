@@ -2,7 +2,6 @@ package de.tud.plt.r43ples.client;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.io.FileUtils;
@@ -60,14 +59,10 @@ public class ConsoleClient {
 		String deleteSet = readFile(args_client.delete_set);
 				
 
-
-		
 		String user = "test";
 		
 		String master = RevisionManagement.getMasterRevisionNumber(args_client.graph);
-		ArrayList<String> list = new ArrayList<String>();
-		list.add(master);
-		String result = RevisionManagement.createNewRevision(args_client.graph, addSet, deleteSet, user, "automatic commit", list);
+		String result = RevisionManagement.createNewRevision(args_client.graph, addSet, deleteSet, user, "automatic commit", master);
 		logger.info(result);			
 	}
 
