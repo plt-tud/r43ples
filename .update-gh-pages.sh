@@ -14,8 +14,8 @@ git clone -b gh-pages https://$GITAUTH@github.com/plt-tud/r43ples gh-pages
 rm -rf gh-pages/site
 cp -r target/site gh-pages/site
 
-echo -e "---\nlayout: index\n---\n`cat README.md`" > gh-pages/index.md
-# cat README.md >> r43ples/index.md
+echo -e "---\nlayout: index\n---\n" > gh-pages/index.md
+cat README.md >> gh-pages/index.md
 
 cd gh-pages
 git add -A *
