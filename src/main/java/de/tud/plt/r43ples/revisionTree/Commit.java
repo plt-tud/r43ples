@@ -13,8 +13,8 @@ public class Commit implements Comparable<Commit> {
 	private List<String> baseRev;
 	private String nextRev;
 	private Branch branch;
-	public List<Commit> Predecessors;
-	public List<Commit> Successors;
+	public List<Commit> predecessor;
+	public List<Commit> successors;
 	
 	/**
 	 * @param uri
@@ -41,8 +41,8 @@ public class Commit implements Comparable<Commit> {
 
 	public Commit(String uri) {
 		this.uri = uri;
-		Predecessors = new ArrayList<Commit>();
-		Successors = new ArrayList<Commit>();
+		predecessor = new ArrayList<Commit>();
+		successors = new ArrayList<Commit>();
 	}
 
 	public String getMessage() {
@@ -98,9 +98,9 @@ public class Commit implements Comparable<Commit> {
 	
 	private boolean findInPredecessors(Commit o)
 	{
-		if(this.Predecessors.contains(o))
+		if(this.predecessor.contains(o))
 			return true;
-		for(Commit c : Predecessors)
+		for(Commit c : predecessor)
 			if(c.findInPredecessors(o))
 				return true;
 		return false;
@@ -108,9 +108,9 @@ public class Commit implements Comparable<Commit> {
 	
 	private boolean findInSuccessors(Commit o)
 	{
-		if(this.Successors.contains(o))
+		if(this.successors.contains(o))
 			return true;
-		for(Commit c : Successors)
+		for(Commit c : successors)
 			if(c.findInSuccessors(o))
 				return true;
 		return false;

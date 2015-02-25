@@ -64,7 +64,7 @@
       <operations public="true" package="false" protected="true" private="false" static="true"/>    
     </display>  
   </class>  
-  <class id="8" language="java" name="de.tud.plt.r43ples.revisionTree.NodeSpecification" project="R43ples" 
+  <class id="8" language="java" name="de.tud.plt.r43ples.revisionTree.Revision" project="R43ples" 
     file="/R43ples/src/de/tud/plt/r43ples/revisionTree/NodeSpecification.java" binary="false" corner="BOTTOM_RIGHT">    
     <position height="254" width="255" x="619" y="1213"/>    
     <display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" accessors="true" 

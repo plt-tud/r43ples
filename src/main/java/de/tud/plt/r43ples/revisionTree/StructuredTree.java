@@ -178,9 +178,9 @@ public class StructuredTree {
 		for (Commit c : commits) {
 			for (Commit b : commits) {
 				if (c.getBaseRevisions().contains(b.getNextRevision()))
-					c.Predecessors.add(b);
+					c.predecessor.add(b);
 				else if (b.getBaseRevisions().contains(c.getNextRevision()))
-					c.Successors.add(b);
+					c.successors.add(b);
 			}
 		}
 

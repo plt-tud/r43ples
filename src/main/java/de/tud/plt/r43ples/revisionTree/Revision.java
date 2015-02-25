@@ -3,18 +3,18 @@ package de.tud.plt.r43ples.revisionTree;
 import java.util.ArrayList;
 
 /**
- * The NodeSpecification class saves the predecessors and the successors of a node.
+ * The Revision class saves the predecessors and the successors of a node.
  * 
  * @author Stephan Hensel
  * @author Markus Graube
  * 
  */
-public class NodeSpecification {
+public class Revision {
 
 	/** The predecessors of the node */
-	private ArrayList<NodeSpecification> predecessor;
+	private ArrayList<Revision> predecessor;
 	/** The successors of the node */
-	private ArrayList<NodeSpecification> successor;
+	private ArrayList<Revision> successor;
 	/** The full graph of a tag or branch if available */
 	private String fullGraph = "";
 	/** The revision number of the node */
@@ -25,9 +25,9 @@ public class NodeSpecification {
 	/**
 	 * The constructor.
 	 */
-	public NodeSpecification(String revisionNumber, String revisionUri, String fullGraph) {
-		predecessor = new ArrayList<NodeSpecification>();
-		successor = new ArrayList<NodeSpecification>();
+	public Revision(String revisionNumber, String revisionUri, String fullGraph) {
+		predecessor = new ArrayList<Revision>();
+		successor = new ArrayList<Revision>();
 		this.revisionNumber = revisionNumber;
 		this.revisionUri = revisionUri;
 		this.fullGraph = fullGraph;
@@ -37,7 +37,7 @@ public class NodeSpecification {
 	/**
 	 * @return the first predecessor
 	 */
-	public NodeSpecification getFirstPredecessor() {
+	public Revision getFirstPredecessor() {
 		return predecessor.get(0);
 	}
 
@@ -45,7 +45,7 @@ public class NodeSpecification {
 	/**
 	 * @param predecessor the predecessor to add
 	 */
-	public void addPredecessor(NodeSpecification predecessor) {
+	public void addPredecessor(Revision predecessor) {
 		this.predecessor.add(predecessor);
 	}
 
@@ -53,7 +53,7 @@ public class NodeSpecification {
 	/**
 	 * @return the first successor
 	 */
-	public NodeSpecification getFirstSuccessor() {
+	public Revision getFirstSuccessor() {
 		return successor.get(0);
 	}
 	
@@ -61,7 +61,7 @@ public class NodeSpecification {
 	/**
 	 * @return the successors
 	 */
-	public ArrayList<NodeSpecification> getSuccessors() {
+	public ArrayList<Revision> getSuccessors() {
 		return successor;
 	}
 	
@@ -76,7 +76,7 @@ public class NodeSpecification {
 	/**
 	 * @param successor the successor to add
 	 */
-	public void addSuccessor(NodeSpecification successor) {
+	public void addSuccessor(Revision successor) {
 		this.successor.add(successor);
 	}
 

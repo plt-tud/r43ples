@@ -70,7 +70,7 @@ public class CommitGraphView {
 
 			// find color
 			Color currentColor = null;
-			for (Commit suc : c.Successors) {
+			for (Commit suc : c.successors) {
 				if (suc.getBranch().equals(c.getBranch()))
 					currentColor = commit_color.get(suc);
 			}
@@ -78,7 +78,7 @@ public class CommitGraphView {
 				currentColor = getNextColor();
 
 			// connect with any succeeding commits
-			for (Commit suc : c.Successors) {
+			for (Commit suc : c.successors) {
 
 				// calculate and set starting point
 				GeneralPath path = new GeneralPath();
@@ -87,7 +87,7 @@ public class CommitGraphView {
 				path.moveTo(x, y);
 
 				// set color
-				if (!suc.getBranch().equals(c.getBranch()) && suc.Predecessors.size() == 1)
+				if (!suc.getBranch().equals(c.getBranch()) && suc.predecessor.size() == 1)
 					g.setColor(commit_color.get(suc));
 				else
 					g.setColor(currentColor);
@@ -111,11 +111,11 @@ public class CommitGraphView {
 				int line;
 				for (line = currentLine; line > endLine + 1; line--) {
 					// drawConnection
-					drawConnectionTo(g, path, line - 1, column);
+					drawConnectionTo(path, line - 1, column);
 					maxColumn = Math.max(maxColumn, column);
 				}
 				maxColumn = Math.max(maxColumn, column);
-				drawConnectionTo(g, path, endLine, endColumn);
+				drawConnectionTo(path, endLine, endColumn);
 				g.draw(path);
 			}
 			
@@ -149,7 +149,7 @@ public class CommitGraphView {
 		return dimension;
 	}
 
-	private void drawConnectionTo(Graphics2D g, GeneralPath path, int line,
+	private void drawConnectionTo(GeneralPath path, int line,
 			int column) {
 		
 		int x1 = (int) path.getCurrentPoint().getX();
@@ -178,7 +178,7 @@ public class CommitGraphView {
 		int column = -1;
 
 		// test if there is a successor of same branch terminating a column
-		for (Commit suc : c.Successors) {
+		for (Commit suc : c.successors) {
 			if (terminalCommits.contains(suc) && suc.getBranch().equals(c.getBranch())) {
 				return terminalCommits.indexOf(suc);
 			}
@@ -189,14 +189,14 @@ public class CommitGraphView {
 			boolean isReusable = true;
 
 			// test whether terminal commit has predecessors not yet drawn
-			for (Commit term_pre : term.Predecessors) {
+			for (Commit term_pre : term.predecessor) {
 				if (commits.indexOf(term_pre) > commits.indexOf(c)) {
 					isReusable = false;
 					break;
 				}
 				// test whether current commit has successors that would lead to
 				// overlapping
-				for (Commit suc : c.Successors) {
+				for (Commit suc : c.successors) {
 					if (!terminalCommits.contains(suc) && (commits.indexOf(suc) < commits.indexOf(term_pre))) {
 						isReusable = false;
 						break;

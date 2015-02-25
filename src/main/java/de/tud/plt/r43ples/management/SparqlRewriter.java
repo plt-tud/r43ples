@@ -32,7 +32,8 @@ import com.hp.hpl.jena.sparql.util.ExprUtils;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.revisionTree.NodeSpecification;
+import de.tud.plt.r43ples.revisionTree.Revision;
+import de.tud.plt.r43ples.revisionTree.Tree;
 
 /**
  * Rewrites SPARQL queries in order to reflect old revisions.
@@ -78,11 +79,12 @@ public class SparqlRewriter {
 			
 			String revisionNumber = RevisionManagement.getRevisionNumber(graphName, referenceName);
 
-			LinkedList<NodeSpecification> list = RevisionManagement.getRevisionTree(graphName).getPathToRevision(revisionNumber);
+			Tree tree =  new Tree(graphName);
+			LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
 			logger.info("Path to revision: " + list.toString());
 			expression_list_last_revision.add(ExprUtils.nodeToExpr(NodeFactory.createURI(list.get(0).getRevisionUri())));
 			list.removeLast();
-			for (NodeSpecification ns : list) {
+			for (Revision ns : list) {
 				expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(ns.getRevisionUri())));
 			}
 

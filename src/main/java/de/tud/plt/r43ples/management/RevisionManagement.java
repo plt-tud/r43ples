@@ -17,7 +17,7 @@ import com.hp.hpl.jena.util.FileUtils;
 
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.revisionTree.NodeSpecification;
+import de.tud.plt.r43ples.revisionTree.Revision;
 import de.tud.plt.r43ples.revisionTree.Tree;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 
@@ -346,7 +346,8 @@ public class RevisionManagement {
 		TripleStoreInterfaceFactory.get().executeUpdateQuery("CREATE GRAPH <" + tempGraphName + ">");
 
 		// Create path to revision
-		LinkedList<NodeSpecification> list = getRevisionTree(graphName).getPathToRevision(revisionNumber);
+		Tree tree =  new Tree(graphName);
+		LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
 
 		// Copy branch to temporary graph
 		String number = list.pollFirst().getRevisionNumber();
@@ -496,60 +497,7 @@ public class RevisionManagement {
 		}
 	}
 
-	/**
-	 * Creates a tree with all revisions (with predecessors and successors and
-	 * references of tags and branches)
-	 * 
-	 * @param graphName
-	 *            the graph name
-	 * @return the revision tree
-	 */
-	public static Tree getRevisionTree(final String graphName) {
-		logger.info("Start creation of revision tree of graph " + graphName + "!");
-
-		Tree tree = new Tree();
-		// create query
-		String queryRevisions = prefixes + String.format(""
-						+ "SELECT ?uri ?revNumber ?fullGraph " 
-						+ "WHERE {"
-						+ "GRAPH <%s> {"
-						+ "	?uri a rmo:Revision;" 
-						+ "		rmo:revisionOf <%s>; "
-						+ "		rmo:revisionNumber ?revNumber."
-						+ "	OPTIONAL { ?branch rmo:references ?uri; rmo:fullGraph ?fullGraph.}" 
-						+ "} }",
-						Config.revision_graph, graphName);
-		ResultSet resultsCommits = TripleStoreInterfaceFactory.get().executeSelectQuery(queryRevisions);
-		while (resultsCommits.hasNext()) {
-			QuerySolution qsCommits = resultsCommits.next();
-			String revision = qsCommits.getResource("?uri").toString();
-			String revisionNumber = qsCommits.getLiteral("?revNumber").getString();
-			String fullGraph = "";
-			if (qsCommits.getResource("?fullGraph") != null)
-				fullGraph = qsCommits.getResource("?fullGraph").toString();
-
-			logger.debug("Found revision: " + revision + ".");
-			tree.addNode(revisionNumber, revision, fullGraph);
-		}
-
-		String queryRevisionConnection = prefixes + String.format(""
-						+ "SELECT ?revNumber ?preRevNumber "  
-						+ "WHERE { GRAPH <%s> {"
-						+ " ?rev a rmo:Revision;" 
-						+ "	rmo:revisionOf <%s>; "
-						+ "	rmo:revisionNumber ?revNumber; " 
-						+ "	prov:wasDerivedFrom ?preRev. "
-						+ "?preRev rmo:revisionNumber ?preRevNumber. " 
-						+ " } }", Config.revision_graph, graphName);
-		ResultSet resultRevConnection = TripleStoreInterfaceFactory.get().executeSelectQuery(queryRevisionConnection);
-		while (resultRevConnection.hasNext()) {
-			QuerySolution qsCommits = resultRevConnection.next();
-			String revision = qsCommits.getLiteral("?revNumber").toString();
-			String preRevision = qsCommits.getLiteral("?preRevNumber").toString();
-			tree.addEdge(revision, preRevision);
-		}
-		return tree;
-	}
+	
 
 	/**
 	 * Get the MASTER revision number of a graph.
@@ -606,6 +554,7 @@ public class RevisionManagement {
 			return getNextRevisionNumberForLastRevisionNumber(graphName, revisionNumber);
 		}
 	}
+	
 
 	/**
 	 * Get the next revision number for specified revision number of any branch.
