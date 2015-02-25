@@ -6,9 +6,7 @@ import java.io.IOException;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -18,17 +16,16 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
 
 public class TestRevisionManagment {
 	
 	private final static String graph_test = "http://test.com/dataset1";
-    private final static String format = "application/sparql-results+xml";
-    Endpoint ep;
-	String result;
-	String expected;
+    private final String format = "application/sparql-results+xml";
+    private final Endpoint ep = new Endpoint();
+	private String result;
+	private String expected;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException{
@@ -36,17 +33,6 @@ public class TestRevisionManagment {
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
 		SampleDataSet.createSampleDataset1(graph_test);
-	}
-	
-	@AfterClass
-	public static void tearDown() {
-		RevisionManagement.purgeGraph(graph_test);
-		TripleStoreInterfaceSingleton.close();
-	}
-	
-	@Before
-	public void setUp() {
-		ep = new Endpoint();
 	}
 	
 	@Test

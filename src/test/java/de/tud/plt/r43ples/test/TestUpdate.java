@@ -1,8 +1,8 @@
 package de.tud.plt.r43ples.test;
 
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,8 +12,6 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -24,7 +22,6 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
 public class TestUpdate {
@@ -37,7 +34,7 @@ public class TestUpdate {
 	
 	final static String format = "application/sparql-results+xml";
 	
-	Endpoint ep;
+	private final Endpoint 	ep = new Endpoint();
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -47,21 +44,11 @@ public class TestUpdate {
 		SampleDataSet.createSampleDataset1(graph_test);
 	}
 
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		TripleStoreInterfaceSingleton.close();
-	}
-
 	@Before
 	public void setUp() throws  ConfigurationException, InternalErrorException{
 		SampleDataSet.createSampleDataSetMerging(graphName);
-		ep = new Endpoint();
 	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
-
+	
 
 	@Test
 	public void test_insert_existing_triples() throws SAXException, IOException, InternalErrorException {
