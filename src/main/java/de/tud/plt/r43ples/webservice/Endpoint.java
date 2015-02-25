@@ -37,7 +37,6 @@ import com.github.mustachejava.MustacheFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
-import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.management.Config;
@@ -467,22 +466,44 @@ public class Endpoint {
 	 * @throws InternalErrorException 
 	 */
 	private Response getSelectConstructAskResponse(final String query, final String format) throws InternalErrorException {
+		ResponseBuilder responseBuilder = Response.ok();
+		String result;
+		
 		if (query.contains("OPTION r43ples:SPARQL_JOIN")) {
-			ResponseBuilder responseBuilder = Response.ok();
 			String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
 			query_rewritten = SparqlRewriter.rewriteQuery(query_rewritten);
-			String result = TripleStoreInterfaceFactory.get().executeSelectConstructAskQuery(query_rewritten, format);
-			responseBuilder.entity(result);
-			responseBuilder.type(format);
-			
-			responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(query));
-			return responseBuilder.build();
+			result = TripleStoreInterfaceFactory.get().executeSelectConstructAskQuery(query_rewritten, format);
 		}
 		else {
-			return getSelectConstructAskResponseClassic(query, format);
+			result = getSelectConstructAskResponseClassic(query, format);
 		}
+		
+		if (format.equals("text/html")){
+			responseBuilder.entity(getHTMLResult(result, query));
+		} else {
+			responseBuilder.entity(result);
+		}
+		responseBuilder.type(format);
+		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(query));		
+		return responseBuilder.build();
 	}
 
+
+	/**
+	 * @param query
+	 * @param responseBuilder
+	 * @param result
+	 */
+	private String getHTMLResult(final String result, String query) {
+		MustacheFactory mf = new DefaultMustacheFactory();
+		Mustache mustache = mf.compile("templates/result.mustache");
+		StringWriter sw = new StringWriter();
+		htmlMap.put("result", result);
+		htmlMap.put("query", query);
+		mustache.execute(sw, htmlMap);		
+		return sw.toString();
+	}
+	
 
 	/**
 	 * @param query
@@ -490,14 +511,11 @@ public class Endpoint {
 	 * @return
 	 * @throws InternalErrorException 
 	 */
-	private Response getSelectConstructAskResponseClassic(final String query, final String format) throws InternalErrorException {
-		ResponseBuilder responseBuilder = Response.ok();
+	private String getSelectConstructAskResponseClassic(final String query, final String format) throws InternalErrorException {
 		String queryM = query;
 
 		Matcher m = patternSelectFromPart.matcher(queryM);
-		boolean found = false;
 		while (m.find()) {
-			found = true;
 			String graphName = m.group("graph");
 			String type = m.group("type");
 			String revisionNumber = m.group("revision").toLowerCase();
@@ -507,10 +525,8 @@ public class Endpoint {
 			if (revisionNumber == null) {
 				revisionNumber = "master";
 			}
-			String headerRevisionNumber;
 			if (revisionNumber.equalsIgnoreCase("master")) {
 				// Respond with MASTER revision - nothing to be done - MASTER revisions are already created in the named graphs
-				headerRevisionNumber = "master";
 				newGraphName = graphName;
 			} else {
 				if (RevisionManagement.isBranch(graphName, revisionNumber)) {
@@ -520,31 +536,14 @@ public class Endpoint {
 					newGraphName = graphName + "-temp";
 					RevisionManagement.generateFullGraphOfRevision(graphName, revisionNumber, newGraphName);
 				}
-				headerRevisionNumber = revisionNumber;
 			}
 
 			queryM = m.replaceFirst(type + " <" + newGraphName + ">");
 			m = patternSelectFromPart.matcher(queryM);
-
 			
-		    // Remove the http:// of the graph name because it is not permitted that a header parameter contains a colon
-			String graphNameHeader;
-			try {
-				graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				graphNameHeader = graphName;
-			}
-		    
-		    // Respond with specified revision
-			responseBuilder.header(graphNameHeader + "-revision-number", headerRevisionNumber);
-		    responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
-		}
-		if (!found) {
-			logger.info("No R43ples SELECT query: " + queryM);
 		}
 		String response = TripleStoreInterfaceFactory.get().executeSelectConstructAskQuery(queryM, format);
-		return responseBuilder.entity(response).type(format).build();
+		return response;
 	}
 
 	
@@ -565,8 +564,6 @@ public class Endpoint {
 	 */
 	private Response getUpdateResponse(final String query, final String user, final String commitMessage,
 			final String format) throws InternalErrorException {
-
-		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Update detected");
 		
 		// write to add and delete sets
@@ -645,25 +642,23 @@ public class Endpoint {
 			usedRevisionNumber.add(revisionName);
 			RevisionManagement.addMetaInformationForNewRevision(graphName, user, commitMessage, usedRevisionNumber,
 					newRevisionNumber, addSetGraphUri, removeSetGraphUri);
-
-			String graphNameHeader;
-			try {
-				graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				graphNameHeader = graphName;
-			}
 			
-			// Respond with next revision number
-	    	responseBuilder.header(graphNameHeader + "-revision-number", newRevisionNumber);
-			responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
-			logger.debug("Respond with new revision number " + newRevisionNumber + ".");
+			
 			queryM = m.replaceAll(String.format("GRAPH <%s> ", graphName));
 			m = patternGraphWithRevision.matcher(queryM);
 		}
-
-		Response response = responseBuilder.build();
-		return response;
+		
+		ResponseBuilder responseBuilder = Response.created(URI.create(""));
+		
+		String result = "Query successfully executed";
+		if (format.equals("text/html")){
+			responseBuilder.entity(getHTMLResult(result, query));
+		} else {
+			responseBuilder.entity(result);
+		}
+		responseBuilder.type(format);
+		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(query));		
+		return responseBuilder.build();
 	}
 
 
@@ -677,42 +672,38 @@ public class Endpoint {
 	 * @throws InternalErrorException 
 	 */
 	private Response getCreateGraphResponse(final String query, final String format) throws InternalErrorException {
-		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Graph creation detected");
 
+		String graphName = null;
 		Matcher m = patternCreateGraph.matcher(query);
 		boolean found = false;
 		while (m.find()) {
 			found = true;
-			String graphName = m.group("graph");
+			graphName = m.group("graph");
 //			String silent = m.group("silent");
-			String querySparql = m.group();
 			
 			// Create graph
-			String result = "";
-			TripleStoreInterfaceFactory.get().executeUpdateQuery(querySparql);
-		    responseBuilder.entity(result);
+			TripleStoreInterfaceFactory.get().executeCreateGraph(graphName);
 		    
 		    if (RevisionManagement.getMasterRevisionNumber(graphName) == null)
 		    {
 			    // Add R43ples information
 			    RevisionManagement.putGraphUnderVersionControl(graphName);
-		    	
-			    String graphNameHeader;
-				try {
-					graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-					graphNameHeader = graphName;
-				}
-			    responseBuilder.header(graphNameHeader + "-revision-number", 0);
-				responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", 0);
 			}
-
 		}
 		if (!found) {
 			throw new QueryErrorException("Query doesn't contain a correct CREATE query:\n" + query);
 		}
+		String result = "Graph successfully created";
+		
+		ResponseBuilder responseBuilder = Response.created(URI.create(graphName));
+		if (format.equals("text/html")){
+			responseBuilder.entity(getHTMLResult(result, query));
+		} else {
+			responseBuilder.entity(result);
+		}
+		responseBuilder.type(format);
+		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(query));		
 		return responseBuilder.build();
 	}
 
@@ -726,8 +717,6 @@ public class Endpoint {
 	 * @throws InternalErrorException 
 	 */
 	private Response getDropGraphResponse(final String query, final String format) throws InternalErrorException {
-		ResponseBuilder responseBuilder = Response.created(URI.create(""));
-
 		// Clear R43ples information for specified graphs
 		Matcher m = patternDropGraph.matcher(query);
 		boolean found = false;
@@ -739,8 +728,15 @@ public class Endpoint {
 		if (!found) {
 			throw new QueryErrorException("Query contain errors:\n" + query);
 		}
-		responseBuilder.status(Response.Status.OK);
-		responseBuilder.entity("Successful: " + query);
+		String result = "Graph successfully dropped";
+		
+		ResponseBuilder responseBuilder = Response.ok();
+		if (format.equals("text/html")){
+			responseBuilder.entity(getHTMLResult(result, query));
+		} else {
+			responseBuilder.entity(result);
+		}
+		responseBuilder.type(format);		
 		return responseBuilder.build();
 	}
 
@@ -757,7 +753,6 @@ public class Endpoint {
 	 */
 	private Response getBranchOrTagResponse(final String sparqlQuery, final String user, final String commitMessage,
 			final String format) throws InternalErrorException {
-		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Tag or branch creation detected");
 
 		// Add R43ples information
@@ -770,35 +765,27 @@ public class Endpoint {
 			String graphName = m.group("graph");
 			String revisionNumber = m.group("revision").toLowerCase();
 			String referenceName = m.group("name").toLowerCase();
-			try {
-				if (action.equals("TAG")) {
-					RevisionManagement.createReference("tag", graphName, revisionNumber, referenceName, user, commitMessage);
-				} else if (action.equals("BRANCH")) {
-					RevisionManagement.createReference("branch", graphName, revisionNumber, referenceName, user, commitMessage);
-				} else {
-					throw new QueryErrorException("Error in query: " + sparqlQuery);
-				}
-			} catch (IdentifierAlreadyExistsException e) {
-				responseBuilder = Response.status(Response.Status.CONFLICT);
-			}
-
-			String graphNameHeader;
-			try {
-				graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				graphNameHeader = graphName;
-			}
-		    	
-	    	// Respond with next revision number
-		    responseBuilder.header(graphNameHeader + "-revision-number", RevisionManagement.getRevisionNumber(graphName, referenceName));
-	    	responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
-		    
+			if (action.equals("TAG")) {
+				RevisionManagement.createReference("tag", graphName, revisionNumber, referenceName, user, commitMessage);
+			} else if (action.equals("BRANCH")) {
+				RevisionManagement.createReference("branch", graphName, revisionNumber, referenceName, user, commitMessage);
+			} else {
+				throw new QueryErrorException("Error in query: " + sparqlQuery);
+			}	    
 		}
 		if (!foundEntry) {
 			throw new QueryErrorException("Error in query: " + sparqlQuery);
 		}
+		String result = "Tagging or branching successful";
 
+		ResponseBuilder responseBuilder = Response.ok();
+		if (format.equals("text/html")){
+			responseBuilder.entity(getHTMLResult(result, sparqlQuery));
+		} else {
+			responseBuilder.entity(result);
+		}
+		responseBuilder.type(format);	
+		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(sparqlQuery));		
 		return responseBuilder.build();
 	}
 	

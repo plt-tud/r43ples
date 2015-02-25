@@ -98,8 +98,8 @@ public class TestR43ples {
 	@Test
 	public void testSelectQueryWithoutRevision() throws IOException, SAXException {
 		String query = String.format(""
-				+ "select * from <%s>"
-				+ "where { ?s ?p ?o. }"
+				+ "select * from <%s> %n"
+				+ "where { ?s ?p ?o. } %n"
 				+ "ORDER BY ?s ?p ?o", graphName);
 		String result = executeR43plesQuery(query);
 		String expected = ResourceManagement.getContentFromResource("response-master.xml");

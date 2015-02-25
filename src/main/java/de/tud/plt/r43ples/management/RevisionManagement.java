@@ -853,10 +853,8 @@ public class RevisionManagement {
 //		query = "SELECT DISTINCT ?graph WHERE { GRAPH ?graph { ?s ?p ?o } } limit 100";
 				
 		ResultSet results = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
-		logger.info(results.toString());
 		while (results.hasNext()) {
 			QuerySolution qs = results.next();
-			logger.info(qs.toString());
 			if (qs.contains("?graph")) {
 					String graphName = qs.getResource("graph").toString();
 					TripleStoreInterfaceFactory.get().executeUpdateQuery("DROP SILENT GRAPH <" + graphName + ">");

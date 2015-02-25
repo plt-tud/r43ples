@@ -14,15 +14,16 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.GitRepositoryState;
 
 @Provider
 public class ExceptionMapper implements
-		javax.ws.rs.ext.ExceptionMapper<Exception> {
+		javax.ws.rs.ext.ExceptionMapper<InternalErrorException> {
 	private static Logger logger = Logger.getLogger(ExceptionMapper.class);
 
 	@Override
-	public Response toResponse(Exception e) {
+	public Response toResponse(InternalErrorException e) {
 		logger.error(e.getMessage(), e);
 
 		
@@ -40,4 +41,5 @@ public class ExceptionMapper implements
 		
 		return Response.serverError().entity(content).type(MediaType.TEXT_HTML).build();
 	}
+
 }

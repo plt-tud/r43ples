@@ -1,10 +1,11 @@
 package de.tud.plt.r43ples.management;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 
+import javax.ws.rs.core.MediaType;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
@@ -35,14 +36,14 @@ public class DatasetGenerationManagement {
 		logger.info("Purge silent example graph");
 		String query = String.format("DROP SILENT GRAPH <%s>", graphName);
 		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + ep.sparql("HTML", query));
+		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
 		
 		// Create new example graph
 		logger.info("Create new example graph");
 		query = String.format("CREATE SILENT GRAPH <%s>", graphName);
 		
 		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + ep.sparql("HTML", query));
+		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
 	}
 	
 	
@@ -63,7 +64,7 @@ public class DatasetGenerationManagement {
 				+ "MESSAGE \"%s\" \n"
 				+ "BRANCH GRAPH <%s> REVISION \"%s\" TO \"%s\" \n", user, message, graphName, revision, branchName);
 		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + ep.sparql("HTML", query));
+		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
 	}
 	
 	
@@ -88,7 +89,7 @@ public class DatasetGenerationManagement {
 				+ "	} %n"
 				+ "}", user, message, graphName, revision, triples);
 		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + ep.sparql("HTML", query));
+		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
 	}
 	
 	
@@ -113,7 +114,7 @@ public class DatasetGenerationManagement {
 				+ "	} %n"
 				+ "}", user, message, graphName, revision, triples);
 		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + ep.sparql("HTML", query));
+		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
 	}
 	
 	
@@ -143,7 +144,7 @@ public class DatasetGenerationManagement {
 				+ "	} %n"
 				+ "}", user, message, graphName, revision, triples, graphName, revision, triples);
 		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + ep.sparql("HTML", query));
+		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
 	}
 	
 	
@@ -174,7 +175,7 @@ public class DatasetGenerationManagement {
 				+ "	} %n"
 				+ "}", user, message, graphName, revision, triplesInsert, graphName, revision, triplesDelete);
 		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + ep.sparql("HTML", query));
+		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
 	}
 	
 	
@@ -186,16 +187,8 @@ public class DatasetGenerationManagement {
 	 * @throws IOException
 	 */
 	public static String readFileToString(String path) throws IOException {
-		StringBuilder string = new StringBuilder();
 		InputStream is = ClassLoader.getSystemResourceAsStream(path);
-		
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        String line;
-        while ((line = reader.readLine()) != null) {
-            string.append(line);
-        }
-		
-		return string.toString();
+		return IOUtils.toString(is);
 	}
 	
 }

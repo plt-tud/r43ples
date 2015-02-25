@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.ResultSet;
@@ -73,14 +72,10 @@ public abstract class TripleStoreInterface {
 			ResultSetFormatter.outputAsRDF(baos, "Turtle", results);
 		else if (format.equals("application/json") )
 			ResultSetFormatter.outputAsJSON(baos, results);
-		else if (format.equals("text/plain") ) {
+		else if (format.equals("text/plain") )
 			ResultSetFormatter.out(baos, results);
-			return baos.toString();
-		}
-		else {
+		else
 			ResultSetFormatter.out(baos, results);
-			return "<pre>"+StringEscapeUtils.escapeHtml(baos.toString())+"</pre>";
-		}
 		return baos.toString();
 	}
 	
@@ -108,9 +103,7 @@ public abstract class TripleStoreInterface {
 				result.write(baos, format);
 			}
 			catch (NoWriterForLangException e) {
-				
 				result.write(baos, "Turtle");
-				return "<pre>"+StringEscapeUtils.escapeHtml(baos.toString())+"</pre>";
 			}
 		}
 		logger.debug("Result: " + baos.toString());
