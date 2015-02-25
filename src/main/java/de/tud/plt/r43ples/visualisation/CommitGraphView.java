@@ -13,25 +13,19 @@ import java.util.Map;
 import java.util.Queue;
 
 import de.tud.plt.r43ples.revisionTree.Commit;
-import de.tud.plt.r43ples.revisionTree.StructuredTree;
 
 public class CommitGraphView {
 	
 	/**
-	 * Vertical distance between commits
-	 */
-	public int LineHeight = 20;
-	
-	/**
 	 * Diameter of the circles representing commits
 	 */
-	public int CircleDiameter = 10;
+	private final int CircleDiameter = 10;
 	
 	
 	/**
 	 * Horizontal distance between commits respective branches
 	 */
-	public int ColumnWidth = 15;
+	private final int ColumnWidth = 15;
 	
 	// dimensions of this graph, is null until drawn
 	private Dimension2D dimension;
@@ -44,8 +38,8 @@ public class CommitGraphView {
 	// list of commits
 	private List<Commit> commits;
 
-	public CommitGraphView(StructuredTree tree) {
-		commits = tree.getCommits();
+	public CommitGraphView(List<Commit> commits2) {
+		commits = commits2;
 		colorQueue = new LinkedList<Color>();
 		colorQueue.add(new Color(0.5f, 0.1f, 0.1f));
 		colorQueue.add(new Color(0.1f, 0.5f, 0.1f));
@@ -59,6 +53,7 @@ public class CommitGraphView {
 
 		int currentLine = 0;
 		int maxColumn = 0;
+		g.translate(0, MMSTVisualisation.LineHeight/2);
 		g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
 		
 		Map<Commit, Color> commit_color = new HashMap<Commit, Color>();
@@ -83,7 +78,7 @@ public class CommitGraphView {
 				// calculate and set starting point
 				GeneralPath path = new GeneralPath();
 				int x = ColumnWidth * currentColumn + CircleDiameter / 2;
-				int y = LineHeight * currentLine + CircleDiameter / 2;
+				int y = MMSTVisualisation.LineHeight * currentLine + CircleDiameter / 2;
 				path.moveTo(x, y);
 
 				// set color
@@ -135,11 +130,14 @@ public class CommitGraphView {
 			int column = commit_column.get(c);
 			drawCircle(g, l, column);
 		}
+		
+		g.translate(0, -MMSTVisualisation.LineHeight/2);
 
 		// calculate dimensions
 		dimension = new Dimension();
-		dimension.setSize(maxColumn * ColumnWidth, commits.size()
-				* LineHeight);
+		dimension.setSize((maxColumn+1) * ColumnWidth, commits.size()
+				* MMSTVisualisation.LineHeight);
+
 	}
 	
 	/**
@@ -155,21 +153,21 @@ public class CommitGraphView {
 		int x1 = (int) path.getCurrentPoint().getX();
 		int y1 = (int) path.getCurrentPoint().getY();
 		int x2 = ColumnWidth * column + CircleDiameter / 2;
-		int y2 = LineHeight * line + CircleDiameter / 2;
+		int y2 = MMSTVisualisation.LineHeight * line + CircleDiameter / 2;
 
 		if (x1 == x2) {
 			// draw straight line
 			path.lineTo(x2, y2);
 		} else {
 			// draw curved line
-			int curvedLineBase = (int) (LineHeight * 0.7);
+			int curvedLineBase = (int) (MMSTVisualisation.LineHeight * 0.7);
 			path.curveTo(x1, y1 - curvedLineBase, x2, y2 + curvedLineBase,
 					x2, y2);
 		}
 	}
 
 	private void drawCircle(Graphics2D g, int line, int column) {
-		g.fillOval(ColumnWidth * column, LineHeight * line, CircleDiameter,
+		g.fillOval(ColumnWidth * column, MMSTVisualisation.LineHeight * line, CircleDiameter,
 				CircleDiameter);
 	}
 

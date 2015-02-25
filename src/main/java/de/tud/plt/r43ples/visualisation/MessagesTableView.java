@@ -18,14 +18,9 @@ import de.tud.plt.r43ples.revisionTree.Tag;
 public class MessagesTableView {
 
 	/**
-	 * Vertical distance between commits
-	 */
-	public int LineHeight = 20;
-
-	/**
 	 * Font of the Text
 	 */
-	public Font TextFont = new Font("SansSerif", Font.PLAIN, 16);
+	protected final Font TextFont = new Font("SansSerif", Font.PLAIN, 16);
 
 	private List<Commit> commits;
 	private Map<Commit, List<Branch>> branch_index;
@@ -75,7 +70,7 @@ public class MessagesTableView {
 		// header line
 		g.drawString("Number", pos, y);
 		int numberWidth = fm.stringWidth("Number");
-		y = LineHeight;
+		y = MMSTVisualisation.LineHeight;
 
 		for (Commit c : commits) {
 			
@@ -85,17 +80,18 @@ public class MessagesTableView {
 			// calculate offset of next column
 			numberWidth = Math.max(numberWidth, fm.stringWidth(rev));
 
-			y += LineHeight;
+			y += MMSTVisualisation.LineHeight;
 		}
 		
-		pos += numberWidth + 20;
+		
+		pos += numberWidth + MMSTVisualisation.padding;
 		
 		// Commit message
 		// header line
 		y=0;
 		g.drawString("Commit Message", pos, y);
 		int commitWidth = fm.stringWidth("Commit Message");
-		y += LineHeight;
+		y += MMSTVisualisation.LineHeight;
 
 		for (Commit c : commits) {
 			String message = c.getMessage();
@@ -146,10 +142,10 @@ public class MessagesTableView {
 			// calculate offset of next column
 			commitWidth = Math.max(commitWidth, branchesWidth + fm.stringWidth(message));
 
-			y += LineHeight;
+			y += MMSTVisualisation.LineHeight;
 		}
 		
-		pos += commitWidth + 20;
+		pos += commitWidth + MMSTVisualisation.padding;
 
 		
 		// Author
@@ -158,7 +154,7 @@ public class MessagesTableView {
 		// header line
 		g.drawString("Author", pos, y);
 		int authorWidth = fm.stringWidth("Author");
-		y += LineHeight;
+		y += MMSTVisualisation.LineHeight;
 
 		for (Commit c : commits) {
 			String author = c.getAuthor();
@@ -167,10 +163,10 @@ public class MessagesTableView {
 			// calculate offset of next column
 			authorWidth = Math.max(authorWidth, fm.stringWidth(author));
 
-			y += LineHeight;
+			y += MMSTVisualisation.LineHeight;
 		}
-		pos += authorWidth + 20;
-		dimension = new Dimension(pos, y + 10);
+		pos += authorWidth;
+		dimension = new Dimension(pos, y);
 
 		g.setFont(tmp);
 	}

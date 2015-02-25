@@ -154,8 +154,7 @@ public class RevisionManagement {
 
 		// Update full graph of branch
 		if (removedAsNTriples!=null && !removedAsNTriples.isEmpty()) {
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
-					"DELETE DATA { GRAPH <%s> {%n %s %n} }%n", referenceGraph, removedAsNTriples));
+			RevisionManagement.executeDELETE(referenceGraph, removedAsNTriples);
 		}
 		if (addedAsNTriples!=null && !addedAsNTriples.isEmpty()) {
 			RevisionManagement.executeINSERT(referenceGraph, addedAsNTriples);
@@ -871,8 +870,6 @@ public class RevisionManagement {
 				+ " UNION {?rev rmo:deltaRemoved ?graph}"
 				+ " UNION {?ref rmo:references ?rev; rmo:fullGraph ?graph}" 
 				+ "} }", Config.revision_graph, graph);
-		
-//		query = "SELECT DISTINCT ?graph WHERE { GRAPH ?graph { ?s ?p ?o } } limit 100";
 				
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		while (results.hasNext()) {
