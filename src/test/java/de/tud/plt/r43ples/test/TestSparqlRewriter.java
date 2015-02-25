@@ -15,7 +15,7 @@ import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 /**
  * @author Markus Graube
@@ -28,14 +28,13 @@ public class TestSparqlRewriter {
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException{
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterfaceFactory.createInterface();
 		SampleDataSet.createSampleDataset1(graph_test);
 	}
 	
 	@AfterClass
 	public static void tearDown() {
 		RevisionManagement.purgeGraph(graph_test);
-		TripleStoreInterfaceFactory.close();
+		TripleStoreInterfaceSingleton.close();
 	}
 	
 	/**

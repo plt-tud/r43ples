@@ -19,7 +19,7 @@ import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.revisionTree.Revision;
 import de.tud.plt.r43ples.revisionTree.Tree;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 /**
  * This class provides methods for interaction with graphs.
@@ -86,7 +86,7 @@ public class RevisionManagement {
 
 		String queryRevision = prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", Config.revision_graph, queryContent);
 		
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(queryRevision);
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryRevision);
 	}
 
 	/**
@@ -127,20 +127,20 @@ public class RevisionManagement {
 
 		// Update full graph of branch
 		if (!removedAsNTriples.isEmpty()) {
-			TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format(
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
 					"DELETE DATA { GRAPH <%s> {%n %s %n} }%n", referenceGraph, removedAsNTriples));
 		}
 		RevisionManagement.executeINSERT(referenceGraph, addedAsNTriples);
 
 		// Create new graph with delta-added-newRevisionNumber
 		logger.info("Create new graph with name " + addSetGraphUri);
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
 				addSetGraphUri));
 		RevisionManagement.executeINSERT(addSetGraphUri, addedAsNTriples);
 
 		// Create new graph with delta-removed-newRevisionNumber
 		logger.info("Create new graph with name " + removeSetGraphUri);
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
 				removeSetGraphUri));
 		if (!removedAsNTriples.isEmpty()) {
 			RevisionManagement.executeINSERT(removeSetGraphUri, removedAsNTriples);
@@ -154,14 +154,14 @@ public class RevisionManagement {
 //							"SELECT ?branch ?graph WHERE{ ?branch a rmo:Branch; rmo:references <%s>; rmo:fullGraph ?graph. }",
 //							oldRevision2);
 //			QuerySolution sol2 = ResultSetFactory.fromXML(
-//					TripleStoreInterfaceFactory.get().executeQueryWithAuthorization(queryBranch2, "XML")).next();
+//					TripleStoreInterfaceSingleton.get().executeQueryWithAuthorization(queryBranch2, "XML")).next();
 //			String removeBranchUri = sol2.getResource("?branch").toString();
 //			String removeBranchFullGraph = sol2.getResource("?graph").toString();
 //			String query = String.format(
 //					"DELETE { GRAPH <%s> { <%s> ?p ?o. } } WHERE { GRAPH <%s> { <%s> ?p ?o. }}%n",
 //					Config.revision_graph, removeBranchUri, Config.revision_graph, removeBranchUri);
 //			query += String.format("DROP SILENT GRAPH <%s>%n", removeBranchFullGraph);
-//			TripleStoreInterfaceFactory.get().executeQueryWithAuthorization(query);
+//			TripleStoreInterfaceSingleton.get().executeQueryWithAuthorization(query);
 //		}
 
 		return newRevisionNumber;
@@ -221,7 +221,7 @@ public class RevisionManagement {
 				+ String.format("INSERT DATA { GRAPH <%s> { %s } } ;%n", Config.revision_graph,
 						queryContent.toString());
 		
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(query);
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
 
 		// Move branch to new revision
 		String branchIdentifier = usedRevisionNumber.get(0).toString();
@@ -236,7 +236,7 @@ public class RevisionManagement {
 					+ "} }",
 					Config.revision_graph, oldRevisionUri, branchIdentifier, oldRevisionUri,
 						branchIdentifier);
-		QuerySolution sol = TripleStoreInterfaceFactory.get().executeSelectQuery(queryBranch).next();
+		QuerySolution sol = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryBranch).next();
 		String branchName = sol.getResource("?branch").toString();
 
 		query = prefixes + String.format("DELETE DATA { GRAPH <%s> { <%s> rmo:references <%s>. } };%n",
@@ -246,7 +246,7 @@ public class RevisionManagement {
 
 		// Execute queries
 		logger.info("Execute all queries updating the revision graph, full graph and change sets");
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(query);
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
 	}
 
 	/**
@@ -305,7 +305,7 @@ public class RevisionManagement {
 			// Execute queries
 			String query = prefixes
 					+ String.format("INSERT DATA { GRAPH <%s> { %s } } ;", Config.revision_graph, queryContent);
-			TripleStoreInterfaceFactory.get().executeUpdateQuery(query);
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
 		}
 	}
 
@@ -320,7 +320,7 @@ public class RevisionManagement {
 	 */
 	public static boolean checkGraphExistence(final String graphName){
 		String query = "ASK { GRAPH <" + graphName + "> {?s ?p ?o} }";
-		return TripleStoreInterfaceFactory.get().executeAskQuery(query);
+		return TripleStoreInterfaceSingleton.get().executeAskQuery(query);
 	}
 
 	/**
@@ -342,8 +342,8 @@ public class RevisionManagement {
 		String revisionNumber = getRevisionNumber(graphName, revisionName);
 
 		// Create temporary graph
-		TripleStoreInterfaceFactory.get().executeUpdateQuery("DROP SILENT GRAPH <" + tempGraphName + ">");
-		TripleStoreInterfaceFactory.get().executeUpdateQuery("CREATE GRAPH <" + tempGraphName + ">");
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <" + tempGraphName + ">");
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery("CREATE GRAPH <" + tempGraphName + ">");
 
 		// Create path to revision
 		Tree tree =  new Tree(graphName);
@@ -351,7 +351,7 @@ public class RevisionManagement {
 
 		// Copy branch to temporary graph
 		String number = list.pollFirst().getRevisionNumber();
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(
 				"COPY GRAPH <" + RevisionManagement.getReferenceGraph(graphName, number) + "> TO GRAPH <"
 						+ tempGraphName + ">");
 
@@ -362,10 +362,10 @@ public class RevisionManagement {
 			String graph_added   = graphName + "-delta-added-"+ number;
 			// Add data to temporary graph
 			if (RevisionManagement.checkGraphExistence(graph_removed))
-				TripleStoreInterfaceFactory.get().executeUpdateQuery("ADD GRAPH <" + graph_removed + "> TO GRAPH <" + tempGraphName + ">");
+				TripleStoreInterfaceSingleton.get().executeUpdateQuery("ADD GRAPH <" + graph_removed + "> TO GRAPH <" + tempGraphName + ">");
 			// Remove data from temporary graph (no opposite of SPARQL ADD available)
 			if (RevisionManagement.checkGraphExistence(graph_added))
-				TripleStoreInterfaceFactory.get().executeUpdateQuery(  "DELETE { GRAPH <" + tempGraphName+ "> { ?s ?p ?o.} }"
+				TripleStoreInterfaceSingleton.get().executeUpdateQuery(  "DELETE { GRAPH <" + tempGraphName+ "> { ?s ?p ?o.} }"
 														+ "WHERE  { GRAPH <" + graph_added	+ "> { ?s ?p ?o.} }");
 
 			number = list.pollFirst().getRevisionNumber();
@@ -391,7 +391,7 @@ public class RevisionManagement {
 								+ "UNION {?rev a rmo:Revision; rmo:revisionOf <%s>. ?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%s\" .}"
 								+ "} }", Config.revision_graph, graphName, revisionIdentifier, graphName,
 						revisionIdentifier);
-		ResultSet resultSet = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
+		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
 			if (resultSet.hasNext()) {
@@ -423,7 +423,7 @@ public class RevisionManagement {
 						+ " ?rev a rmo:Revision; rmo:revisionOf <%s>."
 						+ "	{?rev rmo:revisionNumber \"%s\".} UNION {?ref rdfs:label \"%s\" .}" + "} }",
 						Config.revision_graph, graphName, referenceIdentifier, referenceIdentifier);
-		ResultSet resultSet = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
+		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
 			if (resultSet.hasNext()) {
@@ -458,7 +458,7 @@ public class RevisionManagement {
 				+ " ?rev a rmo:Revision; rmo:revisionOf <%s>."
 				+ "	{?ref rdfs:label \"%s\"} UNION {?rev rmo:revisionNumber \"%s\"}" 
 				+ "} }", Config.revision_graph, graphName, referenceIdentifier, referenceIdentifier);
-		ResultSet resultSet = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
+		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
 			return qs.getResource("?graph").toString();
@@ -484,7 +484,7 @@ public class RevisionManagement {
 								+ "	?rev a rmo:Revision; rmo:revisionNumber ?revNumber; rmo:revisionOf <%s>."
 								+ "	{?rev rmo:revisionNumber \"%s\".} UNION {?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%s\".}"
 								+ "} }", Config.revision_graph, graphName, referenceName, referenceName);
-		ResultSet resultSet = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
+		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
 			if (resultSet.hasNext()) {
@@ -515,7 +515,7 @@ public class RevisionManagement {
 				+ "	?master a rmo:Master; rmo:references ?revision . "
 				+ "	?revision rmo:revisionNumber ?revisionNumber; rmo:revisionOf <%s> . " 
 				+ "} }", Config.revision_graph, graphName);
-		ResultSet results = TripleStoreInterfaceFactory.get().executeSelectQuery(queryString);
+		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryString);
 		if (results.hasNext()){
 			QuerySolution qs = results.next();
 			return qs.getLiteral("?revisionNumber").getString();
@@ -543,7 +543,7 @@ public class RevisionManagement {
 						+ " <%s> rmo:references ?rev; prov:wasDerivedFrom ?rev ." 
 						+ " }} ",
 						Config.revision_graph, referenceUri);
-		return TripleStoreInterfaceFactory.get().executeAskQuery(queryASKBranch);
+		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASKBranch);
 	}
 
 	public static String getNextRevisionNumber(final String graphName, final String revisionIdentifier) throws InternalErrorException {
@@ -599,7 +599,7 @@ public class RevisionManagement {
 					+ "		rmo:revisionOf <%s>;" 
 					+ "		rmo:revisionNumber \"%s\"}}",
 							Config.revision_graph, graphName, newRevisionNumber);
-			boolean resultASK = TripleStoreInterfaceFactory.get().executeAskQuery(queryASK);
+			boolean resultASK = TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
 			if (resultASK == false) {
 				return newRevisionNumber;
 			}
@@ -641,14 +641,14 @@ public class RevisionManagement {
 				insert.append('\n').append(sub);
 				counter++;
 				if (counter == MAX_STATEMENTS-1) {
-					TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format(insertQueryTemplate, graphName, insert));
+					TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(insertQueryTemplate, graphName, insert));
 					counter = 0;
 					insert = new StringBuilder();
 				}
 			}
 		}
 
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format(insertQueryTemplate, graphName, insert));
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(insertQueryTemplate, graphName, insert));
 	}
 	
 	
@@ -680,13 +680,13 @@ public class RevisionManagement {
 				delete.append('\n').append(sub);
 				counter++;
 				if (counter == MAX_STATEMENTS-1) {
-					TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format(deleteQueryTemplate, graphName, delete));
+					TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(deleteQueryTemplate, graphName, delete));
 					counter = 0;
 					delete = new StringBuilder();
 				}
 			}
 		}
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format(deleteQueryTemplate, graphName, delete));
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(deleteQueryTemplate, graphName, delete));
 	}
 	
 	
@@ -724,7 +724,7 @@ public class RevisionManagement {
 					+ "} }",
 					Config.revision_graph, graphName);
 		}
-		return TripleStoreInterfaceFactory.get().executeConstructQuery(sparqlQuery, format);
+		return TripleStoreInterfaceSingleton.get().executeConstructQuery(sparqlQuery, format);
 	}
 
 	/**
@@ -741,7 +741,7 @@ public class RevisionManagement {
 						+ "WHERE {"
 						+ " GRAPH <%s> { ?rev rmo:revisionOf ?graph. }" 
 						+ "} ORDER BY ?graph", Config.revision_graph);
-		return TripleStoreInterfaceFactory.get().executeSelectQuery(sparqlQuery, format);
+		return TripleStoreInterfaceSingleton.get().executeSelectQuery(sparqlQuery, format);
 	}
 	
 	
@@ -757,7 +757,7 @@ public class RevisionManagement {
 						+ "WHERE {"
 						+ " GRAPH <%s> { ?rev rmo:revisionOf ?graph. }" 
 						+ "} ORDER BY ?graph", Config.revision_graph);
-		return TripleStoreInterfaceFactory.get().executeSelectQuery(sparqlQuery);
+		return TripleStoreInterfaceSingleton.get().executeSelectQuery(sparqlQuery);
 	}
 	
 
@@ -800,12 +800,12 @@ public class RevisionManagement {
 		
 //		query = "SELECT DISTINCT ?graph WHERE { GRAPH ?graph { ?s ?p ?o } } limit 100";
 				
-		ResultSet results = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
+		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		while (results.hasNext()) {
 			QuerySolution qs = results.next();
 			if (qs.contains("?graph")) {
 					String graphName = qs.getResource("graph").toString();
-					TripleStoreInterfaceFactory.get().executeUpdateQuery("DROP SILENT GRAPH <" + graphName + ">");
+					TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <" + graphName + ">");
 					logger.debug("Graph deleted: " + graphName);
 			}
 		}
@@ -828,7 +828,7 @@ public class RevisionManagement {
 						+ "}"
 						, Config.revision_graph, Config.revision_graph, graph);
 		
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(queryDelete);
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryDelete);
 	}
 
 	/**
@@ -842,7 +842,7 @@ public class RevisionManagement {
 		String query = prefixes
 				+ String.format("SELECT ?personUri { GRAPH <%s>  { " + "?personUri a prov:Person;"
 						+ "  rdfs:label \"%s\"." + "} }", Config.revision_graph, user);
-		ResultSet results = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
+		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		if (results.hasNext()) {
 			logger.debug("User " + user + " already exists.");
 			QuerySolution qs = results.next();
@@ -853,7 +853,7 @@ public class RevisionManagement {
 			query = prefixes
 					+ String.format("INSERT DATA { GRAPH <%s> { <%s> a prov:Person; rdfs:label \"%s\". } }",
 							Config.revision_graph, personUri, user);
-			TripleStoreInterfaceFactory.get().executeUpdateQuery(query);
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
 			return personUri;
 		}
 	}
@@ -884,7 +884,7 @@ public class RevisionManagement {
 				+ String.format("ASK { GRAPH <%s> { " + " ?ref a rmo:Reference; rdfs:label \"%s\". "
 						+ " ?ref rmo:references ?rev ." + " ?rev rmo:revisionOf <%s> ." + " }} ",
 						Config.revision_graph, referenceName, graphName);
-		return TripleStoreInterfaceFactory.get().executeAskQuery(queryASK);
+		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
 	}
 
 	/**
@@ -905,7 +905,7 @@ public class RevisionManagement {
 						+ " ?ref a rmo:Reference; rmo:references ?rev ."
 						+ " { ?rev rmo:revisionNumber \"%s\"} UNION { ?ref rdfs:label \"%s\"} }} ",
 						Config.revision_graph, graphName, identifier, identifier);
-		return TripleStoreInterfaceFactory.get().executeAskQuery(queryASK);
+		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
 	}
 	
 	
@@ -923,7 +923,7 @@ public class RevisionManagement {
 			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaAdded> ?addSetURI . %n"
 			+ "} }", revisionGraph, revisionURI);
 		
-		ResultSet results = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
+		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		
 		if (results.hasNext()) {
 			QuerySolution qs = results.next();
@@ -948,7 +948,7 @@ public class RevisionManagement {
 			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaRemoved> ?deleteSetURI . %n"
 			+ "} }", revisionGraph, revisionURI);
 		
-		ResultSet results = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
+		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		
 		if (results.hasNext()) {
 			QuerySolution qs = results.next();
@@ -970,7 +970,7 @@ public class RevisionManagement {
 				  "CONSTRUCT {?s ?p ?o} %n"
 				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
 		
-		return TripleStoreInterfaceFactory.get().executeConstructQuery(query, FileUtils.langTurtle);		
+		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, FileUtils.langTurtle);		
 	}
 	
 	
@@ -1015,7 +1015,7 @@ public class RevisionManagement {
 				+ "FILTER (?type IN (rmo:Tag, rmo:Master, rmo:Branch)) %n"
 				+ "FILTER (?graph IN (%s)) %n"
 				+ "} }", Config.revision_graph, graphList);
-		String header = TripleStoreInterfaceFactory.get().executeConstructQuery(queryConstruct, FileUtils.langTurtle);
+		String header = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryConstruct, FileUtils.langTurtle);
 		return header;
 	}
 	

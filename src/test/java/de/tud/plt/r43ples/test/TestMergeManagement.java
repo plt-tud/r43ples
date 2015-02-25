@@ -18,7 +18,7 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 /**
  * @author Markus Graube
@@ -34,7 +34,6 @@ public class TestMergeManagement {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterfaceFactory.createInterface();
 		SampleDataSet.createSampleDataSetMerging(graph);
 	}
 
@@ -44,7 +43,7 @@ public class TestMergeManagement {
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
 		RevisionManagement.purgeGraph(graph);
-		TripleStoreInterfaceFactory.close();
+		TripleStoreInterfaceSingleton.close();
 	}
 
 	/**

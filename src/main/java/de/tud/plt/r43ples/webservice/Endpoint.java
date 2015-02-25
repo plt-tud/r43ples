@@ -46,7 +46,7 @@ import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.visualisation.MMSTVisualisation;
 import de.tud.plt.r43ples.visualisation.VisualisationD3;
 
@@ -327,11 +327,11 @@ public class Endpoint {
 	private String getSparqlDebugResponse(final String sparqlQuery) {
 		logger.info("Debug query was requested. Query: " + sparqlQuery);
 		if (sparqlQuery.contains("INSERT")) {
-			TripleStoreInterfaceFactory.get().executeUpdateQuery(sparqlQuery);
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(sparqlQuery);
 			return "Query executed";
 		}
 		else
-			return TripleStoreInterfaceFactory.get().executeSelectConstructAskQuery(sparqlQuery, "text/html");
+			return TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(sparqlQuery, "text/html");
 	}
 	
 	
@@ -345,7 +345,7 @@ public class Endpoint {
 		MustacheFactory mf = new DefaultMustacheFactory();
 	    Mustache mustache = mf.compile("templates/debug.mustache");
 	    StringWriter sw = new StringWriter();
-	    htmlMap.put("graphs", TripleStoreInterfaceFactory.get().getGraphs());
+	    htmlMap.put("graphs", TripleStoreInterfaceSingleton.get().getGraphs());
 	    htmlMap.put("revisionGraph", Config.revision_graph);
 	    mustache.execute(sw, htmlMap);		
 		
@@ -472,7 +472,7 @@ public class Endpoint {
 		if (query.contains("OPTION r43ples:SPARQL_JOIN")) {
 			String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
 			query_rewritten = SparqlRewriter.rewriteQuery(query_rewritten);
-			result = TripleStoreInterfaceFactory.get().executeSelectConstructAskQuery(query_rewritten, format);
+			result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query_rewritten, format);
 		}
 		else {
 			result = getSelectConstructAskResponseClassic(query, format);
@@ -542,7 +542,7 @@ public class Endpoint {
 			m = patternSelectFromPart.matcher(queryM);
 			
 		}
-		String response = TripleStoreInterfaceFactory.get().executeSelectConstructAskQuery(queryM, format);
+		String response = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(queryM, format);
 		return response;
 	}
 
@@ -603,7 +603,7 @@ public class Endpoint {
 		m= patternEmptyGraphPattern.matcher(queryM);
 		queryM = m.replaceAll("");
 
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(queryM);
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryM);
 
 		queryM = query;
 		m = patternGraphWithRevision.matcher(queryM);
@@ -621,19 +621,19 @@ public class Endpoint {
 			// remove doubled data
 			// (already existing triples in add set; not existing triples in
 			// delete set)
-			TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format(
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
 							"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }", addSetGraphUri,
 							referenceFullGraph));
-			TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format(
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
 					"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } MINUS { GRAPH <%s> { ?s ?p ?o. } } }",
 					removeSetGraphUri, removeSetGraphUri, referenceFullGraph));
 
 			// merge change sets into reference graph
 			// (copy add set to reference graph; remove delete set from reference graph)
-			TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format(
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
 						"INSERT { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }",
 						referenceFullGraph,	addSetGraphUri));
-			TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format(
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
 					"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }", 
 					referenceFullGraph,	removeSetGraphUri));
 
@@ -683,7 +683,7 @@ public class Endpoint {
 //			String silent = m.group("silent");
 			
 			// Create graph
-			TripleStoreInterfaceFactory.get().executeCreateGraph(graphName);
+			TripleStoreInterfaceSingleton.get().executeCreateGraph(graphName);
 		    
 		    if (RevisionManagement.getMasterRevisionNumber(graphName) == null)
 		    {
@@ -867,7 +867,7 @@ public class Endpoint {
 						+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
 						+ "} }", Config.revision_graph, graphName);
 				
-				ResultSet resultSetSDD = TripleStoreInterfaceFactory.get().executeSelectQuery(querySDD);
+				ResultSet resultSetSDD = TripleStoreInterfaceSingleton.get().executeSelectQuery(querySDD);
 				if (resultSetSDD.hasNext()) {
 					QuerySolution qs = resultSetSDD.next();
 					usedSDDURI = qs.getResource("?defaultSDD").toString();
@@ -914,7 +914,7 @@ public class Endpoint {
 						+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
 						+ "	} %n"
 						+ "}", graphNameDiff);
-				if (TripleStoreInterfaceFactory.get().executeAskQuery(queryASK)) {
+				if (TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK)) {
 					// Difference model contains conflicts
 					// Return the conflict model to the client
 					responseBuilder = Response.status(Response.Status.CONFLICT);

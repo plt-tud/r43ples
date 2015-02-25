@@ -274,17 +274,26 @@
 				<artifactId>maven-changelog-plugin</artifactId>
 			</plugin>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9</version>
+				<version>2.10.1</version>
 				<configuration>
-					<doclet>org.jboss.apiviz.APIviz</doclet>
-					<docletArtifact>
-						<groupId>org.jboss.apiviz</groupId>
-						<artifactId>apiviz</artifactId>
-						<version>1.3.2.GA</version>
-					</docletArtifact>
-					<useStandardDocletOptions>true</useStandardDocletOptions>
+					<doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
+			          <docletArtifact>
+			            <groupId>org.umlgraph</groupId>
+			            <artifactId>umlgraph</artifactId>
+			            <version>5.6.6</version>
+			          </docletArtifact>
+			          <additionalparam>
+			          	-all
+			          	-inferrel  
+			          	-inferdep 
+			          	-hide java.* 
+			          	-collpackages java.util.* 
+			          	-qualify 
+			          	-postfixpackage
+			          	-views
+			          </additionalparam>
+			          <useStandardDocletOptions>true</useStandardDocletOptions>
 					<charset>UTF-8</charset>
 					<encoding>UTF-8</encoding>
 					<docencoding>UTF-8</docencoding>
@@ -293,9 +302,6 @@
 					<author>true</author>
 					<keywords>true</keywords>
               		<failOnError>false</failOnError>
-					<additionalparam>
-						-sourceclasspath ${project.build.outputDirectory}
-					</additionalparam>
 				</configuration>
 			</plugin>
 

@@ -3,35 +3,39 @@ package de.tud.plt.r43ples.triplestoreInterface;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.MergeManagement;
-import de.tud.plt.r43ples.management.RevisionManagement;
 
-public class TripleStoreInterfaceFactory {
+/**
+ * 
+ * @author Markus Graube
+ * @navassoc 1 - 1 TripleStoreInterface
+ *
+ */
+public class TripleStoreInterfaceSingleton {
 	
 	private static TripleStoreInterface triplestore;
 	/** The logger */
 	private static Logger logger = Logger.getLogger(TripleStoreInterface.class);
-	
-	public static TripleStoreInterface get() {
-		return triplestore;
-	}
 	
 	/** Create interface according to Config
 	 * can be a Jena TDB Interface or a Virtuoso interface
 	 * 
 	 * @return triplestoreinterface
 	 */
-	public static TripleStoreInterface createInterface() {
-		if (Config.jena_tdb_directory != null)
-			triplestore = createJenaTDBInterface(Config.jena_tdb_directory);
-		else if (Config.virtuoso_url != null)
-			triplestore = createVirtuosoHttpInterface(Config.virtuoso_url, Config.virtuoso_user, Config.virtuoso_password);
+	public static TripleStoreInterface get() {
+		if (triplestore!=null)
+			return triplestore;
 		else {
-			logger.error("No database specified in config");
-			System.exit(1);
+			if (Config.jena_tdb_directory != null)
+				triplestore = createJenaTDBInterface(Config.jena_tdb_directory);
+			else if (Config.virtuoso_url != null)
+				triplestore = createVirtuosoHttpInterface(Config.virtuoso_url, Config.virtuoso_user, Config.virtuoso_password);
+			else {
+				logger.error("No database specified in config");
+				System.exit(1);
+			}
+			triplestore.init();
+			return triplestore;
 		}
-		init();
-		return triplestore;
 	}
 
 	
@@ -62,21 +66,6 @@ public class TripleStoreInterfaceFactory {
 			return null;
 	}
 	
-	
-	private static void init() {
-		if (!RevisionManagement.checkGraphExistence(Config.revision_graph)){
-			logger.info("Create revision graph");
-			triplestore.executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
-	 	}
-		
-		// Create SDD graph
-		if (!RevisionManagement.checkGraphExistence(Config.sdd_graph)){
-			logger.info("Create sdd graph");
-			triplestore.executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
-			// Insert default content into SDD graph
-			RevisionManagement.executeINSERT(Config.sdd_graph, MergeManagement.convertJenaModelToNTriple(MergeManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent)));
-	 	}		
-	}
 
 	public static void close(){
 		triplestore.close();
