@@ -14,15 +14,15 @@ if [[ "$COMMITS" -le "1" ]]; then
     git config --global user.name "r43ples travis-ci"
     git config --global push.default simple 
 
-    git clone -b coverity_scan https://$GITAUTH@github.com/plt-tud/r43ples
-    cd r43ples
+    git clone -b coverity_scan https://$GITAUTH@github.com/plt-tud/r43ples coverity_scan
+    cd coverity_scan
     git fetch origin
-    git merge origin/master
+    git merge --ff --log -m "merge from master to coverity_scan" /master
     git add *
     git commit -am "push to coverity scan by travis-ci"
     git push https://$GITAUTH@github.com/plt-tud/r43ples
     cd ..
-    rm -rf r43ples
+    rm -rf coverity_scan
 else
     echo "Not the first commit of the day - no push to coverity required"
 fi 
