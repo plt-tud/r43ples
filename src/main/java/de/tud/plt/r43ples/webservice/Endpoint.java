@@ -731,12 +731,13 @@ public class Endpoint {
 		String result = "Graph successfully dropped";
 		
 		ResponseBuilder responseBuilder = Response.ok();
-		if (format.equals("text/html")){
+		if (format.contains("text/html")){
 			responseBuilder.entity(getHTMLResult(result, query));
+			responseBuilder.type("text/html");
 		} else {
 			responseBuilder.entity(result);
+			responseBuilder.type("text/plain");
 		}
-		responseBuilder.type(format);		
 		return responseBuilder.build();
 	}
 
@@ -766,9 +767,9 @@ public class Endpoint {
 			String revisionNumber = m.group("revision").toLowerCase();
 			String referenceName = m.group("name").toLowerCase();
 			if (action.equals("TAG")) {
-				RevisionManagement.createReference("tag", graphName, revisionNumber, referenceName, user, commitMessage);
+				RevisionManagement.createTag(graphName, revisionNumber, referenceName, user, commitMessage);
 			} else if (action.equals("BRANCH")) {
-				RevisionManagement.createReference("branch", graphName, revisionNumber, referenceName, user, commitMessage);
+				RevisionManagement.createBranch(graphName, revisionNumber, referenceName, user, commitMessage);
 			} else {
 				throw new QueryErrorException("Error in query: " + sparqlQuery);
 			}	    

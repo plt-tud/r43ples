@@ -280,6 +280,49 @@ public class RevisionManagement {
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
 	}
 
+	
+	/**
+	 * Create a new tag
+	 * 
+	 * @param graphName
+	 *            the graph name
+	 * @param revisionNumber
+	 *            the revision number where the tag should be attached to
+	 * @param tagName
+	 *            name of the new tag
+	 * @param user
+	 *            user who performs this tag generation
+	 * @param message
+	 *            message describing intent of this command
+	 * @throws InternalErrorException 
+	 */
+	public static void createTag(final String graphName,
+			final String revisionNumber, final String tagName, final String user,
+			final String message) throws InternalErrorException {
+		createReference("tag", graphName, revisionNumber, tagName, user, message);
+	}
+		
+	/**
+	 * Create a new branch
+	 * 
+	 * @param graphName
+	 *            the graph name
+	 * @param revisionNumber
+	 *            the revision number where the branch should start 
+	 * @param branchName
+	 *            name of the new tag
+	 * @param user
+	 *            user who performs this branch generation
+	 * @param message
+	 *            message describing intent of this command
+	 * @throws InternalErrorException 
+	 */
+	public static void createBranch(final String graphName,
+			final String revisionNumber, final String branchName, final String user,
+			final String message) throws InternalErrorException {
+		createReference("branch", graphName, revisionNumber, branchName, user, message);
+	}
+			
 	/**
 	 * Create a new reference which can be a branch or a tag
 	 * 
@@ -291,14 +334,14 @@ public class RevisionManagement {
 	 *            the revision number where the reference should start or be
 	 *            attached to
 	 * @param newReferenceName
-	 *            name of the new branch
+	 *            name of the new reference
 	 * @param user
 	 *            user who performs this reference generation
 	 * @param message
 	 *            message describing intent of this command
 	 * @throws InternalErrorException 
 	 */
-	public static void createReference(final String referenceType, final String graphName,
+	private static void createReference(final String referenceType, final String graphName,
 			final String revisionNumber, final String newReferenceName, final String user,
 			final String message) throws InternalErrorException {
 		logger.info("Start creation of new " + referenceType);
