@@ -1034,14 +1034,15 @@ public class RevisionManagement {
 	 * Get the content of a graph by execution of CONSTRUCT.
 	 * 
 	 * @param graphName the graphName
-	 * @return the constructed graph content as turtle
+	 * @param format RDF serialisation format which should be returned
+	 * @return the constructed graph content as specified RDF serialisation format
 	 */
-	public static String getContentOfGraphByConstruct(String graphName) {
+	public static String getContentOfGraphByConstruct(String graphName, String format) {
 		String query = String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
 				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
 		
-		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, FileUtils.langTurtle);		
+		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		
 	}
 	
 	

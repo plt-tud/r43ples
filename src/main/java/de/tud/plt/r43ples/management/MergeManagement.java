@@ -1,11 +1,5 @@
 package de.tud.plt.r43ples.management;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -20,7 +14,6 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.FileUtils;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
@@ -752,7 +745,7 @@ public class MergeManagement {
 						}
 					} else {
 						// MERGE WITH query - conflicting triple
-						Model model = readNTripleStringToJenaModel(triples);
+						Model model = JenaModelManagement.readNTripleStringToJenaModel(triples);
 						// Create ASK query which will check if the model contains the specified triple
 						String queryAsk = String.format(
 								  "ASK { %n"
@@ -836,68 +829,6 @@ public class MergeManagement {
 		return RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, usedRevisionNumbers);
 	}
 
-	
-	/**
-	 * Read turtle file to jena model.
-	 * 
-	 * @param path the file path to the turtle file
-	 * @return the jena model
-	 */
-	public static Model readTurtleFileToJenaModel(String path) {
-		Model model = ModelFactory.createDefaultModel();
-		InputStream is = ClassLoader.getSystemResourceAsStream(path);
-		model.read(is, null, "TURTLE");
-		try {
-			is.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return null;
-		}
-		
-		return model;
-	}
-	
-	
-	/**
-	 * Read N-Triple string to jena model.
-	 * 
-	 * @param triples the triples in N-Triple serialization
-	 * @return the model
-	 */
-	public static Model readNTripleStringToJenaModel(String triples) {
-		Model model = ModelFactory.createDefaultModel();
-		InputStream is = new ByteArrayInputStream(triples.getBytes(StandardCharsets.UTF_8));
-		model.read(is, null, "N-TRIPLE");
-		try {
-			is.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return model;
-	}
-	
-	
-	/**
-	 * Converts a jena model to N-Triple serialization. 
-	 * 
-	 * @param model the jena model
-	 * @return the string which contains the N-Triples
-	 */
-	public static String convertJenaModelToNTriple(Model model) {
-			
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		model.write(os, "N-TRIPLES");
-		
-		try {
-			return new String(os.toByteArray(), "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			return "";
-		}
-	}
 	
 	
 	/**

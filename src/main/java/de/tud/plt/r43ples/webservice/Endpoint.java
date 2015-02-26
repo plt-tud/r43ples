@@ -1,5 +1,6 @@
 package de.tud.plt.r43ples.webservice;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -36,11 +37,14 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.shared.NoWriterForLangException;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.GitRepositoryState;
+import de.tud.plt.r43ples.management.JenaModelManagement;
 import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.RevisionManagement;
@@ -434,11 +438,11 @@ public class Endpoint {
 	 */
 	private Response getServiceDescriptionResponse(final String format) {
 		logger.info("Service Description requested");
-		String body =String.format("@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> . %n"
+		String triples =String.format("@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> . %n"
 				+ "@prefix ns3:	<http://www.w3.org/ns/formats/> .%n"
 				+ "@prefix sd:	<http://www.w3.org/ns/sparql-service-description#> .%n"
 				+ "<%1$s>	rdf:type	sd:Service ;%n"
-				+ "	sd:endpoint	ns1:sparql ;%n"
+				+ "	sd:endpoint	<%1$s> ;%n"
 				+ "	sd:feature	sd:r43ples ;"
 				+ "	sd:resultFormat	ns3:SPARQL_Results_JSON ,%n"
 				+ "		ns3:SPARQL_Results_XML ,%n"
@@ -450,7 +454,24 @@ public class Endpoint {
 				+ "		ns3:RDFa ;%n"
 				+ "	sd:supportedLanguage	sd:SPARQL10Query, sd:SPARQL11Query, sd:SPARQL11Query, sd:SPARQL11Update, sd:R43plesQuery  ;%n"
 				+ "	sd:url	<%1$s> .%n", uriInfo.getAbsolutePath()) ;
-		return Response.ok().entity(body).build();
+		Model model = JenaModelManagement.readStringToJenaModel(triples, "TURTLE");
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		
+		if (format.toLowerCase().contains("xml") )
+			model.write(baos, "RDF/XML");
+		else if (format.toLowerCase().contains("turtle") )
+			model.write(baos, "Turtle");
+		else if (format.toLowerCase().contains("json") )
+			model.write(baos, "RDF/JSON");
+		else {
+			try {
+				model.write(baos, format);
+			}
+			catch (NoWriterForLangException e) {
+				model.write(baos, "Turtle");
+			}
+		}
+		return Response.ok().entity(baos.toString()).build();
 	}
 
 	/**
@@ -919,7 +940,7 @@ public class Endpoint {
 					// Difference model contains conflicts
 					// Return the conflict model to the client
 					responseBuilder = Response.status(Response.Status.CONFLICT);
-					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff));
+					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
 				} else {
 					// Difference model contains no conflicts
 					// Create the merged revision
