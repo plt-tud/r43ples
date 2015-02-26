@@ -10,10 +10,11 @@ import com.hp.hpl.jena.query.ResultSet;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 /**
  * This class provides a tree structure to store revision structure.
+ * Uses the {@link Revision revision} class.
  * 
  * @author Stephan Hensel
  *
@@ -34,7 +35,6 @@ public class Tree {
 	 * 
 	 * @param graphName
 	 *            the graph name
-	 * @return the revision tree
 	 */
 	public Tree (final String graphName) {
 		logger.info("Start creation of revision tree of graph " + graphName + "!");
@@ -50,7 +50,7 @@ public class Tree {
 						+ "	OPTIONAL { ?branch rmo:references ?uri; rmo:fullGraph ?fullGraph.}" 
 						+ "} }",
 						Config.revision_graph, graphName);
-		ResultSet resultsCommits = TripleStoreInterfaceFactory.get().executeSelectQuery(queryRevisions);
+		ResultSet resultsCommits = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryRevisions);
 		while (resultsCommits.hasNext()) {
 			QuerySolution qsCommits = resultsCommits.next();
 			String revision = qsCommits.getResource("?uri").toString();
@@ -72,7 +72,7 @@ public class Tree {
 						+ "	prov:wasDerivedFrom ?preRev. "
 						+ "?preRev rmo:revisionNumber ?preRevNumber. " 
 						+ " } }", Config.revision_graph, graphName);
-		ResultSet resultRevConnection = TripleStoreInterfaceFactory.get().executeSelectQuery(queryRevisionConnection);
+		ResultSet resultRevConnection = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryRevisionConnection);
 		while (resultRevConnection.hasNext()) {
 			QuerySolution qsCommits = resultRevConnection.next();
 			String revision = qsCommits.getLiteral("?revNumber").toString();

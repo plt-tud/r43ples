@@ -7,18 +7,16 @@ import static org.hamcrest.core.StringContains.containsString;
 
 import java.util.LinkedList;
 
-import org.junit.After;
-import org.junit.AfterClass;
+import org.apache.commons.configuration.ConfigurationException;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 
 /**
  * @author Markus Graube
@@ -29,38 +27,18 @@ public class TestMergeManagement {
 	final static String graph = "http://exampleGraph.com/merging";
 	
 	/**
-	 * @throws java.lang.Exception
+	 * @throws ConfigurationException 
+	 * @throws InternalErrorException 
 	 */
 	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
+	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException {
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterfaceFactory.createInterface();
 		SampleDataSet.createSampleDataSetMerging(graph);
 	}
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-		RevisionManagement.purgeGraph(graph);
-		TripleStoreInterfaceFactory.close();
-	}
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
 
-	}
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@After
-	public void tearDown() throws Exception {
-	}
 
 	/**
 	 * Test method for {@link de.tud.plt.r43ples.management.MergeManagement#getCommonRevisionWithShortestPath(java.lang.String, java.lang.String)}.

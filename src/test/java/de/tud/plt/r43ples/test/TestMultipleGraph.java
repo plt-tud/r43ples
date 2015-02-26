@@ -3,16 +3,13 @@
  */
 package de.tud.plt.r43ples.test;
 
-import static org.hamcrest.core.StringContains.containsString;
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.hamcrest.core.StringContains.containsString;
 
 import java.io.IOException;
 
 import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -22,11 +19,10 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
 /**
- * @author mgraube
+ * @author Markus Graube
  * 
  */
 public class TestMultipleGraph {
@@ -34,10 +30,10 @@ public class TestMultipleGraph {
 	final static String graph1 = "http://test.com/graph1";
 	final static String graph2 = "http://test.com/graph2";
 
-	Endpoint ep;
-	String result;
-	String expected;
-	final static String format = "application/sparql-results+xml";
+	private final Endpoint ep = new Endpoint();
+	private String result;
+	private String expected;
+	private final static String format = "application/sparql-results+xml";
 
 	/**
 	 * @throws java.lang.Exception
@@ -46,26 +42,10 @@ public class TestMultipleGraph {
 	public static void setUpBeforeClass() throws Exception {
 		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.conf");
-		TripleStoreInterfaceFactory.createInterface();
 		SampleDataSet.createSampleDataset1(graph1);
 		SampleDataSet.createSampleDataset2(graph2);
 	}
 
-	@AfterClass
-	public static void tearDownafterClass() {
-		RevisionManagement.purgeGraph(graph1);
-		RevisionManagement.purgeGraph(graph2);
-		TripleStoreInterfaceFactory.close();
-	}
-
-	@Before
-	public void setUp() {
-		ep = new Endpoint();
-	}
-
-	@After
-	public void tearDown() {
-	}
 
 	/**
 	 * @throws IOException 

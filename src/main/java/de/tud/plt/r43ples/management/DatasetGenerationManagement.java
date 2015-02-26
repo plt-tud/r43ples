@@ -33,17 +33,14 @@ public class DatasetGenerationManagement {
 	 */
 	public static void createNewGraph(String graphName) throws InternalErrorException {
 		// Purge silent example graph
-		logger.info("Purge silent example graph");
 		String query = String.format("DROP SILENT GRAPH <%s>", graphName);
-		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
+		ep.sparql(MediaType.TEXT_HTML, query);
 		
 		// Create new example graph
-		logger.info("Create new example graph");
 		query = String.format("CREATE SILENT GRAPH <%s>", graphName);
+		ep.sparql(MediaType.TEXT_HTML, query);
 		
-		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
+		logger.info("New graph <" + graphName +"> created");
 	}
 	
 	
@@ -58,13 +55,12 @@ public class DatasetGenerationManagement {
 	 * @throws InternalErrorException 
 	 */
 	public static void createNewBranch(String user, String message, String graphName, String revision, String branchName) throws InternalErrorException {
-		logger.info(message);
 		String query = String.format(""
-				+ "USER \"%s\" \n"
-				+ "MESSAGE \"%s\" \n"
-				+ "BRANCH GRAPH <%s> REVISION \"%s\" TO \"%s\" \n", user, message, graphName, revision, branchName);
-		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
+				+ "USER \"%s\" %n"
+				+ "MESSAGE \"%s\" %n"
+				+ "BRANCH GRAPH <%s> REVISION \"%s\" TO \"%s\"", user, message, graphName, revision, branchName);
+		ep.sparql(MediaType.TEXT_HTML, query);
+		logger.info("New branch \"" + graphName +"\" for <" + graphName +"> created.");
 	}
 	
 	
@@ -79,7 +75,6 @@ public class DatasetGenerationManagement {
 	 * @throws InternalErrorException 
 	 */
 	 public static void executeInsertQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
-		logger.info(message);
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
@@ -88,8 +83,7 @@ public class DatasetGenerationManagement {
 				+ "	  %s %n"
 				+ "	} %n"
 				+ "}", user, message, graphName, revision, triples);
-		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
+		ep.sparql(MediaType.TEXT_HTML, query);
 	}
 	
 	
@@ -104,7 +98,6 @@ public class DatasetGenerationManagement {
 	 * @throws InternalErrorException 
 	 */
 	public static void executeDeleteQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
-		logger.info(message);
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
@@ -113,8 +106,7 @@ public class DatasetGenerationManagement {
 				+ "	  %s %n"
 				+ "	} %n"
 				+ "}", user, message, graphName, revision, triples);
-		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
+		ep.sparql(MediaType.TEXT_HTML, query);
 	}
 	
 	
@@ -129,7 +121,6 @@ public class DatasetGenerationManagement {
 	 * @throws InternalErrorException 
 	 */
 	public static void executeDeleteWhereQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
-		logger.info(message);
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
@@ -143,8 +134,7 @@ public class DatasetGenerationManagement {
 				+ "		%s %n"
 				+ "	} %n"
 				+ "}", user, message, graphName, revision, triples, graphName, revision, triples);
-		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
+		ep.sparql(MediaType.TEXT_HTML, query);
 	}
 	
 	
@@ -160,7 +150,6 @@ public class DatasetGenerationManagement {
 	 * @throws InternalErrorException 
 	 */
 	public static void executeInsertDeleteQuery(String user, String message, String graphName, String revision, String triplesInsert, String triplesDelete) throws InternalErrorException {
-		logger.info(message);
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
@@ -174,8 +163,7 @@ public class DatasetGenerationManagement {
 				+ "	  %s %n"
 				+ "	} %n"
 				+ "}", user, message, graphName, revision, triplesInsert, graphName, revision, triplesDelete);
-		logger.info("Execute query: \n" + query);
-		logger.info("Response: \n" + ep.sparql(MediaType.TEXT_HTML, query));
+		ep.sparql(MediaType.TEXT_HTML, query);
 	}
 	
 	
@@ -188,7 +176,9 @@ public class DatasetGenerationManagement {
 	 */
 	public static String readFileToString(String path) throws IOException {
 		InputStream is = ClassLoader.getSystemResourceAsStream(path);
-		return IOUtils.toString(is);
+		String result = IOUtils.toString(is);
+		is.close();
+		return result;
 	}
 	
 }

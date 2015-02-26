@@ -3,13 +3,10 @@ package de.tud.plt.r43ples.test;
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -19,36 +16,23 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
 
 public class TestRevisionManagment {
 	
 	private final static String graph_test = "http://test.com/dataset1";
-    private final static String format = "application/sparql-results+xml";
-    Endpoint ep;
-	String result;
-	String expected;
+    private final String format = "application/sparql-results+xml";
+    private final Endpoint ep = new Endpoint();
+	private String result;
+	private String expected;
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException{
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
-		TripleStoreInterfaceFactory.createInterface();
 		SampleDataSet.createSampleDataset1(graph_test);
-	}
-	
-	@AfterClass
-	public static void tearDown() {
-		RevisionManagement.purgeGraph(graph_test);
-		TripleStoreInterfaceFactory.close();
-	}
-	
-	@Before
-	public void setUp() {
-		ep = new Endpoint();
 	}
 	
 	@Test
@@ -194,28 +178,23 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void testBranching() throws InternalErrorException {
-		RevisionManagement.createReference("branch", graph_test, "2", "testBranch", "test_user", "branching as junit test");
-		ArrayList<String> usedRevisionNumber = new ArrayList<String>();
-		usedRevisionNumber.add("testBranch");
-		RevisionManagement.createNewRevision(graph_test, "<a> <b> <c>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		RevisionManagement.createBranch(graph_test, "2", "testBranch", "test_user", "branching as junit test");
+
+		RevisionManagement.createNewRevision(graph_test, "<a> <b> <c>", "", "test_user", "test_commitMessage", "testBranch");
 		String revNumber = RevisionManagement.getRevisionNumber(graph_test, "testBranch");
 		Assert.assertEquals("2.0-0", revNumber);
 		
-		RevisionManagement.createNewRevision(graph_test, "<a> <b> <d>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		RevisionManagement.createNewRevision(graph_test, "<a> <b> <d>", "", "test_user", "test_commitMessage", "testBranch");
 		String revNumber2 = RevisionManagement.getRevisionNumber(graph_test, "testBranch");
 		Assert.assertEquals("2.0-1", revNumber2);
 		
-		RevisionManagement.createReference("branch", graph_test, "2.0-1", "testBranch2", "test_user", "branching as junit test");
-		usedRevisionNumber.clear();
-		usedRevisionNumber.add("testBranch2");
-		RevisionManagement.createNewRevision(graph_test, "<a> <b> <e>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		RevisionManagement.createBranch(graph_test, "2.0-1", "testBranch2", "test_user", "branching as junit test");
+		RevisionManagement.createNewRevision(graph_test, "<a> <b> <e>", "", "test_user", "test_commitMessage", "testBranch2");
 		String revNumber3 = RevisionManagement.getRevisionNumber(graph_test, "testBranch2");
 		Assert.assertEquals("2.0-1.0-0", revNumber3);
 		
-		RevisionManagement.createReference("branch", graph_test, "2.0-1", "testBranch2a", "test_user", "branching as junit test");
-		usedRevisionNumber.clear();
-		usedRevisionNumber.add("testBranch2a");
-		RevisionManagement.createNewRevision(graph_test, "<a> <b> <f>", "", "test_user", "test_commitMessage", usedRevisionNumber);
+		RevisionManagement.createBranch(graph_test, "2.0-1", "testBranch2a", "test_user", "branching as junit test");
+		RevisionManagement.createNewRevision(graph_test, "<a> <b> <f>", "", "test_user", "test_commitMessage", "testBranch2a");
 		String revNumber4 = RevisionManagement.getRevisionNumber(graph_test, "testBranch2a");
 		Assert.assertEquals("2.0-1.1-0", revNumber4);
 	}

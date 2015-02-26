@@ -22,9 +22,36 @@ import de.tud.plt.r43ples.revisionTree.Commit;
 import de.tud.plt.r43ples.revisionTree.StructuredTree;
 
 public class MMSTVisualisation {
+	
+	private static final int timelineView_width = 70;
 
-	private static String buildSVG(StructuredTree revisionTree)
-			throws SVGGraphics2DIOException {
+	/**
+	 * Vertical distance between commits
+	 */
+	protected final static int LineHeight = 22;
+	
+	protected final static int padding = 10;
+	
+	private TimeLineView timeView;
+
+	private List<Commit> commits;
+
+	private CommitGraphView graphView;
+
+	private MessagesTableView msgView;
+	
+
+	public MMSTVisualisation(StructuredTree revisionTree) {
+		commits = revisionTree.getCommits();
+		Collections.reverse(commits);
+		
+		timeView = new TimeLineView(commits);
+		graphView = new CommitGraphView(commits);
+		msgView = new MessagesTableView(revisionTree);
+	}
+	
+	
+	private String buildSVG() throws SVGGraphics2DIOException {
 		
 		// generate svg document
 		String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;
@@ -33,40 +60,28 @@ public class MMSTVisualisation {
 
 		SVGGraphics2D g = new SVGGraphics2D(doc);
 		
-		// reverse commits list to begin with newest commit
-		List<Commit> commits = revisionTree.getCommits();
-		Collections.reverse(commits);
-
-		// generic config for graph generation
-		int y_start = 20;
-		int lineheight = 20;
-		int totalHeight = y_start + lineheight * commits.size() + 10;
 
 		// translate to first text-baseline
-		g.translate(0, y_start);
-
-		TimeLineView timeView = new TimeLineView(revisionTree);
+		g.translate(0, LineHeight);		
 		timeView.draw(g);
 
-		g.translate(75, 10);
-
-		CommitGraphView graphView = new CommitGraphView(revisionTree);
+		g.translate(timelineView_width, 0);
 		graphView.drawGraph(g);
 
-		g.translate(graphView.getDimension().getWidth() + 20, -10);
-
-		MessagesTableView msgView = new MessagesTableView(revisionTree);
+		g.translate(graphView.getDimension().getWidth() + padding, 0);
 		msgView.draw(g);
 		
-		g.translate(-graphView.getDimension().getWidth() - 20 - 75, 0);
+		g.translate(-graphView.getDimension().getWidth() - padding - timelineView_width, 0);
 
 		// calculate overall width
-		int totalWidth = (int) (75 + graphView.getDimension().getWidth() + 20 + msgView.getDimension().getWidth());
-
+		int totalWidth = (int) (timelineView_width + graphView.getDimension().getWidth() + padding + msgView.getDimension().getWidth());
+		
+		
 		// draw header line
 		int offset = g.getFontMetrics(msgView.TextFont).getDescent();
 		g.drawLine(0, offset, totalWidth, offset);
 
+		int totalHeight = LineHeight * (commits.size()+1) + offset;
 		g.setSVGCanvasSize(new Dimension(totalWidth, totalHeight));
 
 		Writer writer = new StringWriter();
@@ -83,11 +98,12 @@ public class MMSTVisualisation {
 
 		// get graph tree
 		StructuredTree graphTree = StructuredTree.getTreeOfGraph(graphName);
-
+		MMSTVisualisation visu = new MMSTVisualisation(graphTree);
+		
 		Map<String, Object> scope = new HashMap<String, Object>();
 		scope.put("graphName", graphName);
 		try {
-			scope.put("svg_content", buildSVG(graphTree));
+			scope.put("svg_content", visu.buildSVG());
 		} catch (SVGGraphics2DIOException e) {
 			scope.put("svg_content", "Error while creating SVG");
 		}

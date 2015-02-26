@@ -9,8 +9,6 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -21,7 +19,6 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
 
@@ -43,13 +40,8 @@ public class TestMerge {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
-		TripleStoreInterfaceFactory.createInterface();
 	}
 	
-	@AfterClass
-	public static void tearDownAfterClass() {
-		TripleStoreInterfaceFactory.close();
-	}
 	
 	/**
 	 * Set up.
@@ -61,14 +53,6 @@ public class TestMerge {
 		// Create the initial data set
 		SampleDataSet.createSampleDataSetComplexStructure(graphName);
 	}
-	
-	/**
-	 * Tear down.
-	 */
-	@After
-	public void tearDown() {
-	}
-	
 	
 	
 	

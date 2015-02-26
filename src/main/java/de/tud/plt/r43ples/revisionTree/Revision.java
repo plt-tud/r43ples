@@ -69,7 +69,7 @@ public class Revision {
 	 * @return the successors
 	 */
 	public boolean hasSuccessor() {
-		return (successor.size()>0);
+		return successor.size()>0;
 	}
 
 	

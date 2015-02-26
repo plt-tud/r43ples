@@ -81,7 +81,7 @@ public class SparqlRewriter {
 
 			Tree tree =  new Tree(graphName);
 			LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
-			logger.info("Path to revision: " + list.toString());
+			logger.debug("Path to revision: " + list.toString());
 			expression_list_last_revision.add(ExprUtils.nodeToExpr(NodeFactory.createURI(list.get(0).getRevisionUri())));
 			list.removeLast();
 			for (Revision ns : list) {
@@ -105,7 +105,7 @@ public class SparqlRewriter {
 		qe.setDistinct(true);
 		qe.setQueryPattern(eg_modified);
 		query_sparql = qe.serialize();
-		logger.info("Rewritten query: \n" + query_sparql);
+		logger.debug("Rewritten query: \n" + query_sparql);
 		return query_sparql;
 	}
 

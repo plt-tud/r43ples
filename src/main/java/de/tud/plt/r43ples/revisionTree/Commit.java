@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 public class Commit implements Comparable<Commit> {
 	private String uri;
 	private String message;
@@ -95,6 +97,11 @@ public class Commit implements Comparable<Commit> {
 		}
 		return false;
 	}
+	
+	@Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(uri).toHashCode();
+    }
 	
 	private boolean findInPredecessors(Commit o)
 	{

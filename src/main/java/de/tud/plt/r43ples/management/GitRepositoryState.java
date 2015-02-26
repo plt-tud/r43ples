@@ -23,6 +23,8 @@ public class GitRepositoryState {
 	public String commitMessageShort;      // =${git.commit.message.short}
 	public String commitTime;              // =${git.commit.time}
 
+
+	
 	private GitRepositoryState(PropertiesConfiguration properties)
 	{
 	   this.branch = properties.getString("git.branch");
@@ -50,12 +52,11 @@ public class GitRepositoryState {
 		 PropertiesConfiguration config;
 		try {
 			config = new PropertiesConfiguration("git.properties");
+			gitRepositoryState = new GitRepositoryState(config);
 		} catch (ConfigurationException e) {
 			e.printStackTrace();
-			return null;
 		}
-
-	      gitRepositoryState = new GitRepositoryState(config);
+	      
 	   }
 	   return gitRepositoryState;
 	}

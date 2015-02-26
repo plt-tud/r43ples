@@ -2,7 +2,6 @@ package de.tud.plt.r43ples.client;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.io.FileUtils;
@@ -14,7 +13,7 @@ import com.beust.jcommander.ParameterException;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 public class ConsoleClient {
 
@@ -49,11 +48,10 @@ public class ConsoleClient {
 		logger.info("delete set file: " +  args_client.delete_set);
 		
 		Config.readConfig(args_client.r43ples.config);
-		TripleStoreInterfaceFactory.createInterface();
 		
 		
 		if (args_client.create) {
-			TripleStoreInterfaceFactory.get().executeCreateGraph(args_client.graph);
+			TripleStoreInterfaceSingleton.get().executeCreateGraph(args_client.graph);
 			RevisionManagement.putGraphUnderVersionControl(args_client.graph);
 		}
 		
@@ -61,14 +59,10 @@ public class ConsoleClient {
 		String deleteSet = readFile(args_client.delete_set);
 				
 
-
-		
 		String user = "test";
 		
 		String master = RevisionManagement.getMasterRevisionNumber(args_client.graph);
-		ArrayList<String> list = new ArrayList<String>();
-		list.add(master);
-		String result = RevisionManagement.createNewRevision(args_client.graph, addSet, deleteSet, user, "automatic commit", list);
+		String result = RevisionManagement.createNewRevision(args_client.graph, addSet, deleteSet, user, "automatic commit", master);
 		logger.info(result);			
 	}
 

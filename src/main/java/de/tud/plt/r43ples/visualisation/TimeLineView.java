@@ -8,30 +8,24 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import de.tud.plt.r43ples.revisionTree.Commit;
-import de.tud.plt.r43ples.revisionTree.StructuredTree;
 
 public class TimeLineView {
 
 	/**
-	 * Vertical distance between commits
-	 */
-	public int LineHeight = 20;
-
-	/**
 	 * Font of the Text
 	 */
-	public Font TextFont = new Font("Monospaced", Font.PLAIN, 14);
+	private final Font TextFont = new Font("Monospaced", Font.PLAIN, 14);
 
 	private List<Commit> commits;
 
-	public TimeLineView(StructuredTree tree) {
-		commits = tree.getCommits();
+	public TimeLineView(List<Commit> commits2) {
+		commits = commits2;
 	}
 
 	public void draw(Graphics2D g) {
 
-		int y = LineHeight;
-		int totalHeight = commits.size() * LineHeight + 10;
+		int y = MMSTVisualisation.LineHeight;
+		int totalHeight = commits.size() * MMSTVisualisation.LineHeight + 10;
 		DateFormat dayFormat = new SimpleDateFormat("d");
 		DateFormat monthFormat = new SimpleDateFormat("MMM");
 
@@ -61,7 +55,7 @@ public class TimeLineView {
 				g.drawString(day, 38, y);
 				oldDay = day;
 			}
-			y += LineHeight;
+			y += MMSTVisualisation.LineHeight;
 		}
 		g.setColor(Color.BLACK);
 		g.setFont(tmp);

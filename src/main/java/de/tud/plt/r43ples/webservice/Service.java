@@ -21,7 +21,7 @@ import com.hp.hpl.jena.query.Dataset;
 import de.tud.plt.r43ples.client.R43plesArgs;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.GitRepositoryState;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 
 /**
@@ -72,17 +72,18 @@ public class Service {
 		}
 		
 		logger.debug("config: " + jci.config);
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() { Service.stop(); }
+		});
 		try {
 			Config.readConfig(jci.config);
 			start();
-			logger.info("Press enter to quit the server");
-			System.in.read();
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.exit(1);
 		}
-		finally {
-			stop();
-		}
+		logger.info("Press ctrl+c to quit the server");
+		while (true);		
 	}
 
 	
@@ -93,9 +94,7 @@ public class Service {
 	 * @throws URISyntaxException
 	 * @throws IOException 
 	 */
-	public static void start() throws ConfigurationException, URISyntaxException, IOException {
-		TripleStoreInterfaceFactory.createInterface();
-		
+	public static void start() throws ConfigurationException, URISyntaxException, IOException {		
 		logger.info("Starting R43ples on grizzly...");
 		URI BASE_URI;
 		
@@ -145,7 +144,7 @@ public class Service {
 	 */
 	public static void stop() {
 		logger.info("Server shutdown ...");
-		TripleStoreInterfaceFactory.close();
+		TripleStoreInterfaceSingleton.close();
 		server.shutdown();
 	}
 	

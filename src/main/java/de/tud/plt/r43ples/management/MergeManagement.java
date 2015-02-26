@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,7 +24,7 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.util.FileUtils;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceFactory;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 /**
  * This class provides methods for merging branches.
@@ -78,7 +79,7 @@ public class MergeManagement {
 			  + "}"
 			  + "LIMIT 1",
 			  Config.revision_graph, revision1, revision2);
-		ResultSet results = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
+		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		
 		if (results.hasNext()) {
 			QuerySolution qs = results.next();
@@ -115,7 +116,7 @@ public class MergeManagement {
 		HashMap<String, ArrayList<String>> resultMap = new HashMap<String, ArrayList<String>>();
 		LinkedList<String> list = new LinkedList<String>();
 		
-		ResultSet resultSet = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
+		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 
 		// Path element counter
 		int counterLength = 0;
@@ -174,8 +175,8 @@ public class MergeManagement {
 	public static void createRevisionProgress(LinkedList<String> list, String graphNameRevisionProgress, String uri) throws InternalErrorException {
 		logger.info("Create the revision progress of " + uri + " in graph " + graphNameRevisionProgress + ".");
 		
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameRevisionProgress));
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphNameRevisionProgress));
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameRevisionProgress));
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphNameRevisionProgress));
 		Iterator<String> iteList = list.iterator();
 		
 		if (iteList.hasNext()) {
@@ -194,7 +195,7 @@ public class MergeManagement {
 				+ " 	<%s> <http://eatld.et.tu-dresden.de/rmo#revisionOf> ?graph . %n"
 				+ "} }", Config.revision_graph, firstRevision, firstRevision);
 			
-			ResultSet results = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
+			ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 			
 			if (results.hasNext()) {
 				QuerySolution qs = results.next();
@@ -215,25 +216,25 @@ public class MergeManagement {
 			// Create the initial content
 			logger.info("Create the initial content.");
 			String queryInitial = prefixes + String.format(	
-				  "INSERT { GRAPH <%s> { \n"
-				+ "	<%s> a rpo:RevisionProgress; \n"
-				+ "		rpo:original [ \n"
-				+ "			rdf:subject ?s ; \n"
-				+ "			rdf:predicate ?p ; \n"
-				+ "			rdf:object ?o ; \n"
-				+ "			rmo:references <%s> \n"
-				+ "		] \n"
-				+ "} } WHERE { \n"
-				+ "	GRAPH <%s> \n"
-				+ "		{ ?s ?p ?o . } \n"
+				  "INSERT { GRAPH <%s> { %n"
+				+ "	<%s> a rpo:RevisionProgress; %n"
+				+ "		rpo:original [ %n"
+				+ "			rdf:subject ?s ; %n"
+				+ "			rdf:predicate ?p ; %n"
+				+ "			rdf:object ?o ; %n"
+				+ "			rmo:references <%s> %n"
+				+ "		] %n"
+				+ "} } WHERE { %n"
+				+ "	GRAPH <%s> %n"
+				+ "		{ ?s ?p ?o . } %n"
 				+ "}",graphNameRevisionProgress,uri, firstRevision, fullGraphName);
 		
 			// Execute the query which generates the initial content
-			TripleStoreInterfaceFactory.get().executeUpdateQuery(queryInitial);
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryInitial);
 			
 			// Drop the temporary full graph
 			logger.info("Drop the temporary full graph.");
-			TripleStoreInterfaceFactory.get().executeUpdateQuery("DROP SILENT GRAPH <"+fullGraphName+">");
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <"+fullGraphName+">");
 			
 			// Update content by current add and delete set - remove old entries
 			while (iteList.hasNext()) {
@@ -249,89 +250,89 @@ public class MergeManagement {
 					
 					// Delete old entries (original)
 					String queryRevision = prefixes + String.format(
-						  "DELETE { GRAPH <%s> { \n"
-						+ "	<%s> rpo:original ?blank . \n"
-						+ "	?blank rdf:subject ?s . \n"
-						+ "	?blank rdf:predicate ?p . \n"
-						+ "	?blank rdf:object ?o . \n"
-						+ "	?blank rmo:references ?revision . \n"
-						+ "} } \n"
+						  "DELETE { GRAPH <%s> { %n"
+						+ "	<%s> rpo:original ?blank . %n"
+						+ "	?blank rdf:subject ?s . %n"
+						+ "	?blank rdf:predicate ?p . %n"
+						+ "	?blank rdf:object ?o . %n"
+						+ "	?blank rmo:references ?revision . %n"
+						+ "} } %n"
 						+ "WHERE { "
-						+ "		GRAPH <%s> { \n"
-						+ "			<%s> rpo:original ?blank . \n"
-						+ "			?blank rdf:subject ?s . \n"
-						+ "			?blank rdf:predicate ?p . \n"
-						+ "			?blank rdf:object ?o . \n"
-						+ "			?blank rmo:references ?revision . \n"
-						+ "		} \n"
-						+ "		GRAPH <%s> { \n"
-						+ "			?s ?p ?o \n"
-						+ "		} \n"
+						+ "		GRAPH <%s> { %n"
+						+ "			<%s> rpo:original ?blank . %n"
+						+ "			?blank rdf:subject ?s . %n"
+						+ "			?blank rdf:predicate ?p . %n"
+						+ "			?blank rdf:object ?o . %n"
+						+ "			?blank rmo:references ?revision . %n"
+						+ "		} %n"
+						+ "		GRAPH <%s> { %n"
+						+ "			?s ?p ?o %n"
+						+ "		} %n"
 						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
 					
 					queryRevision += "\n";
 					
 					// Delete old entries (added)
 					queryRevision += String.format(
-						  "DELETE { GRAPH <%s> { \n"
-						+ "	<%s> rpo:added ?blank . \n"
-						+ "	?blank rdf:subject ?s . \n"
-						+ "	?blank rdf:predicate ?p . \n"
-						+ "	?blank rdf:object ?o . \n"
-						+ "	?blank rmo:references ?revision . \n"
-						+ "} } \n"
+						  "DELETE { GRAPH <%s> { %n"
+						+ "	<%s> rpo:added ?blank . %n"
+						+ "	?blank rdf:subject ?s . %n"
+						+ "	?blank rdf:predicate ?p . %n"
+						+ "	?blank rdf:object ?o . %n"
+						+ "	?blank rmo:references ?revision . %n"
+						+ "} } %n"
 						+ "WHERE { "
-						+ "		GRAPH <%s> { \n"
-						+ "			<%s> rpo:added ?blank . \n"
-						+ "			?blank rdf:subject ?s . \n"
-						+ "			?blank rdf:predicate ?p . \n"
-						+ "			?blank rdf:object ?o . \n"
-						+ "			?blank rmo:references ?revision . \n"
-						+ "		} \n"
-						+ "		GRAPH <%s> { \n"
-						+ "			?s ?p ?o \n"
-						+ "		} \n"
+						+ "		GRAPH <%s> { %n"
+						+ "			<%s> rpo:added ?blank . %n"
+						+ "			?blank rdf:subject ?s . %n"
+						+ "			?blank rdf:predicate ?p . %n"
+						+ "			?blank rdf:object ?o . %n"
+						+ "			?blank rmo:references ?revision . %n"
+						+ "		} %n"
+						+ "		GRAPH <%s> { %n"
+						+ "			?s ?p ?o %n"
+						+ "		} %n"
 						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
 					
 					queryRevision += "\n";
 					
 					// Delete old entries (removed)
 					queryRevision += String.format(
-						  "DELETE { GRAPH <%s> { \n"
-						+ "	<%s> rpo:removed ?blank . \n"
-						+ "	?blank rdf:subject ?s . \n"
-						+ "	?blank rdf:predicate ?p . \n"
-						+ "	?blank rdf:object ?o . \n"
-						+ "	?blank rmo:references ?revision . \n"
-						+ "} } \n"
+						  "DELETE { GRAPH <%s> { %n"
+						+ "	<%s> rpo:removed ?blank . %n"
+						+ "	?blank rdf:subject ?s . %n"
+						+ "	?blank rdf:predicate ?p . %n"
+						+ "	?blank rdf:object ?o . %n"
+						+ "	?blank rmo:references ?revision . %n"
+						+ "} } %n"
 						+ "WHERE { "
-						+ "		GRAPH <%s> { \n"
-						+ "			<%s> rpo:removed ?blank . \n"
-						+ "			?blank rdf:subject ?s . \n"
-						+ "			?blank rdf:predicate ?p . \n"
-						+ "			?blank rdf:object ?o . \n"
-						+ "			?blank rmo:references ?revision . \n"
-						+ "		} \n"
-						+ "		GRAPH <%s> { \n"
-						+ "			?s ?p ?o \n"
-						+ "		} \n"
+						+ "		GRAPH <%s> { %n"
+						+ "			<%s> rpo:removed ?blank . %n"
+						+ "			?blank rdf:subject ?s . %n"
+						+ "			?blank rdf:predicate ?p . %n"
+						+ "			?blank rdf:object ?o . %n"
+						+ "			?blank rmo:references ?revision . %n"
+						+ "		} %n"
+						+ "		GRAPH <%s> { %n"
+						+ "			?s ?p ?o %n"
+						+ "		} %n"
 						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
 					
 					queryRevision += "\n";
 					
 					// Insert new entries (added)
 					queryRevision += String.format(	
-						  "INSERT { GRAPH <%s> {\n"
-						+ "	<%s> a rpo:RevisionProgress; \n"
-						+ "		rpo:added [ \n"
-						+ "			rdf:subject ?s ; \n"
-						+ "			rdf:predicate ?p ; \n"
-						+ "			rdf:object ?o ; \n"
-						+ "			rmo:references <%s> \n"
-						+ "		] \n"
-						+ "} } WHERE { \n"
-						+ "	GRAPH <%s> \n"
-						+ "		{ ?s ?p ?o . } \n"
+						  "INSERT { GRAPH <%s> {%n"
+						+ "	<%s> a rpo:RevisionProgress; %n"
+						+ "		rpo:added [ %n"
+						+ "			rdf:subject ?s ; %n"
+						+ "			rdf:predicate ?p ; %n"
+						+ "			rdf:object ?o ; %n"
+						+ "			rmo:references <%s> %n"
+						+ "		] %n"
+						+ "} } WHERE { %n"
+						+ "	GRAPH <%s> %n"
+						+ "		{ ?s ?p ?o . } %n"
 						+ "};", graphNameRevisionProgress, uri, revision, addSetURI);
 					
 					queryRevision += "\n \n";
@@ -340,93 +341,93 @@ public class MergeManagement {
 					
 					// Delete old entries (original)
 					queryRevision += String.format(
-						  "DELETE { GRAPH <%s> { \n"
-						+ "	<%s> rpo:original ?blank . \n"
-						+ "	?blank rdf:subject ?s . \n"
-						+ "	?blank rdf:predicate ?p . \n"
-						+ "	?blank rdf:object ?o . \n"
-						+ "	?blank rmo:references ?revision . \n"
-						+ "} } \n"
+						  "DELETE { GRAPH <%s> { %n"
+						+ "	<%s> rpo:original ?blank . %n"
+						+ "	?blank rdf:subject ?s . %n"
+						+ "	?blank rdf:predicate ?p . %n"
+						+ "	?blank rdf:object ?o . %n"
+						+ "	?blank rmo:references ?revision . %n"
+						+ "} } %n"
 						+ "WHERE { "
-						+ "		GRAPH <%s> { \n"
-						+ "			<%s> rpo:original ?blank . \n"
-						+ "			?blank rdf:subject ?s . \n"
-						+ "			?blank rdf:predicate ?p . \n"
-						+ "			?blank rdf:object ?o . \n"
-						+ "			?blank rmo:references ?revision . \n"
-						+ "		} \n"
-						+ "		GRAPH <%s> { \n"
-						+ "			?s ?p ?o \n"
-						+ "		} \n"
+						+ "		GRAPH <%s> { %n"
+						+ "			<%s> rpo:original ?blank . %n"
+						+ "			?blank rdf:subject ?s . %n"
+						+ "			?blank rdf:predicate ?p . %n"
+						+ "			?blank rdf:object ?o . %n"
+						+ "			?blank rmo:references ?revision . %n"
+						+ "		} %n"
+						+ "		GRAPH <%s> { %n"
+						+ "			?s ?p ?o %n"
+						+ "		} %n"
 						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
 					
 					queryRevision += "\n";
 					
 					// Delete old entries (added)
 					queryRevision += String.format(
-						  "DELETE { GRAPH <%s> { \n"
-						+ "	<%s> rpo:added ?blank . \n"
-						+ "	?blank rdf:subject ?s . \n"
-						+ "	?blank rdf:predicate ?p . \n"
-						+ "	?blank rdf:object ?o . \n"
-						+ "	?blank rmo:references ?revision . \n"
-						+ "} } \n"
+						  "DELETE { GRAPH <%s> { %n"
+						+ "	<%s> rpo:added ?blank . %n"
+						+ "	?blank rdf:subject ?s . %n"
+						+ "	?blank rdf:predicate ?p . %n"
+						+ "	?blank rdf:object ?o . %n"
+						+ "	?blank rmo:references ?revision . %n"
+						+ "} } %n"
 						+ "WHERE { "
-						+ "		GRAPH <%s> { \n"
-						+ "			<%s> rpo:added ?blank . \n"
-						+ "			?blank rdf:subject ?s . \n"
-						+ "			?blank rdf:predicate ?p . \n"
-						+ "			?blank rdf:object ?o . \n"
-						+ "			?blank rmo:references ?revision . \n"
-						+ "		} \n"
-						+ "		GRAPH <%s> { \n"
-						+ "			?s ?p ?o \n"
-						+ "		} \n"
+						+ "		GRAPH <%s> { %n"
+						+ "			<%s> rpo:added ?blank . %n"
+						+ "			?blank rdf:subject ?s . %n"
+						+ "			?blank rdf:predicate ?p . %n"
+						+ "			?blank rdf:object ?o . %n"
+						+ "			?blank rmo:references ?revision . %n"
+						+ "		} %n"
+						+ "		GRAPH <%s> { %n"
+						+ "			?s ?p ?o %n"
+						+ "		} %n"
 						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
 					
 					queryRevision += "\n";
 					
 					// Delete old entries (removed)
 					queryRevision += String.format(
-						  "DELETE { GRAPH <%s> { \n"
-						+ "	<%s> rpo:removed ?blank . \n"
-						+ "	?blank rdf:subject ?s . \n"
-						+ "	?blank rdf:predicate ?p . \n"
-						+ "	?blank rdf:object ?o . \n"
-						+ "	?blank rmo:references ?revision . \n"
-						+ "} } \n"
+						  "DELETE { GRAPH <%s> { %n"
+						+ "	<%s> rpo:removed ?blank . %n"
+						+ "	?blank rdf:subject ?s . %n"
+						+ "	?blank rdf:predicate ?p . %n"
+						+ "	?blank rdf:object ?o . %n"
+						+ "	?blank rmo:references ?revision . %n"
+						+ "} } %n"
 						+ "WHERE { "
-						+ "		GRAPH <%s> { \n"
-						+ "			<%s> rpo:removed ?blank . \n"
-						+ "			?blank rdf:subject ?s . \n"
-						+ "			?blank rdf:predicate ?p . \n"
-						+ "			?blank rdf:object ?o . \n"
-						+ "			?blank rmo:references ?revision . \n"
-						+ "		} \n"
-						+ "		GRAPH <%s> { \n"
-						+ "			?s ?p ?o \n"
-						+ "		} \n"
+						+ "		GRAPH <%s> { %n"
+						+ "			<%s> rpo:removed ?blank . %n"
+						+ "			?blank rdf:subject ?s . %n"
+						+ "			?blank rdf:predicate ?p . %n"
+						+ "			?blank rdf:object ?o . %n"
+						+ "			?blank rmo:references ?revision . %n"
+						+ "		} %n"
+						+ "		GRAPH <%s> { %n"
+						+ "			?s ?p ?o %n"
+						+ "		} %n"
 						+ "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
 					
 					queryRevision += "\n";
 					
 					// Insert new entries (removed)
 					queryRevision += String.format(	
-						  "INSERT { GRAPH <%s> { \n"
-						+ "	<%s> a rpo:RevisionProgress; \n"
-						+ "		rpo:removed [ \n"
-						+ "			rdf:subject ?s ; \n"
-						+ "			rdf:predicate ?p ; \n"
-						+ "			rdf:object ?o ; \n"
-						+ "			rmo:references <%s> \n"
-						+ "		] \n"
-						+ "} } WHERE { \n"
-						+ "	GRAPH <%s> \n"
-						+ "		{ ?s ?p ?o . } \n"
+						  "INSERT { GRAPH <%s> { %n"
+						+ "	<%s> a rpo:RevisionProgress; %n"
+						+ "		rpo:removed [ %n"
+						+ "			rdf:subject ?s ; %n"
+						+ "			rdf:predicate ?p ; %n"
+						+ "			rdf:object ?o ; %n"
+						+ "			rmo:references <%s> %n"
+						+ "		] %n"
+						+ "} } WHERE { %n"
+						+ "	GRAPH <%s> %n"
+						+ "		{ ?s ?p ?o . } %n"
 						+ "}", graphNameRevisionProgress, uri, revision, deleteSetURI);
 				
 					// Execute the query which updates the revision progress by the current revision
-					TripleStoreInterfaceFactory.get().executeUpdateQuery(queryRevision);
+					TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryRevision);
 
 				} else {
 					//TODO Error management - is needed when a ADD or DELETE set is not referenced in the current implementation this error should not occur
@@ -452,8 +453,8 @@ public class MergeManagement {
 	public static void createDifferenceTripleModel(String graphName, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD){
 		
 		logger.info("Create the difference triple model");
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameDifferenceTripleModel));
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphNameDifferenceTripleModel));
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameDifferenceTripleModel));
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphNameDifferenceTripleModel));
 		
 		// Templates for revision A and B
 		String sparqlTemplateRevisionA = String.format(
@@ -512,7 +513,7 @@ public class MergeManagement {
 				+ "} } %n", Config.sdd_graph, uriSDD);
 				
 		// Iterate over all differing combination URIs
-		ResultSet resultSetDifferences = TripleStoreInterfaceFactory.get().executeSelectQuery(queryDifferingSD);
+		ResultSet resultSetDifferences = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryDifferingSD);
 		while (resultSetDifferences.hasNext()) {
 			QuerySolution qs = resultSetDifferences.next();
 
@@ -581,7 +582,7 @@ public class MergeManagement {
 					+ "} %n", querySelectPart, sparqlQueryRevisionA, sparqlQueryRevisionB);
 					
 			// Iterate over all triples
-			ResultSet resultSetTriples = TripleStoreInterfaceFactory.get().executeSelectQuery(query);
+			ResultSet resultSetTriples = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 			while (resultSetTriples.hasNext()) {
 				QuerySolution qsQuery = resultSetTriples.next();
 				
@@ -638,7 +639,7 @@ public class MergeManagement {
 									object,
 									referencesAB);
 				
-				TripleStoreInterfaceFactory.get().executeUpdateQuery(queryTriple);
+				TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryTriple);
 			}
 		}
 	}
@@ -680,7 +681,7 @@ public class MergeManagement {
 		} else {	
 			// Copy graph B to temporary merged graph
 			String queryCopy = String.format("COPY <%s> TO <%s>", graphNameOfBranchB, graphNameOfMerged);
-			TripleStoreInterfaceFactory.get().executeUpdateQuery(queryCopy);
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryCopy);
 			
 			// Get the triples from branch A which should be added to/removed from the merged revision
 			String triplesToAdd = "";
@@ -698,7 +699,7 @@ public class MergeManagement {
 					+ "} }", graphNameDifferenceTripleModel);
 	
 			// Iterate over all difference groups
-			ResultSet resultSetDifferenceGroups = TripleStoreInterfaceFactory.get().executeSelectQuery(queryDifferenceGroup);
+			ResultSet resultSetDifferenceGroups = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryDifferenceGroup);
 			while (resultSetDifferenceGroups.hasNext()) {
 				QuerySolution qsCurrentDifferenceGroup = resultSetDifferenceGroups.next();
 	
@@ -723,7 +724,7 @@ public class MergeManagement {
 						+ "} }", graphNameDifferenceTripleModel, currentDifferencGroupURI);
 				
 				// Iterate over all differences (triples)
-				ResultSet resultSetDifferences = TripleStoreInterfaceFactory.get().executeSelectQuery(queryDifference);
+				ResultSet resultSetDifferences = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryDifference);
 				while (resultSetDifferences.hasNext()) {
 					QuerySolution qsCurrentDifference = resultSetDifferences.next();
 					
@@ -738,7 +739,9 @@ public class MergeManagement {
 						object = "<" + qsCurrentDifference.getResource("?o").toString() + ">";
 					}
 					
-					if (type.equals(MergeQueryTypeEnum.AUTO) || type.equals(MergeQueryTypeEnum.COMMON) || (type.equals(MergeQueryTypeEnum.WITH) && (!currentDifferencGroupConflict))) {
+					if (	type.equals(MergeQueryTypeEnum.AUTO) || 
+							type.equals(MergeQueryTypeEnum.COMMON) || 
+							(type.equals(MergeQueryTypeEnum.WITH) && !currentDifferencGroupConflict) ) {
 						// MERGE AUTO or common MERGE query
 						if (currentDifferencGroupAutomaticResolutionState.equals(SDDTripleState.ADDED.getSddRepresentation())) {
 							// Triple should be added
@@ -758,6 +761,8 @@ public class MergeManagement {
 						Query query = QueryFactory.create(queryAsk);
 						QueryExecution qe = QueryExecutionFactory.create(query, model);
 						boolean resultAsk = qe.execAsk();
+						qe.close();
+						model.close();
 						if (resultAsk) {
 							// Model contains the specified triple
 							// Triple should be added
@@ -788,7 +793,7 @@ public class MergeManagement {
 				+ "	} %n"
 				+ "}", graphNameOfMerged, graphNameOfBranchA);
 		
-		String addedTriples = TripleStoreInterfaceFactory.get().executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
+		String addedTriples = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
 		
 		queryAddedTriples = String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
@@ -799,7 +804,7 @@ public class MergeManagement {
 				+ "	} %n"
 				+ "}", graphNameOfMerged, graphNameOfBranchB);
 
-		addedTriples += TripleStoreInterfaceFactory.get().executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
+		addedTriples += TripleStoreInterfaceSingleton.get().executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
 		
 		// Get all removed triples (concatenate all triples which are in A but not in MERGED and all triples which are in B but not in MERGED)
 		String queryRemovedTriples = String.format(
@@ -811,7 +816,7 @@ public class MergeManagement {
 				+ "	} %n"
 				+ "}", graphNameOfBranchA, graphNameOfMerged);
 		
-		String removedTriples = TripleStoreInterfaceFactory.get().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
+		String removedTriples = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
 		
 		queryRemovedTriples = String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
@@ -822,7 +827,7 @@ public class MergeManagement {
 				+ "	} %n"
 				+ "}", graphNameOfBranchB, graphNameOfMerged);
 		
-		removedTriples += TripleStoreInterfaceFactory.get().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
+		removedTriples += TripleStoreInterfaceSingleton.get().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
 
 		// Create list with the 2 predecessors - the order is important - fist item will specify the branch were the new merged revision will be created
 		ArrayList<String> usedRevisionNumbers = new ArrayList<String>();
@@ -862,7 +867,7 @@ public class MergeManagement {
 	 */
 	public static Model readNTripleStringToJenaModel(String triples) {
 		Model model = ModelFactory.createDefaultModel();
-		InputStream is = new ByteArrayInputStream(triples.getBytes());
+		InputStream is = new ByteArrayInputStream(triples.getBytes(StandardCharsets.UTF_8));
 		model.read(is, null, "N-TRIPLE");
 		try {
 			is.close();
@@ -902,8 +907,8 @@ public class MergeManagement {
 	 */
 	private static void createNewGraph(String graphName) {
 		logger.info("Create new graph with the name: " + graphName + ".");
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphName));
-		TripleStoreInterfaceFactory.get().executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphName));
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphName));
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphName));
 	}
 	
 	
