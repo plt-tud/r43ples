@@ -17,8 +17,7 @@ if [[ "$COMMITS" -le "1" ]]; then
     git clone -b coverity_scan https://$GITAUTH@github.com/plt-tud/r43ples coverity_scan
     cd coverity_scan
     git fetch origin
-    git merge --ff --log -m "merge from master to coverity_scan" /master
-    git add *
+    git merge --ff --log -m "merge from master to coverity_scan" origin/master
     git commit -am "push to coverity scan by travis-ci"
     git push https://$GITAUTH@github.com/plt-tud/r43ples
     cd ..

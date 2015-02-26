@@ -72,17 +72,18 @@ public class Service {
 		}
 		
 		logger.debug("config: " + jci.config);
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+			public void run() { Service.stop(); }
+		});
 		try {
 			Config.readConfig(jci.config);
 			start();
-			logger.info("Press enter to quit the server");
-			System.in.read();
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.exit(1);
 		}
-		finally {
-			stop();
-		}
+		logger.info("Press ctrl+c to quit the server");
+		while (true);		
 	}
 
 	

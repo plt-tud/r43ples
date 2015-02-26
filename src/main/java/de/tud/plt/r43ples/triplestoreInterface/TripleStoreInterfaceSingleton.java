@@ -68,8 +68,10 @@ public class TripleStoreInterfaceSingleton {
 	
 
 	public static void close(){
-		triplestore.close();
-		triplestore = null;
+		if (triplestore!=null) {
+			triplestore.close();
+			triplestore = null;
+		}
 	}
 
 }

@@ -23,9 +23,6 @@ public class GitRepositoryState {
 	public String commitMessageShort;      // =${git.commit.message.short}
 	public String commitTime;              // =${git.commit.time}
 
-	private GitRepositoryState()
-	{
-	}
 
 	
 	private GitRepositoryState(PropertiesConfiguration properties)
@@ -58,7 +55,6 @@ public class GitRepositoryState {
 			gitRepositoryState = new GitRepositoryState(config);
 		} catch (ConfigurationException e) {
 			e.printStackTrace();
-			gitRepositoryState = new GitRepositoryState();
 		}
 	      
 	   }
