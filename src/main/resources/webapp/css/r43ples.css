@@ -13,3 +13,6 @@
 #query {
 	resize: vertical;
 }
+
+/* required for fixed navbar at the bottom  http://getbootstrap.com/components/#navbar-fixed-bottom */
+body { padding-bottom: 70px; }

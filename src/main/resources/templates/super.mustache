@@ -8,15 +8,15 @@
 <link rel="icon" type="image/png" href="/static/images/r43ples-r-logo.v04.png">    
 
 <!-- Bootstrap core CSS -->
-<link href="/static/css/bootstrap.min.css" rel="stylesheet">
-<link href="/static/css/bootstrap-theme.min.css" rel="stylesheet" >
+<link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.3.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.3.2/css/bootstrap-theme.min.css">
 
 <!-- Custom styles for this template -->
 <link href="/static/css/r43ples.css" rel="stylesheet" />
 
 <!--     Bootstrap core JavaScript -->
-<script src="/static/js/jquery.min.js"></script>
-<script src="/static/js/bootstrap.min.js"></script>
+<script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+<script src="//cdn.jsdelivr.net/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 
 {{$script_extra}}{{/script_extra}}
 
@@ -51,15 +51,11 @@
 {{$content}}Default content of the page{{/content}}
 </div>
 
-<div class="row">
-	<div id="footer" class="navbar-default">
+<div id="footer" class="navbar navbar-default navbar-fixed-bottom">
 	<div class="container">
-	<div class="span12">
 		<p class="navbar-text navbar-center">2015 - {{#version}}Version: {{toString}}{{/version}}{{^version}}Git: {{git.commitIdAbbrev}} - {{git.branch}}{{/version}}</p>
 		<p class="navbar-text logo"><a href="https://github.com/plt-tud/r43ples">R43ples@GitHub</a></p>
 		<p class="navbar-text">powered by <a href="https://jersey.java.net/">Jersey</a></p>
-	</div>
-	</div>
 	</div>
 </div>
 

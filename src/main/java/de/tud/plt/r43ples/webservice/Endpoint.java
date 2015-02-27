@@ -335,7 +335,7 @@ public class Endpoint {
 			return "Query executed";
 		}
 		else
-			return TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(sparqlQuery, "text/html");
+			return getHTMLResult(TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(sparqlQuery, "text/html"), sparqlQuery);
 	}
 	
 	
