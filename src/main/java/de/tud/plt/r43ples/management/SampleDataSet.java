@@ -32,6 +32,7 @@ public class SampleDataSet {
 				ResourceManagement.getContentFromResource("samples/dataset1/added-3.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset1/removed-3.nt"), "test_user",
 				"test commit message 3", "2");
+		RevisionManagement.createTag(graph, "3", "v0.1", "test_user", "Version v0.1 published");
 		RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-4.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset1/removed-4.nt"), "test_user",

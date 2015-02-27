@@ -222,7 +222,7 @@ public class RevisionManagement {
 		String personUri = getUserName(user);
 		String revisionUri = graphName + "-revision-" + newRevisionNumber;
 		String commitUri = graphName + "-commit-" + newRevisionNumber;
-		String branchUri = getReferenceUri(graphName, usedRevisionNumber.get(0));
+		String branchUri = getBranchUri(graphName, usedRevisionNumber.get(0));
 
 		// Create a new commit (activity)
 		StringBuilder queryContent = new StringBuilder(1000);
@@ -480,7 +480,7 @@ public class RevisionManagement {
 	}
 
 	/**
-	 * Get the reference URI for a given reference name or revision number
+	 * Get the reference URI of a branch for a given reference name or revision number
 	 * 
 	 * @param graphName
 	 *            the graph name
@@ -489,10 +489,10 @@ public class RevisionManagement {
 	 * @return URI of identified revision
 	 * @throws InternalErrorException 
 	 */
-	public static String getReferenceUri(final String graphName, final String referenceIdentifier) throws InternalErrorException {
+	public static String getBranchUri(final String graphName, final String referenceIdentifier) throws InternalErrorException {
 		String query = prefixes
 				+ String.format("SELECT ?ref " + "WHERE { GRAPH <%s> {"
-						+ "	?ref a rmo:Reference; rmo:references ?rev."
+						+ "	?ref a rmo:Branch; rmo:references ?rev."
 						+ " ?rev a rmo:Revision; rmo:revisionOf <%s>."
 						+ "	{?rev rmo:revisionNumber \"%s\".} UNION {?ref rdfs:label \"%s\" .}" + "} }",
 						Config.revision_graph, graphName, referenceIdentifier, referenceIdentifier);
@@ -610,7 +610,7 @@ public class RevisionManagement {
 	 * @throws InternalErrorException 
 	 */
 	private static boolean isBranchEmpty(final String graphName, final String referenceIdentifier) throws InternalErrorException {
-		String referenceUri = getReferenceUri(graphName, referenceIdentifier);
+		String referenceUri = getBranchUri(graphName, referenceIdentifier);
 		String queryASKBranch = prefixes
 				+ String.format("ASK { GRAPH <%s> { "
 						+ " <%s> rmo:references ?rev; prov:wasDerivedFrom ?rev ." 
@@ -793,7 +793,7 @@ public class RevisionManagement {
 					+ "WHERE { GRAPH <%s> { " 
 					+ "	?revision rmo:revisionOf <%s>; ?r_p ?r_o. "
 					+ " OPTIONAL {?reference rmo:references ?revision; ?ref_p ?ref_o. }"
-					+ " OPTIONAL {?commit prov:generated ?revision; ?c_p ?c_o. }" 
+					+ " OPTIONAL {?commit prov:used|prov:generated ?revision; ?c_p ?c_o. }" 
 					+ "} }",
 					Config.revision_graph, graphName);
 		}
@@ -894,7 +894,7 @@ public class RevisionManagement {
 						+ "	GRAPH <%s> {" 
 						+ "		?revision rmo:revisionOf <%s>; ?r_p ?r_o. "
 						+ " 	OPTIONAL {?reference rmo:references ?revision; ?ref_p ?ref_o. }"
-						+ " 	OPTIONAL {?commit prov:generated ?revision; ?c_p ?c_o. }"
+						+ " 	OPTIONAL {?commit prov:used|prov:generated ?revision; ?c_p ?c_o. }"
 						+ "		}" 
 						+ "}"
 						, Config.revision_graph, Config.revision_graph, graph);
