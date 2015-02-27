@@ -44,8 +44,28 @@ public class TestSparqlRewriter {
 				+ "} ORDER BY ?p1 ?p2";  
 		
 		String result = SparqlRewriter.rewriteQuery(query);
+//		System.out.println(result);
 		String expected = ResourceManagement.getContentFromResource("rewritten-query-minus.rq");
 		Assert.assertEquals(expected, result);
+	}
+	
+	/**
+	 * Test method for {@link de.tud.plt.r43ples.management.SparqlRewriter#rewriteQuery(java.lang.String)}.
+	 * @throws InternalErrorException 
+	 */
+	@Test
+	public final void testRewriteQuery_Simple() throws InternalErrorException {
+		String query = "PREFIX : <http://test.com/> "
+				+ "SELECT DISTINCT ?s ?p ?o "
+				+ "FROM <" + graph_test + "> REVISION \"2\""
+				+ "WHERE {"
+				+ "	?s ?p ?o"
+				+ "} ORDER BY ?s ?p ?o";  
+		
+		String result = SparqlRewriter.rewriteQuery(query);
+		System.out.println(result);
+//		String expected = ResourceManagement.getContentFromResource("rewritten-query-minus.rq");
+//		Assert.assertEquals(expected, result);
 	}
 
 }
