@@ -76,7 +76,20 @@ SPARQL endpoint is available at:
 
 The endpoint directly accepts SPARQL queries with HTTP GET parameters for *query* and *format*: 
 
-    [uri]:[port]/r43ples/sparql?query=[]&format=(HTML|JSON)
+    [uri]:[port]/r43ples/sparql?query=[]&format=[]
+
+### Supported Formats
+
+The formats can be specified as URL Path Parameter *format*, as HTTP post paramter *format* or as HTTP header parameter *Accept*: 
+
+* text/turtle
+* application/json
+* application/rdf+xml
+* text/html
+* text/plain
+
+
+### R43ples keywords
 
 There are some additional keywords which can be used to control the revisions of graphs:
 
