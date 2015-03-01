@@ -91,10 +91,11 @@ public class VirtuosoHttpInterface extends TripleStoreInterface {
 		try{
 			InputStream in = response.getEntity().getContent();
 			if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
-				throw new HttpException(response.getStatusLine().toString()+"\n"+in);
+				logger.warn(response.getStatusLine().toString()+"\n"+in);
+				return null;
 			}
 			return in;
-		} catch (HttpException | IOException e){
+		} catch (IOException e){
 			e.printStackTrace();
 			return null;
 		}

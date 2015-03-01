@@ -76,12 +76,10 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	@Override
 	public ResultSet executeSelectQuery(String selectQueryString) {
 		dataset.begin(ReadWrite.READ);
-		try {
-			QueryExecution qExec = QueryExecutionFactory.create(selectQueryString, dataset);
-			return qExec.execSelect();
-		} finally {
-			dataset.end();
-		}
+		QueryExecution qExec = QueryExecutionFactory.create(selectQueryString, dataset);
+		ResultSet result = qExec.execSelect();
+		dataset.end();
+		return result;
 	}
 	
 	
@@ -94,12 +92,10 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	@Override
 	public Model executeConstructQuery(String constructQueryString) {
 		dataset.begin(ReadWrite.READ);
-		try {
-			QueryExecution qExec = QueryExecutionFactory.create(constructQueryString, dataset);
-			return qExec.execConstruct();
-		} finally {
-			dataset.end();
-		}
+		QueryExecution qExec = QueryExecutionFactory.create(constructQueryString, dataset);
+		Model result = qExec.execConstruct();
+		dataset.end();
+		return result;
 	}
 	
 	
@@ -114,12 +110,10 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	public Model executeDescribeQuery(String describeQueryString) {
 		logger.debug("Query: " + describeQueryString);
 		dataset.begin(ReadWrite.READ);
-		try {
-			QueryExecution qExec = QueryExecutionFactory.create(describeQueryString, dataset);
-			return qExec.execDescribe();
-		} finally {
-			dataset.end();
-		}
+		QueryExecution qExec = QueryExecutionFactory.create(describeQueryString, dataset);
+		Model result = qExec.execDescribe();
+		dataset.end();
+		return result;
 	}
 	
 
@@ -132,12 +126,10 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	@Override
 	public boolean executeAskQuery(String askQueryString) {
 		dataset.begin(ReadWrite.READ);
-		try {
-			QueryExecution qe = QueryExecutionFactory.create(askQueryString, dataset);
-			return qe.execAsk();
-		} finally {
-			dataset.end();
-		}
+		QueryExecution qe = QueryExecutionFactory.create(askQueryString, dataset);
+		boolean result = qe.execAsk();
+		dataset.end();
+		return result;
 	}
 	
 	/**
@@ -149,39 +141,29 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	public void executeUpdateQuery(String updateQueryString) {
 		logger.debug("Query:" + updateQueryString);
 		dataset.begin(ReadWrite.WRITE);
-		try {
-			GraphStore graphStore = GraphStoreFactory.create(dataset) ;
-		    UpdateRequest request = UpdateFactory.create(updateQueryString) ;
-		    UpdateProcessor proc = UpdateExecutionFactory.create(request, graphStore) ;
-		    proc.execute() ;
-
-		    dataset.commit();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			dataset.end();
-		}
+		
+		GraphStore graphStore = GraphStoreFactory.create(dataset) ;
+		
+	    UpdateRequest request = UpdateFactory.create(updateQueryString) ;
+	    UpdateProcessor proc = UpdateExecutionFactory.create(request, graphStore) ;
+	    proc.execute();
+	    dataset.commit();
+		dataset.end();
 	}
 	
 
 	@Override
 	public void executeCreateGraph(String graph) {
 		dataset.begin(ReadWrite.WRITE);
-		try {
-			GraphStore graphStore = GraphStoreFactory.create(dataset) ;
+		
+		GraphStore graphStore = GraphStoreFactory.create(dataset) ;
 
-		    UpdateRequest request = UpdateFactory.create("CREATE GRAPH <"+graph+">") ;
-		    UpdateProcessor proc = UpdateExecutionFactory.create(request, graphStore) ;
-		    proc.execute() ;
+	    UpdateRequest request = UpdateFactory.create("CREATE GRAPH <"+graph+">") ;
+	    UpdateProcessor proc = UpdateExecutionFactory.create(request, graphStore) ;
+	    proc.execute();
 
-		    dataset.commit();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			dataset.end();
-		}
+	    dataset.commit();
+		dataset.end();
 	}
 
 	@Override

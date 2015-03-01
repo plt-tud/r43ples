@@ -24,8 +24,8 @@ public class TimeLineView {
 
 	public void draw(Graphics2D g) {
 
-		int y = MMSTVisualisation.LineHeight;
-		int totalHeight = commits.size() * MMSTVisualisation.LineHeight + 10;
+		int y = MMSTVisualisation.LINE_HEIGHT;
+		int totalHeight = commits.size() * MMSTVisualisation.LINE_HEIGHT + 10;
 		DateFormat dayFormat = new SimpleDateFormat("d");
 		DateFormat monthFormat = new SimpleDateFormat("MMM");
 
@@ -55,7 +55,7 @@ public class TimeLineView {
 				g.drawString(day, 38, y);
 				oldDay = day;
 			}
-			y += MMSTVisualisation.LineHeight;
+			y += MMSTVisualisation.LINE_HEIGHT;
 		}
 		g.setColor(Color.BLACK);
 		g.setFont(tmp);

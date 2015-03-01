@@ -23,14 +23,14 @@ import de.tud.plt.r43ples.revisionTree.StructuredTree;
 
 public class MMSTVisualisation {
 	
-	private static final int timelineView_width = 70;
+	private static final int TIMELINEVIEW_WIDTH = 70;
 
 	/**
 	 * Vertical distance between commits
 	 */
-	protected final static int LineHeight = 22;
+	protected final static int LINE_HEIGHT = 22;
 	
-	protected final static int padding = 10;
+	protected final static int PADDING = 10;
 	
 	private TimeLineView timeView;
 
@@ -62,26 +62,26 @@ public class MMSTVisualisation {
 		
 
 		// translate to first text-baseline
-		g.translate(0, LineHeight);		
+		g.translate(0, LINE_HEIGHT);		
 		timeView.draw(g);
 
-		g.translate(timelineView_width, 0);
+		g.translate(TIMELINEVIEW_WIDTH, 0);
 		graphView.drawGraph(g);
 
-		g.translate(graphView.getDimension().getWidth() + padding, 0);
+		g.translate(graphView.getDimension().getWidth() + PADDING, 0);
 		msgView.draw(g);
 		
-		g.translate(-graphView.getDimension().getWidth() - padding - timelineView_width, 0);
+		g.translate(-graphView.getDimension().getWidth() - PADDING - TIMELINEVIEW_WIDTH, 0);
 
 		// calculate overall width
-		int totalWidth = (int) (timelineView_width + graphView.getDimension().getWidth() + padding + msgView.getDimension().getWidth());
+		int totalWidth = (int) (TIMELINEVIEW_WIDTH + graphView.getDimension().getWidth() + PADDING + msgView.getDimension().getWidth());
 		
 		
 		// draw header line
 		int offset = g.getFontMetrics(msgView.TextFont).getDescent();
 		g.drawLine(0, offset, totalWidth, offset);
 
-		int totalHeight = LineHeight * (commits.size()+1) + offset;
+		int totalHeight = LINE_HEIGHT * (commits.size()+1) + offset;
 		g.setSVGCanvasSize(new Dimension(totalWidth, totalHeight));
 
 		Writer writer = new StringWriter();

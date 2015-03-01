@@ -119,9 +119,8 @@ public class StructuredTree {
 
 	private void updateCommits(String graph) {
 		// query all commits
-		String queryCommits = String.format(
-				RevisionManagement.prefixes
-						+ "SELECT ?commit ?time ?prev ?next ?title ?authname ?branch%n"
+		String queryCommits = RevisionManagement.prefixes + String.format(
+						"SELECT ?commit ?time ?prev ?next ?title ?authname ?branch%n"
 						+ "WHERE { GRAPH <%s> {%n"
 						+ "?commit a rmo:Commit;%n"
 						+ "dc-terms:title ?title;%n"
