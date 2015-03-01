@@ -2,10 +2,8 @@ prefix rmo:	<http://eatld.et.tu-dresden.de/rmo#>
 prefix prov:	<http://www.w3.org/ns/prov#> 
 prefix eatld:	<http://eatld.et.tu-dresden.de/>
 
-select distinct ?s ?p ?o
-
-where {
-	
+SELECT DISTINCT ?s ?p ?o
+WHERE {
 	GRAPH <http://eatld.et.tu-dresden.de/r43ples-revisions> {
         { []  <http://eatld.et.tu-dresden.de/rmo#references>  <http://test.com/r43ples-dataset-1-revision-5> ;
             <http://eatld.et.tu-dresden.de/rmo#fullGraph>  ?g_delete_set_full_graph . }

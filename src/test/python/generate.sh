@@ -10,14 +10,14 @@ python testdata.py 2 -c -f 10 nt scenario_2
 
 cd ../../..
 
-GRAPH=http://test.com/scenario-1
+GRAPH=http://test.com/benchmark/scenario_1
 
 DIR=src/test/python/scenario_1
 
 
 
 # create graph 
-mvn exec:java -Dconsole -Dexec.args="-g $GRAPH -c"
+mvn exec:java -Dconsole -Dexec.args="--create --graph $GRAPH"
 for i in {1..20}
 do
     echo $i
