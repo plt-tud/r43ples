@@ -17,15 +17,15 @@ DIR=src/test/python/scenario_1
 
 
 # create graph 
-mvn exec:java -Dconsole -Dexec.args="--create --graph $GRAPH"
+mvn exec:java -Dconsole -Dexec.args="--new --graph $GRAPH"
 for i in {1..20}
 do
-    echo $i
+    echo "Inserting revision $i"
     ADD=$DIR/scenario_1_commit_${i}_inserts.nt
-    echo $ADD
+#     echo $ADD
     DEL=$DIR/scenario_1_commit_${i}_deletes.nt
-    echo $DEL
-    mvn exec:java -Dconsole -Dexec.args="-g $GRAPH -a $ADD -d $DEL"
+#     echo $DEL
+    mvn exec:java -Dconsole -Dexec.args="-g $GRAPH -a $ADD -d $DEL -m 'benchmark commit $i'"
 done
 
 

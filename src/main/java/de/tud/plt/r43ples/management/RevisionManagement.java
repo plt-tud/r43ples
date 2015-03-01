@@ -1,5 +1,7 @@
 package de.tud.plt.r43ples.management;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -619,6 +621,13 @@ public class RevisionManagement {
 		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASKBranch);
 	}
 
+	/**
+	 * 
+	 * @param graphName
+	 * @param revisionIdentifier
+	 * @return
+	 * @throws InternalErrorException
+	 */
 	public static String getNextRevisionNumber(final String graphName, final String revisionIdentifier) throws InternalErrorException {
 		String revisionNumber = getRevisionNumber(graphName, revisionIdentifier);
 		if (isBranchEmpty(graphName, revisionIdentifier)) {
@@ -919,7 +928,12 @@ public class RevisionManagement {
 			QuerySolution qs = results.next();
 			return qs.getResource("?personUri").toString();
 		} else {
-			String personUri = "http://eatld.et.tu-dresden.de/persons/" + user;
+			String personUri = null;
+			try {
+				personUri = "http://eatld.et.tu-dresden.de/persons/" + URLEncoder.encode(user, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
 			logger.debug("User does not exists. Create user " + personUri + ".");
 			query = prefixes
 					+ String.format("INSERT DATA { GRAPH <%s> { <%s> a prov:Person; rdfs:label \"%s\". } }",
