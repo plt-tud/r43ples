@@ -16,8 +16,7 @@ if [[ "$COMMITS" -le "1" ]]; then
 
     git checkout coverity_scan
     git pull
-    git merge --ff --log -m "merge from master to coverity_scan" master
-    git commit -am "push to coverity scan by travis-ci"
+    git merge --ff --log -m "merge from master to coverity_scan" origin/master
     git push https://$GITAUTH@github.com/plt-tud/r43ples
     git checkout master
 else

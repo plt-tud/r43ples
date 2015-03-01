@@ -27,7 +27,7 @@ before_script:
     #- sudo dpkg -i virtuoso.deb
 
 script:
-    - mvn test
+    - mvn -q test
 
 
 after_success:
