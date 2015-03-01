@@ -5,7 +5,7 @@
 # of the day to the coverity scan service
 #
 
-COMMITS=`git log --since=today.midnight --oneline | wc -l`
+COMMITS=`git log --since=today.midnight --oneline coverity_scan | wc -l`
 
 if [[ "$COMMITS" -le "1" ]]; then
     #first commit a day - push changes to branch coverity_scan
@@ -14,14 +14,12 @@ if [[ "$COMMITS" -le "1" ]]; then
     git config --global user.name "r43ples travis-ci"
     git config --global push.default simple 
 
-    git clone -b coverity_scan https://$GITAUTH@github.com/plt-tud/r43ples coverity_scan
-    cd coverity_scan
-    git fetch origin
-    git merge --ff --log -m "merge from master to coverity_scan" origin/master
+    git checkout coverity_scan
+    git pull
+    git merge --ff --log -m "merge from master to coverity_scan" master
     git commit -am "push to coverity scan by travis-ci"
     git push https://$GITAUTH@github.com/plt-tud/r43ples
-    cd ..
-    rm -rf coverity_scan
+    git checkout master
 else
-    echo "Not the first commit of the day - no push to coverity required"
+    echo "Already pushed to coverity_scan today"
 fi 
