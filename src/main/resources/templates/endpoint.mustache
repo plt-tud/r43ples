@@ -116,13 +116,23 @@ WHERE {
 </div>
 
 <div>
+			<h3>Select Query II</h3>
+			<pre>SELECT * 
+WHERE {
+  GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "3" {
+    ?s ?p ?o.
+  } 
+}</pre>
+</div>
+
+<div>
 			<h3>Select Query - Multiple Graphs</h3>
 			<pre>OPTION r43ples:SPARQL_JOIN
 SELECT ?s ?p ?o 
 FROM &lt;http://test.com/r43ples-dataset-1&gt; REVISION "master"
 FROM &lt;http://test.com/r43ples-dataset-2&gt; REVISION "2"
 WHERE {
-	?s ?p ?o. 
+  ?s ?p ?o. 
 }</pre>
 </div>
 
@@ -130,8 +140,11 @@ WHERE {
 			<h3>Update Query</h3>
 			<pre>USER "mgraube"
 MESSAGE "test commit"
-INSERT { GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "4"
-{	&lt;a&gt; &lt;b&gt; &lt;c&gt; .	}}</pre>
+INSERT DATA {
+  GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "4" {
+    &lt;a&gt; &lt;b&gt; &lt;c&gt; .
+  }
+}</pre>
 </div>
 
 <div>
