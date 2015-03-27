@@ -74,7 +74,7 @@ SPARQL endpoint is available at:
 
     [uri]:[port]/r43ples/sparql
 
-The endpoint directly accepts SPARQL queries with HTTP GET parameters for *query* and *format*: 
+The endpoint directly accepts SPARQL queries with HTTP GET or HTTP POST parameters for *query* and *format*: 
 
     [uri]:[port]/r43ples/sparql?query=[]&format=(HTML|JSON)
 
@@ -125,11 +125,7 @@ There is a new option for R43ples which improves the performance. The necessary 
 The SPARQL query is rewritten in such a way that the branch and the change sets are directly joined inside the query. This includes the order of the change sets.
 It is currently under development and further research.
 
-The option can be enabled by:
-
-```
-OPTION r43ples:SPARQL_JOIN
-```
+The option can be enabled by passing an additional parameter "join_option=true"
 
 It currently supports:
 
@@ -139,37 +135,6 @@ It currently supports:
 * MINUS
 
 For more details, have a look into the *doc/* directory.
-
-
-Algorithm
------------
-Without SPARQL Join option the algorithms are very simple:
-    
-```
-For each named graph 'g' in a query, a temporary graph 'TempGraph_g_r' is generated for the specified revision 'r' according to this formula ('g_x' = full materialized revision 'x' of graph 'g'):
-    TempGraph_g_r = g_nearestBranch + SUM[revision i= nearestBranch to r]( deleteSet_g_i - addSet_g_i )
-```
-
-```
-def select_query(query_string):
-    for (graph,revision) in query_string.get_named_graphs_and_revisions():   
-        execQuery("COPY GRAPH <"+graph+"> TO GRAPH <tmp-"+graph+"-"+revision+">")
-        for rev in graph.find_shortest_path_to_revision(revision):
-            execQuery("REMOVE GRAPH "+ rev.add_set_graph+" FROM GRAPH <tmp-"+graph+"-"+revision+">")
-            execQuery("ADD GRAPH "+ rev.delete_set_graph+" TO GRAPH <tmp-"+graph+"-"+revision+">")
-        query_string.replace(graph, "tmp-"+graph+"-"+revision)
-    result = execQuery(query_string)
-    execQuery("DROP GRAPH <tmp-*>")
-    return result
-```
-  
-``` 
-def update_query(query_string):
-    for (graph,revision) in query_string.get_named_graphs_and_revisions():
-        newRevision = revision +1
-        execQuery("ADD GRAPH "+ rev.delete_set_graph+" TO GRAPH <tmp-"+graph+"-"+revision+">")
-        ...
-```
 
 
 Used libraries and frameworks

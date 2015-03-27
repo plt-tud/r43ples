@@ -220,9 +220,11 @@ public class Endpoint {
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("format") final String formatQuery, @FormParam("query") @DefaultValue("") final String sparqlQuery) throws InternalErrorException {
+			@FormParam("format") final String formatQuery, 
+			@FormParam("query") @DefaultValue("") final String sparqlQuery,
+			@FormParam("join_option") final boolean join_option) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
-		return sparql(format, sparqlQuery);
+		return sparql(format, sparqlQuery, join_option);
 	}
 		
 	
@@ -245,7 +247,9 @@ public class Endpoint {
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
-			@QueryParam("format") final String formatQuery, @QueryParam("query") @DefaultValue("") final String sparqlQuery) throws InternalErrorException {
+			@QueryParam("format") final String formatQuery, 
+			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
+			@QueryParam("join_option") final boolean join_option) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		
 		String sparqlQueryDecoded;
@@ -255,7 +259,7 @@ public class Endpoint {
 			e.printStackTrace();
 			sparqlQueryDecoded = sparqlQuery;
 		}
-		return sparql(format, sparqlQueryDecoded);
+		return sparql(format, sparqlQueryDecoded, join_option);
 	}
 	
 	
@@ -297,7 +301,7 @@ public class Endpoint {
 	 * @return the response
 	 * @throws InternalErrorException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException {
+	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException {
 		if (sparqlQuery.equals("")) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
@@ -305,9 +309,27 @@ public class Endpoint {
 				return getServiceDescriptionResponse(format);
 			}
 		} else {
-			return getSparqlResponse(format, sparqlQuery);
+			return getSparqlResponse(format, sparqlQuery, join_option);
 		}
 	}
+	
+	/**
+	 * Interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * Provides HTML form if no query is specified and HTML is requested
+	 * Provides Service Description if no query is specified and RDF
+	 * representation is requested
+	 * 
+	 * @param format
+	 *            mime type for response format
+	 * @param sparqlQuery
+	 *            decoded SPARQL query
+	 * @return the response
+	 * @throws InternalErrorException 
+	 */
+	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException {
+		return sparql(format, sparqlQuery, false);
+	}
+
 
 	
 	/**
@@ -355,7 +377,7 @@ public class Endpoint {
 	 * @return HTTP response of evaluating the sparql query 
 	 * @throws InternalErrorException
 	 */
-	private Response getSparqlResponse(final String format, String sparqlQuery) throws InternalErrorException {
+	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean join_option) throws InternalErrorException {
 		logger.info("SPARQL query was requested. Query: " + sparqlQuery);
 		String user = null;
 		Matcher userMatcher = patternUser.matcher(sparqlQuery);
@@ -371,7 +393,7 @@ public class Endpoint {
 		}
 
 		if (patternSelectAskConstructQuery.matcher(sparqlQuery).find()) {
-			return getSelectConstructAskResponse(sparqlQuery, format);
+			return getSelectConstructAskResponse(sparqlQuery, format, join_option);
 		}
 		if (patternUpdateQuery.matcher(sparqlQuery).find()) {
 			return getUpdateResponse(sparqlQuery, user, message, format);
@@ -470,17 +492,18 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @param format
 	 *            the result format
+	 * @param join_option
+	 * 			   use inner JIOn option for query
 	 * @return the response with HTTP header for every graph (revision number
 	 *         and MASTER revision number)
 	 * @throws InternalErrorException 
 	 */
-	private Response getSelectConstructAskResponse(final String query, final String format) throws InternalErrorException {
+	private Response getSelectConstructAskResponse(final String query, final String format, final boolean join_option) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.ok();
 		String result;
 		
-		if (query.contains("OPTION r43ples:SPARQL_JOIN")) {
-			String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
-			query_rewritten = SparqlRewriter.rewriteQuery(query_rewritten);
+		if (join_option) {
+			String query_rewritten = SparqlRewriter.rewriteQuery(query);
 			result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query_rewritten, format);
 		}
 		else {
