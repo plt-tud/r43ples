@@ -15,46 +15,53 @@ public class SampleDataSet {
 
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(SampleDataSet.class);
+	
+	/** The user. **/
+	private static final String user = "butler";
 
-	public static void createSampleDataset1(String graph) throws InternalErrorException  {
+	public static String createSampleDataset1() throws InternalErrorException  {
+		String graph = "http://test.com/r43ples-dataset-1";
 		RevisionManagement.purgeGraph(graph);
 		RevisionManagement.putGraphUnderVersionControl(graph);
 
 		RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-1.nt"),
-				ResourceManagement.getContentFromResource("samples/dataset1/removed-1.nt"), "test_user",
+				ResourceManagement.getContentFromResource("samples/dataset1/removed-1.nt"), user,
 				"test commit message 1", "0");
 		RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-2.nt"),
-				ResourceManagement.getContentFromResource("samples/dataset1/removed-2.nt"), "test_user",
+				ResourceManagement.getContentFromResource("samples/dataset1/removed-2.nt"), user,
 				"test commit message 2", "1");
 		RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-3.nt"),
-				ResourceManagement.getContentFromResource("samples/dataset1/removed-3.nt"), "test_user",
+				ResourceManagement.getContentFromResource("samples/dataset1/removed-3.nt"), user,
 				"test commit message 3", "2");
 		RevisionManagement.createTag(graph, "3", "v0.1", "test_user", "Version v0.1 published");
 		RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-4.nt"),
-				ResourceManagement.getContentFromResource("samples/dataset1/removed-4.nt"), "test_user",
+				ResourceManagement.getContentFromResource("samples/dataset1/removed-4.nt"), user,
 				"test commit message 4", "3");
 		RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-5.nt"),
-				ResourceManagement.getContentFromResource("samples/dataset1/removed-5.nt"), "test_user",
+				ResourceManagement.getContentFromResource("samples/dataset1/removed-5.nt"), user,
 				"test commit message 5", "4");
+		return graph;
 	}
 
-	public static void createSampleDataset2(String graph) throws InternalErrorException {
+	public static String createSampleDataset2() throws InternalErrorException {
+		String graph = "http://test.com/r43ples-dataset-2";
 		RevisionManagement.purgeGraph(graph);
 		RevisionManagement.putGraphUnderVersionControl(graph);
 
 		RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/test2-delta-added-1.nt"),
-				ResourceManagement.getContentFromResource("samples/test2-delta-removed-1.nt"), "test_user",
+				ResourceManagement.getContentFromResource("samples/test2-delta-removed-1.nt"), user,
 				"test commit message 1", "0");
 		RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/test2-delta-added-2.nt"),
-				ResourceManagement.getContentFromResource("samples/test2-delta-removed-2.nt"), "test_user",
+				ResourceManagement.getContentFromResource("samples/test2-delta-removed-2.nt"), user,
 				"test commit message 2", "1");
+		return graph;
 	}
 
 	
@@ -75,9 +82,8 @@ public class SampleDataSet {
 	 * @throws InternalErrorException 
 	 *
 	 */
-	public static void createSampleDataSetMerging(String graphName) throws InternalErrorException {
-		/** The user. **/
-		String user = "shensel";
+	public static String createSampleDataSetMerging() throws InternalErrorException {
+		String graphName = "http://test.com/r43ples-dataset-merging";
 
 		// Create new example graph
 		DatasetGenerationManagement.createNewGraph(graphName);
@@ -125,19 +131,19 @@ public class SampleDataSet {
 				triplesInsert);
 		
 		logger.info("Example graph <" + graphName +"> created.");
+		return graphName;
 	}
 	
 	
 	/**
 	 * 
 	 * 
-	 * @param graphName the graph name
+	 * @returns graphName
 	 * @throws IOException
 	 * @throws InternalErrorException 
 	 */
-	public static void createSampleDataSetMergingClasses(String graphName) throws IOException, InternalErrorException {
-		/** The user. **/
-		String user = "shensel";
+	public static String createSampleDataSetMergingClasses() throws IOException, InternalErrorException {		
+		String graphName = "http://test.com/r43ples-dataset-merging-classes";
 		/** The initial content file path **/
 		String initialContentFilePath = "verification/ExampleGraphClasses_initial.triples";
 
@@ -186,6 +192,7 @@ public class SampleDataSet {
 				"<http://eatld.et.tu-dresden.de/batch/A3A5R01TZU> ?p ?o . \n");
 
 		logger.info("Example graph <" + graphName +"> created.");
+		return graphName;
 	}
 
 	
@@ -204,12 +211,11 @@ public class SampleDataSet {
 	 * 
 	 * Contains the renaming of 1A to 1G.
 	 * 
-	 * @param graphName the graph name
-	 * @throws IOException
+	 * @returns graphName
+	 * @throws InternalErrorException
 	 */
-	public static void createSampleDataSetRenaming(String graphName) throws IOException, InternalErrorException {
-		/** The user. **/
-		String user = "shensel";
+	public static String createSampleDataSetRenaming() throws InternalErrorException {
+		String graphName = "http://test.com/r43ples-dataset-renaming";
 
 		// Create new example graph
 		DatasetGenerationManagement.createNewGraph(graphName);
@@ -259,6 +265,7 @@ public class SampleDataSet {
 				triplesInsert);
 
 		logger.info("Example graph <" + graphName +"> created.");
+		return graphName;
 	}
 
 	
@@ -286,11 +293,11 @@ public class SampleDataSet {
 	 * ---X----------+-------------X-------------------X-----------------------(MASTER)-----------------------------+--      
 	 * DEL: -                   DEL: C              DEL: M                                                                     
 	 * 
-	 * @param graphName the graph name
+	 * @returns graphName
+	 * @throws InternalErrorException
 	 */
-	public static void createSampleDataSetComplexStructure(String graphName) throws InternalErrorException {
-		/** The user. **/
-		String user = "shensel";
+	public static String createSampleDataSetComplexStructure() throws InternalErrorException {
+		String graphName = "http://test.com/r43ples-dataset-complex-structure";
 		
 		// Create new example graph
 		DatasetGenerationManagement.createNewGraph(graphName);
@@ -380,6 +387,7 @@ public class SampleDataSet {
 		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Third commit to MASTER", graphName, "master", triplesInsert, triplesDelete);
 		
 		logger.info("Example graph <" + graphName +"> created.");
+		return graphName;
 	}
 	
 }

@@ -20,12 +20,12 @@ import de.tud.plt.r43ples.management.SparqlRewriter;
  */
 public class TestSparqlRewriter {
 
-	private final static String graph_test = "http://test.com/dataset1";
+	private static String graph_test = "http://test.com/dataset1";
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException{
 		Config.readConfig("r43ples.conf");
-		SampleDataSet.createSampleDataset1(graph_test);
+		graph_test = SampleDataSet.createSampleDataset1();
 	}
 	
 	
@@ -36,15 +36,13 @@ public class TestSparqlRewriter {
 	@Test
 	public final void testRewriteQuery() throws InternalErrorException {
 		String query = "PREFIX : <http://test.com/> "
-				+ "SELECT DISTINCT ?p1 ?p2 "
+				+ "SELECT DISTINCT ?s ?o "
 				+ "FROM <" + graph_test + "> REVISION \"2\""
 				+ "WHERE {"
-				+ "	?p1 :knows ?p2."
-				+ "	MINUS {?p1 :knows :Danny}"
-				+ "} ORDER BY ?p1 ?p2";  
+				+ "	?s :knows ?o"
+				+ "} ORDER BY ?s ?o";	
 		
 		String result = SparqlRewriter.rewriteQuery(query);
-//		System.out.println(result);
 		String expected = ResourceManagement.getContentFromResource("rewritten-query-minus.rq");
 		Assert.assertEquals(expected, result);
 	}
@@ -54,18 +52,19 @@ public class TestSparqlRewriter {
 	 * @throws InternalErrorException 
 	 */
 	@Test
-	public final void testRewriteQuery_Simple() throws InternalErrorException {
+	public final void testRewriteQuery2() throws InternalErrorException {
 		String query = "PREFIX : <http://test.com/> "
-				+ "SELECT DISTINCT ?s ?p ?o "
-				+ "FROM <" + graph_test + "> REVISION \"2\""
-				+ "WHERE {"
-				+ "	?s ?p ?o"
-				+ "} ORDER BY ?s ?p ?o";  
+
+		+ "SELECT DISTINCT ?p1 ?p2 "
+		+ "FROM <" + graph_test + "> REVISION \"2\""
+		+ "WHERE {"
+		+ "	?p1 :knows ?p2."
+		+ "	MINUS {?p1 :knows :Danny}"
+		+ "} ORDER BY ?p1 ?p2";  
 		
 		String result = SparqlRewriter.rewriteQuery(query);
-		System.out.println(result);
-//		String expected = ResourceManagement.getContentFromResource("rewritten-query-minus.rq");
-//		Assert.assertEquals(expected, result);
+		String expected = ResourceManagement.getContentFromResource("rewritten-query-minus.rq");
+		Assert.assertEquals(expected, result);
 	}
 
 }

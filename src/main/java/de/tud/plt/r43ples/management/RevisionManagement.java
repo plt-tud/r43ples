@@ -1065,7 +1065,9 @@ public class RevisionManagement {
 			if (!m.hitEnd())
 				graphNames.append(", ");			
 		}
-		return getResponseHeader(graphNames.toString());
+		String names = graphNames.toString();
+		String result = getResponseHeader(names);
+		return result;
 		
 	}
 	

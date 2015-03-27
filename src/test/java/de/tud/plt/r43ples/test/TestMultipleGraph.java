@@ -27,8 +27,8 @@ import de.tud.plt.r43ples.webservice.Endpoint;
  */
 public class TestMultipleGraph {
 
-	final static String graph1 = "http://test.com/graph1";
-	final static String graph2 = "http://test.com/graph2";
+	private static String graph1;
+	private static String graph2;
 
 	private final Endpoint ep = new Endpoint();
 	private String result;
@@ -42,8 +42,8 @@ public class TestMultipleGraph {
 	public static void setUpBeforeClass() throws Exception {
 		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.conf");
-		SampleDataSet.createSampleDataset1(graph1);
-		SampleDataSet.createSampleDataset2(graph2);
+		graph1 = SampleDataSet.createSampleDataset1();
+		graph2 = SampleDataSet.createSampleDataset2();
 	}
 
 

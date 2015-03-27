@@ -29,8 +29,8 @@ public class TestUpdate {
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(TestUpdate.class);
 	/** The graph name. **/
-	private final static String graphName = "http://exampleGraph.com/r43ples";
-	private final static String graph_test = "http://test-dataset-user";
+	private static String graphName;
+	private static String graph_test;
 	
 	final static String format = "application/sparql-results+xml";
 	
@@ -41,12 +41,12 @@ public class TestUpdate {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.conf");
-		SampleDataSet.createSampleDataset1(graph_test);
+		graph_test = SampleDataSet.createSampleDataset1();
 	}
 
 	@Before
 	public void setUp() throws  ConfigurationException, InternalErrorException{
-		SampleDataSet.createSampleDataSetMerging(graphName);
+		graphName= SampleDataSet.createSampleDataSetMerging();
 	}
 	
 

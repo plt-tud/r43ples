@@ -133,36 +133,24 @@ public class Endpoint {
 	@GET
 	@Template(name = "/exampleDatasetGeneration.mustache")
 	public final List<String> createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws IOException, InternalErrorException {
-		final String graph_dataset1 = "http://test.com/r43ples-dataset-1";
-		final String graph_dataset2 = "http://test.com/r43ples-dataset-2";
-		final String graph_dataset_merging = "http://test.com/r43ples-dataset-merging";
-		final String graph_dataset_merging_classes = "http://test.com/r43ples-dataset-merging-classes";
-		final String graph_dataset_renaming = "http://test.com/r43ples-dataset-renaming";
-		final String graph_dataset_complex_structure = "http://test.com/r43ples-dataset-complex-structure";
 		List<String> graphs = new ArrayList<>();
-		if (graph.equals(graph_dataset1) || graph.equals("all")){
-			SampleDataSet.createSampleDataset1(graph_dataset1);
-			graphs.add(graph_dataset1);
+		if (graph.equals("1") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataset1());
 		}
-		if (graph.equals(graph_dataset2) || graph.equals("all")){
-			SampleDataSet.createSampleDataset2(graph_dataset2);
-			graphs.add(graph_dataset2);
+		if (graph.equals("2") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataset2());
 		}
-		if (graph.equals(graph_dataset_merging) || graph.equals("all")){
-			SampleDataSet.createSampleDataSetMerging(graph_dataset_merging);
-			graphs.add(graph_dataset_merging);
+		if (graph.equals("merging") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataSetMerging());
 		}
-		if (graph.equals(graph_dataset_merging_classes) || graph.equals("all")){
-			SampleDataSet.createSampleDataSetMergingClasses(graph_dataset_merging_classes);
-			graphs.add(graph_dataset_merging_classes);
+		if (graph.equals("merging_classes") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataSetMergingClasses());
 		}
-		if (graph.equals(graph_dataset_renaming) || graph.equals("all")){
-			SampleDataSet.createSampleDataSetRenaming(graph_dataset_renaming);
-			graphs.add(graph_dataset_renaming);
+		if (graph.equals("renaming") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataSetRenaming());
 		}
-		if (graph.equals(graph_dataset_complex_structure) || graph.equals("all")){
-			SampleDataSet.createSampleDataSetComplexStructure(graph_dataset_complex_structure);
-			graphs.add(graph_dataset_complex_structure);
+		if (graph.equals("complex_structure") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataSetComplexStructure());
 		}
 	    htmlMap.put("graphs", graphs);
 		return graphs;

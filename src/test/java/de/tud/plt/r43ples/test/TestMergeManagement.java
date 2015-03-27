@@ -24,7 +24,7 @@ import de.tud.plt.r43ples.management.SampleDataSet;
  */
 public class TestMergeManagement {
 
-	final static String graph = "http://exampleGraph.com/merging";
+	private static String graph;
 	
 	/**
 	 * @throws ConfigurationException 
@@ -33,7 +33,7 @@ public class TestMergeManagement {
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException {
 		Config.readConfig("r43ples.conf");
-		SampleDataSet.createSampleDataSetMerging(graph);
+		graph = SampleDataSet.createSampleDataSetMerging();
 	}
 
 

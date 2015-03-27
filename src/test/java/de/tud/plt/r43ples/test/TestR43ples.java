@@ -37,7 +37,7 @@ public class TestR43ples {
 	/** The endpoint. **/
 	private static String endpoint = "http://localhost:9998/r43ples/sparql";
 	/** The graph name. **/
-	private static String graphName = "http://exampleGraph.com/r43ples";
+	private static String graphName;
 	
 	
 	@BeforeClass
@@ -45,7 +45,7 @@ public class TestR43ples {
 		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.test.conf");
 		Service.start();
-		SampleDataSet.createSampleDataSetMerging(graphName);
+		graphName = SampleDataSet.createSampleDataSetMerging();
 	}
 	
 	@AfterClass
@@ -113,18 +113,16 @@ public class TestR43ples {
 	 * @throws InternalErrorException 
 	 */
 	@Test public void testExampleQueries() throws IOException, InternalErrorException {
-		SampleDataSet.createSampleDataset1("http://test.com/r43ples-dataset-1");
-		SampleDataSet.createSampleDataset2("http://test.com/r43ples-dataset-2");
+		String graph1 = SampleDataSet.createSampleDataset1();
+		String graph2 = SampleDataSet.createSampleDataset2();
 		
-		String result = executeR43plesQuery("CREATE SILENT GRAPH <http://test.com/r43ples-dataset-1>");
-		
-		result = executeR43plesQuery("SELECT * FROM <http://test.com/r43ples-dataset-1> REVISION \"3\" WHERE {	?s ?p ?o. }");
+		String result = executeR43plesQuery("SELECT * FROM " + graph1 + " REVISION \"3\" WHERE { ?s ?p ?o. }");
 		Assert.assertThat(result, containsString("http://test.com/Adam"));
 		
 		result = executeR43plesQuery("OPTION r43ples:SPARQL_JOIN \n"
 		+ "	SELECT ?s ?p ?o"
-		+ "	FROM <http://test.com/r43ples-dataset-1> REVISION \"master\""
-		+ "	FROM <http://test.com/r43ples-dataset-2> REVISION \"2\""
+		+ "	FROM " + graph1 + " REVISION \"master\""
+		+ "	FROM " + graph2 + "REVISION \"2\""
 		+ "	WHERE {"
 		+ "	?s ?p ?o."
 		+ "	}");
@@ -133,18 +131,18 @@ public class TestR43ples {
 		result = executeR43plesQuery(""
 		+ "USER \"mgraube\""
 		+ "MESSAGE \"test commit\""
-		+ "	INSERT DATA { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"5\""
+		+ "	INSERT DATA { GRAPH " + graph1 + " REVISION \"5\""
 		+ "	{	<a> <b> <c> .	}}");
 		
 		result = executeR43plesQuery(""
 		+ "USER \"mgraube\""
 		+ "MESSAGE \"test branch commit\""
-		+ "	BRANCH GRAPH <http://test.com/r43ples-dataset-1> REVISION \"2\" TO \"unstable\"");
+		+ "	BRANCH GRAPH " + graph1 + " REVISION \"2\" TO \"unstable\"");
 		
 		result = executeR43plesQuery(""
 		+ "USER \"mgraube\" "
 		+ "MESSAGE \"test tag commit\" "
-		+ "TAG GRAPH <http://test.com/r43ples-dataset-1> REVISION \"2\" TO \"v0.3-alpha\"");
+		+ "TAG GRAPH " + graph1 + " REVISION \"2\" TO \"v0.3-alpha\"");
 	
 	}
 		

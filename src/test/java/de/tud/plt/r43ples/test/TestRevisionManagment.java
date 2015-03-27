@@ -21,7 +21,7 @@ import de.tud.plt.r43ples.webservice.Endpoint;
 
 public class TestRevisionManagment {
 	
-	private final static String graph_test = "http://test.com/dataset1";
+	private static String graph_test;
     private final String format = "application/sparql-results+xml";
     private final Endpoint ep = new Endpoint();
 	private String result;
@@ -32,7 +32,7 @@ public class TestRevisionManagment {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
-		SampleDataSet.createSampleDataset1(graph_test);
+		graph_test = SampleDataSet.createSampleDataset1();
 	}
 	
 	@Test
