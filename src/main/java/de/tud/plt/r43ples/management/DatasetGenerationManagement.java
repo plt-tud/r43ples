@@ -34,7 +34,7 @@ public class DatasetGenerationManagement {
 	public static void createNewGraph(String graphName) throws InternalErrorException {
 		// Purge silent example graph
 		String query = String.format("DROP SILENT GRAPH <%s>", graphName);
-		ep.sparql(MediaType.TEXT_HTML, query);
+		ep.sparql(MediaType.TEXT_HTML, query, false);
 		
 		// Create new example graph
 		query = String.format("CREATE SILENT GRAPH <%s>", graphName);

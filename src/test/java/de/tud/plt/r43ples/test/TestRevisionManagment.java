@@ -21,7 +21,7 @@ import de.tud.plt.r43ples.webservice.Endpoint;
 
 public class TestRevisionManagment {
 	
-	private final static String graph_test = "http://test.com/dataset1";
+	private static String graph_test;
     private final String format = "application/sparql-results+xml";
     private final Endpoint ep = new Endpoint();
 	private String result;
@@ -32,8 +32,13 @@ public class TestRevisionManagment {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
-		SampleDataSet.createSampleDataset1(graph_test);
+		graph_test = SampleDataSet.createSampleDataset1();
 	}
+	
+	private final String query_template = ""
+    		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
+    		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
+	
 	
 	@Test
 	public void test_reference_uri() throws InternalErrorException {
@@ -72,56 +77,47 @@ public class TestRevisionManagment {
         assertXMLEqual(expected, result);   
 	}
 	
-	private static String query_template_Rewriting = "OPTION r43ples:SPARQL_JOIN%n"
-    		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
-    		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
-	
 	@Test
 	public void testSelectWithRewriting_0() throws SAXException, IOException, InternalErrorException {
-        result = ep.sparql(format, String.format(query_template_Rewriting, 0)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 0), true).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev0.xml");
         assertXMLEqual(expected, result);
 	}
 	
 	@Test
 	public void testSelectWithRewriting_1() throws SAXException, IOException, InternalErrorException {
-        result = ep.sparql(format, String.format(query_template_Rewriting, 1)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 1), true).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev1.xml");
         assertXMLEqual(expected, result);
 	}
 	
 	@Test
 	public void testSelectWithRewriting_2() throws SAXException, IOException, InternalErrorException {    
-        result = ep.sparql(format, String.format(query_template_Rewriting, 2)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 2), true).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev2.xml");
         assertXMLEqual(expected, result);
 	}
 	
 	@Test
 	public void testSelectWithRewriting_3() throws SAXException, IOException, InternalErrorException {
-        result = ep.sparql(format, String.format(query_template_Rewriting, 3)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 3), true).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev3.xml");
         assertXMLEqual(expected, result);
 	}
 	
 	@Test
 	public void testSelectWithRewriting_4() throws SAXException, IOException, InternalErrorException {
-        result = ep.sparql(format, String.format(query_template_Rewriting, 4)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 4), true).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev4.xml");
         assertXMLEqual(expected, result);
    }
 	
 	@Test
 	public void testSelectWithRewriting_5() throws SAXException, IOException, InternalErrorException {
-        result = ep.sparql(format, String.format(query_template_Rewriting, 5)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, 5), true).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev5.xml");
         assertXMLEqual(expected, result);
 	}
-
-	
-	private final String query_template = ""
-    		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
-    		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
 	
 	@Test
 	public void testSelect_0() throws SAXException, IOException, InternalErrorException {
@@ -187,7 +183,7 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void testSelect2Pattern_sparql_join() throws SAXException, IOException, InternalErrorException {
-		String query = "OPTION r43ples:SPARQL_JOIN\n"
+		String query = ""
 				+ "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "
 				+ "FROM <"+ graph_test + "> REVISION \"%d\" "
@@ -198,11 +194,11 @@ public class TestRevisionManagment {
 				+ "} ORDER BY ?p1 ?p2"; 
 		
 		expected = ResourceManagement.getContentFromResource("2patterns/response-rev3.xml");
-		result = ep.sparql(format, String.format(query,3)).getEntity().toString();
+		result = ep.sparql(format, String.format(query,3), true).getEntity().toString();
 		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("2patterns/response-rev4.xml");
-		result = ep.sparql(format, String.format(query,4)).getEntity().toString();
+		result = ep.sparql(format, String.format(query,4), true).getEntity().toString();
 		assertXMLEqual(expected, result);
 	}
 	
@@ -256,7 +252,7 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void test_minus_sparql_join() throws SAXException, IOException, InternalErrorException {
-		String query = "OPTION r43ples:SPARQL_JOIN\n"
+		String query = ""
 				+ "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?p1 ?p2 "
 				+ "FROM <"+ graph_test + "> REVISION \"%d\" "
@@ -266,15 +262,15 @@ public class TestRevisionManagment {
 				+ "} ORDER BY ?p1 ?p2"; 
 		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev2.xml");
-		result = ep.sparql(format, String.format(query,2)).getEntity().toString();
+		result = ep.sparql(format, String.format(query,2), true).getEntity().toString();
 		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev3.xml");
-		result = ep.sparql(format, String.format(query,3)).getEntity().toString();
+		result = ep.sparql(format, String.format(query,3), true).getEntity().toString();
 		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev4.xml");
-		result = ep.sparql(format, String.format(query,4)).getEntity().toString();
+		result = ep.sparql(format, String.format(query,4), true).getEntity().toString();
 		assertXMLEqual(expected, result);
 	}
 	

@@ -27,8 +27,8 @@ import de.tud.plt.r43ples.webservice.Endpoint;
  */
 public class TestMultipleGraph {
 
-	final static String graph1 = "http://test.com/graph1";
-	final static String graph2 = "http://test.com/graph2";
+	private static String graph1;
+	private static String graph2;
 
 	private final Endpoint ep = new Endpoint();
 	private String result;
@@ -41,9 +41,9 @@ public class TestMultipleGraph {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		XMLUnit.setIgnoreWhitespace(true);
-		Config.readConfig("r43ples.conf");
-		SampleDataSet.createSampleDataset1(graph1);
-		SampleDataSet.createSampleDataset2(graph2);
+		Config.readConfig("r43ples.test.conf");
+		graph1 = SampleDataSet.createSampleDataset1();
+		graph2 = SampleDataSet.createSampleDataset2();
 	}
 
 
@@ -53,9 +53,8 @@ public class TestMultipleGraph {
 	 * @throws InternalErrorException 
 	 */
 	@Test
-	public final void testMultipleGraphsSparqlJoin() throws SAXException, IOException, InternalErrorException {
+	public final void testMultipleGraphs() throws SAXException, IOException, InternalErrorException {
 		String query_template = ""
-				+ "OPTION r43ples:SPARQL_JOIN %n"
 				+ "PREFIX : <http://test.com/> %n"
 				+ "SELECT ?address %n"
 				+ "FROM <" + graph1	+ "> REVISION \"%d\"%n" 
@@ -64,7 +63,7 @@ public class TestMultipleGraph {
 				+ "	:Adam :knows ?a."
 				+ " ?a :address ?address."
 				+ "} %n"
-				+ "ORDER By ?address";
+				+ "ORDER BY ?address";
 
 		result = ep.sparql(format, String.format(query_template, 1, 1)).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-1-1.xml");
@@ -75,6 +74,37 @@ public class TestMultipleGraph {
 		assertXMLEqual(expected, result);
 		
 		result = ep.sparql(format, String.format(query_template, 2, 2)).getEntity().toString();
+		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-2-2.xml");
+		assertXMLEqual(expected, result);
+	}
+	
+	/**
+	 * @throws IOException 
+	 * @throws SAXException 
+	 * @throws InternalErrorException 
+	 */
+	@Test
+	public final void testMultipleGraphsSparqlJoin() throws SAXException, IOException, InternalErrorException {
+		String query_template = ""
+				+ "PREFIX : <http://test.com/> %n"
+				+ "SELECT ?address %n"
+				+ "FROM <" + graph1	+ "> REVISION \"%d\"%n" 
+				+ "FROM <" + graph2	+ "> REVISION \"%d\"%n"
+				+ "WHERE {"
+				+ "	:Adam :knows ?a."
+				+ " ?a :address ?address."
+				+ "} %n"
+				+ "ORDER BY ?address";
+
+		result = ep.sparql(format, String.format(query_template, 1, 1), true).getEntity().toString();
+		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-1-1.xml");
+		assertXMLEqual(expected, result);
+		
+		result = ep.sparql(format, String.format(query_template, 2, 1), true).getEntity().toString();
+		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-2-1.xml");
+		assertXMLEqual(expected, result);
+		
+		result = ep.sparql(format, String.format(query_template, 2, 2), true).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-2-2.xml");
 		assertXMLEqual(expected, result);
 	}

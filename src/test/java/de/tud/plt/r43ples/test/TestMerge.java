@@ -25,7 +25,7 @@ import de.tud.plt.r43ples.webservice.Endpoint;
 public class TestMerge {
 
 	/** The graph name. **/
-	private static String graphName = "http://exampleGraph.com/r43ples/merge";
+	private static String graphName;
 	/** The user. **/
 	private static String user = "shensel";
 	
@@ -51,7 +51,7 @@ public class TestMerge {
 	@Before
 	public void setUp() throws InternalErrorException {
 		// Create the initial data set
-		SampleDataSet.createSampleDataSetComplexStructure(graphName);
+		graphName = SampleDataSet.createSampleDataSetComplexStructure();
 	}
 	
 	

@@ -31,24 +31,34 @@
 <div id="main" class="col-md-7">
 	<div id="query_form">
 		<h2>Query Form</h2>
-		<form action="/r43ples/sparql" method="post" role="form" class="form">
+		<form action="/r43ples/sparql" method="post" role="form" class="form-horizontal">
 			<div class="form-group">
 				<label for="query">Query Text</label><br />
 				<textarea name="query" class="form-control" id="query" rows="16" placeholder="Insert R43ples/SPARQL query text or copy it from examples"></textarea>
 			</div>
 			<div class="form-group">
-				<label for="format">Results Format:</label>
-				<select	name="format" class="form-control" id="name">
-					<option value="text/html">HTML</option>
-					<option value="text/plain">Text</option>
-					<option value="application/sparql-results+xml">RDF/XML</option>
-					<option value="text/turtle">Turtle</option>
-					<option value="application/json">JSON</option>
-				</select>
+				<label for="format" class="col-sm-3">Results Format:</label>
+				<div class="col-sm-9">
+					<select	name="format" class="form-control" id="name">
+						<option value="text/html">HTML</option>
+						<option value="text/plain">Text</option>
+						<option value="application/sparql-results+xml">RDF/XML</option>
+						<option value="text/turtle">Turtle</option>
+						<option value="application/json">JSON</option>
+					</select>
+				</div>
 			</div>
 			<div class="form-group">
-				<input type="submit" class="btn btn-primary" value="Run Query" />
-				<input type="reset"	class="btn btn-warning" value="Reset" />
+				<label for="join_option" class="col-sm-3" >JOIN Option:</label>
+				<div class="col-sm-9">
+					<input type="checkbox" name="join_option" value="true">
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-3 col-sm-9">
+					<input type="submit" class="btn btn-primary" value="Run Query" />
+					<input type="reset"	class="btn btn-warning btn-sm" value="Reset" />
+				</div>
 			</div>
 		</form>
 
@@ -58,12 +68,12 @@
 				<form action="createSampleDataset" method="get" class="form-inline">
 					<select id="exampleGraph" class="form-control" name="dataset">
 						<option value="all">All</option>
-						<option>http://test.com/r43ples-dataset-1</option>
-						<option>http://test.com/r43ples-dataset-2</option>
-						<option>http://test.com/r43ples-dataset-merging</option>
-						<option>http://test.com/r43ples-dataset-merging-classes</option>
-						<option>http://test.com/r43ples-dataset-renaming</option>
-						<option>http://test.com/r43ples-dataset-complex-structure</option>
+						<option value="1">http://test.com/r43ples-dataset-1</option>
+						<option value="2">http://test.com/r43ples-dataset-2</option>
+						<option value="merging">http://test.com/r43ples-dataset-merging</option>
+						<option value="merging-classes">http://test.com/r43ples-dataset-merging-classes</option>
+						<option value="renaming">http://test.com/r43ples-dataset-renaming</option>
+						<option value="complex-structure">http://test.com/r43ples-dataset-complex-structure</option>
 					</select>
 					<input type="submit" class="btn btn-default" value="Create sample data set" />
 				</form>

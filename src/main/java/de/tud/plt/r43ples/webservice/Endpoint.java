@@ -71,7 +71,7 @@ public class Endpoint {
 			"(?<type>SELECT|ASK|CONSTRUCT).*WHERE\\s*\\{(?<where>.*)\\}", 
 			patternModifier);
 	private final Pattern patternSelectFromPart = Pattern.compile(
-			"(?<type>FROM|GRAPH)\\s*<(?<graph>.*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
+			"(?<type>FROM|GRAPH)\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
 			patternModifier);
 	
 	private final Pattern patternUpdateQuery = Pattern.compile(
@@ -133,36 +133,24 @@ public class Endpoint {
 	@GET
 	@Template(name = "/exampleDatasetGeneration.mustache")
 	public final List<String> createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws IOException, InternalErrorException {
-		final String graph_dataset1 = "http://test.com/r43ples-dataset-1";
-		final String graph_dataset2 = "http://test.com/r43ples-dataset-2";
-		final String graph_dataset_merging = "http://test.com/r43ples-dataset-merging";
-		final String graph_dataset_merging_classes = "http://test.com/r43ples-dataset-merging-classes";
-		final String graph_dataset_renaming = "http://test.com/r43ples-dataset-renaming";
-		final String graph_dataset_complex_structure = "http://test.com/r43ples-dataset-complex-structure";
 		List<String> graphs = new ArrayList<>();
-		if (graph.equals(graph_dataset1) || graph.equals("all")){
-			SampleDataSet.createSampleDataset1(graph_dataset1);
-			graphs.add(graph_dataset1);
+		if (graph.equals("1") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataset1());
 		}
-		if (graph.equals(graph_dataset2) || graph.equals("all")){
-			SampleDataSet.createSampleDataset2(graph_dataset2);
-			graphs.add(graph_dataset2);
+		if (graph.equals("2") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataset2());
 		}
-		if (graph.equals(graph_dataset_merging) || graph.equals("all")){
-			SampleDataSet.createSampleDataSetMerging(graph_dataset_merging);
-			graphs.add(graph_dataset_merging);
+		if (graph.equals("merging") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataSetMerging());
 		}
-		if (graph.equals(graph_dataset_merging_classes) || graph.equals("all")){
-			SampleDataSet.createSampleDataSetMergingClasses(graph_dataset_merging_classes);
-			graphs.add(graph_dataset_merging_classes);
+		if (graph.equals("merging_classes") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataSetMergingClasses());
 		}
-		if (graph.equals(graph_dataset_renaming) || graph.equals("all")){
-			SampleDataSet.createSampleDataSetRenaming(graph_dataset_renaming);
-			graphs.add(graph_dataset_renaming);
+		if (graph.equals("renaming") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataSetRenaming());
 		}
-		if (graph.equals(graph_dataset_complex_structure) || graph.equals("all")){
-			SampleDataSet.createSampleDataSetComplexStructure(graph_dataset_complex_structure);
-			graphs.add(graph_dataset_complex_structure);
+		if (graph.equals("complex_structure") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataSetComplexStructure());
 		}
 	    htmlMap.put("graphs", graphs);
 		return graphs;
@@ -232,9 +220,11 @@ public class Endpoint {
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("format") final String formatQuery, @FormParam("query") @DefaultValue("") final String sparqlQuery) throws InternalErrorException {
+			@FormParam("format") final String formatQuery, 
+			@FormParam("query") @DefaultValue("") final String sparqlQuery,
+			@FormParam("join_option") final boolean join_option) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
-		return sparql(format, sparqlQuery);
+		return sparql(format, sparqlQuery, join_option);
 	}
 		
 	
@@ -257,7 +247,9 @@ public class Endpoint {
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
-			@QueryParam("format") final String formatQuery, @QueryParam("query") @DefaultValue("") final String sparqlQuery) throws InternalErrorException {
+			@QueryParam("format") final String formatQuery, 
+			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
+			@QueryParam("join_option") final boolean join_option) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		
 		String sparqlQueryDecoded;
@@ -267,7 +259,7 @@ public class Endpoint {
 			e.printStackTrace();
 			sparqlQueryDecoded = sparqlQuery;
 		}
-		return sparql(format, sparqlQueryDecoded);
+		return sparql(format, sparqlQueryDecoded, join_option);
 	}
 	
 	
@@ -309,7 +301,7 @@ public class Endpoint {
 	 * @return the response
 	 * @throws InternalErrorException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException {
+	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException {
 		if (sparqlQuery.equals("")) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
@@ -317,9 +309,27 @@ public class Endpoint {
 				return getServiceDescriptionResponse(format);
 			}
 		} else {
-			return getSparqlResponse(format, sparqlQuery);
+			return getSparqlResponse(format, sparqlQuery, join_option);
 		}
 	}
+	
+	/**
+	 * Interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * Provides HTML form if no query is specified and HTML is requested
+	 * Provides Service Description if no query is specified and RDF
+	 * representation is requested
+	 * 
+	 * @param format
+	 *            mime type for response format
+	 * @param sparqlQuery
+	 *            decoded SPARQL query
+	 * @return the response
+	 * @throws InternalErrorException 
+	 */
+	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException {
+		return sparql(format, sparqlQuery, false);
+	}
+
 
 	
 	/**
@@ -367,7 +377,7 @@ public class Endpoint {
 	 * @return HTTP response of evaluating the sparql query 
 	 * @throws InternalErrorException
 	 */
-	private Response getSparqlResponse(final String format, String sparqlQuery) throws InternalErrorException {
+	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean join_option) throws InternalErrorException {
 		logger.info("SPARQL query was requested. Query: " + sparqlQuery);
 		String user = null;
 		Matcher userMatcher = patternUser.matcher(sparqlQuery);
@@ -383,7 +393,7 @@ public class Endpoint {
 		}
 
 		if (patternSelectAskConstructQuery.matcher(sparqlQuery).find()) {
-			return getSelectConstructAskResponse(sparqlQuery, format);
+			return getSelectConstructAskResponse(sparqlQuery, format, join_option);
 		}
 		if (patternUpdateQuery.matcher(sparqlQuery).find()) {
 			return getUpdateResponse(sparqlQuery, user, message, format);
@@ -482,17 +492,18 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @param format
 	 *            the result format
+	 * @param join_option
+	 * 			   use inner JIOn option for query
 	 * @return the response with HTTP header for every graph (revision number
 	 *         and MASTER revision number)
 	 * @throws InternalErrorException 
 	 */
-	private Response getSelectConstructAskResponse(final String query, final String format) throws InternalErrorException {
+	private Response getSelectConstructAskResponse(final String query, final String format, final boolean join_option) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.ok();
 		String result;
 		
-		if (query.contains("OPTION r43ples:SPARQL_JOIN")) {
-			String query_rewritten = query.replace("OPTION r43ples:SPARQL_JOIN", "");
-			query_rewritten = SparqlRewriter.rewriteQuery(query_rewritten);
+		if (join_option) {
+			String query_rewritten = SparqlRewriter.rewriteQuery(query);
 			result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query_rewritten, format);
 		}
 		else {
@@ -975,5 +986,8 @@ public class Endpoint {
 		
 		return responseBuilder.build();	
 	}
+
+
+
 	
 }
