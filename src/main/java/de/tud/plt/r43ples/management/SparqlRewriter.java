@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.graph.Node;
@@ -14,7 +15,9 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.sparql.core.TriplePath;
 import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.expr.E_Equals;
 import com.hp.hpl.jena.sparql.expr.E_OneOf;
+import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
 import com.hp.hpl.jena.sparql.path.P_Link;
@@ -55,55 +58,118 @@ public class SparqlRewriter {
 	private static final Node rmo_references = NodeFactory.createURI(rmo + "references");
 	private static final Node prov_wasDerivedFrom = NodeFactory.createURI(prov + "wasDerivedFrom");
 
-	private static int statement_i = 0;
-	
-	private static final Pattern pattern = Pattern.compile("(FROM|GRAPH)\\s*<(?<graph>\\S*)>\\s*REVISION\\s*\"(?<revision>\\S*)\"", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
 
-	
-	
-	public static String rewriteQuery(final String query_r43ples) throws InternalErrorException {
 
-		statement_i = 0;
+	/** instance variables */
+	private int statement_i = 0;
+	private final String query_original;
+	private String query_rewritten;
+	private LinkedList<String> revisions = new LinkedList<String>();
+	private LinkedList<String> graphs = new LinkedList<String>();
+	private ExprList expression_list_revision_path = new ExprList();
+	private Expr last_revision;
+	
+	public static String rewriteQuery(final String query_r43ples) {
+		SparqlRewriter sr = new SparqlRewriter(query_r43ples);
+		return sr.query_rewritten;
+	}
+	
+	public static void main(String[] args) throws ConfigurationException {
+		Config.readConfig("r43ples.conf");
 		
-		ExprList expression_list_revision_path = new ExprList();
-		ExprList last_revision = new ExprList();
-
-		Matcher m = pattern.matcher(query_r43ples);
-		String query_sparql = query_r43ples;
-		while (m.find()) {
-			String graphName = m.group("graph");
-			String referenceName = m.group("revision").toLowerCase();
-			m.reset();
+		String query = "SELECT * WHERE { GRAPH <http://test.com/r43ples-dataset-1> { ?s ?p ?o.} FILTER (?s=?p)}";
+		String result = rewriteQuery(query);
+		System.out.println(result);
+		
+		
+		query = "SELECT * WHERE { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"1\" { ?s ?p ?o.} FILTER (?s=?p)}";
+		result = rewriteQuery(query);
+		System.out.println(result);
+		
+		query = "SELECT * WHERE { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"1\" { ?s ?p ?o; ?p2 ?o2. FILTER (?o=?o2)}}";
+		result = rewriteQuery(query);
+		System.out.println(result);
+		
+		
+		query = "SELECT * WHERE { "
+				+ " GRAPH <http://test.com/r43ples-dataset-1> REVISION \"1\" { ?s ?p ?o}"
+				+ " GRAPH <http://test.com/r43ples-dataset-1> { ?s ?p2 ?o2}"
+				+ "}";
+		result = rewriteQuery(query);
+		System.out.println(result);
+		
+		
+		query = "SELECT * WHERE { "
+				+ " GRAPH <http://test.com/r43ples-dataset-1> REVISION \"1\" { ?s ?p ?o}"
+				+ " GRAPH <http://test.com/r43ples-dataset-1> REVISION \"4\" { ?s ?p2 ?o2.}"
+				+ "}";
+        result = rewriteQuery(query);
+        System.out.println(result);
+	}
+	
+	
+	
+	public SparqlRewriter(String query){
+		query_original = query;
+		try {
+			query_rewritten = rewrite();
+		} catch (InternalErrorException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public String getRewrittenQuery(){
+		return query_rewritten;
+	}
+	
+	private void updateRevision(){
+		String revisionNumber = revisions.removeFirst();
+		String graphName = graphs.removeFirst();
+		Tree tree =  new Tree(graphName);
+		LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
+		logger.debug("Path to revision: " + list.toString());
+		last_revision = ExprUtils.nodeToExpr(NodeFactory.createURI(list.get(0).getRevisionUri()));
+		list.removeLast();
+		for (Revision ns : list) {
+			expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(ns.getRevisionUri())));
+		}
+	}
+	
+	public String rewrite() throws InternalErrorException {
+		final Pattern pattern1 = Pattern.compile("GRAPH\\s*<(?<graph>\\S*)>\\s*\\{", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+		final Pattern pattern2 = Pattern.compile("GRAPH\\s*<(?<graph>\\S*)>\\s*REVISION\\s*\"(?<revision>\\S*)\"", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+		
+		
+		
+		
+		Matcher m1 = pattern1.matcher(query_original);
+		String query_sparql = m1.replaceAll("GRAPH <$1> REVISION \"master\" {");
+				
+		
+		Matcher m2 = pattern2.matcher(query_sparql);
+		
+		while (m2. find()) {
+			String graphName = m2.group("graph");
+			String referenceName = m2.group("revision").toLowerCase();
 			
 			String revisionNumber = RevisionManagement.getRevisionNumber(graphName, referenceName);
+			graphs.add(graphName);
+			revisions.add(revisionNumber);
 
-			Tree tree =  new Tree(graphName);
-			LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
-			logger.debug("Path to revision: " + list.toString());
-			last_revision.add(ExprUtils.nodeToExpr(NodeFactory.createURI(list.get(0).getRevisionUri())));
-			list.removeLast();
-			for (Revision ns : list) {
-				expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(ns.getRevisionUri())));
-			}
-
-			query_sparql = m.replaceFirst("");
-			m = pattern.matcher(query_sparql);
+			query_sparql = m2.replaceFirst("GRAPH <"+graphName+">");
+			m2 = pattern2.matcher(query_sparql);
 		}
 
 		// creates the Query
 		Query query_new = QueryFactory.create(query_sparql);
-		ElementGroup eg_orginal = (ElementGroup) query_new.getQueryPattern();
+		Element el_orginal = query_new.getQueryPattern();
 
-		// stores the modified elements
-		ElementGroup eg_modified = new ElementGroup();
-		ElementGroup eg = getRewrittenElementGroup(expression_list_revision_path, last_revision,
-				eg_orginal);
-		for (Iterator<Element> iterator = eg.getElements().iterator(); iterator.hasNext();) {
-			eg_modified.addElement(iterator.next());
-		}
+		// Do the rewriting and store the modified elements
+		Element el_modified = getRewrittenElement(el_orginal);
+		
 
 		query_new.setDistinct(true);
-		query_new.setQueryPattern(eg_modified);
+		query_new.setQueryPattern(el_modified);
 		query_sparql = query_new.serialize();
 		logger.debug("Rewritten query: \n" + query_sparql);
 		return query_sparql;
@@ -115,37 +181,46 @@ public class SparqlRewriter {
 	 * @param eg_orginal
 	 * @return rewritten element group
 	 */
-	private static ElementGroup getRewrittenElementGroup(ExprList expression_list_revision_path,
-			ExprList branch, ElementGroup eg_orginal) {
-		ElementGroup eg_modified = new ElementGroup();
-		for (Element element : eg_orginal.getElements()) {
-			try {
-				if (element.getClass().equals(ElementMinus.class)) {
-					ElementMinus elementMinus = (ElementMinus) element;
-					ElementGroup elementgroup = (ElementGroup) elementMinus.getMinusElement();
-					Element minusPart = getRewrittenElementGroup(expression_list_revision_path,
-							branch, elementgroup);
-					ElementMinus em = new ElementMinus(minusPart);
-					eg_modified.addElement(em);
-				} else {
-					ElementPathBlock epb = (ElementPathBlock) element;
-					Iterator<TriplePath> itPatternElts = epb.patternElts();
-
-					while (itPatternElts.hasNext()) {
-						TriplePath triplePath = itPatternElts.next();
-						statement_i += 1;
-						ElementGroup eg = getRewrittenTriplePath(expression_list_revision_path,
-								branch, triplePath);
-						for (Iterator<Element> iterator = eg.getElements().iterator(); iterator.hasNext();) {
-							eg_modified.addElement(iterator.next());
-						}
-					}
-				}
-			} catch (ClassCastException e) {
-				eg_modified.addElement(element);
+	private Element getRewrittenElement(final Element el_orginal) {
+		if (el_orginal.getClass().equals(ElementNamedGraph.class)) {
+			ElementNamedGraph ng_original = (ElementNamedGraph) el_orginal;
+			ElementGroup eg_original = (ElementGroup) ng_original.getElement();
+			updateRevision();			
+			return getRewrittenElement(eg_original);
+		} 
+		else if (el_orginal.getClass().equals(ElementGroup.class)) {
+			ElementGroup elementgroup = (ElementGroup) el_orginal;
+			
+			ElementGroup eg_modified = new ElementGroup();
+			for (Element el : elementgroup.getElements()) {
+				Element el_mod = getRewrittenElement(el);
+				expand(eg_modified, el_mod);
 			}
+			return eg_modified;
+		} 
+		else if (el_orginal.getClass().equals(ElementMinus.class)) {
+			ElementMinus elementMinus = (ElementMinus) el_orginal;
+			ElementGroup elementgroup = (ElementGroup) elementMinus.getMinusElement();
+			Element minusPart = getRewrittenElement(elementgroup);
+			ElementMinus em = new ElementMinus(minusPart);
+			return em;
 		}
-		return eg_modified;
+		else if (el_orginal.getClass().equals(ElementPathBlock.class)){
+			ElementPathBlock epb = (ElementPathBlock) el_orginal;
+			Iterator<TriplePath> itPatternElts = epb.patternElts();
+
+			ElementGroup eg_modified = new ElementGroup();
+			while (itPatternElts.hasNext()) {
+				TriplePath triplePath = itPatternElts.next();
+				statement_i += 1;
+				ElementGroup eg = getRewrittenTriplePath(triplePath);
+				expand(eg_modified, eg);
+			}
+			return eg_modified;
+		}
+		else {
+			return el_orginal;
+		}
 	}
 
 	/**
@@ -154,8 +229,7 @@ public class SparqlRewriter {
 	 * @param triplePath
 	 * @return rewritten triple path element
 	 */
-	private static ElementGroup getRewrittenTriplePath(ExprList expression_list_revision_path,
-			ExprList branch, TriplePath triplePath) {
+	private ElementGroup getRewrittenTriplePath(TriplePath triplePath) {
 		{
 			ElementGroup eg_modified = new ElementGroup();
 			
@@ -175,7 +249,7 @@ public class SparqlRewriter {
 //			eg_fullgraph.addElement(new ElementBind( var_r_delete_set, ExprUtils.nodeToExpr(branch)));
 			eg_fullgraph.addTriplePattern(new Triple(anon, rmo_references, var_r_delete_set));
 			eg_fullgraph.addTriplePattern(new Triple(anon, rmo_fullGraph, g_delete_set_full_graph));
-			eg_fullgraph.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_delete_set), branch)));
+			eg_fullgraph.addElementFilter(new ElementFilter(new E_Equals(new ExprVar(var_r_delete_set), last_revision)));
 			
 
 			ElementUnion eg_union = new ElementUnion();
@@ -211,6 +285,15 @@ public class SparqlRewriter {
 			eg_modified.addElement(new ElementMinus(eg_minus));
 			return eg_modified;
 		}
+	}
+	
+	private static ElementGroup expand(ElementGroup eg, final Element el) {
+		if (el.getClass().equals(ElementGroup.class))
+			for (Element el_new : ((ElementGroup) el).getElements())
+				eg.addElement(el_new);
+		else
+			eg.addElement(el);
+		return eg;
 	}
 
 }
