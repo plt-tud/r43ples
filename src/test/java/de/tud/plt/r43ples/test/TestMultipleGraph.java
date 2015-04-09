@@ -46,6 +46,14 @@ public class TestMultipleGraph {
 		graph2 = SampleDataSet.createSampleDataset2();
 	}
 
+	private final String query_template = ""
+			+ "PREFIX : <http://test.com/> %n"
+			+ "SELECT ?address %n"
+			+ "WHERE {"
+			+ "  GRAPH <" + graph1	+ "> REVISION \"%d\" { :Adam :knows ?a. }%n"
+			+ "  GRAPH <" + graph2	+ "> REVISION \"%d\" {?a :address ?address. }%n"
+			+ "} %n"
+			+ "ORDER BY ?address";
 
 	/**
 	 * @throws IOException 
@@ -54,17 +62,6 @@ public class TestMultipleGraph {
 	 */
 	@Test
 	public final void testMultipleGraphs() throws SAXException, IOException, InternalErrorException {
-		String query_template = ""
-				+ "PREFIX : <http://test.com/> %n"
-				+ "SELECT ?address %n"
-				+ "FROM <" + graph1	+ "> REVISION \"%d\"%n" 
-				+ "FROM <" + graph2	+ "> REVISION \"%d\"%n"
-				+ "WHERE {"
-				+ "	:Adam :knows ?a."
-				+ " ?a :address ?address."
-				+ "} %n"
-				+ "ORDER BY ?address";
-
 		result = ep.sparql(format, String.format(query_template, 1, 1)).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-1-1.xml");
 		assertXMLEqual(expected, result);
@@ -85,17 +82,6 @@ public class TestMultipleGraph {
 	 */
 	@Test
 	public final void testMultipleGraphsSparqlJoin() throws SAXException, IOException, InternalErrorException {
-		String query_template = ""
-				+ "PREFIX : <http://test.com/> %n"
-				+ "SELECT ?address %n"
-				+ "FROM <" + graph1	+ "> REVISION \"%d\"%n" 
-				+ "FROM <" + graph2	+ "> REVISION \"%d\"%n"
-				+ "WHERE {"
-				+ "	:Adam :knows ?a."
-				+ " ?a :address ?address."
-				+ "} %n"
-				+ "ORDER BY ?address";
-
 		result = ep.sparql(format, String.format(query_template, 1, 1), true).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-1-1.xml");
 		assertXMLEqual(expected, result);

@@ -7,7 +7,7 @@ WHERE
     GRAPH <http://eatld.et.tu-dresden.de/r43ples-revisions>
       {   { _:b0  <http://eatld.et.tu-dresden.de/rmo#references>  ?r_delete_set_1 ;
                   <http://eatld.et.tu-dresden.de/rmo#fullGraph>  ?g_delete_set_full_graph_1 .
-            FILTER ( ?r_delete_set_1 IN (:r43ples-dataset-1-revision-5) )
+            FILTER ( ?r_delete_set_1 = :r43ples-dataset-1-revision-5 )
           }
         UNION
           { ?r_delete_set_1
@@ -32,7 +32,7 @@ WHERE
         GRAPH <http://eatld.et.tu-dresden.de/r43ples-revisions>
           {   { _:b1  <http://eatld.et.tu-dresden.de/rmo#references>  ?r_delete_set_2 ;
                       <http://eatld.et.tu-dresden.de/rmo#fullGraph>  ?g_delete_set_full_graph_2 .
-                FILTER ( ?r_delete_set_2 IN (:r43ples-dataset-1-revision-5) )
+                FILTER ( ?r_delete_set_2 = :r43ples-dataset-1-revision-5 )
               }
             UNION
               { ?r_delete_set_2

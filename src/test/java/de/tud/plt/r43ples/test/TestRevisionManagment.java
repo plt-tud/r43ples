@@ -36,9 +36,31 @@ public class TestRevisionManagment {
 	}
 	
 	private final String query_template = ""
-    		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
-    		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
+    		+ "SELECT ?s ?p ?o %n"
+    		+ "WHERE { %n"
+    		+ "  GRAPH <"+graph_test+"> REVISION \"%d\" {?s ?p ?o} %n"
+			+ "} ORDER BY ?s ?p ?o";
 	
+	
+	private final String query_template_2_triples_filter = "PREFIX : <http://test.com/> "
+			+ "SELECT DISTINCT ?p1 ?p2 "
+			+ "WHERE {"
+			+ "  GRAPH <"+ graph_test + "> REVISION \"%d\" {"
+			+ "  	?p1 :knows ?t."
+			+ "	    ?p2 :knows ?t."
+			+ "     FILTER (?p1!=?p2)"
+			+ "  }"
+			+ "} ORDER BY ?p1 ?p2"; 
+	
+	private String query_template_minus = ""
+			+ "PREFIX : <http://test.com/> "
+			+ "SELECT DISTINCT ?p1 ?p2 "
+			+ "WHERE {"
+			+ "  GRAPH <"+ graph_test + "> REVISION \"%d\"{ "
+			+ "	  ?p1 :knows ?p2."
+			+ "	  MINUS {?p1 :knows :Danny}"
+			+ "  }"
+			+ "} ORDER BY ?p1 ?p2"; 
 	
 	@Test
 	public void test_reference_uri() throws InternalErrorException {
@@ -69,8 +91,9 @@ public class TestRevisionManagment {
         assertXMLEqual(expected, result);
         
         query = "SELECT ?s ?p ?o "
-        		+ "FROM <"+graph_test+"> REVISION \"MASTER\""
-        		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
+        		+ "WHERE {"
+        		+ "	GRAPH <"+graph_test+"> REVISION \"MASTER\" {?s ?p ?o}"
+				+ "} ORDER BY ?s ?p ?o";
         
         result = ep.sparql(format, query).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev5.xml");
@@ -163,42 +186,23 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void testSelect2Pattern() throws SAXException, IOException, InternalErrorException {
-		String query = "PREFIX : <http://test.com/> "
-				+ "SELECT DISTINCT ?p1 ?p2 "
-				+ "FROM <"+ graph_test + "> REVISION \"%d\" "
-				+ "WHERE {"
-				+ "	?p1 :knows ?t."
-				+ "	?p2 :knows ?t."
-				+ " FILTER (?p1!=?p2)"
-				+ "} ORDER BY ?p1 ?p2"; 
-		
 		expected = ResourceManagement.getContentFromResource("2patterns/response-rev3.xml");
-		result = ep.sparql(format, String.format(query,3)).getEntity().toString();
+		result = ep.sparql(format, String.format(query_template_2_triples_filter,3)).getEntity().toString();
 		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("2patterns/response-rev4.xml");
-		result = ep.sparql(format, String.format(query,4)).getEntity().toString();
+		result = ep.sparql(format, String.format(query_template_2_triples_filter,4)).getEntity().toString();
 		assertXMLEqual(expected, result);
 	}
 	
 	@Test
 	public void testSelect2Pattern_sparql_join() throws SAXException, IOException, InternalErrorException {
-		String query = ""
-				+ "PREFIX : <http://test.com/> "
-				+ "SELECT DISTINCT ?p1 ?p2 "
-				+ "FROM <"+ graph_test + "> REVISION \"%d\" "
-				+ "WHERE {"
-				+ "	?p1 :knows ?t."
-				+ "	?p2 :knows ?t."
-				+ " FILTER (?p1!=?p2)"
-				+ "} ORDER BY ?p1 ?p2"; 
-		
 		expected = ResourceManagement.getContentFromResource("2patterns/response-rev3.xml");
-		result = ep.sparql(format, String.format(query,3), true).getEntity().toString();
+		result = ep.sparql(format, String.format(query_template_2_triples_filter,3), true).getEntity().toString();
 		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("2patterns/response-rev4.xml");
-		result = ep.sparql(format, String.format(query,4), true).getEntity().toString();
+		result = ep.sparql(format, String.format(query_template_2_triples_filter,4), true).getEntity().toString();
 		assertXMLEqual(expected, result);
 	}
 	
@@ -226,51 +230,33 @@ public class TestRevisionManagment {
 		Assert.assertEquals("2.0-1.1-0", revNumber4);
 	}
 	
-	
 	@Test
 	public void test_minus() throws SAXException, IOException, InternalErrorException {
-		String query = "PREFIX : <http://test.com/> "
-				+ "SELECT DISTINCT ?p1 ?p2 "
-				+ "FROM <"+ graph_test + "> REVISION \"%d\" "
-				+ "WHERE {"
-				+ "	?p1 :knows ?p2."
-				+ "	MINUS {?p1 :knows :Danny}"
-				+ "} ORDER BY ?p1 ?p2"; 
-		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev2.xml");
-		result = ep.sparql(format, String.format(query,2)).getEntity().toString();
+		result = ep.sparql(format, String.format(query_template_minus,2)).getEntity().toString();
 		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev3.xml");
-		result = ep.sparql(format, String.format(query,3)).getEntity().toString();
+		result = ep.sparql(format, String.format(query_template_minus,3)).getEntity().toString();
 		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev4.xml");
-		result = ep.sparql(format, String.format(query,4)).getEntity().toString();
+		result = ep.sparql(format, String.format(query_template_minus,4)).getEntity().toString();
 		assertXMLEqual(expected, result);
 	}
 	
 	@Test
 	public void test_minus_sparql_join() throws SAXException, IOException, InternalErrorException {
-		String query = ""
-				+ "PREFIX : <http://test.com/> "
-				+ "SELECT DISTINCT ?p1 ?p2 "
-				+ "FROM <"+ graph_test + "> REVISION \"%d\" "
-				+ "WHERE {"
-				+ "	?p1 :knows ?p2."
-				+ "	MINUS {?p1 :knows :Danny}"
-				+ "} ORDER BY ?p1 ?p2"; 
-		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev2.xml");
-		result = ep.sparql(format, String.format(query,2), true).getEntity().toString();
+		result = ep.sparql(format, String.format(query_template_minus,2), true).getEntity().toString();
 		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev3.xml");
-		result = ep.sparql(format, String.format(query,3), true).getEntity().toString();
+		result = ep.sparql(format, String.format(query_template_minus,3), true).getEntity().toString();
 		assertXMLEqual(expected, result);
 		
 		expected = ResourceManagement.getContentFromResource("minus/response-rev4.xml");
-		result = ep.sparql(format, String.format(query,4), true).getEntity().toString();
+		result = ep.sparql(format, String.format(query_template_minus,4), true).getEntity().toString();
 		assertXMLEqual(expected, result);
 	}
 	

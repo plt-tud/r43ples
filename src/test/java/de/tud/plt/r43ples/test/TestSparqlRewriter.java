@@ -37,9 +37,8 @@ public class TestSparqlRewriter {
 	public final void testRewriteQuery1() throws InternalErrorException {
 		String query = "PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?s ?o "
-				+ "FROM <" + graph_test + "> REVISION \"2\""
 				+ "WHERE {"
-				+ "	?s :knows ?o"
+				+ "  GRAPH <" + graph_test + "> REVISION \"2\" {?s :knows ?o }"
 				+ "} ORDER BY ?s ?o";	
 		
 		String result = SparqlRewriter.rewriteQuery(query);
@@ -56,10 +55,11 @@ public class TestSparqlRewriter {
 		String query = "PREFIX : <http://test.com/> "
 
 		+ "SELECT DISTINCT ?p1 ?p2 "
-		+ "FROM <" + graph_test + "> REVISION \"2\""
 		+ "WHERE {"
-		+ "	?p1 :knows ?p2."
-		+ "	MINUS {?p1 :knows :Danny}"
+		+ "  GRAPH <" + graph_test + "> REVISION \"2\" {"
+		+ "	   ?p1 :knows ?p2."
+		+ "	   MINUS {?p1 :knows :Danny}"
+		+ "  }"
 		+ "} ORDER BY ?p1 ?p2";  
 		
 		String result = SparqlRewriter.rewriteQuery(query);

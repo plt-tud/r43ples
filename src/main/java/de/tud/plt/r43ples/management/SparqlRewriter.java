@@ -2,6 +2,7 @@ package de.tud.plt.r43ples.management;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -204,6 +205,14 @@ public class SparqlRewriter {
 			Element minusPart = getRewrittenElement(elementgroup);
 			ElementMinus em = new ElementMinus(minusPart);
 			return em;
+		}
+		else if (el_orginal.getClass().equals(ElementUnion.class)) {
+			ElementUnion elementUnion = (ElementUnion) el_orginal;
+			List<Element> elements = elementUnion.getElements();
+			ElementUnion elementModified = new ElementUnion();
+			for (Element el : elements)
+				elementModified.addElement(getRewrittenElement(el));
+			return elementModified;
 		}
 		else if (el_orginal.getClass().equals(ElementPathBlock.class)){
 			ElementPathBlock epb = (ElementPathBlock) el_orginal;

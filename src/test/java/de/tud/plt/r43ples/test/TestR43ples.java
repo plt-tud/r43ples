@@ -55,10 +55,11 @@ public class TestR43ples {
 	public void testSelectSparqlJoinOption() throws IOException, SAXException, InternalErrorException{		
 		String query = String.format(""
 						+ "SELECT ?s ?p ?o "
-						+ "FROM <%s> REVISION \"B1\" "
-						+ "FROM <%s> REVISION \"B2\" "
-						+ "WHERE { ?s ?p ?o. }"
-						+ "ORDER BY ?s ?p ?o", graphName, graphName);
+						+ "WHERE { "
+						+ "  {GRAPH <%s> REVISION \"B1\" { ?s ?p ?o}}"
+						+ "  UNION "
+						+ "  {GRAPH <%s> REVISION \"B2\" { ?s ?p ?o}}"
+						+ "} ORDER BY ?s ?p ?o", graphName, graphName);
 		String result4 = ep.sparql(format, query, true).getEntity().toString();
 		String expected4 = ResourceManagement.getContentFromResource("response-b1-b2.xml");
 		assertXMLEqual(expected4, result4);
