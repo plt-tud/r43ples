@@ -1,13 +1,6 @@
-.navbar-static-top {
-	padding-bottom: 15px;
-}
-
-.navbar-toggle {
-	margin-top: 35px;
-}
-
-#navbar {
-	margin-top: 27px;
+.navbar-header > a > img {
+	max-height:45px; 
+	margin-right:0.5em;
 } 
 
 #query {

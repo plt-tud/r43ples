@@ -275,6 +275,18 @@ public class Endpoint {
 	
 	
 	/**
+	 * Landing page
+	 *
+	 */
+	@Path("/")
+	@GET
+	@Template(name = "/home.mustache")
+	public final Map<String, Object> getLandingPage() {
+		logger.info("Get Landing page");
+		return htmlMap;
+	}
+	
+	/**
 	 * HTTP GET merging interface.
 	 * This is the HTML front end  for the merging functionalities of R43ples
 	 *
@@ -284,6 +296,7 @@ public class Endpoint {
 	@Template(name = "/merging.mustache")
 	public final Map<String, Object> getMerging() {
 		logger.info("Get Merging interface");
+		htmlMap.put("merging_active", true);
 		return htmlMap;
 	}
 		
@@ -361,6 +374,9 @@ public class Endpoint {
 	    StringWriter sw = new StringWriter();
 	    htmlMap.put("graphs", TripleStoreInterfaceSingleton.get().getGraphs());
 	    htmlMap.put("revisionGraph", Config.revision_graph);
+	    htmlMap.put("triplestore", Config.jena_tdb_directory);
+	    htmlMap.put("sdd_graph", Config.sdd_graph);
+	    htmlMap.put("debug_active", true);
 	    mustache.execute(sw, htmlMap);		
 		
 		String content = sw.toString();
@@ -428,6 +444,7 @@ public class Endpoint {
 	    StringWriter sw = new StringWriter();
 	    
 	    htmlMap.put("graphList", graphList);
+	    htmlMap.put("endpoint_active", true);
 	    mustache.execute(sw, htmlMap);		
 		
 		String content = sw.toString();
