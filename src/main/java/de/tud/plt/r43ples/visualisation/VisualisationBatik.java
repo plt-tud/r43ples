@@ -21,7 +21,7 @@ import com.github.mustachejava.MustacheFactory;
 import de.tud.plt.r43ples.revisionTree.Commit;
 import de.tud.plt.r43ples.revisionTree.StructuredTree;
 
-public class MMSTVisualisation {
+public class VisualisationBatik {
 	
 	private static final int TIMELINEVIEW_WIDTH = 70;
 
@@ -41,7 +41,7 @@ public class MMSTVisualisation {
 	private MessagesTableView msgView;
 	
 
-	public MMSTVisualisation(StructuredTree revisionTree) {
+	public VisualisationBatik(StructuredTree revisionTree) {
 		commits = revisionTree.getCommits();
 		Collections.reverse(commits);
 		
@@ -93,12 +93,12 @@ public class MMSTVisualisation {
 	public static String getHtmlOutput(String graphName) {
 		// initialise mustache template
 		MustacheFactory mf = new DefaultMustacheFactory();
-		Mustache mustache = mf.compile("templates/MMSTVisualisation.mustache");
+		Mustache mustache = mf.compile("templates/graphvisualisation_batik.mustache");
 		StringWriter sw = new StringWriter();
 
 		// get graph tree
 		StructuredTree graphTree = StructuredTree.getTreeOfGraph(graphName);
-		MMSTVisualisation visu = new MMSTVisualisation(graphTree);
+		VisualisationBatik visu = new VisualisationBatik(graphTree);
 		
 		Map<String, Object> scope = new HashMap<String, Object>();
 		scope.put("graphName", graphName);

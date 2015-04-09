@@ -51,7 +51,7 @@ import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import de.tud.plt.r43ples.visualisation.MMSTVisualisation;
+import de.tud.plt.r43ples.visualisation.VisualisationBatik;
 import de.tud.plt.r43ples.visualisation.VisualisationD3;
 
 /**
@@ -143,13 +143,13 @@ public class Endpoint {
 		if (graph.equals("merging") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetMerging());
 		}
-		if (graph.equals("merging_classes") || graph.equals("all")){
+		if (graph.equals("merging-classes") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetMergingClasses());
 		}
 		if (graph.equals("renaming") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetRenaming());
 		}
-		if (graph.equals("complex_structure") || graph.equals("all")){
+		if (graph.equals("complex-structure") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetComplexStructure());
 		}
 	    htmlMap.put("graphs", graphs);
@@ -177,7 +177,7 @@ public class Endpoint {
 		ResponseBuilder response = Response.ok();
 		if (format.equals("batik")) {
 			response.type(MediaType.TEXT_HTML);
-			response.entity(MMSTVisualisation.getHtmlOutput(graph));
+			response.entity(VisualisationBatik.getHtmlOutput(graph));
 		} else if (format.equals("d3")) {
 			response.entity(VisualisationD3.getHtmlOutput(graph));
 		}

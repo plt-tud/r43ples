@@ -53,7 +53,7 @@ public class CommitGraphView {
 
 		int currentLine = 0;
 		int maxColumn = 0;
-		g.translate(0, MMSTVisualisation.LINE_HEIGHT/2);
+		g.translate(0, VisualisationBatik.LINE_HEIGHT/2);
 		g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
 		
 		Map<Commit, Color> commit_color = new HashMap<Commit, Color>();
@@ -78,7 +78,7 @@ public class CommitGraphView {
 				// calculate and set starting point
 				GeneralPath path = new GeneralPath();
 				int x = COLUMN_WIDTH * currentColumn + CIRCLE_DIAMETER / 2;
-				int y = MMSTVisualisation.LINE_HEIGHT * currentLine + CIRCLE_DIAMETER / 2;
+				int y = VisualisationBatik.LINE_HEIGHT * currentLine + CIRCLE_DIAMETER / 2;
 				path.moveTo(x, y);
 
 				// set color
@@ -131,12 +131,12 @@ public class CommitGraphView {
 			drawCircle(g, l, column);
 		}
 		
-		g.translate(0, -MMSTVisualisation.LINE_HEIGHT/2);
+		g.translate(0, -VisualisationBatik.LINE_HEIGHT/2);
 
 		// calculate dimensions
 		dimension = new Dimension();
 		dimension.setSize((maxColumn+1) * COLUMN_WIDTH, commits.size()
-				* MMSTVisualisation.LINE_HEIGHT);
+				* VisualisationBatik.LINE_HEIGHT);
 
 	}
 	
@@ -153,21 +153,21 @@ public class CommitGraphView {
 		int x1 = (int) path.getCurrentPoint().getX();
 		int y1 = (int) path.getCurrentPoint().getY();
 		int x2 = COLUMN_WIDTH * column + CIRCLE_DIAMETER / 2;
-		int y2 = MMSTVisualisation.LINE_HEIGHT * line + CIRCLE_DIAMETER / 2;
+		int y2 = VisualisationBatik.LINE_HEIGHT * line + CIRCLE_DIAMETER / 2;
 
 		if (x1 == x2) {
 			// draw straight line
 			path.lineTo(x2, y2);
 		} else {
 			// draw curved line
-			int curvedLineBase = (int) (MMSTVisualisation.LINE_HEIGHT * 0.7);
+			int curvedLineBase = (int) (VisualisationBatik.LINE_HEIGHT * 0.7);
 			path.curveTo(x1, y1 - curvedLineBase, x2, y2 + curvedLineBase,
 					x2, y2);
 		}
 	}
 
 	private void drawCircle(Graphics2D g, int line, int column) {
-		g.fillOval(COLUMN_WIDTH * column, MMSTVisualisation.LINE_HEIGHT * line, CIRCLE_DIAMETER,
+		g.fillOval(COLUMN_WIDTH * column, VisualisationBatik.LINE_HEIGHT * line, CIRCLE_DIAMETER,
 				CIRCLE_DIAMETER);
 	}
 
