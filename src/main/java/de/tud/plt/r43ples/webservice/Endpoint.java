@@ -640,7 +640,7 @@ public class Endpoint {
 			} else if (action.equalsIgnoreCase("DELETE")) {
 				queryM = m.replaceFirst(String.format("INSERT %s { GRAPH <%s>", data, removeSetGraphUri));
 			} else if (action.equalsIgnoreCase("WHERE")) {
-				// TODO ersetze mit SPARQL JOIN
+				// TODO: replace generateFullGraphOfRevision with SPARQL JOIN
 				String tempGraphName = graphName + "-temp";
 				RevisionManagement.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
 				queryM = m.replaceFirst(String.format("WHERE { GRAPH <%s>", tempGraphName));

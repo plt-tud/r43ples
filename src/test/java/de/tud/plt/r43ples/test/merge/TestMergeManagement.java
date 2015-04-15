@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.tud.plt.r43ples.test;
+package de.tud.plt.r43ples.test.merge;
 
 import static org.hamcrest.core.StringContains.containsString;
 

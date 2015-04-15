@@ -79,7 +79,6 @@ public class RevisionManagement {
 				graphName + "-master", graphName, revisionUri);
 		
 		// Add graph element
-		// TODO It is possible to add more information about the graph under revision control (e.g. label, comment, user, ...)
 		// TODO Currently to every created graph the default SDD is referenced - provide possibility to choose SDD
 		queryContent += String.format(
 				"<%s> a rmo:Graph ;%n"

@@ -32,7 +32,7 @@ public class TestUpdate {
 	private static String graphName;
 	private static String graph_test;
 	
-	final static String format = "application/sparql-results+xml";
+	private final static String format = "application/sparql-results+xml";
 	
 	private final Endpoint 	ep = new Endpoint();
 

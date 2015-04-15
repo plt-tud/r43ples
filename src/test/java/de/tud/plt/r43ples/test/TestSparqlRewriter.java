@@ -20,7 +20,7 @@ import de.tud.plt.r43ples.management.SparqlRewriter;
  */
 public class TestSparqlRewriter {
 
-	private static String graph_test = "http://test.com/dataset1";
+	private static String graph_test;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException{

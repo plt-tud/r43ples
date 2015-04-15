@@ -22,7 +22,7 @@ import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
 
-public class TestR43ples {
+public class TestEndpoint {
 
 	/** The graph name. **/
 	private static String graphName;
