@@ -50,6 +50,7 @@ import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
+import de.tud.plt.r43ples.merging.MergingControl;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.visualisation.MMSTVisualisation;
 import de.tud.plt.r43ples.visualisation.VisualisationD3;
@@ -295,6 +296,29 @@ public class Endpoint {
 		return htmlMap;
 	}
 		
+	@Path("mergingView")
+	@GET
+    @Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
+		 MediaType.APPLICATION_SVG_XML })
+	public final Object getMergingView(@HeaderParam("Accept") final String format_header,
+			@QueryParam("optradio") final String format_query,@QueryParam("graph") final String graph) {
+		logger.info("in mergingView yxy");
+		logger.info("Get Radio: " + graph);
+		String format = (format_query != null) ? format_query : format_header;
+		logger.info("format: " + format);
+		
+		ResponseBuilder response = Response.ok();
+		
+		if (format.equals("on")) {
+			response.entity(MergingControl.getHtmlOutput(graph));
+		}
+		else {
+			format = "application/json";
+			response.type(format);
+			response.entity(RevisionManagement.getRevisionInformation(graph, format));
+		}
+		return response.build();
+	}
 	
 	/**
 	 * Interface for query and update (e.g. SELECT, INSERT, DELETE).

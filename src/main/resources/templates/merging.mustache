@@ -1,12 +1,194 @@
 {{<templates/super}}
 
 {{$title}}R43ples Merging Interface{{/title}}
-    
-{{$content}}
 
-	    <h1>Development is Work in Progress</h1>
+{{$script_extra}}
+<script type="text/javascript">
+    $(document).ready(function(){
+    $("#btn-add").click(function(){
+    $("#tb").append("<tr><th><input class=\"form-control\" placeholder=\"User\"></th><th><input class=\"form-control\"   placeholder=\"User\"></th><th><button type=\"button\" class=\"btn btn-block btn-primary btn-xs\" onclick=\"$(this).parent().parent().remove()\">delete</button></th></tr>");
+    });  
+    //$(".panel-collapse").first().addClass("out");
+   // $("#btn-delete").click(function(){$(this).parent().parent().remove()});
+    });   
+</script>
+{{/script_extra}}
+
+{{$content}}   	    
+<div class="container">
+			<div class="row">
+				<div class="col-sm-2">
+					<div class="btn-group-vertical btn-block" style="margin-top:16px">
+        				<button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#merge" >New Merge</button>
+ 					    <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#properties">Properties</button>
+                        <button type="button" class="btn btn-primary" data-toggle="collapse" data-target="#help">Help</button>
+                        <button type="button" class="btn btn-primary disabled">Push</button>
+      				</div>
+      				
+				</div>
+				<div class="col-sm-10">
+                <div class="panel-group" id="accordion">
+                 <div class="panel panel-default" style="margin-top:16px">
+                  <div class="panel-heading" data-toggle="collapse"  href="#merge" data-parent="#accordion">
+                    <h4 class="panel-title">Start Merging</h4>
+                  </div>
+	              <div id="merge" class="panel-collapse collapse">
+                    <div class="panel-body">
+                    <form action="mergingView" method="get" class="form-horizontal" role="form">
+                     <div class="col-sm-6">
+                     <div class="form-group">
+                     <div class="panel panel-default">
+                         <div class="panel-heading"><strong>Select the merging method</strong></div>
+                      <div class="panel-body">
+                        <div class="col-sm-offset-1 col-sm-2 radio">
+                            <label><input type="radio" name="optradio"><strong>Common</strong></label>
+                        </div>
+                        <div class="col-sm-offset-3 col-sm-2 radio">
+                            <label><input type="radio"><strong>AUTO</strong></label>
+                        </div>
+                      </div>
+                      </div>
+                     </div>
+                      <div class="form-group" >
+                        <label class="control-label col-sm-2"><div align=center>GRAPH:</div></label>
+                        <div class="col-sm-10" >
+                          <select class="form-control" id="graph" name="graph">
+                            <option>http://test.com/r43ples-dataset-merging</option>
+                            <option>http://exampleGraph-2</option>
+                            <option>http://exampleGraph-3</option>
+                            <option>http://exampleGraph-4</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                          <label class="control-label col-sm-2"><div align=center>SDD:</div></label>
+                          <div class="col-sm-10">          
+                            <select class="form-control" id="sdd">
+                             <option>sdd:default SDD</option>
+                            </select>
+                          </div>
+                      </div>
+                      <div class="form-group">
+                        <label class="control-label col-sm-2"><div align=center>MERGE:</div></label>
+                        <div class="col-sm-4">          
+                          <input class="form-control" id="b1" placeholder="B1">
+                        </div>
+                        <label class="control-label col-sm-2"><div align=center>INTO:</div></label>
+                        <div class="col-sm-4">          
+                          <input class="form-control" id="b2" placeholder="B2">
+                        </div>
+                      </div>
+                     </div>
+                    <div class="col-sm-6">
+                        <br>
+                       <div class="form-group">
+                           <label class="control-label col-sm-2"><div align=center>USER:</div></label>
+                           <div class="col-sm-10">
+                            <input class="form-control" placeholder="User" id="user">
+                           </div>
+                       </div>
+                        <br><br>
+                      <div class="form-group">
+                           <label class="control-label col-sm-2"><div align=center>MESSAGE:</div></label>
+                           <div class="col-sm-10">
+                           <textarea class="form-control" rows="6" id="message"></textarea>
+                           </div>
+                      </div>
+                    </div>                        
+                            <button type="submit" class="btn btn-block btn-success">Submit</button>
+                            <button type="button" class="btn btn-block btn-warning">Cancel</button>
+                    </form>
+                    </div>
+                 </div>
+                </div>
+                    
+                  <br>  
+                 <div class="panel panel-default">
+                  <div class="panel-heading" data-toggle="collapse"  href="#properties" data-parent="#accordion">
+                    <h4 class="panel-title">Properties configuration</h4>
+                  </div>
+	              <div id="properties" class="panel-collapse collapse">
+                    <div class="panel-body">
+                      <form class="form-horizontal" role="form">
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                        <div class="panel panel-default">
+                        <div class="panel-heading"><strong>Remote</strong></div>
+                        <div class="panel-body">
+                         <label class="control-label"><div align=center>R43ples SPQRQL endpoint</div></label>
+                         <input class="form-control" placeholder="http://localhost:9998/r43ples/sparql" id="endpoint">
+                         <label class="control-label"><div align=center>R43ples JSON HTTP-GET interface to get all revised graphs</div></label>
+                         <input class="form-control" placeholder="http://localhost:9998/r43ples/getRevisedGraphs" id="endpoint"> 
+                         <label class="control-label"><div align=center>R43ples revision graph</div></label>
+                         <input class="form-control" placeholder="http://eatld.et.tu-dresden.de/r43ples-revisions" id="endpoint"> 
+                         <label class="control-label"><div align=center>R43ples SDD graph</div></label>
+                         <input class="form-control" placeholder="http://eatld.et.tu-dresden.de/r43ples-sdd" id="endpoint"> 
+                            
+                        </div>
+                        </div>
+                        </div>
+                        </div>
+                          
+                        <div class="col-sm-6">
+                          <div class="form-group">
+                        <div class="panel panel-default">
+                        <div class="panel-heading"><strong>Local</strong></div>
+                        <div class="panel-body">
+                         <div class="table-bordered">
+                          <table class="table">
+                            <thead>
+                              <tr>
+                                <th class="col-sm-2">prefix</th>
+                                <th class="col-sm-8">mapping</th>
+                                <th class="col-sm-2">delete</th>
+                              </tr>
+                            </thead>
+                            <tbody id="tb">
+                              <tr id ="tr1">
+                                <th><input class="form-control" placeholder="User"></th>
+                                <th><input class="form-control" placeholder="User"></th>
+                                <th><button type="button" class="btn btn-block btn-primary btn-xs" onclick="$(this).parent().parent().remove()">delete</button></th>
+                              </tr>
+                            </tbody>
+                          </table>
+                         </div>
+                         <button type="button" class="btn btn-block btn-primary" id="btn-add">Add</button>
+                            
+                        </div>
+                        </div>
+                        </div>
+                        </div>
+                            <button type="submit" class="btn btn-block btn-success">Submit</button>
+                            <button type="button" class="btn btn-block btn-warning">Cancel</button>
+                      </form>
+                    </div>
+                  </div>
+                  </div>  
+                      
+                      
+                    <br>
+                <div class="panel panel-default">
+                  <div class="panel-heading" data-toggle="collapse"  href="#help" data-parent="#accordion">
+                    <h4 class="panel-title">Help</h4>
+                  </div>
+	              <div id="help" class="panel-collapse collapse in">
+                    <div class="jumbotron panel-body">Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+                    sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+                    minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
+                    commodo consequat.
+                    </div>
+                  </div>
+                 </div>  
+			</div>
+            </div>
+		</div>
+    </div>
+		
+		Development is Work in Progress
 		A desktop client version of a merging tool can be found on <a href="https://github.com/plt-tud/r43ples-merging-client">https://github.com/plt-tud/r43ples-merging-client</a>
+		
 {{/content}}
 
 
 {{/templates/super}}
+

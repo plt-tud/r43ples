@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+<html class="no-js" lang="en" >
+
+<head>
+  <meta charset="utf-8">
+  <!-- If you delete this meta tag World War Z will become a reality -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merge View</title>
+
+  <!-- If you are using the CSS version, only link these 2 files, you may add app.css to use for your overrides if you like -->
+  <!--<link rel="stylesheet" href="css/normalize.css">-->
+  <link href="/static/css/foundation.css" rel="stylesheet" />
+
+  <!-- If you are using the gem version, you need this only -->
+  <!-- <link rel="stylesheet" href="css/app.css">
+
+  <script src="js/vendor/modernizr.js"></script>-->
+  
+    <!--CSS Dateien für den Version Graph, tipsy und Font Awesome für Symbole -->
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/tipsy/1.0/stylesheets/tipsy.css">
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/fontawesome/4.3.0/css/font-awesome.css">
+    <link rel="stylesheet" href="/static/css/version-graph.css">
+    
+    <!--Einbinden der externen Bibliotheken-->
+    <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+	<!--D3.js-->
+	<script src="//cdn.jsdelivr.net/d3js/3.5.5/d3.min.js"></script>
+	<!--dagre-d3-->
+	<script src="//cpettitt.github.io/project/dagre-d3/latest/dagre-d3.min.js"></script>
+	<!--tipsy-->
+	<script src="//cdn.jsdelivr.net/tipsy/1.0/javascripts/jquery.tipsy.js"></script>
+	<!--Version Graph-->
+	<script src="/static/js/merging-version-graph.js"></script>
+	<script src="//cdn.jsdelivr.net/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+	
+    <!--DataTable-->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.6/css/jquery.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/1.10.6/integration/foundation/dataTables.foundation.css">
+    <script src="https://cdn.datatables.net/1.10.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/plug-ins/1.10.6/integration/foundation/dataTables.foundation.js"></script>
+
+</head>
+<body>
+  <script type="text/javascript">
+    $(document).ready(function () {
+        // Elemente in Variablen Speichern
+        var toogleBranches = $('#toogle-branches');
+        var toogleTags = $('#toogle-tags');
+        //var dataSource = $('#datasource');
+        
+        // Graph mit der aktuellen Auswahl erstellen
+        drawGraph("mergingView?graph={{graphName}}&format=application/json",toogleBranches.prop("checked"),toogleTags.prop("checked"));
+        
+        // ChangeListener für die Tags
+        toogleTags.change(function () {
+            $(this).prop('checked')?showTags():hideTags();
+        });
+        
+        // ChangeListener für die Branches
+        toogleBranches.change(function () {
+            $(this).prop('checked')?showBranches():hideBranches();
+        });
+        
+        //DataTable
+        var table = $('#example').DataTable( {
+        "scrollY": "300px",
+        "paging": true
+         } );
+        var table = $('#example1').DataTable( {
+        "scrollY": "280.5px",
+        "paging": false
+        } );
+
+        $('a.toggle-vis').on( 'click', function (e) {
+        e.preventDefault();
+ 
+        // Get the column API object
+        var column = table.column( $(this).attr('data-column') );
+ 
+        // Toggle the visibility
+        column.visible( ! column.visible() );
+        } );
+    });
+  </script>
+
+  <!-- body content here -->
+   
+       
+  
+      <div class="row">
+        <nav class="top-bar" data-topbar role="navigation">
+          <ul class="title-area">
+            <li class="name">
+            <h1><a href="#">R43ples Merge</a></h1>
+            </li>
+     <!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
+          </ul>
+
+         <section class="top-bar-section">
+    <!-- Right Nav Section -->
+          <ul class="right">
+            <li><a href="#">New Merge</a></li>
+            <li class="has-dropdown">
+              <a href="#">View</a>
+              <ul class="dropdown">
+                <li class="active"><a href="#">Triple view</a></li>
+                <li><a href="#">Individual view</a></li>
+                <li><a href="#">High level view</a></li>
+              </ul>
+            </li>
+          </ul>
+
+    <!-- Left Nav Section -->
+          <ul class="left">
+           <li><a href="#">Push</a></li>
+          </ul>
+         </section>
+        </nav>
+      </div>
+      
+       
+      
+      
+      <div class="row">    
+        
+         
+         
+       <div class="large-9 push-3 columns" style="margin:0px;padding:0px;">
+          <div class="panel" style="margin:0px;padding:0px;">
+            <h8 class="active" style="margin:0px">Revision graph</h8>
+            <div id="visualisation">
+             <svg id="svg" width="100%" height="360" style="border:1px solid #000000; margin:1px; overflow:hidden;"></svg>
+            </div> 
+            <div class="form" >
+              <label for="toogle-tags" class="checkbox-inline">Tags</label><input type="checkbox" id="toogle-tags" class="checkbox-inline">
+              <label for="toogle-branches" class="checkbox-inline">Branches</label><input type="checkbox" id="toogle-branches" class="checkbox-inline">
+            </div>      
+          </div>
+        <div class="panel" style="margin:0px;padding:0px;">
+         <div class="row" style="margin:0px;padding:0px;">
+            <div class="large-3 columns">
+              <p>Resolution</p>
+            </div>
+            <div class="large-9 columns">
+                <div class="button-bar">
+                  <ul class="button-group right">
+                    <li><a href="#" class="tiny button radius">Approve selected</a></li>
+                    <li><a href="#" class="tiny button radius">select all</a></li>
+                  </ul>
+                </div>
+            </div>
+         </div>
+
+         <div class ="row" style="margin:0px;padding:0px;">
+                  <table id="example" class="cell-border stripe" cellspacing="0" width="100%" >
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Predicate</th>
+                            <th>Object</th>
+                            <th>State B1</th>
+                            <th>State B2</th>
+                            <th>Conflicting</th>
+                            <th>Resolution State</th>
+                        </tr>
+                    </thead>
+             
+                    <tfoot>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Predicate</th>
+                            <th>Object</th>
+                            <th>State B1</th>
+                            <th>State B2</th>
+                            <th>Conflicting</th>
+                            <th>Resolution State</th>
+                        </tr>
+                    </tfoot>
+             
+                    <tbody>
+                        <tr>
+                            <td>ex:testS</td>
+                            <td>ex:testP</td>
+                            <td>"D"</td>
+                            <td>added</td>
+                            <td>deleted</td>
+                            <td>true</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>ex:testS</td>
+                            <td>ex:testP</td>
+                            <td>"D"</td>
+                            <td>added</td>
+                            <td>deleted</td>
+                            <td>true</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>ex:testS</td>
+                            <td>ex:testP</td>
+                            <td>"D"</td>
+                            <td>added</td>
+                            <td>deleted</td>
+                            <td>true</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>ex:testS</td>
+                            <td>ex:testP</td>
+                            <td>"D"</td>
+                            <td>added</td>
+                            <td>deleted</td>
+                            <td>true</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>ex:testS</td>
+                            <td>ex:testP</td>
+                            <td>"D"</td>
+                            <td>added</td>
+                            <td>deleted</td>
+                            <td>true</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>ex:testS</td>
+                            <td>ex:testP</td>
+                            <td>"D"</td>
+                            <td>added</td>
+                            <td>deleted</td>
+                            <td>true</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>ex:testS</td>
+                            <td>ex:testP</td>
+                            <td>"D"</td>
+                            <td>added</td>
+                            <td>deleted</td>
+                            <td>true</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>ex:testS</td>
+                            <td>ex:testP</td>
+                            <td>"D"</td>
+                            <td>added</td>
+                            <td>deleted</td>
+                            <td>true</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>ex:testS</td>
+                            <td>ex:testP</td>
+                            <td>"D"</td>
+                            <td>added</td>
+                            <td>deleted</td>
+                            <td>true</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                    </tbody>
+                  </table>
+         </div>
+
+        </div>
+       </div>
+        
+        <div class="large-3 pull-9 columns" style="margin:0px;padding:0px;">
+          <div class="panel" style="margin:0px;padding:0px;">
+            <h8 class="active" style="margin:0px">Differences</h8>
+            <div id="visualisation">
+             <svg id="svg1" width="100%" height="460" style="border:1px solid #000000; margin:1px; overflow:hidden;"></svg>
+            </div>   
+          </div>  
+          <div class="panel" style="margin:0px;padding:0px;">
+            <h8 class="active" style="margin:0px">Filters</h8> 
+            <div class="row" style="margin:0px;padding:0px;">
+              <table id="example1" class="stripe compact" cellspacing="0" width="100%">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Select</th>
+                        </tr>
+                    </thead>
+             
+                    <tbody>
+                        <tr>
+                            <td>ex:testP</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                         <tr>
+                            <td>ex:testP</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                         <tr>
+                            <td>ex:testP</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                         <tr>
+                            <td>ex:testP</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>ex:testP</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>ex:testP</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>ex:testP</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                        <tr>
+                            <td>ex:testP</td>
+                            <td><input type="checkbox" name="state" value="1"></td>
+                        </tr>
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <th>Property</th>
+                            <th>Select</th>
+                        </tr>
+                    </tfoot>
+                </table>
+
+              </div>            
+          </div>  
+
+        </div>
+        
+      </div>
+
+        
+      
+       
+      
+      <footer class="row">
+        <div class="large-12 columns">
+          <hr/>
+          <div class="row">
+            <div class="large-6 columns">
+              <p>© Copyright no one at all. Go to town.</p>
+            </div>
+            <div class="large-6 columns">
+              <ul class="inline-list right">
+                <li><a href="#">Section 1</a></li>
+                <li><a href="#">Section 2</a></li>
+                <li><a href="#">Section 3</a></li>
+                <li><a href="#">Section 4</a></li>
+              </ul>
+            </div>
+          </div>
+        </div> 
+      </footer>
+   
+
+  <!--<script src="js/vendor/jquery.js"></script>
+  <script src="js/foundation.min.js"></script>
+  <script>
+    $(document).foundation();
+  </script>-->
+</body>
+</html>
