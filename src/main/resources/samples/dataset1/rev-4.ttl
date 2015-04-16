@@ -2,5 +2,5 @@
 
 :Adam :knows :Emma.
 :Adam :knows :Freddy.
-:Freddy :knows :Emma.
 :Carlos :knows :Danny.
+:Freddy :knows :Emma.

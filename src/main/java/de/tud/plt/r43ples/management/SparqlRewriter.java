@@ -2,9 +2,11 @@ package de.tud.plt.r43ples.management;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.graph.Node;
@@ -14,12 +16,13 @@ import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.sparql.core.TriplePath;
 import com.hp.hpl.jena.sparql.core.Var;
+import com.hp.hpl.jena.sparql.expr.E_Equals;
 import com.hp.hpl.jena.sparql.expr.E_OneOf;
+import com.hp.hpl.jena.sparql.expr.Expr;
 import com.hp.hpl.jena.sparql.expr.ExprList;
 import com.hp.hpl.jena.sparql.expr.ExprVar;
-import com.hp.hpl.jena.sparql.path.P_Alt;
 import com.hp.hpl.jena.sparql.path.P_Link;
-import com.hp.hpl.jena.sparql.path.P_OneOrMore1;
+import com.hp.hpl.jena.sparql.path.P_ZeroOrMore1;
 import com.hp.hpl.jena.sparql.syntax.Element;
 import com.hp.hpl.jena.sparql.syntax.ElementFilter;
 import com.hp.hpl.jena.sparql.syntax.ElementGroup;
@@ -56,200 +59,250 @@ public class SparqlRewriter {
 	private static final Node rmo_references = NodeFactory.createURI(rmo + "references");
 	private static final Node prov_wasDerivedFrom = NodeFactory.createURI(prov + "wasDerivedFrom");
 
-	// TODO make instance variable
-	private static int statement_i = 0;
-	
-	private static final Pattern pattern = Pattern.compile("FROM\\s*<(?<graph>\\S*)>\\s*REVISION\\s*\"(?<revision>\\S*)\"", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
 
-	
-	
-	public static String rewriteQuery(final String query_r43ples) throws InternalErrorException {
 
-		statement_i = 0;
+	/** instance variables */
+	private int statement_i = 0;
+	private final String query_original;
+	private String query_rewritten;
+	private LinkedList<String> revisions = new LinkedList<String>();
+	private LinkedList<String> graphs = new LinkedList<String>();
+	private ExprList expression_list_revision_path = new ExprList();
+	private Expr last_revision;
+	
+	public static String rewriteQuery(final String query_r43ples) {
+		SparqlRewriter sr = new SparqlRewriter(query_r43ples);
+		return sr.query_rewritten;
+	}
+	
+	public static void main(String[] args) throws ConfigurationException {
+		Config.readConfig("r43ples.conf");
 		
-		ExprList expression_list_revision_path = new ExprList();
-		ExprList expression_list_last_revision = new ExprList();
-
-		Matcher m = pattern.matcher(query_r43ples);
-		String query_sparql = query_r43ples;
-		while (m.find()) {
-			String graphName = m.group("graph");
-			String referenceName = m.group("revision").toLowerCase();
-			m.reset();
+		String query = "SELECT * WHERE { GRAPH <http://test.com/r43ples-dataset-1> { ?s ?p ?o.} FILTER (?s=?p)}";
+		String result = rewriteQuery(query);
+		System.out.println(result);
+		
+		
+		query = "SELECT * WHERE { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"1\" { ?s ?p ?o.} FILTER (?s=?p)}";
+		result = rewriteQuery(query);
+		System.out.println(result);
+		
+		query = "SELECT * WHERE { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"1\" { ?s ?p ?o; ?p2 ?o2. FILTER (?o=?o2)}}";
+		result = rewriteQuery(query);
+		System.out.println(result);
+		
+		
+		query = "SELECT * WHERE { "
+				+ " GRAPH <http://test.com/r43ples-dataset-1> REVISION \"1\" { ?s ?p ?o}"
+				+ " GRAPH <http://test.com/r43ples-dataset-1> { ?s ?p2 ?o2}"
+				+ "}";
+		result = rewriteQuery(query);
+		System.out.println(result);
+		
+		
+		query = "SELECT * WHERE { "
+				+ " GRAPH <http://test.com/r43ples-dataset-1> REVISION \"1\" { ?s ?p ?o}"
+				+ " GRAPH <http://test.com/r43ples-dataset-1> REVISION \"4\" { ?s ?p2 ?o2.}"
+				+ "}";
+        result = rewriteQuery(query);
+        System.out.println(result);
+	}
+	
+	
+	
+	public SparqlRewriter(String query){
+		query_original = query;
+		try {
+			query_rewritten = rewrite();
+		} catch (InternalErrorException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public String getRewrittenQuery(){
+		return query_rewritten;
+	}
+	
+	private void updateRevision(){
+		String revisionNumber = revisions.removeFirst();
+		String graphName = graphs.removeFirst();
+		Tree tree =  new Tree(graphName);
+		LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
+		logger.debug("Path to revision: " + list.toString());
+		last_revision = ExprUtils.nodeToExpr(NodeFactory.createURI(list.get(0).getRevisionUri()));
+		list.removeLast();
+		for (Revision ns : list) {
+			expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(ns.getRevisionUri())));
+		}
+	}
+	
+	public String rewrite() throws InternalErrorException {
+		final Pattern pattern1 = Pattern.compile("GRAPH\\s*<(?<graph>\\S*)>\\s*\\{", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+		final Pattern pattern2 = Pattern.compile("GRAPH\\s*<(?<graph>\\S*)>\\s*REVISION\\s*\"(?<revision>\\S*)\"", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+		
+		
+		
+		
+		Matcher m1 = pattern1.matcher(query_original);
+		String query_sparql = m1.replaceAll("GRAPH <$1> REVISION \"master\" {");
+				
+		
+		Matcher m2 = pattern2.matcher(query_sparql);
+		
+		while (m2. find()) {
+			String graphName = m2.group("graph");
+			String referenceName = m2.group("revision").toLowerCase();
 			
 			String revisionNumber = RevisionManagement.getRevisionNumber(graphName, referenceName);
+			graphs.add(graphName);
+			revisions.add(revisionNumber);
 
-			Tree tree =  new Tree(graphName);
-			LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
-			logger.debug("Path to revision: " + list.toString());
-			expression_list_last_revision.add(ExprUtils.nodeToExpr(NodeFactory.createURI(list.get(0).getRevisionUri())));
-			list.removeLast();
-			for (Revision ns : list) {
-				expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(ns.getRevisionUri())));
-			}
-
-			query_sparql = m.replaceFirst("");
-			m = pattern.matcher(query_sparql);
+			query_sparql = m2.replaceFirst("GRAPH <"+graphName+">");
+			m2 = pattern2.matcher(query_sparql);
 		}
 
 		// creates the Query
-		Query qe = QueryFactory.create(query_sparql);
-		ElementGroup eg_orginal = (ElementGroup) qe.getQueryPattern();
+		Query query_new = QueryFactory.create(query_sparql);
+		Element el_orginal = query_new.getQueryPattern();
 
-		// stores the modified elements
-		ElementGroup eg_modified = new ElementGroup();
-		Element el = getRewrittenElementGroup(expression_list_revision_path, expression_list_last_revision,
-				eg_orginal);
-		eg_modified.addElement(el);
+		// Do the rewriting and store the modified elements
+		Element el_modified = getRewrittenElement(el_orginal);
+		
 
-		qe.setDistinct(true);
-		qe.setQueryPattern(eg_modified);
-		query_sparql = qe.serialize();
+		query_new.setDistinct(true);
+		query_new.setQueryPattern(el_modified);
+		query_sparql = query_new.serialize();
 		logger.debug("Rewritten query: \n" + query_sparql);
 		return query_sparql;
 	}
 
 	/**
 	 * @param expression_list_revision_path
-	 * @param expression_list_last_revision
+	 * @param branch
 	 * @param eg_orginal
 	 * @return rewritten element group
 	 */
-	private static Element getRewrittenElementGroup(ExprList expression_list_revision_path,
-			ExprList expression_list_last_revision, ElementGroup eg_orginal) {
-		ElementGroup eg_modified = new ElementGroup();
-		for (Element element : eg_orginal.getElements()) {
-			try {
-				if (element.getClass().equals(ElementMinus.class)) {
-					ElementMinus elementMinus = (ElementMinus) element;
-					ElementGroup elementgroup = (ElementGroup) elementMinus.getMinusElement();
-					Element minusPart = getRewrittenElementGroup(expression_list_revision_path,
-							expression_list_last_revision, elementgroup);
-					ElementMinus em = new ElementMinus(minusPart);
-					eg_modified.addElement(em);
-				} else {
-					ElementPathBlock epb = (ElementPathBlock) element;
-					Iterator<TriplePath> itPatternElts = epb.patternElts();
-
-					while (itPatternElts.hasNext()) {
-						TriplePath triplePath = itPatternElts.next();
-						statement_i += 1;
-						Element el = getRewrittenTriplePath(expression_list_revision_path,
-								expression_list_last_revision, triplePath);
-						eg_modified.addElement(el);
-					}
-				}
-			} catch (ClassCastException e) {
-				eg_modified.addElement(element);
+	private Element getRewrittenElement(final Element el_orginal) {
+		if (el_orginal.getClass().equals(ElementNamedGraph.class)) {
+			ElementNamedGraph ng_original = (ElementNamedGraph) el_orginal;
+			ElementGroup eg_original = (ElementGroup) ng_original.getElement();
+			updateRevision();			
+			return getRewrittenElement(eg_original);
+		} 
+		else if (el_orginal.getClass().equals(ElementGroup.class)) {
+			ElementGroup elementgroup = (ElementGroup) el_orginal;
+			
+			ElementGroup eg_modified = new ElementGroup();
+			for (Element el : elementgroup.getElements()) {
+				Element el_mod = getRewrittenElement(el);
+				expand(eg_modified, el_mod);
 			}
+			return eg_modified;
+		} 
+		else if (el_orginal.getClass().equals(ElementMinus.class)) {
+			ElementMinus elementMinus = (ElementMinus) el_orginal;
+			ElementGroup elementgroup = (ElementGroup) elementMinus.getMinusElement();
+			Element minusPart = getRewrittenElement(elementgroup);
+			ElementMinus em = new ElementMinus(minusPart);
+			return em;
 		}
-		return eg_modified;
+		else if (el_orginal.getClass().equals(ElementUnion.class)) {
+			ElementUnion elementUnion = (ElementUnion) el_orginal;
+			List<Element> elements = elementUnion.getElements();
+			ElementUnion elementModified = new ElementUnion();
+			for (Element el : elements)
+				elementModified.addElement(getRewrittenElement(el));
+			return elementModified;
+		}
+		else if (el_orginal.getClass().equals(ElementPathBlock.class)){
+			ElementPathBlock epb = (ElementPathBlock) el_orginal;
+			Iterator<TriplePath> itPatternElts = epb.patternElts();
+
+			ElementGroup eg_modified = new ElementGroup();
+			while (itPatternElts.hasNext()) {
+				TriplePath triplePath = itPatternElts.next();
+				statement_i += 1;
+				ElementGroup eg = getRewrittenTriplePath(triplePath);
+				expand(eg_modified, eg);
+			}
+			return eg_modified;
+		}
+		else {
+			return el_orginal;
+		}
 	}
 
 	/**
 	 * @param expression_list_revision_path
-	 * @param expression_list_last_revision
+	 * @param branch
 	 * @param triplePath
 	 * @return rewritten triple path element
 	 */
-	private static Element getRewrittenTriplePath(ExprList expression_list_revision_path,
-			ExprList expression_list_last_revision, TriplePath triplePath) {
+	private ElementGroup getRewrittenTriplePath(TriplePath triplePath) {
 		{
 			ElementGroup eg_modified = new ElementGroup();
 			
-			
-			Node g_revision = NodeFactory.createURI(Config.revision_graph);
-			Node var_g_delete_set_full_graph = Var.alloc("g_delete_set_full_graph_" + statement_i);
-			Node var_reference = Var.alloc("reference_" + statement_i);
-			Node var_r_fullgraph = Var.alloc("r_fullgraph" + statement_i);
-			Node var_r_delete_set = Var.alloc("r_delete_set_" + statement_i);
-			Node var_r_add_set = Var.alloc("r_add_set_" + statement_i);
-			Node var_g_add_set = Var.alloc("g_add_set_" + statement_i);
-			Node var_r_delta_set_old = Var.alloc("r_delta_set_old_" + statement_i);
-			Node var_g_delta_set_old = Var.alloc("g_delta_set_old_" + statement_i);
-
 			ElementTriplesBlock block_triple_path = new ElementTriplesBlock();
 			block_triple_path.addTriple(triplePath.asTriple());
 			
-			ElementNamedGraph ng = new ElementNamedGraph(var_g_delete_set_full_graph, block_triple_path);
+
+			Node g_delete_set_full_graph = Var.alloc("g_delete_set_full_graph_" + statement_i);
+			Node g_add_set = Var.alloc("g_add_set_" + statement_i);
+			Node g_revisiongraph = NodeFactory.createURI(Config.revision_graph);			
+			
+			Var var_r_delete_set = Var.alloc("r_delete_set_" + statement_i);
+			Var var_r_add_set = Var.alloc("r_add_set_" + statement_i);
 
 			ElementGroup eg_fullgraph = new ElementGroup();
-			eg_fullgraph.addTriplePattern(new Triple(var_reference, rmo_references, var_r_fullgraph));
-			eg_fullgraph.addTriplePattern(new Triple(var_reference, rmo_fullGraph, var_g_delete_set_full_graph));
-			eg_fullgraph.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_fullgraph),
-					expression_list_last_revision)));
+			Node anon = NodeFactory.createAnon();
+//			eg_fullgraph.addElement(new ElementBind( var_r_delete_set, ExprUtils.nodeToExpr(branch)));
+			eg_fullgraph.addTriplePattern(new Triple(anon, rmo_references, var_r_delete_set));
+			eg_fullgraph.addTriplePattern(new Triple(anon, rmo_fullGraph, g_delete_set_full_graph));
+			eg_fullgraph.addElementFilter(new ElementFilter(new E_Equals(new ExprVar(var_r_delete_set), last_revision)));
 			
-			eg_modified.addElement(ng);
 
-			ElementGroup eg_union = new ElementGroup();
-			ElementNamedGraph ng_union = new ElementNamedGraph(g_revision, eg_union);
-			eg_modified.addElement(ng_union);
+			ElementUnion eg_union = new ElementUnion();
+			eg_union.addElement(eg_fullgraph);			
 			
-			eg_union.addElement(eg_fullgraph);
+			ElementGroup eg_revisiongraph = new ElementGroup();
+			eg_revisiongraph.addElement(eg_union);
 
-			if (!expression_list_revision_path.isEmpty()) {
-				ElementGroup eg_delete_set = new ElementGroup();
-				eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, RDF.type.asNode(), rmo_Revision));
-				eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, rmo_deltaRemoved, var_g_delete_set_full_graph));
-				// add filter
-				// FILTER (?rg1 IN
-				// (<http://test.com/r43ples-dataset-revision-4>,
-				// <http://test.com/r43ples-dataset-revision-3>))
-				eg_delete_set.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_delete_set),
-						expression_list_revision_path)));
-				ElementUnion union = new ElementUnion();
-				union.addElement(eg_delete_set);
+			ElementGroup eg_delete_set = new ElementGroup();
+			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, RDF.type.asNode(), rmo_Revision));
+			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, rmo_deltaRemoved, g_delete_set_full_graph));
+			eg_delete_set.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_delete_set),
+					expression_list_revision_path)));
+			eg_union.addElement(eg_delete_set);
 
-				// First Minus part
-				// GRAPH ?gm1 { ?s ?p ?o }
-				// ?rm1 a rmo:Revision.
-				// ?rm1 rmo:deltaAdded ?gm1.
-				// FILTER (?rm1 IN
-				// (<http://test.com/r43ples-dataset-revision-4>,
-				// <http://test.com/r43ples-dataset-revision-3>))
-				ElementGroup eg_minus = new ElementGroup();
-				ElementMinus minus = new ElementMinus(eg_minus);
-				ElementNamedGraph ng_addset = new ElementNamedGraph(var_g_add_set, block_triple_path);
-				eg_minus.addElement(ng_addset);
-				ElementGroup eg_addset = new ElementGroup();
-				ElementNamedGraph ng_addset_revision_info = new ElementNamedGraph(g_revision, eg_addset);
-				eg_minus.addElement(ng_addset_revision_info);
-				eg_addset.addTriplePattern(new Triple(var_r_add_set, RDF.type.asNode(), rmo_Revision));
-				eg_addset.addTriplePattern(new Triple(var_r_add_set, rmo_deltaAdded, var_g_add_set));
-
-				ElementGroup eg_innerminus = new ElementGroup();
-				// GRAPH ?gm1_old {?s ?p ?o.}
-				// ?rm1_old a rmo:Revision.
-				// ?rm1 prov:wasDerivedFrom+ ?rm1_old.
-				// ?rm1_old rmo:deltaRemoved ?gm1_old.
-				// FILTER (?rm1_old IN
-				// (<http://test.com/r43ples-dataset-revision-4>,
-				// <http://test.com/r43ples-dataset-revision-3>))
-				ElementMinus inner_minus = new ElementMinus(eg_innerminus);
-				ElementNamedGraph ng_delta_set_old = new ElementNamedGraph(var_g_delta_set_old, block_triple_path);
-				eg_innerminus.addElement(ng_delta_set_old);
-
-				ElementGroup eg_ebp = new ElementGroup();
-				ElementPathBlock ebp = new ElementPathBlock();				
-				ebp.addTriplePath(new TriplePath(var_r_delta_set_old, new P_Link(RDF.type.asNode()), rmo_Revision));
-				ebp.addTriplePath(new TriplePath(var_r_delta_set_old, new P_Alt(new P_Link(rmo_deltaRemoved), new P_Link(rmo_deltaAdded)), var_g_delta_set_old));
-				ebp.addTriplePath(new TriplePath(var_r_add_set, new P_OneOrMore1(new P_Link(prov_wasDerivedFrom)),
-						var_r_delta_set_old));
-				eg_ebp.addElement(ebp);
-				ElementNamedGraph ng_delta_set_old_revision_info = new ElementNamedGraph(g_revision, eg_ebp);
-				eg_innerminus.addElement(ng_delta_set_old_revision_info);
-
-				eg_ebp.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_delta_set_old),
-						expression_list_revision_path)));
-				eg_addset.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_add_set),
-						expression_list_revision_path)));
-				eg_minus.addElement(inner_minus);
-				eg_union.addElement(union);
-				
-				eg_modified.addElement(minus);
-			}
+			
+			ElementGroup eg_revisiongraph2 = new ElementGroup();
+			ElementPathBlock ebp = new ElementPathBlock();	
+			ebp.addTriplePath(new TriplePath(var_r_delete_set, new P_ZeroOrMore1(new P_Link(prov_wasDerivedFrom)),
+					var_r_add_set));
+			eg_revisiongraph2.addElement(ebp);
+			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, RDF.type.asNode(), rmo_Revision));
+			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, rmo_deltaAdded, g_add_set));
+			eg_revisiongraph2.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_add_set),
+					expression_list_revision_path)));			
+		
+			ElementGroup eg_minus = new ElementGroup();
+			eg_minus.addElement(new ElementNamedGraph(g_add_set, block_triple_path));
+			eg_minus.addElement(new ElementNamedGraph(g_revisiongraph, eg_revisiongraph2));
+			
+			eg_modified.addElement(new ElementNamedGraph(g_delete_set_full_graph, block_triple_path));
+			eg_modified.addElement(new ElementNamedGraph(g_revisiongraph, eg_revisiongraph));
+			eg_modified.addElement(new ElementMinus(eg_minus));
 			return eg_modified;
 		}
+	}
+	
+	private static ElementGroup expand(ElementGroup eg, final Element el) {
+		if (el.getClass().equals(ElementGroup.class))
+			for (Element el_new : ((ElementGroup) el).getElements())
+				eg.addElement(el_new);
+		else
+			eg.addElement(el);
+		return eg;
 	}
 
 }

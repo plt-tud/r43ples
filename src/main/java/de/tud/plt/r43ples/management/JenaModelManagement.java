@@ -25,9 +25,7 @@ public class JenaModelManagement {
 		try {
 			is.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return null;
 		}
 		
 		return model;
@@ -49,7 +47,6 @@ public class JenaModelManagement {
 		try {
 			is.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

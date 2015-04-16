@@ -41,6 +41,8 @@ public class ConsoleClient {
 			System.exit(0);
 		}
 		
+		// TODO: add file import option for generating new version (only new version instead of add and delete sets) 
+		
 		logger.info("config: " + args_client.r43ples.config);
 		logger.info("graph: " + args_client.graph);
 		logger.info("create: " + args_client.create);

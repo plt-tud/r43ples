@@ -1,11 +1,12 @@
 {{<templates/super}}
 
-{{$script_extra}}
+{{$head_extra}}
     <!--CSS Dateien für den Version Graph, tipsy und Font Awesome für Symbole -->
     <link rel="stylesheet" href="//cdn.jsdelivr.net/tipsy/1.0/stylesheets/tipsy.css">
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/fontawesome/4.3.0/css/font-awesome.css">
     <link rel="stylesheet" href="/static/css/version-graph.css">
-    
+{{/head_extra}}
+ 
+{{$script_extra}}   
     <!--Einbinden der externen Bibliotheken-->
 	<!--D3.js-->
 	<script src="//cdn.jsdelivr.net/d3js/3.5.5/d3.min.js"></script>
@@ -42,14 +43,15 @@
 {{/script_extra}}
     
 {{$content}}
-<h1>Revision Graph of &lt;{{graphName}}&gt;</h1>
+<h1>Revision Graph</h1>
+    <h2><samp>&lt;{{graphName}}&gt;</samp></h2>
 <!--SVG-Element für den Version Graph-->
 	<div id="visualisation">
-	<svg width="400" height="580" style="border:1px solid #000000; margin: 5px; overflow:hidden;"></svg>
-	<div class="form-inline">
-		<label for="toogle-tags" class="checkbox-inline">Tags</label><input type="checkbox" id="toogle-tags" class="checkbox-inline">
-		<label for="toogle-branches" class="checkbox-inline">Branches</label><input type="checkbox" id="toogle-branches" class="checkbox-inline">
-	</div>	
+		<svg width="400" height="580" style="border:1px solid #000000; margin: 5px; overflow:hidden;"></svg>
+		<div class="form-inline">
+			<label for="toogle-tags" class="checkbox-inline">Tags</label><input type="checkbox" id="toogle-tags" class="checkbox-inline">
+			<label for="toogle-branches" class="checkbox-inline">Branches</label><input type="checkbox" id="toogle-branches" class="checkbox-inline">
+		</div>	
 	</div>
 	<br/>
 	<a class="btn btn-default" href="sparql">Back to Endpoint</a>

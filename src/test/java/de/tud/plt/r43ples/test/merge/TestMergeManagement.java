@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.tud.plt.r43ples.test;
+package de.tud.plt.r43ples.test.merge;
 
 import static org.hamcrest.core.StringContains.containsString;
 
@@ -24,7 +24,7 @@ import de.tud.plt.r43ples.management.SampleDataSet;
  */
 public class TestMergeManagement {
 
-	final static String graph = "http://exampleGraph.com/merging";
+	private static String graph;
 	
 	/**
 	 * @throws ConfigurationException 
@@ -32,8 +32,8 @@ public class TestMergeManagement {
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException {
-		Config.readConfig("r43ples.conf");
-		SampleDataSet.createSampleDataSetMerging(graph);
+		Config.readConfig("r43ples.test.conf");
+		graph = SampleDataSet.createSampleDataSetMerging();
 	}
 
 
