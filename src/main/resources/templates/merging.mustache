@@ -36,13 +36,13 @@
             document.getElementById("illustration").innerHTML="";
           }
           if(num == 1){
-            document.getElementById("illustration").innerHTML="<img class=\"pull-left\" src=\"/static/images/fast-forward-strategie.png\" alt=\"fast-forward\" style=\"width:446px;height:500px;margin-left:36px\">";
+            document.getElementById("illustration").innerHTML="<img class=\"pull-left\" src=\"/static/images/fast-forward-strategie.png\" alt=\"fast-forward\" style=\"width:416px;height:466px;margin-left:6px\">";
           }
           if(num == 2){
-            document.getElementById("illustration").innerHTML="<img class=\"pull-left\" src=\"/static/images/three-way-strategie.png\" alt=\"three-way\" style=\"width:446px;height:500px;margin-left:36px\">";
+            document.getElementById("illustration").innerHTML="<img class=\"pull-left\" src=\"/static/images/three-way-strategie.png\" alt=\"three-way\" style=\"width:416px;height:466px;margin-left:6px\">";
           }
           if(num == 3){ 
-            document.getElementById("illustration").innerHTML="<img class=\"pull-left\" src=\"/static/images/rebase-strategie.png\" alt=\"rebase\"     style=\"width:446px;height:500px;margin-left:36px\">";
+            document.getElementById("illustration").innerHTML="<img class=\"pull-left\" src=\"/static/images/rebase-strategie.png\" alt=\"rebase\"     style=\"width:416px;height:466px;margin-left:6px\">";
           }
 
         }; 
@@ -52,7 +52,7 @@
 {{$content}}   	    
 <div class="container">
 			<div class="row">
-				<div class="col-sm-6">
+				<div class="col-sm-7">
                  <div class="panel panel-default" >
                   <div class="panel-heading" data-toggle="collapse"  href="#merge" data-parent="#accordion">
                     <h4 class="panel-title">Start Merging</h4>
@@ -60,13 +60,13 @@
                     <div class="panel-body">
                     <form action="mergingView" method="get" class="form-horizontal" role="form">
                      <div class="form-group">
-                     <div class="panel panel-default">
+                     <div class="panel panel-default col-sm-11" style="margin-left:26px">
                          <div class="panel-heading"><strong>Select the merging method</strong></div>
                       <div class="panel-body">
-                        <div class="col-sm-offset-1 col-sm-2 radio">
+                        <div class="col-sm-2 radio">
                             <label><input type="radio" name="optradio" value="common" checked><strong>Common</strong></label>
                         </div>
-                        <div class="col-sm-offset-3 col-sm-2 radio">
+                        <div class="col-sm-offset-5 col-sm-2 radio">
                             <label><input type="radio" name="optradio" value="auto"><strong>AUTO</strong></label>
                         </div>
                       </div>
@@ -130,15 +130,19 @@
                            <textarea class="form-control" rows="6" id="message"></textarea>
                            </div>
                       </div>
-                            <button type="submit" class="btn btn-block btn-success">Submit</button>
-                            <button type="button" class="btn btn-block btn-warning">Cancel</button>
+                          <div class="col-sm-6">
+                            <button type="submit" class="btn btn-block btn-primary">Submit</button>
+                          </div>
+                          <div class="col-sm-6">
+                            <button type="button" class="btn btn-block btn-danger">Cancel</button>
+                          </div>
                     </form>
                     </div>
                 </div>
 			 </div>
 
-       <div class= "col-sm-6">
-          <div class="panel panel-default" style="height:560px; margin-top:56px">
+       <div class= "col-sm-5">
+          <div class="panel panel-default" style="height:536px; margin-top:56px">
             <div class="panel-heading" data-toggle="collapse"  href="#merge" data-parent="#accordion">
               <h4 class="panel-title">Strategie Illustration</h4>
             </div>

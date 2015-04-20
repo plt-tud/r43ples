@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.merging;
+package de.tud.plt.r43ples.merging.control;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -11,7 +11,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.mergingControl.BranchManagement;
+import de.tud.plt.r43ples.merging.management.BranchManagement;
 
 public class MergingControl {
 	public static String getHtmlOutput(String optradio) {

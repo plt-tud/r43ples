@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.mergingControl;
+package de.tud.plt.r43ples.merging.management;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -50,7 +50,8 @@ import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
-import de.tud.plt.r43ples.merging.MergingControl;
+import de.tud.plt.r43ples.merging.control.MergingControl;
+import de.tud.plt.r43ples.merging.management.ProcessManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.visualisation.VisualisationBatik;
 import de.tud.plt.r43ples.visualisation.VisualisationD3;
@@ -336,6 +337,55 @@ public class Endpoint {
 			response.entity(MergingControl.getBranchInformation(graph));
 		}
 		return response.build();
+	}
+	
+	/**
+	 * mergingProcess: create mergingQuery 
+	 * create RevisionProcess Model A
+	 * create RevisionProcess Model B
+	 * create Difference model 
+	 * @throws IOException 
+	 */
+	
+	@Path("mergingProcess")
+	@POST
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final Response mergingPOST(@HeaderParam("Accept") final String formatHeader,
+			@FormParam("optrado") final String model, 
+			@FormParam("graph") @DefaultValue("") final String graphName,
+			@FormParam("sdd") final String sddName,
+			@FormParam("Branch1") final String branch1,
+			@FormParam("Branch2") final String branch2,
+			@FormParam("user") @DefaultValue("") final String user,
+			@FormParam("message") @DefaultValue("") final String message) throws InternalErrorException, IOException {
+		MergeQueryTypeEnum type = null;
+		if (model.equals("auto")) {
+			type = MergeQueryTypeEnum.AUTO;
+		} else if (model.equals("common")) {
+			type = MergeQueryTypeEnum.COMMON;
+		} else {
+			type = MergeQueryTypeEnum.MANUAL;
+		}
+		
+		String mergeQuery = ProcessManagement.createMergeQuery(graphName, sddName, user, message, type, branch1, branch2, null);
+		String userCommit = null;
+		Matcher userMatcher = patternUser.matcher(mergeQuery);
+		if (userMatcher.find()) {
+			userCommit = userMatcher.group("user");
+			mergeQuery = userMatcher.replaceAll("");
+		}
+		String messageCommit = null;
+		Matcher messageMatcher = patternCommitMessage.matcher(mergeQuery);
+		if (messageMatcher.find()) {
+			messageCommit = messageMatcher.group("message");
+			mergeQuery = messageMatcher.replaceAll("");
+		}
+		if (patternMergeQuery.matcher(mergeQuery).find()) {
+			return getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
+		}
+		else{
+			return null;
+		}	
 	}
 		
 	@Path("mergingView")
