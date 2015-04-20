@@ -50,7 +50,7 @@
         //var dataSource = $('#datasource');
         
         // Graph mit der aktuellen Auswahl erstellen
-        drawGraph("mergingView?graph={{graphName}}&format=application/json",toogleBranches.prop("checked"),toogleTags.prop("checked"));
+        drawGraph("mergingView?graph={{graphName}}&optradio=application/json",toogleBranches.prop("checked"),toogleTags.prop("checked"));
         
         // ChangeListener für die Tags
         toogleTags.change(function () {

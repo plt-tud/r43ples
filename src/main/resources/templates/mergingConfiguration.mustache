@@ -1,0 +1,87 @@
+{{<templates/super}}
+
+{{$title}}R43ples Merging Interface{{/title}}
+
+{{$script_extra}}
+<script type="text/javascript">
+    $(document).ready(function(){
+      $("#btn-add").click(function(){
+      $("#tb").append("<tr><th><input class=\"form-control\" placeholder=\"User\"></th><th><input class=\"form-control\"   placeholder=\"User\"></th><th><button type=\"button\" class=\"btn btn-block btn-primary btn-xs\" onclick=\"$(this).parent().parent().remove()\">delete</button></th></tr>");
+      });  
+      //$(".panel-collapse").first().addClass("out");
+      // $("#btn-delete").click(function(){$(this).parent().parent().remove()});
+
+    }); 
+</script>
+{{/script_extra}}
+
+{{$content}}   	    
+<div class="container-fluid">
+			<div class="row">
+				<div class="col-sm-8 col-sm-push-2" style="height:616px">        
+                 <div class="panel panel-default">
+                  <div class="panel-heading" data-toggle="collapse"  href="#properties" data-parent="#accordion">
+                    <h4 class="panel-title">Properties configuration</h4>
+                  </div>
+                    <div class="panel-body">
+                      <form class="form-horizontal" role="form">
+                        <div class="col-sm-12">
+                          <div class="form-group">
+                        <div class="panel panel-default">
+                        <div class="panel-heading"><strong>Remote</strong></div>
+                        <div class="panel-body">
+                         <label class="control-label"><div align=center>R43ples SPQRQL endpoint</div></label>
+                         <input class="form-control" placeholder="http://localhost:9998/r43ples/sparql" id="endpoint" readonly>
+                         <label class="control-label"><div align=center>R43ples JSON HTTP-GET interface to get all revised graphs</div></label>
+                         <input class="form-control" placeholder="http://localhost:9998/r43ples/getRevisedGraphs" id="endpoint" readonly> 
+                         <label class="control-label"><div align=center>R43ples revision graph</div></label>
+                         <input class="form-control" placeholder="http://eatld.et.tu-dresden.de/r43ples-revisions" id="endpoint" readonly> 
+                         <label class="control-label"><div align=center>R43ples SDD graph</div></label>
+                         <input class="form-control" placeholder="http://eatld.et.tu-dresden.de/r43ples-sdd" id="endpoint" readonly> 
+                            
+                        </div>
+                        </div>
+                        </div>
+                        </div>
+                          
+                        <div class="col-sm-12" >
+                          <div class="form-group">
+                        <div class="panel panel-default">
+                        <div class="panel-heading"><strong>Local</strong></div>
+                        <div class="panel-body">
+                         <div class="table-bordered">
+                          <table class="table">
+                            <thead>
+                              <tr>
+                                <th class="col-sm-2">prefix</th>
+                                <th class="col-sm-8">mapping</th>
+                                <th class="col-sm-2">delete</th>
+                              </tr>
+                            </thead>
+                            <tbody id="tb">
+                              <tr id ="tr1">
+                                <th><input class="form-control" placeholder="User"></th>
+                                <th><input class="form-control" placeholder="User"></th>
+                                <th><button type="button" class="btn btn-block btn-primary btn-xs" onclick="$(this).parent().parent().remove()">delete</button></th>
+                              </tr>
+                            </tbody>
+                          </table>
+                         </div>
+                         <button type="button" class="btn btn-block btn-primary" id="btn-add">Add</button>
+                            
+                        </div>
+                        </div>
+                        </div>
+                        </div>
+                            <button type="submit" class="btn btn-block btn-success">Submit</button>
+                            <button type="button" class="btn btn-block btn-warning">Cancel</button>
+                      </form>
+                    </div>
+                  </div>                         
+            </div>
+		 </div>
+  </div>
+{{/content}}
+
+
+{{/templates/super}}

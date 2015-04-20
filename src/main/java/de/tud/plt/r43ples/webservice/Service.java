@@ -12,6 +12,7 @@ import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.mvc.freemarker.FreemarkerMvcFeature;
 import org.glassfish.jersey.server.mvc.mustache.MustacheMvcFeature;
 
 import com.beust.jcommander.JCommander;
@@ -98,11 +99,14 @@ public class Service {
 		logger.info("Starting R43ples on grizzly...");
 		URI BASE_URI;
 		
+		//support templates:freemarker,mustache
 		ResourceConfig rc = new ResourceConfig()
 			.registerClasses(Endpoint.class)
 			.property(MustacheMvcFeature.TEMPLATE_BASE_PATH, "templates")
 			.register(MustacheMvcFeature.class)
-			.register(ExceptionMapper.class);
+			.register(ExceptionMapper.class)
+			.property(FreemarkerMvcFeature.TEMPLATE_BASE_PATH, "templates")
+			.register(FreemarkerMvcFeature.class);
 		
 		SSLContextConfigurator sslCon =  new SSLContextConfigurator();
 		

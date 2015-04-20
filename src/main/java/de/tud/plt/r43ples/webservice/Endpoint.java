@@ -292,13 +292,50 @@ public class Endpoint {
 	 * This is the HTML front end  for the merging functionalities of R43ples
 	 *
 	 */
+//	@Path("merging")
+//	@GET
+//	@Template(name = "/merging.mustache")
+//	public final Map<String, Object> getMerging() {
+//		logger.info("Merging form requested");
+//		List<String> graphList = RevisionManagement.getRevisedGraphs();
+//		
+//		logger.info("Get Merging interface");
+//		htmlMap.put("merging_active", true);
+//		htmlMap.put("graphList", graphList);
+//		return htmlMap;
+//	}
+	
+	@Path("mergingConfiguration")
+	@GET
+	@Template(name = "/mergingConfiguration.mustache")
+	public final Map<String, Object> getMerging() {
+		logger.info("Merging form requested");		
+		logger.info("Get Merging interface");
+		
+		htmlMap.put("mergingConfiguration_active", true);
+		return htmlMap;
+	}
+	
 	@Path("merging")
 	@GET
-	@Template(name = "/merging.mustache")
-	public final Map<String, Object> getMerging() {
-		logger.info("Get Merging interface");
-		htmlMap.put("merging_active", true);
-		return htmlMap;
+    @Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
+		 MediaType.APPLICATION_SVG_XML })
+	public final Object getMerging(@HeaderParam("Accept") final String format_header,
+		@DefaultValue("0") @QueryParam("q") final String q,@QueryParam("graph") final String graph) throws IOException {
+		logger.info("in merging yxy");
+		logger.info("Get q: " + q);
+		logger.info("Get graph: " + graph);
+		logger.info(format_header);
+		
+		ResponseBuilder response = Response.ok();
+		
+		if (q.equals("0")) {
+			response.entity(MergingControl.getMenuHtmlOutput());
+		}
+		else {
+			response.entity(MergingControl.getBranchInformation(graph));
+		}
+		return response.build();
 	}
 		
 	@Path("mergingView")
@@ -309,12 +346,13 @@ public class Endpoint {
 			@QueryParam("optradio") final String format_query,@QueryParam("graph") final String graph) {
 		logger.info("in mergingView yxy");
 		logger.info("Get Radio: " + graph);
+		logger.info(format_header);
 		String format = (format_query != null) ? format_query : format_header;
 		logger.info("format: " + format);
 		
 		ResponseBuilder response = Response.ok();
 		
-		if (format.equals("on")) {
+		if (format.equals("common")) {
 			response.entity(MergingControl.getHtmlOutput(graph));
 		}
 		else {
