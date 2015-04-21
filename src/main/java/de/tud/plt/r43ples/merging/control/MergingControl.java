@@ -46,7 +46,7 @@ public class MergingControl {
 		for(String branchName:branchList){
 			branchInformation.append("<option value="+"\""+branchName+"\""+">"+branchName+"</option>");
 		}
-		System.out.println(branchInformation.toString());
+		System.out.println("branch success created");
 		return branchInformation.toString();
 	}
 }

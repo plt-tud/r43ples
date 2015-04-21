@@ -350,8 +350,8 @@ public class Endpoint {
 	@Path("mergingProcess")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response mergingPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("optrado") final String model, 
+	public void mergingPOST(@HeaderParam("Accept") final String formatHeader,
+			@FormParam("optradio") final String model, 
 			@FormParam("graph") @DefaultValue("") final String graphName,
 			@FormParam("sdd") final String sddName,
 			@FormParam("Branch1") final String branch1,
@@ -359,6 +359,7 @@ public class Endpoint {
 			@FormParam("user") @DefaultValue("") final String user,
 			@FormParam("message") @DefaultValue("") final String message) throws InternalErrorException, IOException {
 		MergeQueryTypeEnum type = null;
+		System.out.println(model);
 		if (model.equals("auto")) {
 			type = MergeQueryTypeEnum.AUTO;
 		} else if (model.equals("common")) {
@@ -366,6 +367,8 @@ public class Endpoint {
 		} else {
 			type = MergeQueryTypeEnum.MANUAL;
 		}
+		
+		System.out.println(model+graphName+sddName+branch1+branch2+user+message+type.toString());
 		
 		String mergeQuery = ProcessManagement.createMergeQuery(graphName, sddName, user, message, type, branch1, branch2, null);
 		String userCommit = null;
@@ -381,11 +384,8 @@ public class Endpoint {
 			mergeQuery = messageMatcher.replaceAll("");
 		}
 		if (patternMergeQuery.matcher(mergeQuery).find()) {
-			return getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
+			Response response= getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
 		}
-		else{
-			return null;
-		}	
 	}
 		
 	@Path("mergingView")
