@@ -47,7 +47,7 @@ import de.tud.plt.r43ples.revisionTree.Tree;
 public class SparqlRewriter {
 
 	/** The logger. **/
-	private static final Logger logger = Logger.getLogger(RevisionManagement.class);
+	private static final Logger logger = Logger.getLogger(SparqlRewriter.class);
 
 	private static final String rmo = "http://eatld.et.tu-dresden.de/rmo#";
 	private static final String prov = "http://www.w3.org/ns/prov#";

@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.webservice;
+package de.tud.plt.r43ples;
 
 import java.io.IOException;
 import java.net.URI;
@@ -22,6 +22,8 @@ import de.tud.plt.r43ples.client.R43plesArgs;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import de.tud.plt.r43ples.webservice.Endpoint;
+import de.tud.plt.r43ples.webservice.ExceptionMapper;
 
 
 /**
@@ -32,10 +34,10 @@ import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
  * @author Markus Graube
  *
  */
-public class Service {
+public class R43plesService {
 
 	/** The logger */
-	private static Logger logger = Logger.getLogger(Service.class);
+	private static Logger logger = Logger.getLogger(R43plesService.class);
 	/** The HTTP server. **/
 	private static HttpServer server;
 	/** The TDB dataset. **/
@@ -73,7 +75,7 @@ public class Service {
 		
 		logger.debug("config: " + jci.config);
 		Runtime.getRuntime().addShutdownHook(new Thread() {
-			public void run() { Service.stop(); }
+			public void run() { R43plesService.stop(); }
 		});
 		try {
 			Config.readConfig(jci.config);
@@ -125,13 +127,13 @@ public class Service {
 		}
 		
 		server.getServerConfiguration().addHttpHandler(
-		        new CLStaticHttpHandler(Service.class.getClassLoader(),"webapp/"), "/static/");
+		        new CLStaticHttpHandler(R43plesService.class.getClassLoader(),"webapp/"), "/static/");
 
 		server.start();
 
 		logger.info(String.format("Server started - R43ples endpoint available under: %s/sparql", BASE_URI));
 		
-		String version = Service.class.getPackage().getImplementationVersion();
+		String version = R43plesService.class.getPackage().getImplementationVersion();
 		if (version==null){
 			version = "Commit: " +GitRepositoryState.getGitRepositoryState().commitIdAbbrev;
 		}

@@ -50,6 +50,7 @@ import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
+import de.tud.plt.r43ples.management.SparqlRewriter_old;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.visualisation.VisualisationBatik;
 import de.tud.plt.r43ples.visualisation.VisualisationD3;
@@ -222,7 +223,7 @@ public class Endpoint {
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("format") final String formatQuery, 
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
-			@FormParam("join_option") final boolean join_option) throws InternalErrorException {
+			@FormParam("join_option") final String join_option) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		return sparql(format, sparqlQuery, join_option);
 	}
@@ -314,7 +315,7 @@ public class Endpoint {
 	 * @return the response
 	 * @throws InternalErrorException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException {
+	public final Response sparql(final String format, final String sparqlQuery, final String join_option) throws InternalErrorException {
 		if (sparqlQuery.equals("")) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
@@ -324,6 +325,13 @@ public class Endpoint {
 		} else {
 			return getSparqlResponse(format, sparqlQuery, join_option);
 		}
+	}
+	
+	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException {
+		if (join_option)
+			return sparql(format, sparqlQuery, "new");
+		else
+			return sparql(format, sparqlQuery, "");
 	}
 	
 	/**
@@ -340,7 +348,7 @@ public class Endpoint {
 	 * @throws InternalErrorException 
 	 */
 	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException {
-		return sparql(format, sparqlQuery, false);
+		return sparql(format, sparqlQuery, "");
 	}
 
 
@@ -393,7 +401,7 @@ public class Endpoint {
 	 * @return HTTP response of evaluating the sparql query 
 	 * @throws InternalErrorException
 	 */
-	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean join_option) throws InternalErrorException {
+	private Response getSparqlResponse(final String format, String sparqlQuery, final String join_option) throws InternalErrorException {
 		logger.info("SPARQL query was requested. Query: " + sparqlQuery);
 		String user = null;
 		Matcher userMatcher = patternUser.matcher(sparqlQuery);
@@ -515,11 +523,15 @@ public class Endpoint {
 	 *         and MASTER revision number)
 	 * @throws InternalErrorException 
 	 */
-	private Response getSelectConstructAskResponse(final String query, final String format, final boolean join_option) throws InternalErrorException {
+	private Response getSelectConstructAskResponse(final String query, final String format, final String join_option) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.ok();
 		String result;
 		
-		if (join_option) {
+		if (join_option.equals("old")) {
+			String query_rewritten = SparqlRewriter_old.rewriteQuery(query);
+			result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query_rewritten, format);
+		} 
+		else if (join_option.equals("new")) {
 			String query_rewritten = SparqlRewriter.rewriteQuery(query);
 			result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query_rewritten, format);
 		}

@@ -51,9 +51,6 @@ public class Config {
 	/** The path to the SDD graph default content. **/
 	public static String sdd_graph_defaultContent;
 	
-	// Visualisation settings
-	/** The visualization file path. **/
-	public static String visualisation_path;
 	/** The logger. **/
 	private static Logger logger = Logger.getLogger(Config.class);	
 	
@@ -91,7 +88,6 @@ public class Config {
 			sdd_graph = config.getString("sdd.graph");
 			sdd_graph_defaultContent = config.getString("sdd.graph.defaultContent");
 
-			visualisation_path = config.getString("visualisation.path");
 		} catch (ConfigurationException e) {
 			logger.warn("Could not read configuration file '" + configFilePath + "'. Switch to 'r43ples.dist.conf'.");
 			readConfig("r43ples.dist.conf");

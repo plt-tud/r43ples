@@ -14,7 +14,7 @@ public class TripleStoreInterfaceSingleton {
 	
 	private static TripleStoreInterface triplestore;
 	/** The logger */
-	private static Logger logger = Logger.getLogger(TripleStoreInterface.class);
+	private static Logger logger = Logger.getLogger(TripleStoreInterfaceSingleton.class);
 	
 	
 	/** Create interface according to Config
