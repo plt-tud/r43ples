@@ -70,5 +70,30 @@ public class ProcessManagement {
 		return query;
 
 	}
-
+	
+	public static void readDifferenceModel(String differenceModelToRead, DifferenceModel differenceModel) throws IOException {
+		logger.info("Start reading difference model.");
+		differenceModel.clear();
+		
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

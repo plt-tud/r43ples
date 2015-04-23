@@ -96,6 +96,7 @@ public class JenaTDBInterface extends TripleStoreInterface {
 		QueryExecution qExec = QueryExecutionFactory.create(constructQueryString, dataset);
 		Model result = qExec.execConstruct();
 		dataset.end();
+		logger.info("Construct did it"+ result);
 		return result;
 	}
 	
@@ -130,6 +131,8 @@ public class JenaTDBInterface extends TripleStoreInterface {
 		QueryExecution qe = QueryExecutionFactory.create(askQueryString, dataset);
 		boolean result = qe.execAsk();
 		dataset.end();
+		logger.info("ASk did it"+ result);
+
 		return result;
 	}
 	

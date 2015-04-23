@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -350,7 +351,7 @@ public class Endpoint {
 	@Path("mergingProcess")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public void mergingPOST(@HeaderParam("Accept") final String formatHeader,
+	public final Response mergingPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("optradio") final String model, 
 			@FormParam("graph") @DefaultValue("") final String graphName,
 			@FormParam("sdd") final String sddName,
@@ -358,6 +359,10 @@ public class Endpoint {
 			@FormParam("Branch2") final String branch2,
 			@FormParam("user") @DefaultValue("") final String user,
 			@FormParam("message") @DefaultValue("") final String message) throws InternalErrorException, IOException {
+		ResponseBuilder response = Response.ok();
+		Response responsePost = null;
+
+		System.out.println("1 mal merging Process");
 		MergeQueryTypeEnum type = null;
 		System.out.println(model);
 		if (model.equals("auto")) {
@@ -367,9 +372,9 @@ public class Endpoint {
 		} else {
 			type = MergeQueryTypeEnum.MANUAL;
 		}
-		
+			
 		System.out.println(model+graphName+sddName+branch1+branch2+user+message+type.toString());
-		
+			
 		String mergeQuery = ProcessManagement.createMergeQuery(graphName, sddName, user, message, type, branch1, branch2, null);
 		String userCommit = null;
 		Matcher userMatcher = patternUser.matcher(mergeQuery);
@@ -384,34 +389,61 @@ public class Endpoint {
 			mergeQuery = messageMatcher.replaceAll("");
 		}
 		if (patternMergeQuery.matcher(mergeQuery).find()) {
-			Response response= getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
+			responsePost= getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
+			logger.info("yxy get Post"+responsePost.toString());	
 		}
-	}
-		
-	@Path("mergingView")
-	@GET
-    @Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
-		 MediaType.APPLICATION_SVG_XML })
-	public final Object getMergingView(@HeaderParam("Accept") final String format_header,
-			@QueryParam("optradio") final String format_query,@QueryParam("graph") final String graph) {
-		logger.info("in mergingView yxy");
-		logger.info("Get Radio: " + graph);
-		logger.info(format_header);
-		String format = (format_query != null) ? format_query : format_header;
-		logger.info("format: " + format);
-		
-		ResponseBuilder response = Response.ok();
-		
-		if (format.equals("common")) {
-			response.entity(MergingControl.getHtmlOutput(graph));
-		}
-		else {
-			format = "application/json";
-			response.type(format);
-			response.entity(RevisionManagement.getRevisionInformation(graph, format));
-		}
+			
+//		if (responsePost.getStatus() == HttpURLConnection.HTTP_CONFLICT){
+//			logger.info("Merge query produced conflicts.");
+//			ProcessManagement.readDifferenceModel(responsePost.getEntity(), differenceModel);
+//		}
+
+		logger.info("Inhalt von Response:"+responsePost.getEntity().toString());	
+			
+			
+		response.entity(MergingControl.getHtmlOutput(graphName));
 		return response.build();
 	}
+	
+	@Path("mergingProcess")
+	@GET
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final Response mergingGET(@HeaderParam("Accept") final String formatHeader,
+			@QueryParam("graph") final String graph) throws InternalErrorException {
+		System.out.println("2 mal merging Process");
+		ResponseBuilder response = Response.ok();
+		String format = "application/json";
+		response.type(format);
+		response.entity(RevisionManagement.getRevisionInformation(graph, format));
+		return response.build();
+
+	}	
+
+	
+//	@Path("mergingView")
+//	@GET
+//    @Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
+//		 MediaType.APPLICATION_SVG_XML })
+//	public final Object getMergingView(@HeaderParam("Accept") final String format_header,
+//			@QueryParam("optradio") final String format_query,@QueryParam("graph") final String graph) {
+//		logger.info("in mergingView yxy");
+//		logger.info("Get Radio: " + graph);
+//		logger.info(format_header);
+//		String format = (format_query != null) ? format_query : format_header;
+//		logger.info("format: " + format);
+//		
+//		ResponseBuilder response = Response.ok();
+//		
+//		if (format.equals("common")) {
+//			response.entity(MergingControl.getHtmlOutput(graph));
+//		}
+//		else {
+//			format = "application/json";
+//			response.type(format);
+//			response.entity(RevisionManagement.getRevisionInformation(graph, format));
+//		}
+//		return response.build();
+//	}
 	
 	/**
 	 * Interface for query and update (e.g. SELECT, INSERT, DELETE).
@@ -1076,11 +1108,13 @@ public class Endpoint {
 						+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
 						+ "	} %n"
 						+ "}", graphNameDiff);
+				logger.info("yxy test :"+TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK));
 				if (TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK)) {
 					// Difference model contains conflicts
 					// Return the conflict model to the client
 					responseBuilder = Response.status(Response.Status.CONFLICT);
 					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
+					logger.info("yxy mache it");
 				} else {
 					// Difference model contains no conflicts
 					// Create the merged revision
@@ -1101,7 +1135,13 @@ public class Endpoint {
 			
 			// Return the revision number which were used (convert tag or branch identifier to revision number)
 			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(graphName, branchNameA));
-			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));			
+			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));		
+			
+			//for test
+			responseBuilder = Response.status(Response.Status.CONFLICT);
+			// for test
+			logger.info("Inhalt von Entity:"+RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
+			responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
 			
 			if (newRevisionNumber != null) {
 				// Respond with next revision number
