@@ -62,33 +62,34 @@
 </script>
 {{/script_extra}}
 
-{{$content}}   	    
+{{$content}}
+</br>   	    
 <div class="container">
 			<div class="row">
-				<div class="col-sm-7">
-                 <div class="panel panel-default" >
-                  <div class="panel-heading" data-toggle="collapse"  href="#merge" data-parent="#accordion">
-                    <h4 class="panel-title">Start Merging</h4>
-                  </div>
-                    <div class="panel-body">
-                    <form action="mergingProcess" method="post" class="form-horizontal" role="form">
-                     <div class="form-group">
-                     <div class="panel panel-default col-sm-11" style="margin-left:26px">
-                         <div class="panel-heading"><strong>Select the merging method</strong></div>
-                      <div class="panel-body">
-                        <div class="col-sm-2 radio">
-                            <label><input type="radio" name="optradio" value="common" checked><strong>Common</strong></label>
+				<div class="small-7 columns">
+                <div class="panel radius" >
+                  <fieldset>
+                    <legend><h4><strong>Start Merging</strong></h4></legend>
+                    </br>
+                    <form action="mergingProcess" method="post" role="form">
+                      <fieldset>
+                        <legend><em>Fieldset</em></legend>
+                        <div class="row">
+                          <div class="small-6 columns">
+                              <input type="radio" name="optradio" value="common" checked><label><strong>Common</strong></label>
+                          </div>
+                          <div class=" small-6 columns">
+                              <input type="radio" name="optradio" value="auto"><label><strong>AUTO</strong></label>
+                          </div>
                         </div>
-                        <div class="col-sm-offset-5 col-sm-2 radio">
-                            <label><input type="radio" name="optradio" value="auto"><strong>AUTO</strong></label>
+                      </fieldset>
+                      </br>
+                      <div class="row collapse prefix-radius" >
+                        <div class="small-2 columns" >
+                          <span class="prefix"><strong>GRAPH:</strong></span>
                         </div>
-                      </div>
-                      </div>
-                     </div>
-                      <div class="form-group" >
-                        <label class="control-label col-sm-2"><div align=center>GRAPH:</div></label>
-                        <div class="col-sm-10" >
-                          <select class="form-control" id="graph" name="graph" onchange="showCustomer(this.value)">
+                        <div class="small-10 columns" >
+                          <select class="radius" id="graph" name="graph" onchange="showCustomer(this.value)">
                              <option value="no">None</option>
 							               {{#graphList}}
                              <option value="{{toString}}">{{toString}}</option>
@@ -96,11 +97,13 @@
                           </select>
                         </div>
                       </div>
-
-                      <div class="form-group" >
-                        <label class="control-label col-sm-2"><div align=center>Strategie:</div></label>
-                        <div class="col-sm-10" >
-                          <select class="form-control" id="strategie" name="strategie" onchange="showIllustration(this.value)">
+                      </br>
+                      <div class="row collapse prefix-radius" >
+                        <div class="small-2 columns" >
+                          <span class="prefix"><strong>Strategie:</strong></span>
+                        </div>
+                        <div class="small-10 columns" >
+                          <select class="radius" id="strategie" name="strategie" onchange="showIllustration(this.value)">
                              <option value="0">None</option>
                              <option value="1">Fast-Forward Merge Strategie</option>
                              <option value="2">Three-Way Merge Strategie</option>
@@ -108,68 +111,82 @@
                           </select>
                         </div>
                       </div>
-
-                      <div class="form-group">
-                          <label class="control-label col-sm-2"><div align=center>SDD:</div></label>
-                          <div class="col-sm-10">          
-                            <select class="form-control" id="sdd" name="sdd">
-                             <option>sdd:defaultSDD</option>
+                      </br>
+                      <div class="row collapse prefix-radius" >
+                          <div class="small-2 columns" >
+                            <span class="prefix"><strong>SDD:</strong></span>
+                          </div>
+                          <div class="small-10 columns">          
+                            <select class="radius" id="sdd" name="sdd">
+                             <option value="sdd:defaultSDD">sdd:defaultSDD</option>
                             </select>
                           </div>
                       </div>
-                      <div class="form-group">
-                        <label class="control-label col-sm-2"><div align=center>MERGE:</div></label>
-                        <div class="col-sm-4">
-                          <select class="form-control" id="Branch1" name="Branch1">    
+                      </br>
+                      <div class="row collapse prefix-radius">
+                        <div class="small-2 columns">
+                          <span class="prefix"><strong>MERGE:</strong></span>
+                        </div>
+                        <div class="small-3 columns">
+                          <select class="radius" id="Branch1" name="Branch1">    
                              <option value="no"></option>
                           </select>          
                         </div>
-                        <label class="control-label col-sm-2"><div align=center>INTO:</div></label>
-                        <div class="col-sm-4">
-                          <select class="form-control" id="Branch2" name="Branch2">
+                        <div class="small-2 small-offset-2 columns">
+                          <span class="prefix"><strong>INTO:</strong></span>
+                        </div>
+                        <div class="small-3 columns">
+                          <select class="radius" id="Branch2" name="Branch2">
                              <option value="no"></option>
                           </select>          
                         </div>
                       </div>
-                       <div class="form-group">
-                           <label class="control-label col-sm-2"><div align=center>USER:</div></label>
-                           <div class="col-sm-10">
-                            <input class="form-control" placeholder="User" id="user" name="user">
-                           </div>
-                       </div>
-                      <div class="form-group">
-                           <label class="control-label col-sm-2"><div align=center>MESSAGE:</div></label>
-                           <div class="col-sm-10">
+                      </br>  
+                      <div class="row collapse prefix-radius">
+                          <div class="small-2 columns">
+                            <span class="prefix"><strong>USER:</strong></span>
+                          </div>
+                          <div class="small-10 columns">
+                            <input type="text" placeholder="User" id="user" name="user">
+                          </div>
+                       </div>    
+                      </br>
+                      <div class="row">
+                           <label class="small-2 columns"><div align=center><strong>MESSAGE:</strong></div></label>
+                           <div class="small-10 columns">
                            <textarea class="form-control" rows="6" id="message" name="message"></textarea>
                            </div>
                       </div>
-                          <div class="col-sm-6">
-                            <button id="sub" type="submit" class="btn btn-block btn-primary">Submit</button>
+                      </br>
+                      <div class="row">
+                          <div class="small-6 columns">
+                            <button id="sub" type="submit" class="button small expand default">Submit</button>
                           </div>
-                          <div class="col-sm-6">
-                            <button id="can" type="button" class="btn btn-block btn-danger">Cancel</button>
+                          <div class="small-6 columns">
+                            <button id="can" type="button" class="button small expand alert ">Cancel</button>
                           </div>
-                     
+                      </div>
                     </form>
-             
-                          <div class="col-sm-12" style="margin-top:6px">
-                            <button id ="con" type="button" class="btn btn-block btn-success" disabled onclick="window.location.href='/r43ples/mergingView?optradio=common&graph=http://test.com/r43ples-dataset-merging'">Confirm</button>
+                        <div class="row">
+                          <div class="small-12 columns" style="margin-top:6px">
+                            <button id ="con" type="button" class="button small  expand success" disabled onclick="window.location.href='/r43ples/mergingView?optradio=common&graph=http://test.com/r43ples-dataset-merging'">Confirm</button>
                           </div>
-                    </div>
+                        </div>
+                  </fieldset>
                 </div>
 			 </div>
 
-       <div class= "col-sm-5">
-          <div class="panel panel-default" style="height:536px; margin-top:56px">
-            <div class="panel-heading" data-toggle="collapse"  href="#merge" data-parent="#accordion">
-              <h4 class="panel-title">Strategie Illustration</h4>
+       <div class= "small-5 columns">
+          <div class="panel radius" style="height:566px; width:486;margin-top:56px">
+          <fieldset style="background-color:white">
+            <legend><h4><strong>Strategie Illustration</strong></h4></legend>
+            <div class="panel-body" id="illustration" style="height:486px; width:406px ;">
             </div>
-            <div class="panel-body" id="illustration">
-            </div>
+          </fieldset>
           </div>
        </div>
 		</div>
-    </div>
+   </div>
 		
 		
 {{/content}}

@@ -1085,7 +1085,7 @@ public class Endpoint {
 			
 			// Create difference model
 			MergeManagement.createDifferenceTripleModel(graphName,  graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI);
-			
+			logger.info("ABC TEST " +RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, "TURTLE"));
 			// Differ between the different merge queries
 			if ((action != null) && (action.equalsIgnoreCase("AUTO")) && (with == null) && (triples == null)) {
 				logger.info("AUTO MERGE query detected");

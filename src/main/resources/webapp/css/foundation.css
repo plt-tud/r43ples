@@ -120,10 +120,10 @@ select {
 .row {
   width: 100%;
   margin-left: auto;
-  margin-right: auto;
+  margin-right:auto;
   margin-top: 0;
   margin-bottom: 0;
-  max-width: 62.5rem; }
+  max-width: 76.5rem; }
   .row:before, .row:after {
     content: " ";
     display: table; }
@@ -1612,7 +1612,7 @@ fieldset {
   margin: 1.125rem 0; }
   fieldset legend {
     font-weight: bold;
-    background: #FFFFFF;
+    background: auto;
     padding: 0 0.1875rem;
     margin: 0;
     margin-left: -0.1875rem; }
@@ -2673,7 +2673,7 @@ meta.foundation-mq-topbar {
 /* Panels */
 .panel {
   border-style: solid;
-  border-width: 1px;
+  border-width: 0px;
   border-color: #d8d8d8;
   margin-bottom: 1.25rem;
   padding: 1.25rem;
@@ -2714,7 +2714,7 @@ meta.foundation-mq-topbar {
       .panel.callout a:not(.button):hover, .panel.callout a:not(.button):focus {
         color: #0078a0; }
   .panel.radius {
-    border-radius: 3px; }
+    border-radius: 16px; }
 
 .dropdown.button, button.dropdown {
   position: relative;
@@ -5219,7 +5219,7 @@ table {
   background: #FFFFFF;
   margin-bottom: 1.25rem;
   border: solid 1px #DDDDDD;
-  table-layout: auto; }
+  table-layout: 100%; }
   table caption {
     background: transparent;
     color: #222222;
