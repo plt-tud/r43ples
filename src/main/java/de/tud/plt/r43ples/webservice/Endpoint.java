@@ -227,6 +227,11 @@ public class Endpoint {
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
 			@FormParam("join_option") final boolean join_option) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
+		
+		logger.info("yxy test format:"+format);
+		logger.info("yxy test sparqlQuery:"+sparqlQuery);
+
+
 		return sparql(format, sparqlQuery, join_option);
 	}
 		
@@ -376,8 +381,11 @@ public class Endpoint {
 		System.out.println(model+graphName+sddName+branch1+branch2+user+message+type.toString());
 			
 		String mergeQuery = ProcessManagement.createMergeQuery(graphName, sddName, user, message, type, branch1, branch2, null);
+		logger.info("yxy test mergeQuery:"+mergeQuery);
+		
 		String userCommit = null;
 		Matcher userMatcher = patternUser.matcher(mergeQuery);
+		logger.info("yxy test mergeQuery:"+mergeQuery);
 		if (userMatcher.find()) {
 			userCommit = userMatcher.group("user");
 			mergeQuery = userMatcher.replaceAll("");
@@ -388,6 +396,9 @@ public class Endpoint {
 			messageCommit = messageMatcher.group("message");
 			mergeQuery = messageMatcher.replaceAll("");
 		}
+		
+		logger.info("yxy test mergeQuery nach verarbeit:"+mergeQuery);
+
 		if (patternMergeQuery.matcher(mergeQuery).find()) {
 			responsePost= getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
 			logger.info("yxy get Post"+responsePost.toString());	

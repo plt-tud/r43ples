@@ -16,7 +16,7 @@ import de.tud.plt.r43ples.merging.management.BranchManagement;
 public class MergingControl {
 	public static String getHtmlOutput(String optradio) {
 		MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/mergingView1.mustache");
+	    Mustache mustache = mf.compile("templates/mergingView.mustache");
 	    StringWriter sw = new StringWriter();
 	    
 	    Map<String, Object> scope = new HashMap<String, Object>();

@@ -1,0 +1,47 @@
+{{<templates/super}}
+   
+{{$content}}
+<div class="row">
+	<div id="main" class="col-md-6">
+		<div id="query_form">
+			<h2>Query Form</h2>
+			<form action="/r43ples/debug" method="get" role="form" class="form">
+				<div class="form-group">
+					<label for="query">Query Text</label><br />
+					<textarea name="query" class="form-control" id="query" rows="16">
+SELECT * 
+WHERE { 
+	GRAPH &lt;{{revisionGraph}}&gt; {
+		?s ?p ?o 
+	}
+}
+					</textarea>
+				</div>
+				<div class="form-group">
+					<div class="col-xs-offset-3 col-xs-9 btn-group">
+						<input type="submit" class="col-xs-8 btn btn-primary" value="Run Query" />
+						<input type="reset"	class="col-xs-4 btn btn-default" value="Reset" />
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<div id="main" class="col-md-6">
+		<h2>Debug information</h2>
+		<h3>Configuration</h3>
+		<ul>
+			<li>Revision Graph: <samp>{{revisionGraph}}</samp></li>
+			<li>SDD Graph: <samp>{{sdd_graph}}</samp></li>
+			<li>Triplestore: <samp>{{triplestore}}</samp></li>
+		</ul>
+		<h3>Existing graphs in triplestore</h3>
+		<ul>
+			{{#graphs}}
+			 <li><samp>{{toString}}</samp></li>
+			{{/graphs}}
+			</ul>
+	</div>
+</div>
+{{/content}}
+
+{{/templates/super}}
