@@ -6,14 +6,26 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.management.BranchManagement;
+import de.tud.plt.r43ples.merging.management.ProcessManagement;
+import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
+
+import javax.ws.rs.core.Response.ResponseBuilder;
+import javax.ws.rs.core.Response;
+
 
 public class MergingControl {
+	private static Logger logger = Logger.getLogger(MergingControl.class);
+	private static DifferenceModel differenceModel = new DifferenceModel();
+
+	
 	public static String getHtmlOutput(String optradio) {
 		MustacheFactory mf = new DefaultMustacheFactory();
 	    Mustache mustache = mf.compile("templates/mergingView.mustache");
@@ -48,6 +60,20 @@ public class MergingControl {
 		}
 		System.out.println("branch success created");
 		return branchInformation.toString();
+	}
+	
+	public static void getMergeProcess(Response response) throws IOException{
+		//ob diese satz richt ist oder nicht?
+		if (response.getStatusInfo() == Response.Status.CONFLICT){
+			logger.info("Merge query produced conflicts.");
+			ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel);
+		} else if (response.getStatusInfo() == Response.Status.CREATED){
+			logger.info("Merge query produced no conflicts. Merged revision was created.");
+			
+		} else {
+			// error occurred
+		}		
+		
 	}
 }
 

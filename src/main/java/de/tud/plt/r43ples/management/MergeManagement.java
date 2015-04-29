@@ -196,16 +196,22 @@ public class MergeManagement {
 				graphName = qs.getResource("?graph").toString();
 			}
 			
+			logger.info("TfirstRevisionNumber"+ firstRevisionNumber);
+			logger.info("TGN"+ graphName);
+
 			// Get the full graph name of first revision or create full revision graph of first revision
 			String fullGraphName = "";
 			try {
 				fullGraphName = RevisionManagement.getReferenceGraph(graphName, firstRevisionNumber);
+				logger.info("TFGN"+ fullGraphName);
+
 			} catch (InternalErrorException e) {
 				// Create a temporary full graph
 				fullGraphName = graphName+"RM-TEMP-REVISION-PROGRESS-FULLGRAPH";
 				RevisionManagement.generateFullGraphOfRevision(graphName, firstRevisionNumber, fullGraphName);
 			}
 			
+		
 			// Create the initial content
 			logger.info("Create the initial content.");
 			String queryInitial = prefixes + String.format(	
@@ -227,7 +233,14 @@ public class MergeManagement {
 			
 			// Drop the temporary full graph
 			logger.info("Drop the temporary full graph.");
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <"+fullGraphName+">");
+			
+			logger.info("VorTgraph" +RevisionManagement.getContentOfGraphByConstruct("http://test.com/r43ples-dataset-merging", "TURTLE"));
+	//		TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <"+fullGraphName+">");
+			logger.info("NachTgraph" +RevisionManagement.getContentOfGraphByConstruct("http://test.com/r43ples-dataset-merging", "TURTLE"));
+
+			logger.info("Tfullgraphname " +fullGraphName);
+			logger.info("Tgraphname " +graphName);
+
 			
 			// Update content by current add and delete set - remove old entries
 			while (iteList.hasNext()) {

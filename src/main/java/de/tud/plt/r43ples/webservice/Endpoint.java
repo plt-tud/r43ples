@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -404,14 +403,11 @@ public class Endpoint {
 			logger.info("yxy get Post"+responsePost.toString());	
 		}
 			
-//		if (responsePost.getStatus() == HttpURLConnection.HTTP_CONFLICT){
-//			logger.info("Merge query produced conflicts.");
-//			ProcessManagement.readDifferenceModel(responsePost.getEntity(), differenceModel);
-//		}
 
-		logger.info("Inhalt von Response:"+responsePost.getEntity().toString());	
+		logger.info("Inhalt von Response Entity:"+responsePost.getEntity().toString());	
 			
-			
+		MergingControl.getMergeProcess(responsePost);
+		
 		response.entity(MergingControl.getHtmlOutput(graphName));
 		return response.build();
 	}
@@ -1091,9 +1087,16 @@ public class Endpoint {
 			String uriA = "http://eatld.et.tu-dresden.de/branch-A";
 			String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 			
+			logger.info("YXY TEST Vor CreateRevisionProcess " +RevisionManagement.getContentOfGraphByConstruct(graphName, "TURTLE"));
+
 			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA), graphNameA, uriA);
 			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
 			
+			logger.info("YXY TEST graphName " + graphName);
+
+			
+			logger.info("YXY TEST Nach CreateRevisionProcess " +RevisionManagement.getContentOfGraphByConstruct(graphName, "TURTLE"));
+
 			// Create difference model
 			MergeManagement.createDifferenceTripleModel(graphName,  graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI);
 			logger.info("ABC TEST " +RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, "TURTLE"));
@@ -1125,7 +1128,6 @@ public class Endpoint {
 					// Return the conflict model to the client
 					responseBuilder = Response.status(Response.Status.CONFLICT);
 					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
-					logger.info("yxy mache it");
 				} else {
 					// Difference model contains no conflicts
 					// Create the merged revision
@@ -1148,11 +1150,8 @@ public class Endpoint {
 			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(graphName, branchNameA));
 			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));		
 			
-			//for test
-			responseBuilder = Response.status(Response.Status.CONFLICT);
 			// for test
 			logger.info("Inhalt von Entity:"+RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
-			responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
 			
 			if (newRevisionNumber != null) {
 				// Respond with next revision number

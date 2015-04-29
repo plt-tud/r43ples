@@ -22,11 +22,18 @@
 <!-- Custom styles for this template -->
 <link href="/static/css/r43ples.css" rel="stylesheet" />
 
+<style>
+.wsmall{
+      -webkit-transform: scale(0.8,0.8); /* Safari and Chrome */
+      }
+</style>
+
 {{$head_extra}}{{/head_extra}}
 </head>
-<body>
+<body style="background-color:WhiteSmoke;">
 
 <!-- Navigation -->
+  <div class="fixed">
     <nav class = "top-bar" data-topbar role = "navigation">
       <ul class = "title-area">
         <li class = "name">
@@ -55,19 +62,18 @@
         </section>
       </nav>
 
+  </div>
 
-    </nav>
-
-
-
-    <div class="container">
+    <div class="container wsmall">
     	{{$content}}Default content of the page{{/content}}
     </div>
 
 <!--     Bootstrap core JavaScript -->
 <!--  At the end in order to load the page faster-->
 <script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
-<script src="//cdn.jsdelivr.net/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+<!--foundation.js-->
+<script src="/static/js/foundation.js"></script>
+
 {{$script_extra}}{{/script_extra}}
 
 </body>
