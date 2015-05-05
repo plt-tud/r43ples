@@ -1,0 +1,90 @@
+svg {
+    background-color: #FFF;
+    cursor: default;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+  }
+.live.map text {
+    font-weight: 300;
+    font-size: 14px;
+  }
+
+  .live.map .node rect {
+    stroke-width: 1.5px;
+    stroke: #bbb;
+    fill: #666;
+  }
+
+  .live.map .status {
+    height: 100%;
+    width: 15px;
+    display: block;
+    float: left;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    margin-right: 4px;
+  }
+
+  .live.map .running .status {
+    background-color: #7f7;
+  }
+
+  .live.map .running.warn .status {
+    background-color: #ffed68;
+  }
+
+  .live.map .stopped .status {
+    background-color: #f77;
+  }
+
+  .live.map .warn .queue {
+    color: #f77;
+  }
+
+ 
+  .live.map .consumers {
+    margin-right: 2px;
+  }
+
+  .live.map .consumers,
+  .live.map .name {
+    margin-top: 4px;
+  }
+
+  .live.map .consumers:after {
+    content: "x";
+  }
+
+  .live.map .queue {
+    display: block;
+    float: left;
+    width: 130px;
+    height: 20px;
+    font-size: 12px;
+    margin-top: 2px;
+  }
+
+  .live.map .node g div {
+    width: 200px;
+    height: 40px;
+    color: #fff;
+  }
+
+  .live.map .node g div span.consumers {
+    display: inline-block;
+    width: 20px;
+  }
+
+  .live.map .edgeLabel text {
+    width: 50px;
+    fill: #fff;
+  }
+
+  .live.map .edgePath path {
+    stroke: #999;
+    stroke-width: 1.5px;
+    fill: #999;
+  }

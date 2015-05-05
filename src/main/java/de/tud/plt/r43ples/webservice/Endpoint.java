@@ -28,6 +28,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Template;
@@ -55,6 +56,7 @@ import de.tud.plt.r43ples.merging.management.ProcessManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.visualisation.VisualisationBatik;
 import de.tud.plt.r43ples.visualisation.VisualisationD3;
+import freemarker.template.TemplateException;
 
 /**
  * Provides SPARQL endpoint via [host]:[port]/r43ples/.
@@ -175,7 +177,8 @@ public class Endpoint {
 		logger.info("Get Revision Graph: " + graph);
 		String format = (format_query != null) ? format_query : format_header;
 		logger.info("format: " + format);
-
+		logger.info("format_header"+ format_header);
+		
 		ResponseBuilder response = Response.ok();
 		if (format.equals("batik")) {
 			response.type(MediaType.TEXT_HTML);
@@ -350,6 +353,8 @@ public class Endpoint {
 	 * create RevisionProcess Model B
 	 * create Difference model 
 	 * @throws IOException 
+	 * @throws TemplateException 
+	 * @throws ConfigurationException 
 	 */
 	
 	@Path("mergingProcess")
@@ -362,7 +367,7 @@ public class Endpoint {
 			@FormParam("Branch1") final String branch1,
 			@FormParam("Branch2") final String branch2,
 			@FormParam("user") @DefaultValue("") final String user,
-			@FormParam("message") @DefaultValue("") final String message) throws InternalErrorException, IOException {
+			@FormParam("message") @DefaultValue("") final String message) throws InternalErrorException, IOException, TemplateException, ConfigurationException {
 		ResponseBuilder response = Response.ok();
 		Response responsePost = null;
 
@@ -404,11 +409,12 @@ public class Endpoint {
 		}
 			
 
-		logger.info("Inhalt von Response Entity:"+responsePost.getEntity().toString());	
+//		logger.info("Inhalt von Response Entity:"+responsePost.getEntity().toString());	
 			
 		MergingControl.getMergeProcess(responsePost);
 		
-		response.entity(MergingControl.getHtmlOutput(graphName));
+		
+		response.entity(MergingControl.getViewHtmlOutput(graphName));
 		return response.build();
 	}
 	
@@ -416,10 +422,15 @@ public class Endpoint {
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response mergingGET(@HeaderParam("Accept") final String formatHeader,
-			@QueryParam("graph") final String graph) throws InternalErrorException {
+			 @QueryParam("graph") @DefaultValue("") final String graph, @QueryParam("optradio") @DefaultValue("") final String format_new) throws InternalErrorException {
 		System.out.println("2 mal merging Process");
 		ResponseBuilder response = Response.ok();
 		String format = "application/json";
+		logger.info("format_header"+ formatHeader);
+		logger.info("yxy graphName"+ graph);
+		logger.info("yxy format_new"+ format_new);
+
+
 		response.type(format);
 		response.entity(RevisionManagement.getRevisionInformation(graph, format));
 		return response.build();
@@ -1087,12 +1098,12 @@ public class Endpoint {
 			String uriA = "http://eatld.et.tu-dresden.de/branch-A";
 			String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 			
-			logger.info("YXY TEST Vor CreateRevisionProcess " +RevisionManagement.getContentOfGraphByConstruct(graphName, "TURTLE"));
+			logger.info("YXYtest commonRevision " + commonRevision);
 
-			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA), graphNameA, uriA);
-			MergeManagement.createRevisionProgress(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
+			MergeManagement.createRevisionProgresses(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA), graphNameA, uriA, MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
 			
-			logger.info("YXY TEST graphName " + graphName);
+			logger.info("YXY Processgraph A " +RevisionManagement.getContentOfGraphByConstruct(graphNameA, "HTML"));
+			logger.info("YXY Processgraph B " +RevisionManagement.getContentOfGraphByConstruct(graphNameB, "HTML"));
 
 			
 			logger.info("YXY TEST Nach CreateRevisionProcess " +RevisionManagement.getContentOfGraphByConstruct(graphName, "TURTLE"));

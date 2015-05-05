@@ -22,6 +22,7 @@ import com.hp.hpl.jena.query.Dataset;
 import de.tud.plt.r43ples.client.R43plesArgs;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.GitRepositoryState;
+import de.tud.plt.r43ples.merging.control.MergingControl;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 
@@ -101,7 +102,7 @@ public class Service {
 		
 		//support templates:freemarker,mustache
 		ResourceConfig rc = new ResourceConfig()
-			.registerClasses(Endpoint.class)
+			.registerClasses(Endpoint.class, MergingControl.class)
 			.property(MustacheMvcFeature.TEMPLATE_BASE_PATH, "templates")
 			.register(MustacheMvcFeature.class)
 			.register(ExceptionMapper.class)

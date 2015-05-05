@@ -31,8 +31,7 @@
 	<!--tipsy-->
 	<script src="//cdn.jsdelivr.net/tipsy/1.0/javascripts/jquery.tipsy.js"></script>
 	<!--Version Graph-->
-	<script src="/static/js/merging-version-graph.js"></script>
-	<script src="//cdn.jsdelivr.net/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+	<script src="/static/js/merging-process-graph.js"></script>
 	
     <!--DataTable-->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.6/css/jquery.dataTables.css">
@@ -48,10 +47,9 @@
         var toogleBranches = $('#toogle-branches');
         var toogleTags = $('#toogle-tags');
         //var dataSource = $('#datasource');
-        
+        draw();
         // Graph mit der aktuellen Auswahl erstellen
-        drawGraph("mergingProcess?graph={{graphName}}&optradio=application/json",toogleBranches.prop("checked"),toogleTags.prop("checked"));
-        
+       // drawGraph("mergingProcess?graph={{graphName}}&optradio=application/json",toogleBranches.prop("checked"),toogleTags.prop("checked"));
         // ChangeListener für die Tags
         toogleTags.change(function () {
             $(this).prop('checked')?showTags():hideTags();
@@ -130,7 +128,7 @@
           <div class="panel" style="margin:0px;padding:0px;">
             <h8 class="active" style="margin:0px">Revision graph</h8>
             <div id="visualisation">
-             <svg id="svg" width="100%" height="360" style="border:1px solid #000000; margin:1px; overflow:hidden;"></svg>
+             <svg id="svg" width="100%" height="360" style="border:1px solid #000000; margin:1px; overflow:hidden;"><g/></svg>
             </div> 
             <div class="form" >
               <label for="toogle-tags" class="checkbox-inline">Tags</label><input type="checkbox" id="toogle-tags" class="checkbox-inline">

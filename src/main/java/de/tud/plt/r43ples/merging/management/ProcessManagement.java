@@ -3,8 +3,13 @@ package de.tud.plt.r43ples.merging.management;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
 
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.QueryExecution;
@@ -22,6 +27,7 @@ import de.tud.plt.r43ples.management.TripleObjectTypeEnum;
 import de.tud.plt.r43ples.merging.model.structure.Difference;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
+import de.tud.plt.r43ples.merging.model.structure.TreeNode;
 import de.tud.plt.r43ples.merging.model.structure.Triple;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
@@ -117,7 +123,13 @@ public class ProcessManagement {
 	    	SDDTripleStateEnum tripleStateA = convertSDDStringToSDDTripleState(qsDifferenceGroups.getResource("?tripleStateA").toString());
 	    	SDDTripleStateEnum tripleStateB = convertSDDStringToSDDTripleState(qsDifferenceGroups.getResource("?tripleStateB").toString());
 	    	SDDTripleStateEnum automaticResolutionState = convertSDDStringToSDDTripleState(qsDifferenceGroups.getResource("?automaticResolutionState").toString());
-	    	boolean conflicting = qsDifferenceGroups.getLiteral("?conflicting").toString().equals("1^^http://www.w3.org/2001/XMLSchema#integer");   	
+	    	boolean conflicting = qsDifferenceGroups.getLiteral("?conflicting").toString().equals("true^^http://www.w3.org/2001/XMLSchema#boolean");   
+	    	
+	    	//Wert von conflicting is "true^^http://www.w3.org/2001/XMLSchema#boolean" not "1^^http://www.w3.org/2001/XMLSchema#integer".
+	    	//boolean conflicting = qsDifferenceGroups.getLiteral("?conflicting").toString().equals("1^^http://www.w3.org/2001/XMLSchema#integer");   
+	    		
+	    	logger.info("Original wert von Conflict: "+ qsDifferenceGroups.getLiteral("?conflicting").toString());
+	    	logger.info("YXY Test conflicting:" + conflicting );
 
 	    	ResolutionState resolutionState = ResolutionState.DIFFERENCE;
 	    	if (conflicting) {
@@ -233,14 +245,19 @@ public class ProcessManagement {
 		    	
 		    	Difference difference = new Difference(triple, referencedRevisionA, referencedRevisionLabelA, referencedRevisionB, referencedRevisionLabelB, automaticResolutionState, resolutionState);
 		    	differenceGroup.addDifference(tripleToString(triple), difference);
+		    	logger.info("yxytree: "+ differenceGroup.getDifferences().entrySet().toString());
 		    }
 	    	differenceModel.addDifferenceGroup(differenceGroup.getTripleStateA().toString() + "-" + differenceGroup.getTripleStateB().toString(), differenceGroup);
 	    }
 	    
 	    logger.info("Difference model successfully read.");	
 		logger.info("DT"+differenceModel.getDifferenceGroups().toString());
-		logger.info("Unittest:"+differenceModel.getDifferenceGroups().get("ORIGINAL-DELETED").getDifferences().entrySet().toString());
+		logger.info("Unittest:"+differenceModel.getDifferenceGroups().get("ADDED-DELETED").isConflicting());
 	}
+	
+	
+	
+	
 	
 	//copy Hensel
 	public static Model readTurtleStringToJenaModel(String triples) throws IOException {
@@ -272,9 +289,14 @@ public class ProcessManagement {
 	public static String tripleToString(Triple triple) {
 		if (triple.getObjectType().equals(TripleObjectTypeEnum.LITERAL)) {
 			logger.debug(String.format("<%s> %s \"%s\" .", triple.getSubject(), getPredicate(triple), triple.getObject()));
+			
+			logger.info("LITERAL Triple");
 			return String.format("<%s> %s \"%s\" .", triple.getSubject(), getPredicate(triple), triple.getObject());
+			
 		} else {
 			logger.debug(String.format("<%s> %s <%s> .", triple.getSubject(), getPredicate(triple), triple.getObject()));
+			logger.info("Ohne LITERAL Triple");
+
 			return String.format("<%s> %s <%s> .", triple.getSubject(), getPredicate(triple), triple.getObject());
 		}
 	}
@@ -303,6 +325,100 @@ public class ProcessManagement {
 			return "<" + triple.getObject() + ">";		
 		}
 	}
+	
+	
+	public static void createDifferenceTree(DifferenceModel differenceModel, List<TreeNode> treeList) throws ConfigurationException{
+//		List<TreeNode> treeList = new ArrayList<TreeNode>();
+		treeList.clear();	
+		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
+		while(iterDM.hasNext()){
+			//get Triple List von jede DifferenceGroup
+			List<String> tripleList = new ArrayList<String>();
+			Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterDM.next();
+			
+			//get Name von differenceGroup
+			String groupName = (String) entryDG.getKey();
+			
+			logger.info("Tree test groupName: "+ groupName);
+			//get jede differenceGroup
+			DifferenceGroup differ = (DifferenceGroup) entryDG.getValue();
+			
+			//get conflict status von differenceGroup
+			boolean status = differ.isConflicting();
+			
+			logger.info("Tree test Status: "+ status);
+
+			//get String name von jede Triples
+			Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
+			while(iterDIF.hasNext()){
+				Entry<String, Difference> entryDF = iterDIF.next();
+				// get jede tripleName
+				String tripleName = entryDF.getKey();
+				logger.info("Tree test TripleName: "+ tripleName);
+				
+				Triple triple = entryDF.getValue().getTriple();
+				
+				String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(triple));
+				String predicate = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(triple));
+				String object = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(triple));
+				
+				StringBuilder TripleBuilder = new StringBuilder();
+				String prefixTriple = TripleBuilder.append(subject).append(" ").append(predicate).append(" ").append(object).toString();
+				
+				logger.info("Tree test PrefixTriple: "+ prefixTriple);
+
+				//get alle tripleNames in der DifferenceGroup
+				tripleList.add(prefixTriple);
+			}
+			// create treeNode
+			TreeNode treeNode = new TreeNode(groupName, tripleList, status);
+			treeList.add(treeNode);
+		}
+		
+		logger.info("Difference Tree successful created.");
+	}
+	
+	
+	/**
+	 * Converts a triple string to a string in which URIs are replaced by prefixes which were specified in the configuration.
+	 * If no prefix was found or if input string is a literal the input string will be returned.
+	 * 
+	 * @param tripleString the triple string (subject or predicate or object) to convert
+	 * @return the converted triple string or input string
+	 * @throws ConfigurationException 
+	 */
+	public static String convertTripleStringToPrefixTripleString(String tripleString) throws ConfigurationException {
+		//read clent.conf to get the prefix map
+		ClientConfig.readConfig("client.conf");
+		logger.info("Prefix Mapping geted: "+ClientConfig.prefixMappings.entrySet().toString());
+		
+		if (tripleString.contains("<") && tripleString.contains(">")) {
+			String tripleStringConverted = tripleString.trim().replaceAll("<", "").replaceAll(">", "");
+			int lastIndexSlash = tripleStringConverted.lastIndexOf("/");
+			int lastIndexHash = tripleStringConverted.lastIndexOf("#");
+			if ((lastIndexSlash == -1) && (lastIndexHash == -1)) {
+				return tripleString;
+			} else {
+				int index = 0;
+				if (lastIndexSlash > lastIndexHash) {
+					// Slash separator found
+					index = lastIndexSlash + 1;
+				} else {
+					// Hash separator found
+					index = lastIndexHash + 1;
+				}
+				String subString = tripleStringConverted.substring(0, index);
+				
+				logger.info("get substring: "+subString);
+				// Try to find the prefix
+				if (ClientConfig.prefixMappings.containsKey(subString)) {
+					return ClientConfig.prefixMappings.get(subString) + ":" + tripleStringConverted.substring(index, tripleStringConverted.length());
+				}
+			}
+		}
+		return tripleString;
+	}
+
 	
 }
 

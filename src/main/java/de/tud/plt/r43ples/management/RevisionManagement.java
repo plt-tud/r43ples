@@ -784,6 +784,8 @@ public class RevisionManagement {
 	 */
 	public static String getRevisionInformation(final String graphName, final String format) {
 		String sparqlQuery;
+		
+		logger.info("yxyv graphName : " + graphName );
 		if (graphName.equals("")) {
 			sparqlQuery = String.format(""
 					+ "CONSTRUCT" 

@@ -1,24 +1,43 @@
+<!DOCTYPE html>
+	<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
+	<html class="no-js" lang="en" >
 
-{{<templates/super}}
-
-  {{$head_extra}}
-
-
+<head>
+	  	<meta charset="utf-8">
+	    <!-- If you delete this meta tag World War Z will become a reality -->
+	  	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	    <title>Merge View</title>
+	  	<meta name="author" content="Markus Graube">
+		<meta name="description" content="R43ples web application">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+			  
+	  <!-- Foundation 5 core CSS -->
+	<link href="/static/css/foundation.css" rel="stylesheet" />
+	<link href="/static/css/normalize.css" rel="stylesheet" />
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/fontawesome/4.3.0/css/font-awesome.css">
+	
+	<!-- Custom styles for this template -->
+	<link href="/static/css/r43ples.css" rel="stylesheet" />
+	
+	<script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+	
+	<!--jsTree-->
+	<script src="/static/js/jstree.js"></script>
+	<link rel="stylesheet" href="/static/css/jsTreeStyle.css" />
+	
+	<!--foundation.js-->
+	<script src="/static/js/foundation.js"></script>
+		
+	  
     <link rel="stylesheet" href="//cdn.jsdelivr.net/tipsy/1.0/stylesheets/tipsy.css">
     <!--<link rel="stylesheet" href="/static/css/version-merging-graph.css">-->
     <link rel="stylesheet" href="/static/css/process-graph.css">
 
 
    <!-- <link rel="stylesheet" href="https://cdn.datatables.net/1.10.6/css/jquery.dataTables.css"> -->
-  <!--  <link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/1.10.6/integration/foundation/dataTables.foundation.css">-->
+   <!--  <link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/1.10.6/integration/foundation/dataTables.foundation.css">-->
     <link rel="stylesheet" href="/static/css/foundation.table.css">
 
-  {{/head_extra}}
-
-
-
-  
-  {{$script_extra}}    
     
         <!--Einbinden der externen Bibliotheken-->
     	<!--D3.js-->
@@ -36,8 +55,12 @@
         
       <script src="https://cdn.datatables.net/1.10.6/js/jquery.dataTables.min.js"></script>
       <script src="https://cdn.datatables.net/plug-ins/1.10.6/integration/foundation/dataTables.foundation.js"></script>
+	  
 
-       
+ 
+</head>
+
+<body>       
       <script type="text/javascript">
         $(document).foundation();      
         $(document).ready(function () {
@@ -47,7 +70,7 @@
             //var dataSource = $('#datasource');
             
             // Graph mit der aktuellen Auswahl erstellen
-            drawGraph("mergingProcess?graph={{graphName}}&optradio=application/json",toogleBranches.prop("checked"),toogleTags.prop("checked"));
+            drawGraph("mergingProcess?graph=${graphName}&optradio=application/json",toogleBranches.prop("checked"),toogleTags.prop("checked"));
             
             //test merging-process-graph
             //drawProcess();
@@ -82,12 +105,31 @@
             // Toggle the visibility
             column.visible( ! column.visible() );
             } );
+
+            //jsTree
+            $("#diffTree").jstree({
+              "plugins" : [ "themes", "html_data" ]
+              // "types" : {
+              //           "types" : {
+              //               "team" : {
+              //                   "icon" : {
+              //                       "image" : "r43ples-r-logo.png"
+              //                   }
+              //               }, 
+             
+              //               "iteration" : {
+              //                   "icon" : {
+              //                       "image" : "r43ples-r-logo.png"
+              //                   }
+              //               }
+              //           }
+              //       },
+              //       "plugins" : [ "html_data", "types", "themes" ]
+            });
+
         });
       </script>
 
-  {{/script_extra}}
-
-  {{$content}}
 
 
   <!-- body content here -->
@@ -256,10 +298,60 @@
            </div>
             
             <div class="large-3 pull-9 columns" style="margin:0px;padding:0px;">
-              <fieldset style="padding-top:0px;padding-bottom:6px">
+              <fieldset style="padding-top:0px;padding-bottom:6px;height:519px;" >
                 <legend><strong>Differences</strong></legend>
-                <div id="visualisation">
-                 <svg id="svg1" width="100%" height="480" style="border:1px solid #000000; margin:1px; overflow:hidden;"></svg>
+                <div id="diffTree" style="overflow:auto; height:486px; width:266px; padding:0px">
+                  <#if conStatus=="1">
+                    <ul>
+                        <li><a>Conflict</a>
+                          <ul>
+                            <#list conList as node>
+                              <li ><a>${node.differenceGroup}</a>
+                                <ul>
+                                    <#assign triples = node.tripleList>
+                                    <#list triples as triple>
+                                        <li ><a>${triple}</a></li>              
+                                    </#list>
+                                </ul>
+                              </li>          
+                            </#list>
+                          </ul>
+                         </li>
+                         
+                         <li><a>Difference</a>
+                          <ul>
+                            <#list diffList as node>
+                              <li ><a>${node.differenceGroup}</a>
+                                <ul>
+                                    <#assign triples = node.tripleList>
+                                    <#list triples as triple>
+                                        <li ><a>${triple}</a></li>              
+                                    </#list>
+                                </ul>
+                              </li>          
+                            </#list>
+                          </ul>
+                         </li>       
+                     </ul> 
+                    
+                   <#else>
+                      <ul>
+                         <li><a>Difference</a>
+                          <ul>
+                            <#list diffList as node>
+                              <li ><a>${node.differenceGroup}</a>
+                                <ul>
+                                    <#assign triples = node.tripleList>
+                                    <#list triples as triple>
+                                        <li ><a>${triple}</a></li>              
+                                    </#list>
+                                </ul>
+                              </li>          
+                            </#list>
+                          </ul>
+                         </li>       
+                      </ul> 
+                    </#if>                 
                 </div>   
 
               </fieldset>
@@ -326,9 +418,8 @@
       </div>      
   </div>    
            
-          
+</body>
+</html>       
 
   
- {{/content}}
 
-{{/templates/super}}
