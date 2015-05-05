@@ -158,14 +158,85 @@ public class MergeManagement {
 	
 	
 	/**
+	 * Create the revision progresses for both branches.
+	 * 
+	 * @param listA the linked list with all revisions from start revision to target revision of branch A
+	 * @param graphNameRevisionProgressA the graph name of the revision progress of branch A
+	 * @param uriA the URI of the revision progress of branch A
+	 * @param listB the linked list with all revisions from start revision to target revision branch B
+	 * @param graphNameRevisionProgressB the graph name of the revision progress of branch B
+	 * @param uriB the URI of the revision progress of branch B
+	 * @throws InternalErrorException 
+	 */
+	public static void createRevisionProgresses(LinkedList<String> listA, String graphNameRevisionProgressA, String uriA, LinkedList<String> listB, String graphNameRevisionProgressB, String uriB) throws InternalErrorException {
+		logger.info("Create the revision progress of branch A and B.");
+		
+		// Get the common revision
+		String commonRevision = null;
+		if ((listA.size() > 0) && (listB.size() > 0)) {
+			commonRevision = listA.getFirst();
+		} else {
+			throw new InternalErrorException("Revision path contains no revisions.");
+		}
+
+		// Get the revision number of first revision
+		logger.info("Get the revision number of first revision.");
+		String firstRevisionNumber = "";
+		String graphName = "";
+
+		String query = String.format(
+			  "SELECT ?number ?graph %n"
+			+ "WHERE { %n"
+			+ "	GRAPH <%s> { %n"
+			+ "		<%s> <http://eatld.et.tu-dresden.de/rmo#revisionNumber> ?number . %n"
+			+ " 	<%s> <http://eatld.et.tu-dresden.de/rmo#revisionOf> ?graph . %n"
+			+ "} }", Config.revision_graph, commonRevision, commonRevision);
+		
+		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
+		
+		if (results.hasNext()) {
+			QuerySolution qs = results.next();
+			firstRevisionNumber = qs.getLiteral("?number").toString();
+			graphName = qs.getResource("?graph").toString();
+		}
+		
+		// Get the full graph name of first revision or create full revision graph of first revision
+		String fullGraphNameCommonRevision = "";
+		Boolean tempGraphWasCreated = false;
+		try {
+			fullGraphNameCommonRevision = RevisionManagement.getReferenceGraph(graphName, firstRevisionNumber);
+		} catch (InternalErrorException e) {
+			// Create a temporary full graph
+			fullGraphNameCommonRevision = graphName + "RM-TEMP-REVISION-PROGRESS-FULLGRAPH";
+			RevisionManagement.generateFullGraphOfRevision(graphName, firstRevisionNumber, fullGraphNameCommonRevision);
+			tempGraphWasCreated = true;
+		}
+		
+		// Create revision progress of branch A
+		createRevisionProgress(listA, fullGraphNameCommonRevision, graphNameRevisionProgressA, uriA);
+		
+		// Create revision progress of branch A
+		createRevisionProgress(listB, fullGraphNameCommonRevision, graphNameRevisionProgressB, uriB);
+		
+		// Drop the temporary full graph
+		if (tempGraphWasCreated) {
+			logger.info("Drop the temporary full graph.");
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <" + fullGraphNameCommonRevision + ">");
+		}
+		
+	}
+	
+	
+	/**
 	 * Create the revision progress.
 	 * 
 	 * @param list the linked list with all revisions from start revision to target revision
+	 * @param fullGraphNameCommonRevision the full graph name of the common revision (first revision of path)
 	 * @param graphNameRevisionProgress the graph name of the revision progress
 	 * @param uri the URI of the revision progress
 	 * @throws InternalErrorException 
 	 */
-	public static void createRevisionProgress(LinkedList<String> list, String graphNameRevisionProgress, String uri) throws InternalErrorException {
+	public static void createRevisionProgress(LinkedList<String> list, String fullGraphNameCommonRevision, String graphNameRevisionProgress, String uri) throws InternalErrorException {
 		logger.info("Create the revision progress of " + uri + " in graph " + graphNameRevisionProgress + ".");
 		
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameRevisionProgress));
@@ -174,37 +245,6 @@ public class MergeManagement {
 		
 		if (iteList.hasNext()) {
 			String firstRevision = iteList.next();
-			
-			// Get the revision number of first revision
-			logger.info("Get the revision number of first revision.");
-			String firstRevisionNumber = "";
-			String graphName = "";
-
-			String query = String.format(
-				  "SELECT ?number ?graph %n"
-				+ "WHERE { %n"
-				+ "	GRAPH <%s> { %n"
-				+ "		<%s> <http://eatld.et.tu-dresden.de/rmo#revisionNumber> ?number . %n"
-				+ " 	<%s> <http://eatld.et.tu-dresden.de/rmo#revisionOf> ?graph . %n"
-				+ "} }", Config.revision_graph, firstRevision, firstRevision);
-			
-			ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
-			
-			if (results.hasNext()) {
-				QuerySolution qs = results.next();
-				firstRevisionNumber = qs.getLiteral("?number").toString();
-				graphName = qs.getResource("?graph").toString();
-			}
-			
-			// Get the full graph name of first revision or create full revision graph of first revision
-			String fullGraphName = "";
-			try {
-				fullGraphName = RevisionManagement.getReferenceGraph(graphName, firstRevisionNumber);
-			} catch (InternalErrorException e) {
-				// Create a temporary full graph
-				fullGraphName = graphName+"RM-TEMP-REVISION-PROGRESS-FULLGRAPH";
-				RevisionManagement.generateFullGraphOfRevision(graphName, firstRevisionNumber, fullGraphName);
-			}
 			
 			// Create the initial content
 			logger.info("Create the initial content.");
@@ -220,15 +260,11 @@ public class MergeManagement {
 				+ "} } WHERE { %n"
 				+ "	GRAPH <%s> %n"
 				+ "		{ ?s ?p ?o . } %n"
-				+ "}",graphNameRevisionProgress,uri, firstRevision, fullGraphName);
+				+ "}",graphNameRevisionProgress, uri, firstRevision, fullGraphNameCommonRevision);
 		
 			// Execute the query which generates the initial content
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryInitial);
-			
-			// Drop the temporary full graph
-			logger.info("Drop the temporary full graph.");
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <"+fullGraphName+">");
-			
+						
 			// Update content by current add and delete set - remove old entries
 			while (iteList.hasNext()) {
 				String revision = iteList.next();
