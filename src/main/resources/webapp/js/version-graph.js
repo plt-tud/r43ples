@@ -13,7 +13,7 @@ function updateWindow(){
 }
 window.onresize = updateWindow;
 
-// jQuery-SVG-Objekt um den Loader zu postionieren
+// jQuery-SVG-Objekt um den Loader zu positionieren
 var _svg, spinner;
 
 $(document).ready(function () {
