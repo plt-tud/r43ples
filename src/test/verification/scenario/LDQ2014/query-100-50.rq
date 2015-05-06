@@ -1,0 +1,6 @@
+SELECT ?s ?p ?o 
+WHERE { 
+    GRAPH <http://test.com/benchmark/LDQ2014/dataset-100-50> REVISION "%%%REV%%%"  {
+        ?s ?p ?o.
+    }
+}LIMIT 10

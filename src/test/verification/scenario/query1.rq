@@ -1,0 +1,8 @@
+PREFIX : <http://test.com/>
+
+SELECT ?s ?o 
+WHERE { 
+    GRAPH <http://test.com/r43ples-dataset-1> REVISION "%%%REV%%%"  {
+        ?s :knows ?o.
+    }
+}
