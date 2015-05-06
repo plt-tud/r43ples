@@ -223,7 +223,7 @@ public class Endpoint {
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("format") final String formatQuery, 
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
-			@FormParam("join_option") final String join_option) throws InternalErrorException {
+			@FormParam("join_option") @DefaultValue("") final String join_option) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		return sparql(format, sparqlQuery, join_option);
 	}
@@ -250,7 +250,7 @@ public class Endpoint {
 	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
 			@QueryParam("format") final String formatQuery, 
 			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
-			@QueryParam("join_option") final boolean join_option) throws InternalErrorException {
+			@QueryParam("join_option") @DefaultValue("") final boolean join_option) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		
 		String sparqlQueryDecoded;
@@ -402,7 +402,7 @@ public class Endpoint {
 	 * @throws InternalErrorException
 	 */
 	private Response getSparqlResponse(final String format, String sparqlQuery, final String join_option) throws InternalErrorException {
-		logger.info("SPARQL query was requested. Query: " + sparqlQuery);
+		logger.info(String.format("SPARQL request (format=%s, join_option=%s) -> %n %s", format, join_option, sparqlQuery));
 		String user = null;
 		Matcher userMatcher = patternUser.matcher(sparqlQuery);
 		if (userMatcher.find()) {
