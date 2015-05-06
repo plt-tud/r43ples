@@ -1,41 +1,66 @@
 #! /bin/bash
 
-ENDPOINT=http://localhost:9998/r43ples/sparql
+EP=http://localhost:9998/r43ples/sparql
+TIME_FILE=logs/time.`date +%Y-%m-%d_%H:%M:%S`.log
 
-GRAPH=http://test.com/scenario_1
-
-TIME_FILE=time.`date +%Y-%m-%d_%H:%M:%S`.log
-
-RUNS=20
+RUNS=4
 TIMEFORMAT=%R
 
-DATASETPATH=../resources/dataset
+
+
 
 function singleTest {
- echo -n "ISQL-SPARQL $TRIPLES  " >> $TIME_FILE
+    MODE=$1
+    REVISION=$2
+    ENDPOINT=$3
+    QUERY_TEMPLATE=$4
+    QUERY=`sed -e "s/%%%REV%%%/$REVISION/" $QUERY_TEMPLATE`
+    echo -n "$MODE; $QUERY_TEMPLATE; $REVISION; " >> $TIME_FILE
     {
         time {
-            curl $ENDPOINT $VOS_USER $VOS_PW $SQL_FILE;
+            curl -H "Accept: application/sparql-results+xml" --data "join_option=$MODE&query=$QUERY" $ENDPOINT;
         }
     } 2>>$TIME_FILE
 }
 
 
 echo "# Run on $ENDPOINT at `date`" > $TIME_FILE
-echo "Mode  Triples  Time" >> $TIME_FILE
+echo "Join; Query; Revision; Time" >> $TIME_FILE
 
+
+
+# simple
 for runs in $(seq $RUNS); do
-    for n in $(seq 2 5); do
-        N=`echo "1*10^$n" | bc`
-        singleTest $N
-        N=`echo "2*10^$n" | bc`
-        singleTest $N
-        N=`echo "5*10^$n" | bc`
-        singleTest $N
+    for revision in {1..5}; do
+        singleTest "new" $revision $EP scenario/query1.rq
+        singleTest "off" $revision $EP scenario/query1.rq
     done
-    notify-send "R43ples Performance Test" "Run $runs/$RUNS completed"
+#     notify-send "R43ples Performance Test" "Run $runs/$RUNS completed"
 done
 
+# Wien
+for runs in $(seq $RUNS); do
+    for revision in {1..20}; do
+        singleTest "new" $revision $EP scenario/Wien/query4.rq
+        singleTest "off" $revision $EP scenario/Wien/query4.rq
+    done
+#     notify-send "R43ples Performance Test" "Run $runs/$RUNS completed"
+done
 
-Rscript EvaluatePerformance.R $TIME_FILE
+# LDQ 2014
+for runs in $(seq $RUNS); do
+    for revision in {1..20}; do
+        singleTest "new" $revision $EP scenario/LDQ2014/query-100-50.rq
+        singleTest "off" $revision $EP scenario/LDQ2014/query-100-50.rq
+        singleTest "new" $revision $EP scenario/LDQ2014/query-1000-50.rq
+        singleTest "off" $revision $EP scenario/LDQ2014/query-1000-50.rq
+        singleTest "new" $revision $EP scenario/LDQ2014/query-10000-50.rq
+        singleTest "off" $revision $EP scenario/LDQ2014/query-10000-50.rq
+        singleTest "new" $revision $EP scenario/LDQ2014/query-100000-50.rq
+        singleTest "off" $revision $EP scenario/LDQ2014/query-100000-50.rq
+    done
+#     notify-send "R43ples Performance Test" "Run $runs/$RUNS completed"
+done
+
+# Rscript EvaluatePerformance.R $TIME_FILE
 notify-send -t 0 "R43ples Performance Test" "All Test completed"
