@@ -690,7 +690,7 @@ public class RevisionManagement {
 	}
 
 	/**
-	 * Split huge INSERT statements into separate queries of up to fifty triple
+	 * Split huge INSERT statements into separate queries of up to 500 triple
 	 * statements.
 	 * 
 	 * @param graphName
@@ -700,38 +700,10 @@ public class RevisionManagement {
 	 */
 	public static void executeINSERT(final String graphName, final String dataSetAsNTriples) {
 
-		String insertQueryTemplate =  "INSERT DATA { GRAPH <%s> { %n"
-				+ "	%s %n"
-				+ "} }";
+		String insertQueryTemplate =  "INSERT DATA { GRAPH <%s> { %s } }";
 		
-		final int MAX_STATEMENTS = 200;
-		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
-		int counter = 0;
-		StringBuilder insert = new StringBuilder();
-		
-		for (int i=0; i < lines.length; i++) {
-			// Remove whitespace characters
-			String sub = lines[i].replaceAll("# Empty NT", "").trim();
-			if (!sub.equals("") && !sub.startsWith("#")) {
-				if (!sub.startsWith("<")) {
-					sub = "<" + sub;
-				}
-				if (i < lines.length - 1) {
-					sub = sub + ".";
-				}
-				insert.append('\n').append(sub);
-				counter++;
-				if (counter == MAX_STATEMENTS-1) {
-					TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(insertQueryTemplate, graphName, insert));
-					counter = 0;
-					insert = new StringBuilder();
-				}
-			}
-		}
-
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(insertQueryTemplate, graphName, insert));
+		splitAndExecuteBigQuery(graphName, dataSetAsNTriples, insertQueryTemplate);
 	}
-	
 	
 	/**
 	 * Split huge DELETE statements into separate queries of up to fifty triple statements.
@@ -743,33 +715,31 @@ public class RevisionManagement {
 
 		String deleteQueryTemplate =  "DELETE DATA { GRAPH <%s> { %s } }";
 		
-		final int MAX_STATEMENTS = 200;
-		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
-		int counter = 0;
-		StringBuilder delete = new StringBuilder();
-		
-		for (int i=0; i < lines.length; i++) {
-			// Remove whitespace characters
-			String sub = lines[i].replaceAll("# Empty NT", "").trim();
-			if (!sub.equals("") && !sub.startsWith("#")) {
-				if (!sub.startsWith("<")) {
-					sub = "<" + sub;
-				}
-				if (i < lines.length - 1) {
-					sub = sub + ".";
-				}
-				delete.append('\n').append(sub);
-				counter++;
-				if (counter == MAX_STATEMENTS-1) {
-					TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(deleteQueryTemplate, graphName, delete));
-					counter = 0;
-					delete = new StringBuilder();
-				}
-			}
-		}
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(deleteQueryTemplate, graphName, delete));
+		splitAndExecuteBigQuery(graphName, dataSetAsNTriples, deleteQueryTemplate);
 	}
 	
+	
+	
+	public static void splitAndExecuteBigQuery(final String graphName, final String dataSetAsNTriples, final String template){
+		final int MAX_STATEMENTS = 500;
+		String[] lines = dataSetAsNTriples.split("\n");
+		int counter = 0;
+		StringBuilder insert = new StringBuilder();
+		
+		for (int i=0; i < lines.length; i++) {
+			insert.append(lines[i]);
+			counter++;
+			if (counter == MAX_STATEMENTS-1) {
+				TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(template, graphName, insert));
+				counter = 0;
+				insert = new StringBuilder();
+			}
+		}
+
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(template, graphName, insert));
+	}
+	
+
 	
 
 	/**
