@@ -11,7 +11,7 @@ function createRdfFile {
   CONNECTIONS=2
   NODES=`echo "$TRIPLES/$CONNECTIONS" | bc `
 
-  java -jar random2rdf.jar Poissonian $NODES $CONNECTIONS > $RDF_FILE.ttl
+#   java -jar random2rdf.jar Poissonian $NODES $CONNECTIONS > $RDF_FILE.ttl
   rapper -g -o ntriples $RDF_FILE.ttl > $RDF_FILE
   rm $RDF_FILE.ttl
   echo "Dataset created: $RDF_FILE ($TRIPLES)"

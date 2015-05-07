@@ -13,7 +13,7 @@ boxplot(Time~Join,    data=data, main='R43ples Operation Time', log="y", xlab='J
 boxplot(Time~(Join*Revision),    data=data, main='R43ples Operation Time', log="y", xlab='Dataset Size (Triples)', ylab='Time (ms)')
 
 
-require(rColorBrewer)
+require(RColorBrewer)
 
 colors <- brewer.pal(3,"Set3")
 lmts <- c(0, max(data$Time))
