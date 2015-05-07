@@ -33,11 +33,10 @@
             <li {{#endpoint_active}}class="active"{{/endpoint_active}}><a href="sparql"><i class="fa fa-edit"></i> Endpoint</a></li>
             <li {{#debug_active}}class="active"{{/debug_active}}><a href="debug"><i class="fa fa-stethoscope"></i> Debug</a></li>
             <li {{#merging_active}}class="active"{{/merging_active}}><a href="merging"><i class="fa fa-magic"></i> Merging</a></li>
+            <li {{#config_active}}class="active"{{/config_active}}><a href="configuration"><i class="fa fa-cog"></i> Configuration</a></li>
             <li class="divider"></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
-          	<li><em class="navbar-text hidden-sm hidden-xs">{{#version}}Version: {{toString}}{{/version}}{{^version}}Git: {{git.commitIdAbbrev}} - {{git.branch}}{{/version}}</em></li>
-            <li class="divider"></li>
             <li><a href="http://plt-tud.github.io/r43ples/"><i class="fa fa-globe"></i> Website</a></li>
             <li><a href="https://github.com/plt-tud/r43ples"><i class="fa fa-github"></i> GitHub</a></li>
           </ul>

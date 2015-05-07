@@ -287,6 +287,18 @@ public class Endpoint {
 		return htmlMap;
 	}
 	
+	
+	@Path("configuration")
+	@GET
+	@Template(name = "/configuration.mustache")
+	public final Map<String, Object> getConfiguration() {
+		logger.info("Get config interface");
+		
+		htmlMap.put("config_active", true);
+		htmlMap.put("config", new Config());
+		return htmlMap;
+	}
+	
 	/**
 	 * HTTP GET merging interface.
 	 * This is the HTML front end  for the merging functionalities of R43ples
