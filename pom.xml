@@ -6,7 +6,7 @@
 	<groupId>de.tud.plt</groupId>
 	<artifactId>r43ples</artifactId>
 	<packaging>jar</packaging>
-	<version>0.8.6-SNAPSHOT</version>
+	<version>0.8.7-SNAPSHOT</version>
 	<name>r43ples</name>
 	
 	<url>http://plt-tud.github.io/r43ples/</url>
@@ -172,7 +172,7 @@
 				</configuration>
 				<executions>
 					<execution>
-						<id>ToolOne</id>
+						<id>Webservice</id>
 						<phase>package</phase> <!-- bind to the packaging phase -->
 						<goals>
 							<goal>single</goal>

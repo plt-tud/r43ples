@@ -46,13 +46,9 @@ Maven is used for compiling
 
     mvn exec:java
     
-Releases can be be built with:
+Packages (JAR with dependencies for the webservice, a console client and a debian package) can be be built with:
 
-    mvn assembly:single
-
-Debian packages can be built with:
-
-    mvn package:jdeb
+    mvn package
     
 
 Configuration
