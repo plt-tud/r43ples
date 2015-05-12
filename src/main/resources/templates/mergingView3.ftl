@@ -109,6 +109,8 @@
             //jsTree
             $("#diffTree").jstree({
               "plugins" : [ "themes", "html_data" ]
+               
+              
               // "types" : {
               //           "types" : {
               //               "team" : {
@@ -303,14 +305,14 @@
                 <div id="diffTree" style="overflow:auto; height:486px; width:266px; padding:0px">
                   <#if conStatus=="1">
                     <ul>
-                        <li><a>Conflict</a>
+                        <li><a><img src="/static/images/Conflict.png"/> Conflict</a>
                           <ul>
                             <#list conList as node>
-                              <li ><a>${node.differenceGroup}</a>
+                              <li ><a><img src="/static/images/Conflict.png"/> ${node.differenceGroup}</a>
                                 <ul>
                                     <#assign triples = node.tripleList>
                                     <#list triples as triple>
-                                        <li ><a>${triple}</a></li>              
+                                        <li ><a><img src="/static/images/Conflict.png"/> ${triple}</a></li>              
                                     </#list>
                                 </ul>
                               </li>          
@@ -318,14 +320,14 @@
                           </ul>
                          </li>
                          
-                         <li><a>Difference</a>
+                         <li><a><img src="/static/images/Difference.png"/> Difference</a>
                           <ul>
                             <#list diffList as node>
-                              <li ><a>${node.differenceGroup}</a>
+                              <li ><a><img src="/static/images/Difference.png"/> ${node.differenceGroup}</a>
                                 <ul>
                                     <#assign triples = node.tripleList>
                                     <#list triples as triple>
-                                        <li ><a>${triple}</a></li>              
+                                        <li ><a><img src="/static/images/Difference.png"/> ${triple}</a></li>              
                                     </#list>
                                 </ul>
                               </li>          
@@ -336,14 +338,14 @@
                     
                    <#else>
                       <ul>
-                         <li><a>Difference</a>
+                         <li><a><img src="/static/images/Difference.png"/> Difference</a>
                           <ul>
                             <#list diffList as node>
-                              <li ><a>${node.differenceGroup}</a>
+                              <li ><a><img src="/static/images/Difference.png"/> ${node.differenceGroup}</a>
                                 <ul>
                                     <#assign triples = node.tripleList>
                                     <#list triples as triple>
-                                        <li ><a>${triple}</a></li>              
+                                        <li ><a><img src="/static/images/Difference.png"/> ${triple}</a></li>              
                                     </#list>
                                 </ul>
                               </li>          
