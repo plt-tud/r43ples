@@ -11,6 +11,7 @@ import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.mvc.mustache.MustacheMvcFeature;
 
@@ -104,7 +105,8 @@ public class R43plesService {
 			.registerClasses(Endpoint.class)
 			.property(MustacheMvcFeature.TEMPLATE_BASE_PATH, "templates")
 			.register(MustacheMvcFeature.class)
-			.register(ExceptionMapper.class);
+			.register(ExceptionMapper.class)
+			.register(JacksonFeature.class);
 		
 		SSLContextConfigurator sslCon =  new SSLContextConfigurator();
 		
