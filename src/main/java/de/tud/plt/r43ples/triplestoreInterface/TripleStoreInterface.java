@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
-import org.apache.jena.atlas.logging.Log;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.ResultSet;
@@ -33,7 +32,6 @@ public abstract class TripleStoreInterface {
 			logger.info("Create sdd graph");
 			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
 			// Insert default content into SDD graph
-			Log.info("caller", "msg");
 			logger.info(Config.sdd_graph_defaultContent);
 			Model jena_model = JenaModelManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent);
 			
