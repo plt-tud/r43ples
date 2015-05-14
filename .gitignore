@@ -7,6 +7,6 @@ database/
 .settings
 .externalToolBuilders/
 
-r43ples.conf
+*.conf
 r43ples.log*
 
