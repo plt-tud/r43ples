@@ -1,0 +1,19 @@
+PREFIX prov: <http://www.w3.org/ns/prov#>
+
+SELECT DISTINCT ?revision
+
+WHERE {
+    GRAPH <http://eatld.et.tu-dresden.de/r43ples-revisions> {
+        ?branch1 prov:wasDerivedFrom+ ?revision .
+        ?branch2 prov:wasDerivedFrom+ ?revision .
+
+        FILTER NOT EXISTS {
+            ?next prov:wasDerivedFrom ?revision.
+            ?branch1 prov:wasDerivedFrom+ ?next .
+            ?branch2 prov:wasDerivedFrom+ ?next .
+        }
+
+        FILTER ( ?branch1 = <http://test.com/r43ples-dataset-renaming-revision-1.1-1> )
+        FILTER ( ?branch2 = <http://test.com/r43ples-dataset-renaming-revision-1.0-1> )
+    }
+}

@@ -1,0 +1,8 @@
+PREFIX rmo: <http://www.w3.org/ns/prov#>
+SELECT ?rev
+WHERE {
+    GRAPH <http://eatld.et.tu-dresden.de/r43ples-revisions> { 
+        <http://test.com/r43ples-dataset-renaming-revision-1.0-1>  rmo:wasDerivedFrom+ ?rev.
+        ?rev rmo:wasDerivedFrom+ <http://test.com/r43ples-dataset-renaming-revision-0>.
+    }
+}
