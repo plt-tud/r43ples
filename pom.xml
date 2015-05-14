@@ -33,7 +33,10 @@
    </ciManagement>
 
 	<repositories>
-	<!-- see http://stackoverflow.com/questions/364114/can-i-add-jars-to-maven-2-build-classpath-without-installing-them/ -->
+	<!-- see http://stackoverflow.com/questions/364114/can-i-add-jars-to-maven-2-build-classpath-without-installing-them/ 
+	mvn install:install-file -DlocalRepositoryPath=repo -DcreateChecksum=true -Dpackaging=jar -Dfile=/home/mgraube/Dokumente/Projekte/LinkedData/applications/Backend/Virtuoso/Jena-Provider/virtjdbc4.jar -DgroupId=virtuoso -DartifactId=jdbc -Dversion=4
+	mvn install:install-file -DlocalRepositoryPath=repo -DcreateChecksum=true -Dpackaging=jar file=/home/mgraube/Dokumente/Projekte/LinkedData/applications/Backend/Virtuoso/Jena-Provider/virt_jena2.jar -DgroupId=virtuoso -DartifactId=jena -Dversion=2
+	-->
 		<repository>
 			<id>repo</id>
 			<url>file://${project.basedir}/repo</url>
@@ -165,11 +168,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.5.4</version>
-				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-				</configuration>
 				<executions>
 					<execution>
 						<id>Webservice</id>
@@ -178,9 +176,14 @@
 							<goal>single</goal>
 						</goals>
 						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
 							<archive>
 								<manifest>
 									<mainClass>de.tud.plt.r43ples.R43plesService</mainClass>
+									<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+									<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 								</manifest>
 							</archive>
 						</configuration>
@@ -193,9 +196,14 @@
 						</goals>
 						<configuration>
 						 	<finalName>r43ples-console-client</finalName>
+						 	<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
 							<archive>
 								<manifest>
 									<mainClass>de.tud.plt.r43ples.client.ConsoleClient</mainClass>
+									<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+									<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
 								</manifest>
 							</archive>
 						</configuration>
@@ -278,11 +286,6 @@
 										<filemode>755</filemode>
 									</mapper>
 								</data>
-
-								<!-- <data> <type>template</type> <paths> <path>etc/${project.artifactId}</path> 
-									<path>var/lib/${project.artifactId}</path> <path>var/log/${project.artifactId}</path> 
-									<path>var/run/${project.artifactId}</path> </paths> <mapper> <type>perm</type> 
-									<user>loader</user> <group>loader</group> </mapper> </data> -->
 							</dataSet>
 						</configuration>
 					</execution>
@@ -406,6 +409,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.2.1</version>
 						<configuration>
 							<mainClass>de.tud.plt.r43ples.client.ConsoleClient</mainClass>
 						</configuration>
