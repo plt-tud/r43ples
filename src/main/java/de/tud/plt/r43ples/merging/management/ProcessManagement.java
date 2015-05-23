@@ -1,13 +1,21 @@
 package de.tud.plt.r43ples.merging.management;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.Map.Entry;
+
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
@@ -16,9 +24,11 @@ import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.ResolutionState;
@@ -27,8 +37,15 @@ import de.tud.plt.r43ples.management.TripleObjectTypeEnum;
 import de.tud.plt.r43ples.merging.model.structure.Difference;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
+import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeModel;
+import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeRenaming;
+import de.tud.plt.r43ples.merging.model.structure.IndividualModel;
+import de.tud.plt.r43ples.merging.model.structure.IndividualStructure;
+import de.tud.plt.r43ples.merging.model.structure.TableModel;
+import de.tud.plt.r43ples.merging.model.structure.TableRow;
 import de.tud.plt.r43ples.merging.model.structure.TreeNode;
 import de.tud.plt.r43ples.merging.model.structure.Triple;
+import de.tud.plt.r43ples.merging.model.structure.TripleIndividualStructure;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 
@@ -93,7 +110,17 @@ public class ProcessManagement {
 
 	}
 	
-
+	
+	
+	
+	/**
+	 * Read difference model to java representation.
+	 * 
+	 * @param differenceModelToRead the difference model to read
+	 * @param differenceModel the difference model where the result should be stored
+	 * @throws IOException 
+	 */
+	
 	
 	public static void readDifferenceModel(String differenceModelToRead, DifferenceModel differenceModel) throws IOException {
 		logger.info("Start reading difference model.");
@@ -252,14 +279,18 @@ public class ProcessManagement {
 	    
 	    logger.info("Difference model successfully read.");	
 		logger.info("DT"+differenceModel.getDifferenceGroups().toString());
-		logger.info("Unittest:"+differenceModel.getDifferenceGroups().get("ADDED-DELETED").isConflicting());
 	}
 	
 	
+	/**
+	 * Read Turtle string to jena model.
+	 * 
+	 * @param triples the triples in Turtle serialization
+	 * @return the model
+	 * @throws IOException
+	 * 
+	 */
 	
-	
-	
-	//copy Hensel
 	public static Model readTurtleStringToJenaModel(String triples) throws IOException {
 		Model model = null;
 		model = ModelFactory.createDefaultModel();
@@ -270,7 +301,29 @@ public class ProcessManagement {
 		return model;
 	}
 	
-	//copy Hensel
+	
+	/**
+	 * Write jena model to N-Triples string.
+	 * 
+	 * @param model the model
+	 * @return the N-Triples string
+	 */
+	public static String writeJenaModelToNTriplesString(Model model) {
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		
+		model.write(stream, "N-TRIPLES");
+		
+		return stream.toString();
+	}
+	
+	
+	/**
+	 * Convert SDD state string to SDD triple state. If value does not exists in enum null will be returned.
+	 * 
+	 * @param state the state to convert
+	 * @return the SDD triple state
+	 */
+	
 	public static SDDTripleStateEnum convertSDDStringToSDDTripleState(String state) {
 		if (state.equals(SDDTripleStateEnum.ADDED.getSddRepresentation())) {
 			return SDDTripleStateEnum.ADDED;
@@ -285,7 +338,15 @@ public class ProcessManagement {
 		}
 	}
 	
-	//copy Hensel
+	
+	
+	/**
+	 * Create a string representation of the triple.
+	 * 
+	 * @param triple the triple
+	 * @return the string representation
+	 */
+	
 	public static String tripleToString(Triple triple) {
 		if (triple.getObjectType().equals(TripleObjectTypeEnum.LITERAL)) {
 			logger.debug(String.format("<%s> %s \"%s\" .", triple.getSubject(), getPredicate(triple), triple.getObject()));
@@ -301,10 +362,25 @@ public class ProcessManagement {
 		}
 	}
 	
+	
+	/**
+	 * Get the subject of triple.
+	 * 
+	 * @param triple the triple
+	 * @return the formatted subject
+	 */
+	
 	public static String getSubject(Triple triple) {
 		return "<" + triple.getSubject() + ">";
 	}
 	
+	
+	/**
+	 * Get the predicate of triple. If predicate equals rdf:type 'a' will be returned.
+	 * 
+	 * @param triple the triple
+	 * @return the formatted predicate
+	 */
 	
 	public static String getPredicate(Triple triple) {
 		if (triple.getPredicate().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
@@ -313,6 +389,14 @@ public class ProcessManagement {
 			return "<" + triple.getPredicate() + ">";
 		}
 	}
+	
+	
+	/**
+	 * Get the object of triple.
+	 * 
+	 * @param triple the triple
+	 * @return the formatted object
+	 */
 	
 	public static String getObject(Triple triple) {
 		if (triple.getObjectType().equals(TripleObjectTypeEnum.LITERAL)) {
@@ -326,6 +410,352 @@ public class ProcessManagement {
 		}
 	}
 	
+	/**save the current version numbers 
+	 * todo ?*/
+
+	
+	
+	/** Create the individual models of both branches*/
+	
+	/**
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 * ##                                                                                                                                                                      ##
+	 * ## Semantic enrichment - individuals.                                                                                                                                   ##
+	 * ##                                                                                                                                                                      ##
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 */	
+
+	
+	/**
+	 * Get all individuals of specified revision.
+	 * 
+	 * @param graphName the graph name
+	 * @param revisionName the revision name
+	 * @return the array list of individual URIs
+	 * @throws IOException 
+	 * @throws InternalErrorException 
+	 */
+	public static ArrayList<String> getAllIndividualsOfRevision(String graphName, String revisionName) throws IOException, InternalErrorException {
+		logger.info("Get all individuals of revision.");
+		
+		// Result array list
+		ArrayList<String> list = new ArrayList<String>();
+		
+    	// Query all individuals (DISTINCT because there can be multiple individual definitions)
+		String query = prefixes + String.format(
+				  "SELECT DISTINCT ?individualUri %n"
+				+ "FROM <%s> REVISION \"%s\" %n"
+				+ "WHERE { %n"
+				+ "	?individualUri a ?class . %n"
+				+ "} %n"
+				+ "ORDER BY ?individualUri", graphName, revisionName);
+		logger.debug(query);
+		
+		logger.info("yxy did query before");
+		
+		
+		String result = QueryManagement.getSelectConstructAskResponseClassic(query, "text/xml");
+		
+		logger.info("yxy did query after");
+
+		//here difference with mergingClient
+//		String result = TripleStoreInterface.executeQueryWithoutAuthorization(query, "text/xml");
+		logger.debug(result);
+		
+		// Iterate over all individuals
+		ResultSet resultSet = ResultSetFactory.fromXML(result);
+		while (resultSet.hasNext()) {
+			QuerySolution qs = resultSet.next();
+			list.add(qs.getResource("?individualUri").toString());
+		}
+		logger.info("Individual List : " + list.toArray().toString());
+		return list;
+	}
+	
+	/**
+	 * Get all corresponding triples of specified individual.
+	 * 
+	 * @param graphName the graph name
+	 * @param revisionName the revision name
+	 * @param individualUri the individual URI
+	 * @param differenceModel the difference model
+	 * @return the hash map of triples
+	 * @throws IOException 
+	 * @throws InternalErrorException 
+	 */
+	public static HashMap<String, TripleIndividualStructure> getAllTriplesOfIndividual(String graphName, String revisionName, String individualUri, DifferenceModel differenceModel) throws IOException, InternalErrorException {
+		logger.info("Get all corresponding triples of specified individual.");
+		
+		// Result hash map
+		HashMap<String, TripleIndividualStructure> list = new HashMap<String, TripleIndividualStructure>();
+		
+    	// Query all individuals
+		String query = prefixes + String.format(
+				  "SELECT ?predicate ?object %n"
+				+ "FROM <%s> REVISION \"%s\" %n"
+				+ "WHERE { %n"
+				+ "	<%s> ?predicate ?object . %n"
+				+ "}"
+				+ "ORDER BY ?predicate ?object", graphName, revisionName, individualUri);
+		logger.debug(query);
+		
+		//here difference with mergingClient
+//		String result = TripleStoreInterface.executeQueryWithoutAuthorization(query, "text/xml");
+		String result = QueryManagement.getSelectConstructAskResponseClassic(query, "text/xml");
+		
+		logger.debug(result);
+		
+		// Iterate over all individuals
+		ResultSet resultSet = ResultSetFactory.fromXML(result);
+		while (resultSet.hasNext()) {
+			QuerySolution qs = resultSet.next();
+			
+	    	String predicate = qs.getResource("?predicate").toString();
+    	
+	    	// Differ between literal and resource
+			String object = "";
+			TripleObjectTypeEnum objectType = null;
+			if (qs.get("?object").isLiteral()) {
+				object = qs.getLiteral("?object").toString();
+				objectType = TripleObjectTypeEnum.LITERAL;
+			} else {
+				object = qs.getResource("?object").toString();
+				objectType = TripleObjectTypeEnum.RESOURCE;
+			}
+	    	// Create the triple
+			Triple triple = new Triple(individualUri, predicate, object, objectType);
+			// Check if there is a corresponding difference
+			Difference difference = getDifferenceByTriple(triple, differenceModel);			
+			// Create the triple individual structure
+			TripleIndividualStructure tripleIndividualStructure = new TripleIndividualStructure(triple, difference);
+			// Put the triple individual structure
+	    	list.put(tripleToString(triple), tripleIndividualStructure);
+		}
+
+		return list;
+	}
+	
+	/**
+	 * Get difference by triple. If the difference model does not contain the triple null will be returned.
+	 * 
+	 * @param triple the triple to look for
+	 * @param differenceModel the difference model
+	 * @return the difference or null if triple is not included in difference model
+	 */
+	public static Difference getDifferenceByTriple(Triple triple, DifferenceModel differenceModel) {
+		String tripleIdentifier = tripleToString(triple);
+		
+		// Iterate over all difference groups
+		Iterator<String> iteDifferenceGroupNames = differenceModel.getDifferenceGroups().keySet().iterator();
+		while (iteDifferenceGroupNames.hasNext()) {
+			String differenceGroupName = iteDifferenceGroupNames.next();
+			DifferenceGroup differenceGroup = differenceModel.getDifferenceGroups().get(differenceGroupName);
+			// Check if the hash map contains the triple
+			if (differenceGroup.getDifferences().containsKey(tripleIdentifier)) {
+				return differenceGroup.getDifferences().get(tripleIdentifier);
+			};
+		}
+
+		return null;
+	}
+	
+	
+	
+	/**
+	 * Create the individual model of specified revision.
+	 * 
+	 * @param graphName the graph name
+	 * @param revisionName the revision name
+	 * @param differenceModel the difference model
+	 * @return the individual model
+	 * @throws IOException 
+	 * @throws InternalErrorException 
+	 */
+	public static IndividualModel createIndividualModelOfRevision(String graphName, String revisionName, DifferenceModel differenceModel) throws IOException, InternalErrorException {
+		IndividualModel individualModel = new IndividualModel();
+		
+		ArrayList<String> individualURIs = getAllIndividualsOfRevision(graphName, revisionName);
+		
+		Iterator<String> iteIndividualURIs = individualURIs.iterator();
+		while (iteIndividualURIs.hasNext()) {
+			String currentIndividualUri = iteIndividualURIs.next();
+			HashMap<String, TripleIndividualStructure> currentTriples = getAllTriplesOfIndividual(graphName, revisionName, currentIndividualUri, differenceModel);
+			IndividualStructure currentIndividualStructure = new IndividualStructure(currentIndividualUri);
+			currentIndividualStructure.setTriples(currentTriples);		
+			individualModel.addIndividualStructure(currentIndividualUri, currentIndividualStructure);
+		}
+		
+		return individualModel;
+	}
+	
+	
+	/**create high level change renaming model for high level view*/
+	
+	/**
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 * ##                                                                                                                                                                      ##
+	 * ## High level change generation.                                                                                                                                        ##
+	 * ##                                                                                                                                                                      ##
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 */
+	
+	
+	/**
+	 * Create the high level change renaming model.
+	 * 
+	 * @param highLevelChangeModel the high level change model
+	 * @param differenceModel the difference model
+	 */
+	public static void createHighLevelChangeRenamingModel(HighLevelChangeModel highLevelChangeModel, DifferenceModel differenceModel) {
+		// Clear high level change model
+		highLevelChangeModel.clear();
+		
+		// Get all differences of state combination DELETED-ORIGINAL
+		DifferenceGroup delOrig = differenceModel.getDifferenceGroups().get(SDDTripleStateEnum.DELETED + "-" + SDDTripleStateEnum.ORIGINAL);
+		
+		// Get all differences of state combination DELETED-ADDED
+		DifferenceGroup delAdd = differenceModel.getDifferenceGroups().get(SDDTripleStateEnum.DELETED + "-" + SDDTripleStateEnum.ADDED);
+		
+		// Get all differences of state combination ADDED-NOTINCLUDED
+		DifferenceGroup addNotInc = differenceModel.getDifferenceGroups().get(SDDTripleStateEnum.ADDED + "-" + SDDTripleStateEnum.NOTINCLUDED);
+
+		if ((addNotInc != null) && ((delOrig != null) || (delAdd != null))) {
+			// Get all possible prefixes
+			HashMap<String, Difference> possiblePrefixes = getAllPrefixesOfDifferenceMap(addNotInc.getDifferences());
+			// Iterate over all possible prefixes
+			Iterator<String> itePossiblePrefixes = possiblePrefixes.keySet().iterator();
+			while (itePossiblePrefixes.hasNext()) {
+				String currentPrefix = itePossiblePrefixes.next();
+				// Get possible mappings of DELETED-ORIGINAL map
+				ArrayList<Difference> mappingsDelOrig = new ArrayList<Difference>();
+				if (delOrig != null) {
+					mappingsDelOrig = getAllDifferencesByPrefix(currentPrefix, delOrig.getDifferences());	
+				}
+				// Get possible mappings of DELETED-ADDED map
+				ArrayList<Difference> mappingsDelAdd = new ArrayList<Difference>();
+				if (delAdd != null) {
+					mappingsDelAdd = getAllDifferencesByPrefix(currentPrefix, delAdd.getDifferences());
+				}
+				
+				HighLevelChangeRenaming highLevelChangeRenaming = null;
+				
+				if ((mappingsDelOrig.size() == 1) && mappingsDelAdd.isEmpty()) {
+					// Original found
+					highLevelChangeRenaming = new HighLevelChangeRenaming(mappingsDelOrig.get(0), possiblePrefixes.get(currentPrefix));
+				} else if (mappingsDelOrig.isEmpty() && (mappingsDelAdd.size() == 1)) {
+					// Added found
+					highLevelChangeRenaming = new HighLevelChangeRenaming(mappingsDelAdd.get(0), possiblePrefixes.get(currentPrefix));
+				}	
+	
+				if (highLevelChangeRenaming != null) {
+					highLevelChangeModel.addHighLevelChangeRenaming(tripleToString(highLevelChangeRenaming.getAdditionDifference().getTriple()), highLevelChangeRenaming);
+				}		
+			}
+			
+			Iterator<Entry<String, HighLevelChangeRenaming>> test = highLevelChangeModel.getHighLevelChangesRenaming().entrySet().iterator();
+			while(test.hasNext()){
+				Entry<String, HighLevelChangeRenaming> ent = test.next();
+				
+				logger.info("High Level Change Model Test: " + ent.getKey().toString());
+				logger.info("High Level Additon Value : "+ ent.getValue().getAdditionDifference().getTriple().getObject().toString());
+				logger.info("High Level Deletion Value : "+ ent.getValue().getDeletionDifference().getTriple().getObject().toString());
+
+				
+
+			}
+			
+		}
+	}
+	
+	
+	/**
+	 * Get all prefixes of difference map and corresponding difference. Prefix is equal to triple string which contains only subject and predicate.
+	 * Object must be a literal and the difference should not be approved.
+	 * 
+	 * @param differenceMap the difference map
+	 * @return return distinct map of prefix difference combinations
+	 */
+	public static HashMap<String, Difference> getAllPrefixesOfDifferenceMap(HashMap<String, Difference> differenceMap) {
+		// Create the result array list
+		HashMap<String, Difference> resultList = new HashMap<String, Difference>();
+		
+		// Iterate over all differences
+		Iterator<String> iteDifferences = differenceMap.keySet().iterator();
+		while (iteDifferences.hasNext()) {
+			String currentKey = iteDifferences.next();
+			Difference currentDifference = differenceMap.get(currentKey);
+			Triple currentTriple = currentDifference.getTriple();
+			String currentPrefix = "<" + currentTriple.getSubject() + "> <" + currentTriple.getPredicate() + "> ";
+			if (!resultList.containsKey(currentPrefix) && currentTriple.getObjectType().equals(TripleObjectTypeEnum.LITERAL) && !currentDifference.getResolutionState().equals(ResolutionState.RESOLVED)) {
+				resultList.put(currentPrefix, currentDifference);
+			}
+		}
+		
+		return resultList;
+	}
+	
+	
+	/**
+	 * Get all differences by specified prefix.
+	 * Object must be a literal and the difference should not be approved.
+	 * 
+	 * @param prefix the prefix
+	 * @param differenceMap the difference map
+	 * @return the differences which could be identified by specified prefix
+	 */
+	public static ArrayList<Difference> getAllDifferencesByPrefix(String prefix, HashMap<String, Difference> differenceMap) {
+		// The result list
+		ArrayList<Difference> result = new ArrayList<Difference>();
+		// Tree map for sorting entries of hash map
+		TreeMap<String, Difference> treeMap = new TreeMap<String, Difference>();
+		treeMap.putAll(differenceMap);
+		// Tail the tree map
+		SortedMap<String, Difference> tailMap = treeMap.tailMap(prefix);
+		if (!tailMap.isEmpty() && tailMap.firstKey().startsWith(prefix)) {
+			Iterator<String> iteTailMap = tailMap.keySet().iterator();
+			while (iteTailMap.hasNext()) {
+				String currentKey = iteTailMap.next();
+				if (currentKey.startsWith(prefix)) {
+					Difference currentDifference = tailMap.get(currentKey);
+					Triple currentTriple = currentDifference.getTriple();
+					if (currentTriple.getObjectType().equals(TripleObjectTypeEnum.LITERAL) && !currentDifference.getResolutionState().equals(ResolutionState.RESOLVED)) {
+						// Add corresponding difference to result list
+						result.add(currentDifference);
+					}
+				} else {
+					// Return the result map because there are no further keys which will start with the specified prefix
+					return result;
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	
+	/**
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 * ##                                                                                                                                                                      ##
+	 * ## Difference tree.                                                                                                                                                     ##
+	 * ##                                                                                                                                                                      ##
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 */	
+	
+	
+	/**
+	 * Create the differences tree root node.
+	 * 
+	 * @param differenceModel the differences model to use
+	 * @return void aber read differenceModel and write the treeList
+	 */
+	
+	/** read difference model and create treelist*/
 	
 	public static void createDifferenceTree(DifferenceModel differenceModel, List<TreeNode> treeList) throws ConfigurationException{
 //		List<TreeNode> treeList = new ArrayList<TreeNode>();
@@ -377,6 +807,53 @@ public class ProcessManagement {
 		
 		logger.info("Difference Tree successful created.");
 	}
+	/**read difference model and create table model
+	 * @throws ConfigurationException */
+	public static void createTableModel(DifferenceModel differenceModel, TableModel tableModel) throws ConfigurationException{
+		tableModel.clear();
+		
+		//get difference group
+		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
+		while(iterDM.hasNext()){
+			Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterDM.next();
+			DifferenceGroup differ = (DifferenceGroup) entryDG.getValue();
+			boolean isconflicting = differ.isConflicting();
+			SDDTripleStateEnum stateA = differ.getTripleStateA();
+			SDDTripleStateEnum stateB = differ.getTripleStateB();
+			SDDTripleStateEnum resolutionState = differ.getAutomaticResolutionState();
+			String conflicting = (isconflicting ) ? "1" : "0";
+			//get difference 
+			Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
+			while(iterDIF.hasNext()){
+				
+				Entry<String, Difference> entryDF = iterDIF.next();
+				//get triple
+				Triple triple = entryDF.getValue().getTriple();	
+				
+				String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(triple));
+				String predicate = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(triple));
+				String object = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(triple));
+				//get revision number
+				String revisionA = entryDF.getValue().getReferencedRevisionLabelA();
+				String revisionB = entryDF.getValue().getReferencedRevisionLabelB();
+				
+				//read each TableRow
+				tableModel.readTableRow(new TableRow(triple, subject, predicate, object, stateA.toString(), 
+			                            stateB.toString(), revisionA, revisionB, conflicting, resolutionState.toString()));
+													
+			}			
+			
+		}
+		Iterator<TableRow> idt = tableModel.getTripleRowList().iterator();
+		while(idt.hasNext()){
+			TableRow tr = idt.next();
+			logger.info("TableModel ID Test:" + tr.getRevisionA() + tr.getResolutionState() + tr.getTripleId() );
+		}
+		
+		
+		logger.info("TableModel successful created.");
+		
+	}
 	
 	
 	/**
@@ -419,6 +896,66 @@ public class ProcessManagement {
 		return tripleString;
 	}
 
+	
+
+	
+	/**
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 * ##                                                                                                                                                                      ##
+	 * ## create properties list.                                                                                                                                                     ##
+	 * ##                                                                                                                                                                      ##
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 */	
+	
+	/**
+	 * Get all properties of specified revision.
+	 * 
+	 * @param graphName the graph name
+	 * @param branchNameA the branch name A
+	 * @param branchNameB the branch name B
+	 * @return the array list of property URIs
+	 * @throws IOException 
+	 * @throws InternalErrorException 
+	 */
+	public static ArrayList<String> getPropertiesOfRevision(String graphName, String branchNameA, String branchNameB) throws IOException, InternalErrorException {
+		logger.info("Get all properties of branches.");
+		
+		// Result array list
+		ArrayList<String> list = new ArrayList<String>();
+
+    	// Query all properties (DISTINCT because there can be multiple property occurrences)
+		String query = String.format(
+				  "OPTION r43ples:SPARQL_JOIN %n"
+				+ "SELECT DISTINCT ?propertyUri %n"
+				+ "FROM <%s> REVISION \"%s\" %n"
+				+ "FROM <%s> REVISION \"%s\" %n"
+				+ "WHERE { %n"
+				+ "	?subject ?propertyUri ?object . %n"
+				+ "} %n"
+				+ "ORDER BY ?propertyUri", graphName, branchNameA, graphName, branchNameB);
+		logger.debug(query);
+		
+		//here difference with mergingClient
+		//String result = TripleStoreInterface.executeQueryWithoutAuthorization(query, "text/xml");
+		//String result = QueryManagement.getSelectConstructAskResponseClassic(query, "text/xml");
+		String result = QueryManagement.getSelectConstructAskResponse(query, "text/xml");
+		
+		logger.debug(result);
+		
+		// Iterate over all properties
+		ResultSet resultSet = ResultSetFactory.fromXML(result);
+		while (resultSet.hasNext()) {
+			QuerySolution qs = resultSet.next();
+			list.add(qs.getResource("?propertyUri").toString());
+		}
+
+		return list;
+	}
+	
+	
+	
 	
 }
 

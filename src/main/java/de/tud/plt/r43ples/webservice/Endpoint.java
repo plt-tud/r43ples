@@ -411,7 +411,7 @@ public class Endpoint {
 
 //		logger.info("Inhalt von Response Entity:"+responsePost.getEntity().toString());	
 			
-		MergingControl.getMergeProcess(responsePost);
+		MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
 		
 		
 		response.entity(MergingControl.getViewHtmlOutput(graphName));
@@ -436,7 +436,75 @@ public class Endpoint {
 		return response.build();
 
 	}	
+	
+//	@Path("pushProcess")
+//	@POST
+//	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+//	public final Response pushPOST(@HeaderParam("Accept") final String formatHeader,
+//			@FormParam("user") final String user, @FormParam("options") @DefaultValue("") final String triples) {
+//		
+//		ResponseBuilder response = Response.ok();
+//		logger.info("format_header"+ formatHeader);
+//		logger.info("Push post Test :"+ user);
+//		logger.info("Push post Array :"+ triples);
+//
+//
+//		response.entity("push test");
+//		return response.build();
+//
+//	}	
 
+
+	@Path("pushProcess")
+	@GET
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final Response pushGET(@HeaderParam("Accept") final String formatHeader,
+			 @QueryParam("options") @DefaultValue("") final String triples) {
+		
+		ResponseBuilder response = Response.ok();
+		logger.info("format_header"+ formatHeader);
+		logger.info("Push get Array :"+ triples);
+
+
+		response.entity("push test GET");
+		return response.build();
+
+	}
+	
+//	@Path("individualView")
+//	@GET
+//	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+//	public final Response individualGET(@HeaderParam("Accept") final String formatHeader,
+//			@QueryParam("data") final String data) throws TemplateException, IOException {
+//		
+//		ResponseBuilder response = Response.ok();
+//		logger.info("format_header"+ formatHeader);
+//		logger.info("Individual get Test :"+ data);
+//
+//
+//		response.entity(MergingControl.getIndividualView(data));
+//		return response.build();
+//
+//	}
+	
+	/**load individual View
+	 * todo */
+	
+	@Path("individualView")
+	@POST
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final Response individualPOST(@HeaderParam("Accept") final String formatHeader,
+			@FormParam("data") final String data) throws TemplateException, IOException {
+		
+		ResponseBuilder response = Response.ok();
+		logger.info("format_header"+ formatHeader);
+		logger.info("Individual post Test :"+ data);
+
+
+		response.entity(MergingControl.getIndividualView(data));
+		return response.build();
+
+	}
 	
 //	@Path("mergingView")
 //	@GET

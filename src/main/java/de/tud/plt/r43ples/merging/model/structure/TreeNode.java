@@ -3,9 +3,9 @@ package de.tud.plt.r43ples.merging.model.structure;
 import java.util.ArrayList;
 import java.util.List;
 
+/***Tree Node fuer jede Triple in difference Model
+ *  The data will with Freemarker in Html display**/
 
-
-//Tree Node fuer jede Triple in difference Model
 public class TreeNode {
 	public String differenceGroup;
 	public List<String> tripleList;

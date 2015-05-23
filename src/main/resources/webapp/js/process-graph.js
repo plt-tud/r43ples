@@ -424,7 +424,6 @@ var drawGraph = function (_JSON, _showBranches, _showTags) {
             
             var html = version_head + version_body;
             
-   
 //            value.labelType = "html";
             value.label = html;
             // Höhe setzen
