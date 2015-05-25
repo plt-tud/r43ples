@@ -918,8 +918,9 @@ public class ProcessManagement {
 	 * @return the array list of property URIs
 	 * @throws IOException 
 	 * @throws InternalErrorException 
+	 * @throws ConfigurationException 
 	 */
-	public static ArrayList<String> getPropertiesOfRevision(String graphName, String branchNameA, String branchNameB) throws IOException, InternalErrorException {
+	public static ArrayList<String> getPropertiesOfRevision(String graphName, String branchNameA, String branchNameB) throws IOException, InternalErrorException, ConfigurationException {
 		logger.info("Get all properties of branches.");
 		
 		// Result array list
@@ -948,14 +949,18 @@ public class ProcessManagement {
 		ResultSet resultSet = ResultSetFactory.fromXML(result);
 		while (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
-			list.add(qs.getResource("?propertyUri").toString());
+			//get kurz property
+//			ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(triple));
+			String kqs = ProcessManagement.convertTripleStringToPrefixTripleString("<"+qs.getResource("?propertyUri").toString()+">");
+			
+			//list.add(qs.getResource("?propertyUri").toString());
+			list.add(kqs);
+
 		}
 
 		return list;
 	}
-	
-	
-	
+		
 	
 }
 

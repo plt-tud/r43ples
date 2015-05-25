@@ -10,10 +10,12 @@
               </thead>
        
               <tbody>
-                  <tr>
-                      <td>ex:testP</td>
-                      <td><input type="checkbox" name="state" value="1"></td>
-                  </tr>
+              	  <#list individualTableList as row> 
+              	  <tr>
+              	  	  <td>${row.rowData[0]}</td>
+              	  	  <td>${row.rowData[1]}</td>
+              	  </tr>
+              	  </#list> 
               </tbody>
 
               <tfoot>

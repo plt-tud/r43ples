@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
@@ -22,6 +23,8 @@ import de.tud.plt.r43ples.merging.management.ProcessManagement;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
 import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeModel;
 import de.tud.plt.r43ples.merging.model.structure.IndividualModel;
+import de.tud.plt.r43ples.merging.model.structure.IndividualStructure;
+import de.tud.plt.r43ples.merging.model.structure.TableEntrySemanticEnrichmentAllIndividuals;
 import de.tud.plt.r43ples.merging.model.structure.TableModel;
 import de.tud.plt.r43ples.merging.model.structure.TreeNode;
 import freemarker.template.Configuration;
@@ -43,6 +46,7 @@ public class MergingControl {
 	private static IndividualModel individualModelBranchB;	
 	/** The properties array list. **/
 	private static ArrayList<String> propertyList;
+	
 
 	
 	public static String getHtmlOutput(String graphName) {
@@ -111,6 +115,10 @@ public class MergingControl {
 		scope.put("conList",conList);
 		scope.put("diffList",diffList);
 		scope.put("conStatus", conStatus);
+		scope.put("propertyList", propertyList);
+
+
+		
 		
 		temp.process(scope,sw);		
 		return sw.toString();		
@@ -143,6 +151,14 @@ public class MergingControl {
 			// Create the individual models of both branches
 			individualModelBranchA = ProcessManagement.createIndividualModelOfRevision(graphName, branchNameA, differenceModel);
 			logger.info("Individual Model A Test : " + individualModelBranchA.getIndividualStructures().keySet().toString());
+			Iterator<Entry<String, IndividualStructure>> itEnt = individualModelBranchA.getIndividualStructures().entrySet().iterator();
+			while(itEnt.hasNext()){
+				Entry<String,IndividualStructure> entryInd = itEnt.next();
+				logger.info("Individual Sturcture Uri Test" + entryInd.getValue().getIndividualUri());
+				logger.info("Individual Sturcture Triples Test" + entryInd.getValue().getTriples().keySet().toString());
+
+				
+			}
 
 			individualModelBranchB = ProcessManagement.createIndividualModelOfRevision(graphName, branchNameB, differenceModel);
 			logger.info("Individual Model B Test : " + individualModelBranchB.getIndividualStructures().keySet().toString());
@@ -183,14 +199,75 @@ public class MergingControl {
         } catch (IOException e) {  
             e.printStackTrace();  
         }  
-		
-	 	
-		scope.put("individual", individual);
+			 	
+		scope.put("individualTableList", MergingControl.createTableModelSemanticEnrichmentAllIndividualsList());
 		
 		temp.process(scope,sw);		
 		return sw.toString();	
 		
 	}
+	
+	/**
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 * ##                                                                                                                                                                      ##
+	 * ## Semantic enrichment - individuals.                                                                                                                                   ##
+	 * ##                                                                                                                                                                      ##
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 */
+	
+	
+	/**
+	 * Create the semantic enrichment List of all individuals.
+	 */
+	public static List<TableEntrySemanticEnrichmentAllIndividuals> createTableModelSemanticEnrichmentAllIndividualsList() {
+		List<TableEntrySemanticEnrichmentAllIndividuals> individualTableList = new ArrayList<TableEntrySemanticEnrichmentAllIndividuals>();
+
+		// Get key sets
+		ArrayList<String> keySetIndividualModelBranchA = new ArrayList<String>(individualModelBranchA.getIndividualStructures().keySet());
+		ArrayList<String> keySetIndividualModelBranchB = new ArrayList<String>(individualModelBranchB.getIndividualStructures().keySet());
+		
+		// Iterate over all individual URIs of branch A
+		@SuppressWarnings("unchecked")
+		Iterator<String> iteKeySetIndividualModelBranchA = ((ArrayList<String>) keySetIndividualModelBranchA.clone()).iterator();
+		while (iteKeySetIndividualModelBranchA.hasNext()) {
+			String currentKeyBranchA = iteKeySetIndividualModelBranchA.next();
+			
+			// Add all individual URIs to table model which are in both branches
+			if (keySetIndividualModelBranchB.contains(currentKeyBranchA)) {
+				TableEntrySemanticEnrichmentAllIndividuals tableEntry = new TableEntrySemanticEnrichmentAllIndividuals(individualModelBranchA.getIndividualStructures().get(currentKeyBranchA), individualModelBranchB.getIndividualStructures().get(currentKeyBranchA), new Object[]{currentKeyBranchA, currentKeyBranchA});
+				
+				individualTableList.add(tableEntry);
+				// Remove key from branch A key set copy
+				keySetIndividualModelBranchA.remove(currentKeyBranchA);
+				// Remove key from branch B key set copy
+				keySetIndividualModelBranchB.remove(currentKeyBranchA);
+			}
+		}
+		
+		// Iterate over all individual URIs of branch A (will only contain the individuals which are not in B)
+		Iterator<String> iteKeySetIndividualModelBranchAOnly = keySetIndividualModelBranchA.iterator();
+		while (iteKeySetIndividualModelBranchAOnly.hasNext()) {
+			String currentKeyBranchA = iteKeySetIndividualModelBranchAOnly.next();
+			TableEntrySemanticEnrichmentAllIndividuals tableEntry = new TableEntrySemanticEnrichmentAllIndividuals(individualModelBranchA.getIndividualStructures().get(currentKeyBranchA), new IndividualStructure(null), new Object[]{currentKeyBranchA, ""});
+			individualTableList.add(tableEntry);
+
+		}
+		
+		// Iterate over all individual URIs of branch B (will only contain the individuals which are not in A)
+		Iterator<String> iteKeySetIndividualModelBranchBOnly = keySetIndividualModelBranchB.iterator();
+		while (iteKeySetIndividualModelBranchBOnly.hasNext()) {
+			String currentKeyBranchB = iteKeySetIndividualModelBranchBOnly.next();
+			TableEntrySemanticEnrichmentAllIndividuals tableEntry = new TableEntrySemanticEnrichmentAllIndividuals(new IndividualStructure(null), individualModelBranchB.getIndividualStructures().get(currentKeyBranchB), new Object[]{"", currentKeyBranchB});
+			individualTableList.add(tableEntry);
+
+
+		}
+		
+		return individualTableList;
+	}
+	
 }
 
 

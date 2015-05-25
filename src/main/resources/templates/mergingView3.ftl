@@ -327,38 +327,12 @@
                           </thead>
                    
                           <tbody>
-                              <tr>
-                                  <td>ex:testP</td>
+                          	  <#list propertyList as property>
+                          	  	<tr>
+                          	  	  <td>${property}</td>
                                   <td><input type="checkbox" name="state" value="1"></td>
-                              </tr>
-                               <tr>
-                                  <td>ex:testP</td>
-                                  <td><input type="checkbox" name="state" value="1"></td>
-                              </tr>
-                               <tr>
-                                  <td>ex:testP</td>
-                                  <td><input type="checkbox" name="state" value="1"></td>
-                              </tr>
-                               <tr>
-                                  <td>ex:testP</td>
-                                  <td><input type="checkbox" name="state" value="1"></td>
-                              </tr>
-                              <tr>
-                                  <td>ex:testP</td>
-                                  <td><input type="checkbox" name="state" value="1"></td>
-                              </tr>
-                              <tr>
-                                  <td>ex:testP</td>
-                                  <td><input type="checkbox" name="state" value="1"></td>
-                              </tr>
-                              <tr>
-                                  <td>ex:testP</td>
-                                  <td><input type="checkbox" name="state" value="1"></td>
-                              </tr>
-                              <tr>
-                                  <td>ex:testP</td>
-                                  <td><input type="checkbox" name="state" value="1"></td>
-                              </tr>
+                          	  	</tr>            	  
+                          	  </#list>                   	                      
                           </tbody>
 
                           <tfoot>
