@@ -471,6 +471,22 @@ public class Endpoint {
 
 	}
 	
+	@Path("filterProcess")
+	@POST
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final Response filterPOST(@HeaderParam("Accept") final String formatHeader,
+			@FormParam("properties") @DefaultValue("") final String properties) throws TemplateException, IOException {
+		
+		ResponseBuilder response = Response.ok();
+		logger.info("format_header"+ formatHeader);
+		logger.info("Filter post Array :"+ properties);
+
+		
+		response.entity(MergingControl.updateTripleTable(properties));
+		return response.build();
+
+	}	
+	
 //	@Path("individualView")
 //	@GET
 //	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })

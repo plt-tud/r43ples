@@ -180,6 +180,8 @@
 
             });
 
+
+            //change to individual view
             $("#individual").click(function(){
               $("#left").hide();
               $("#right").removeClass("large-9");
@@ -192,6 +194,7 @@
               });
             });
 
+            //change to triple view
             $("#triple").click(function(){
               $("#individualView").hide();
               $("#left").show();
@@ -205,6 +208,7 @@
               // graphDom.find("#visualisation #svg").width(500);
               // $("#right").prepend(graphDom);
 
+              //each change view initial size of svg
               var graphDom = $("#svg");
               $("#svg").remove();
               graphDom.width("100%");
@@ -215,10 +219,33 @@
      //         window.location.href = "#";              
             });
 
+            // initial the size of svg
             var svgInitial = $("#svg");
             $("#svg").remove();
             svgInitial.width("100%");
             $("#visualisation").prepend(svgInitial);
+
+
+            // filter table checked , filter TripleTable
+            var property = $("#propertyBody").find("input");
+            property.click(function(){
+              var checked = [];
+              var properties;
+              $("input[name='pFilter']:checked").each(function (){
+                    checked.push($(this).val());
+                });
+                properties = checked.join(",");
+                alert(properties);
+                $.post("filterProcess",
+                  {
+                    properties: properties
+                  },
+                  function(data, status){
+                    $("#tripleTable").empty();
+                    $("#tripleTable").prepend(data);
+                  }); 
+                
+            });
 
         });
       </script>
@@ -317,7 +344,45 @@
 
                 <fieldset style="padding-top:0px">
                   <legend><strong>Filters</strong></legend> 
-                  <div class="row" style="margin:0px;padding:0px;">
+
+                  <div class = "parentTbl">
+                        <table  style="width:100%; table-layout:fixed; ">
+                          <tr>
+                            <td>
+                              <div class = "childTbl">
+                                <table  style="width:100%; table-layout:fixed;" class = "childTbl">
+                                  <tr>
+                                    <th style = "width:50%">Property</th>
+                                    <th style = "width:50%">Select</th>
+                                  </tr>
+                                </table>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td>
+                              <div class="scrollData childTbl" style = "height:345.5px;">
+                                <table id = "propertyBody" style="width:100%;table-layout:fixed;">
+
+                                  <#list propertyList as property>
+                                    <tr>
+                                        <td>${property}</td>
+                                        <td><input type="checkbox" name="pFilter" checked value=${property}></td>
+                                    </tr>
+                                  </#list>       
+
+                                  
+                                </table>
+                              </div>
+                            </td>
+                          </tr>
+                        </table>
+                  </div>
+
+
+
+                  <!--Filter by Datatable.js-->
+              <!--<div class="row" style="margin:0px;padding:0px;">
                     <table id="example1" class="stripe compact" cellspacing="0" width="100%">
                           <thead>
                               <tr>
@@ -326,11 +391,11 @@
                               </tr>
                           </thead>
                    
-                          <tbody>
+                          <tbody id = "propertyBody">
                           	  <#list propertyList as property>
                           	  	<tr>
                           	  	  <td>${property}</td>
-                                  <td><input type="checkbox" name="state" value="1"></td>
+                                  <td><input type="checkbox" name="pFilter" checked value=${property}></td>
                           	  	</tr>            	  
                           	  </#list>                   	                      
                           </tbody>
@@ -342,8 +407,7 @@
                               </tr>
                           </tfoot>
                       </table>
-                    </div>            
-
+                  </div> -->
               </fieldset>
               </div>
 
@@ -371,11 +435,11 @@
                       </div>
                       <hr style="margin:8px;"/>
                       <div class = "parentTbl">
-                        <table  style="width:100%; ">
+                        <table  style="width:100%; table-layout:fixed;">
                           <tr>
                             <td>
                               <div class = "childTbl">
-                                <table  style="width:100%; " class = "childTbl">
+                                <table  style="width:100%; table-layout:fixed;" class = "childTbl">
                                   <tr>
                                     <th style = "width:12%">Subject</th>
                                     <th style = "width:12%">Predicate</th>
@@ -391,8 +455,8 @@
                           </tr>
                           <tr>
                             <td>
-                              <div class="scrollData childTbl">
-                                <table style="width:100%;">
+                              <div id = "tripleTable" class="scrollData childTbl">
+                                <table style="width:100%; table-layout:fixed;">
 
                                   <#list tableRowList as row>
                                     <tr>
@@ -416,10 +480,10 @@
                             </td>
                           </tr>
                         </table>
+                      </div>
 
-
-
-                      <!--  <table id="example"  style="width:100%; ">
+                      <!--data table by DataTable.js-->
+                  <!--<table id="example"  style="width:100%; ">
                           <thead >
                               <tr >
                                   <th>Subject</th>
@@ -462,7 +526,6 @@
                               </#list>                          
                           </tbody>
                         </table> -->
-                      </div>
               </fieldset>
 
 

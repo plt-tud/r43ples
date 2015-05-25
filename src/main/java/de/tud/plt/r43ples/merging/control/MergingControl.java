@@ -26,6 +26,7 @@ import de.tud.plt.r43ples.merging.model.structure.IndividualModel;
 import de.tud.plt.r43ples.merging.model.structure.IndividualStructure;
 import de.tud.plt.r43ples.merging.model.structure.TableEntrySemanticEnrichmentAllIndividuals;
 import de.tud.plt.r43ples.merging.model.structure.TableModel;
+import de.tud.plt.r43ples.merging.model.structure.TableRow;
 import de.tud.plt.r43ples.merging.model.structure.TreeNode;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -203,6 +204,46 @@ public class MergingControl {
 		scope.put("individualTableList", MergingControl.createTableModelSemanticEnrichmentAllIndividualsList());
 		
 		temp.process(scope,sw);		
+		return sw.toString();	
+		
+	}
+	
+	public static String updateTripleTable(String properties) throws TemplateException, IOException{
+		
+		Map<String, Object> scope = new HashMap<String, Object>();
+		StringWriter sw = new StringWriter();
+		freemarker.template.Template temp = null; 
+		String name = "tripleTable.ftl";
+		
+		try {  
+            // 通过Freemarker的Configuration读取相应的Ftl  
+            Configuration cfg = new Configuration();  
+            // 设定去哪里读取相应的ftl模板  
+            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
+            // 在模板文件目录中寻找名称为name的模板文件  
+            temp = cfg.getTemplate(name);  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+			 	
+		
+		String[] propertyArray = properties.split(",");
+		List<TableRow> TripleRowList = tableModel.getTripleRowList();
+		List<TableRow> updatedTripleRowList = new ArrayList<TableRow>();
+		for(String property: propertyArray) {
+			Iterator<TableRow> itu = TripleRowList.iterator();
+			while(itu.hasNext()){
+				TableRow tableRow = itu.next();
+				if(tableRow.getPredicate().equals(property)) {
+					updatedTripleRowList.add(tableRow);
+				}
+			}					
+		}
+		
+		scope.put("tableRowList", updatedTripleRowList);
+		
+		temp.process(scope,sw);	
+		
 		return sw.toString();	
 		
 	}
