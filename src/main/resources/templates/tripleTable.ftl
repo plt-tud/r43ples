@@ -1,4 +1,19 @@
-    <table style="width:100%;">
+    <script type="text/javascript">
+    	//change row color on click
+    	$(function(){
+    		$("#tripleTable,#individualBody").find("tr").click(function() {
+              if(this.style.background == "" || this.style.background =="white") {
+                  $(this).css('background', 'green');
+              }
+              else {
+                  $(this).css('background', 'white');
+              }
+            });
+    	});
+    </script>
+    
+    //freemarker get Table
+    <table style="width:100%; table-layout:fixed;word-break: break-all; word-wrap: break-word;">
 
       <#list tableRowList as row>
         <tr>

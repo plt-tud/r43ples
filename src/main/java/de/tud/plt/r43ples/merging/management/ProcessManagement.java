@@ -4,18 +4,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-import javax.ws.rs.core.Response;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
@@ -126,6 +122,7 @@ public class ProcessManagement {
 		logger.info("Start reading difference model.");
 		differenceModel.clear();
 		
+		logger.info("differenceModelToRead: "+ differenceModelToRead);
 		Model model = readTurtleStringToJenaModel(differenceModelToRead);
 		
 		// Query all difference groups
@@ -537,6 +534,8 @@ public class ProcessManagement {
 		return list;
 	}
 	
+	
+	
 	/**
 	 * Get difference by triple. If the difference model does not contain the triple null will be returned.
 	 * 
@@ -588,6 +587,94 @@ public class ProcessManagement {
 		}
 		
 		return individualModel;
+	}
+	
+	
+	
+	/**
+	 * Create the individual model in Triple Table.
+	 * 
+	 * @param individualA the individual of Branch A 
+	 * @param individualA the individual of Branch A 
+	 * @param individualModelBranchA the individual model of Branch A
+	 * @param individualModelBranchB the individual model of Branch b
+	 * @param individualTableModel read the information in individual table model
+	 * @throws ConfigurationException 
+	 
+	 */
+	public static List<TableRow> createIndividualTableList (String individualA, String individualB, IndividualModel individualModelBranchA, 
+			IndividualModel individualModelBranchB, TableModel tableModel) throws ConfigurationException {
+		
+		List<TableRow> TripleRowList = tableModel.getTripleRowList();
+		List<TableRow> updatedTripleRowList = new ArrayList<TableRow>();
+		
+		String identiferUri;
+		if(!individualB.isEmpty()){
+			identiferUri = individualB;
+			Iterator<Entry<String,TripleIndividualStructure>> indIter = individualModelBranchB
+					.getIndividualStructures().get(identiferUri).getTriples().entrySet().iterator();
+			while(indIter.hasNext()) {
+				Entry<String,TripleIndividualStructure> indEnt = indIter.next();
+				
+				//get triple
+				Triple triple = indEnt.getValue().getTriple();			
+				
+				String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(triple));
+				String predicate = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(triple));
+				String object = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(triple));
+				
+				Iterator<TableRow> itr = TripleRowList.iterator();
+				boolean status = true;
+				while(itr.hasNext()){
+					TableRow tableRow = itr.next();
+					if(tableRow.getSubject().equals(subject) && tableRow.getObject().equals(object) && tableRow.getPredicate().equals(predicate)) {
+						updatedTripleRowList.add(tableRow);
+						status = false;
+					}				
+				}
+				if(status == true){
+					updatedTripleRowList.add(new TableRow(triple, subject, predicate, object, "--", 
+	                        "--", "--", "--", "--", "--"));
+				}
+			}
+			return updatedTripleRowList;
+			
+		}else if (!individualA.isEmpty()) {
+			identiferUri = individualA;
+			Iterator<Entry<String,TripleIndividualStructure>> indIter = individualModelBranchA
+					.getIndividualStructures().get(identiferUri).getTriples().entrySet().iterator();
+			while(indIter.hasNext()) {
+				Entry<String,TripleIndividualStructure> indEnt = indIter.next();
+				
+				//get triple
+				Triple triple = indEnt.getValue().getTriple();			
+				
+				String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(triple));
+				String predicate = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(triple));
+				String object = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(triple));
+				
+				Iterator<TableRow> itr = TripleRowList.iterator();
+				boolean status = true;
+				while(itr.hasNext()){
+					TableRow tableRow = itr.next();
+					if(tableRow.getSubject().equals(subject) && tableRow.getObject().equals(object) && tableRow.getPredicate().equals(predicate)) {
+						updatedTripleRowList.add(tableRow);
+						status = false;
+					}
+					
+				}
+				
+				if(status == true){
+					updatedTripleRowList.add(new TableRow(triple, subject, predicate, object, "--", 
+	                        "--", "--", "--", "--", "--"));
+				}
+				
+			}
+			return updatedTripleRowList;
+			
+		}else {
+			return updatedTripleRowList;
+		}	
 	}
 	
 	
@@ -820,7 +907,7 @@ public class ProcessManagement {
 			boolean isconflicting = differ.isConflicting();
 			SDDTripleStateEnum stateA = differ.getTripleStateA();
 			SDDTripleStateEnum stateB = differ.getTripleStateB();
-			SDDTripleStateEnum resolutionState = differ.getAutomaticResolutionState();
+	//		SDDTripleStateEnum resolutionState = differ.getAutomaticResolutionState();
 			String conflicting = (isconflicting ) ? "1" : "0";
 			//get difference 
 			Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
@@ -828,7 +915,9 @@ public class ProcessManagement {
 				
 				Entry<String, Difference> entryDF = iterDIF.next();
 				//get triple
-				Triple triple = entryDF.getValue().getTriple();	
+				Triple triple = entryDF.getValue().getTriple();
+				
+				SDDTripleStateEnum autoResolutionState = entryDF.getValue().getTripleResolutionState();
 				
 				String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(triple));
 				String predicate = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(triple));
@@ -839,7 +928,8 @@ public class ProcessManagement {
 				
 				//read each TableRow
 				tableModel.readTableRow(new TableRow(triple, subject, predicate, object, stateA.toString(), 
-			                            stateB.toString(), revisionA, revisionB, conflicting, resolutionState.toString()));
+			                            stateB.toString(), revisionA, revisionB, conflicting, autoResolutionState.toString()));
+				logger.info("State Test"+ autoResolutionState.toString());
 													
 			}			
 			
@@ -960,7 +1050,102 @@ public class ProcessManagement {
 
 		return list;
 	}
+	
+	
+	/**
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 * ##                                                                                                                                                                      ##
+	 * ## create push ergebnis and create merging query                                                                                                                                                     ##
+	 * ##                                                                                                                                                                      ##
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 */	
+	
+	
+	/**
+	 * Get the whole content of a revision as jena model.
+	 * 
+	 * @param graphName the graph name
+	 * @param revision the revision
+	 * @return the whole content of the revision of the graph as jena model
+	 * @throws IOException 
+	 * @throws InternalErrorException 
+	 */
+	public static Model getWholeContentOfRevision(String graphName, String revision) throws IOException, InternalErrorException {
+		String query = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "FROM <%s> REVISION \"%s\" %n"
+				+ "WHERE { %n"
+				+ "	?s ?p ?o %n"
+				+ "}", graphName, revision);
+//		String result = TripleStoreInterface.executeQueryWithoutAuthorization(query, "text/xml");
+//		String result = QueryManagement.getSelectConstructAskResponseClassic(query, "text/xml");
+
+		String result = QueryManagement.getSelectConstructAskResponseClassic(query, "text/turtle");
 		
+		logger.debug(result);
+		logger.info("WholeContent Result: "+result);		
+
+		return readTurtleStringToJenaModel(result);
+	}
+	
+	
+	/**
+	 * Get all triples divided into insert and delete.
+	 * 
+	 * @param differenceModel the difference model
+	 * @return array list which has two entries (entry 0 contains the triples to insert; entry 1 contains the triples to delete)
+	 */
+	public static ArrayList<String> getAllTriplesDividedIntoInsertAndDelete(DifferenceModel differenceModel, Model model) {
+		// The result list
+		ArrayList<String> list = new ArrayList<String>();
+		
+		String triplesToInsert = "";
+		String triplesToDelete = "";
+		
+		// Iterate over all difference groups
+		Iterator<String> iteDifferenceGroups = differenceModel.getDifferenceGroups().keySet().iterator();
+		while (iteDifferenceGroups.hasNext()) {
+			String differenceGroupKey = iteDifferenceGroups.next();
+			DifferenceGroup differenceGroup = differenceModel.getDifferenceGroups().get(differenceGroupKey);
+			
+			Iterator<String> iteDifferences = differenceGroup.getDifferences().keySet().iterator();
+			while (iteDifferences.hasNext()) {
+				String differenceKey = iteDifferences.next();
+				Difference difference = differenceGroup.getDifferences().get(differenceKey);
+				
+				// Get the triple state to use
+				SDDTripleStateEnum tripleState;
+				if (difference.getResolutionState().equals(ResolutionState.RESOLVED)) {
+					// Use the approved triple state
+					tripleState = difference.getTripleResolutionState();					
+				} else {
+					// Use the automatic resolution state
+					tripleState = differenceGroup.getAutomaticResolutionState();
+				}
+				
+				// Get the triple
+				String triple = tripleToString( difference.getTriple());					
+				
+				// Add the triple to the corresponding string
+				if (tripleState.equals(SDDTripleStateEnum.ADDED) || tripleState.equals(SDDTripleStateEnum.ORIGINAL)) {
+					triplesToInsert += triple + "%n";				
+				} else if (tripleState.equals(SDDTripleStateEnum.DELETED) || tripleState.equals(SDDTripleStateEnum.NOTINCLUDED)) {
+					triplesToDelete += triple + "%n";
+				} else {
+					// Error occurred - state was not changed
+					logger.error("Triple state was used which has no internal representation.");
+				}
+			}
+		}
+		
+		// Add the string to the result list
+		list.add(String.format(triplesToInsert));
+		list.add(String.format(triplesToDelete));
+		
+		return list;
+	}	
 	
 }
 

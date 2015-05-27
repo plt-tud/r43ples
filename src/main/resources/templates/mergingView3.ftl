@@ -8,35 +8,35 @@
 	  	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	    <title>Merge View</title>
 	  	<meta name="author" content="Markus Graube">
-		<meta name="description" content="R43ples web application">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+  		<meta name="description" content="R43ples web application">
+  		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 			  
-	  <!-- Foundation 5 core CSS -->
-	<link href="/static/css/foundation.css" rel="stylesheet" />
-	<link href="/static/css/normalize.css" rel="stylesheet" />
-	<link rel="stylesheet" href="//cdn.jsdelivr.net/fontawesome/4.3.0/css/font-awesome.css">
-	
-	<!-- Custom styles for this template -->
-	<link href="/static/css/r43ples.css" rel="stylesheet" />
-	
-	<script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
-	
-	<!--jsTree-->
-	<script src="/static/js/jstree.js"></script>
-	<link rel="stylesheet" href="/static/css/jsTreeStyle.css" />
-	
-	<!--foundation.js-->
-	<script src="/static/js/foundation.js"></script>
-		
-	  
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/tipsy/1.0/stylesheets/tipsy.css">
-    <!--<link rel="stylesheet" href="/static/css/version-merging-graph.css">-->
-    <link rel="stylesheet" href="/static/css/process-graph.css">
+    	  <!-- Foundation 5 core CSS -->
+    	<link href="/static/css/foundation.css" rel="stylesheet" />
+    	<link href="/static/css/normalize.css" rel="stylesheet" />
+    	<link rel="stylesheet" href="//cdn.jsdelivr.net/fontawesome/4.3.0/css/font-awesome.css">
+    	
+    	<!-- Custom styles for this template -->
+    	<link href="/static/css/r43ples.css" rel="stylesheet" />
+    	
+    	<script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+    	
+    	<!--jsTree-->
+    	<script src="/static/js/jstree.js"></script>
+    	<link rel="stylesheet" href="/static/css/jsTreeStyle.css" />
+    	
+    	<!--foundation.js-->
+    	<script src="/static/js/foundation.js"></script>
+    		
+  	  
+      <link rel="stylesheet" href="//cdn.jsdelivr.net/tipsy/1.0/stylesheets/tipsy.css">
+      <!--<link rel="stylesheet" href="/static/css/version-merging-graph.css">-->
+      <link rel="stylesheet" href="/static/css/process-graph.css">
 
 
-   <!-- <link rel="stylesheet" href="https://cdn.datatables.net/1.10.6/css/jquery.dataTables.css"> -->
-   <!--  <link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/1.10.6/integration/foundation/dataTables.foundation.css">-->
-    <link rel="stylesheet" href="/static/css/foundation.table.css">
+     <!-- <link rel="stylesheet" href="https://cdn.datatables.net/1.10.6/css/jquery.dataTables.css"> -->
+     <!--  <link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/1.10.6/integration/foundation/dataTables.foundation.css">-->
+      <link rel="stylesheet" href="/static/css/foundation.table.css">
 
     
         <!--Einbinden der externen Bibliotheken-->
@@ -72,6 +72,7 @@
         .childTbl th,
         .childTbl td {
           border: 1px solid #d7d7d7;
+          text-align: center;
         }
         .scrollData {
           width: 690;
@@ -79,9 +80,31 @@
           overflow-x: hidden;
         }
 
-        th,td {
-            text-align: center;
-        }        
+
+        .childTbl td:hover{
+            cursor: pointer;
+        }  
+
+        .childTbl tr:hover{
+            background-color: #ccc;
+        }  
+
+        #example tr {
+            background-color: #eee;
+            border-top: 1px solid #fff;
+        }
+        #example tr:hover {
+            background-color: #ccc;
+        }
+        #example th {
+            background-color: #fff;
+        }
+        #example th, #example td {
+            padding: 3px 5px;
+        }
+        #example td:hover {
+            cursor: pointer;
+        }     
 
       </style>
 	  
@@ -92,7 +115,7 @@
 <body>       
       <script type="text/javascript">
         $(document).foundation();      
-        $(document).ready(function () {
+        $(document).ready(function(){
             // Elemente in Variablen Speichern
             var toogleBranches = $('#toogle-branches');
             var toogleTags = $('#toogle-tags');
@@ -170,12 +193,17 @@
    //           $("#opt").val(options);
 
             //  $.post("pushProcess",{options: options});
-              $.get("pushProcess",
+              $.post("pushProcess",
               {
                   options: options
               },
               function(data, status){
-                  
+                if (confirm("Push process : " + status + "Show push result ?") == true) {
+                    window.location.assign("pushProcess");
+                } else {
+                    alert("stop!");
+                }
+
               });
 
             });
@@ -186,20 +214,22 @@
               $("#left").hide();
               $("#right").removeClass("large-9");
               $("#right").addClass("large-12");
+              $("#tripleView").hide();
               // $("#right").css("width", "100%");
               $("#individualView").load("individualView", { data : "1" }, function(){
-                $("#individualView").show();
-                alert( "Load was performed." );
+              $("#individualView").show();
       //          window.location.href = "#";
               });
             });
 
             //change to triple view
-            $("#triple").click(function(){
+              $("#triple").click(function(){
               $("#individualView").hide();
               $("#left").show();
               $("#right").removeClass("large-12");
               $("#right").addClass("large-9");
+              $("#tripleView").show();
+
             //  $("#right").css("width", "");
 
              // debugger;
@@ -247,6 +277,18 @@
                 
             });
 
+
+            //Table row clicked, color change
+            $("#tripleTable").find("tr").click(function() {
+              if(this.style.background == "" || this.style.background =="white") {
+                  $(this).css('background', 'green');
+              }
+              else {
+                  $(this).css('background', 'white');
+              }
+            });
+
+
         });
       </script>
 
@@ -267,7 +309,7 @@
                       <ul class="button-group radius left" style="margin-top:16px">
                         <li><a href="#" class="button tiny">New Merge</a></li>
                         <!--click push to push Triple and resolution state-->
-                        <li><a href = "http://localhost:9998/r43ples/pushProcess"><button id="push" class="button tiny">Push</button></a></li>
+                        <li><a href ="#"><button id="push" class="button tiny">Push</button></a></li>
                     <!--    <li><a href="#" class="button tiny">Push</a></li> -->
                       </ul>
                 </div>
@@ -346,11 +388,11 @@
                   <legend><strong>Filters</strong></legend> 
 
                   <div class = "parentTbl">
-                        <table  style="width:100%; table-layout:fixed; ">
+                        <table  style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">
                           <tr>
                             <td>
                               <div class = "childTbl">
-                                <table  style="width:100%; table-layout:fixed;" class = "childTbl">
+                                <table  style="width:100%; table-layout:fixed;word-break: break-all; word-wrap: break-word;" class = "childTbl">
                                   <tr>
                                     <th style = "width:50%">Property</th>
                                     <th style = "width:50%">Select</th>
@@ -362,15 +404,21 @@
                           <tr>
                             <td>
                               <div class="scrollData childTbl" style = "height:345.5px;">
-                                <table id = "propertyBody" style="width:100%;table-layout:fixed;">
-
-                                  <#list propertyList as property>
-                                    <tr>
-                                        <td>${property}</td>
-                                        <td><input type="checkbox" name="pFilter" checked value=${property}></td>
-                                    </tr>
-                                  </#list>       
-
+                                <table id = "propertyBody" style="width:100%;table-layout:fixed;word-break: break-all; word-wrap: break-word;">
+									
+                	 								<#if propertyList??>
+                									   <#list propertyList as property>
+	                                    <tr>
+	                                        <td >${property!" "}</td>
+	                                        <td><input type="checkbox" name="pFilter" checked value=${property!" "}></td>
+	                                    </tr>
+	                                  </#list>     
+									               <#else>
+										                  <tr>
+	                                        <td >null</td>
+	                                        <td>no property</td>
+	                                    </tr>
+									               </#if>
                                   
                                 </table>
                               </div>
@@ -392,12 +440,19 @@
                           </thead>
                    
                           <tbody id = "propertyBody">
-                          	  <#list propertyList as property>
-                          	  	<tr>
-                          	  	  <td>${property}</td>
-                                  <td><input type="checkbox" name="pFilter" checked value=${property}></td>
-                          	  	</tr>            	  
-                          	  </#list>                   	                      
+							<#if propertyList??>
+							 <#list propertyList as property>
+                                <tr>
+                                    <td >${property!" "}</td>
+                                    <td><input type="checkbox" name="pFilter" checked value=${property!" "}></td>
+                                </tr>
+                              </#list>     
+							<#else>
+								<tr>
+                                    <td >null</td>
+                                    <td>no property</td>
+                                </tr>
+							</#if>                	                      
                           </tbody>
 
                           <tfoot>
@@ -425,6 +480,7 @@
 
                 <div id="individualView"></div>   
 
+                <div id="tripleView">
                 <fieldset style="padding-bottom:0px;padding-top:0px;margin-bottom:6px">
                     <legend><strong>Resolution</strong></legend>
                       <div class="button-bar" >
@@ -435,11 +491,11 @@
                       </div>
                       <hr style="margin:8px;"/>
                       <div class = "parentTbl">
-                        <table  style="width:100%; table-layout:fixed;">
+                        <table  style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">
                           <tr>
                             <td>
                               <div class = "childTbl">
-                                <table  style="width:100%; table-layout:fixed;" class = "childTbl">
+                                <table  style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;" class = "childTbl">
                                   <tr>
                                     <th style = "width:12%">Subject</th>
                                     <th style = "width:12%">Predicate</th>
@@ -456,11 +512,11 @@
                           <tr>
                             <td>
                               <div id = "tripleTable" class="scrollData childTbl">
-                                <table style="width:100%; table-layout:fixed;">
+                                <table style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">
 
                                   <#list tableRowList as row>
                                     <tr>
-                                      <td style = "width:12%">${row.subject}</td>
+                                      <td style = "width:12%">${row.subject} </td>
                                       <td style = "width:12%">${row.predicate}</td>
                                       <td style = "width:12%">${row.object}</td>
                                       <td style = "width:20%">${row.stateA} (${row.revisionA!"  "})</td>
@@ -470,18 +526,24 @@
                                       <#else>
                                         <td style = "width:12%;text-align: center;"><a><img src="/static/images/Difference.png"/></a></td>
                                       </#if>
-                                      <td style = "width:12% ;text-align: center;"><input type="checkbox" id ="opt" name="options" value=${row.tripleId}></td>
-                                    </tr>
-                                  </#list>       
 
-                                  
+                                      <#if row.resolutionState == "ADDED">
+                                      <td style = "width:12% ;text-align: center;"><input type="checkbox" id ="opt" name="options" checked value=${row.tripleId}>
+                                      </td>
+                                      <#else>
+                                      <td style = "width:12% ;text-align: center;"><input type="checkbox" id ="opt" name="options" value=${row.tripleId}>
+                                      </td>
+                                      </#if>
+                                    </tr>
+                                  </#list>   
+                        
                                 </table>
                               </div>
                             </td>
                           </tr>
                         </table>
                       </div>
-
+                     
                       <!--data table by DataTable.js-->
                   <!--<table id="example"  style="width:100%; ">
                           <thead >
@@ -527,7 +589,7 @@
                           </tbody>
                         </table> -->
               </fieldset>
-
+              </div>
 
              </div>
 

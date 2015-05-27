@@ -383,6 +383,7 @@ public class Endpoint {
 		}
 			
 		System.out.println(model+graphName+sddName+branch1+branch2+user+message+type.toString());
+		MergingControl.createCommitModel(graphName, sddName, user, message, branch1, branch2);
 			
 		String mergeQuery = ProcessManagement.createMergeQuery(graphName, sddName, user, message, type, branch1, branch2, null);
 		logger.info("yxy test mergeQuery:"+mergeQuery);
@@ -414,7 +415,7 @@ public class Endpoint {
 		MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
 		
 		
-		response.entity(MergingControl.getViewHtmlOutput(graphName));
+		response.entity(MergingControl.getViewHtmlOutput());
 		return response.build();
 	}
 	
@@ -437,36 +438,65 @@ public class Endpoint {
 
 	}	
 	
-//	@Path("pushProcess")
-//	@POST
-//	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-//	public final Response pushPOST(@HeaderParam("Accept") final String formatHeader,
-//			@FormParam("user") final String user, @FormParam("options") @DefaultValue("") final String triples) {
-//		
-//		ResponseBuilder response = Response.ok();
-//		logger.info("format_header"+ formatHeader);
-//		logger.info("Push post Test :"+ user);
-//		logger.info("Push post Array :"+ triples);
-//
-//
-//		response.entity("push test");
-//		return response.build();
-//
-//	}	
+	@Path("pushProcess")
+	@POST
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final Response pushPOST(@HeaderParam("Accept") final String formatHeader,
+			@FormParam("options") @DefaultValue("") final String triplesId) throws IOException, InternalErrorException {
+		
+		ResponseBuilder response = Response.ok();
+		
+		Response responsePost = null;
+
+		logger.info("format_header"+ formatHeader);
+		logger.info("Push get Array :"+ triplesId);
+		String mergeQuery = MergingControl.updateMergeQuery(triplesId);
+		
+		String userCommit = null;
+		Matcher userMatcher = patternUser.matcher(mergeQuery);
+		logger.info("yxy test mergeQuery:"+mergeQuery);
+		if (userMatcher.find()) {
+			userCommit = userMatcher.group("user");
+			mergeQuery = userMatcher.replaceAll("");
+		}
+		String messageCommit = null;
+		Matcher messageMatcher = patternCommitMessage.matcher(mergeQuery);
+		if (messageMatcher.find()) {
+			messageCommit = messageMatcher.group("message");
+			mergeQuery = messageMatcher.replaceAll("");
+		}
+		
+		logger.info("yxy test mergeQuery nach verarbeit:"+mergeQuery);
+
+		if (patternMergeQuery.matcher(mergeQuery).find()) {
+			responsePost= getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
+			logger.info("yxy get Post"+responsePost.toString());	
+		}
+			
+
+//		logger.info("Inhalt von Response Entity:"+responsePost.getEntity().toString());	
+			
+		//MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
+		
+
+//		response.entity("push test GET");
+		return response.build();
+
+	}	
 
 
 	@Path("pushProcess")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response pushGET(@HeaderParam("Accept") final String formatHeader,
-			 @QueryParam("options") @DefaultValue("") final String triples) {
+			 @QueryParam("options") @DefaultValue("") final String triplesId) throws IOException, InternalErrorException, TemplateException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
-		logger.info("format_header"+ formatHeader);
-		logger.info("Push get Array :"+ triples);
+		
 
 
-		response.entity("push test GET");
+		response.entity(MergingControl.getUpdatedViewHtmlOutput());
+//		response.entity("push test GET");
 		return response.build();
 
 	}
@@ -521,6 +551,36 @@ public class Endpoint {
 		return response.build();
 
 	}
+	
+	/**with individual filter the Triple in tripleTable
+	 * @param individualA individual of Branch A
+	 * @param individualB individual of Branch B */
+	
+	@Path("individualFilter")
+	@POST
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final Response filterPOST(@HeaderParam("Accept") final String formatHeader,
+			@FormParam("individualA") @DefaultValue("null") final String individualA,
+			@FormParam("individualB") @DefaultValue("null") final String individualB) throws TemplateException, IOException, ConfigurationException {
+		
+		ResponseBuilder response = Response.ok();
+		logger.info("format_header"+ formatHeader);
+		logger.info("individualFilter A Array :"+ individualA);
+		logger.info("individualFilter B Array :"+ individualB);
+		
+		// individual filter the triple in triple table
+		
+		String individualFilter = MergingControl.getIndividualFilter(individualA, individualB);
+		
+		
+		
+		logger.info(individualB.isEmpty());
+		response.entity(individualFilter);
+		return response.build();
+
+	}	
+	
+	
 	
 //	@Path("mergingView")
 //	@GET
