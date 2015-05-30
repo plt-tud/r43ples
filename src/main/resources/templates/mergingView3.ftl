@@ -209,25 +209,28 @@
             });
 
 
+
             //change to individual view
             $("#individual").click(function(){
               $("#left").hide();
-              $("#right").removeClass("large-9");
-              $("#right").addClass("large-12");
+              $("#right").removeClass();
+              $("#right").addClass("large-12 columns");
               $("#tripleView").hide();
+              $("#highLevelView").hide();
               // $("#right").css("width", "100%");
-              $("#individualView").load("individualView", { data : "1" }, function(){
-              $("#individualView").show();
+              $("#individualView").load("individualView",function(){
+                $("#individualView").show();
       //          window.location.href = "#";
               });
             });
 
             //change to triple view
-              $("#triple").click(function(){
+            $("#triple").click(function(){
               $("#individualView").hide();
+              $("#highLevelView").hide();
               $("#left").show();
-              $("#right").removeClass("large-12");
-              $("#right").addClass("large-9");
+              $("#right").removeClass();
+              $("#right").addClass("large-9 columns");
               $("#tripleView").show();
 
             //  $("#right").css("width", "");
@@ -247,6 +250,19 @@
 
    //           table.columns.adjust().draw();
      //         window.location.href = "#";              
+            });
+
+            $("#highLevel").click(function(){
+              $("#left").hide();
+              $("#right").removeClass();
+              $("#right").addClass("large-12 columns");
+              $("#tripleView").hide();
+              $("#individualView").hide();
+              $("#highLevelView").load("highLevelView", function(){
+                $("#highLevelView").show();
+      //          window.location.href = "#";
+              });
+
             });
 
             // initial the size of svg
@@ -307,7 +323,7 @@
              <div class="row" style="padding-left:16px;padding-right:16px">
                 <div class="columns small-5" >
                       <ul class="button-group radius left" style="margin-top:16px">
-                        <li><a href="#" class="button tiny">New Merge</a></li>
+                        <li><a href="merging" class="button tiny">New Merge</a></li>
                         <!--click push to push Triple and resolution state-->
                         <li><a href ="#"><button id="push" class="button tiny">Push</button></a></li>
                     <!--    <li><a href="#" class="button tiny">Push</a></li> -->
@@ -318,7 +334,7 @@
                       <ul class="button-group radius right" style="margin-top:16px">
                         <li><a href="#" id="triple" class="button tiny">Triple view</a></li>
                         <li><a href="#" id="individual" class="button tiny">Individual</a></li>
-                        <li><a href="#" class="button tiny">High level</a></li>              
+                        <li><a href="#" id="highLevel" class="button tiny">High level</a></li>              
                       </ul>
                 </div>
              </div> 
@@ -478,7 +494,8 @@
                   </div> 
                 </fieldset> 
 
-                <div id="individualView"></div>   
+                <div id="individualView"></div> 
+                <div id="highLevelView"></div>  
 
                 <div id="tripleView">
                 <fieldset style="padding-bottom:0px;padding-top:0px;margin-bottom:6px">

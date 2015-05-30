@@ -1,6 +1,6 @@
 	    <script type="text/javascript">
 	    	$(function(){
-	    		$("#tripleTable").find("tr").click(function() {
+	    		$("#individualTripleTable").find("tr").click(function() {
 	              if((this.style.background == "" || this.style.background =="white")) {
 	                  $(this).css('background', 'green');	              	  
 	              }
@@ -43,7 +43,7 @@
                   </tr>
                   <tr>
                     <td>
-                      <div id = "tripleTable" class="scrollData childTbl">
+                      <div id = "individualTripleTable" class="scrollData childTbl">
                         <table style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">
 						  
 						  

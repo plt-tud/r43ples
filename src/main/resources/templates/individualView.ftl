@@ -91,7 +91,7 @@
                   </tr>
                   <tr>
                     <td>
-                      <div id = "tripleTable" class="scrollData childTbl" style = "height:166px;">
+                      <div class="scrollData childTbl" style = "height:166px;">
                         <table style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">						 				
                 
                         </table>

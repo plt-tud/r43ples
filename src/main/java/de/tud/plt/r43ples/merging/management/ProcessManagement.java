@@ -12,7 +12,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 
@@ -35,6 +34,8 @@ import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
 import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeModel;
 import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeRenaming;
+import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeTableModel;
+import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeTableRow;
 import de.tud.plt.r43ples.merging.model.structure.IndividualModel;
 import de.tud.plt.r43ples.merging.model.structure.IndividualStructure;
 import de.tud.plt.r43ples.merging.model.structure.TableModel;
@@ -823,6 +824,33 @@ public class ProcessManagement {
 		return result;
 	}
 	
+	
+	/**create High level change Table Model from high level change Model
+	 * @param highLevelChangeModel the model to be read 
+	 * @param hightLevelChangeTableModel the Model to be created 
+	 * @throws ConfigurationException */
+	public static void createHighLevelChangeTableModel (HighLevelChangeModel highLevelChangeModel, HighLevelChangeTableModel highLevelChangeTableModel) throws ConfigurationException{
+		highLevelChangeTableModel.clear();
+		Iterator<Entry<String, HighLevelChangeRenaming>> iterHL = highLevelChangeModel.getHighLevelChangesRenaming().entrySet().iterator();
+		while(iterHL.hasNext()){
+			HighLevelChangeRenaming hlcr = iterHL.next().getValue();
+			Triple additionTriple = hlcr.getAdditionDifference().getTriple();
+			Triple deletionTriple = hlcr.getDeletionDifference().getTriple();
+					
+			String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(additionTriple));
+			String predicate = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(additionTriple));
+			String altObject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(deletionTriple));
+			String newObject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(additionTriple));
+			
+			highLevelChangeTableModel.readTableRow(new HighLevelChangeTableRow(hlcr, subject, predicate, altObject, newObject));
+		}
+		
+		Iterator<HighLevelChangeTableRow> iter = highLevelChangeTableModel.getTripleRowList().iterator();
+		while(iter.hasNext()){
+			HighLevelChangeTableRow row = iter.next();
+			logger.info("HighLevelTable test: " + row.getSubject() +  row.getPredicate()+ row.getObjectAlt() + row.getObjectNew() + "--" + row.getTripleId());
+		}
+	}
 	
 	/**
 	 * ##########################################################################################################################################################################

@@ -12,7 +12,6 @@
     	});
     </script>
     
-    //freemarker get Table
     <table style="width:100%; table-layout:fixed;word-break: break-all; word-wrap: break-word;">
 
       <#list tableRowList as row>
@@ -27,7 +26,14 @@
           <#else>
             <td style = "width:12%;text-align: center;"><a><img src="/static/images/Difference.png"/></a></td>
           </#if>
-          <td style = "width:12% ;text-align: center;"><input type="checkbox" id ="opt" name="options" value=${row.tripleId}></td>
+          
+          <#if row.resolutionState == "ADDED">
+	          <td style = "width:12% ;text-align: center;"><input type="checkbox" id ="opt" name="options" checked value=${row.tripleId}>
+	          </td>
+          <#else>
+	          <td style = "width:12% ;text-align: center;"><input type="checkbox" id ="opt" name="options" value=${row.tripleId}>
+	          </td>
+          </#if>
         </tr>
       </#list>       
 

@@ -537,20 +537,32 @@ public class Endpoint {
 	 * todo */
 	
 	@Path("individualView")
-	@POST
+	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response individualPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("data") final String data) throws TemplateException, IOException {
+	public final Response individualGET() throws TemplateException, IOException {
 		
 		ResponseBuilder response = Response.ok();
-		logger.info("format_header"+ formatHeader);
-		logger.info("Individual post Test :"+ data);
 
-
-		response.entity(MergingControl.getIndividualView(data));
+		response.entity(MergingControl.getIndividualView());
 		return response.build();
 
 	}
+	
+	/**load High Level Change Table View */
+	
+	@Path("highLevelView")
+	@GET
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final Response highLevelGET() throws TemplateException, IOException {
+		
+		ResponseBuilder response = Response.ok();
+		
+		response.entity(MergingControl.getHighLevelView());
+		return response.build();
+
+	}
+	
+	
 	
 	/**with individual filter the Triple in tripleTable
 	 * @param individualA individual of Branch A

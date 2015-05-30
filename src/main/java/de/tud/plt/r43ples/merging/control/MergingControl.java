@@ -30,6 +30,8 @@ import de.tud.plt.r43ples.merging.model.structure.Difference;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
 import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeModel;
+import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeTableModel;
+import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeTableRow;
 import de.tud.plt.r43ples.merging.model.structure.IndividualModel;
 import de.tud.plt.r43ples.merging.model.structure.IndividualStructure;
 import de.tud.plt.r43ples.merging.model.structure.TableEntrySemanticEnrichmentAllIndividuals;
@@ -49,10 +51,11 @@ public class MergingControl {
 	private static List<TreeNode> treeList = new ArrayList<TreeNode>();
 	private static TableModel tableModel = new TableModel();
 	
-	/** The each individual of Triple Table*/
-	private static TableModel individualTableModel = new TableModel();
 	
 	private static HighLevelChangeModel highLevelChangeModel = new HighLevelChangeModel();
+	
+	/**read the HighLevelChangeModel and create the highLevelChangeTableModel*/
+	private static HighLevelChangeTableModel highLevelChangeTableModel = new HighLevelChangeTableModel();
 	
 	/** The individual model of branch A. **/
 	private static IndividualModel individualModelBranchA;
@@ -235,6 +238,9 @@ public class MergingControl {
 			
 			ProcessManagement.createHighLevelChangeRenamingModel(highLevelChangeModel, differenceModel);
 			
+			//test the highlevelChangeTableModel
+			ProcessManagement.createHighLevelChangeTableModel(highLevelChangeModel, highLevelChangeTableModel);
+			
 			// Save the current revision numbers
 			revisionNumberBranchA = RevisionManagement.getRevisionNumber(graphName, branchNameA);
 			revisionNumberBranchB = RevisionManagement.getRevisionNumber(graphName, branchNameB);
@@ -275,7 +281,7 @@ public class MergingControl {
 		
 	}
 	
-	public static String getIndividualView(String individual) throws TemplateException, IOException{
+	public static String getIndividualView() throws TemplateException, IOException{
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		freemarker.template.Template temp = null; 
@@ -306,6 +312,7 @@ public class MergingControl {
 		List<TableRow> updatedTripleRowList = ProcessManagement.createIndividualTableList(individualA, 
 				individualB, individualModelBranchA, individualModelBranchB, tableModel);
 		
+		//test Table Row list
 		Iterator<TableRow> ite = updatedTripleRowList.iterator();
 		while(ite.hasNext()){
 			TableRow t = ite.next();
@@ -333,6 +340,35 @@ public class MergingControl {
 		
 		return sw.toString();	
 		
+		
+	}
+	
+	/**getHighLevel View
+	 * @throws IOException 
+	 * @throws TemplateException */
+	public static String getHighLevelView() throws TemplateException, IOException {
+		List<HighLevelChangeTableRow> highLevelRowList = highLevelChangeTableModel.getTripleRowList();
+		
+		Map<String, Object> scope = new HashMap<String, Object>();
+		StringWriter sw = new StringWriter();
+		freemarker.template.Template temp = null; 
+		String name = "highLevelView.ftl";
+		try {  
+            // 通过Freemarker的Configuration读取相应的Ftl  
+            Configuration cfg = new Configuration();  
+            // 设定去哪里读取相应的ftl模板  
+            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
+            // 在模板文件目录中寻找名称为name的模板文件  
+            temp = cfg.getTemplate(name);  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+			 	
+		scope.put("highLevelRowList", highLevelRowList);
+		
+		temp.process(scope,sw);
+		
+		return sw.toString();		
 		
 	}
 	
