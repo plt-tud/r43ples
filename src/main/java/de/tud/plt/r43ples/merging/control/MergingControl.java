@@ -34,6 +34,7 @@ import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeTableModel;
 import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeTableRow;
 import de.tud.plt.r43ples.merging.model.structure.IndividualModel;
 import de.tud.plt.r43ples.merging.model.structure.IndividualStructure;
+import de.tud.plt.r43ples.merging.model.structure.ReportResult;
 import de.tud.plt.r43ples.merging.model.structure.TableEntrySemanticEnrichmentAllIndividuals;
 import de.tud.plt.r43ples.merging.model.structure.TableModel;
 import de.tud.plt.r43ples.merging.model.structure.TableRow;
@@ -70,6 +71,9 @@ public class MergingControl {
 	private static String revisionNumberBranchA;
 	/** The revision number of the branch B. **/
 	private static String revisionNumberBranchB;
+	
+	/** The report result. **/
+	private static ReportResult reportResult;
 	
 
 	
@@ -245,6 +249,10 @@ public class MergingControl {
 			revisionNumberBranchA = RevisionManagement.getRevisionNumber(graphName, branchNameA);
 			revisionNumberBranchB = RevisionManagement.getRevisionNumber(graphName, branchNameB);
 			
+			//create and initialization reportResult
+			
+			reportResult = new ReportResult();
+			
 			// Create the individual models of both branches
 			individualModelBranchA = ProcessManagement.createIndividualModelOfRevision(graphName, branchNameA, differenceModel);
 			logger.info("Individual Model A Test : " + individualModelBranchA.getIndividualStructures().keySet().toString());
@@ -309,6 +317,9 @@ public class MergingControl {
 	 * return response of updated triple table by individual 
 	 * */
 	public static String getIndividualFilter(String individualA , String individualB) throws ConfigurationException, TemplateException, IOException {
+		//updated tableModel
+		ProcessManagement.createTableModel(differenceModel, tableModel);
+		
 		List<TableRow> updatedTripleRowList = ProcessManagement.createIndividualTableList(individualA, 
 				individualB, individualModelBranchA, individualModelBranchB, tableModel);
 		
@@ -373,9 +384,10 @@ public class MergingControl {
 	}
 	
 	/**@param properties :  property list of Filter by property
-	 * return response of updated triple table*/
+	 * return response of updated triple table
+	 * @throws ConfigurationException */
 	
-	public static String updateTripleTable(String properties) throws TemplateException, IOException{
+	public static String updateTripleTable(String properties) throws TemplateException, IOException, ConfigurationException{
 		
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
@@ -391,13 +403,20 @@ public class MergingControl {
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
-        }  
-			 	
+        } 
+		
+		//updated tableModel	 	
+		ProcessManagement.createTableModel(differenceModel, tableModel);
 		
 		String[] propertyArray = properties.split(",");
 		List<TableRow> TripleRowList = tableModel.getTripleRowList();
 		List<TableRow> updatedTripleRowList = new ArrayList<TableRow>();
 		for(String property: propertyArray) {
+			
+			if(property.equals("rdf:type")){
+				logger.info("property type ");
+				property = "a";
+			}
 			Iterator<TableRow> itu = TripleRowList.iterator();
 			while(itu.hasNext()){
 				TableRow tableRow = itu.next();
@@ -415,6 +434,186 @@ public class MergingControl {
 		
 	}
 	
+	/**get triple view after changed view
+	 * @throws ConfigurationException */
+	public static String getTripleView() throws TemplateException, IOException, ConfigurationException{
+		Map<String, Object> scope = new HashMap<String, Object>();
+		StringWriter sw = new StringWriter();
+		freemarker.template.Template temp = null; 
+		String name = "tripleView.ftl";
+		try {  
+            // 通过Freemarker的Configuration读取相应的Ftl  
+            Configuration cfg = new Configuration();  
+            // 设定去哪里读取相应的ftl模板  
+            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
+            // 在模板文件目录中寻找名称为name的模板文件  
+            temp = cfg.getTemplate(name);  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+		
+		//updated tableModel	 	
+		ProcessManagement.createTableModel(differenceModel, tableModel);	
+		
+		scope.put("tableRowList", tableModel.getTripleRowList());
+		
+		temp.process(scope,sw);		
+		return sw.toString();	
+		
+	}
+	
+	/**
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 * ##                                                                                                                                                                      ##
+	 * ## approve Process : interactive approved process through ajax                                                                                                                              ##
+	 * ##                                                                                                                                                                      ##
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 */
+	
+	/**
+	 * approve id nummer of Triple in Triple Table 
+	 * Difference Model will changed though ajax
+	 * updated reportResult by decrementCounterDifferenceResolutionChanged() and incrementCounterDifferenceResolutionChanged()
+	 * @param id: to approved Triple id 
+	 * @param isChecked : status of approved Triple*/
+	
+	public static void approveToDifferenceModel(String id, String isChecked){
+		
+		// Count for Conflict;
+		int count = 0;
+		Triple checkedTriple = tableModel.getManuellTriple().get(id);
+		SDDTripleStateEnum tripleState;
+		if (isChecked.equals("1")){
+			tripleState = SDDTripleStateEnum.ADDED;
+		}else {
+			tripleState = SDDTripleStateEnum.DELETED;
+		}
+		
+		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
+		while(iterDM.hasNext()) {
+			Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterDM.next();
+			DifferenceGroup differ = (DifferenceGroup) entryDG.getValue();
+			boolean conflicting = differ.isConflicting();
+			
+			SDDTripleStateEnum automaticState = differ.getAutomaticResolutionState();
+			Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
+			while(iterDIF.hasNext()){
+				Entry<String, Difference> entryDF = iterDIF.next();
+				//get triple
+				String tripleString = entryDF.getKey();
+				
+				logger.info("tripleString : "+ tripleString);
+				Difference difference = entryDF.getValue();
+				ResolutionState resolutionState = difference.getResolutionState();
+
+				
+				if (ProcessManagement.tripleToString(checkedTriple).equals(tripleString)){
+					
+					if(resolutionState == ResolutionState.RESOLVED){
+						if(!tripleState.equals(automaticState) && !conflicting) {
+							reportResult.decrementCounterDifferencesResolutionChanged();
+							difference.setTripleResolutionState(automaticState);
+						}
+						
+						difference.setResolutionState(ResolutionState.DIFFERENCE);
+						if (conflicting) {
+							difference.setResolutionState(ResolutionState.CONFLICT);
+							if(!tripleState.equals(automaticState)){
+								difference.setTripleResolutionState(automaticState);
+							}
+						}
+					}else{
+						
+						if(resolutionState == ResolutionState.DIFFERENCE && (!tripleState.equals(automaticState))) {
+							reportResult.incrementCounterDifferencesResolutionChanged();
+							difference.setTripleResolutionState(tripleState);
+						}else if (resolutionState == ResolutionState.CONFLICT && (!tripleState.equals(automaticState))){
+							difference.setTripleResolutionState(tripleState);
+						}
+						
+						difference.setResolutionState(ResolutionState.RESOLVED);
+					}
+					
+				}
+				
+				if(difference.getResolutionState().equals(ResolutionState.CONFLICT)){
+					count ++;
+				}
+			}
+		}
+		
+		
+		reportResult.setConflictsNotApproved(count);
+		
+		logger.info("reportresult : "+ reportResult.getConflictsNotApproved());
+		
+		//test ReportResult:
+		logger.info("reportresult count: "+ reportResult.getConflictsNotApproved() + "--" + reportResult.getDifferencesResolutionChanged());
+		// only for test approved difference model
+		Iterator<Entry<String, DifferenceGroup>> iterD = differenceModel.getDifferenceGroups().entrySet().iterator();
+		while(iterD.hasNext()) {
+			Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterD.next();
+			DifferenceGroup differ = (DifferenceGroup) entryDG.getValue();
+			Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
+			while(iterDIF.hasNext()){
+				Entry<String, Difference> entryDF = iterDIF.next();
+				//get triple
+				String tripleString = entryDF.getKey();
+				Difference difference = entryDF.getValue();
+				
+				logger.info("approved difference model: " + tripleString + difference.getTripleResolutionState() + difference.getResolutionState().toString());
+			}
+		}	
+		
+	}
+	
+	/**
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 * ##                                                                                                                                                                      ##
+	 * ## create Report Process : get report result                                                                                                                             ##
+	 * ##                                                                                                                                                                      ##
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 * @throws IOException 
+	 * @throws TemplateException 
+	 */
+	
+	public static String createReportProcess() throws TemplateException, IOException {
+		Map<String, Object> scope = new HashMap<String, Object>();
+		StringWriter sw = new StringWriter();
+		freemarker.template.Template temp = null; 
+		String name = "reportView.ftl";
+		try {  
+            // 通过Freemarker的Configuration读取相应的Ftl  
+            Configuration cfg = new Configuration();  
+            // 设定去哪里读取相应的ftl模板  
+            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
+            // 在模板文件目录中寻找名称为name的模板文件  
+            temp = cfg.getTemplate(name);  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+		String report = null;
+		if(reportResult.getConflictsNotApproved() > 0){
+			report = "es gibt noch Konflikten, die nicht geloest werden";
+		}else {
+			report = "alles ist in Ordnung";
+		}
+		
+		
+		scope.put("report", report);
+		
+		temp.process(scope,sw);		
+		return sw.toString();	
+		
+		
+	}
+	
+	
+	
 	/**
 	 * ##########################################################################################################################################################################
 	 * ##########################################################################################################################################################################
@@ -424,7 +623,92 @@ public class MergingControl {
 	 * ##########################################################################################################################################################################
 	 * ##########################################################################################################################################################################
 	 */
+	/**
+	 * check the reportResult and get the new mergeQuery.
+	 * die difference model is always updated through Ajax
+	 * @throws InternalErrorException 
+	 * 
+	 * @throws IOException 
+	 */
+	
+	public static String updateMergeQueryNew () throws IOException, InternalErrorException {
 		
+		if (reportResult != null) {
+			if (reportResult.getConflictsNotApproved() == 0){
+				
+				// Get the definitions
+				String user = commitModel.getUser();
+				String message = commitModel.getMessage();
+				String graphName = commitModel.getGraphName();
+				String sdd = commitModel.getSddName();
+				
+				String mergeQuery = null;
+				if (reportResult.getDifferencesResolutionChanged() > 0) {
+					
+					//create Triples
+					// Get the whole dataset
+					Model wholeContentModel = ProcessManagement.getWholeContentOfRevision(graphName, revisionNumberBranchB);
+					logger.debug("Whole model as N-Triples: \n" + ProcessManagement.writeJenaModelToNTriplesString(wholeContentModel));
+					
+					logger.info("whole model: " + ProcessManagement.writeJenaModelToNTriplesString(wholeContentModel));
+
+					// Update dataset with local data
+					ArrayList<String> list = ProcessManagement.getAllTriplesDividedIntoInsertAndDelete(differenceModel, wholeContentModel);
+					
+					logger.debug("INSERT: \n" + list.get(0));
+					logger.debug("DELETE: \n" + list.get(1));
+					
+					logger.info("insert Triple: "+list.get(0));
+					logger.info("delete Triple: "+list.get(1));
+
+					
+					String updateQueryInsert = String.format(
+							  "INSERT DATA { %n"
+							+ "	%s %n"
+							+ "}", list.get(0));
+					UpdateAction.parseExecute(updateQueryInsert, wholeContentModel);
+					
+					String updateQueryDelete = String.format(
+							  "DELETE DATA { %n"
+							+ " %s %n"
+							+ "}", list.get(1));
+					UpdateAction.parseExecute(updateQueryDelete, wholeContentModel);
+					
+					String triples = ProcessManagement.writeJenaModelToNTriplesString(wholeContentModel);
+					logger.debug("Updated model as N-Triples: \n" + triples); 
+					
+					logger.info("updated whole model: "+ triples);
+					// Execute MERGE MANUAL query
+					mergeQuery = ProcessManagement.createMergeQuery(graphName, sdd, user, message, MergeQueryTypeEnum.MANUAL, revisionNumberBranchA, revisionNumberBranchB, triples);
+					logger.info("manualmergeQuery:"+mergeQuery);
+					
+					
+				}else{
+					
+					String triples = ProcessManagement.getTriplesOfMergeWithQuery(differenceModel);
+					// Execute MERGE WITH query
+					mergeQuery = ProcessManagement.createMergeQuery(graphName, sdd, user, message, MergeQueryTypeEnum.WITH, revisionNumberBranchA, revisionNumberBranchB, triples);
+					logger.info("withmergeQuery:"+mergeQuery);
+				}
+				
+				return mergeQuery;
+				
+			}else {
+				logger.info("there is still conflict");
+				return "there is still conflict";
+			}
+		}
+		
+		logger.info("reportResult is null");
+		return "reportResult is null";
+		
+	}
+	
+	
+	
+		
+	
+	
 	/**
 	 * Push the changes to the remote repository.
 	 * @param triplesId id of triples, what als added in end version selected
@@ -434,6 +718,7 @@ public class MergingControl {
 	 */
 	
 	public static String updateMergeQuery (String triplesId) throws IOException, InternalErrorException {
+		//update DifferenceModel by triples id 
 		updateDifferenceModel(triplesId);
 		String user = commitModel.getUser();
 		String message = commitModel.getMessage();
@@ -504,8 +789,9 @@ public class MergingControl {
 				
 				logger.info("tripleString : "+ tripleString);
 				Difference difference = entryDF.getValue();
-				difference.setResolutionState(ResolutionState.RESOLVED);
+				
 				difference.setTripleResolutionState(SDDTripleStateEnum.DELETED);
+				
 				logger.info("test:" + difference.getTripleResolutionState().toString());
 				for (String id : idArray) {
 					logger.info("tripleId: "+ id);
@@ -521,7 +807,7 @@ public class MergingControl {
 			}
 		}
  			
-		
+		// only for test updated difference model
 		Iterator<Entry<String, DifferenceGroup>> iterD = differenceModel.getDifferenceGroups().entrySet().iterator();
 		while(iterD.hasNext()) {
 			Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterD.next();

@@ -59,6 +59,12 @@ public class ReportResult {
 		differencesResolutionChanged++;
 	}
 	
+	/**
+	 * decrement the number of manually changed difference resolution states.
+	 */
+	public void decrementCounterDifferencesResolutionChanged() {
+		differencesResolutionChanged--;
+	}
 	
 	/**
 	 * Set the number of manually changed difference resolution states.

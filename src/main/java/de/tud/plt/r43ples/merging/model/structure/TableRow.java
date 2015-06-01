@@ -16,9 +16,10 @@ public class TableRow {
 	String revisionB;
 	String conflicting;
 	String resolutionState;
+	String state;
 	
 	public TableRow(Triple triple, String subject, String predicate, String object, String stateA, 
-			String stateB, String revisionA, String revisionB, String conflicting, String resolutionState){
+			String stateB, String revisionA, String revisionB, String conflicting, String resolutionState,String state){
 		this.triple = triple;
 		this.subject = subject;
 		this.object = object;
@@ -29,6 +30,7 @@ public class TableRow {
 		this.revisionB = revisionB;
 		this.conflicting = conflicting;	
 		this.resolutionState = resolutionState;
+		this.state =state;
 	}
 
 	public String getTripleId() {
@@ -118,4 +120,12 @@ public class TableRow {
 	public void setResolutionState(String resolutionState) {
 		this.resolutionState = resolutionState;
 	}	
+	
+	public void setState(String state){
+		this.state = state;
+	}
+	
+	public String getState(){
+		return this.state;
+	}
 }

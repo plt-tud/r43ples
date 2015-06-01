@@ -231,7 +231,22 @@
               $("#left").show();
               $("#right").removeClass();
               $("#right").addClass("large-9 columns");
-              $("#tripleView").show();
+              //updated tripleView
+              $("#tripleView").children().remove();
+              $("#tripleView").load("tripleView",function(){
+                $("#tripleView").show();
+                
+                $("#tripleTable :button").each(function (){
+                   if($(this).text() == "Approved") {
+                      $(this).parent().prev().children().prop({"disabled":true});
+                      $(this).parent().parent().css('background','green');
+                   }else{
+                      $(this).parent().prev().children().prop({"disabled":false});
+                      $(this).parent().parent().css('background','white');
+                   }
+                });
+
+              });
 
             //  $("#right").css("width", "");
 
@@ -261,6 +276,7 @@
               $("#highLevelView").load("highLevelView", function(){
                 $("#highLevelView").show();
       //          window.location.href = "#";
+
               });
 
             });
@@ -289,19 +305,94 @@
                   function(data, status){
                     $("#tripleTable").empty();
                     $("#tripleTable").prepend(data);
+                    $("#tripleTable :button").each(function (){
+                       if($(this).text() == "Approved") {
+                          $(this).parent().prev().children().prop({"disabled":true});
+                          $(this).parent().parent().css('background','green');
+                       }else{
+                          $(this).parent().prev().children().prop({"disabled":false});
+                          $(this).parent().parent().css('background','white');
+                       }
+                    });
+                            
+
                   }); 
                 
             });
 
 
             //Table row clicked, color change
-            $("#tripleTable").find("tr").click(function() {
-              if(this.style.background == "" || this.style.background =="white") {
-                  $(this).css('background', 'green');
+            // $("#tripleTable").find("tr").click(function() {
+            //   if(this.style.background == "" || this.style.background =="white") {
+            //       $(this).css('background', 'green');
+            //   }
+            //   else {
+            //       $(this).css('background', 'white');
+            //   }
+            // });
+
+            $("#tripleTable :button").click(function(){
+              var box = $(this).parent().prev().children();
+              var id = box.val();
+              var isChecked;
+              alert(box.is(':checked'));
+              if(box.is(':checked')){
+                //triple added
+                isChecked = 1;
+              }else{
+                //triple deleted
+                isChecked = 0;
               }
-              else {
-                  $(this).css('background', 'white');
+
+              if(box.attr("disabled")){
+                box.prop({"disabled":false});
+                $(this).parent().parent().css('background','white');
+                $(this).text("Confirm");
+              }else{
+                box.prop({"disabled":true});
+                $(this).parent().parent().css('background','green');
+                $(this).text("Approved");
               }
+              
+              $.post("approveProcess",
+                  {
+                    id: id,
+                    isChecked: isChecked
+                  }
+              );
+
+            });
+
+            $("#allSelect").click(function(){
+              $("#tripleTable input[name='options']").each(function(){
+                var id = $(this).val();
+                var isChecked;
+
+                if($(this).is(':checked')){
+                  //triple added
+                  isChecked = 1;
+                }else{
+                  //triple deleted
+                  isChecked = 0;
+                }
+
+                if($(this).attr("disabled")){
+                  // $(this).prop({"disabled":false});
+                  // $(this).parent().parent().css('background','white');
+                }else{
+                  $(this).prop({"disabled":true});
+                  $(this).parent().parent().css('background','green');
+                  $(this).parent().next().children().text("Approved");
+                  $.post("approveProcess",
+                    {
+                      id: id,
+                      isChecked: isChecked
+                    }
+                  );
+                }
+
+              });
+
             });
 
 
@@ -325,7 +416,7 @@
                       <ul class="button-group radius left" style="margin-top:16px">
                         <li><a href="merging" class="button tiny">New Merge</a></li>
                         <!--click push to push Triple and resolution state-->
-                        <li><a href ="#"><button id="push" class="button tiny">Push</button></a></li>
+                        <li><a href ="reportProcess"><button id="Report" class="button tiny">Report</button></a></li>
                     <!--    <li><a href="#" class="button tiny">Push</a></li> -->
                       </ul>
                 </div>
@@ -500,12 +591,8 @@
                 <div id="tripleView">
                 <fieldset style="padding-bottom:0px;padding-top:0px;margin-bottom:6px">
                     <legend><strong>Resolution</strong></legend>
-                      <div class="button-bar" >
-                        <ul class="button-group right">
-                          <li><a href="#" class="tiny button radius" style="margin-bottom:0px;">Approve selected</a></li>
-                          <li><a href="#" class="tiny button radius" style="margin-bottom:0px;">select all</a></li>
-                        </ul>
-                      </div>
+                      <div id="allSelect" class="columns large-2 push-10"><button type="button" class="button tiny expand radius">Approve All</button></div>
+
                       <hr style="margin:8px;"/>
                       <div class = "parentTbl">
                         <table  style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">
@@ -517,10 +604,11 @@
                                     <th style = "width:12%">Subject</th>
                                     <th style = "width:12%">Predicate</th>
                                     <th style = "width:12%">Object</th>
-                                    <th style = "width:20%">State B1</th>
-                                    <th style = "width:20%">State B2</th>
-                                    <th style = "width:12%">Conflicting</th>
-                                    <th style = "width:12%">Resolution State</th>
+                                    <th style = "width:18%">State B1</th>
+                                    <th style = "width:18%">State B2</th>
+                                    <th style = "width:9%">Conflicting</th>
+                                    <th style = "width:9%">Resolution State</th>
+                                    <th style = "width:10%">Approve</th>
                                   </tr>
                                 </table>
                               </div>
@@ -531,36 +619,43 @@
                               <div id = "tripleTable" class="scrollData childTbl">
                                 <table style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">
 
-                                  <#list tableRowList as row>
+                                  <#list tableRowList as row>               
                                     <tr>
                                       <td style = "width:12%">${row.subject} </td>
                                       <td style = "width:12%">${row.predicate}</td>
                                       <td style = "width:12%">${row.object}</td>
-                                      <td style = "width:20%">${row.stateA} (${row.revisionA!"  "})</td>
-                                      <td style = "width:20%">${row.stateB} (${row.revisionB!"  "})</td>
+                                      <td style = "width:18%">${row.stateA} (${row.revisionA!"  "})</td>
+                                      <td style = "width:18%">${row.stateB} (${row.revisionB!"  "})</td>
                                       <#if row.conflicting == "1">
-                                        <td style = "width:12%;text-align: center;"><a><img src="/static/images/Conflict.png"/></a></td>
+                                        <td style = "width:9%;text-align: center;"><a><img src="/static/images/Conflict.png"/></a></td>
                                       <#else>
-                                        <td style = "width:12%;text-align: center;"><a><img src="/static/images/Difference.png"/></a></td>
+                                        <td style = "width:9%;text-align: center;"><a><img src="/static/images/Difference.png"/></a></td>
                                       </#if>
 
                                       <#if row.resolutionState == "ADDED">
-                                      <td style = "width:12% ;text-align: center;"><input type="checkbox" id ="opt" name="options" checked value=${row.tripleId}>
+                                      <td style = "width:9% ;text-align: center;"><input type="checkbox" id ="opt" name="options" checked value=${row.tripleId}>
                                       </td>
                                       <#else>
-                                      <td style = "width:12% ;text-align: center;"><input type="checkbox" id ="opt" name="options" value=${row.tripleId}>
+                                      <td style = "width:9% ;text-align: center;"><input type="checkbox" id ="opt" name="options" value=${row.tripleId}>
                                       </td>
+                                      </#if>
+
+                                      <#if row.state == "RESOLVED">
+                                        <td><button type="button" class="button tiny expand radius" >Approved</button></td>
+                                      <#else>
+                                        <td><button type="button" class="button tiny expand radius" >Confirm</button></td>
                                       </#if>
                                     </tr>
                                   </#list>   
                         
                                 </table>
+
                               </div>
                             </td>
                           </tr>
                         </table>
                       </div>
-                     
+
                       <!--data table by DataTable.js-->
                   <!--<table id="example"  style="width:100%; ">
                           <thead >

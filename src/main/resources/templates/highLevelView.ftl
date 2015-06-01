@@ -14,12 +14,7 @@
         
         <fieldset style="padding-bottom:0px;padding-top:0px;margin-bottom:6px">
             <legend><strong>Resolution</strong></legend>
-              <div class="button-bar" >
-                <ul class="button-group right">
-                  <li><a href="#" class="tiny button radius" style="margin-bottom:0px;">Approve selected</a></li>
-                  <li><a href="#" class="tiny button radius" style="margin-bottom:0px;">select all</a></li>
-                </ul>
-              </div>
+              <div id="allSelect" class="columns large-2 push-10"><button type="button" class="button tiny expand radius" onclick="'">Approve All</button></div>
               <hr style="margin:8px;"/>
               <div class = "parentTbl">
                 <table  style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">

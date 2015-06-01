@@ -438,6 +438,89 @@ public class Endpoint {
 
 	}	
 	
+	@Path("approveProcess")
+	@POST
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final void approvePOST(@HeaderParam("Accept") final String formatHeader, @FormParam("isChecked") @DefaultValue("") final String isChecked,
+			@FormParam("id") @DefaultValue("") final String id) throws IOException, InternalErrorException {
+		logger.info("approve test: "+id);
+		logger.info("isChecked: " + isChecked);
+		MergingControl.approveToDifferenceModel(id, isChecked);
+		
+		
+	}
+	
+	
+	/**push check : coflict approved check , difference approved change check
+	 * reportResult create
+	 * save the triplesId in checkbox
+	 * todo 
+	 * @throws TemplateException */
+	
+	
+	@Path("reportProcess")
+	@GET
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final Response reportGET() throws IOException, InternalErrorException, TemplateException {
+		
+		ResponseBuilder response = Response.ok();
+		
+		response.entity(MergingControl.createReportProcess());
+	
+		return response.build();
+
+	}	
+
+	
+	/**neue push process with report view
+	 * @throws TemplateException 
+	 * @throws ConfigurationException */
+	@Path("pushProcessNew")
+	@GET
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final Response pushReportGET() throws IOException, InternalErrorException, ConfigurationException, TemplateException {
+		
+		ResponseBuilder response = Response.ok();
+		
+		Response responsePost = null;
+
+		String mergeQuery = MergingControl.updateMergeQueryNew();
+		
+		String userCommit = null;
+		Matcher userMatcher = patternUser.matcher(mergeQuery);
+		logger.info("yxy test mergeQuery:"+mergeQuery);
+		if (userMatcher.find()) {
+			userCommit = userMatcher.group("user");
+			mergeQuery = userMatcher.replaceAll("");
+		}
+		String messageCommit = null;
+		Matcher messageMatcher = patternCommitMessage.matcher(mergeQuery);
+		if (messageMatcher.find()) {
+			messageCommit = messageMatcher.group("message");
+			mergeQuery = messageMatcher.replaceAll("");
+		}
+		
+		logger.info("yxy test mergeQuery nach verarbeit:"+mergeQuery);
+
+		if (patternMergeQuery.matcher(mergeQuery).find()) {
+			responsePost= getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
+			logger.info("yxy get Post"+responsePost.toString());	
+		}
+			
+
+//		logger.info("Inhalt von Response Entity:"+responsePost.getEntity().toString());	
+			
+		//MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
+		
+
+		response.entity(MergingControl.getUpdatedViewHtmlOutput());
+		return response.build();
+
+	}	
+	
+	
+	
+	/**alter push process without reportview*/
 	@Path("pushProcess")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
@@ -505,7 +588,7 @@ public class Endpoint {
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response filterPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("properties") @DefaultValue("") final String properties) throws TemplateException, IOException {
+			@FormParam("properties") @DefaultValue("") final String properties) throws TemplateException, IOException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
 		logger.info("format_header"+ formatHeader);
@@ -547,6 +630,24 @@ public class Endpoint {
 		return response.build();
 
 	}
+	
+	
+	/**load updated triple View
+	 * todo 
+	 * @throws ConfigurationException */
+	
+	@Path("tripleView")
+	@GET
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final Response tripleViewGET() throws TemplateException, IOException, ConfigurationException {
+		
+		ResponseBuilder response = Response.ok();
+
+		response.entity(MergingControl.getTripleView());
+		return response.build();
+
+	}
+	
 	
 	/**load High Level Change Table View */
 	

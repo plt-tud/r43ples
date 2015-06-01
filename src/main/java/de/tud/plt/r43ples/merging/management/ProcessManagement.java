@@ -408,6 +408,42 @@ public class ProcessManagement {
 		}
 	}
 	
+	/**
+	 * Get the triples of the MERGE WITH query.
+	 * 
+	 * @param differenceModel the difference model
+	 * @return the triples of the MERGE WITH query
+	 */
+	public static String getTriplesOfMergeWithQuery(DifferenceModel differenceModel) {
+		
+		// Contains all triples to add
+		String triples = "";
+		
+		// Iterate over all difference groups
+		Iterator<String> iteDifferenceGroupNames = differenceModel.getDifferenceGroups().keySet().iterator();
+		while (iteDifferenceGroupNames.hasNext()) {
+			String differenceGroupName = iteDifferenceGroupNames.next();
+			DifferenceGroup differenceGroup = differenceModel.getDifferenceGroups().get(differenceGroupName);
+			if (differenceGroup.isConflicting()) {
+				// Iterate over all difference of current conflicting difference group
+				Iterator<String> iteDifferenceNames = differenceGroup.getDifferences().keySet().iterator();
+				while (iteDifferenceNames.hasNext()) {
+					String currentDifferenceName = iteDifferenceNames.next();
+					Difference difference = differenceGroup.getDifferences().get(currentDifferenceName);
+
+					if (difference.getTripleResolutionState().equals(SDDTripleStateEnum.ADDED)) {
+						String triple = tripleToString(difference.getTriple());						
+						triples += triple + "\n";
+					}
+				}
+			}
+		}
+
+		return triples;
+	}
+	
+	
+	
 	/**save the current version numbers 
 	 * todo ?*/
 
@@ -635,7 +671,7 @@ public class ProcessManagement {
 				}
 				if(status == true){
 					updatedTripleRowList.add(new TableRow(triple, subject, predicate, object, "--", 
-	                        "--", "--", "--", "--", "--"));
+	                        "--", "--", "--", "--", "--","--"));
 				}
 			}
 			return updatedTripleRowList;
@@ -667,7 +703,7 @@ public class ProcessManagement {
 				
 				if(status == true){
 					updatedTripleRowList.add(new TableRow(triple, subject, predicate, object, "--", 
-	                        "--", "--", "--", "--", "--"));
+	                        "--", "--", "--", "--", "--","--"));
 				}
 				
 			}
@@ -945,6 +981,8 @@ public class ProcessManagement {
 				//get triple
 				Triple triple = entryDF.getValue().getTriple();
 				
+				ResolutionState resolutionState = entryDF.getValue().getResolutionState();
+				
 				SDDTripleStateEnum autoResolutionState = entryDF.getValue().getTripleResolutionState();
 				
 				String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(triple));
@@ -956,7 +994,7 @@ public class ProcessManagement {
 				
 				//read each TableRow
 				tableModel.readTableRow(new TableRow(triple, subject, predicate, object, stateA.toString(), 
-			                            stateB.toString(), revisionA, revisionB, conflicting, autoResolutionState.toString()));
+			                            stateB.toString(), revisionA, revisionB, conflicting, autoResolutionState.toString(),resolutionState.toString()));
 				logger.info("State Test"+ autoResolutionState.toString());
 													
 			}			
