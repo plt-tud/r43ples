@@ -30,15 +30,15 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="6.0350311"
-     inkscape:cx="41.921906"
+     inkscape:cx="103.20793"
      inkscape:cy="56.2771"
      inkscape:document-units="px"
-     inkscape:current-layer="layer9"
+     inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1920"
-     inkscape:window-height="1180"
-     inkscape:window-x="1918"
-     inkscape:window-y="-3"
+     inkscape:window-height="1171"
+     inkscape:window-x="1916"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      fit-margin-top="5"
      fit-margin-left="5"
@@ -271,17 +271,16 @@
        id="text7898-0-7"
        y="94.288399"
        x="96.327415"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18px;line-height:125%;font-family:'Univers 55';-inkscape-font-specification:'Univers 55,';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;display:inline;fill:#8f253c;fill-opacity:1;stroke:none;enable-background:new"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18px;line-height:125%;font-family:'Univers 55';-inkscape-font-specification:'Univers 55,';text-align:start;letter-spacing:-1.86px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;display:inline;fill:#8f253c;fill-opacity:1;stroke:none;enable-background:new;"
        xml:space="preserve"><tspan
          y="94.288399"
          x="96.327415"
          id="tspan7900-4-4"
          sodipodi:role="line">R<tspan
    id="tspan5170"
-   style="font-size:64.99999762%;baseline-shift:super">*</tspan><tspan
-   dx="-6"
+   style="font-size:64.99999762%;baseline-shift:super;letter-spacing:-1.86px;">*</tspan><tspan
    id="tspan6500-3"
-   style="font-size:65.00091553%;letter-spacing:-1.86000001px;baseline-shift:sub">b</tspan></tspan></text>
+   style="font-size:65.00091553%;letter-spacing:-1.86px;baseline-shift:sub;">f</tspan></tspan></text>
   </g>
   <g
      style="display:inline"
@@ -777,9 +776,7 @@
          id="tspan7900"
          sodipodi:role="line">R<tspan
    id="tspan6498"
-   style="font-size:65.00091553%;baseline-shift:sub">a</tspan><tspan
-   style="font-size:65.00091553%;baseline-shift:sub"
-   id="tspan5683" /></tspan></text>
+   style="font-size:65.00091553%;baseline-shift:sub">q</tspan></tspan></text>
     <text
        sodipodi:linespacing="125%"
        id="text7898-0"
@@ -792,7 +789,7 @@
          id="tspan7900-4"
          sodipodi:role="line">R<tspan
    id="tspan6500"
-   style="font-size:65.00091553%;baseline-shift:sub">b</tspan></tspan></text>
+   style="font-size:65.00091553%;baseline-shift:sub">f</tspan></tspan></text>
   </g>
   <g
      style="display:none"

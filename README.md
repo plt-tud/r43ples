@@ -65,19 +65,6 @@ There is a configuration file named *resources/r43ples.conf*. The most important
 * *service.port* - port which should provide R43ples
 * *service.path* - path of host which should provide R43ples
 
-R43ples can be attached to different triplestores which need specific parameters specified in the configuration file:
-    
-* Jena TDB
-    * *jena.tdb.directory* (database/dataset)
-* Virtuoso via JDBC
-    * *virtuoso.url* (jdbc:virtuoso://localhost:1111)
-    * *virtuoso.user* (dba)
-    * *virtuoso.password* (dba)
-* HTTP SPARQL endpoint interface (succesfully tested against StarDog)
-    * *http.url* (http://localhost:5820/myDB/query)
-    * *http.user* (admin)
-    * *http.password* (admin)
-
 The logging configuration is stored in *resources/log4j.properties*
 
 
