@@ -36,11 +36,11 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
  * @author Markus Graube
  *
  */
-public class HttpInterface extends TripleStoreInterface {
+public class VirtuosoHttpInterface extends TripleStoreInterface {
 
 	private static UsernamePasswordCredentials credentials;
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(HttpInterface.class);
+	private static Logger logger = Logger.getLogger(VirtuosoHttpInterface.class);
 	private static String endpoint;
 
 
@@ -55,7 +55,7 @@ public class HttpInterface extends TripleStoreInterface {
 	 * @param sparql_password
 	 * 			password which should be used for authentication
 	 */
-	public HttpInterface(String sparql_endpoint, String sparql_username, String sparql_password) {
+	public VirtuosoHttpInterface(String sparql_endpoint, String sparql_username, String sparql_password) {
 		credentials = new UsernamePasswordCredentials(sparql_username, sparql_password);
 		endpoint = sparql_endpoint;		
 	}
@@ -169,7 +169,7 @@ public class HttpInterface extends TripleStoreInterface {
 
 	@Override
 	public boolean executeAskQuery(String askQueryString) {
-		InputStream result = executeQueryWithAuthorization(askQueryString, "text/boolean");
+		InputStream result = executeQueryWithAuthorization(askQueryString, "application/sparql-results+xml");
 		String answer;
 		try {
 			answer = IOUtils.toString(result);

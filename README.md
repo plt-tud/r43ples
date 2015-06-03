@@ -55,10 +55,15 @@ Configuration
 -------------
 There is a configuration file named *resources/r43ples.conf*. The most important ones are the following:
 
-* *service.port* - port under which R43ples provides its services
-* *service.uri* - URI under which R43ples provides its services
+* *triplestore.type* - type of attached triplestore (can be tdb, virtuoso, http or http_virtuoso)
+* *triplestore.uri* - URI or path under which R43ples can access the attached triplestore
+* *triplestore.user* - user of attached triplestore if necessary
+* *triplestore.password* - password of attached triplestore if necessary
 * *revision.graph* - named graph which is used by R43ples to store revision graph information
 * *sdd.graph* - named graph for storing the SDD
+* *service.host* - host which provides R43ples
+* *service.port* - port which should provide R43ples
+* *service.path* - path of host which should provide R43ples
 
 R43ples can be attached to different triplestores which need specific parameters specified in the configuration file:
     

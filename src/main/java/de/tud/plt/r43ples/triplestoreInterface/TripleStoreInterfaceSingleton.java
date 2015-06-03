@@ -26,12 +26,14 @@ public class TripleStoreInterfaceSingleton {
 		if (triplestore!=null)
 			return triplestore;
 		else {
-			if (Config.jena_tdb_directory != null)
-				triplestore = createJenaTDBInterface(Config.jena_tdb_directory);
-			else if (Config.virtuoso_url != null)
-				triplestore = createVirtuosoInterface(Config.virtuoso_url, Config.virtuoso_user, Config.virtuoso_password);
-			else if (Config.http_url != null)
-				triplestore = createHttpInterface(Config.http_url, Config.http_user, Config.http_password);
+			if (Config.triplestore_type.equals("tdb"))
+				triplestore = createJenaTDBInterface(Config.triplestore_url);
+			else if (Config.triplestore_type.equals("virtuoso"))
+				triplestore = createVirtuosoInterface(Config.triplestore_url, Config.triplestore_user, Config.triplestore_password);
+			else if (Config.triplestore_type.equals("http"))
+				triplestore = createHttpInterface(Config.triplestore_url, Config.triplestore_user, Config.triplestore_password);
+			else if (Config.triplestore_type.equals("http_virtuoso"))
+				triplestore = createVirtuosoHttpInterface(Config.triplestore_url, Config.triplestore_user, Config.triplestore_password);
 			else {
 				logger.error("No database specified in config");
 				System.exit(1);
@@ -63,6 +65,15 @@ public class TripleStoreInterfaceSingleton {
 	public static TripleStoreInterface createHttpInterface(String http_url, String http_user, String http_password) {
 		if (triplestore==null) {
 			triplestore = new HttpInterface(http_url, http_user, http_password);
+			return triplestore;
+		}
+		else
+			return null;
+	}
+	
+	public static TripleStoreInterface createVirtuosoHttpInterface(String http_url, String http_user, String http_password) {
+		if (triplestore==null) {
+			triplestore = new VirtuosoHttpInterface(http_url, http_user, http_password);
 			return triplestore;
 		}
 		else

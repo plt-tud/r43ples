@@ -16,18 +16,13 @@ import org.apache.log4j.Logger;
 public class Config {
 
 	// Database settings
-	// Jena
-	public static String jena_tdb_directory;
 	
-	// Virtuoso
-	public static String virtuoso_url;
-	public static String virtuoso_user;
-	public static String virtuoso_password;
+	// tdb, virtuoso, http_virtuoso, http
+	public static String triplestore_type;
+	public static String triplestore_url;
+	public static String triplestore_user;
+	public static String triplestore_password;
 	
-	// HTTP
-	public static String http_url;
-	public static String http_user;
-	public static String http_password;
 	
 	// Service settings
 	/** The service host. **/
@@ -66,15 +61,10 @@ public class Config {
 		try {
 			config = new PropertiesConfiguration(configFilePath);
 			
-			jena_tdb_directory = config.getString("jena.tdb.directory");
-			
-			virtuoso_url = config.getString("virtuoso.url");
-			virtuoso_user = config.getString("virtuoso.user");
-			virtuoso_password = config.getString("virtuoso.password");
-			
-			http_url = config.getString("http.url");
-			http_user = config.getString("http.user");
-			http_password = config.getString("http.password");
+			triplestore_type = config.getString("triplestore.type");
+			triplestore_url = config.getString("triplestore.url");
+			triplestore_user = config.getString("triplestore.user");
+			triplestore_password = config.getString("triplestore.password");
 			
 			service_host = config.getString("service.host");
 			service_port = config.getInt("service.port");

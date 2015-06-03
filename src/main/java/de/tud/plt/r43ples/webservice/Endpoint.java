@@ -394,7 +394,8 @@ public class Endpoint {
 	    StringWriter sw = new StringWriter();
 	    htmlMap.put("graphs", TripleStoreInterfaceSingleton.get().getGraphs());
 	    htmlMap.put("revisionGraph", Config.revision_graph);
-	    htmlMap.put("triplestore", Config.jena_tdb_directory);
+	    htmlMap.put("triplestore_type", Config.triplestore_type);
+	    htmlMap.put("triplestore_url", Config.triplestore_url);
 	    htmlMap.put("sdd_graph", Config.sdd_graph);
 	    htmlMap.put("debug_active", true);
 	    mustache.execute(sw, htmlMap);		
