@@ -59,6 +59,8 @@ public class MergeManagement {
 			  + "SELECT DISTINCT ?revision "
 			  + "WHERE { "
 			  + "    GRAPH <%s> {"
+			  + "        BIND ( <%s> AS ?branch1)"
+			  + "        BIND ( <%s> AS ?branch2)"
 			  + "        ?branch1 prov:wasDerivedFrom+ ?revision ."
 			  + "        ?branch2 prov:wasDerivedFrom+ ?revision ."
 			  + "        FILTER NOT EXISTS {"
@@ -66,8 +68,6 @@ public class MergeManagement {
 			  + "            ?branch1 prov:wasDerivedFrom+ ?next ."
 			  + "            ?branch2 prov:wasDerivedFrom+ ?next ."
 			  + "        }"
-			  + "        FILTER ( ?branch1 = <%s> )"
-			  + "        FILTER ( ?branch2 = <%s> )"
 			  + "    }"
 			  + "}"
 			  + "LIMIT 1",

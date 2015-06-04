@@ -169,7 +169,7 @@ public class VirtuosoHttpInterface extends TripleStoreInterface {
 
 	@Override
 	public boolean executeAskQuery(String askQueryString) {
-		InputStream result = executeQueryWithAuthorization(askQueryString, "application/sparql-results+xml");
+		InputStream result = executeQueryWithAuthorization(askQueryString, "text/plain");
 		String answer;
 		try {
 			answer = IOUtils.toString(result);
