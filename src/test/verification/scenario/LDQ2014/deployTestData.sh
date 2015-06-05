@@ -7,8 +7,8 @@
 DIR=`pwd`/data
 
 # CONFIG_R43PLES="config/r43ples.stardog.conf"
-CONFIG_TDB="../../conf/r43ples.tdb.conf"
-CONFIG_STARDOG="../../conf/r43ples.stardog.conf"
+CONFIG_TDB="conf/r43ples.tdb.conf"
+CONFIG_STARDOG="conf/r43ples.stardog.conf"
 
 CONFIG=$CONFIG_TDB
 
