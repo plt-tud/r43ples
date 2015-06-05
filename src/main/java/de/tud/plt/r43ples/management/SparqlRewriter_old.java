@@ -37,6 +37,7 @@ import de.tud.plt.r43ples.revisionTree.Tree;
 
 /**
  * Rewrites SPARQL queries in order to reflect old revisions.
+ * DOES NOT WORK CORRECTLY RIGHT NOW!
  * 
  * @author Markus Graube
  *
@@ -59,7 +60,7 @@ public class SparqlRewriter_old {
 	// TODO make instance variable
 	private static int statement_i = 0;
 	
-	private static final Pattern pattern = Pattern.compile("FROM\\s*<(?<graph>\\S*)>\\s*REVISION\\s*\"(?<revision>\\S*)\"", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+	private static final Pattern pattern = Pattern.compile("(GRAPH|FROM)\\s*<(?<graph>\\S*)>\\s*REVISION\\s*\"(?<revision>\\S*)\"", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
 
 	
 	
