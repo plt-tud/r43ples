@@ -149,30 +149,21 @@
 <div>
 			<h3>Select Query</h3>
 			<pre>SELECT * 
-FROM &lt;http://test.com/r43ples-dataset-1&gt; REVISION "3"
-WHERE {
-	?s ?p ?o. 
-}</pre>
-</div>
-
-<div>
-			<h3>Select Query II</h3>
-			<pre>SELECT * 
 WHERE {
   GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "3" {
-    ?s ?p ?o.
-  } 
+	?s ?p ?o. 
+  }
 }</pre>
 </div>
 
 <div>
 			<h3>Select Query - Multiple Graphs</h3>
 			<pre>OPTION r43ples:SPARQL_JOIN
+# Find all triples that are both in revision 2 and in the master revision
 SELECT ?s ?p ?o 
-FROM &lt;http://test.com/r43ples-dataset-1&gt; REVISION "master"
-FROM &lt;http://test.com/r43ples-dataset-2&gt; REVISION "2"
 WHERE {
-  ?s ?p ?o. 
+  GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "master" { ?s ?p ?o. }
+  GRAPH &lt;http://test.com/r43ples-dataset-2&gt; REVISION "2" { ?s ?p ?o. } 
 }</pre>
 </div>
 

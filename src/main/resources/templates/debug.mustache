@@ -30,9 +30,10 @@ WHERE {
 		<h2>Debug information</h2>
 		<h3>Configuration</h3>
 		<ul>
+			<li>Version: {{#version}}Version: {{toString}}{{/version}}{{^version}}Git: {{git.commitIdAbbrev}} - {{git.branch}}{{/version}}</li>
+			<li>Triplestore: <samp>{{triplestore_type}} - {{triplestore_url}}</samp></li>
 			<li>Revision Graph: <samp>{{revisionGraph}}</samp></li>
 			<li>SDD Graph: <samp>{{sdd_graph}}</samp></li>
-			<li>Triplestore: <samp>{{triplestore_type}} - {{triplestore_url}}</samp></li>
 		</ul>
 		<h3>Existing graphs in triplestore</h3>
 		<ul>
