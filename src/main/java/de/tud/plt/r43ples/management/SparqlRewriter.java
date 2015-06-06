@@ -69,6 +69,8 @@ public class SparqlRewriter {
 	private LinkedList<String> graphs = new LinkedList<String>();
 	private ExprList expression_list_revision_path = new ExprList();
 	private Expr last_revision;
+	private String revisionNumber;
+	private String graphName; 
 	
 	public static String rewriteQuery(final String query_r43ples) {
 		SparqlRewriter sr = new SparqlRewriter(query_r43ples);
@@ -83,17 +85,17 @@ public class SparqlRewriter {
 		System.out.println(result);
 		
 		
-		query = "SELECT * WHERE { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"1\" { ?s ?p ?o.} FILTER (?s=?p)}";
+		query = "SELECT * WHERE { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"2\" { ?s ?p ?o.} FILTER (?s=?p)}";
 		result = rewriteQuery(query);
 		System.out.println(result);
 		
-		query = "SELECT * WHERE { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"1\" { ?s ?p ?o; ?p2 ?o2. FILTER (?o=?o2)}}";
+		query = "SELECT * WHERE { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"2\" { ?s ?p ?o; ?p2 ?o2. FILTER (?o=?o2)}}";
 		result = rewriteQuery(query);
 		System.out.println(result);
 		
 		
 		query = "SELECT * WHERE { "
-				+ " GRAPH <http://test.com/r43ples-dataset-1> REVISION \"1\" { ?s ?p ?o}"
+				+ " GRAPH <http://test.com/r43ples-dataset-1> REVISION \"2\" { ?s ?p ?o}"
 				+ " GRAPH <http://test.com/r43ples-dataset-1> { ?s ?p2 ?o2}"
 				+ "}";
 		result = rewriteQuery(query);
@@ -123,33 +125,39 @@ public class SparqlRewriter {
 		return query_rewritten;
 	}
 	
-	private void updateRevision(){
-		String revisionNumber = revisions.removeFirst();
-		String graphName = graphs.removeFirst();
-		Tree tree =  new Tree(graphName);
-		LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
-		logger.debug("Path to revision: " + list.toString());
-		last_revision = ExprUtils.nodeToExpr(NodeFactory.createURI(list.get(0).getRevisionUri()));
-		list.removeLast();
-		for (Revision ns : list) {
-			expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(ns.getRevisionUri())));
+	/** updates last_revision and expression_list_revision_path by pulling first item of revisionNumber and graphName
+	 * 
+	 * @return false if revisionNumber is still a branch, otherwise true
+	 */
+	private boolean updateRevision(){
+		revisionNumber = revisions.removeFirst();
+		graphName = graphs.removeFirst();
+		if (RevisionManagement.isBranch(graphName, revisionNumber))
+			return false;
+		else {
+			Tree tree =  new Tree(graphName);
+			LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
+			logger.debug("Path to revision: " + list.toString());
+			last_revision = ExprUtils.nodeToExpr(NodeFactory.createURI(list.get(0).getRevisionUri()));
+			list.removeLast();
+			for (Revision ns : list) {
+				expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(ns.getRevisionUri())));
+			}
+			return true;
 		}
 	}
 	
 	public String rewrite() throws InternalErrorException {
 		final Pattern pattern1 = Pattern.compile("GRAPH\\s*<(?<graph>\\S*)>\\s*\\{", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
 		final Pattern pattern2 = Pattern.compile("GRAPH\\s*<(?<graph>\\S*)>\\s*REVISION\\s*\"(?<revision>\\S*)\"", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
-		
-		
-		
+				
 		
 		Matcher m1 = pattern1.matcher(query_original);
 		String query_sparql = m1.replaceAll("GRAPH <$1> REVISION \"master\" {");
 				
-		
 		Matcher m2 = pattern2.matcher(query_sparql);
 		
-		while (m2. find()) {
+		while (m2.find()) {
 			String graphName = m2.group("graph");
 			String referenceName = m2.group("revision").toLowerCase();
 			
@@ -176,6 +184,7 @@ public class SparqlRewriter {
 		return query_sparql;
 	}
 
+	
 	/**
 	 * @param expression_list_revision_path
 	 * @param branch
@@ -186,8 +195,18 @@ public class SparqlRewriter {
 		if (el_orginal.getClass().equals(ElementNamedGraph.class)) {
 			ElementNamedGraph ng_original = (ElementNamedGraph) el_orginal;
 			ElementGroup eg_original = (ElementGroup) ng_original.getElement();
-			updateRevision();			
-			return getRewrittenElement(eg_original);
+			if (updateRevision())
+				return getRewrittenElement(eg_original);
+			else {
+				ElementNamedGraph ng_new;
+				try {
+					ng_new = new ElementNamedGraph(NodeFactory.createURI(RevisionManagement.getReferenceGraph(graphName, revisionNumber)), eg_original);
+					return ng_new;
+				} catch (InternalErrorException e) {
+					e.printStackTrace();
+					return null;
+				}
+			}
 		} 
 		else if (el_orginal.getClass().equals(ElementGroup.class)) {
 			ElementGroup elementgroup = (ElementGroup) el_orginal;
