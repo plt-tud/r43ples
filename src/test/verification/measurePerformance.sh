@@ -1,7 +1,7 @@
 #! /bin/bash
 
 
-RUNS=10
+RUNS=20
 TIMEFORMAT=%R
 
 
@@ -23,7 +23,7 @@ function singleQuery {
 
     {
         time {
-            curl -H "Accept: application/sparql-results+xml" --data "join_option=$MODE&query=$QUERY" $ENDPOINT
+            curl -H "Accept: application/sparql-results+xml" --data "join_option=$MODE&query=$QUERY" $ENDPOINT 
         }
     } 2>>$TIME_FILE
 }
@@ -47,20 +47,20 @@ function singleTest {
 function simple {
     init_log_file
     echo "# Simple scenario" >> $TIME_FILE
-    echo "Revision; Endpoint; Mode; Time" >> $TIME_FILE
+    echo "Revision;Endpoint;Mode;Time" >> $TIME_FILE
     for runs in $(seq $RUNS); do
         for revision in {1..5}; do
-            echo -n "$revision; TDB; off; " >> $TIME_FILE
+            echo -n "$revision;TDB;off;" >> $TIME_FILE
             singleTest $EP_TDB off scenario/simple_r43ples-dataset-1/query.rq $revision
             
-            echo -n "$revision; TDB; new; " >> $TIME_FILE
+            echo -n "$revision;TDB;new;" >> $TIME_FILE
             singleTest $EP_TDB new scenario/simple_r43ples-dataset-1/query.rq $revision
             
-            echo -n "$revision; STARDOG; off; " >> $TIME_FILE
-            singleTest $EP_STARDOG off scenario/simple_r43ples-dataset-1/query.rq $revision
+            #echo -n "$revision;STARDOG;off;" >> $TIME_FILE
+            #singleTest $EP_STARDOG off scenario/simple_r43ples-dataset-1/query.rq $revision
             
-            echo -n "$revision; STARDOG; new; " >> $TIME_FILE
-            singleTest $EP_STARDOG new scenario/simple_r43ples-dataset-1/query.rq $revision
+            #echo -n "$revision;STARDOG;new;" >> $TIME_FILE
+            #singleTest $EP_STARDOG new scenario/simple_r43ples-dataset-1/query.rq $revision
             
         done
         notify-send "R43ples Performance Test" "Run $runs/$RUNS completed"
@@ -87,20 +87,21 @@ function ldqquery {
     CHANGESIZE=$2
     REVISION=$3
     
-    QUERY=`sed -e "s/%%%DATASET%%%/$DATASET/; s/%%%CHANGESIZE%%%/$CHANGESIZE/; s/%%%REV%%%/$REVISION/;" scenario/LDQ2014/query.rq`
-    QUERY_OLD=`sed -e "s/%%%DATASET%%%/$DATASET/; s/%%%CHANGESIZE%%%/$CHANGESIZE/; s/%%%REV%%%/$REVISION/;" scenario/LDQ2014/query-old.rq`
+#     QUERY=`sed -e "s/%%%DATASET%%%/$DATASET/; s/%%%CHANGESIZE%%%/$CHANGESIZE/; s/%%%REV%%%/$REVISION/;" scenario/LDQ2014/query.rq`
+     QUERY=`sed -e "s/%%%DATASET%%%/$DATASET/; s/%%%CHANGESIZE%%%/$CHANGESIZE/; s/%%%REV%%%/$REVISION/;" scenario/LDQ2014/query-individual.rq`
+#     QUERY_OLD=`sed -e "s/%%%DATASET%%%/$DATASET/; s/%%%CHANGESIZE%%%/$CHANGESIZE/; s/%%%REV%%%/$REVISION/;" scenario/LDQ2014/query-old.rq`
     
-    echo -n "$DATASET; $CHANGESIZE; $REVISION; TDB; off; " >> $TIME_FILE
-    singleQuery $EP_TDB off "$QUERY"
-
-    # zu langsam
-#     echo -n "$DATASET; $CHANGESIZE; $REVISION; TDB; new; " >> $TIME_FILE
-#     singleQuery $EP_TDB new "$QUERY"
+#     echo -n "$DATASET;$CHANGESIZE;$REVISION;TDB;off;" >> $TIME_FILE
+#     singleQuery $EP_TDB off "$QUERY"
+# 
+#     # zu langsam
+#      echo -n "$DATASET;$CHANGESIZE;$REVISION;TDB;new;" >> $TIME_FILE
+#      singleQuery $EP_TDB new "$QUERY"
     
-    echo -n "$DATASET; $CHANGESIZE; $REVISION; STARDOG; off; " >> $TIME_FILE
+    echo -n "$DATASET;$CHANGESIZE;$REVISION;STARDOG;off;" >> $TIME_FILE
     singleQuery $EP_STARDOG off "$QUERY"
     
-    echo -n "$DATASET; $CHANGESIZE; $REVISION; STARDOG; new; " >> $TIME_FILE
+    echo -n "$DATASET;$CHANGESIZE;$REVISION;STARDOG;new;" >> $TIME_FILE
     singleQuery $EP_STARDOG new "$QUERY"
 }
 
@@ -108,30 +109,34 @@ function ldqquery {
 function ldq2014 {
     init_log_file
     echo "#LDQ 2014 scenario" >> $TIME_FILE
-    echo "Dataset; Changesize; Revision; Endpoint; Mode; Time" >> $TIME_FILE
+    echo "Dataset;Changesize;Revision;Endpoint;Mode;Time" >> $TIME_FILE
      
     for runs in $(seq $RUNS); do
-        ldqquery 100 50 10
-        ldqquery 1000 50 10
-        ldqquery 10000 50 10
-        ldqquery 100000 50 10
-        ldqquery 1000000 50 10
-
-        ldqquery 10000 10 10
-        ldqquery 10000 30 10
-        ldqquery 10000 70 10
-        ldqquery 10000 90 10
         
-        ldqquery 10000 50 18
-        ldqquery 10000 50 14
-        ldqquery 10000 50 6
-        ldqquery 10000 50 2
+        
+        ldqquery 100 50 12
+        ldqquery 1000 50 12
+        ldqquery 10000 50 12
+        ldqquery 100000 50 12
+        ldqquery 1000000 50 12
+
+        ldqquery 10000 10 12
+        ldqquery 10000 30 12
+        ldqquery 10000 50 12
+        ldqquery 10000 70 12
+        ldqquery 10000 90 12
+        
+        ldqquery 10000 50 21
+        ldqquery 10000 50 20
+        ldqquery 10000 50 16
+        ldqquery 10000 50 8
+        ldqquery 10000 50 4
     done
     
     notify-send -t 0 "R43ples Performance Test" "All Test completed"
 }
 
-simple
+#simple
 ldq2014
 
 # Rscript EvaluatePerformance.R $TIME_FILE

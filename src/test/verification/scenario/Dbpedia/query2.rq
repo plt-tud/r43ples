@@ -1,0 +1,6 @@
+SELECT *
+WHERE {
+    GRAPH <http://dbpedia.org> {
+        <http://dbpedia.org/resource/Germany> ?p ?o
+    }
+}

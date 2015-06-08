@@ -1,0 +1,6 @@
+SELECT ?o 
+WHERE { 
+    GRAPH <http://test.com/benchmark/LDQ2014/dataset-%%%DATASET%%%-%%%CHANGESIZE%%%> REVISION "%%%REV%%%"  {
+        <urn:random:4b67cf4d> <http://simile.mit.edu/2005/03/ontologies/random#links> ?o.
+    }
+}LIMIT 10
