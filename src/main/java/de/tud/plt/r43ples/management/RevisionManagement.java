@@ -141,7 +141,7 @@ public class RevisionManagement {
 	public static String createNewRevision(final String graphName, final String addedAsNTriples,
 			final String removedAsNTriples, final String user, final String commitMessage,
 			final ArrayList<String> usedRevisionNumber) throws InternalErrorException {
-		logger.info("Start creation of new revision!");
+		logger.info("Start creation of new revision for graph " + graphName);
 
 		// General variables
 		String newRevisionNumber = getNextRevisionNumber(graphName, usedRevisionNumber.get(0));
@@ -163,7 +163,7 @@ public class RevisionManagement {
 
 		// Create new graph with delta-added-newRevisionNumber
 		if (addedAsNTriples!=null && !addedAsNTriples.isEmpty()) {
-			logger.info("Create new graph with name " + addSetGraphUri);
+			logger.debug("Create new graph with name " + addSetGraphUri);
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
 				addSetGraphUri));
 			RevisionManagement.executeINSERT(addSetGraphUri, addedAsNTriples);
@@ -171,7 +171,7 @@ public class RevisionManagement {
 
 		// Create new graph with delta-removed-newRevisionNumber
 		if (removedAsNTriples!=null && !removedAsNTriples.isEmpty()) {
-			logger.info("Create new graph with name " + removeSetGraphUri);
+			logger.debug("Create new graph with name " + removeSetGraphUri);
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
 					removeSetGraphUri));
 			RevisionManagement.executeINSERT(removeSetGraphUri, removedAsNTriples);
@@ -276,7 +276,7 @@ public class RevisionManagement {
 				branchName, revisionUri);
 
 		// Execute queries
-		logger.info("Execute all queries updating the revision graph, full graph and change sets");
+		logger.debug("Execute all queries updating the revision graph, full graph and change sets");
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
 	}
 
@@ -344,7 +344,7 @@ public class RevisionManagement {
 	private static void createReference(final String referenceType, final String graphName,
 			final String revisionNumber, final String newReferenceName, final String user,
 			final String message) throws InternalErrorException {
-		logger.info("Start creation of new " + referenceType);
+		logger.info("Create new " + referenceType + " '"+ newReferenceName+"' for graph " + graphName);
 
 		// Check branch existence
 		if (checkReferenceNameExistence(graphName, newReferenceName)) {

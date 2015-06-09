@@ -23,22 +23,18 @@ public abstract class TripleStoreInterface {
 	
 	protected void init() {
 		if (!RevisionManagement.checkGraphExistence(Config.revision_graph)){
-			logger.info("Create revision graph");
+			logger.debug("Create revision graph: "+ Config.revision_graph);
 			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
 	 	}
 		
-		// Create SDD graph
 		if (!RevisionManagement.checkGraphExistence(Config.sdd_graph)){
-			logger.info("Create sdd graph");
-			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
 			// Insert default content into SDD graph
-			logger.info(Config.sdd_graph_defaultContent);
+			logger.info("Create sdd graph from " + Config.sdd_graph_defaultContent);
+			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
+			
 			Model jena_model = JenaModelManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent);
-			
-			logger.info(jena_model);
 			String model = JenaModelManagement.convertJenaModelToNTriple(jena_model);
-			logger.info(model);
-			
+			logger.debug("SDD model: " + model);	
 			RevisionManagement.executeINSERT(Config.sdd_graph, model);
 	 	}		
 	}
