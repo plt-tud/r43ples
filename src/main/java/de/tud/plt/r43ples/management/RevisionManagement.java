@@ -249,7 +249,7 @@ public class RevisionManagement {
 			queryContent.append(String.format("<%s> prov:wasDerivedFrom <%s> .", revisionUri, revUri));
 		}
 		String query = prefixes
-				+ String.format("INSERT DATA { GRAPH <%s> { %s } } ;%n", Config.revision_graph,
+				+ String.format("INSERT DATA { GRAPH <%s> { %s } }", Config.revision_graph,
 						queryContent.toString());
 		
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
@@ -272,7 +272,7 @@ public class RevisionManagement {
 
 		query = prefixes + String.format("DELETE DATA { GRAPH <%s> { <%s> rmo:references <%s>. } };%n",
 				Config.revision_graph, branchName, oldRevisionUri);
-		query += String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:references <%s>. } } ;%n", Config.revision_graph,
+		query += String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:references <%s>. } }", Config.revision_graph,
 				branchName, revisionUri);
 
 		// Execute queries

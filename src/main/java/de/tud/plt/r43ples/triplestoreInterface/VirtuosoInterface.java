@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import virtuoso.jena.driver.VirtGraph;
 import virtuoso.jena.driver.VirtuosoQueryExecution;
 import virtuoso.jena.driver.VirtuosoQueryExecutionFactory;
@@ -16,6 +18,9 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 
 public class VirtuosoInterface extends TripleStoreInterface {
+	
+	/** The logger. **/
+	private static Logger logger = Logger.getLogger(VirtuosoInterface.class);
 
 	private VirtGraph set;
 	
@@ -34,14 +39,7 @@ public class VirtuosoInterface extends TripleStoreInterface {
 	@Override
 	public ResultSet executeSelectQuery(String selectQueryString) {
 		Query query =  QueryFactory.create(selectQueryString);
-//		set.begin(ReadWrite.READ);
-//		QueryExecution vqe = QueryExecutionFactory.create(query, set);
-//		ResultSet result = vqe.execSelect();
-//		set.end();
-//		return result;
-//		Query query =  VirtuosoQueryExecutionFactory.cre QueryFactory.create(selectQueryString);
 		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(query, set);
-//		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(selectQueryString, (VirtGraph) set);
 		return vqe.execSelect();
 		
 	}
@@ -49,27 +47,40 @@ public class VirtuosoInterface extends TripleStoreInterface {
 	@Override
 	public Model executeConstructQuery(String constructQueryString) {
 		Query query =  QueryFactory.create(constructQueryString);
-		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(query, (VirtGraph) set);
+		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(query,  set);
 		return vqe.execConstruct();
 	}
 
 
 	@Override
 	public boolean executeAskQuery(String askQueryString) {
-		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(askQueryString, (VirtGraph) set);
+		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(askQueryString, set);
 		return vqe.execAsk();
 	}
 
 	@Override
 	public void executeUpdateQuery(String updateQueryString) {
-		VirtuosoUpdateRequest vqe = VirtuosoUpdateFactory.create(updateQueryString, (VirtGraph) set);
-		vqe.exec();
+		logger.info(updateQueryString);
+		VirtuosoUpdateRequest vqe = VirtuosoUpdateFactory.create(updateQueryString, set);
+		try {
+			vqe.exec();
+		}
+		catch (Exception e) {
+			logger.error(e);
+			throw e;
+		}
 	}
 
 	@Override
 	public void executeCreateGraph(String graph) {
-		VirtuosoUpdateRequest vqe = VirtuosoUpdateFactory.create("CREATE GRAPH <"+graph+">", (VirtGraph) set);
-		vqe.exec();
+		VirtuosoUpdateRequest vqe = VirtuosoUpdateFactory.create("CREATE GRAPH <"+graph+">", set);
+		try {
+			vqe.exec();
+		}
+		catch (Exception e) {
+			logger.error(e);
+			throw e;
+		}
 	}
 
 	@Override
@@ -84,7 +95,7 @@ public class VirtuosoInterface extends TripleStoreInterface {
 
 	@Override
 	public Model executeDescribeQuery(String describeQueryString) {
-		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(describeQueryString, (VirtGraph) set);
+		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(describeQueryString, set);
 		return vqe.execDescribe();
 	}
 
