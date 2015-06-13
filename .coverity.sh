@@ -1,4 +1,4 @@
-#!/bin/bash
+!/#bin/bash
 
 #
 # This script is run by travis-ci and pushes the first commit
@@ -10,8 +10,8 @@ COMMITS=`git log --since=today.midnight --oneline | wc -l`
 if [[ "$COMMITS" -le "1" ]]; then
     echo "first commit a day - push changes to branch coverity_scan"
 
+    git fetch origin +coverity_scan:coverity_scan
     git checkout coverity_scan
-    git pull
     git merge --ff --log -m "merge from master to coverity_scan" origin/master
     
     git config --global user.email "r43ples-travis-ci@users.noreply.github.com"
