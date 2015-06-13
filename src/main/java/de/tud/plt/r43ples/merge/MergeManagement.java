@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.management;
+package de.tud.plt.r43ples.merge;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +17,9 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.util.FileUtils;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.JenaModelManagement;
+import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 /**

@@ -14,9 +14,9 @@ import org.junit.Test;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
+import de.tud.plt.r43ples.merge.MergeManagement;
 
 /**
  * @author Markus Graube
@@ -41,7 +41,7 @@ public class TestMergeManagement {
 
 
 	/**
-	 * Test method for {@link de.tud.plt.r43ples.management.MergeManagement#getCommonRevisionWithShortestPath(java.lang.String, java.lang.String)}.
+	 * Test method for {@link de.tud.plt.r43ples.merge.MergeManagement#getCommonRevisionWithShortestPath(java.lang.String, java.lang.String)}.
 	 */
 	@Test
 	public final void testGetCommonRevisionWithShortestPath() {
@@ -50,7 +50,7 @@ public class TestMergeManagement {
 	}
 
 	/**
-	 * Test method for {@link de.tud.plt.r43ples.management.MergeManagement#getPathBetweenStartAndTargetRevision(java.lang.String, java.lang.String)}.
+	 * Test method for {@link de.tud.plt.r43ples.merge.MergeManagement#getPathBetweenStartAndTargetRevision(java.lang.String, java.lang.String)}.
 	 */
 	@Test
 	public final void testGetPathBetweenStartAndTargetRevision() {
@@ -64,7 +64,7 @@ public class TestMergeManagement {
 	}
 	
 	/**
-	 * Test method for {@link de.tud.plt.r43ples.management.MergeManagement#getPathBetweenStartAndTargetRevision(java.lang.String, java.lang.String)}.
+	 * Test method for {@link de.tud.plt.r43ples.merge.MergeManagement#getPathBetweenStartAndTargetRevision(java.lang.String, java.lang.String)}.
 	 */
 	@Test
 	public final void testGetPathBetweenStartAndTargetRevision2() {

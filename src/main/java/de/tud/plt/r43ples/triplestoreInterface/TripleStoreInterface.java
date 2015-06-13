@@ -150,6 +150,7 @@ public abstract class TripleStoreInterface {
 		return baos.toString();
 	}
 	
+
 	public abstract Model executeDescribeQuery(String describeQueryString) ;
 	
 
@@ -168,14 +169,11 @@ public abstract class TripleStoreInterface {
 	 */
 	public abstract void executeUpdateQuery(String updateQueryString);
 
+	
 	public abstract void executeCreateGraph(String graph) ;
 
-	public abstract Iterator<String> getGraphs();
-
-
 	
-
-
+	public abstract Iterator<String> getGraphs();
 
 	
 }
