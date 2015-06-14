@@ -6,11 +6,12 @@
 	<groupId>de.tud.plt</groupId>
 	<artifactId>r43ples</artifactId>
 	<packaging>jar</packaging>
-	<version>0.8.7-SNAPSHOT</version>
+	<version>0.8.7</version>
 	<name>r43ples</name>
 	
 	<url>http://plt-tud.github.io/r43ples/</url>
-	<description>Revision Control System for the Semantic Web Adds a semantic revision control system to an existing triplestore with SPARQL interface (like Virtuoso).</description>
+	<description>Revision Control System for the Semantic Web
+Adds a semantic revision control system to an existing triplestore using its SPARQL interface</description>
 	
 	<organization>
 		<name>Technische Universität Dresden - Professur für Prozessleittechnik</name>
