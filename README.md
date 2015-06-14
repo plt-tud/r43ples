@@ -11,7 +11,7 @@ It provides different revisions of named graphs via a SPARQL interface. All info
 
 
 This project provides an enhanced SPARQL endpoint for revision management of named graphs.
-R43ples uses an internal Jena TDB is attached to an existing SPARQL endpoint of a Triple Store and acts as another endpoint both for normal SPARQL queries
+R43ples uses an internal Jena TDB is attached to an existing SPARQL endpoint of a triplestore and acts as another endpoint both for normal SPARQL queries
 as well as for revision-enhanced SPARQL queries, named R43ples queries.
 The R43ples endpoint allows to specify revisions which should be queried for each named graph used inside a SPARQL query.
 The whole revision information is stored in additional graphs in the attached Jena TDB.
@@ -38,7 +38,7 @@ They just have to be unzipped and started with Java
     java -jar r43ples-*-with-dependencies.jar
 
     
-Debian packages are going to be deployed soon. 
+There are also debian packages available. 
 
 Compiling
 ---------
