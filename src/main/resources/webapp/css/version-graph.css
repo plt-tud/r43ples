@@ -32,11 +32,9 @@ text {
 }
 
 /* This styles the title of the tooltip */
-.tipsy h1,h2 {
+.tipsy h1, .tipsy h2 {
     font-size: 1.6em;
     font-weight: bold;
-    color: #000000;
-    margin: 0;
 }
 
 .tipsy h2 {
@@ -44,31 +42,28 @@ text {
 }
 
 /* This styles the body of the tooltip */
-.tipsy p {
-    font-size: 1.3em;
-    text-align: center;
-    width:100%;
-    cursor: default;
+.tipsy-inner {
+	max-width: 800px;
 }
 
 .tipsy .properties {
-    border:0;
     font-size: 1.3em;
-    text-align: left;
-    width:100%;
-    cursor: default;
+    color: white;
+
 }
+
 
 .tipsy .properties td {
-    padding:0;
-}
-.tipsy .properties td:first-child {
-    text-align: right;
-    font-weight: bold;
-    white-space: nowrap;
+	padding-left: 5px;
 }
 
-.tipsy a, a:hover, a:active {
+.tipsy .properties td:first-child {
+    font-weight: bold;
+    white-space: nowrap;
+    padding-left: 0px;
+}
+
+.tipsy a, .tipsy a:hover, .tipsy a:active {
     color: #60b1fc;
     text-decoration: none;
 }

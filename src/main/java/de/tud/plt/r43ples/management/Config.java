@@ -16,11 +16,13 @@ import org.apache.log4j.Logger;
 public class Config {
 
 	// Database settings
-	public static String jena_tdb_directory;
 	
-	public static String virtuoso_url;
-	public static String virtuoso_user;
-	public static String virtuoso_password;
+	// tdb, virtuoso, http_virtuoso, http
+	public static String triplestore_type;
+	public static String triplestore_url;
+	public static String triplestore_user;
+	public static String triplestore_password;
+	
 	
 	// Service settings
 	/** The service host. **/
@@ -44,9 +46,6 @@ public class Config {
 	/** The path to the SDD graph default content. **/
 	public static String sdd_graph_defaultContent;
 	
-	// Visualisation settings
-	/** The visualization file path. **/
-	public static String visualisation_path;
 	/** The logger. **/
 	private static Logger logger = Logger.getLogger(Config.class);	
 	
@@ -62,11 +61,10 @@ public class Config {
 		try {
 			config = new PropertiesConfiguration(configFilePath);
 			
-			jena_tdb_directory = config.getString("jena.tdb.directory");
-			
-			virtuoso_url = config.getString("virtuoso.url");
-			virtuoso_user = config.getString("virtuoso.user");
-			virtuoso_password = config.getString("virtuoso.password");
+			triplestore_type = config.getString("triplestore.type");
+			triplestore_url = config.getString("triplestore.url");
+			triplestore_user = config.getString("triplestore.user");
+			triplestore_password = config.getString("triplestore.password");
 			
 			service_host = config.getString("service.host");
 			service_port = config.getInt("service.port");
@@ -80,7 +78,6 @@ public class Config {
 			sdd_graph = config.getString("sdd.graph");
 			sdd_graph_defaultContent = config.getString("sdd.graph.defaultContent");
 
-			visualisation_path = config.getString("visualisation.path");
 		} catch (ConfigurationException e) {
 			logger.warn("Could not read configuration file '" + configFilePath + "'. Switch to 'r43ples.dist.conf'.");
 			readConfig("r43ples.dist.conf");

@@ -12,7 +12,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.shared.NoWriterForLangException;
 
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.MergeManagement;
+import de.tud.plt.r43ples.management.JenaModelManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 
 
@@ -23,16 +23,19 @@ public abstract class TripleStoreInterface {
 	
 	protected void init() {
 		if (!RevisionManagement.checkGraphExistence(Config.revision_graph)){
-			logger.info("Create revision graph");
+			logger.debug("Create revision graph: "+ Config.revision_graph);
 			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
 	 	}
 		
-		// Create SDD graph
 		if (!RevisionManagement.checkGraphExistence(Config.sdd_graph)){
-			logger.info("Create sdd graph");
-			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
 			// Insert default content into SDD graph
-			RevisionManagement.executeINSERT(Config.sdd_graph, MergeManagement.convertJenaModelToNTriple(MergeManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent)));
+			logger.info("Create sdd graph from " + Config.sdd_graph_defaultContent);
+			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
+			
+			Model jena_model = JenaModelManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent);
+			String model = JenaModelManagement.convertJenaModelToNTriple(jena_model);
+			logger.debug("SDD model: " + model);	
+			RevisionManagement.executeINSERT(Config.sdd_graph, model);
 	 	}		
 	}
 	
@@ -110,7 +113,7 @@ public abstract class TripleStoreInterface {
 		Model result = executeConstructQuery(constructQueryString);
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		if (format.toLowerCase().contains("xml2") )
+		if (format.toLowerCase().contains("xml") )
 			result.write(baos, "RDF/XML");
 		else if (format.toLowerCase().contains("turtle") )
 			result.write(baos, "Turtle");
@@ -147,6 +150,7 @@ public abstract class TripleStoreInterface {
 		return baos.toString();
 	}
 	
+
 	public abstract Model executeDescribeQuery(String describeQueryString) ;
 	
 
@@ -165,14 +169,11 @@ public abstract class TripleStoreInterface {
 	 */
 	public abstract void executeUpdateQuery(String updateQueryString);
 
+	
 	public abstract void executeCreateGraph(String graph) ;
 
-	public abstract Iterator<String> getGraphs();
-
-
 	
-
-
+	public abstract Iterator<String> getGraphs();
 
 	
 }

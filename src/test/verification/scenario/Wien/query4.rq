@@ -1,0 +1,12 @@
+PREFIX eplan: <http://www.owl-ontologies.com/Ontology1370788248.owl#>
+PREFIX cs: <http://purl.org/vocab/changeset/schema#>
+
+SELECT ?component ?commit (count(?eplan_s) as ?numberElements) 
+WHERE {
+    GRAPH <http://test.com/benchmark/scenario_1> REVISION "%%%REV%%%" {
+        ?eplan_s eplan:signalNumber ?number.
+        ?cs cs:subjectOfChange ?eplan_s.
+        ?cs cs:createdDate ?commit.
+        BIND( SUBSTR(?number, 16) AS ?component )
+    }
+} GROUP BY ?component ?commit

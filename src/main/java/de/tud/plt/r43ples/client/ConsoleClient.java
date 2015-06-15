@@ -41,29 +41,32 @@ public class ConsoleClient {
 			System.exit(0);
 		}
 		
+		// TODO: add file import option for generating new version (only new version instead of add and delete sets) 
+		
 		logger.info("config: " + args_client.r43ples.config);
 		logger.info("graph: " + args_client.graph);
 		logger.info("create: " + args_client.create);
 		logger.info("add set file: " + args_client.add_set);
 		logger.info("delete set file: " +  args_client.delete_set);
+		logger.info("user: " +  args_client.user);
+		logger.info("commit message: " +  args_client.message);
+		logger.info("branch: " +  args_client.branch);
 		
 		Config.readConfig(args_client.r43ples.config);
 		
 		
 		if (args_client.create) {
+			RevisionManagement.purgeGraph(args_client.graph);
 			TripleStoreInterfaceSingleton.get().executeCreateGraph(args_client.graph);
 			RevisionManagement.putGraphUnderVersionControl(args_client.graph);
+			logger.info("Graph created: "+ args_client.graph);
+		} else {
+			String addSet = readFile(args_client.add_set);
+			String deleteSet = readFile(args_client.delete_set);
+		
+			String result = RevisionManagement.createNewRevision(args_client.graph, addSet, deleteSet, args_client.user, args_client.message, args_client.branch);
+			logger.info("New Revision: "+ result);			
 		}
-		
-		String addSet = readFile(args_client.add_set);
-		String deleteSet = readFile(args_client.delete_set);
-				
-
-		String user = "test";
-		
-		String master = RevisionManagement.getMasterRevisionNumber(args_client.graph);
-		String result = RevisionManagement.createNewRevision(args_client.graph, addSet, deleteSet, user, "automatic commit", master);
-		logger.info(result);			
 	}
 
 	/**

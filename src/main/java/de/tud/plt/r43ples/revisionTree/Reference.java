@@ -1,5 +1,7 @@
 package de.tud.plt.r43ples.revisionTree;
 
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
 public abstract class Reference {
 	
 	private String uri;
@@ -36,4 +38,9 @@ public abstract class Reference {
 		}
 		return super.equals(obj);
 	}
+	
+	@Override
+    public int hashCode() {
+        return new HashCodeBuilder().append(uri).toHashCode();
+    }
 }

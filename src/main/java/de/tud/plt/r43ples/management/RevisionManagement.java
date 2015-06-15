@@ -1,5 +1,7 @@
 package de.tud.plt.r43ples.management;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -77,7 +79,6 @@ public class RevisionManagement {
 				graphName + "-master", graphName, revisionUri);
 		
 		// Add graph element
-		// TODO It is possible to add more information about the graph under revision control (e.g. label, comment, user, ...)
 		// TODO Currently to every created graph the default SDD is referenced - provide possibility to choose SDD
 		queryContent += String.format(
 				"<%s> a rmo:Graph ;%n"
@@ -140,7 +141,7 @@ public class RevisionManagement {
 	public static String createNewRevision(final String graphName, final String addedAsNTriples,
 			final String removedAsNTriples, final String user, final String commitMessage,
 			final ArrayList<String> usedRevisionNumber) throws InternalErrorException {
-		logger.info("Start creation of new revision!");
+		logger.info("Start creation of new revision for graph " + graphName);
 
 		// General variables
 		String newRevisionNumber = getNextRevisionNumber(graphName, usedRevisionNumber.get(0));
@@ -162,7 +163,7 @@ public class RevisionManagement {
 
 		// Create new graph with delta-added-newRevisionNumber
 		if (addedAsNTriples!=null && !addedAsNTriples.isEmpty()) {
-			logger.info("Create new graph with name " + addSetGraphUri);
+			logger.debug("Create new graph with name " + addSetGraphUri);
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
 				addSetGraphUri));
 			RevisionManagement.executeINSERT(addSetGraphUri, addedAsNTriples);
@@ -170,7 +171,7 @@ public class RevisionManagement {
 
 		// Create new graph with delta-removed-newRevisionNumber
 		if (removedAsNTriples!=null && !removedAsNTriples.isEmpty()) {
-			logger.info("Create new graph with name " + removeSetGraphUri);
+			logger.debug("Create new graph with name " + removeSetGraphUri);
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
 					removeSetGraphUri));
 			RevisionManagement.executeINSERT(removeSetGraphUri, removedAsNTriples);
@@ -222,7 +223,7 @@ public class RevisionManagement {
 		String personUri = getUserName(user);
 		String revisionUri = graphName + "-revision-" + newRevisionNumber;
 		String commitUri = graphName + "-commit-" + newRevisionNumber;
-		String branchUri = getReferenceUri(graphName, usedRevisionNumber.get(0));
+		String branchUri = getBranchUri(graphName, usedRevisionNumber.get(0));
 
 		// Create a new commit (activity)
 		StringBuilder queryContent = new StringBuilder(1000);
@@ -248,7 +249,7 @@ public class RevisionManagement {
 			queryContent.append(String.format("<%s> prov:wasDerivedFrom <%s> .", revisionUri, revUri));
 		}
 		String query = prefixes
-				+ String.format("INSERT DATA { GRAPH <%s> { %s } } ;%n", Config.revision_graph,
+				+ String.format("INSERT DATA { GRAPH <%s> { %s } }", Config.revision_graph,
 						queryContent.toString());
 		
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
@@ -271,11 +272,11 @@ public class RevisionManagement {
 
 		query = prefixes + String.format("DELETE DATA { GRAPH <%s> { <%s> rmo:references <%s>. } };%n",
 				Config.revision_graph, branchName, oldRevisionUri);
-		query += String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:references <%s>. } } ;%n", Config.revision_graph,
+		query += String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:references <%s>. } }", Config.revision_graph,
 				branchName, revisionUri);
 
 		// Execute queries
-		logger.info("Execute all queries updating the revision graph, full graph and change sets");
+		logger.debug("Execute all queries updating the revision graph, full graph and change sets");
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
 	}
 
@@ -343,7 +344,7 @@ public class RevisionManagement {
 	private static void createReference(final String referenceType, final String graphName,
 			final String revisionNumber, final String newReferenceName, final String user,
 			final String message) throws InternalErrorException {
-		logger.info("Start creation of new " + referenceType);
+		logger.info("Create new " + referenceType + " '"+ newReferenceName+"' for graph " + graphName);
 
 		// Check branch existence
 		if (checkReferenceNameExistence(graphName, newReferenceName)) {
@@ -480,7 +481,7 @@ public class RevisionManagement {
 	}
 
 	/**
-	 * Get the reference URI for a given reference name or revision number
+	 * Get the reference URI of a branch for a given reference name or revision number
 	 * 
 	 * @param graphName
 	 *            the graph name
@@ -489,10 +490,10 @@ public class RevisionManagement {
 	 * @return URI of identified revision
 	 * @throws InternalErrorException 
 	 */
-	public static String getReferenceUri(final String graphName, final String referenceIdentifier) throws InternalErrorException {
+	public static String getBranchUri(final String graphName, final String referenceIdentifier) throws InternalErrorException {
 		String query = prefixes
 				+ String.format("SELECT ?ref " + "WHERE { GRAPH <%s> {"
-						+ "	?ref a rmo:Reference; rmo:references ?rev."
+						+ "	?ref a rmo:Branch; rmo:references ?rev."
 						+ " ?rev a rmo:Revision; rmo:revisionOf <%s>."
 						+ "	{?rev rmo:revisionNumber \"%s\".} UNION {?ref rdfs:label \"%s\" .}" + "} }",
 						Config.revision_graph, graphName, referenceIdentifier, referenceIdentifier);
@@ -610,7 +611,7 @@ public class RevisionManagement {
 	 * @throws InternalErrorException 
 	 */
 	private static boolean isBranchEmpty(final String graphName, final String referenceIdentifier) throws InternalErrorException {
-		String referenceUri = getReferenceUri(graphName, referenceIdentifier);
+		String referenceUri = getBranchUri(graphName, referenceIdentifier);
 		String queryASKBranch = prefixes
 				+ String.format("ASK { GRAPH <%s> { "
 						+ " <%s> rmo:references ?rev; prov:wasDerivedFrom ?rev ." 
@@ -619,6 +620,13 @@ public class RevisionManagement {
 		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASKBranch);
 	}
 
+	/**
+	 * 
+	 * @param graphName
+	 * @param revisionIdentifier
+	 * @return
+	 * @throws InternalErrorException
+	 */
 	public static String getNextRevisionNumber(final String graphName, final String revisionIdentifier) throws InternalErrorException {
 		String revisionNumber = getRevisionNumber(graphName, revisionIdentifier);
 		if (isBranchEmpty(graphName, revisionIdentifier)) {
@@ -682,7 +690,7 @@ public class RevisionManagement {
 	}
 
 	/**
-	 * Split huge INSERT statements into separate queries of up to fifty triple
+	 * Split huge INSERT statements into separate queries of up to 500 triple
 	 * statements.
 	 * 
 	 * @param graphName
@@ -692,38 +700,10 @@ public class RevisionManagement {
 	 */
 	public static void executeINSERT(final String graphName, final String dataSetAsNTriples) {
 
-		String insertQueryTemplate =  "INSERT DATA { GRAPH <%s> { %n"
-				+ "	%s %n"
-				+ "} }";
+		String insertQueryTemplate =  "INSERT DATA { GRAPH <%s> { %s } }";
 		
-		final int MAX_STATEMENTS = 200;
-		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
-		int counter = 0;
-		StringBuilder insert = new StringBuilder();
-		
-		for (int i=0; i < lines.length; i++) {
-			// Remove whitespace characters
-			String sub = lines[i].replaceAll("# Empty NT", "").trim();
-			if (!sub.equals("") && !sub.startsWith("#")) {
-				if (!sub.startsWith("<")) {
-					sub = "<" + sub;
-				}
-				if (i < lines.length - 1) {
-					sub = sub + ".";
-				}
-				insert.append('\n').append(sub);
-				counter++;
-				if (counter == MAX_STATEMENTS-1) {
-					TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(insertQueryTemplate, graphName, insert));
-					counter = 0;
-					insert = new StringBuilder();
-				}
-			}
-		}
-
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(insertQueryTemplate, graphName, insert));
+		splitAndExecuteBigQuery(graphName, dataSetAsNTriples, insertQueryTemplate);
 	}
-	
 	
 	/**
 	 * Split huge DELETE statements into separate queries of up to fifty triple statements.
@@ -735,33 +715,31 @@ public class RevisionManagement {
 
 		String deleteQueryTemplate =  "DELETE DATA { GRAPH <%s> { %s } }";
 		
-		final int MAX_STATEMENTS = 200;
-		String[] lines = dataSetAsNTriples.split("\\.\\s*<");
-		int counter = 0;
-		StringBuilder delete = new StringBuilder();
-		
-		for (int i=0; i < lines.length; i++) {
-			// Remove whitespace characters
-			String sub = lines[i].replaceAll("# Empty NT", "").trim();
-			if (!sub.equals("") && !sub.startsWith("#")) {
-				if (!sub.startsWith("<")) {
-					sub = "<" + sub;
-				}
-				if (i < lines.length - 1) {
-					sub = sub + ".";
-				}
-				delete.append('\n').append(sub);
-				counter++;
-				if (counter == MAX_STATEMENTS-1) {
-					TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(deleteQueryTemplate, graphName, delete));
-					counter = 0;
-					delete = new StringBuilder();
-				}
-			}
-		}
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(deleteQueryTemplate, graphName, delete));
+		splitAndExecuteBigQuery(graphName, dataSetAsNTriples, deleteQueryTemplate);
 	}
 	
+	
+	
+	public static void splitAndExecuteBigQuery(final String graphName, final String dataSetAsNTriples, final String template){
+		final int MAX_STATEMENTS = 500;
+		String[] lines = dataSetAsNTriples.split("\n");
+		int counter = 0;
+		StringBuilder insert = new StringBuilder();
+		
+		for (int i=0; i < lines.length; i++) {
+			insert.append(lines[i]);
+			counter++;
+			if (counter == MAX_STATEMENTS-1) {
+				TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(template, graphName, insert));
+				counter = 0;
+				insert = new StringBuilder();
+			}
+		}
+
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(template, graphName, insert));
+	}
+	
+
 	
 
 	/**
@@ -793,7 +771,7 @@ public class RevisionManagement {
 					+ "WHERE { GRAPH <%s> { " 
 					+ "	?revision rmo:revisionOf <%s>; ?r_p ?r_o. "
 					+ " OPTIONAL {?reference rmo:references ?revision; ?ref_p ?ref_o. }"
-					+ " OPTIONAL {?commit prov:generated ?revision; ?c_p ?c_o. }" 
+					+ " OPTIONAL {?commit prov:used|prov:generated ?revision; ?c_p ?c_o. }" 
 					+ "} }",
 					Config.revision_graph, graphName);
 		}
@@ -894,7 +872,7 @@ public class RevisionManagement {
 						+ "	GRAPH <%s> {" 
 						+ "		?revision rmo:revisionOf <%s>; ?r_p ?r_o. "
 						+ " 	OPTIONAL {?reference rmo:references ?revision; ?ref_p ?ref_o. }"
-						+ " 	OPTIONAL {?commit prov:generated ?revision; ?c_p ?c_o. }"
+						+ " 	OPTIONAL {?commit prov:used|prov:generated ?revision; ?c_p ?c_o. }"
 						+ "		}" 
 						+ "}"
 						, Config.revision_graph, Config.revision_graph, graph);
@@ -919,7 +897,12 @@ public class RevisionManagement {
 			QuerySolution qs = results.next();
 			return qs.getResource("?personUri").toString();
 		} else {
-			String personUri = "http://eatld.et.tu-dresden.de/persons/" + user;
+			String personUri = null;
+			try {
+				personUri = "http://eatld.et.tu-dresden.de/persons/" + URLEncoder.encode(user, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
 			logger.debug("User does not exists. Create user " + personUri + ".");
 			query = prefixes
 					+ String.format("INSERT DATA { GRAPH <%s> { <%s> a prov:Person; rdfs:label \"%s\". } }",
@@ -1034,14 +1017,15 @@ public class RevisionManagement {
 	 * Get the content of a graph by execution of CONSTRUCT.
 	 * 
 	 * @param graphName the graphName
-	 * @return the constructed graph content as turtle
+	 * @param format RDF serialisation format which should be returned
+	 * @return the constructed graph content as specified RDF serialisation format
 	 */
-	public static String getContentOfGraphByConstruct(String graphName) {
+	public static String getContentOfGraphByConstruct(String graphName, String format) {
 		String query = String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
 				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
 		
-		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, FileUtils.langTurtle);		
+		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		
 	}
 	
 	
@@ -1064,7 +1048,9 @@ public class RevisionManagement {
 			if (!m.hitEnd())
 				graphNames.append(", ");			
 		}
-		return getResponseHeader(graphNames.toString());
+		String names = graphNames.toString();
+		String result = getResponseHeader(names);
+		return result;
 		
 	}
 	

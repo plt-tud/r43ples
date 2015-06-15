@@ -14,10 +14,11 @@ public class TripleStoreInterfaceSingleton {
 	
 	private static TripleStoreInterface triplestore;
 	/** The logger */
-	private static Logger logger = Logger.getLogger(TripleStoreInterface.class);
+	private static Logger logger = Logger.getLogger(TripleStoreInterfaceSingleton.class);
+	
 	
 	/** Create interface according to Config
-	 * can be a Jena TDB Interface or a Virtuoso interface
+	 * can be a Jena TDB Interface, a Virtuoso interface or a HTTP interface
 	 * 
 	 * @return triplestoreinterface
 	 */
@@ -25,10 +26,14 @@ public class TripleStoreInterfaceSingleton {
 		if (triplestore!=null)
 			return triplestore;
 		else {
-			if (Config.jena_tdb_directory != null)
-				triplestore = createJenaTDBInterface(Config.jena_tdb_directory);
-			else if (Config.virtuoso_url != null)
-				triplestore = createVirtuosoHttpInterface(Config.virtuoso_url, Config.virtuoso_user, Config.virtuoso_password);
+			if (Config.triplestore_type.equals("tdb"))
+				triplestore = createJenaTDBInterface(Config.triplestore_url);
+			else if (Config.triplestore_type.equals("virtuoso"))
+				triplestore = createVirtuosoInterface(Config.triplestore_url, Config.triplestore_user, Config.triplestore_password);
+			else if (Config.triplestore_type.equals("http"))
+				triplestore = createHttpInterface(Config.triplestore_url, Config.triplestore_user, Config.triplestore_password);
+			else if (Config.triplestore_type.equals("http_virtuoso"))
+				triplestore = createVirtuosoHttpInterface(Config.triplestore_url, Config.triplestore_user, Config.triplestore_password);
 			else {
 				logger.error("No database specified in config");
 				System.exit(1);
@@ -57,9 +62,18 @@ public class TripleStoreInterfaceSingleton {
 			return null;
 	}
 	
-	public static TripleStoreInterface createVirtuosoHttpInterface(String virtuoso_url, String virtuoso_user, String virtuoso_password) {
+	public static TripleStoreInterface createHttpInterface(String http_url, String http_user, String http_password) {
 		if (triplestore==null) {
-			triplestore = new VirtuosoHttpInterface(virtuoso_url, virtuoso_user, virtuoso_password);
+			triplestore = new HttpInterface(http_url, http_user, http_password);
+			return triplestore;
+		}
+		else
+			return null;
+	}
+	
+	public static TripleStoreInterface createVirtuosoHttpInterface(String http_url, String http_user, String http_password) {
+		if (triplestore==null) {
+			triplestore = new VirtuosoHttpInterface(http_url, http_user, http_password);
 			return triplestore;
 		}
 		else

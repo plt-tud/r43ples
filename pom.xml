@@ -6,12 +6,11 @@
 	<groupId>de.tud.plt</groupId>
 	<artifactId>r43ples</artifactId>
 	<packaging>jar</packaging>
-	<version>0.8.6-SNAPSHOT</version>
+	<version>0.8.7</version>
 	<name>r43ples</name>
 	
 	<url>http://plt-tud.github.io/r43ples/</url>
-	<description>Revision Control System for the Semantic Web Adds a semantic revision control system to an existing triplestore with SPARQL interface (like Virtuoso).</description>
-	
+	<description>Revision Control System for the Semantic Web. Adds a semantic revision control system to an existing triplestore using its SPARQL interface</description>
 	<organization>
 		<name>Technische Universität Dresden - Professur für Prozessleittechnik</name>
 		<url>http://www.et.tu-dresden.de/ifa/index.php?id=prozessleittechnik</url>
@@ -33,7 +32,10 @@
    </ciManagement>
 
 	<repositories>
-	<!-- see http://stackoverflow.com/questions/364114/can-i-add-jars-to-maven-2-build-classpath-without-installing-them/ -->
+	<!-- see http://stackoverflow.com/questions/364114/can-i-add-jars-to-maven-2-build-classpath-without-installing-them/ 
+	mvn install:install-file -DlocalRepositoryPath=repo -DcreateChecksum=true -Dpackaging=jar -Dfile=/home/mgraube/Dokumente/Projekte/LinkedData/applications/Backend/Virtuoso/Jena-Provider/virtjdbc4.jar -DgroupId=virtuoso -DartifactId=jdbc -Dversion=4
+	mvn install:install-file -DlocalRepositoryPath=repo -DcreateChecksum=true -Dpackaging=jar file=/home/mgraube/Dokumente/Projekte/LinkedData/applications/Backend/Virtuoso/Jena-Provider/virt_jena2.jar -DgroupId=virtuoso -DartifactId=jena -Dversion=2
+	-->
 		<repository>
 			<id>repo</id>
 			<url>file://${project.basedir}/repo</url>
@@ -41,9 +43,10 @@
 	</repositories>
 
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+    </properties>
 
 
 	<dependencies>
@@ -57,12 +60,13 @@
 		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-grizzly2-http</artifactId>
-			<version>2.14</version>
+			<version>2.17</version>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.glassfish.jersey.ext</groupId>
 			<artifactId>jersey-mvc-mustache</artifactId>
-			<version>2.14</version>
+			<version>2.17</version>
 		</dependency>
 
 		<dependency>
@@ -132,6 +136,11 @@
 			<artifactId>jdbc</artifactId>
 			<version>4</version>
 		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-jackson</artifactId>
+			<version>2.17</version>
+		</dependency>
 	</dependencies>
 
 	<pluginRepositories>
@@ -143,6 +152,7 @@
 	</pluginRepositories>
 
 	<build>
+        <finalName>${finalName}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -156,25 +166,48 @@
 			</plugin>
 
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<configuration>
-					<archive>
-						<manifest>
-							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-							<mainClass>de.tud.plt.r43ples.webservice.Service</mainClass>
-						</manifest>
-					</archive>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-				</configuration>
+				<version>2.5.4</version>
 				<executions>
 					<execution>
-						<id>make-assembly</id> <!-- this is used for inheritance merges -->
+						<id>Webservice</id>
 						<phase>package</phase> <!-- bind to the packaging phase -->
 						<goals>
 							<goal>single</goal>
 						</goals>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<archive>
+								<manifest>
+									<mainClass>de.tud.plt.r43ples.R43plesService</mainClass>
+									<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+									<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+								</manifest>
+							</archive>
+						</configuration>
+					</execution>
+					<execution>
+						<id>ConsoleClient</id>
+						<phase>package</phase> <!-- bind to the packaging phase -->
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+						 	<finalName>r43ples-console-client</finalName>
+						 	<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<archive>
+								<manifest>
+									<mainClass>de.tud.plt.r43ples.client.ConsoleClient</mainClass>
+									<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+									<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+								</manifest>
+							</archive>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -254,11 +287,6 @@
 										<filemode>755</filemode>
 									</mapper>
 								</data>
-
-								<!-- <data> <type>template</type> <paths> <path>etc/${project.artifactId}</path> 
-									<path>var/lib/${project.artifactId}</path> <path>var/log/${project.artifactId}</path> 
-									<path>var/run/${project.artifactId}</path> </paths> <mapper> <type>perm</type> 
-									<user>loader</user> <group>loader</group> </mapper> </data> -->
 							</dataSet>
 						</configuration>
 					</execution>
@@ -272,7 +300,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.10.1</version>
+				<version>2.10.3</version>
 				<configuration>
 					<doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
 			          <docletArtifact>
@@ -364,7 +392,7 @@
 							</execution>
 						</executions>
 						<configuration>
-							<mainClass>de.tud.plt.r43ples.webservice.Service</mainClass>
+							<mainClass>de.tud.plt.r43ples.R43plesService</mainClass>
 						</configuration>
 					</plugin>
 				</plugins>
@@ -382,6 +410,7 @@
 					<plugin>
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.2.1</version>
 						<configuration>
 							<mainClass>de.tud.plt.r43ples.client.ConsoleClient</mainClass>
 						</configuration>

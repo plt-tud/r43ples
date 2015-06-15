@@ -11,13 +11,12 @@ It provides different revisions of named graphs via a SPARQL interface. All info
 
 
 This project provides an enhanced SPARQL endpoint for revision management of named graphs.
-R43ples uses an internal Jena TDB is attached to an existing SPARQL endpoint of a Triple Store and acts as another endpoint both for normal SPARQL queries
+R43ples uses an internal Jena TDB is attached to an existing SPARQL endpoint of a triplestore and acts as another endpoint both for normal SPARQL queries
 as well as for revision-enhanced SPARQL queries, named R43ples queries.
 The R43ples endpoint allows to specify revisions which should be queried for each named graph used inside a SPARQL query.
 The whole revision information is stored in additional graphs in the attached Jena TDB.
 
-The javadoc can be found at the [website](http://plt-tud.github.io/r43ples) under [http://plt-tud.github.io/r43ples/site/apidocs/](http://plt-tud.github.io/r43ples/site/apidocs/).
-
+The [website](http://plt-tud.github.io/r43ples) of R43ples contains further [project information](http://plt-tud.github.io/r43ples/site/project-reports.html) including [Javadocs](http://plt-tud.github.io/r43ples/site/apidocs/).
 A running test server should be available under [http://eatld.et.tu-dresden.de:9998/r43ples/sparql](http://eatld.et.tu-dresden.de:9998/r43ples/sparql)
 
 
@@ -38,7 +37,7 @@ They just have to be unzipped and started with Java
     java -jar r43ples-*-with-dependencies.jar
 
     
-Debian packages are going to be deployed soon. 
+There are also debian packages available. 
 
 Compiling
 ---------
@@ -46,24 +45,24 @@ Maven is used for compiling
 
     mvn exec:java
     
-Releases can be be built with:
+Packages (JAR with dependencies for the webservice, a console client and a debian package) can be be built with:
 
-    mvn assembly:single
-
-Debian packages can be built with:
-
-    mvn package:jdeb
+    mvn package
     
 
 Configuration
 -------------
 There is a configuration file named *resources/r43ples.conf*. The most important ones are the following:
 
-* *database.directory* - directory for Jena TDB database
-* *service.port* - port under which R43ples provides its services
-* *service.uri* - URI under which R43ples provides its services
+* *triplestore.type* - type of attached triplestore (can be tdb, virtuoso, http or http_virtuoso)
+* *triplestore.uri* - URI or path under which R43ples can access the attached triplestore
+* *triplestore.user* - user of attached triplestore if necessary
+* *triplestore.password* - password of attached triplestore if necessary
 * *revision.graph* - named graph which is used by R43ples to store revision graph information
 * *sdd.graph* - named graph for storing the SDD
+* *service.host* - host which provides R43ples
+* *service.port* - port which should provide R43ples
+* *service.path* - path of host which should provide R43ples
 
 The logging configuration is stored in *resources/log4j.properties*
 
@@ -74,9 +73,22 @@ SPARQL endpoint is available at:
 
     [uri]:[port]/r43ples/sparql
 
-The endpoint directly accepts SPARQL queries with HTTP GET parameters for *query* and *format*: 
+The endpoint directly accepts SPARQL queries with HTTP GET or HTTP POST parameters for *query* and *format*: 
 
-    [uri]:[port]/r43ples/sparql?query=[]&format=(HTML|JSON)
+    [uri]:[port]/r43ples/sparql?query=[]&format=[]
+
+### Supported Formats
+
+The formats can be specified as URL Path Parameter *format*, as HTTP post paramter *format* or as HTTP header parameter *Accept*: 
+
+* text/turtle
+* application/json
+* application/rdf+xml
+* text/html
+* text/plain
+
+
+### R43ples keywords
 
 There are some additional keywords which can be used to control the revisions of graphs:
 
@@ -125,11 +137,7 @@ There is a new option for R43ples which improves the performance. The necessary 
 The SPARQL query is rewritten in such a way that the branch and the change sets are directly joined inside the query. This includes the order of the change sets.
 It is currently under development and further research.
 
-The option can be enabled by:
-
-```
-OPTION r43ples:SPARQL_JOIN
-```
+The option can be enabled by passing an additional parameter "join_option=true"
 
 It currently supports:
 
@@ -139,37 +147,6 @@ It currently supports:
 * MINUS
 
 For more details, have a look into the *doc/* directory.
-
-
-Algorithm
------------
-Without SPARQL Join option the algorithms are very simple:
-    
-```
-For each named graph 'g' in a query, a temporary graph 'TempGraph_g_r' is generated for the specified revision 'r' according to this formula ('g_x' = full materialized revision 'x' of graph 'g'):
-    TempGraph_g_r = g_nearestBranch + SUM[revision i= nearestBranch to r]( deleteSet_g_i - addSet_g_i )
-```
-
-```
-def select_query(query_string):
-    for (graph,revision) in query_string.get_named_graphs_and_revisions():   
-        execQuery("COPY GRAPH <"+graph+"> TO GRAPH <tmp-"+graph+"-"+revision+">")
-        for rev in graph.find_shortest_path_to_revision(revision):
-            execQuery("REMOVE GRAPH "+ rev.add_set_graph+" FROM GRAPH <tmp-"+graph+"-"+revision+">")
-            execQuery("ADD GRAPH "+ rev.delete_set_graph+" TO GRAPH <tmp-"+graph+"-"+revision+">")
-        query_string.replace(graph, "tmp-"+graph+"-"+revision)
-    result = execQuery(query_string)
-    execQuery("DROP GRAPH <tmp-*>")
-    return result
-```
-  
-``` 
-def update_query(query_string):
-    for (graph,revision) in query_string.get_named_graphs_and_revisions():
-        newRevision = revision +1
-        execQuery("ADD GRAPH "+ rev.delete_set_graph+" TO GRAPH <tmp-"+graph+"-"+revision+">")
-        ...
-```
 
 
 Used libraries and frameworks

@@ -1,8 +1,11 @@
 package de.tud.plt.r43ples.triplestoreInterface;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
-import virtuoso.jena.driver.VirtDataset;
+import org.apache.log4j.Logger;
+
 import virtuoso.jena.driver.VirtGraph;
 import virtuoso.jena.driver.VirtuosoQueryExecution;
 import virtuoso.jena.driver.VirtuosoQueryExecutionFactory;
@@ -15,6 +18,9 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 
 public class VirtuosoInterface extends TripleStoreInterface {
+	
+	/** The logger. **/
+	private static Logger logger = Logger.getLogger(VirtuosoInterface.class);
 
 	private VirtGraph set;
 	
@@ -35,12 +41,13 @@ public class VirtuosoInterface extends TripleStoreInterface {
 		Query query =  QueryFactory.create(selectQueryString);
 		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(query, set);
 		return vqe.execSelect();
+		
 	}
 
 	@Override
 	public Model executeConstructQuery(String constructQueryString) {
 		Query query =  QueryFactory.create(constructQueryString);
-		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(query, set);
+		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(query,  set);
 		return vqe.execConstruct();
 	}
 
@@ -53,19 +60,37 @@ public class VirtuosoInterface extends TripleStoreInterface {
 
 	@Override
 	public void executeUpdateQuery(String updateQueryString) {
+		logger.info(updateQueryString);
 		VirtuosoUpdateRequest vqe = VirtuosoUpdateFactory.create(updateQueryString, set);
-		vqe.exec();
+		try {
+			vqe.exec();
+		}
+		catch (Exception e) {
+			logger.error(e);
+			throw e;
+		}
 	}
 
 	@Override
 	public void executeCreateGraph(String graph) {
 		VirtuosoUpdateRequest vqe = VirtuosoUpdateFactory.create("CREATE GRAPH <"+graph+">", set);
-		vqe.exec();
+		try {
+			vqe.exec();
+		}
+		catch (Exception e) {
+			logger.error(e);
+			throw e;
+		}
 	}
 
 	@Override
 	public Iterator<String> getGraphs() {
-		return ((VirtDataset) set).listNames();
+	//	return set.listNames();
+		ResultSet resultSet = executeSelectQuery("SELECT DISTINCT ?graph WHERE { GRAPH ?graph { ?s ?p ?o}}");
+		List<String> list = new ArrayList<String>();
+		while (resultSet.hasNext())
+			list.add(resultSet.next().getResource("?graph").toString());
+		return list.iterator();
 	}
 
 	@Override

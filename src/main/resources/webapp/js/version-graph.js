@@ -1,21 +1,32 @@
-
-
 // Create a new directed graph
 // Globale Variablen für das SVG-Element, den D3-Graph, das Graph-Element, den Zoom und den Renderer
 var svg, g, inner, zoom, render;
 // Variablen für das Datenmodell
 var commits, revisions, referenceCommits, branches;
 
-// jQuery-SVG-Objekt um den Loader zu postionieren
+var tipsy_options = {gravity: 'w', html: true, fade:true, trigger: 'focus', offset: 50, delayOut: 500};
+
+// http://stackoverflow.com/questions/16265123/resize-svg-when-window-is-resized-in-d3-js
+var w;
+function updateWindow(){
+    _svg.attr("width", w.clientWidth);
+}
+window.onresize = updateWindow;
+
+// jQuery-SVG-Objekt um den Loader zu positionieren
 var _svg, spinner;
 
 $(document).ready(function () {
-_svg = $("svg");
-// Loading Symbol in der Mitte des Graphen einfügen
-spinner = jQuery.parseHTML("<div style='position: absolute; top:" + (_svg.position().top + (_svg.attr('height') / 2) - 34) + "px;left:" + (_svg.position().left + (_svg.attr('width') / 2) - 34) + "px;'><i class='fa fa-spinner fa-pulse fa-3x'></i></div>");
-// Loading Symbol ins DOM einfügen
-_svg.after(spinner);
+	_svg = $("svg");
+	 w = $("#visualisation")[0];
+	 updateWindow();
+	// Loading Symbol in der Mitte des Graphen einfügen
+	spinner = jQuery.parseHTML("<div style='position: absolute; top:" + (_svg.position().top + (_svg.attr('height') / 2) - 34) + "px;left:" + (_svg.position().left + (_svg.attr('width') / 2) - 34) + "px;'><i class='fa fa-spinner fa-pulse fa-3x'></i></div>");
+	// Loading Symbol ins DOM einfügen
+	_svg.after(spinner);
 });
+
+
 
 
 // Center the graph
@@ -36,16 +47,24 @@ var center = function () {
     $(spinner).hide();
 };
 
+
+function padStr(i) {
+    return (i < 10) ? "0" + i : "" + i;
+}
+
 // Funktion, die den Inhalt der Revisions-Tooltips erstellt
 var revTooltip = function (name, node) {
     // Tabelle mit den Detailinformationen der Revision erstellen, Verlinkte Informationen könnten ggfs. asynchron nachgeladen werden
     var tooltip = "<h1>Revision " + node.revisionNumber + "</h1>" +
         "<table class='properties'>" +
-        "<tr><td>URL:</td><td>" + name + "</td><td></td></tr>" +
-        "<tr><td>Revision of:</td><td>" + node.revisionOf + "</td><td><a href='" + node.revisionOf + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+        "<tr><td>Number:</td><td>" + node.revisionNumber + "</td><td></td></tr>" +
         "<tr><td>Branch:</td><td>" + branches[node.revisionOfBranch].label + "</td><td><a href='" + node.revisionOfBranch + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-        "<tr><td>Removed:</td><td>" + node.deltaRemoved + "</td><td><a href='" + node.deltaRemoved + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-        "<tr><td>Added:</td><td>" + node.deltaAdded + "</td><td><a href='" + node.deltaAdded + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr></table></p>";
+        "<tr><td>Revised graph:</td><td>" + node.revisionOf + "</td><td><a href='" + node.revisionOf + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+        "<tr><td>URL:</td><td>" + name + "</td><td></td></tr>" +
+        "<tr><td>Add Set:</td><td>" + node.deltaAdded + "</td><td><a href='" + node.deltaAdded + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+        "<tr><td>Delete Set:</td><td>" + node.deltaRemoved + "</td><td><a href='" + node.deltaRemoved + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+        "</table></p>";
+       
     // Falls die Revision Version 0 ist, kann keine Information zum Commit angegeben werden
     if (node.commit == null) {
         return tooltip;
@@ -54,16 +73,24 @@ var revTooltip = function (name, node) {
     var date = new Date(commits[node.commit].time);
     tooltip += "<h2>Creating Commits</h2>" +
     "<table class='properties'>" +
-    "<tr><td><i class='fa fa-code-fork'></i></td><td colspan='2'>" + node.commit + "</td></tr>" +
     "<tr><td>Title:</td><td colspan='2'>" + commits[node.commit].title + "</td></tr>" +
+    "<tr><td>Time:</td><td>" + padStr(date.getDate()) + "." + padStr((date.getMonth() + 1)) + "." + date.getFullYear() + " " + padStr(date.getHours()) + ":" + padStr(date.getMinutes()) + ":" + padStr(date.getSeconds()) + "</td><td></td></tr>" +
     "<tr><td>User:</td><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-    "<tr><td>Time:</td><td>" + date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "</td><td></td></tr></table></p>";
+    "<tr><td>URL:</i></td><td colspan='2'>" + node.commit + "</td></tr>" + 
+    "</table>";
     return tooltip;
 };
 
 // Funktion, die den Inhalt der Tag-Tooltips erstellt
 var tagTooltip = function (node) {
-    return "<p>By " + node.wasAssociatedWith + " <a href='" + node.wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></p>";
+	var date = new Date(node.atTime);
+	tooltip = "<h1>Tag " + node.title +"</h1>" +
+    "<table class='properties'>" +
+    "<tr><td>Title:</td><td colspan='2'>" + node.title + "</td></tr>" +
+    "<tr><td>Time:</td><td>" + padStr(date.getDate()) + "." + padStr((date.getMonth() + 1)) + "." + date.getFullYear() + " " + padStr(date.getHours()) + ":" + padStr(date.getMinutes()) + ":" + padStr(date.getSeconds()) + "</td><td></td></tr>" +
+    "<tr><td>User:</td><td>" + node.wasAssociatedWith + "</td><td><a href='" + node.wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+    "</table>";
+    return tooltip;
 };
 
 // Funktion, die die Tags als Knoten mit Kanten erstellt
@@ -142,7 +169,7 @@ var bindTags = function () {
             return tagTooltip(g.node(v))
         })
         .each(function (v) {
-            $(this).tipsy({gravity: "w", html: true});
+            $(this).tipsy(tipsy_options);
         });
 };
 
@@ -444,7 +471,7 @@ var drawGraph = function (_JSON, _showBranches, _showTags) {
             })
             // mit $.fn.tipsy.autoNS sorgt dafür, dass Tooltips zu dicht am oberen oder unteren Rand passend dargestellt werden
             .each(function (v) {
-                $(this).tipsy({gravity: $.fn.tipsy.autoNS, html: true});
+                $(this).tipsy(tipsy_options);
             });
         // Bei Bedarf auch tipsy an die Tags binden
         if (_showTags) {
@@ -453,4 +480,7 @@ var drawGraph = function (_JSON, _showBranches, _showTags) {
         // Graph skalieren und positionieren
         center();
     });
+    
+    
 };
+

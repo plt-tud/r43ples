@@ -1,0 +1,6 @@
+SELECT *
+WHERE { 
+    GRAPH <http://dbpedia.org> {
+        ?s ?p <http://schema.org/Country> 
+    } 
+}

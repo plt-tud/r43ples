@@ -70,7 +70,7 @@ public class VirtuosoHttpInterface extends TripleStoreInterface {
 	 * @throws HttpException 
 	 */
 	private InputStream executeQueryWithAuthorization(String query) {
-		return executeQueryWithAuthorization(query, "XML");
+		return executeQueryWithAuthorization(query, "application/sparql-results+xml");
 	}
 
 	
@@ -91,10 +91,11 @@ public class VirtuosoHttpInterface extends TripleStoreInterface {
 		try{
 			InputStream in = response.getEntity().getContent();
 			if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
-				throw new HttpException(response.getStatusLine().toString()+"\n"+in);
+				logger.warn(response.getStatusLine().toString()+"\n"+in);
+				return null;
 			}
 			return in;
-		} catch (HttpException | IOException e){
+		} catch (IOException e){
 			e.printStackTrace();
 			return null;
 		}
@@ -118,9 +119,7 @@ public class VirtuosoHttpInterface extends TripleStoreInterface {
 			
 	    HttpPost request = new HttpPost(endpoint);
 		
-		//set up HTTP Post Request (look at http://virtuoso.openlinksw.com/dataspace/doc/dav/wiki/Main/VOSSparqlProtocol for Protocol)
 		List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>(1);
-		nameValuePairs.add(new BasicNameValuePair("format",format));
 		nameValuePairs.add(new BasicNameValuePair("query", query));
     	try {
 			request.setEntity(new UrlEncodedFormEntity(nameValuePairs, "UTF-8"));
@@ -128,7 +127,8 @@ public class VirtuosoHttpInterface extends TripleStoreInterface {
 			e.printStackTrace();
 		}
     	request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-		
+    	request.setHeader("Accept", format);
+    	
 		//Execute Query
 		try {
 			return httpClient.execute(request);
@@ -145,15 +145,17 @@ public class VirtuosoHttpInterface extends TripleStoreInterface {
 
 	@Override
 	public ResultSet executeSelectQuery(String selectQueryString) {
-		InputStream result = executeQueryWithAuthorization(selectQueryString);
+		InputStream result = executeQueryWithAuthorization(selectQueryString, "application/sparql-results+xml");
 		return ResultSetFactory.fromXML(result);
 	}
 
 	@Override
 	public Model executeConstructQuery(String constructQueryString) {
-		InputStream result = executeQueryWithAuthorization(constructQueryString);
+		InputStream result = executeQueryWithAuthorization(constructQueryString, "application/rdf+xml");
 		Model model = ModelFactory.createDefaultModel();
-		RDFDataMgr.read(model, result, Lang.RDFXML);
+		if (result!=null) {
+			RDFDataMgr.read(model, result, Lang.RDFXML);
+		}
 		return model;
 	}
 
@@ -167,7 +169,7 @@ public class VirtuosoHttpInterface extends TripleStoreInterface {
 
 	@Override
 	public boolean executeAskQuery(String askQueryString) {
-		InputStream result = executeQueryWithAuthorization(askQueryString, "text");
+		InputStream result = executeQueryWithAuthorization(askQueryString, "text/plain");
 		String answer;
 		try {
 			answer = IOUtils.toString(result);

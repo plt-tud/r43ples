@@ -4,6 +4,8 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
@@ -14,18 +16,19 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
-import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.GitRepositoryState;
 
 @Provider
 public class ExceptionMapper implements
-		javax.ws.rs.ext.ExceptionMapper<InternalErrorException> {
+		javax.ws.rs.ext.ExceptionMapper<Throwable> {
 	private static Logger logger = Logger.getLogger(ExceptionMapper.class);
-
+	
+	@Context
+	HttpServletRequest request;
+	 
 	@Override
-	public Response toResponse(InternalErrorException e) {
+	public Response toResponse(Throwable e) {
 		logger.error(e.getMessage(), e);
-
 		
 		MustacheFactory mf = new DefaultMustacheFactory();
 	    Mustache mustache = mf.compile("templates/error.mustache");
@@ -35,6 +38,7 @@ public class ExceptionMapper implements
 	    htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
 	    htmlMap.put("git", GitRepositoryState.getGitRepositoryState());
 		htmlMap.put("error", e);
+		htmlMap.put("request", request.getMethod() );
 		
 		mustache.execute(sw, htmlMap);
 		String content = sw.toString();

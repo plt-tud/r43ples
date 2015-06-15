@@ -1,0 +1,33 @@
+prefix rmo:	<http://eatld.et.tu-dresden.de/rmo#>
+prefix prov:	<http://www.w3.org/ns/prov#> 
+prefix eatld:	<http://eatld.et.tu-dresden.de/>
+
+SELECT DISTINCT ?s ?p ?o
+WHERE {
+	GRAPH <http://eatld.et.tu-dresden.de/r43ples-revisions> {
+        { []  <http://eatld.et.tu-dresden.de/rmo#references>  <http://test.com/r43ples-dataset-1-revision-5> ;
+            <http://eatld.et.tu-dresden.de/rmo#fullGraph>  ?g_delete_set_full_graph . }
+        UNION
+        {   ?r_delete_set  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://eatld.et.tu-dresden.de/rmo#Revision> ;
+                <http://eatld.et.tu-dresden.de/rmo#deltaRemoved>  ?g_delete_set_full_graph .
+            FILTER ( ?r_delete_set IN (<http://test.com/r43ples-dataset-1-revision-5>,  <http://test.com/r43ples-dataset-1-revision-4>) )
+        }
+    
+        ?rm1 a rmo:Revision.
+        ?rm1 rmo:deltaAdded ?gm1.
+        FILTER (?rm1 IN (<http://test.com/r43ples-dataset-1-revision-5>, <http://test.com/r43ples-dataset-1-revision-4>))
+        
+        MINUS {
+            ?rm1_old a rmo:Revision.
+            ?rm1 prov:wasDerivedFrom+ ?rm1_old.
+            ?rm1_old rmo:deltaRemoved ?gm1_old.     
+            FILTER (?rm1_old IN (<http://test.com/r43ples-dataset-1-revision-5>, <http://test.com/r43ples-dataset-1-revision-4>))
+        }
+    }
+   
+    GRAPH ?g_delete_set_full_graph { ?s ?p ?o. } 
+	MINUS {
+		GRAPH ?gm1 { ?s ?p ?o }
+		}
+    GRAPH ?gm1_old {?s ?p ?o.}  
+}

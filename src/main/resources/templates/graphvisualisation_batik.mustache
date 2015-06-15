@@ -1,0 +1,29 @@
+{{<templates/super}}
+
+
+{{$script_extra}}
+	<script>
+		$(document)
+				.ready(
+						function() {
+							var svg = document.getElementById("revisiongraph").innerHTML;
+							var b64 = btoa(svg);
+							$("#graphDownload").attr("href", "data:image/svg+xml;base64," + b64);
+						});
+	</script>
+{{/script_extra}}
+    
+{{$content}}
+	    <h1>Revision Graph</h1>
+	    <h2><samp>&lt;{{graphName}}&gt;</samp></h2>
+		
+		<div id="revisiongraph">
+		{{{svg_content}}}
+		</div>
+		<br/>
+		<a class="btn btn-default" href="sparql">Back to Endpoint</a>
+		<a class="btn btn-default" id="graphDownload" href-lang='image/svg+xml' title='revisiongraph_{{graphName}}.svg' download='revisiongraph_{{graphName}}.svg'>Download</a><br/>
+{{/content}}
+
+
+{{/templates/super}}
