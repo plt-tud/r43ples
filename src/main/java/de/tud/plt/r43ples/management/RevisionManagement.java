@@ -441,8 +441,9 @@ public class RevisionManagement {
 			if (RevisionManagement.checkGraphExistence(graph_added))
 				TripleStoreInterfaceSingleton.get().executeUpdateQuery(  "DELETE { GRAPH <" + tempGraphName+ "> { ?s ?p ?o.} }"
 														+ "WHERE  { GRAPH <" + graph_added	+ "> { ?s ?p ?o.} }");
-
-			number = list.pollFirst().getRevisionNumber();
+			Revision first = list.pollFirst();
+			if (first!=null)
+				number = first.getRevisionNumber();
 		}
 
 	}
