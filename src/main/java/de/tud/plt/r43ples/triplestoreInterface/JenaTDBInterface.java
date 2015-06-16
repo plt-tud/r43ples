@@ -94,6 +94,7 @@ public class JenaTDBInterface extends TripleStoreInterface {
 		dataset.begin(ReadWrite.READ);
 		QueryExecution qExec = QueryExecutionFactory.create(constructQueryString, dataset);
 		Model result = qExec.execConstruct();
+		qExec.close();
 		dataset.end();
 		return result;
 	}
@@ -112,6 +113,7 @@ public class JenaTDBInterface extends TripleStoreInterface {
 		dataset.begin(ReadWrite.READ);
 		QueryExecution qExec = QueryExecutionFactory.create(describeQueryString, dataset);
 		Model result = qExec.execDescribe();
+		qExec.close();
 		dataset.end();
 		return result;
 	}
@@ -128,6 +130,7 @@ public class JenaTDBInterface extends TripleStoreInterface {
 		dataset.begin(ReadWrite.READ);
 		QueryExecution qe = QueryExecutionFactory.create(askQueryString, dataset);
 		boolean result = qe.execAsk();
+		qe.close();
 		dataset.end();
 		return result;
 	}

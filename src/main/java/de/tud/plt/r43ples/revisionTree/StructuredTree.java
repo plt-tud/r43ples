@@ -56,9 +56,8 @@ public class StructuredTree {
 
 	private void updateBranches(String graph) {
 		//query all branches
-		String queryBranches = String.format(
-				RevisionManagement.prefixes
-						+ "SELECT ?branch ?title ?commit%n"
+		String queryBranches = RevisionManagement.prefixes + String.format(
+						"SELECT ?branch ?title ?commit%n"
 						+ "WHERE { GRAPH <%s> { %n"
 						+ "?branch a rmo:Branch;%n"
 						+ "rdfs:label ?title;%n"
@@ -80,9 +79,8 @@ public class StructuredTree {
 
 	private void updateTags(String graph) {
 		// query all tags
-		String queryBranches = String.format(
-				RevisionManagement.prefixes
-						+ "SELECT ?tag ?title ?commit%n"
+		String queryBranches = RevisionManagement.prefixes + String.format(
+						"SELECT ?tag ?title ?commit%n"
 						+ "WHERE { GRAPH <%s> {%n"
 						+ "?tag a rmo:Tag;%n"
 						+ "rdfs:label ?title;%n"

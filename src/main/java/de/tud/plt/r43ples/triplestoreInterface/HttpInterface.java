@@ -87,11 +87,11 @@ public class HttpInterface extends TripleStoreInterface {
 	private InputStream executeQueryWithAuthorization(String query, String format) {
 		HttpResponse response = executeQueryWithAuthorizationResponse(query, format);
 		logger.debug("Statuscode: " + response.getStatusLine().getStatusCode());
-		
 		try{
 			InputStream in = response.getEntity().getContent();
 			if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
 				logger.warn(response.getStatusLine().toString()+"\n"+in);
+				in.close();
 				return null;
 			}
 			return in;
@@ -173,12 +173,12 @@ public class HttpInterface extends TripleStoreInterface {
 		String answer;
 		try {
 			answer = IOUtils.toString(result);
+			result.close();
 			return answer.equals("true");
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
 		}
-		
 	}
 
 	@Override

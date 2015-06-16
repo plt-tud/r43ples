@@ -541,7 +541,7 @@ public class Endpoint {
 		
 		if (mresult.hasConflict) {
 			responseBuilder = Response.status(Response.Status.CONFLICT);
-			responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(mresult.graphDiff, format));
+			responseBuilder.entity(mresult.conflictModel);
 		}
 		String graphNameHeader;
 		try {
