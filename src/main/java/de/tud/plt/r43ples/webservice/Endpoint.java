@@ -1034,6 +1034,10 @@ public class Endpoint {
 			final String format) throws InternalErrorException {
 		logger.info("Update detected");
 		
+		// the HashMap to recode new RevisionNumber 
+		Map<String, String> revisionNumberMap = new HashMap<String, String>();
+		revisionNumberMap.clear();	
+		
 		// write to add and delete sets
 		// (replace graph names in query)
 		String queryM = query;
@@ -1048,9 +1052,21 @@ public class Endpoint {
 			if (data == null)
 				data = "";
 			
-			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
+			// see whether newRevisionNumber already in revisonNumberMap exist. new added code		
+			String newRevisionNumber = null;
+			if (revisionNumberMap.containsKey(revisionName)) {
+				newRevisionNumber = revisionNumberMap.get(revisionName);
+			}else {
+				newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
+				revisionNumberMap.put(revisionName, newRevisionNumber);
+			}
+			
+//			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);						
 			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
 			String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
+			
+			logger.info("hash updatd test data: "+ data );
+			logger.info("hash updatd test newNumber"+ newRevisionNumber);
 			if (!RevisionManagement.isBranch(graphName, revisionName)) {
 				throw new InternalErrorException("Revision is not referenced by a branch");
 			}
@@ -1080,8 +1096,18 @@ public class Endpoint {
 			String revisionName = m.group("revision").toLowerCase();	// can contain revision
 																		// numbers or reference
 																		// names
+			
+			// see whether newRevisionNumber already in revisonNumberMap exist, new added code			
+			String newRevisionNumber = null;
+			if (revisionNumberMap.containsKey(revisionName)) {
+				newRevisionNumber = revisionNumberMap.get(revisionName);
+			}else {
+				newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
+				revisionNumberMap.put(revisionName, newRevisionNumber);
+			}
+			
 			// General variables
-			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
+//			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
 			String referenceFullGraph = RevisionManagement.getReferenceGraph(graphName, revisionName);
 			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
 			String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;

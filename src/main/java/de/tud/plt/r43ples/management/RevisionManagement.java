@@ -2,6 +2,7 @@ package de.tud.plt.r43ples.management;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.rmi.server.UID;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,11 +52,21 @@ public class RevisionManagement {
 	 * @param graphName
 	 *            the graph name of the existing graph
 	 */
-	public static void putGraphUnderVersionControl(final String graphName) {
+	public static String putGraphUnderVersionControl(final String graphName) {
 		logger.info("Put existing graph under version control with the name " + graphName);
 
 		// General variables
-		int revisionNumber = 0;
+		//call: create graph response
+		//int revisionNumber = 0;
+		UID revisionNumberUid = new UID();
+		String revisionNumber = revisionNumberUid.toString();
+		
+		while (checkExistUID(revisionNumber, graphName)){
+			UID newRevisionNumberUid = new UID();
+			revisionNumber = newRevisionNumberUid.toString();		
+		}
+		
+		
 		String revisionUri = graphName + "-revision-" + revisionNumber;
 		String addSetGraphUri = graphName + "-delta-added-" + revisionNumber;
 		String removeSetGraphUri = graphName + "-delta-removed-" + revisionNumber;
@@ -88,6 +99,8 @@ public class RevisionManagement {
 		String queryRevision = prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", Config.revision_graph, queryContent);
 		
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryRevision);
+		
+		return revisionNumber;
 	}
 	
 	
@@ -610,15 +623,15 @@ public class RevisionManagement {
 	 * @return true when it is an empty branch
 	 * @throws InternalErrorException 
 	 */
-	private static boolean isBranchEmpty(final String graphName, final String referenceIdentifier) throws InternalErrorException {
-		String referenceUri = getBranchUri(graphName, referenceIdentifier);
-		String queryASKBranch = prefixes
-				+ String.format("ASK { GRAPH <%s> { "
-						+ " <%s> rmo:references ?rev; prov:wasDerivedFrom ?rev ." 
-						+ " }} ",
-						Config.revision_graph, referenceUri);
-		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASKBranch);
-	}
+//	private static boolean isBranchEmpty(final String graphName, final String referenceIdentifier) throws InternalErrorException {
+//		String referenceUri = getBranchUri(graphName, referenceIdentifier);
+//		String queryASKBranch = prefixes
+//				+ String.format("ASK { GRAPH <%s> { "
+//						+ " <%s> rmo:references ?rev; prov:wasDerivedFrom ?rev ." 
+//						+ " }} ",
+//						Config.revision_graph, referenceUri);
+//		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASKBranch);
+//	}
 
 	/**
 	 * 
@@ -628,15 +641,43 @@ public class RevisionManagement {
 	 * @throws InternalErrorException
 	 */
 	public static String getNextRevisionNumber(final String graphName, final String revisionIdentifier) throws InternalErrorException {
-		String revisionNumber = getRevisionNumber(graphName, revisionIdentifier);
-		if (isBranchEmpty(graphName, revisionIdentifier)) {
-			return getRevisionNumberForNewBranch(graphName, revisionNumber);
-		} else {
-			return getNextRevisionNumberForLastRevisionNumber(graphName, revisionNumber);
+
+//		String revisionNumber = getRevisionNumber(graphName, revisionIdentifier);
+//		if (isBranchEmpty(graphName, revisionIdentifier)) {
+//			return getRevisionNumberForNewBranch(graphName, revisionNumber);
+//		} else {
+//			return getNextRevisionNumberForLastRevisionNumber(graphName, revisionNumber);
+//		}
+		
+		// create UID and check whether the uid number already in named graph exist, if yes , than create it once again,
+		// if not , return this one
+		
+		UID nextNumberUid = new UID();
+		String nextNumber = nextNumberUid.toString();
+		
+		while (checkExistUID(nextNumber,graphName)){
+			UID newNextNumberUid = new UID();
+			nextNumber = newNextNumberUid.toString();		
 		}
+		
+		return nextNumber;
 	}
 	
-
+	/**
+	 * check whether the uid number already exist
+	 * @param revisionUid
+	 * @return boolean*/
+	
+	public static boolean checkExistUID(final String revisionUid, final String graphName) {
+		String queryASK = prefixes
+				+ String.format(""
+						+ "ASK { GRAPH <%s> { " 
+						+ " ?rev a rmo:Revision; rmo:revisionOf <%s>; rmo:revisionNumber \"%s\". }} ",
+						Config.revision_graph, graphName, revisionUid);
+		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
+	}
+	
+	
 	/**
 	 * Get the next revision number for specified revision number of any branch.
 	 * 
@@ -646,16 +687,20 @@ public class RevisionManagement {
 	 *            the revision number of the last revision
 	 * @return the next revision number for specified revision of branch
 	 */
-	public static String getNextRevisionNumberForLastRevisionNumber(final String graphName,
-			final String revisionNumber) {
-		if (revisionNumber.contains("-")) {
-			return revisionNumber.substring(0, revisionNumber.lastIndexOf('-') + 1)
-					+ (Integer.parseInt(revisionNumber.substring(revisionNumber.lastIndexOf('-') + 1,
-							revisionNumber.length())) + 1);
-		} else {
-			return Integer.toString((Integer.parseInt(revisionNumber) + 1));
-		}
-	}
+//	public static String getNextRevisionNumberForLastRevisionNumber(final String graphName,
+//			final String revisionNumber) {
+////		if (revisionNumber.contains("-")) {
+////			return revisionNumber.substring(0, revisionNumber.lastIndexOf('-') + 1)
+////					+ (Integer.parseInt(revisionNumber.substring(revisionNumber.lastIndexOf('-') + 1,
+////							revisionNumber.length())) + 1);
+////		} else {
+////			return Integer.toString((Integer.parseInt(revisionNumber) + 1));
+////		}
+//		// UID Hash code
+//		UID nextNumber = new UID();
+//		return nextNumber.toString();
+//		
+//	}
 
 	/**
 	 * Get the revision number for a new branch.
@@ -666,28 +711,32 @@ public class RevisionManagement {
 	 *            the revision number of the revision which should be branched
 	 * @return the revision number of the new branch
 	 */
-	public static String getRevisionNumberForNewBranch(final String graphName, final String revisionNumber) {
-		logger.info("Get the revision number for a new branch of graph " + graphName
-				+ " and revision number " + revisionNumber);
-		int ii = 0;
-		String newRevisionNumber;
-		final int MAX_TRIES = 99;
-		while (ii < MAX_TRIES) {
-			newRevisionNumber = revisionNumber + "." + ii + "-0";
-			String queryASK = prefixes	+ String.format("" 
-					+ "ASK { GRAPH <%s> { " 
-					+ " ?rev a rmo:Revision;"
-					+ "		rmo:revisionOf <%s>;" 
-					+ "		rmo:revisionNumber \"%s\"}}",
-							Config.revision_graph, graphName, newRevisionNumber);
-			boolean resultASK = TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
-			if (resultASK == false) {
-				return newRevisionNumber;
-			}
-			ii++;
-		}
-		return null;
-	}
+//	public static String getRevisionNumberForNewBranch(final String graphName, final String revisionNumber) {
+////		logger.info("Get the revision number for a new branch of graph " + graphName
+////				+ " and revision number " + revisionNumber);
+////		int ii = 0;
+////		String newRevisionNumber;
+////		final int MAX_TRIES = 99;
+////		while (ii < MAX_TRIES) {
+////			newRevisionNumber = revisionNumber + "." + ii + "-0";
+////			String queryASK = prefixes	+ String.format("" 
+////					+ "ASK { GRAPH <%s> { " 
+////					+ " ?rev a rmo:Revision;"
+////					+ "		rmo:revisionOf <%s>;" 
+////					+ "		rmo:revisionNumber \"%s\"}}",
+////							Config.revision_graph, graphName, newRevisionNumber);
+////			boolean resultASK = TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
+////			if (resultASK == false) {
+////				return newRevisionNumber;
+////			}
+////			ii++;
+////		}
+////		return null;
+//		// UID Hash code
+//			UID newBranchNumber = new UID();
+//			return newBranchNumber.toString();
+//		
+//	}
 
 	/**
 	 * Split huge INSERT statements into separate queries of up to fifty triple
@@ -785,7 +834,6 @@ public class RevisionManagement {
 	public static String getRevisionInformation(final String graphName, final String format) {
 		String sparqlQuery;
 		
-		logger.info("yxyv graphName : " + graphName );
 		if (graphName.equals("")) {
 			sparqlQuery = String.format(""
 					+ "CONSTRUCT" 

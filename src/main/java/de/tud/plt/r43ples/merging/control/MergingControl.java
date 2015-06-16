@@ -25,6 +25,7 @@ import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SDDTripleStateEnum;
 import de.tud.plt.r43ples.merging.management.BranchManagement;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
+import de.tud.plt.r43ples.merging.management.ReportManagement;
 import de.tud.plt.r43ples.merging.model.structure.CommitModel;
 import de.tud.plt.r43ples.merging.model.structure.Difference;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
@@ -251,7 +252,7 @@ public class MergingControl {
 			
 			//create and initialization reportResult
 			
-			reportResult = new ReportResult();
+			reportResult = ReportManagement.initialReportResult(differenceModel);
 			
 			// Create the individual models of both branches
 			individualModelBranchA = ProcessManagement.createIndividualModelOfRevision(graphName, branchNameA, differenceModel);
@@ -413,10 +414,10 @@ public class MergingControl {
 		List<TableRow> updatedTripleRowList = new ArrayList<TableRow>();
 		for(String property: propertyArray) {
 			
-			if(property.equals("rdf:type")){
-				logger.info("property type ");
-				property = "a";
-			}
+//			if(property.equals("rdf:type")){
+//				logger.info("property type ");
+//				property = "a";
+//			}
 			Iterator<TableRow> itu = TripleRowList.iterator();
 			while(itu.hasNext()){
 				TableRow tableRow = itu.next();

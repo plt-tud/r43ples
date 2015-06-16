@@ -380,12 +380,17 @@ public class ProcessManagement {
 	 * @return the formatted predicate
 	 */
 	
+//	public static String getPredicate(Triple triple) {
+//		if (triple.getPredicate().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
+//			return "a";
+//		} else {
+//			return "<" + triple.getPredicate() + ">";
+//		}
+//	}
+	
 	public static String getPredicate(Triple triple) {
-		if (triple.getPredicate().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
-			return "a";
-		} else {
-			return "<" + triple.getPredicate() + ">";
-		}
+		
+		return "<" + triple.getPredicate() + ">";
 	}
 	
 	
