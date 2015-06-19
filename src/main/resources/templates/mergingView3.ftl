@@ -276,6 +276,15 @@
               $("#highLevelView").load("highLevelView", function(){
                 $("#highLevelView").show();
       //          window.location.href = "#";
+                $("#highLevelTable :button").each(function (){
+                   if($(this).text() == "Approved") {
+                      $(this).parent().prev().children().prop({"disabled":true});
+                      $(this).parent().parent().css('background','green');
+                   }else{
+                      $(this).parent().prev().children().prop({"disabled":false});
+                      $(this).parent().parent().css('background','white');
+                   }
+                });
 
               });
 

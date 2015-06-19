@@ -875,15 +875,38 @@ public class ProcessManagement {
 		Iterator<Entry<String, HighLevelChangeRenaming>> iterHL = highLevelChangeModel.getHighLevelChangesRenaming().entrySet().iterator();
 		while(iterHL.hasNext()){
 			HighLevelChangeRenaming hlcr = iterHL.next().getValue();
-			Triple additionTriple = hlcr.getAdditionDifference().getTriple();
-			Triple deletionTriple = hlcr.getDeletionDifference().getTriple();
+			//get added Difference and deleted Difference
+			Difference additionDifference = hlcr.getAdditionDifference();
+			Difference deletionDifference = hlcr.getDeletionDifference();
+			Triple additionTriple = additionDifference.getTriple();
+			Triple deletionTriple = deletionDifference.getTriple();
 					
 			String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(additionTriple));
 			String predicate = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(additionTriple));
 			String altObject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(deletionTriple));
 			String newObject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(additionTriple));
 			
-			highLevelChangeTableModel.readTableRow(new HighLevelChangeTableRow(hlcr, subject, predicate, altObject, newObject));
+			//get checkBox state
+			//get approved button state
+			String isRenaming = "no";
+			String isResolved = "no";
+			if(additionDifference.getResolutionState() == ResolutionState.RESOLVED
+					&& deletionDifference.getResolutionState() == ResolutionState.RESOLVED) {
+				if(additionDifference.getTripleResolutionState() == SDDTripleStateEnum.ADDED
+						&& deletionDifference.getTripleResolutionState() == SDDTripleStateEnum.DELETED) {
+					isRenaming = "yes";
+					isResolved = "yes";	
+				} else if (additionDifference.getTripleResolutionState() == SDDTripleStateEnum.DELETED 
+						&& deletionDifference.getTripleResolutionState() == SDDTripleStateEnum.ADDED) {
+					isRenaming = "no";
+					isResolved = "yes";
+				}
+			}else if(additionDifference.getTripleResolutionState() == SDDTripleStateEnum.ADDED
+					&& deletionDifference.getTripleResolutionState() == SDDTripleStateEnum.DELETED ){
+				isRenaming = "yes";
+			}
+			
+			highLevelChangeTableModel.readTableRow(new HighLevelChangeTableRow(hlcr, subject, predicate, altObject, newObject, isResolved, isRenaming));
 		}
 		
 		Iterator<HighLevelChangeTableRow> iter = highLevelChangeTableModel.getTripleRowList().iterator();

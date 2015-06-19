@@ -168,16 +168,18 @@ public class SampleDataSet {
 		String initialContent = DatasetGenerationManagement.readFileToString(initialContentFilePath);
 
 		// Create new example graph
-		DatasetGenerationManagement.createNewGraph(graphName);
+		//DatasetGenerationManagement.createNewGraph(graphName);
+		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 
 		// Initial commit
-		DatasetGenerationManagement.executeInsertQuery(user, "Initial commit", graphName, "0", initialContent);
+		//DatasetGenerationManagement.executeInsertQuery(user, "Initial commit", graphName, "0", initialContent);
+		String revision1 = RevisionManagement.createNewRevision(graphName, initialContent, null, user, "Initial commit", revision0);
 
 		// Create a new branch B1
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, "1", "B1");
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, revision1, "B1");
 
 		// Create a new branch B2
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2", graphName, "1", "B2");
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2", graphName, revision1, "B2");
 
 		// First commit to B1 - insert sub plant T4
 		String insertT4 = "<http://eatld.et.tu-dresden.de/batch/A3A5R07QZU> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://eatld.et.tu-dresden.de/mso/Unit> . \n"
@@ -195,18 +197,24 @@ public class SampleDataSet {
 				+ "<http://eatld.et.tu-dresden.de/batch/A3A5R07QZU> <http://eatld.et.tu-dresden.de/mso/hasEquipment> <http://eatld.et.tu-dresden.de/batch/A3A5R01PZU> . \n"
 				+ "<http://eatld.et.tu-dresden.de/batch/A3A5R07QZU> <http://www.w3.org/2000/01/rdf-schema#comment> \"Subplant flush\"@en . \n";
 
-		DatasetGenerationManagement.executeInsertQuery(user, "First commit to B1", graphName, "B1", insertT4);
-
+		//DatasetGenerationManagement.executeInsertQuery(user, "First commit to B1", graphName, "B1", insertT4);
+		String revisionB1_0 = RevisionManagement.createNewRevision(graphName, insertT4, null, user, "First commit to B1", "B1".toLowerCase());
+		
 		// Second commit to B1 - delete sub plant T4
-		DatasetGenerationManagement.executeDeleteWhereQuery(user, "Second commit to B1", graphName, "B1",
+		DatasetGenerationManagement.executeDeleteWhereQuery(user, "Second commit to B1", graphName, revisionB1_0,
 				"<http://eatld.et.tu-dresden.de/batch/A3A5R07QZU> ?p ?o . \n");
 
+		//RevisionManagement.createNewRevision(graphName, null, "<http://eatld.et.tu-dresden.de/batch/A3A5R07QZU> ?p ?o . \n", user, "Second commit to B1", revisionB1_0);
+		
 		// First commit to B2 - insert sub plant T4
-		DatasetGenerationManagement.executeInsertQuery(user, "First commit to B2", graphName, "B2", insertT4);
-
+		//DatasetGenerationManagement.executeInsertQuery(user, "First commit to B2", graphName, "B2", insertT4);
+		String revisionB2_0 = RevisionManagement.createNewRevision(graphName, insertT4, null, user, "First commit to B2", "B2".toLowerCase());
+		
 		// Second commit to B2 - delete armature V002
-		DatasetGenerationManagement.executeDeleteWhereQuery(user, "Second commit to B2", graphName, "B2",
+		DatasetGenerationManagement.executeDeleteWhereQuery(user, "Second commit to B2", graphName,revisionB2_0,
 				"<http://eatld.et.tu-dresden.de/batch/A3A5R01TZU> ?p ?o . \n");
+		
+		//RevisionManagement.createNewRevision(graphName, null, "<http://eatld.et.tu-dresden.de/batch/A3A5R01TZU> ?p ?o . \n", user, "Second commit to B2", revisionB2_0);
 
 		logger.info("Example graph <" + graphName +"> created.");
 		return graphName;
@@ -235,53 +243,61 @@ public class SampleDataSet {
 		String graphName = "http://test.com/r43ples-dataset-renaming";
 
 		// Create new example graph
-		DatasetGenerationManagement.createNewGraph(graphName);
+		//DatasetGenerationManagement.createNewGraph(graphName);
+		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 
 		// Initial commit
 		String triples = "<http://example.com/testS> <http://example.com/testP1> \"A\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP1> \"B\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP2> \"C\". \n";
 
-		DatasetGenerationManagement.executeInsertQuery(user, "Initial commit", graphName, "0", triples);
-
+		//DatasetGenerationManagement.executeInsertQuery(user, "Initial commit", graphName, "0", triples);
+		String revision1 = RevisionManagement.createNewRevision(graphName, triples, null, user, "Initial commit", revision0);
+		
 		// Create a new branch B1
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, "1", "B1");
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, revision1, "B1");
 
 		// Create a new branch B2
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2", graphName, "1", "B2");
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2", graphName, revision1, "B2");
 
 		// First commit to B1
 		String triplesInsert = "<http://example.com/testS> <http://example.com/testP2> \"D\". \n";
 
 		String triplesDelete = "<http://example.com/testS> <http://example.com/testP1> \"A\". \n";
 
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B1", graphName, "B1",
-				triplesInsert, triplesDelete);
-
+//		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B1", graphName, "B1",
+//				triplesInsert, triplesDelete);
+		String revisionB1_0 = RevisionManagement.createNewRevision(graphName, triplesInsert, triplesDelete, user, "First commit to B1", "B1".toLowerCase());
+		
 		// First commit to B2
 		triplesInsert = "<http://example.com/testS> <http://example.com/testP2> \"D\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP2> \"H\". \n";
 
 		triplesDelete = "<http://example.com/testS> <http://example.com/testP2> \"C\". \n";
 
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B2", graphName, "B2",
-				triplesInsert, triplesDelete);
-
+//		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B2", graphName, "B2",
+//				triplesInsert, triplesDelete);
+		String revisionB2_0 = RevisionManagement.createNewRevision(graphName, triplesInsert, triplesDelete, user, "First commit to B2", "B2".toLowerCase());
+		
 		// Second commit to B1
 		triplesInsert = "<http://example.com/testS> <http://example.com/testP1> \"G\". \n";
 
 		triplesDelete = "<http://example.com/testS> <http://example.com/testP2> \"D\". \n";
 
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Second commit to B1", graphName, "B1",
-				triplesInsert, triplesDelete);
-
+//		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Second commit to B1", graphName, "B1",
+//				triplesInsert, triplesDelete);
+		
+		RevisionManagement.createNewRevision(graphName, triplesInsert, triplesDelete, user, "Second commit to B1", revisionB1_0);
+		
 		// Second commit to B2
 		triplesInsert = "<http://example.com/testS> <http://example.com/testP2> \"I\". \n";
 
-		DatasetGenerationManagement.executeInsertQuery(user, "Second commit to B2", graphName, "B2",
-				triplesInsert);
-
+//		DatasetGenerationManagement.executeInsertQuery(user, "Second commit to B2", graphName, "B2",
+//				triplesInsert);
+		
+		RevisionManagement.createNewRevision(graphName, triplesInsert, null, user, "Second commit to B2", revisionB2_0);
 		logger.info("Example graph <" + graphName +"> created.");
+		
 		return graphName;
 	}
 

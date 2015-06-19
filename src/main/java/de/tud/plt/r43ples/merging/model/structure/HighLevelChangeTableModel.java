@@ -12,17 +12,17 @@ public class HighLevelChangeTableModel {
 	/**currentTripleId of Triple*/
 	private Integer currentTripleId = 1;
 	private List<HighLevelChangeTableRow> tripleRowList;
-	private Map<String, HighLevelChangeRenaming> manuellTriple;
+	private Map<String, HighLevelChangeTableRow> manuellTriple;
 	
 	public HighLevelChangeTableModel(){
 		this.setTripleRowList(new ArrayList<HighLevelChangeTableRow>());
-		this.setManuellTriple(new HashMap<String, HighLevelChangeRenaming>());	
+		this.setManuellTriple(new HashMap<String, HighLevelChangeTableRow>());	
 	}
 	
 	public void readTableRow(HighLevelChangeTableRow tableRow){
 		tableRow.setTripleId(currentTripleId.toString());
 		this.tripleRowList.add(tableRow);
-		this.manuellTriple.put(tableRow.getTripleId(), tableRow.getHighLevelChangeRenaming());
+		this.manuellTriple.put(tableRow.getTripleId(), tableRow);
 		currentTripleId ++;
 	}
 	
@@ -33,10 +33,10 @@ public class HighLevelChangeTableModel {
 	public void setTripleRowList(List<HighLevelChangeTableRow> tripleRowList) {
 		this.tripleRowList = tripleRowList;
 	}
-	public Map<String, HighLevelChangeRenaming> getManuellTriple() {
+	public Map<String, HighLevelChangeTableRow> getManuellTriple() {
 		return manuellTriple;
 	}
-	public void setManuellTriple(HashMap<String, HighLevelChangeRenaming> manuellTriple) {
+	public void setManuellTriple(HashMap<String, HighLevelChangeTableRow> manuellTriple) {
 		this.manuellTriple = manuellTriple;
 	}
 	

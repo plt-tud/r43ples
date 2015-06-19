@@ -31,6 +31,7 @@ import de.tud.plt.r43ples.merging.model.structure.Difference;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
 import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeModel;
+import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeRenaming;
 import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeTableModel;
 import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeTableRow;
 import de.tud.plt.r43ples.merging.model.structure.IndividualModel;
@@ -173,8 +174,7 @@ public class MergingControl {
 		ProcessManagement.createTableModel(differenceModel, tableModel);
 		
 		logger.info("updated tableModel fertig!");
-		
-		ProcessManagement.createHighLevelChangeRenamingModel(highLevelChangeModel, differenceModel);
+
 		
 		// Create the individual models of both branches
 		individualModelBranchA = ProcessManagement.createIndividualModelOfRevision(commitModel.getGraphName(), commitModel.getBranch1(), differenceModel);
@@ -241,10 +241,6 @@ public class MergingControl {
 			
 			ProcessManagement.createTableModel(differenceModel, tableModel);
 			
-			ProcessManagement.createHighLevelChangeRenamingModel(highLevelChangeModel, differenceModel);
-			
-			//test the highlevelChangeTableModel
-			ProcessManagement.createHighLevelChangeTableModel(highLevelChangeModel, highLevelChangeTableModel);
 			
 			// Save the current revision numbers
 			revisionNumberBranchA = RevisionManagement.getRevisionNumber(graphName, branchNameA);
@@ -357,8 +353,16 @@ public class MergingControl {
 	
 	/**getHighLevel View
 	 * @throws IOException 
-	 * @throws TemplateException */
-	public static String getHighLevelView() throws TemplateException, IOException {
+	 * @throws TemplateException 
+	 * @throws ConfigurationException */
+	public static String getHighLevelView() throws TemplateException, IOException, ConfigurationException {
+		
+		//get high level change model
+		ProcessManagement.createHighLevelChangeRenamingModel(highLevelChangeModel, differenceModel);
+		
+		//test the highlevelChangeTableModel
+		ProcessManagement.createHighLevelChangeTableModel(highLevelChangeModel, highLevelChangeTableModel);
+		
 		List<HighLevelChangeTableRow> highLevelRowList = highLevelChangeTableModel.getTripleRowList();
 		
 		Map<String, Object> scope = new HashMap<String, Object>();
@@ -565,6 +569,181 @@ public class MergingControl {
 				Difference difference = entryDF.getValue();
 				
 				logger.info("approved difference model: " + tripleString + difference.getTripleResolutionState() + difference.getResolutionState().toString());
+			}
+		}	
+		
+	}
+	
+	/**
+	 * approve id nummer of highLevelRow in high level Table 
+	 * Difference Model will changed though ajax
+	 * updated reportResult by decrementCounterDifferenceResolutionChanged() and incrementCounterDifferenceResolutionChanged()
+	 * @param id: to approved Triple id 
+	 * @param isChecked : status of approved Triple*/
+	
+	public static void approveHighLevelToDifferenceModel(String id, String isChecked){
+		
+		// Count for Conflict;
+		int count = 0;
+		HighLevelChangeTableRow tableRow = highLevelChangeTableModel.getManuellTriple().get(id);
+//		String isRenaming = tableRow.getIsRenaming();
+		String isResolved = tableRow.getIsResolved();
+		HighLevelChangeRenaming changeRenaming = tableRow.getHighLevelChangeRenaming();
+		Difference additionDifference = changeRenaming.getAdditionDifference();
+		Difference deletionDifference = changeRenaming.getDeletionDifference();
+		
+		SDDTripleStateEnum additionDifferenceSDDState;
+		SDDTripleStateEnum deletionDifferenceSDDState;
+		
+		//result approved 
+		if(isResolved.equals("no")) {
+			if (isChecked.equals("1")) {
+				// Rename - yes
+				additionDifferenceSDDState = SDDTripleStateEnum.ADDED;
+				deletionDifferenceSDDState = SDDTripleStateEnum.DELETED;
+				
+				
+				
+			} else {
+				// Rename - no
+				
+				additionDifferenceSDDState = SDDTripleStateEnum.DELETED;
+				deletionDifferenceSDDState = SDDTripleStateEnum.ADDED;
+	
+			}
+			
+			Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
+			while(iterDM.hasNext()) {
+				Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterDM.next();
+				DifferenceGroup differ = (DifferenceGroup) entryDG.getValue();
+//				boolean conflicting = differ.isConflicting();
+				
+				SDDTripleStateEnum automaticState = differ.getAutomaticResolutionState();
+				Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
+				while(iterDIF.hasNext()){					
+					Entry<String, Difference> entryDF = iterDIF.next();
+					Difference difference = entryDF.getValue();
+					ResolutionState resolutionState = difference.getResolutionState();
+					
+					if(difference.equals(additionDifference)){
+						
+						if(resolutionState == ResolutionState.DIFFERENCE && (!additionDifferenceSDDState.equals(automaticState))){
+							reportResult.incrementCounterDifferencesResolutionChanged();						
+						}
+						
+						difference.setTripleResolutionState(additionDifferenceSDDState);
+						difference.setResolutionState(ResolutionState.RESOLVED);			
+						
+					}
+					if(difference.equals(deletionDifference)){
+						
+						if(resolutionState == ResolutionState.DIFFERENCE && (!deletionDifferenceSDDState.equals(automaticState))){
+							reportResult.incrementCounterDifferencesResolutionChanged();						
+						}
+						
+						difference.setTripleResolutionState(deletionDifferenceSDDState);
+						difference.setResolutionState(ResolutionState.RESOLVED);			
+						
+					}
+								
+				}
+			}
+			
+			tableRow.setIsResolved("yes");
+		}else{
+			Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
+			while(iterDM.hasNext()) {
+				Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterDM.next();
+				DifferenceGroup differ = (DifferenceGroup) entryDG.getValue();
+				boolean conflicting = differ.isConflicting();
+				
+				SDDTripleStateEnum automaticState = differ.getAutomaticResolutionState();
+				Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
+				while(iterDIF.hasNext()){					
+					Entry<String, Difference> entryDF = iterDIF.next();
+					Difference difference = entryDF.getValue();
+					
+					SDDTripleStateEnum differenceSDDState = difference.getTripleResolutionState();
+//					ResolutionState resolutionState = difference.getResolutionState();
+					
+					if(difference.equals(additionDifference)){
+						
+						if(!differenceSDDState.equals(automaticState) && !conflicting){
+							reportResult.decrementCounterDifferencesResolutionChanged();
+							difference.setTripleResolutionState(automaticState);						
+						}
+						difference.setResolutionState(ResolutionState.DIFFERENCE);
+						if (conflicting) {
+							difference.setResolutionState(ResolutionState.CONFLICT);
+							if(!differenceSDDState.equals(automaticState)){
+								difference.setTripleResolutionState(automaticState);
+							}
+						}					
+						
+					}
+					if(difference.equals(deletionDifference)){
+						
+						if(!differenceSDDState.equals(automaticState) && !conflicting){
+							reportResult.decrementCounterDifferencesResolutionChanged();
+							difference.setTripleResolutionState(automaticState);						
+						}
+						difference.setResolutionState(ResolutionState.DIFFERENCE);
+						if (conflicting) {
+							difference.setResolutionState(ResolutionState.CONFLICT);
+							if(!differenceSDDState.equals(automaticState)){
+								difference.setTripleResolutionState(automaticState);
+							}
+						}	
+					}	
+					
+				}
+			}
+			tableRow.setIsResolved("no");
+		}
+		
+		//else fertig
+		
+		
+		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
+		while(iterDM.hasNext()) {
+			Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterDM.next();
+			DifferenceGroup differ = (DifferenceGroup) entryDG.getValue();
+			
+			Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
+			while(iterDIF.hasNext()){
+				Entry<String, Difference> entryDF = iterDIF.next();
+				//get triple
+				String tripleString = entryDF.getKey();
+				
+				logger.info("tripleString : "+ tripleString);
+				Difference difference = entryDF.getValue();
+				
+				if(difference.getResolutionState().equals(ResolutionState.CONFLICT)){
+					count ++;
+				}
+			}
+		}
+		
+		
+		reportResult.setConflictsNotApproved(count);
+		
+		logger.info("reportresult : "+ reportResult.getConflictsNotApproved());
+		
+		//test ReportResult:
+		logger.info("reportresult count: "+ reportResult.getConflictsNotApproved() + "--" + reportResult.getDifferencesResolutionChanged());
+		// only for test approved difference model
+		Iterator<Entry<String, DifferenceGroup>> iterD = differenceModel.getDifferenceGroups().entrySet().iterator();
+		while(iterD.hasNext()) {
+			Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterD.next();
+			DifferenceGroup differ = (DifferenceGroup) entryDG.getValue();
+			Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
+			while(iterDIF.hasNext()){
+				Entry<String, Difference> entryDF = iterDIF.next();
+				//get triple
+				String tripleString = entryDF.getKey();
+				Difference difference = entryDF.getValue();
+				
+				logger.info("high level approved difference model: " + tripleString + difference.getTripleResolutionState() + difference.getResolutionState().toString());
 			}
 		}	
 		

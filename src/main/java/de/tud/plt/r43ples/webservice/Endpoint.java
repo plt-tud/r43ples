@@ -450,6 +450,18 @@ public class Endpoint {
 		
 	}
 	
+	@Path("approveHighLevelProcess")
+	@POST
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final void approveHighLevelPOST(@HeaderParam("Accept") final String formatHeader, @FormParam("isChecked") @DefaultValue("") final String isChecked,
+			@FormParam("id") @DefaultValue("") final String id) throws IOException, InternalErrorException {
+		logger.info("approve high test: "+id);
+		logger.info("isChecked: " + isChecked);
+		MergingControl.approveHighLevelToDifferenceModel(id, isChecked);
+		
+		
+	}
+	
 	
 	/**push check : coflict approved check , difference approved change check
 	 * reportResult create
@@ -649,12 +661,13 @@ public class Endpoint {
 	}
 	
 	
-	/**load High Level Change Table View */
+	/**load High Level Change Table View 
+	 * @throws ConfigurationException */
 	
 	@Path("highLevelView")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response highLevelGET() throws TemplateException, IOException {
+	public final Response highLevelGET() throws TemplateException, IOException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
 		
