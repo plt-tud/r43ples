@@ -37,6 +37,7 @@ import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeTableRow;
 import de.tud.plt.r43ples.merging.model.structure.IndividualModel;
 import de.tud.plt.r43ples.merging.model.structure.IndividualStructure;
 import de.tud.plt.r43ples.merging.model.structure.ReportResult;
+import de.tud.plt.r43ples.merging.model.structure.ReportTableRow;
 import de.tud.plt.r43ples.merging.model.structure.TableEntrySemanticEnrichmentAllIndividuals;
 import de.tud.plt.r43ples.merging.model.structure.TableModel;
 import de.tud.plt.r43ples.merging.model.structure.TableRow;
@@ -759,9 +760,10 @@ public class MergingControl {
 	 * ##########################################################################################################################################################################
 	 * @throws IOException 
 	 * @throws TemplateException 
+	 * @throws ConfigurationException 
 	 */
 	
-	public static String createReportProcess() throws TemplateException, IOException {
+	public static String createReportProcess() throws TemplateException, IOException, ConfigurationException {
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		freemarker.template.Template temp = null; 
@@ -776,15 +778,20 @@ public class MergingControl {
         } catch (IOException e) {  
             e.printStackTrace();  
         }  
+		
+		
+		List<ReportTableRow>  reportTableRowList = ReportManagement.createReportTableRowList(differenceModel) ;
+		
 		String report = null;
 		if(reportResult.getConflictsNotApproved() > 0){
-			report = "es gibt noch Konflikten, die nicht geloest werden";
+			report = "1";
 		}else {
-			report = "alles ist in Ordnung";
+			report = "0";
 		}
 		
-		
+		scope.put("commit", commitModel);
 		scope.put("report", report);
+		scope.put("reportTableRowList", reportTableRowList);
 		
 		temp.process(scope,sw);		
 		return sw.toString();	

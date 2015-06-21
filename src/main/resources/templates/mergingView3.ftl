@@ -116,6 +116,35 @@
       <script type="text/javascript">
         $(document).foundation();      
         $(document).ready(function(){
+
+            // von report seite go back , triple table bleibt
+            $(window).load(function() {
+              var checked = [];
+              var properties;
+              $("input[name='pFilter']:checked").each(function (){
+                    checked.push($(this).val());
+                });
+
+              properties = checked.join(",");
+
+              $.post("filterProcess",
+                {
+                  properties: properties
+                },
+                function(data, status){
+                  $("#tripleTable").empty();
+                  $("#tripleTable").prepend(data);
+                  $("#tripleTable :button").each(function (){
+                     if($(this).text() == "Approved") {
+                        $(this).parent().prev().children().prop({"disabled":true});
+                        $(this).parent().parent().css('background','green');
+                     }else{
+                        $(this).parent().prev().children().prop({"disabled":false});
+                        $(this).parent().parent().css('background','white');
+                     }
+                  });                           
+              }); 
+            });
             // Elemente in Variablen Speichern
             var toogleBranches = $('#toogle-branches');
             var toogleTags = $('#toogle-tags');
@@ -266,6 +295,7 @@
    //           table.columns.adjust().draw();
      //         window.location.href = "#";              
             });
+            
 
             $("#highLevel").click(function(){
               $("#left").hide();

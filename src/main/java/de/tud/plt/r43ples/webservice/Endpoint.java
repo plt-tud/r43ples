@@ -467,20 +467,21 @@ public class Endpoint {
 	 * reportResult create
 	 * save the triplesId in checkbox
 	 * todo 
-	 * @throws TemplateException */
+	 * @throws TemplateException 
+	 * @throws ConfigurationException */
 	
 	
 	@Path("reportProcess")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response reportGET() throws IOException, InternalErrorException, TemplateException {
+	public final Response reportGET() throws IOException, InternalErrorException, TemplateException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
 		
 		response.entity(MergingControl.createReportProcess());
 	
 		return response.build();
-
+		
 	}	
 
 	
