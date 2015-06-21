@@ -56,6 +56,7 @@ import de.tud.plt.r43ples.merging.management.ProcessManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.visualisation.VisualisationBatik;
 import de.tud.plt.r43ples.visualisation.VisualisationD3;
+import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
 /**
@@ -275,7 +276,7 @@ public class Endpoint {
 	
 	@Path("debug")
 	@GET
-	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) {
+	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws TemplateException, IOException {
 		if (sparqlQuery.equals("")) {
 			return getHTMLDebugResponse();
 		} else {
@@ -800,18 +801,39 @@ public class Endpoint {
 	 * Using mustache templates. 
 	 * 
 	 * @return HTML response for SPARQL form
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	private String getHTMLDebugResponse() {		
-		MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/debug.mustache");
+	private String getHTMLDebugResponse() throws TemplateException, IOException {		
+		//mustache
+//		MustacheFactory mf = new DefaultMustacheFactory();
+//	    Mustache mustache = mf.compile("templates/debug.mustache");
 	    StringWriter sw = new StringWriter();
+		
+		//freemarker
+	    
+		freemarker.template.Template temp = null; 
+		String name = "debug.ftl";
+		try {  
+            // 通过Freemarker的Configuration读取相应的Ftl  
+            Configuration cfg = new Configuration();  
+            // 设定去哪里读取相应的ftl模板  
+            cfg.setClassForTemplateLoading(Endpoint.class, "/templates");
+            // 在模板文件目录中寻找名称为name的模板文件  
+            temp = cfg.getTemplate(name);  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+		
+		
 	    htmlMap.put("graphs", TripleStoreInterfaceSingleton.get().getGraphs());
 	    htmlMap.put("revisionGraph", Config.revision_graph);
 	    htmlMap.put("triplestore", Config.jena_tdb_directory);
 	    htmlMap.put("sdd_graph", Config.sdd_graph);
 	    htmlMap.put("debug_active", true);
-	    mustache.execute(sw, htmlMap);		
+	    //mustache.execute(sw, htmlMap);		
 		
+	    temp.process(htmlMap,sw);	
 		String content = sw.toString();
 		return content;
 	}

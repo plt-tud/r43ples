@@ -19,6 +19,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.update.UpdateAction;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.ResolutionState;
 import de.tud.plt.r43ples.management.RevisionManagement;
@@ -43,6 +44,7 @@ import de.tud.plt.r43ples.merging.model.structure.TableModel;
 import de.tud.plt.r43ples.merging.model.structure.TableRow;
 import de.tud.plt.r43ples.merging.model.structure.TreeNode;
 import de.tud.plt.r43ples.merging.model.structure.Triple;
+import de.tud.plt.r43ples.webservice.Endpoint;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
@@ -78,7 +80,6 @@ public class MergingControl {
 	/** The report result. **/
 	private static ReportResult reportResult;
 	
-
 	
 	public static String getHtmlOutput(String graphName) {
 		MustacheFactory mf = new DefaultMustacheFactory();
@@ -86,7 +87,11 @@ public class MergingControl {
 	    StringWriter sw = new StringWriter();
 	    
 	    Map<String, Object> scope = new HashMap<String, Object>();
-	    scope.put("graphName", graphName);	    
+	    
+	    scope.put("graphName", graphName);	
+	    scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		
 	    mustache.execute(sw, scope);		
 		return sw.toString();
 	}
@@ -101,6 +106,9 @@ public class MergingControl {
 	    Map<String, Object> scope = new HashMap<String, Object>();
 	    scope.put("merging_active", true);
 		scope.put("graphList", graphList);
+		
+		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		scope.put("git", GitRepositoryState.getGitRepositoryState());
 		
 	    mustache.execute(sw, scope);		
 		return sw.toString();
@@ -147,7 +155,10 @@ public class MergingControl {
 		scope.put("conList",conList);
 		scope.put("diffList",diffList);
 		scope.put("conStatus", conStatus);
-		scope.put("propertyList", propertyList);		
+		scope.put("propertyList", propertyList);	
+		
+		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		scope.put("git", GitRepositoryState.getGitRepositoryState());
 		
 		temp.process(scope,sw);		
 		return sw.toString();		
@@ -211,7 +222,10 @@ public class MergingControl {
 		scope.put("conList",conList);
 		scope.put("diffList",diffList);
 		scope.put("conStatus", conStatus);
-		scope.put("propertyList", propertyList);		
+		scope.put("propertyList", propertyList);	
+		
+		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		scope.put("git", GitRepositoryState.getGitRepositoryState());
 		
 		temp.process(scope,sw);
 		logger.info("updated view fertig!");
@@ -305,6 +319,9 @@ public class MergingControl {
 			 	
 		scope.put("individualTableList", MergingControl.createTableModelSemanticEnrichmentAllIndividualsList());
 		
+		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		
 		temp.process(scope,sw);		
 		return sw.toString();	
 		
@@ -345,6 +362,9 @@ public class MergingControl {
 			 	
 		scope.put("updatedTripleRowList", updatedTripleRowList);
 		
+		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		
 		temp.process(scope,sw);
 		
 		return sw.toString();	
@@ -382,6 +402,9 @@ public class MergingControl {
         }  
 			 	
 		scope.put("highLevelRowList", highLevelRowList);
+		
+		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		scope.put("git", GitRepositoryState.getGitRepositoryState());
 		
 		temp.process(scope,sw);
 		
@@ -434,6 +457,9 @@ public class MergingControl {
 		
 		scope.put("tableRowList", updatedTripleRowList);
 		
+		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		
 		temp.process(scope,sw);	
 		
 		return sw.toString();	
@@ -462,6 +488,9 @@ public class MergingControl {
 		ProcessManagement.createTableModel(differenceModel, tableModel);	
 		
 		scope.put("tableRowList", tableModel.getTripleRowList());
+		
+		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		scope.put("git", GitRepositoryState.getGitRepositoryState());
 		
 		temp.process(scope,sw);		
 		return sw.toString();	
@@ -792,6 +821,9 @@ public class MergingControl {
 		scope.put("commit", commitModel);
 		scope.put("report", report);
 		scope.put("reportTableRowList", reportTableRowList);
+		
+		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		scope.put("git", GitRepositoryState.getGitRepositoryState());
 		
 		temp.process(scope,sw);		
 		return sw.toString();	
