@@ -134,11 +134,46 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws InternalErrorException 
 	 */
+//	@Path("createSampleDataset")
+//	@GET
+//	@Template(name = "/exampleDatasetGeneration.mustache")
+//	public final List<String> createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws IOException, InternalErrorException {
+//		List<String> graphs = new ArrayList<>();
+//		if (graph.equals("1") || graph.equals("all")){
+//			graphs.add(SampleDataSet.createSampleDataset1());
+//		}
+//		if (graph.equals("2") || graph.equals("all")){
+//			graphs.add(SampleDataSet.createSampleDataset2());
+//		}
+//		if (graph.equals("merging") || graph.equals("all")){
+//			graphs.add(SampleDataSet.createSampleDataSetMerging());
+//		}
+//		if (graph.equals("merging-classes") || graph.equals("all")){
+//			graphs.add(SampleDataSet.createSampleDataSetMergingClasses());
+//		}
+//		if (graph.equals("renaming") || graph.equals("all")){
+//			graphs.add(SampleDataSet.createSampleDataSetRenaming());
+//		}
+//		if (graph.equals("complex-structure") || graph.equals("all")){
+//			graphs.add(SampleDataSet.createSampleDataSetComplexStructure());
+//		}
+//	    htmlMap.put("graphs", graphs);
+//		return graphs;
+//	}
+	
+	/**
+	 * Creates sample datasets
+	 * @return information provided as HTML response
+	 * @throws IOException 
+	 * @throws InternalErrorException 
+	 * @throws TemplateException 
+	 */
 	@Path("createSampleDataset")
 	@GET
-	@Template(name = "/exampleDatasetGeneration.mustache")
-	public final List<String> createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws IOException, InternalErrorException {
+	public final String createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws IOException, InternalErrorException, TemplateException {
 		List<String> graphs = new ArrayList<>();
+		StringWriter sw = new StringWriter();
+		
 		if (graph.equals("1") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataset1());
 		}
@@ -158,9 +193,25 @@ public class Endpoint {
 			graphs.add(SampleDataSet.createSampleDataSetComplexStructure());
 		}
 	    htmlMap.put("graphs", graphs);
-		return graphs;
+	    
+	  //ftl
+	    freemarker.template.Template temp = null; 
+		String name = "exampleDatasetGeneration.ftl";
+		try {  
+            // 通过Freemarker的Configuration读取相应的Ftl  
+            Configuration cfg = new Configuration();  
+            // 设定去哪里读取相应的ftl模板  
+            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
+            // 在模板文件目录中寻找名称为name的模板文件  
+            temp = cfg.getTemplate(name);  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+		
+		temp.process(htmlMap,sw);	
+		return sw.toString();
+			
 	}
-	
 	
 	/**
 	 * Provide revision information about R43ples system.
@@ -326,12 +377,17 @@ public class Endpoint {
 		return htmlMap;
 	}
 	
+	/**
+	 * get merging seite and input merging information
+	 * @throws TemplateException 
+	 * 
+	 * */
 	@Path("merging")
 	@GET
     @Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
 		 MediaType.APPLICATION_SVG_XML })
 	public final Object getMerging(@HeaderParam("Accept") final String format_header,
-		@DefaultValue("0") @QueryParam("q") final String q,@QueryParam("graph") final String graph) throws IOException {
+		@DefaultValue("0") @QueryParam("q") final String q,@QueryParam("graph") final String graph) throws IOException, TemplateException {
 		logger.info("in merging yxy");
 		logger.info("Get q: " + q);
 		logger.info("Get graph: " + graph);

@@ -96,12 +96,41 @@ public class MergingControl {
 		return sw.toString();
 	}
 	
-	public static String getMenuHtmlOutput() {
-		List<String> graphList = RevisionManagement.getRevisedGraphs();
+//	public static String getMenuHtmlOutput() {
+//		List<String> graphList = RevisionManagement.getRevisedGraphs();
+//	
+//		MustacheFactory mf = new DefaultMustacheFactory();
+//	    Mustache mustache = mf.compile("templates/merging.mustache");
+//	    StringWriter sw = new StringWriter();
+//	    
+//	    Map<String, Object> scope = new HashMap<String, Object>();
+//	    scope.put("merging_active", true);
+//		scope.put("graphList", graphList);
+//		
+//		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+//		scope.put("git", GitRepositoryState.getGitRepositoryState());
+//		
+//	    mustache.execute(sw, scope);		
+//		return sw.toString();
+//	}
 	
-		MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/merging.mustache");
+	public static String getMenuHtmlOutput() throws TemplateException, IOException {
+		List<String> graphList = RevisionManagement.getRevisedGraphs();	
 	    StringWriter sw = new StringWriter();
+	    
+	    //ftl
+	    freemarker.template.Template temp = null; 
+		String name = "merging.ftl";
+		try {  
+            // 通过Freemarker的Configuration读取相应的Ftl  
+            Configuration cfg = new Configuration();  
+            // 设定去哪里读取相应的ftl模板  
+            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
+            // 在模板文件目录中寻找名称为name的模板文件  
+            temp = cfg.getTemplate(name);  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
 	    
 	    Map<String, Object> scope = new HashMap<String, Object>();
 	    scope.put("merging_active", true);
@@ -110,7 +139,7 @@ public class MergingControl {
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
 		scope.put("git", GitRepositoryState.getGitRepositoryState());
 		
-	    mustache.execute(sw, scope);		
+		temp.process(scope,sw);	
 		return sw.toString();
 	}
 	
