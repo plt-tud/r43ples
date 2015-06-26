@@ -292,6 +292,28 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			<plugin>
+			    <groupId>org.codehaus.mojo</groupId>
+			    <artifactId>cobertura-maven-plugin</artifactId>
+			    <version>2.6</version>
+			    <configuration>
+			        <format>xml</format>
+			        <maxmem>256m</maxmem>
+			        <!-- aggregated reports for multi-module projects -->
+			        <aggregate>true</aggregate>
+			        <formats>
+						<format>html</format>
+						<format>xml</format>
+					</formats>
+			    </configuration>
+			</plugin>
+			
+			<plugin>
+			    <groupId>org.eluder.coveralls</groupId>
+			    <artifactId>coveralls-maven-plugin</artifactId>
+			    <version>3.1.0</version>
+			</plugin>
 
 		</plugins>
 	</build>
@@ -330,7 +352,9 @@
 				</configuration>
 			</plugin>
  			<plugin>
+ 			 	<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.10</version>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -355,6 +379,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>taglist-maven-plugin</artifactId>
+				<version>2.4</version>
 				<configuration>
 					<tags>
 						<tag>fixme</tag>
@@ -366,6 +391,17 @@
 						<tag>xxx</tag>
 						<tag>@deprecated</tag>
 					</tags>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<formats>
+						<format>html</format>
+						<format>xml</format>
+					</formats>
 				</configuration>
 			</plugin>
 		</plugins>
