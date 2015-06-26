@@ -142,5 +142,11 @@ public class TestEndpoint {
 		Assert.assertTrue(result.getEntity().toString().contains("svg"));
 		
 	}
+	
+	@Test
+	public void testServiceDescription() throws InternalErrorException{
+		Response response = ep.sparql("text/turtle", "");
+		Assert.assertTrue(response.getEntity().toString().contains("sd:r43ples"));
+	}
 
 }
