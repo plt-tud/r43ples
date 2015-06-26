@@ -148,5 +148,12 @@ public class TestEndpoint {
 		Response response = ep.sparql("text/turtle", "");
 		Assert.assertTrue(response.getEntity().toString().contains("sd:r43ples"));
 	}
+	
+	@Test
+	public void testGetRevisedGraphs() throws InternalErrorException{
+		String response = ep.getRevisedGraphs("text/turtle", null);
+		Assert.assertTrue(response.contains(graphName));
+	}
+
 
 }
