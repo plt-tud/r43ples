@@ -1,11 +1,7 @@
 package de.tud.plt.r43ples.management;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
@@ -164,21 +160,6 @@ public class DatasetGenerationManagement {
 				+ "	} %n"
 				+ "}", user, message, graphName, revision, triplesInsert, graphName, revision, triplesDelete);
 		ep.sparql(MediaType.TEXT_HTML, query);
-	}
-	
-	
-	/**
-	 * Read file to string.
-	 * 
-	 * @param path the path to read
-	 * @return the file content
-	 * @throws IOException
-	 */
-	public static String readFileToString(String path) throws IOException {
-		InputStream is = ClassLoader.getSystemResourceAsStream(path);
-		String result = IOUtils.toString(is);
-		is.close();
-		return result;
 	}
 	
 }

@@ -154,7 +154,7 @@ public class Endpoint {
 	@GET
 	@Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
 			MediaType.APPLICATION_SVG_XML })
-	public final Object getRevisionGraph(@HeaderParam("Accept") final String format_header,
+	public final Response getRevisionGraph(@HeaderParam("Accept") final String format_header,
 			@QueryParam("format") final String format_query, @QueryParam("graph") @DefaultValue("") final String graph) {
 		logger.info("Get Revision Graph: " + graph);
 		String format = (format_query != null) ? format_query : format_header;

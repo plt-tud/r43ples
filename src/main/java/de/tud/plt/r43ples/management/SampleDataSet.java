@@ -148,7 +148,7 @@ public class SampleDataSet {
 		String initialContentFilePath = "verification/ExampleGraphClasses_initial.triples";
 
 		// Read initial content from file to string
-		String initialContent = DatasetGenerationManagement.readFileToString(initialContentFilePath);
+		String initialContent = ResourceManagement.getContentFromResource(initialContentFilePath);
 
 		// Create new example graph
 		DatasetGenerationManagement.createNewGraph(graphName);

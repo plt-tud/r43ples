@@ -34,11 +34,7 @@ public class Interface {
 	public static String sparqlSelectConstructAsk(final String query, final String format, final String join_option)
 			throws InternalErrorException {
 		String result;
-		if (join_option.equals("old")) {
-			String query_rewritten = SparqlRewriter_old.rewriteQuery(query);
-			result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query_rewritten, format);
-		} 
-		else if (join_option.equals("new")) {
+		if (join_option.equals("new")) {
 			String query_rewritten = SparqlRewriter.rewriteQuery(query);
 			result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query_rewritten, format);
 		}

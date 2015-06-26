@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -90,7 +91,8 @@ public class TestEndpoint {
 	 * @throws IOException 
 	 * @throws InternalErrorException 
 	 */
-	@Test public void testExampleQueries() throws IOException, InternalErrorException {
+	@Test
+	public void testExampleQueries() throws IOException, InternalErrorException {
 		String graph1 = SampleDataSet.createSampleDataset1();
 		String graph2 = SampleDataSet.createSampleDataset2();
 		
@@ -128,6 +130,17 @@ public class TestEndpoint {
 		+ "TAG GRAPH <" + graph1 + "> REVISION \"2\" TO \"v0.3-alpha\"";
 		result = ep.sparql(format, query).getEntity().toString();
 	
+	}
+	
+	@Test
+	public void testGetRevisionGraphVisualisation(){
+		Response result = ep.getRevisionGraph("text/turtle", null, graphName);
+		Assert.assertTrue(result.getEntity().toString().contains("rmo:Revision"));
+		result = ep.getRevisionGraph("text/turtle", "batik", graphName);
+		Assert.assertTrue(result.getEntity().toString().contains("svg"));
+		result = ep.getRevisionGraph("text/turtle", "d3", graphName);
+		Assert.assertTrue(result.getEntity().toString().contains("svg"));
+		
 	}
 
 }
