@@ -98,6 +98,19 @@ public class TestEndpoint extends JerseyTest {
 		Assert.assertThat(result, containsString("<form"));
 	}
 	
+	@Test
+	public void testHtmlDebugQueryForm() throws IOException{
+		String result = target("debug").queryParam("query", "").queryParam("format", MediaType.TEXT_HTML).request().get(String.class);
+		Assert.assertThat(result, containsString("<form"));
+	}
+	
+	@Test
+	public void testDebug() throws IOException{
+		String query = "SELECT * WHERE { GRAPH ?g { ?s ?p ?o. } }";
+		String result = target("debug").queryParam("query", URLEncoder.encode(query, "UTF-8")).request().get(String.class);
+		Assert.assertThat(result, containsString("http://eatld.et.tu-dresden.de/r43ples-revisions"));
+	}
+	
 	
 	@Test
 	public void testSelectQueryWithoutRevision() throws IOException, SAXException {
@@ -154,9 +167,11 @@ public class TestEndpoint extends JerseyTest {
 	}
 	
 	@Test
-	public void testGetRevisionGraphVisualisation(){
+	public void testGetRevisionGraph(){
 		String result = target("revisiongraph").queryParam("format", "text/turtle").queryParam("graph", graphNameMerging).request().get(String.class);
 		Assert.assertThat(result, containsString("rmo:Revision"));
+		result = target("revisiongraph").queryParam("format", "application/rdf+xml").queryParam("graph", graphNameMerging).request().get(String.class);
+		Assert.assertThat(result, containsString("http://eatld.et.tu-dresden.de/rmo#Revision"));
 		result = target("revisiongraph").queryParam("format", "batik").queryParam("graph", graphNameDataset1).request().get(String.class);
 		Assert.assertThat(result, containsString("svg"));
 		result = target("revisiongraph").queryParam("format", "d3").queryParam("graph", graphNameDataset1).request().get(String.class);

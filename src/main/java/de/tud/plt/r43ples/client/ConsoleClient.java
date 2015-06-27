@@ -33,12 +33,12 @@ public class ConsoleClient {
 		} catch (ParameterException e) {
 			jc.usage();
 			System.err.println(e.toString());
-			System.exit(0);
+			return;
 		}
 		
 		if (args_client.r43ples.help) {
 			jc.usage();
-			System.exit(0);
+			return;
 		}
 		
 		// TODO: add file import option for generating new version (only new version instead of add and delete sets) 

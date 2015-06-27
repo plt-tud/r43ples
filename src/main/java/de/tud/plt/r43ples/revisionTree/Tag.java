@@ -6,7 +6,4 @@ public class Tag extends Reference {
 		super(uri, name, ref);
 	}
 
-	public Tag(String uri) {
-		super(uri);
-	}
 }

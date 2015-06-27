@@ -105,8 +105,6 @@ public class Tree {
 	private void addEdge(String successor, String predecessor) {
 		Revision nodeS = map.get(successor);
 		Revision nodeP = map.get(predecessor);
-		
-		nodeS.addPredecessor(nodeP);
 		nodeP.addSuccessor(nodeS);
 	}	
 	

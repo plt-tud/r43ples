@@ -251,17 +251,18 @@ public class Endpoint {
 	
 	@Path("debug")
 	@GET
-	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) {
+	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws UnsupportedEncodingException {
 		if (sparqlQuery.equals("")) {
 			return getHTMLDebugResponse();
 		} else {
-			logger.info("Debug query was requested. Query: " + sparqlQuery);
+			String query =  URLDecoder.decode(sparqlQuery, "UTF-8");
+			logger.info("Debug query was requested. Query: " + query);
 			if (sparqlQuery.contains("INSERT")) {
-				TripleStoreInterfaceSingleton.get().executeUpdateQuery(sparqlQuery);
+				TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
 				return "Query executed";
 			}
 			else {
-				String result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(sparqlQuery, "text/html");
+				String result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query, "text/html");
 				return getHTMLResult( result, sparqlQuery);
 			}
 		}
