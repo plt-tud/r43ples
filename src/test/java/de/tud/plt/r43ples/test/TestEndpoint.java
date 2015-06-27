@@ -5,12 +5,15 @@ import static org.hamcrest.core.StringContains.containsString;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.net.URLEncoder;
 
+import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.test.JerseyTest;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -23,64 +26,86 @@ import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
 
-public class TestEndpoint {
+public class TestEndpoint extends JerseyTest {
 
-	/** The graph name. **/
-	private static String graphName;
+	private static String graphNameDataset1;
+	private static String graphNameDataset2;
+	private static String graphNameMerging;
+	private static final String format = "application/sparql-results+xml";
 	
-	private final Endpoint ep = new Endpoint();
-	private final String format = "application/sparql-results+xml";
+	private static String query_union_b1_b2;
 	
-	
+    @Override
+    protected Application configure() {
+        return new ResourceConfig(Endpoint.class);
+    }
+    
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, URISyntaxException, IOException, InternalErrorException{
 		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.test.conf");
-		graphName = SampleDataSet.createSampleDataSetMerging();
+		graphNameDataset1 = SampleDataSet.createSampleDataset1();
+		graphNameDataset2 = SampleDataSet.createSampleDataset2();
+		graphNameMerging = SampleDataSet.createSampleDataSetMerging();
+		query_union_b1_b2 = String.format(""
+				+ "SELECT DISTINCT ?s ?p ?o "
+				+ "WHERE { "
+				+ "  {GRAPH <%s> REVISION \"B1\" { ?s ?p ?o}}"
+				+ "  UNION "
+				+ "  {GRAPH <%s> REVISION \"B2\" { ?s ?p ?o}}"
+				+ "} ORDER BY ?s ?p ?o", graphNameMerging, graphNameMerging);
 	}
 	
 	
 	@Test
-	public void testSelect() throws InternalErrorException, SAXException, IOException {
+	public void testSelect() throws SAXException, IOException {
 		String query = String.format(""
 				+ "SELECT * FROM <%s> REVISION \"B2\" "
 				+ "WHERE { ?s ?p ?o. }"
-				+ "ORDER BY ?s ?p ?o", graphName);
-		String result3 = ep.sparql(format, query).getEntity().toString();
-		String expected3 = ResourceManagement.getContentFromResource("response-1.1-3.xml");
-		assertXMLEqual(expected3, result3);
+				+ "ORDER BY ?s ?p ?o", graphNameMerging);
+		String result = target("sparql").queryParam("query", URLEncoder.encode(query, "UTF-8")).queryParam("format", format).request().get(String.class);
+		String expected = ResourceManagement.getContentFromResource("response-1.1-3.xml");
+		assertXMLEqual(expected, result);
 	}
 	
 	
 	@Test
-	public void testSelectSparqlJoinOption() throws IOException, SAXException, InternalErrorException{		
-		String query = String.format(""
-						+ "SELECT ?s ?p ?o "
-						+ "WHERE { "
-						+ "  {GRAPH <%s> REVISION \"B1\" { ?s ?p ?o}}"
-						+ "  UNION "
-						+ "  {GRAPH <%s> REVISION \"B2\" { ?s ?p ?o}}"
-						+ "} ORDER BY ?s ?p ?o", graphName, graphName);
-		String result4 = ep.sparql(format, query, true).getEntity().toString();
-		String expected4 = ResourceManagement.getContentFromResource("response-b1-b2.xml");
-		assertXMLEqual(expected4, result4);
+	public void testSelectSparqlUnion() throws SAXException, IOException {		
+		String result = target("sparql").
+				queryParam("query", URLEncoder.encode(query_union_b1_b2, "UTF-8")).
+				queryParam("format", format).
+				request().get(String.class);
+		String expected = ResourceManagement.getContentFromResource("response-b1-b2.xml");
+		assertXMLEqual(expected, result);
+	}
+	
+	
+	@Test
+	public void testSelectSparqlJoinOption() throws SAXException, IOException{		
+		String result = target("sparql").
+				queryParam("query", URLEncoder.encode(query_union_b1_b2, "UTF-8")).
+				queryParam("format", format).
+				queryParam("join_option", "true").
+				request().get(String.class);
+		String expected = ResourceManagement.getContentFromResource("response-b1-b2.xml");
+		assertXMLEqual(expected, result);
 	}
 	
 
 	@Test
-	public void testHtmlQueryForm() throws IOException, InternalErrorException{
-		String result = ep.sparql(MediaType.TEXT_HTML, "").getEntity().toString();
+	public void testHtmlQueryForm() throws IOException{
+		String result = target("sparql").queryParam("query", "").queryParam("format", MediaType.TEXT_HTML).request().get(String.class);
 		Assert.assertThat(result, containsString("<form"));
 	}
 	
 	
 	@Test
-	public void testSelectQueryWithoutRevision() throws IOException, SAXException, InternalErrorException {
+	public void testSelectQueryWithoutRevision() throws IOException, SAXException {
 		String query = String.format(""
 				+ "select * from <%s> %n"
 				+ "where { ?s ?p ?o. } %n"
-				+ "ORDER BY ?s ?p ?o", graphName);
-		String result = ep.sparql(format, query).getEntity().toString();
+				+ "ORDER BY ?s ?p ?o", graphNameMerging);
+		String result = target("sparql").queryParam("query", URLEncoder.encode(query, "UTF-8")).queryParam("format", format).request().get(String.class);
 		String expected = ResourceManagement.getContentFromResource("response-master.xml");
 		assertXMLEqual(expected, result);
 	}
@@ -92,67 +117,79 @@ public class TestEndpoint {
 	 * @throws InternalErrorException 
 	 */
 	@Test
-	public void testExampleQueries() throws IOException, InternalErrorException {
-		String graph1 = SampleDataSet.createSampleDataset1();
-		String graph2 = SampleDataSet.createSampleDataset2();
-		
-		String query = "SELECT * FROM <" + graph1 + "> REVISION \"3\" WHERE { ?s ?p ?o. }";
-				
-		String result = ep.sparql(format, query).getEntity().toString();
+	public void testExampleQueries() throws IOException {		
+		String query = "SELECT * FROM <" + graphNameDataset1 + "> REVISION \"3\" WHERE { ?s ?p ?o. }";
+		String result = target("sparql").queryParam("query", URLEncoder.encode(query, "UTF-8")).queryParam("format", format).request().get(String.class);		
 		Assert.assertThat(result, containsString("http://test.com/Adam"));
 		
 		query = ""
 		+ "	SELECT ?s ?p ?o"
-		+ "	FROM <" + graph1 + "> REVISION \"master\""
-		+ "	FROM <" + graph2 + "> REVISION \"2\""
+		+ "	FROM <" + graphNameDataset1 + "> REVISION \"master\""
+		+ "	FROM <" + graphNameDataset2 + "> REVISION \"2\""
 		+ "	WHERE {"
 		+ "	?s ?p ?o."
 		+ "	}";
-		result = ep.sparql(format, query).getEntity().toString();
+		result = target("sparql").queryParam("query", URLEncoder.encode(query, "UTF-8")).queryParam("format", format).request().get(String.class);		
 		Assert.assertThat(result, containsString("http://test.com/Adam"));
 		
 		query = ""
 		+ "USER \"mgraube\""
 		+ "MESSAGE \"test commit\""
-		+ "	INSERT DATA { GRAPH <" + graph1 + "> REVISION \"5\""
+		+ "	INSERT DATA { GRAPH <" + graphNameDataset1 + "> REVISION \"5\""
 		+ "	{	<a> <b> <c> .	}}";
-		result = ep.sparql(format, query).getEntity().toString();
+		result = target("sparql").queryParam("query", URLEncoder.encode(query, "UTF-8")).queryParam("format", format).request().get(String.class);		
 		
 		query = ""
 		+ "USER \"mgraube\""
 		+ "MESSAGE \"test branch commit\""
-		+ "	BRANCH GRAPH <" + graph1 + "> REVISION \"2\" TO \"unstable\"";
-		result = ep.sparql(format, query).getEntity().toString();
+		+ "	BRANCH GRAPH <" + graphNameDataset1 + "> REVISION \"2\" TO \"unstable\"";
+		result = target("sparql").queryParam("query", URLEncoder.encode(query, "UTF-8")).queryParam("format", format).request().get(String.class);		
 		
 		query = ""
 		+ "USER \"mgraube\" "
 		+ "MESSAGE \"test tag commit\" "
-		+ "TAG GRAPH <" + graph1 + "> REVISION \"2\" TO \"v0.3-alpha\"";
-		result = ep.sparql(format, query).getEntity().toString();
+		+ "TAG GRAPH <" + graphNameDataset1 + "> REVISION \"2\" TO \"v0.3-alpha\"";
+		result = target("sparql").queryParam("query", URLEncoder.encode(query, "UTF-8")).queryParam("format", format).request().get(String.class);		
 	
 	}
 	
 	@Test
 	public void testGetRevisionGraphVisualisation(){
-		Response result = ep.getRevisionGraph("text/turtle", null, graphName);
-		Assert.assertTrue(result.getEntity().toString().contains("rmo:Revision"));
-		result = ep.getRevisionGraph("text/turtle", "batik", graphName);
-		Assert.assertTrue(result.getEntity().toString().contains("svg"));
-		result = ep.getRevisionGraph("text/turtle", "d3", graphName);
-		Assert.assertTrue(result.getEntity().toString().contains("svg"));
+		String result = target("revisiongraph").queryParam("format", "text/turtle").queryParam("graph", graphNameMerging).request().get(String.class);
+		Assert.assertThat(result, containsString("rmo:Revision"));
+		result = target("revisiongraph").queryParam("format", "batik").queryParam("graph", graphNameDataset1).request().get(String.class);
+		Assert.assertThat(result, containsString("svg"));
+		result = target("revisiongraph").queryParam("format", "d3").queryParam("graph", graphNameDataset1).request().get(String.class);
+		Assert.assertThat(result, containsString("svg"));
+		result = target("revisiongraph").queryParam("format", "batik").queryParam("graph", graphNameMerging).request().get(String.class);
+		Assert.assertThat(result, containsString("svg"));
+		result = target("revisiongraph").queryParam("format", "d3").queryParam("graph", graphNameMerging).request().get(String.class);
+		Assert.assertThat(result, containsString("svg"));
 		
 	}
 	
 	@Test
-	public void testServiceDescription() throws InternalErrorException{
-		Response response = ep.sparql("text/turtle", "");
-		Assert.assertTrue(response.getEntity().toString().contains("sd:r43ples"));
+	public void testServiceDescription(){
+		String result = target("sparql").queryParam("format", "text/turtle").request().get(String.class);
+		Assert.assertThat(result, containsString("sd:r43ples"));
+	}
+	
+	@Test
+	public void testLandingPage() {
+		String result = target().request().get(String.class);
+		Assert.assertThat(result, containsString("R43ples (Revision for triples) is an open source Revision Management Tool for the Semantic Web"));
+	}
+	
+	@Test
+	public void testMergingPage() {
+		String result = target("merging").request().get(String.class);
+		Assert.assertThat(result, containsString("Development is Work in Progress"));
 	}
 	
 	@Test
 	public void testGetRevisedGraphs() throws InternalErrorException{
-		String response = ep.getRevisedGraphs("text/turtle", null);
-		Assert.assertTrue(response.contains(graphName));
+		String result = target("getRevisedGraphs").queryParam("format", "text/turtle").request().get(String.class);
+		Assert.assertThat(result, containsString(graphNameMerging));
 	}
 
 
