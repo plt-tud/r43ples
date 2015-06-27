@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.graph.Node;
@@ -76,40 +75,6 @@ public class SparqlRewriter {
 		SparqlRewriter sr = new SparqlRewriter(query_r43ples);
 		return sr.query_rewritten;
 	}
-	
-	public static void main(String[] args) throws ConfigurationException {
-		Config.readConfig("r43ples.conf");
-		
-		String query = "SELECT * WHERE { GRAPH <http://test.com/r43ples-dataset-1> { ?s ?p ?o.} FILTER (?s=?p)}";
-		String result = rewriteQuery(query);
-		System.out.println(result);
-		
-		
-		query = "SELECT * WHERE { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"2\" { ?s ?p ?o.} FILTER (?s=?p)}";
-		result = rewriteQuery(query);
-		System.out.println(result);
-		
-		query = "SELECT * WHERE { GRAPH <http://test.com/r43ples-dataset-1> REVISION \"2\" { ?s ?p ?o; ?p2 ?o2. FILTER (?o=?o2)}}";
-		result = rewriteQuery(query);
-		System.out.println(result);
-		
-		
-		query = "SELECT * WHERE { "
-				+ " GRAPH <http://test.com/r43ples-dataset-1> REVISION \"2\" { ?s ?p ?o}"
-				+ " GRAPH <http://test.com/r43ples-dataset-1> { ?s ?p2 ?o2}"
-				+ "}";
-		result = rewriteQuery(query);
-		System.out.println(result);
-		
-		
-		query = "SELECT * WHERE { "
-				+ " GRAPH <http://test.com/r43ples-dataset-1> REVISION \"1\" { ?s ?p ?o}"
-				+ " GRAPH <http://test.com/r43ples-dataset-1> REVISION \"4\" { ?s ?p2 ?o2.}"
-				+ "}";
-        result = rewriteQuery(query);
-        System.out.println(result);
-	}
-	
 	
 	
 	public SparqlRewriter(String query){

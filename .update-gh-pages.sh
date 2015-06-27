@@ -4,7 +4,7 @@
 # with README.md to gh-pages in order to update th website
 
 sudo apt-get install -qq graphviz
-mvn -q site
+mvn -q cobertura:cobertura coveralls:report site
 
 git config --global user.email "r43ples-travis-ci@users.noreply.github.com"
 git config --global user.name "r43ples travis-ci"

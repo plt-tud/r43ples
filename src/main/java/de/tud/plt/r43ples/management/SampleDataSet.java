@@ -69,13 +69,13 @@ public class SampleDataSet {
 	 * Create an example graph of the following structure,
 	 * 
 	 *                  ADD: D,E              ADD: G
-	 *               +-----X---------------------X--------- (Branch B1)
+	 *               +-----X---------------------X--------- (Branch B1 = [B,C,E,G)
 	 *               |  DEL: A                DEL: D
 	 * ADD: A,B,C    |
 	 * ---X----------+ (Master)
 	 * DEL: -        |
 	 *               |  ADD: D,H              ADD: I    ADD: J
-	 *               +-----X---------------------X---------X----- (Branch B2)
+	 *               +-----X---------------------X---------X----- (Branch B2 = [A,B,D,H,I,J)
 	 *                  DEL: C                DEL: -    DEL: -
 	 * 
 	 * 
@@ -148,7 +148,7 @@ public class SampleDataSet {
 		String initialContentFilePath = "verification/ExampleGraphClasses_initial.triples";
 
 		// Read initial content from file to string
-		String initialContent = DatasetGenerationManagement.readFileToString(initialContentFilePath);
+		String initialContent = ResourceManagement.getContentFromResource(initialContentFilePath);
 
 		// Create new example graph
 		DatasetGenerationManagement.createNewGraph(graphName);

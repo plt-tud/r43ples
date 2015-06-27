@@ -154,7 +154,7 @@ public class Endpoint {
 	@GET
 	@Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
 			MediaType.APPLICATION_SVG_XML })
-	public final Object getRevisionGraph(@HeaderParam("Accept") final String format_header,
+	public final Response getRevisionGraph(@HeaderParam("Accept") final String format_header,
 			@QueryParam("format") final String format_query, @QueryParam("graph") @DefaultValue("") final String graph) {
 		logger.info("Get Revision Graph: " + graph);
 		String format = (format_query != null) ? format_query : format_header;
@@ -235,7 +235,7 @@ public class Endpoint {
 	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
 			@QueryParam("format") final String formatQuery, 
 			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
-			@QueryParam("join_option") @DefaultValue("") final boolean join_option) throws InternalErrorException {
+			@QueryParam("join_option") @DefaultValue("") final String join_option) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		
 		String sparqlQueryDecoded;
@@ -272,12 +272,14 @@ public class Endpoint {
 	 * Landing page
 	 *
 	 */
-	@Path("/")
 	@GET
-	@Template(name = "/home.mustache")
-	public final Map<String, Object> getLandingPage() {
+	public final Response getLandingPage() {
 		logger.info("Get Landing page");
-		return htmlMap;
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/home.mustache");
+	    StringWriter sw = new StringWriter();
+	    mustache.execute(sw, htmlMap);		
+		return Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML).build();
 	}
 	
 	/**
@@ -287,11 +289,14 @@ public class Endpoint {
 	 */
 	@Path("merging")
 	@GET
-	@Template(name = "/merging.mustache")
-	public final Map<String, Object> getMerging() {
+	public final Response getMerging() {
 		logger.info("Get Merging interface");
-		htmlMap.put("merging_active", true);
-		return htmlMap;
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merging.mustache");
+	    StringWriter sw = new StringWriter();
+	    htmlMap.put("merging_active", true);
+	    mustache.execute(sw, htmlMap);		
+		return Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML).build();
 	}
 		
 	
@@ -308,7 +313,7 @@ public class Endpoint {
 	 * @return the response
 	 * @throws InternalErrorException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery, final String join_option) throws InternalErrorException {
+	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException {
 		if (sparqlQuery.equals("")) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
@@ -320,11 +325,12 @@ public class Endpoint {
 		}
 	}
 	
-	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException {
-		if (join_option)
-			return sparql(format, sparqlQuery, "new");
+	private final Response sparql(final String format, final String sparqlQuery, final String join_option) throws InternalErrorException {
+		String option = join_option.toLowerCase();
+		if (option.equals("on") || option.equals("true") || option.equals("new"))
+			return sparql(format, sparqlQuery, true);
 		else
-			return sparql(format, sparqlQuery, "");
+			return sparql(format, sparqlQuery, false);
 	}
 	
 	/**
@@ -341,7 +347,7 @@ public class Endpoint {
 	 * @throws InternalErrorException 
 	 */
 	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException {
-		return sparql(format, sparqlQuery, "");
+		return sparql(format, sparqlQuery, false);
 	}
 
 
@@ -419,7 +425,7 @@ public class Endpoint {
 	 * @return HTTP response of evaluating the sparql query 
 	 * @throws InternalErrorException
 	 */
-	private Response getSparqlResponse(final String format, String sparqlQuery, final String join_option) throws InternalErrorException {
+	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean join_option) throws InternalErrorException {
 		logger.info(String.format("SPARQL request (format=%s, join_option=%s) -> %n %s", format, join_option, sparqlQuery));
 		String user = null;
 		Matcher userMatcher = patternUser.matcher(sparqlQuery);
