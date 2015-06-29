@@ -9,6 +9,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -51,8 +52,10 @@ import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
+import de.tud.plt.r43ples.merging.control.FastForwardControl;
 import de.tud.plt.r43ples.merging.control.MergingControl;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
+import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.visualisation.VisualisationBatik;
 import de.tud.plt.r43ples.visualisation.VisualisationD3;
@@ -109,7 +112,10 @@ public class Endpoint {
 	private final Pattern patternMergeQuery =  Pattern.compile(
 			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
 			patternModifier);
-	
+	//fast forward merg query
+	private final Pattern patternFastForwardQuery =  Pattern.compile(
+			"MERGE\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*-ff\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"",
+			patternModifier);
 	
 	@Context
 	private UriInfo uriInfo;
@@ -272,6 +278,8 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @return the response
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
 	@Path("sparql")
 	@POST
@@ -279,7 +287,7 @@ public class Endpoint {
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("format") final String formatQuery, 
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
-			@FormParam("join_option") final boolean join_option) throws InternalErrorException {
+			@FormParam("join_option") final boolean join_option) throws InternalErrorException, TemplateException, IOException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		
 		logger.info("yxy test format:"+format);
@@ -304,6 +312,8 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @return the response
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
 	@Path("sparql")
 	@GET
@@ -311,7 +321,7 @@ public class Endpoint {
 	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
 			@QueryParam("format") final String formatQuery, 
 			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
-			@QueryParam("join_option") final boolean join_option) throws InternalErrorException {
+			@QueryParam("join_option") final boolean join_option) throws InternalErrorException, TemplateException, IOException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		
 		String sparqlQueryDecoded;
@@ -405,6 +415,21 @@ public class Endpoint {
 	}
 	
 	/**
+	 * through graph name , branch1 and branch2 to check the right of fast forward strategy
+	 * */
+	@Path("fastForwardCheckProcess")
+	@GET
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final boolean fastForwardCheckGET(@HeaderParam("Accept") final String formatHeader, @QueryParam("graph") @DefaultValue("") final String graphName,
+			@QueryParam("branch1") @DefaultValue("") final String branch1, @QueryParam("branch2") @DefaultValue("") final String branch2) throws IOException, InternalErrorException {
+		logger.info("graph name test: "+ "--"+graphName+"--");
+		logger.info("branch name test: " + "--"+branch1+"--"+branch2+"--");
+		return MergingControl.fastForwardCheck(graphName, branch1, branch2);
+		
+		
+	}
+	
+	/**
 	 * mergingProcess: create mergingQuery 
 	 * create RevisionProcess Model A
 	 * create RevisionProcess Model B
@@ -421,61 +446,98 @@ public class Endpoint {
 			@FormParam("optradio") final String model, 
 			@FormParam("graph") @DefaultValue("") final String graphName,
 			@FormParam("sdd") final String sddName,
+			@FormParam("strategie") final String strategie,
 			@FormParam("Branch1") final String branch1,
 			@FormParam("Branch2") final String branch2,
 			@FormParam("user") @DefaultValue("") final String user,
 			@FormParam("message") @DefaultValue("") final String message) throws InternalErrorException, IOException, TemplateException, ConfigurationException {
-		ResponseBuilder response = Response.ok();
-		Response responsePost = null;
+		
+		
+		logger.info("im" + strategie);
+		if(strategie.equals("1")){
+			String fastForwardQuery = StrategyManagement.createFastForwardQuery(graphName, sddName, user, message, branch1, branch2);
+			
+			String userCommit = null;
+			Matcher userMatcher = patternUser.matcher(fastForwardQuery);
+			if (userMatcher.find()) {
+				userCommit = userMatcher.group("user");
+				fastForwardQuery = userMatcher.replaceAll("");
+			}
+			String messageCommit = null;
+			Matcher messageMatcher = patternCommitMessage.matcher(fastForwardQuery);
+			if (messageMatcher.find()) {
+				messageCommit = messageMatcher.group("message");
+				fastForwardQuery = messageMatcher.replaceAll("");
+			}
+			
+			//save commit information in FastForwardControl
+			FastForwardControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Fast-Forward");	
+			
+			return getFastForwardResponse(fastForwardQuery, userCommit, messageCommit);
+				
+	
+			
+		}else{
+			
+			ResponseBuilder response = Response.ok();
+			Response responsePost = null;
+			
+			MergeQueryTypeEnum type = null;
+			System.out.println(model);
+			if (model.equals("auto")) {
+				type = MergeQueryTypeEnum.AUTO;
+			} else if (model.equals("common")) {
+				type = MergeQueryTypeEnum.COMMON;
+			} else {
+				type = MergeQueryTypeEnum.MANUAL;
+			}
+			
+			//save commit information in MergingControl
+			MergingControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way");
+				
+			String mergeQuery = ProcessManagement.createMergeQuery(graphName, sddName, user, message, type, branch1, branch2, null);
+			logger.info("yxy test mergeQuery:"+mergeQuery);
+			
+			String userCommit = null;
+			Matcher userMatcher = patternUser.matcher(mergeQuery);
+			logger.info("yxy test mergeQuery:"+mergeQuery);
+			if (userMatcher.find()) {
+				userCommit = userMatcher.group("user");
+				mergeQuery = userMatcher.replaceAll("");
+			}
+			String messageCommit = null;
+			Matcher messageMatcher = patternCommitMessage.matcher(mergeQuery);
+			if (messageMatcher.find()) {
+				messageCommit = messageMatcher.group("message");
+				mergeQuery = messageMatcher.replaceAll("");
+			}
+			
+			logger.info("yxy test mergeQuery nach verarbeit:"+mergeQuery);
 
-		System.out.println("1 mal merging Process");
-		MergeQueryTypeEnum type = null;
-		System.out.println(model);
-		if (model.equals("auto")) {
-			type = MergeQueryTypeEnum.AUTO;
-		} else if (model.equals("common")) {
-			type = MergeQueryTypeEnum.COMMON;
-		} else {
-			type = MergeQueryTypeEnum.MANUAL;
-		}
-			
-		System.out.println(model+graphName+sddName+branch1+branch2+user+message+type.toString());
-		MergingControl.createCommitModel(graphName, sddName, user, message, branch1, branch2);
-			
-		String mergeQuery = ProcessManagement.createMergeQuery(graphName, sddName, user, message, type, branch1, branch2, null);
-		logger.info("yxy test mergeQuery:"+mergeQuery);
-		
-		String userCommit = null;
-		Matcher userMatcher = patternUser.matcher(mergeQuery);
-		logger.info("yxy test mergeQuery:"+mergeQuery);
-		if (userMatcher.find()) {
-			userCommit = userMatcher.group("user");
-			mergeQuery = userMatcher.replaceAll("");
-		}
-		String messageCommit = null;
-		Matcher messageMatcher = patternCommitMessage.matcher(mergeQuery);
-		if (messageMatcher.find()) {
-			messageCommit = messageMatcher.group("message");
-			mergeQuery = messageMatcher.replaceAll("");
-		}
-		
-		logger.info("yxy test mergeQuery nach verarbeit:"+mergeQuery);
+			if (patternMergeQuery.matcher(mergeQuery).find()) {
+				responsePost= getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
+				logger.info("yxy get Post"+responsePost.toString());	
+			}
+				
 
-		if (patternMergeQuery.matcher(mergeQuery).find()) {
-			responsePost= getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
-			logger.info("yxy get Post"+responsePost.toString());	
-		}
+//			logger.info("Inhalt von Response Entity:"+responsePost.getEntity().toString());	
+				
+			MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
 			
+			
+			response.entity(MergingControl.getViewHtmlOutput());
+			return response.build();
+		}	
 
-//		logger.info("Inhalt von Response Entity:"+responsePost.getEntity().toString());	
-			
-		MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
-		
-		
-		response.entity(MergingControl.getViewHtmlOutput());
-		return response.build();
 	}
 	
+	
+
+	
+	
+	/**
+	 * query revision information and get the graph
+	 * by ajax  */
 	@Path("mergingProcess")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
@@ -494,6 +556,29 @@ public class Endpoint {
 		return response.build();
 
 	}	
+	
+	/**
+	 * query revision information and get the graph
+	 * by ajax  */
+	@Path("fastForwardProcess")
+	@GET
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final Response fastForwardGET(@HeaderParam("Accept") final String formatHeader,
+			 @QueryParam("graph") @DefaultValue("") final String graph, @QueryParam("optradio") @DefaultValue("") final String format_new) throws InternalErrorException {
+
+		ResponseBuilder response = Response.ok();
+		String format = "application/json";
+		logger.info("format_header"+ formatHeader);
+		logger.info("yxy graphName"+ graph);
+		logger.info("yxy format_new"+ format_new);
+
+
+		response.type(format);
+		response.entity(StrategyManagement.loadGraphVorFastForward());
+		return response.build();
+
+	}	
+	
 	
 	@Path("approveProcess")
 	@POST
@@ -654,6 +739,9 @@ public class Endpoint {
 
 	}
 	
+	/**
+	 * select property and get the new triple table
+	 *  */
 	@Path("filterProcess")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
@@ -666,6 +754,25 @@ public class Endpoint {
 
 		
 		response.entity(MergingControl.updateTripleTable(properties));
+		return response.build();
+
+	}	
+	
+	/**
+	 * select the difference in difference tree and renew the triple table
+	 * */
+	@Path("treeFilterProcess")
+	@POST
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	public final Response treeFilterPOST(@HeaderParam("Accept") final String formatHeader,
+			@FormParam("triples") @DefaultValue("") final String triples) throws TemplateException, IOException, ConfigurationException {
+		
+		ResponseBuilder response = Response.ok();
+		logger.info("format_header"+ formatHeader);
+		logger.info("Tree Filter post Array :"+ triples);
+
+		
+		response.entity(MergingControl.updateTripleTableByTree(triples));
 		return response.build();
 
 	}	
@@ -803,8 +910,10 @@ public class Endpoint {
 	 *            decoded SPARQL query
 	 * @return the response
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException {
+	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException, TemplateException, IOException {
 		if (sparqlQuery.equals("")) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
@@ -828,8 +937,10 @@ public class Endpoint {
 	 *            decoded SPARQL query
 	 * @return the response
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException {
+	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException, TemplateException, IOException {
 		return sparql(format, sparqlQuery, false);
 	}
 
@@ -903,8 +1014,10 @@ public class Endpoint {
 	 * 			string containing the SPARQL query
 	 * @return HTTP response of evaluating the sparql query 
 	 * @throws InternalErrorException
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean join_option) throws InternalErrorException {
+	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean join_option) throws InternalErrorException, TemplateException, IOException {
 		logger.info("SPARQL query was requested. Query: " + sparqlQuery);
 		String user = null;
 		Matcher userMatcher = patternUser.matcher(sparqlQuery);
@@ -937,6 +1050,24 @@ public class Endpoint {
 		if (patternBranchOrTagQuery.matcher(sparqlQuery).find()) {
 			return getBranchOrTagResponse(sparqlQuery, user, message, format);
 		}
+		//added pattern fast forward
+		Matcher m = patternFastForwardQuery.matcher(sparqlQuery);
+		if (m.find()) {					
+			//pattern matched to do 
+			String graphName = m.group("graph");
+			String branchNameA = m.group("branchNameA").toLowerCase();
+			String branchNameB = m.group("branchNameB").toLowerCase();
+			String sddName = m.group("sdd");
+			
+			boolean canFastForward = MergingControl.fastForwardCheck(graphName, branchNameA, branchNameB);
+			if(canFastForward == false) {
+				throw new InternalErrorException("Error in query: " + sparqlQuery + ", This Query can not satisfy the condition of fast forward!" );
+			}
+			
+			FastForwardControl.createCommitModel(graphName, sddName, user, message, branchNameA, branchNameB, "Fast-Forward");
+			return getFastForwardResponse(sparqlQuery, user, message);
+		}
+		
 		throw new QueryErrorException("No R43ples query detected");
 	}
 
@@ -1551,8 +1682,60 @@ public class Endpoint {
 		
 		return responseBuilder.build();	
 	}
+	
+	/** 
+	 * Creates fast forward merging.
+	 * 
+	 * Using command: MERGE GRAPH <graphURI> -ff BRANCH "branchNameA" INTO "branchNameB"
+	 * 
+	 * @param sparqlQuery the SPARQL query
+	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
+	 */
+	private Response getFastForwardResponse(final String sparqlQuery, final String user, final String commitMessage) throws InternalErrorException, TemplateException, IOException{
+		
+		ResponseBuilder response = Response.ok();
 
+		Matcher m = patternFastForwardQuery.matcher(sparqlQuery);
+		
+		String format = "application/json";
+		
+		boolean foundEntry = false;
+		while (m.find()) {
+			foundEntry = true;
+			
+			String graphName = m.group("graph");
+//			String sdd = m.group("sdd");
+//			String sddURI = m.group("sddURI");
+			String branchNameA = m.group("branchNameA").toLowerCase();
+			String branchNameB = m.group("branchNameB").toLowerCase();
+			
+			StrategyManagement.saveGraphVorFastForward(graphName, format);
+			
+			String branchUriB = RevisionManagement.getBranchUri(graphName, branchNameB);
+			String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
+			String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
+			
+			StrategyManagement.moveBranchReference(branchUriB, revisionUriB, revisionUriA);
+			
+			StrategyManagement.updateRevisionOfBranch(branchUriB, revisionUriB, revisionUriA);	
+			
+			String fastForwardView = FastForwardControl.getFastForwardReportView(graphName);
+					
+			response.entity(fastForwardView);
 
+		}
+			
+		if (!foundEntry){
+			throw new InternalErrorException("Error in query: " + sparqlQuery);
+		}
+			
+				
+		
+		return response.build();
+		
+	}
 
 	
 }

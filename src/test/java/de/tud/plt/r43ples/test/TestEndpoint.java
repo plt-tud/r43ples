@@ -20,6 +20,7 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Endpoint;
+import freemarker.template.TemplateException;
 
 
 public class TestEndpoint {
@@ -32,7 +33,7 @@ public class TestEndpoint {
 	
 	
 	@BeforeClass
-	public static void setUpBeforeClass() throws ConfigurationException, URISyntaxException, IOException, InternalErrorException{
+	public static void setUpBeforeClass() throws ConfigurationException, URISyntaxException, IOException, InternalErrorException, TemplateException{
 		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.test.conf");
 		graphName = SampleDataSet.createSampleDataSetMerging();
@@ -40,7 +41,7 @@ public class TestEndpoint {
 	
 	
 	@Test
-	public void testSelect() throws InternalErrorException, SAXException, IOException {
+	public void testSelect() throws InternalErrorException, SAXException, IOException, TemplateException {
 		String query = String.format(""
 				+ "SELECT * FROM <%s> REVISION \"B2\" "
 				+ "WHERE { ?s ?p ?o. }"
@@ -52,7 +53,7 @@ public class TestEndpoint {
 	
 	
 	@Test
-	public void testSelectSparqlJoinOption() throws IOException, SAXException, InternalErrorException{		
+	public void testSelectSparqlJoinOption() throws IOException, SAXException, InternalErrorException, TemplateException{		
 		String query = String.format(""
 						+ "SELECT ?s ?p ?o "
 						+ "WHERE { "
@@ -67,14 +68,14 @@ public class TestEndpoint {
 	
 
 	@Test
-	public void testHtmlQueryForm() throws IOException, InternalErrorException{
+	public void testHtmlQueryForm() throws IOException, InternalErrorException, TemplateException{
 		String result = ep.sparql(MediaType.TEXT_HTML, "").getEntity().toString();
 		Assert.assertThat(result, containsString("<form"));
 	}
 	
 	
 	@Test
-	public void testSelectQueryWithoutRevision() throws IOException, SAXException, InternalErrorException {
+	public void testSelectQueryWithoutRevision() throws IOException, SAXException, InternalErrorException, TemplateException {
 		String query = String.format(""
 				+ "select * from <%s> %n"
 				+ "where { ?s ?p ?o. } %n"
@@ -89,8 +90,9 @@ public class TestEndpoint {
 	 *  Test example queries from html site
 	 * @throws IOException 
 	 * @throws InternalErrorException 
+	 * @throws TemplateException 
 	 */
-	@Test public void testExampleQueries() throws IOException, InternalErrorException {
+	@Test public void testExampleQueries() throws IOException, InternalErrorException, TemplateException {
 		String graph1 = SampleDataSet.createSampleDataset1();
 		String graph2 = SampleDataSet.createSampleDataset2();
 		

@@ -5,6 +5,7 @@ package de.tud.plt.r43ples.test.merge;
 
 import static org.hamcrest.core.StringContains.containsString;
 
+import java.io.IOException;
 import java.util.LinkedList;
 
 import org.apache.commons.configuration.ConfigurationException;
@@ -17,6 +18,7 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
+import freemarker.template.TemplateException;
 
 /**
  * @author Markus Graube
@@ -29,9 +31,11 @@ public class TestMergeManagement {
 	/**
 	 * @throws ConfigurationException 
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
 	@BeforeClass
-	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException {
+	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException, TemplateException, IOException {
 		Config.readConfig("r43ples.test.conf");
 		graph = SampleDataSet.createSampleDataSetMerging();
 	}

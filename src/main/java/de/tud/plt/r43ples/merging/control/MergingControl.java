@@ -20,6 +20,7 @@ import com.hp.hpl.jena.update.UpdateAction;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.GitRepositoryState;
+import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.ResolutionState;
 import de.tud.plt.r43ples.management.RevisionManagement;
@@ -27,6 +28,7 @@ import de.tud.plt.r43ples.management.SDDTripleStateEnum;
 import de.tud.plt.r43ples.merging.management.BranchManagement;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
 import de.tud.plt.r43ples.merging.management.ReportManagement;
+import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.merging.model.structure.CommitModel;
 import de.tud.plt.r43ples.merging.model.structure.Difference;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
@@ -81,20 +83,20 @@ public class MergingControl {
 	private static ReportResult reportResult;
 	
 	
-	public static String getHtmlOutput(String graphName) {
-		MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/mergingView.mustache");
-	    StringWriter sw = new StringWriter();
-	    
-	    Map<String, Object> scope = new HashMap<String, Object>();
-	    
-	    scope.put("graphName", graphName);	
-	    scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
-		
-	    mustache.execute(sw, scope);		
-		return sw.toString();
-	}
+//	public static String getHtmlOutput(String graphName) {
+//		MustacheFactory mf = new DefaultMustacheFactory();
+//	    Mustache mustache = mf.compile("templates/mergingView.mustache");
+//	    StringWriter sw = new StringWriter();
+//	    
+//	    Map<String, Object> scope = new HashMap<String, Object>();
+//	    
+//	    scope.put("graphName", graphName);	
+//	    scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+//		scope.put("git", GitRepositoryState.getGitRepositoryState());
+//		
+//	    mustache.execute(sw, scope);		
+//		return sw.toString();
+//	}
 	
 //	public static String getMenuHtmlOutput() {
 //		List<String> graphList = RevisionManagement.getRevisedGraphs();
@@ -262,7 +264,10 @@ public class MergingControl {
 	}
 	
 	
-	
+	/**
+	 * get branch information through the graphName
+	 * @param graph : name of graph
+	 * return branch name*/
 	public static String getBranchInformation(String graph) throws IOException {
 		List<String> branchList = BranchManagement.getAllBranchNamesOfGraph(graph);
 		StringBuilder branchInformation = new StringBuilder();
@@ -272,6 +277,25 @@ public class MergingControl {
 		System.out.println("branch success created");
 		return branchInformation.toString();
 	}
+	
+	/**check the condition for fast forward strategy
+	 * @param graphName : name of named graph
+	 * @param branch1 : name of branch1
+	 * @param branch2 : name of branch2
+	 * @throws InternalErrorException */
+	
+	public static boolean fastForwardCheck(String graphName, String branch1 , String branch2) throws InternalErrorException {
+		if(branch1.equals(branch2)) {
+			return false;
+		}
+		
+		//get last revision of each branch
+		String revisionUriA = RevisionManagement.getRevisionUri(graphName, branch1);
+		String revisionUriB = RevisionManagement.getRevisionUri(graphName, branch2);
+		
+		return StrategyManagement.isFastForward(revisionUriA, revisionUriB);
+	}
+	
 	
 	public static void getMergeProcess(Response response, String graphName, String branchNameA, String branchNameB) throws IOException, ConfigurationException, InternalErrorException{
 		//ob diese satz richt ist oder nicht?
@@ -484,6 +508,70 @@ public class MergingControl {
 			}					
 		}
 		
+		scope.put("tableRowList", updatedTripleRowList);
+		
+		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		
+		temp.process(scope,sw);	
+		
+		return sw.toString();	
+		
+	}
+	
+	/**@param triples :  triple list of Difference Tree by checkbox select
+	 * return response of updated triple table
+	 * @throws ConfigurationException */
+	
+	public static String updateTripleTableByTree(String triples) throws TemplateException, IOException, ConfigurationException{
+		
+		Map<String, Object> scope = new HashMap<String, Object>();
+		StringWriter sw = new StringWriter();
+		freemarker.template.Template temp = null; 
+		String name = "tripleTable.ftl";
+		
+		try {  
+            // 通过Freemarker的Configuration读取相应的Ftl  
+            Configuration cfg = new Configuration();  
+            // 设定去哪里读取相应的ftl模板  
+            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
+            // 在模板文件目录中寻找名称为name的模板文件  
+            temp = cfg.getTemplate(name);  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        } 
+		
+		//updated tableModel	 	
+		ProcessManagement.createTableModel(differenceModel, tableModel);
+		
+		String[] tripleArray = triples.split(",");
+		List<TableRow> TripleRowList = tableModel.getTripleRowList();
+		List<TableRow> updatedTripleRowList = new ArrayList<TableRow>();
+		for(String triple: tripleArray) {
+			
+			Iterator<TableRow> itu = TripleRowList.iterator();
+			while(itu.hasNext()){
+				TableRow tableRow = itu.next();
+				//get the triple in table ant transform to string 
+				Triple tableTriple = tableRow.getTriple();
+				String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(tableTriple));
+				String predicate = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(tableTriple));
+				String object = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(tableTriple));
+				
+				StringBuilder TripleBuilder = new StringBuilder();
+				String prefixTriple = TripleBuilder.append(subject).append(" ").append(predicate).append(" ").append(object).toString();
+				logger.info("tree triple: " + "--" + prefixTriple + "--" +triple.trim()+"--");
+				
+				logger.info("tree boolean"+ (prefixTriple).equals(triple.trim()));
+				if((prefixTriple.trim()).equals(triple.trim())) {
+					updatedTripleRowList.add(tableRow);
+				}
+				
+				
+			}					
+		}
+		
+		logger.info("tree table list: "+ updatedTripleRowList.size());
 		scope.put("tableRowList", updatedTripleRowList);
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
@@ -1015,8 +1103,8 @@ public class MergingControl {
 	
 	
 	
-	public static void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2){
-		MergingControl.commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2);
+	public static void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2, String strategy){
+		commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2, strategy);
 	}
 	
 	

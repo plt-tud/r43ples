@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import freemarker.template.TemplateException;
 /**
  * 
  * @author Stephan Hensel
@@ -85,9 +86,11 @@ public class SampleDataSet {
 	 * 
 	 * 
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 *
 	 */
-	public static String createSampleDataSetMerging() throws InternalErrorException {
+	public static String createSampleDataSetMerging() throws InternalErrorException, TemplateException, IOException {
 		String graphName = "http://test.com/r43ples-dataset-merging";
 
 		// Create new example graph
@@ -158,8 +161,9 @@ public class SampleDataSet {
 	 * @returns graphName
 	 * @throws IOException
 	 * @throws InternalErrorException 
+	 * @throws TemplateException 
 	 */
-	public static String createSampleDataSetMergingClasses() throws IOException, InternalErrorException {		
+	public static String createSampleDataSetMergingClasses() throws IOException, InternalErrorException, TemplateException {		
 		String graphName = "http://test.com/r43ples-dataset-merging-classes";
 		/** The initial content file path **/
 		String initialContentFilePath = "verification/ExampleGraphClasses_initial.triples";
@@ -238,8 +242,10 @@ public class SampleDataSet {
 	 * 
 	 * @returns graphName
 	 * @throws InternalErrorException
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public static String createSampleDataSetRenaming() throws InternalErrorException {
+	public static String createSampleDataSetRenaming() throws InternalErrorException, TemplateException, IOException {
 		String graphName = "http://test.com/r43ples-dataset-renaming";
 
 		// Create new example graph
@@ -328,8 +334,10 @@ public class SampleDataSet {
 	 * 
 	 * @returns graphName
 	 * @throws InternalErrorException
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public static String createSampleDataSetComplexStructure() throws InternalErrorException {
+	public static String createSampleDataSetComplexStructure() throws InternalErrorException, TemplateException, IOException {
 		String graphName = "http://test.com/r43ples-dataset-complex-structure";
 		
 		// Create new example graph

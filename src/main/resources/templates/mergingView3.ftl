@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 	<!--[if IE 9]><html class="lt-ie10" lang="en" > <![endif]-->
-	<html class="no-js" lang="en" >
+<html class="no-js" lang="en" >
 
 <head>
 	  	<meta charset="utf-8">
@@ -21,9 +21,7 @@
     	
     	<script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
     	
-    	<!--jsTree-->
-    	<script src="/static/js/jstree.js"></script>
-    	<link rel="stylesheet" href="/static/css/jsTreeStyle.css" />
+    	
     	
     	<!--foundation.js-->
     	<script src="/static/js/foundation.js"></script>
@@ -38,7 +36,9 @@
      <!--  <link rel="stylesheet" href="https://cdn.datatables.net/plug-ins/1.10.6/integration/foundation/dataTables.foundation.css">-->
       <link rel="stylesheet" href="/static/css/foundation.table.css">
 
-    
+      <!--jsTree-->
+      <script src="/static/js/jstree.min.js"></script>
+      <link rel="stylesheet" href="/static/css/style.min.css" />
         <!--Einbinden der externen Bibliotheken-->
     	<!--D3.js-->
     	<script src="//cdn.jsdelivr.net/d3js/3.5.5/d3.min.js"></script>
@@ -69,11 +69,16 @@
           border: 1px solid #d7d7d7;
           width: 665px;
         }
-        .childTbl th,
+        
         .childTbl td {
           border: 1px solid #d7d7d7;
           text-align: center;
         }
+        
+        .childTbl th {
+		  border: 2px solid black;
+		  text-align: center;
+		}
         .scrollData {
           width: 690;
           height: 366px;
@@ -104,8 +109,30 @@
         }
         #example td:hover {
             cursor: pointer;
-        }     
-
+        } 
+        
+        table {
+        	border-color: black;
+        }    
+        table tr td {
+		  padding: 0rem;
+		  font-size: 1rem;
+		  margin-bottom: 0.5rem;
+		}
+		
+		table tr th {
+			padding: 0.3rem;
+			font-size: 1rem;	
+		}
+			
+		button, .button {	 
+		  margin-top: 0.5rem;
+		  margin-bottom: 0.5rem;
+		}
+		
+		.wsmall{
+		  -webkit-transform: scale(0.8,0.8); /* Safari and Chrome */
+		}
       </style>
 	  
 
@@ -116,6 +143,7 @@
       <script type="text/javascript">
         $(document).foundation();      
         $(document).ready(function(){
+
 
             // von report seite go back , triple table bleibt
             $(window).load(function() {
@@ -142,9 +170,11 @@
                         $(this).parent().prev().children().prop({"disabled":false});
                         $(this).parent().parent().css('background','white');
                      }
-                  });                           
+                  }); 
+
               }); 
             });
+            
             // Elemente in Variablen Speichern
             var toogleBranches = $('#toogle-branches');
             var toogleTags = $('#toogle-tags');
@@ -188,27 +218,8 @@
             // } );
 
             //jsTree
-            $("#diffTree").jstree({
-              "plugins" : [ "themes", "html_data" ]
-               
-              
-              // "types" : {
-              //           "types" : {
-              //               "team" : {
-              //                   "icon" : {
-              //                       "image" : "r43ples-r-logo.png"
-              //                   }
-              //               }, 
-             
-              //               "iteration" : {
-              //                   "icon" : {
-              //                       "image" : "r43ples-r-logo.png"
-              //                   }
-              //               }
-              //           }
-              //       },
-              //       "plugins" : [ "html_data", "types", "themes" ]
-            });
+            // get checkbox and delete the file icon
+            $('#diffTree').jstree({ plugins : ["checkbox","sort","types","wholerow"], "core" : { "themes" : { "icons" : false } } });
 
             //get resolutionstate of Triples
             $("#push").click(function(){
@@ -359,6 +370,40 @@
                 
             });
 
+            //difference tree controle the inhalt von triple table 
+            $('#diffTree').click(function(){
+              var diffNode = $('#diffTree li .jstree-leaf');
+              var checked = [];
+              var triples = null;
+              diffNode.each(function(index){
+                if(($(this).attr('aria-selected')) == 'true'){
+                  checked.push($(this).find('a').text());
+                }
+              });
+              triples = checked.join(',');
+
+              //post to server to select the triple table
+              $.post("treeFilterProcess", 
+                {
+                  triples : triples
+                },
+                function(data, status){
+                  $("#tripleTable").empty();
+                  $("#tripleTable").prepend(data);
+                  $("#tripleTable :button").each(function (){
+                     if($(this).text() == "Approved") {
+                        $(this).parent().prev().children().prop({"disabled":true});
+                        $(this).parent().parent().css('background','green');
+                     }else{
+                        $(this).parent().prev().children().prop({"disabled":false});
+                        $(this).parent().parent().css('background','white');
+                     }
+                  });
+
+                });
+
+            });
+
 
             //Table row clicked, color change
             // $("#tripleTable").find("tr").click(function() {
@@ -438,11 +483,11 @@
         });
       </script>
 
- <#include "superNav.ftl">
+  <#include "superNav.ftl">
 
   <!-- body content here -->
       
-    <div class="container" style="margin-top:66px;">  
+    <div class="container wsmall" style="margin-top:-66px;">  
         <div class="row panel radius" style="background-color:white;width:100%" >
 
           <!--Merging Client-->
@@ -477,7 +522,7 @@
                   <div id="diffTree" style="overflow:auto; height:486px; width:266px; padding:0px">
                     <#if conStatus=="1">
                       <ul>
-                          <li><a><img src="/static/images/Conflict.png"/> Conflict</a>
+                          <li data-jstree='{"opened" : true}'><a><img src="/static/images/Conflict.png"/> Conflict</a>
                             <ul>
                               <#list conList as node>
                                 <li ><a><img src="/static/images/Conflict.png"/> ${node.differenceGroup}</a>
@@ -492,7 +537,7 @@
                             </ul>
                            </li>
                            
-                           <li><a><img src="/static/images/Difference.png"/> Difference</a>
+                           <li data-jstree='{"opened" : true}'><a><img src="/static/images/Difference.png"/> Difference</a>
                             <ul>
                               <#list diffList as node>
                                 <li ><a><img src="/static/images/Difference.png"/> ${node.differenceGroup}</a>
@@ -510,7 +555,7 @@
                       
                      <#else>
                         <ul>
-                           <li><a><img src="/static/images/Difference.png"/> Difference</a>
+                           <li data-jstree='{"opened" : true}'><a><img src="/static/images/Difference.png"/> Difference</a>
                             <ul>
                               <#list diffList as node>
                                 <li ><a><img src="/static/images/Difference.png"/> ${node.differenceGroup}</a>
@@ -556,7 +601,7 @@
                 									   <#list propertyList as property>
 	                                    <tr>
 	                                        <td >${property!" "}</td>
-	                                        <td><input type="checkbox" name="pFilter" checked value=${property!" "}></td>
+	                                        <td><input type="checkbox" name="pFilter"  value=${property!" "}></td>
 	                                    </tr>
 	                                  </#list>     
 									               <#else>
@@ -630,7 +675,7 @@
                 <div id="tripleView">
                 <fieldset style="padding-bottom:0px;padding-top:0px;margin-bottom:6px">
                     <legend><strong>Resolution</strong></legend>
-                      <div id="allSelect" class="columns large-2 push-10"><button type="button" class="button tiny expand radius">Approve All</button></div>
+                      <div id="allSelect" class="columns large-2 push-10"><button type="button" class="button tiny radius">Approve All</button></div>
 
                       <hr style="margin:8px;"/>
                       <div class = "parentTbl">

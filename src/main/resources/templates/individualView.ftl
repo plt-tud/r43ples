@@ -75,7 +75,7 @@
 	<div id = "individualFilter">
 	  <fieldset style="padding-bottom:0px;padding-top:0px;margin-bottom:6px">
             <legend><strong>Resolution</strong></legend>
-			  <div id="allSelectIndividual" class="columns large-2 push-10"><button type="button" class="button tiny expand radius" >Approve All</button></div>
+			  <div id="allSelectIndividual" class="columns large-2 push-10"><button type="button" class="button tiny radius" >Approve All</button></div>
               <hr style="margin:8px;"/>
               <div class = "parentTbl">
                 <table  style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">

@@ -54,8 +54,43 @@
           }
 
         }; 
-          //confirm and go on merging 
-     
+
+        // branch onchange check : ob mit fast forward erreichbar
+        function checkFastForward (){
+          var graph = $('#graph').val();
+          var branch1 = $('#Branch1').val();
+          var branch2 = $('#Branch2').val();
+
+
+          $.get("fastForwardCheckProcess", 
+            {
+              graph : graph,
+              branch1 : branch1,
+              branch2 : branch2
+            },
+            function(data,stauts){
+              // get data and check
+              $('#strategie').val('0');
+              alert(data);
+              if(data == "false"){
+                $('#strategie').children('option').each(function(){
+                  if($(this).val() === "1"){
+                    $(this).attr('disabled', true);
+                  }
+                });
+              }else{
+                $('#strategie').children('option').each(function(){
+                  if($(this).val() === "1"){
+                    $(this).attr('disabled', false);
+                  }
+                });
+              }
+
+            });
+        }
+
+
+
 </script>
 
 <div class="container">
@@ -122,7 +157,7 @@
                           <span class="prefix"><strong>MERGE:</strong></span>
                         </div>
                         <div class="small-3 columns">
-                          <select class="radius" id="Branch1" name="Branch1">    
+                          <select class="radius" id="Branch1" name="Branch1" onchange="checkFastForward()">    
                              <option value="no"></option>
                           </select>          
                         </div>
@@ -130,7 +165,7 @@
                           <span class="prefix"><strong>INTO:</strong></span>
                         </div>
                         <div class="small-3 columns">
-                          <select class="radius" id="Branch2" name="Branch2">
+                          <select class="radius" id="Branch2" name="Branch2" onchange="checkFastForward()">
                              <option value="no"></option>
                           </select>          
                         </div>

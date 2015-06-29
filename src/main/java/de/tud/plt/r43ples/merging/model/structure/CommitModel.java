@@ -7,15 +7,17 @@ public class CommitModel {
 	String message = null;
 	String branch1 = null;
 	String branch2 = null;
+	String strategy = null;
 	
 	public CommitModel(String graphName, String sddName, String user,
-			String message, String branch1, String branch2) {
+			String message, String branch1, String branch2, String strategy) {
 		this.graphName = graphName;
 		this.sddName = sddName;
 		this.user = user;
 		this.message = message;
 		this.branch1 = branch1;
 		this.branch2 = branch2;
+		this.strategy = strategy;
 	}
 
 	public String getGraphName() {
@@ -66,7 +68,13 @@ public class CommitModel {
 		this.branch2 = branch2;
 	}
 	
+	public String getStrategy(){
+		return strategy;
+	}
 	
+	public void setStrategy(String strategy) {
+		this.strategy = strategy;
+	}	
 }
 
 
