@@ -11,8 +11,6 @@ import java.util.ArrayList;
  */
 public class Revision {
 
-	/** The predecessors of the node */
-	private ArrayList<Revision> predecessor;
 	/** The successors of the node */
 	private ArrayList<Revision> successor;
 	/** The full graph of a tag or branch if available */
@@ -26,28 +24,12 @@ public class Revision {
 	 * The constructor.
 	 */
 	public Revision(String revisionNumber, String revisionUri, String fullGraph) {
-		predecessor = new ArrayList<Revision>();
 		successor = new ArrayList<Revision>();
 		this.revisionNumber = revisionNumber;
 		this.revisionUri = revisionUri;
 		this.fullGraph = fullGraph;
 	}
 
-	
-	/**
-	 * @return the first predecessor
-	 */
-	public Revision getFirstPredecessor() {
-		return predecessor.get(0);
-	}
-
-	
-	/**
-	 * @param predecessor the predecessor to add
-	 */
-	public void addPredecessor(Revision predecessor) {
-		this.predecessor.add(predecessor);
-	}
 
 	
 	/**
@@ -58,19 +40,6 @@ public class Revision {
 	}
 	
 	
-	/**
-	 * @return the successors
-	 */
-	public ArrayList<Revision> getSuccessors() {
-		return successor;
-	}
-	
-	/**
-	 * @return the successors
-	 */
-	public boolean hasSuccessor() {
-		return successor.size()>0;
-	}
 
 	
 	/**

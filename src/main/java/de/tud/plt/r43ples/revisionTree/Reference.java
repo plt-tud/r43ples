@@ -1,16 +1,11 @@
 package de.tud.plt.r43ples.revisionTree;
 
-import org.apache.commons.lang.builder.HashCodeBuilder;
-
 public abstract class Reference {
 	
 	private String uri;
 	private String name;
 	private Commit ref;
 	
-	public Reference(String uri) {
-		this.uri = uri;
-	}
 
 	public Reference(String uri, String name, Commit ref) {
 		this.uri = uri;
@@ -36,11 +31,9 @@ public abstract class Reference {
 			Reference b = (Reference) obj;
 			return this.uri.equals(b.uri);
 		}
-		return super.equals(obj);
+		else {
+			return super.equals(obj);
+		}
 	}
-	
-	@Override
-    public int hashCode() {
-        return new HashCodeBuilder().append(uri).toHashCode();
-    }
+
 }
