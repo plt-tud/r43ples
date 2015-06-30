@@ -14,6 +14,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -23,6 +24,7 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
 
@@ -54,6 +56,11 @@ public class TestEndpoint extends JerseyTest {
 				+ "  UNION "
 				+ "  {GRAPH <%s> REVISION \"B2\" { ?s ?p ?o}}"
 				+ "} ORDER BY ?s ?p ?o", graphNameMerging, graphNameMerging);
+	}
+	
+	@AfterClass
+	public static void tearDownAfterClass() {
+		TripleStoreInterfaceSingleton.close();
 	}
 	
 	
