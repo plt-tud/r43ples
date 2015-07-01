@@ -303,12 +303,16 @@
 			<plugin>
 			    <groupId>org.codehaus.mojo</groupId>
 			    <artifactId>cobertura-maven-plugin</artifactId>
-			    <version>2.6</version>
+			    <version>2.7</version>
 			    <configuration>
-			        <format>xml</format>
-			        <maxmem>256m</maxmem>
-			        <!-- aggregated reports for multi-module projects -->
-			        <aggregate>true</aggregate>
+                                <instrumentation>
+                                    <excludes>
+                                        <exclude>de/tud/plt/r43ples/R43plesService*.class</exclude>
+                                        <exclude>de/tud/plt/r43ples/client/*.class</exclude>
+                                        <exclude>de/tud/plt/r43ples/triplestoreInterface/HttpInterface.class</exclude>
+                                        <exclude>de/tud/plt/r43ples/triplestoreInterface/VirtuosoInterface.class</exclude>
+                                    </excludes>
+                                </instrumentation>
 			        <formats>
 						<format>html</format>
 						<format>xml</format>

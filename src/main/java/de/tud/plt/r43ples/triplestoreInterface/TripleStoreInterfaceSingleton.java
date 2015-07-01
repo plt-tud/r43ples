@@ -27,59 +27,19 @@ public class TripleStoreInterfaceSingleton {
 			return triplestore;
 		else {
 			if (Config.triplestore_type.equals("tdb"))
-				triplestore = createJenaTDBInterface(Config.triplestore_url);
+				triplestore = new JenaTDBInterface(Config.triplestore_url);
 			else if (Config.triplestore_type.equals("virtuoso"))
-				triplestore = createVirtuosoInterface(Config.triplestore_url, Config.triplestore_user, Config.triplestore_password);
+				triplestore = new VirtuosoInterface(Config.triplestore_url, Config.triplestore_user, Config.triplestore_password);
 			else if (Config.triplestore_type.equals("http"))
-				triplestore = createHttpInterface(Config.triplestore_url, Config.triplestore_user, Config.triplestore_password);
-			else if (Config.triplestore_type.equals("http_virtuoso"))
-				triplestore = createVirtuosoHttpInterface(Config.triplestore_url, Config.triplestore_user, Config.triplestore_password);
+				triplestore = new HttpInterface(Config.triplestore_url, Config.triplestore_user, Config.triplestore_password);
 			else {
-				logger.error("No database specified in config");
+				logger.error("No triplestore specified in config");
 				System.exit(1);
 			}
 			triplestore.init();
 			return triplestore;
 		}
 	}
-
-	
-	public static TripleStoreInterface createJenaTDBInterface(String databaseDirectory) {
-		if (triplestore==null) {
-			triplestore = new JenaTDBInterface(databaseDirectory);
-			return triplestore;
-		}
-		else
-			return triplestore;
-	}
-	
-	public static TripleStoreInterface createVirtuosoInterface(String virtuoso_url, String virtuoso_user, String virtuoso_password) {
-		if (triplestore==null) {
-			triplestore = new VirtuosoInterface(virtuoso_url, virtuoso_user, virtuoso_password);
-			return triplestore;
-		}
-		else
-			return null;
-	}
-	
-	public static TripleStoreInterface createHttpInterface(String http_url, String http_user, String http_password) {
-		if (triplestore==null) {
-			triplestore = new HttpInterface(http_url, http_user, http_password);
-			return triplestore;
-		}
-		else
-			return null;
-	}
-	
-	public static TripleStoreInterface createVirtuosoHttpInterface(String http_url, String http_user, String http_password) {
-		if (triplestore==null) {
-			triplestore = new VirtuosoHttpInterface(http_url, http_user, http_password);
-			return triplestore;
-		}
-		else
-			return null;
-	}
-	
 
 	public static void close(){
 		if (triplestore!=null) {

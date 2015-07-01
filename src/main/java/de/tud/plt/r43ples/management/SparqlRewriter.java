@@ -62,8 +62,6 @@ public class SparqlRewriter {
 
 	/** instance variables */
 	private int statement_i = 0;
-	private final String query_original;
-	private String query_rewritten;
 	private LinkedList<String> revisions = new LinkedList<String>();
 	private LinkedList<String> graphs = new LinkedList<String>();
 	private ExprList expression_list_revision_path = new ExprList();
@@ -71,24 +69,12 @@ public class SparqlRewriter {
 	private String revisionNumber;
 	private String graphName; 
 	
-	public static String rewriteQuery(final String query_r43ples) {
-		SparqlRewriter sr = new SparqlRewriter(query_r43ples);
-		return sr.query_rewritten;
+	public static String rewriteQuery(final String query_r43ples) throws InternalErrorException {
+		SparqlRewriter sr = new SparqlRewriter();
+		return sr.rewrite(query_r43ples);
 	}
 	
 	
-	public SparqlRewriter(String query){
-		query_original = query;
-		try {
-			query_rewritten = rewrite();
-		} catch (InternalErrorException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public String getRewrittenQuery(){
-		return query_rewritten;
-	}
 	
 	/** updates last_revision and expression_list_revision_path by pulling first item of revisionNumber and graphName
 	 * 
@@ -112,12 +98,13 @@ public class SparqlRewriter {
 		}
 	}
 	
-	public String rewrite() throws InternalErrorException {
+	public String rewrite(final String r43ples_query) throws InternalErrorException {
+		
 		final Pattern pattern1 = Pattern.compile("GRAPH\\s*<(?<graph>\\S*)>\\s*\\{", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
 		final Pattern pattern2 = Pattern.compile("GRAPH\\s*<(?<graph>\\S*)>\\s*REVISION\\s*\"(?<revision>\\S*)\"", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
 				
 		
-		Matcher m1 = pattern1.matcher(query_original);
+		Matcher m1 = pattern1.matcher(r43ples_query);
 		String query_sparql = m1.replaceAll("GRAPH <$1> REVISION \"master\" {");
 				
 		Matcher m2 = pattern2.matcher(query_sparql);
@@ -141,7 +128,7 @@ public class SparqlRewriter {
 		// Do the rewriting and store the modified elements
 		Element el_modified = getRewrittenElement(el_orginal);
 		
-
+		// force distinct in order to avoid duplicate entries due to multiple graph joins 
 		query_new.setDistinct(true);
 		query_new.setQueryPattern(el_modified);
 		query_sparql = query_new.serialize();
