@@ -25,7 +25,7 @@ public class FastForwardControl {
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		freemarker.template.Template temp = null; 
-		String name = "fastForwardReportView.ftl";
+		String name = "mergingResultView.ftl";
 		try {  
             // 通过Freemarker的Configuration读取相应的Ftl  
             Configuration cfg = new Configuration();  
@@ -46,8 +46,8 @@ public class FastForwardControl {
 		return sw.toString();	
 	}
 	
-	public static void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2, String strategy){
-		commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2, strategy);
+	public static void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2, String strategy, String type){
+		commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2, strategy, type);
 	}
 	
 }

@@ -78,7 +78,7 @@
           //var dataSource = $('#datasource');
           
           // Graph mit der aktuellen Auswahl erstellen
-          drawGraphOld("fastForwardProcess?graph=${graphName}&optradio=application/json",toogleBranchesLeft.prop("checked"),toogleTagsLeft.prop("checked"));
+          drawGraphOld("loadOldGraphProcess?graph=${graphName}&optradio=application/json",toogleBranchesLeft.prop("checked"),toogleTagsLeft.prop("checked"));
           
           
           // ChangeListener für die Tags
@@ -137,7 +137,7 @@
       <div class="columns small-5 push-1" id= "leftContainer" >
 
         <fieldset style="padding-bottom:0px;" >
-          <legend><strong>Graph vor Fast Forward</strong></legend>
+          <legend><strong>Graph before Merging</strong></legend>
           <div id="visualisation-left" class="live map">
             <svg id="left"  width="100%" height="468" style="border:1px solid #000000; margin:1px; overflow:hidden;"><g/></svg>
           </div> 
@@ -152,7 +152,7 @@
       <div class = "columns small-5 pull-1" id="rightContainer" >
 
         <fieldset style="padding-bottom:0px;" >
-          <legend><strong>Graph Nach Fast Forward</strong></legend>
+          <legend><strong>Graph after Merging</strong></legend>
           <div id="visualisation-right" class="live map">
             <svg id="right"  width="100%" height="468" style="border:1px solid #000000; margin:1px; overflow:hidden;"><g/></svg>
           </div> 
@@ -168,7 +168,7 @@
     <div class= "row ">
       <div class = "small-10 push-1 columns">
         <fieldset>
-           <legend><strong>Fast Forward Report</strong></legend>
+           <legend><strong>Merging Report</strong></legend>
            </br>
            <div class = "small-6 columns">
               <div class="row collapse prefix-radius" >

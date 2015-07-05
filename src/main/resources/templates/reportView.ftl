@@ -117,7 +117,7 @@
 		                          <span class="prefix"><strong>Strategie:</strong></span>
 		                        </div>
 		                        <div class="small-10 columns" >
-		                          <input type="text" placeholder="Strategie Name" disabled></input>
+		                          <input type="text" placeholder= ${commit.strategy} disabled></input>
 		                        </div>
 		                      </div>
 		                      <div class="row collapse prefix-radius" >
@@ -218,7 +218,12 @@
 		                <hr/>
 		                <div style = "display :none" id="haveConflict">${report}</div>
                       	<div class="small-3 push-1 columns">
-                        	<a href ="pushProcessNew"><button id="push" type="button" class="button tiny expand default">Push</button></a>
+                  			<!--check ob isRebase or three way merge-->
+                      		<#if isRebase>
+	                          <a href ="rebasePushProcessNew"><button id="push" type="button" class="button tiny expand default">Push</button></a>
+	                        <#else>
+	                          <a href ="pushProcessNew"><button id="push" type="button" class="button tiny expand default">Push</button></a>
+	                        </#if>            	
                       	</div>
                       	<div class="small-3 pull-1 columns">
                         	<a href ="javascript:history.go(-1)"><button id="back" type="button" class="button tiny expand alert ">Back</button></a>

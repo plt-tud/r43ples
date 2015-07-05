@@ -8,9 +8,10 @@ public class CommitModel {
 	String branch1 = null;
 	String branch2 = null;
 	String strategy = null;
+	String type = null;
 	
 	public CommitModel(String graphName, String sddName, String user,
-			String message, String branch1, String branch2, String strategy) {
+			String message, String branch1, String branch2, String strategy, String type) {
 		this.graphName = graphName;
 		this.sddName = sddName;
 		this.user = user;
@@ -18,6 +19,7 @@ public class CommitModel {
 		this.branch1 = branch1;
 		this.branch2 = branch2;
 		this.strategy = strategy;
+		this.type = type;
 	}
 
 	public String getGraphName() {
@@ -74,7 +76,15 @@ public class CommitModel {
 	
 	public void setStrategy(String strategy) {
 		this.strategy = strategy;
-	}	
+	}
+	
+	public String getType(){
+		return type;
+	}
+	
+	public void setType(String type){
+		this.type = type;
+	}
 }
 
 

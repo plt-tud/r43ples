@@ -156,6 +156,92 @@ public class SampleDataSet {
 	
 	
 	/**
+	 * Create an example graph of the following structure,
+	 * 
+	 *                  ADD: D,E              ADD: G
+	 *               +-----X---------------------X--------- (Branch B1)
+	 *               |  DEL: A                DEL: -
+	 * ADD: A,B,C    |
+	 * ---X----------+ (Master)
+	 * DEL: -        |
+	 *               |  ADD: D,H              ADD: I    ADD: J
+	 *               +-----X---------------------X---------X----- (Branch B2)
+	 *                  DEL: C                DEL: -    DEL: -
+	 * 
+	 * 
+	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
+	 *
+	 */
+	public static String createSampleDataSetRebase() throws InternalErrorException, TemplateException, IOException {
+		String graphName = "http://test.com/r43ples-dataset-rebase";
+
+		// Create new example graph
+		//DatasetGenerationManagement.createNewGraph(graphName);
+		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
+
+		// Initial commit
+		String triples = "<http://example.com/testS> <http://example.com/testP> \"A\". \n"
+				+ "<http://example.com/testS> <http://example.com/testP> \"B\". \n"
+				+ "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
+		//DatasetGenerationManagement.executeInsertQuery(user, "Initial commit", graphName, "0", triples);
+		String revision1 = RevisionManagement.createNewRevision(graphName, triples, null, user, "Initial commit", revision0);
+		
+
+		// Create a new branch B1
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, revision1, "B1");
+
+		// Create a new branch B2
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2", graphName, revision1, "B2");
+
+		// First commit to B1
+		String triplesInsert = "<http://example.com/testS> <http://example.com/testP> \"D\". \n"
+				+ "<http://example.com/testS> <http://example.com/testP> \"E\". \n";
+		String triplesDelete = "<http://example.com/testS> <http://example.com/testP> \"A\". \n";
+		
+//		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B1", graphName, "B1",
+//				triplesInsert, triplesDelete);
+		String revisionB1_0 = RevisionManagement.createNewRevision(graphName, triplesInsert, triplesDelete, user, "First commit to B1", "B1".toLowerCase());
+		
+
+		// First commit to B2
+		triplesInsert = "<http://example.com/testS> <http://example.com/testP> \"D\". \n"
+				+ "<http://example.com/testS> <http://example.com/testP> \"H\". \n";
+		triplesDelete = "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
+//		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B2", graphName, "B2",
+//				triplesInsert, triplesDelete);
+		
+		String revisionB2_0 = RevisionManagement.createNewRevision(graphName, triplesInsert, triplesDelete, user, "First commit to B2", "B2".toLowerCase());
+
+		// Second commit to B1
+		triplesInsert = "<http://example.com/testS> <http://example.com/testP> \"G\". \n";
+		//triplesDelete = "<http://example.com/testS> <http://example.com/testP> \"D\". \n";
+//		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Second commit to B1", graphName, "B1",
+//				triplesInsert, triplesDelete);
+		RevisionManagement.createNewRevision(graphName, triplesInsert, null, user, "Second commit to B1", revisionB1_0);
+		
+
+		// Second commit to B2
+		triplesInsert = "<http://example.com/testS> <http://example.com/testP> \"I\". \n";
+//		DatasetGenerationManagement.executeInsertQuery(user, "Second commit to B2", graphName, "B2",
+//				triplesInsert);
+		String revisionB2_1 = RevisionManagement.createNewRevision(graphName, triplesInsert, null, user, "Second commit to B2", revisionB2_0);
+		
+		// Third commit to B2
+		triplesInsert = "<http://example.com/testS> <http://example.com/testP> \"J\". \n";
+//		DatasetGenerationManagement.executeInsertQuery(user, "Third commit to B2", graphName, "B2",
+//				triplesInsert);
+		RevisionManagement.createNewRevision(graphName, triplesInsert, null, user, "Third commit to B2", revisionB2_1);
+		
+		logger.info("Example graph <" + graphName +"> created.");
+		return graphName;
+	}
+	
+	
+	
+	
+	/**
 	 * 
 	 * 
 	 * @returns graphName

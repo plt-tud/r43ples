@@ -500,7 +500,11 @@
                       <ul class="button-group radius left" style="margin-top:16px">
                         <li><a href="merging" class="button tiny">New Merge</a></li>
                         <!--click push to push Triple and resolution state-->
-                        <li><a href ="reportProcess"><button id="Report" class="button tiny">Report</button></a></li>
+                        <#if isRebase>
+                          <li><a href ="rebaseReportProcess"><button id="Report" class="button tiny">Report</button></a></li>
+                        <#else>
+                          <li><a href ="reportProcess"><button id="Report" class="button tiny">Report</button></a></li>
+                        </#if>                       
                     <!--    <li><a href="#" class="button tiny">Push</a></li> -->
                       </ul>
                 </div>

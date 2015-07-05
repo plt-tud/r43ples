@@ -82,6 +82,8 @@ public class MergingControl {
 	/** The report result. **/
 	private static ReportResult reportResult;
 	
+	private static boolean isRebase = false;
+	
 	
 //	public static String getHtmlOutput(String graphName) {
 //		MustacheFactory mf = new DefaultMustacheFactory();
@@ -180,9 +182,17 @@ public class MergingControl {
 	 		}	 		
 	 	}
 	 	
-	 	logger.info("commitGraphname: " + commitModel.getGraphName());
+	 	if(isRebase){
+	 		logger.info("commitGraphname: " + RebaseControl.getCommitModel().getGraphName());
+		 	scope.put("graphName", RebaseControl.getCommitModel().getGraphName());		 	
+	 	}else{
+	 		logger.info("commitGraphname: " + commitModel.getGraphName());
+		 	scope.put("graphName", commitModel.getGraphName());	 	
+	 	}
+	 	
+	 	scope.put("isRebase", isRebase);
 	 	scope.put("tableRowList", tableModel.getTripleRowList());
-	 	scope.put("graphName", commitModel.getGraphName());	
+	 		
 		scope.put("conList",conList);
 		scope.put("diffList",diffList);
 		scope.put("conStatus", conStatus);
@@ -248,6 +258,7 @@ public class MergingControl {
 	 		}	 		
 	 	}
 	 	
+	 	scope.put("isRebase",isRebase);
 	 	scope.put("tableRowList", tableModel.getTripleRowList());
 	 	scope.put("graphName", commitModel.getGraphName());	
 		scope.put("conList",conList);
@@ -298,9 +309,7 @@ public class MergingControl {
 	
 	
 	public static void getMergeProcess(Response response, String graphName, String branchNameA, String branchNameB) throws IOException, ConfigurationException, InternalErrorException{
-		//ob diese satz richt ist oder nicht?
-		if (response.getStatusInfo() == Response.Status.CONFLICT){
-			logger.info("Merge query produced conflicts.");
+		if (isRebase) {
 			
 			ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel);
 			
@@ -342,16 +351,64 @@ public class MergingControl {
 			while(pit.hasNext()){
 				logger.info("propertyList Test : " + pit.next().toString());
 			}
+
+		}else{
 			
-			
-			
-		} else if (response.getStatusInfo() == Response.Status.CREATED){
-			logger.info("Merge query produced no conflicts. Merged revision was created.");
-			
-		} else {
-			// error occurred
-		}		
-		
+			//ob diese satz richt ist oder nicht?
+			if (response.getStatusInfo() == Response.Status.CONFLICT){
+				logger.info("Merge query produced conflicts.");
+				
+				ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel);
+				
+				
+				ProcessManagement.createDifferenceTree(differenceModel, treeList);
+				
+				ProcessManagement.createTableModel(differenceModel, tableModel);
+				
+				
+				// Save the current revision numbers
+				revisionNumberBranchA = RevisionManagement.getRevisionNumber(graphName, branchNameA);
+				revisionNumberBranchB = RevisionManagement.getRevisionNumber(graphName, branchNameB);
+				
+				//create and initialization reportResult
+				
+				reportResult = ReportManagement.initialReportResult(differenceModel);
+				
+				// Create the individual models of both branches
+				individualModelBranchA = ProcessManagement.createIndividualModelOfRevision(graphName, branchNameA, differenceModel);
+				logger.info("Individual Model A Test : " + individualModelBranchA.getIndividualStructures().keySet().toString());
+				Iterator<Entry<String, IndividualStructure>> itEnt = individualModelBranchA.getIndividualStructures().entrySet().iterator();
+				while(itEnt.hasNext()){
+					Entry<String,IndividualStructure> entryInd = itEnt.next();
+					logger.info("Individual Sturcture Uri Test" + entryInd.getValue().getIndividualUri());
+					logger.info("Individual Sturcture Triples Test" + entryInd.getValue().getTriples().keySet().toString());
+
+					
+				}
+
+				individualModelBranchB = ProcessManagement.createIndividualModelOfRevision(graphName, branchNameB, differenceModel);
+				logger.info("Individual Model B Test : " + individualModelBranchB.getIndividualStructures().keySet().toString());
+
+				
+				
+				// Create the property list of revisions
+				propertyList = ProcessManagement.getPropertiesOfRevision(graphName, branchNameA, branchNameB);
+				
+				Iterator<String> pit = propertyList.iterator();
+				while(pit.hasNext()){
+					logger.info("propertyList Test : " + pit.next().toString());
+				}
+				
+				
+				
+			} else if (response.getStatusInfo() == Response.Status.CREATED){
+				logger.info("Merge query produced no conflicts. Merged revision was created.");
+				
+			} else {
+				// error occurred 
+				throw new InternalErrorException("Error in response : " + response);
+			}				
+		}	
 	}
 	
 	public static String getIndividualView() throws TemplateException, IOException{
@@ -935,7 +992,15 @@ public class MergingControl {
 			report = "0";
 		}
 		
-		scope.put("commit", commitModel);
+		if(isRebase) {
+			scope.put("commit", RebaseControl.getCommitModel());
+		}else{
+			scope.put("commit", commitModel);
+		}
+		
+		// three way merging
+		scope.put("isRebase", false);
+		
 		scope.put("report", report);
 		scope.put("reportTableRowList", reportTableRowList);
 		
@@ -948,6 +1013,60 @@ public class MergingControl {
 		
 	}
 	
+	/**
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 * ##                                                                                                                                                                      ##
+	 * ## create Rebase Report Process : get report result                                                                                                                             ##
+	 * ##                                                                                                                                                                      ##
+	 * ##########################################################################################################################################################################
+	 * ##########################################################################################################################################################################
+	 * @throws IOException 
+	 * @throws TemplateException 
+	 * @throws ConfigurationException 
+	 */
+	
+	public static String createRebaseReportProcess() throws TemplateException, IOException, ConfigurationException {
+		Map<String, Object> scope = new HashMap<String, Object>();
+		StringWriter sw = new StringWriter();
+		freemarker.template.Template temp = null; 
+		String name = "reportView.ftl";
+		try {  
+            // 通过Freemarker的Configuration读取相应的Ftl  
+            Configuration cfg = new Configuration();  
+            // 设定去哪里读取相应的ftl模板  
+            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
+            // 在模板文件目录中寻找名称为name的模板文件  
+            temp = cfg.getTemplate(name);  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+		
+		
+		List<ReportTableRow>  reportTableRowList = ReportManagement.createReportTableRowList(differenceModel) ;
+		
+		String report = null;
+		if(reportResult.getConflictsNotApproved() > 0){
+			report = "1";
+		}else {
+			report = "0";
+		}
+		
+		
+		scope.put("isRebase", true);
+		scope.put("commit", RebaseControl.getCommitModel());
+		
+		scope.put("report", report);
+		scope.put("reportTableRowList", reportTableRowList);
+		
+		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		
+		temp.process(scope,sw);		
+		return sw.toString();	
+		
+		
+	}
 	
 	
 	/**
@@ -1040,10 +1159,12 @@ public class MergingControl {
 		
 	}
 	
-	
+	/**updated the difference model in rebase control */
+	public static void transformDifferenceModelToRebase(){
+		RebaseControl.updateRebaseDifferenceModel(differenceModel);
+	}
 	
 		
-	
 	
 	/**
 	 * Push the changes to the remote repository.
@@ -1103,8 +1224,8 @@ public class MergingControl {
 	
 	
 	
-	public static void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2, String strategy){
-		commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2, strategy);
+	public static void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2, String strategy,String type){
+		commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2, strategy,type);
 	}
 	
 	
@@ -1227,6 +1348,14 @@ public class MergingControl {
 		}
 		
 		return individualTableList;
+	}
+	
+	public static void openRebaseModel() {
+		isRebase = true;
+	}
+	
+	public static void closeRebaseModel(){
+		isRebase = false;
 	}
 	
 }
