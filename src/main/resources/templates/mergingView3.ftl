@@ -497,16 +497,19 @@
                     <!--Button grouo-->
              <div class="row" style="padding-left:16px;padding-right:16px">
                 <div class="columns small-5" >
+
+
+                    <!--
                       <ul class="button-group radius left" style="margin-top:16px">
                         <li><a href="merging" class="button tiny">New Merge</a></li>
-                        <!--click push to push Triple and resolution state-->
+                        <!--click push to push Triple and resolution state
                         <#if isRebase>
                           <li><a href ="rebaseReportProcess"><button id="Report" class="button tiny">Report</button></a></li>
                         <#else>
                           <li><a href ="reportProcess"><button id="Report" class="button tiny">Report</button></a></li>
                         </#if>                       
-                    <!--    <li><a href="#" class="button tiny">Push</a></li> -->
                       </ul>
+                    -->
                 </div>
 
                 <div class="columns small-6">
@@ -605,7 +608,7 @@
                 									   <#list propertyList as property>
 	                                    <tr>
 	                                        <td >${property!" "}</td>
-	                                        <td><input type="checkbox" name="pFilter"  value=${property!" "}></td>
+	                                        <td><input type="checkbox" name="pFilter" checked value=${property!" "}></td>
 	                                    </tr>
 	                                  </#list>     
 									               <#else>
@@ -791,6 +794,16 @@
               </fieldset>
               </div>
 
+             </div>
+             <div class="row" style="padding-left:16px;padding-right:16px">
+               <div class= "small-12 columns">              
+                   
+                  <#if isRebase>
+                    <a href ="rebaseReportProcess" ><button id="Report" type="button" class="button tiny expand radius success">Report</button></a>
+                  <#else>
+                    <a href ="reportProcess"><button id="Report" type="button" class="button tiny expand radius success">Report</button></a>
+                  </#if>                       
+               </div>
              </div>
 
             </fieldset>

@@ -133,7 +133,6 @@
                         </div>
                         <div class="small-10 columns" >
                           <select class="radius" id="strategie" name="strategie" onchange="showIllustration(this.value)">
-                             <option value="0">None</option>
                              <option value="1">Fast-Forward Merge Strategie</option>
                              <option value="2">Three-Way Merge Strategie</option>
                              <option value="3">Rebase Merge Strategie</option>
@@ -196,11 +195,7 @@
                           </div>
                       </div>
                     </form>
-                        <div class="row">
-                          <div class="small-12 columns" style="margin-top:6px">
-                            <button id ="con" type="button" class="button tiny  expand success" disabled onclick="window.location.href='/r43ples/mergingView?optradio=common&graph=http://test.com/r43ples-dataset-merging'">Confirm</button>
-                          </div>
-                        </div>
+       
                   </fieldset>
                 </div>
 			 </div>

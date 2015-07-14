@@ -205,6 +205,8 @@ public class MergingControl {
 		return sw.toString();		
 	}
 	
+	
+	/**get the new graph after der three way merging, with difference tree und triple table*/
 	public static String getUpdatedViewHtmlOutput() throws TemplateException, IOException, ConfigurationException, InternalErrorException {	
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
@@ -272,6 +274,37 @@ public class MergingControl {
 		temp.process(scope,sw);
 		logger.info("updated view fertig!");
 		return sw.toString();		
+	}
+	
+	/**get the new graph after three way merging , with old graph and new graph , ohne difference tree and triple table*/
+	
+	public static String getThreeWayReportView(String graphName) throws TemplateException, IOException{
+		Map<String, Object> scope = new HashMap<String, Object>();
+		StringWriter sw = new StringWriter();
+		freemarker.template.Template temp = null; 
+		String name = "mergingResultView.ftl";
+		try {  
+            // 通过Freemarker的Configuration读取相应的Ftl  
+            Configuration cfg = new Configuration();  
+            // 设定去哪里读取相应的ftl模板  
+            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
+            // 在模板文件目录中寻找名称为name的模板文件  
+            temp = cfg.getTemplate(name);  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+		
+		if(graphName == null) {
+			graphName = commitModel.getGraphName();
+		}
+		
+		scope.put("graphName", graphName);
+		scope.put("commit", commitModel);
+		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		
+		temp.process(scope,sw);		
+		return sw.toString();	
 	}
 	
 	
@@ -1226,6 +1259,10 @@ public class MergingControl {
 	
 	public static void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2, String strategy,String type){
 		commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2, strategy,type);
+	}
+	
+	public static CommitModel getCommitModel(){
+		return commitModel;
 	}
 	
 	

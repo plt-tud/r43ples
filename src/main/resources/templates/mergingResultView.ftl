@@ -228,7 +228,7 @@
               </div> 
               <hr/>
               <div class="row">
-                   <a href="merging" ><button style="width:95%; margin-left:16px" type="button" class="button tiny expand radius" >Confirm</button></a>
+                   <a href="merging" ><button style="width:95%; margin-left:16px" type="button" class="button tiny expand radius" >New Merge</button></a>
               </div> 
               
           </div>

@@ -595,6 +595,7 @@ public class Endpoint {
 			
 			if (model.equals("auto")) {
 				type = MergeQueryTypeEnum.AUTO;
+				
 			} else if (model.equals("common")) {
 				type = MergeQueryTypeEnum.COMMON;
 			} else {
@@ -603,6 +604,12 @@ public class Endpoint {
 			
 			//save commit information in MergingControl
 			MergingControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way", type.toString());
+			
+			//ob auto merging
+			if(type == MergeQueryTypeEnum.AUTO){
+				//save the graph information vor merging 
+				StrategyManagement.saveGraphVorMerging(MergingControl.getCommitModel().getGraphName(), "application/json");
+			}
 				
 			String mergeQuery = ProcessManagement.createMergeQuery(graphName, sddName, user, message, type, branch1, branch2, null);
 			logger.info("yxy test mergeQuery:"+mergeQuery);
@@ -633,7 +640,10 @@ public class Endpoint {
 				
 			MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
 			
-			
+			if(type == MergeQueryTypeEnum.AUTO) {
+				response.entity(MergingControl.getThreeWayReportView(null));
+				return response.build();
+			}
 			response.entity(MergingControl.getViewHtmlOutput());
 			return response.build();
 		}	
@@ -820,7 +830,10 @@ public class Endpoint {
 		ResponseBuilder response = Response.ok();
 		
 		Response responsePost = null;
-
+		
+		//save the graph information vor merging 
+		StrategyManagement.saveGraphVorMerging(MergingControl.getCommitModel().getGraphName(), "application/json");
+		
 		String mergeQuery = MergingControl.updateMergeQueryNew();
 		
 		String userCommit = null;
@@ -850,7 +863,7 @@ public class Endpoint {
 		//MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
 		
 
-		response.entity(MergingControl.getUpdatedViewHtmlOutput());
+		response.entity(MergingControl.getThreeWayReportView(null));
 		return response.build();
 
 	}	
