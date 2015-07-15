@@ -884,6 +884,210 @@ public class MergeManagement {
 		usedRevisionNumbers.add(branchNameA);
 		return RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, usedRevisionNumbers);
 	}
+	
+	/**
+	 * Create a rebase merged revision.
+	 * 
+	 * @param graphName the graph name
+	 * @param branchNameA the name of branch A
+	 * @param branchNameB the name of branch B
+	 * @param user the user
+	 * @param commitMessage the commit message
+	 * @param graphNameDifferenceTripleModel the graph name of the difference triple model
+	 * @param graphNameRevisionProgressA the graph name of the revisions progress A
+	 * @param uriA the URI A
+	 * @param graphNameRevisionProgressB the graph name of the revisions progress B
+	 * @param uriB the URI B
+	 * @param uriSDD the URI of the SDD
+	 * @param type the merge query type
+	 * @param triples the triples which are belonging to the current merge query in N-Triple serialization
+	 * @return new revision number
+	 * @throws InternalErrorException 
+	 */
+	public static ArrayList<String> createRebaseMergedTripleList(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, RebaseQueryTypeEnum type, String triples) throws InternalErrorException {
+		//set the triple list
+		ArrayList<String> list = new ArrayList<String>();
+		
+		// Create an empty temporary graph which will contain the merged full content
+		String graphNameOfMerged = graphName + "-RM-MERGED-TEMP";
+		createNewGraph(graphNameOfMerged);
+		
+		// Get the full graph name of branch A
+		String graphNameOfBranchA = RevisionManagement.getReferenceGraph(graphName, branchNameA);
+		// Get the full graph name of branch B
+		String graphNameOfBranchB = RevisionManagement.getReferenceGraph(graphName, branchNameB);
+		
+		if(type.equals(RebaseQueryTypeEnum.WITH)){
+			// Add the string to the result list
+			list.add(String.format(triples));
+			list.add(null);
+					
+			return list;
+		}
+		
+		logger.info("the triples: "+ triples);
+		if (type.equals(RebaseQueryTypeEnum.MANUAL)) {
+			// Manual merge query
+			RevisionManagement.executeINSERT(graphNameOfMerged, triples);
+		} else {	
+			// Copy graph B to temporary merged graph
+			String queryCopy = String.format("COPY <%s> TO <%s>", graphNameOfBranchB, graphNameOfMerged);
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryCopy);
+			
+			// Get the triples from branch A which should be added to/removed from the merged revision
+			String triplesToAdd = "";
+			String triplesToDelete = "";
+			
+			// Get all difference groups
+			String queryDifferenceGroup = prefixes + String.format(
+					  "SELECT ?differenceCombinationURI ?automaticResolutionState ?tripleStateA ?tripleStateB ?conflict %n"
+					+ "WHERE { GRAPH <%s> { %n"
+					+ "	?differenceCombinationURI a rpo:DifferenceGroup ; %n"
+					+ "		sddo:automaticResolutionState ?automaticResolutionState ; %n"
+					+ "		sddo:hasTripleStateA ?tripleStateA ; %n"
+					+ "		sddo:hasTripleStateB ?tripleStateB ; %n"
+					+ "		sddo:isConflicting ?conflict . %n"
+					+ "} }", graphNameDifferenceTripleModel);
+	
+			// Iterate over all difference groups
+			ResultSet resultSetDifferenceGroups = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryDifferenceGroup);
+			while (resultSetDifferenceGroups.hasNext()) {
+				QuerySolution qsCurrentDifferenceGroup = resultSetDifferenceGroups.next();
+	
+				String currentDifferencGroupURI = qsCurrentDifferenceGroup.getResource("?differenceCombinationURI").toString();
+				String currentDifferencGroupAutomaticResolutionState = qsCurrentDifferenceGroup.getResource("?automaticResolutionState").toString();
+//				Currently not needed
+//				String currentDifferencGroupTripleStateA = qsCurrentDifferenceGroup.getResource("?tripleStateA").toString();
+//				String currentDifferencGroupTripleStateB = qsCurrentDifferenceGroup.getResource("?tripleStateB").toString();
+				boolean currentDifferencGroupConflict = qsCurrentDifferenceGroup.getLiteral("?conflict").getBoolean();
+				
+				// Get all differences (triples) of current difference group
+				String queryDifference = prefixes + String.format(
+						  "SELECT ?s ?p ?o %n"
+						+ "WHERE { GRAPH <%s> { %n"
+						+ "	<%s> a rpo:DifferenceGroup ; %n"
+						+ "		rpo:hasDifference ?blankDifference . %n"
+						+ "	?blankDifference a rpo:Difference ; %n"
+						+ "		rpo:hasTriple ?triple . %n"
+						+ "	?triple rdf:subject ?s . %n"
+						+ "	?triple rdf:predicate ?p . %n"
+						+ "	?triple rdf:object ?o . %n"
+						+ "} }", graphNameDifferenceTripleModel, currentDifferencGroupURI);
+				
+				// Iterate over all differences (triples)
+				ResultSet resultSetDifferences = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryDifference);
+				while (resultSetDifferences.hasNext()) {
+					QuerySolution qsCurrentDifference = resultSetDifferences.next();
+					
+					String subject = "<" + qsCurrentDifference.getResource("?s").toString() + ">";
+					String predicate = "<" + qsCurrentDifference.getResource("?p").toString() + ">";
+	
+					// Differ between literal and resource
+					String object = "";
+					if (qsCurrentDifference.get("?o").isLiteral()) {
+						object = "\"" + qsCurrentDifference.getLiteral("?o").toString() + "\"";
+					} else {
+						object = "<" + qsCurrentDifference.getResource("?o").toString() + ">";
+					}
+					
+					if (	type.equals(RebaseQueryTypeEnum.AUTO) || 
+							type.equals(RebaseQueryTypeEnum.COMMON) || 
+							(type.equals(RebaseQueryTypeEnum.WITH) && !currentDifferencGroupConflict) ) {
+						
+						// MERGE AUTO or common MERGE query
+						if (currentDifferencGroupAutomaticResolutionState.equals(SDDTripleState.ADDED.getSddRepresentation())) {
+							// Triple should be added
+							triplesToAdd += subject + " " + predicate + " " + object + " . \n";
+						} else {
+							// Triple should be deleted
+							triplesToDelete += subject + " " + predicate + " " + object + " . \n";
+						}
+					}else {
+						
+						// MERGE WITH query - conflicting triple
+						Model model = JenaModelManagement.readNTripleStringToJenaModel(triples);
+						// Create ASK query which will check if the model contains the specified triple
+						String queryAsk = String.format(
+								  "ASK { %n"
+								+ " %s %s %s %n"
+								+ "}", subject, predicate, object);
+						Query query = QueryFactory.create(queryAsk);
+						QueryExecution qe = QueryExecutionFactory.create(query, model);
+						boolean resultAsk = qe.execAsk();
+						qe.close();
+						model.close();
+						if (resultAsk) {
+							// Model contains the specified triple
+							// Triple should be added
+							triplesToAdd += subject + " " + predicate + " " + object + " . \n";
+						} else {
+							// Triple should be deleted
+							triplesToDelete += subject + " " + predicate + " " + object + " . \n";
+						}
+					}
+				}
+				// Update the merged graph
+				// Insert triplesToAdd
+				RevisionManagement.executeINSERT(graphNameOfMerged, triplesToAdd);
+				// Delete triplesToDelete
+				RevisionManagement.executeDELETE(graphNameOfMerged, triplesToDelete);
+			}
+		}
+		
+		// Calculate the add and delete sets
+		
+		// Get all added triples (concatenate all triples which are in MERGED but not in A and all triples which are in MERGED but not in B)
+		String queryAddedTriples = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "WHERE { %n"
+				+ "	GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	FILTER NOT EXISTS { %n"
+				+ "		GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	} %n"
+				+ "}", graphNameOfMerged, graphNameOfBranchA);
+		
+		String addedTriples = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
+		
+		queryAddedTriples = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "WHERE { %n"
+				+ "	GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	FILTER NOT EXISTS { %n"
+				+ "		GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	} %n"
+				+ "}", graphNameOfMerged, graphNameOfBranchB);
+
+		addedTriples += TripleStoreInterfaceSingleton.get().executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
+		
+		// Get all removed triples (concatenate all triples which are in A but not in MERGED and all triples which are in B but not in MERGED)
+		String queryRemovedTriples = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "WHERE { %n"
+				+ "	GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	FILTER NOT EXISTS { %n"
+				+ "		GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	} %n"
+				+ "}", graphNameOfBranchA, graphNameOfMerged);
+		
+		String removedTriples = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
+		
+		queryRemovedTriples = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "WHERE { %n"
+				+ "	GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	FILTER NOT EXISTS { %n"
+				+ "		GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	} %n"
+				+ "}", graphNameOfBranchB, graphNameOfMerged);
+		
+		removedTriples += TripleStoreInterfaceSingleton.get().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
+		
+		// Add the string to the result list
+		list.add(String.format(addedTriples));
+		list.add(String.format(removedTriples));
+				
+		return list;
+	}
 
 	
 	

@@ -160,12 +160,12 @@ public class SampleDataSet {
 	 * 
 	 *                  ADD: D,E              ADD: G
 	 *               +-----X---------------------X--------- (Branch B1)
-	 *               |  DEL: A                DEL: -
+	 *               |  DEL: -                DEL: -
 	 * ADD: A,B,C    |
 	 * ---X----------+ (Master)
 	 * DEL: -        |
 	 *               |  ADD: D,H              ADD: I    ADD: J
-	 *               +-----X---------------------X---------X----- (Branch B2)
+	 *               +-----X---------------------X---------X----- (Branch B2)  rebase unfreundlich by C,A
 	 *                  DEL: C                DEL: -    DEL: -
 	 * 
 	 * 
@@ -198,17 +198,17 @@ public class SampleDataSet {
 		// First commit to B1
 		String triplesInsert = "<http://example.com/testS> <http://example.com/testP> \"D\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP> \"E\". \n";
-		String triplesDelete = "<http://example.com/testS> <http://example.com/testP> \"A\". \n";
+	//	String triplesDelete = "<http://example.com/testS> <http://example.com/testP> \"A\". \n";
 		
 //		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B1", graphName, "B1",
 //				triplesInsert, triplesDelete);
-		String revisionB1_0 = RevisionManagement.createNewRevision(graphName, triplesInsert, triplesDelete, user, "First commit to B1", "B1".toLowerCase());
+		String revisionB1_0 = RevisionManagement.createNewRevision(graphName, triplesInsert, null, user, "First commit to B1", "B1".toLowerCase());
 		
 
 		// First commit to B2
 		triplesInsert = "<http://example.com/testS> <http://example.com/testP> \"D\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP> \"H\". \n";
-		triplesDelete = "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
+		String triplesDelete = "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
 //		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B2", graphName, "B2",
 //				triplesInsert, triplesDelete);
 		

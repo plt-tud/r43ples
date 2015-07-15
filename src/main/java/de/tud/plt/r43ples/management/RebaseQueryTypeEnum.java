@@ -7,5 +7,5 @@ package de.tud.plt.r43ples.management;
  *
  */
 public enum RebaseQueryTypeEnum {
-	AUTO, COMMON, FORCE
+	AUTO, COMMON, FORCE, MANUAL, WITH
 }

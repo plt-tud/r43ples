@@ -51,7 +51,7 @@ public class StrategyManagement {
 		String queryTemplateFastForward = 
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
-				+ "MERGE GRAPH <%s> -ff SDD <%s> BRANCH \"%s\" INTO \"%s\"";
+				+ "MERGE ff GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\"";
 		
 		query = String.format(queryTemplateFastForward, user, commitMessage, graphName, sdd, branchNameA, branchNameB);
 		
@@ -104,7 +104,7 @@ public class StrategyManagement {
 	}
 	
 	/**create rebase query*/
-	public static String createRebaseQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB, RebaseQueryTypeEnum type){
+	public static String createRebaseQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB, RebaseQueryTypeEnum type, String triples){
 		logger.info("Execute rebase query of type " + type.toString());
 		String query = "";
 		
@@ -121,14 +121,23 @@ public class StrategyManagement {
 		String queryTemplateForce = 
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
-				+ "REBASE GRAPH <%s> -force SDD <%s> BRANCH \"%s\" INTO \"%s\"";
-				
+				+ "REBASE FORCE GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\"";
+		
+		String queryTemplateManual = 
+				  "USER \"%s\" %n"
+				+ "MESSAGE \"%s\" %n"
+				+ "MERGE MANUAL GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\" WITH { %n"
+				+ "	%s"
+				+ "}";
+		
 		if (type.equals(RebaseQueryTypeEnum.COMMON)) {
 			query = String.format(queryTemplateCommon, user, commitMessage, graphName, sdd, branchNameA, branchNameB);
 		} else if (type.equals(RebaseQueryTypeEnum.AUTO)) {
 			query = String.format(queryTemplateAuto, user, commitMessage, graphName, sdd, branchNameA, branchNameB);
 		} else if (type.equals(RebaseQueryTypeEnum.FORCE)) {
 			query = String.format(queryTemplateForce, user, commitMessage, graphName, sdd, branchNameA, branchNameB);
+		} else if (type.equals(RebaseQueryTypeEnum.MANUAL)) {
+			query = String.format(queryTemplateManual, user, commitMessage, graphName, sdd, branchNameA, branchNameB, triples);
 		}
 		
 		return query;
@@ -280,6 +289,8 @@ public class StrategyManagement {
 		logger.info("No revision number could be found.");
 		return null;
 	}
+	
+	
 	
 }
 

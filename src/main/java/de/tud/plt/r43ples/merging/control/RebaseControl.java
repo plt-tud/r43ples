@@ -2,6 +2,7 @@ package de.tud.plt.r43ples.merging.control;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,12 +13,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 
+import com.hp.hpl.jena.query.Query;
+import com.hp.hpl.jena.query.QueryExecution;
+import com.hp.hpl.jena.query.QueryExecutionFactory;
+import com.hp.hpl.jena.query.QueryFactory;
+import com.hp.hpl.jena.rdf.model.Model;
+
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.GitRepositoryState;
+import de.tud.plt.r43ples.management.JenaModelManagement;
 import de.tud.plt.r43ples.management.ResolutionState;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SDDTripleStateEnum;
@@ -43,7 +52,7 @@ public class RebaseControl {
 	private static PatchGroup patchGroup = new PatchGroup(null, null);
 	private static DifferenceModel differenceModel = new DifferenceModel();
 	
-	private static Response response = null;
+	private static String differenceGraphModel = null;
 	
 	/** The revision number of the branch A. **/
 	private static String revisionNumberBranchA;
@@ -150,28 +159,18 @@ public class RebaseControl {
 	 * @throws IOException 
 	 * @throws ConfigurationException 
 	 * */
-	public static boolean manualRebaseProcess() throws InternalErrorException, ConfigurationException, IOException {
-		//check action command , auto or common
-		boolean isAuto = false;
-		if(commitModel.getType().equals("AUTO")){
-			
-			ArrayList<String> addedAndRemovedTriples = RebaseControl.getAutomaticAddedTriplesAndRemovedTriples();
-			String addedAsNTriples = addedAndRemovedTriples.get(0);
-			String removedAsNTriples = addedAndRemovedTriples.get(1);
-			
-			String basisRevisionNumber = forceRebaseProcess(commitModel.getGraphName());
-			RevisionManagement.createNewRevision(commitModel.getGraphName(), addedAsNTriples, removedAsNTriples,
-					commitModel.getUser(), commitModel.getMessage(), basisRevisionNumber);
-			isAuto = true;
-			return isAuto;
-			
-		}else{
-			MergingControl.openRebaseModel();
-			
-			MergingControl.getMergeProcess(response, commitModel.getGraphName(), commitModel.getBranch1(), commitModel.getBranch2());
-			
-			return isAuto;
-		}
+	public static void manualRebaseProcess() throws InternalErrorException, ConfigurationException, IOException {
+		
+		ResponseBuilder responseBuilder = Response.created(URI.create(""));
+		
+		responseBuilder.entity(differenceGraphModel);
+		
+		Response response = responseBuilder.build();	
+		
+		
+		MergingControl.openRebaseModel();
+		
+		MergingControl.getMergeProcess(response, commitModel.getGraphName(), commitModel.getBranch1(), commitModel.getBranch2());
  			
 	}
 	
@@ -279,6 +278,11 @@ public class RebaseControl {
 	}
 	
 	
+	
+	
+	
+	
+	
 	/**common manual rebase end , get the updated difference model and check the create new Revision
 	 * @throws InternalErrorException 
 	 * 
@@ -302,27 +306,28 @@ public class RebaseControl {
 	/**rebase process beginn , read the difference model and check the freundlichkeit of Rebase
 	 * @throws IOException 
 	 * @throws InternalErrorException */
-	public static boolean checkRebaseFreundlichkeit( Response responsePost, String graphName, String branchNameA, String branchNameB) throws IOException, InternalErrorException{
+	public static boolean checkRebaseFreundlichkeit( String differGraphModel, String graphName, String branchNameA, String branchNameB) throws IOException, InternalErrorException{
 		
 		// Save the current revision numbers
 		revisionNumberBranchA = RevisionManagement.getRevisionNumber(graphName, branchNameA);
 		revisionNumberBranchB = RevisionManagement.getRevisionNumber(graphName, branchNameB);
-		response = responsePost;
+	//	response = responsePost;
 		
-		boolean isRebaseFreundlich = false;
+		differenceGraphModel = differGraphModel;
+		boolean isRebaseFreundlich = true;
 		
-		if(response.getStatusInfo() == Response.Status.CONFLICT){
-			// has conflict rebase unfreundlich
-			return isRebaseFreundlich;
-		}
+//		if(response.getStatusInfo() == Response.Status.CONFLICT){
+//			// has conflict rebase unfreundlich
+//			return isRebaseFreundlich;
+//		}
 		
 		//have not conflict, rebase freundlichkeit checked
 		
-		ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel);
+		ProcessManagement.readDifferenceModel(differenceGraphModel, differenceModel);
 		
 		//get difference group
 		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
-		isRebaseFreundlich = true;
+//		isRebaseFreundlich = true;
 		while(iterDM.hasNext()){
 			Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterDM.next();
 			DifferenceGroup differenceGroup = (DifferenceGroup) entryDG.getValue();
@@ -352,10 +357,95 @@ public class RebaseControl {
 			}		
 			
 		}
-
+		logger.info("check rebase freundlich: " + isRebaseFreundlich);
 		return isRebaseFreundlich;
 				
 	}
+	
+	/**get die triples, die rebase unfreundlich ausloesen
+	 * @throws IOException */
+	public static ArrayList<Triple> getRebaseUnfreundlichbehaftetTriples(String differGraphModel) throws IOException{
+		ArrayList<Triple> tripleList = new ArrayList<Triple>();
+		
+		ProcessManagement.readDifferenceModel(differGraphModel, differenceModel);
+		
+		//get difference group
+		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
+		
+		while(iterDM.hasNext()){
+			Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterDM.next();
+			DifferenceGroup differenceGroup = (DifferenceGroup) entryDG.getValue();
+			
+			
+			SDDTripleStateEnum tripleStateInBranchA = differenceGroup.getTripleStateA();
+			SDDTripleStateEnum tripleStateInBranchB = differenceGroup.getTripleStateB();
+			SDDTripleStateEnum automaticResolutionState = differenceGroup.getAutomaticResolutionState();
+			
+			// folgend 4 condition for the rebase freundlichkeit
+			if((tripleStateInBranchA == SDDTripleStateEnum.ADDED && automaticResolutionState == SDDTripleStateEnum.DELETED) || 
+					(tripleStateInBranchA == SDDTripleStateEnum.DELETED && automaticResolutionState == SDDTripleStateEnum.ADDED)||
+					(tripleStateInBranchA == SDDTripleStateEnum.NOTINCLUDED &&tripleStateInBranchB == SDDTripleStateEnum.ADDED 
+					&& automaticResolutionState == SDDTripleStateEnum.DELETED) ||
+					(tripleStateInBranchA == SDDTripleStateEnum.ORIGINAL &&tripleStateInBranchB == SDDTripleStateEnum.DELETED 
+					&& automaticResolutionState == SDDTripleStateEnum.ADDED)) {
+				
+				Iterator<Entry<String, Difference>> differIter = differenceGroup.getDifferences().entrySet().iterator();
+				while(differIter.hasNext()){
+					Entry<String, Difference> differ = differIter.next();
+					Triple triple = differ.getValue().getTriple();
+					
+					tripleList.add(triple);
+					
+				}		
+			}						
+		}
+		
+		return tripleList;
+		
+	}
+	
+	/**get the right triples in with set
+	 * @throws IOException */
+	
+	public static String filterUnfreundlichTriples(String differGraphModel, String triples) throws IOException {
+		ArrayList<Triple> unfreundlichTripleList = getRebaseUnfreundlichbehaftetTriples(differGraphModel);
+		
+		// MERGE WITH query - conflicting triple
+		Model model = JenaModelManagement.readNTripleStringToJenaModel(triples);
+		
+		//create new Triples, die rebase unfreundlich sind.
+		String newTriples = "";
+		
+		Iterator<Triple> tripleIter = unfreundlichTripleList.iterator();
+		while (tripleIter.hasNext()) {
+			Triple triple = tripleIter.next();
+			String subject = ProcessManagement.getSubject(triple);
+			String object = ProcessManagement.getObject(triple);
+			String predicate = ProcessManagement.getPredicate(triple);
+					
+			
+			logger.info("rebase unfreundlich spo: " + subject + object + predicate);
+			// Create ASK query which will check if the model contains the specified triple
+			String queryAsk = String.format(
+					  "ASK { %n"
+					+ " %s %s %s %n"
+					+ "}", subject, predicate, object);
+			Query query = QueryFactory.create(queryAsk);
+			QueryExecution qe = QueryExecutionFactory.create(query, model);
+			boolean resultAsk = qe.execAsk();
+			qe.close();
+			model.close();
+			if (resultAsk) {
+				// Model contains the specified triple
+				// Triple should be added
+				newTriples += subject + " " + predicate + " " + object + " . \n";
+			} 		
+		}
+		
+		return newTriples;
+	}
+	
+	
 	
 	/**
 	 * ##########################################################################################################################################################################
