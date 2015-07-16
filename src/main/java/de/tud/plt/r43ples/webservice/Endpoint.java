@@ -469,6 +469,8 @@ public class Endpoint {
 			@FormParam("message") @DefaultValue("") final String message) throws InternalErrorException, IOException, TemplateException, ConfigurationException {
 				
 		if(strategie.equals("1")){
+			ResponseBuilder response = Response.ok();
+			
 			String fastForwardQuery = StrategyManagement.createFastForwardQuery(graphName, sddName, user, message, branch1, branch2);
 			
 			String userCommit = null;
@@ -494,13 +496,33 @@ public class Endpoint {
 			}else{
 				type = null;
 			}
+/****************************************not parallel************************************************/	
+		
+			FastForwardControl fastForwardControl = new FastForwardControl();
 			
+			fastForwardControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Fast-Forward", type.toString());	
+			
+			StrategyManagement.saveGraphVorMergingInMap(graphName, "application/json");
+			
+			getFastForwardResponse(fastForwardQuery, userCommit, messageCommit);
+			
+			String fastForwardView = fastForwardControl.getFastForwardReportView(graphName);
+			
+/****************************************not parallel************************************************/
 			//save commit information in FastForwardControl
-			FastForwardControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Fast-Forward", type.toString());	
+//			FastForwardControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Fast-Forward", type.toString());	
 			
-			return getFastForwardResponse(fastForwardQuery, userCommit, messageCommit);
+			//save the old graph information
+//			StrategyManagement.saveGraphVorMerging(graphName, "application/json");
+//			
+//			
+//		    getFastForwardResponse(fastForwardQuery, userCommit, messageCommit);
+//			
+//			String fastForwardView = FastForwardControl.getFastForwardReportView(graphName);
+			
+			response.entity(fastForwardView);
 				
-	
+			return response.build();
 			
 		}else if(strategie.equals("3")){
 			//rebase todo
@@ -686,7 +708,9 @@ public class Endpoint {
 
 
 		response.type(format);
-		response.entity(StrategyManagement.loadGraphVorMerging());
+		//response.entity(StrategyManagement.loadGraphVorMerging());
+		response.entity(StrategyManagement.loadGraphVorMergingFromMap(graph));
+		
 		return response.build();
 
 	}	
@@ -868,9 +892,6 @@ public class Endpoint {
 		
 		ResponseBuilder response = Response.ok();
 		
-//		Response responsePost = null;
-
-//		String mergeQuery = MergingControl.updateMergeQueryNew();
 		
 		MergingControl.transformDifferenceModelToRebase();
 		
@@ -878,34 +899,6 @@ public class Endpoint {
 		
 		
 		String rebaseResultView = RebaseControl.getRebaseReportView(null);
-//		String userCommit = null;
-//		Matcher userMatcher = patternUser.matcher(mergeQuery);
-//		logger.info("yxy test mergeQuery:"+mergeQuery);
-//		if (userMatcher.find()) {
-//			userCommit = userMatcher.group("user");
-//			mergeQuery = userMatcher.replaceAll("");
-//		}
-//		String messageCommit = null;
-//		Matcher messageMatcher = patternCommitMessage.matcher(mergeQuery);
-//		if (messageMatcher.find()) {
-//			messageCommit = messageMatcher.group("message");
-//			mergeQuery = messageMatcher.replaceAll("");
-//		}
-//		
-//		logger.info("yxy test mergeQuery nach verarbeit:"+mergeQuery);
-//
-//		if (patternMergeQuery.matcher(mergeQuery).find()) {
-//			responsePost= getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
-//			logger.info("yxy get Post"+responsePost.toString());	
-//		}
-//			
-
-//		logger.info("Inhalt von Response Entity:"+responsePost.getEntity().toString());	
-			
-		//MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
-		
-
-//		response.entity(MergingControl.getUpdatedViewHtmlOutput());
 		
 		response.entity(rebaseResultView);
 		return response.build();
@@ -1016,21 +1009,6 @@ public class Endpoint {
 
 	}	
 	
-//	@Path("individualView")
-//	@GET
-//	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-//	public final Response individualGET(@HeaderParam("Accept") final String formatHeader,
-//			@QueryParam("data") final String data) throws TemplateException, IOException {
-//		
-//		ResponseBuilder response = Response.ok();
-//		logger.info("format_header"+ formatHeader);
-//		logger.info("Individual get Test :"+ data);
-//
-//
-//		response.entity(MergingControl.getIndividualView(data));
-//		return response.build();
-//
-//	}
 	
 	/**load individual View
 	 * todo */
@@ -1111,31 +1089,6 @@ public class Endpoint {
 	}	
 	
 	
-	
-//	@Path("mergingView")
-//	@GET
-//    @Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
-//		 MediaType.APPLICATION_SVG_XML })
-//	public final Object getMergingView(@HeaderParam("Accept") final String format_header,
-//			@QueryParam("optradio") final String format_query,@QueryParam("graph") final String graph) {
-//		logger.info("in mergingView yxy");
-//		logger.info("Get Radio: " + graph);
-//		logger.info(format_header);
-//		String format = (format_query != null) ? format_query : format_header;
-//		logger.info("format: " + format);
-//		
-//		ResponseBuilder response = Response.ok();
-//		
-//		if (format.equals("common")) {
-//			response.entity(MergingControl.getHtmlOutput(graph));
-//		}
-//		else {
-//			format = "application/json";
-//			response.type(format);
-//			response.entity(RevisionManagement.getRevisionInformation(graph, format));
-//		}
-//		return response.build();
-//	}
 	
 	/**
 	 * Interface for query and update (e.g. SELECT, INSERT, DELETE).
@@ -1289,22 +1242,8 @@ public class Endpoint {
 		if (patternBranchOrTagQuery.matcher(sparqlQuery).find()) {
 			return getBranchOrTagResponse(sparqlQuery, user, message, format);
 		}
-		//added pattern fast forward
-		Matcher m = patternFastForwardQuery.matcher(sparqlQuery);
-		if (m.find()) {					
-			//pattern matched to do 
-			String graphName = m.group("graph");
-			String branchNameA = m.group("branchNameA").toLowerCase();
-			String branchNameB = m.group("branchNameB").toLowerCase();
-			String sddName = m.group("sdd");
-			
-			boolean canFastForward = MergingControl.fastForwardCheck(graphName, branchNameA, branchNameB);
-			if(canFastForward == false) {
-				throw new InternalErrorException("Error in query: " + sparqlQuery + ", This Query can not satisfy the condition of fast forward!" );
-			}
-			
-			// to do resolve the auto and common query get the type
-			FastForwardControl.createCommitModel(graphName, sddName, user, message, branchNameA, branchNameB, "Fast-Forward", null);
+		//added pattern fast forward und rebase
+		if (patternFastForwardQuery.matcher(sparqlQuery).find()) {					
 			return getFastForwardResponse(sparqlQuery, user, message);
 		}
 		
@@ -1939,11 +1878,11 @@ public class Endpoint {
 	 */
 	private Response getFastForwardResponse(final String sparqlQuery, final String user, final String commitMessage) throws InternalErrorException, TemplateException, IOException{
 		
-		ResponseBuilder response = Response.ok();
-
+		ResponseBuilder responseBuilder = Response.created(URI.create(""));
+		
 		Matcher m = patternFastForwardQuery.matcher(sparqlQuery);
 		
-		String format = "application/json";
+//		String format = "application/json";
 		
 		boolean foundEntry = false;
 		while (m.find()) {
@@ -1955,7 +1894,41 @@ public class Endpoint {
 			String branchNameA = m.group("branchNameA").toLowerCase();
 			String branchNameB = m.group("branchNameB").toLowerCase();
 			
-			StrategyManagement.saveGraphVorMerging(graphName, format);
+			
+			// transform the response to the rebase freundlich check process
+			String graphNameHeader;
+			try {
+				graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				graphNameHeader = graphName;
+			}
+			
+			// transform the graph strategy to the httpheader
+			String graphStrategy = null;
+			try {
+				graphStrategy = URLEncoder.encode("merging-strategy-information", "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				graphStrategy = "merging-strategy-information";
+			}
+			
+			// Return the revision number which were used (convert tag or branch identifier to revision number)
+			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(graphName, branchNameA));
+			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));
+			
+			// check ob fast forward strategy executable
+			boolean canFastForward = MergingControl.fastForwardCheck(graphName, branchNameA, branchNameB);
+			if(canFastForward == false) {
+				
+				responseBuilder.header(graphStrategy, "fast-forward-unexecutable");
+				
+				return responseBuilder.build();	
+				
+			}
+			
+			//save the old graph information
+			//StrategyManagement.saveGraphVorMerging(graphName, "application/json");
 			
 			String branchUriB = RevisionManagement.getBranchUri(graphName, branchNameB);
 			String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
@@ -1965,9 +1938,11 @@ public class Endpoint {
 			
 			StrategyManagement.updateRevisionOfBranch(branchUriB, revisionUriB, revisionUriA);	
 			
-			String fastForwardView = FastForwardControl.getFastForwardReportView(graphName);
+//			String fastForwardView = FastForwardControl.getFastForwardReportView(graphName);
 					
-			response.entity(fastForwardView);
+//			response.entity(fastForwardView);
+			
+			responseBuilder.header(graphStrategy, "fast-forward-execute");
 
 		}
 			
@@ -1975,9 +1950,7 @@ public class Endpoint {
 			throw new InternalErrorException("Error in query: " + sparqlQuery);
 		}
 			
-				
-		
-		return response.build();
+		return responseBuilder.build();
 		
 	}
 	

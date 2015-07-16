@@ -1,6 +1,7 @@
 package de.tud.plt.r43ples.merging.management;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -9,6 +10,7 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
@@ -20,6 +22,8 @@ public class StrategyManagement {
 	private static Logger logger = Logger.getLogger(StrategyManagement.class);
 	
 	private static String revisionInformation;
+	
+	private static HashMap<String, String> oldRevisionGraphMap = new HashMap<String, String>();
 	
 	public static final String prefixes = 
 			  "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> \n"
@@ -96,6 +100,37 @@ public class StrategyManagement {
 	public static void saveGraphVorMerging(String graph, String format){
 		revisionInformation = RevisionManagement.getRevisionInformation(graph, format);
 	}
+	
+	/**
+	 * save old revision information of Graph 
+	 * @throws InternalErrorException */
+	public static void saveGraphVorMergingInMap(String graph, String format) throws InternalErrorException{
+		if(!oldRevisionGraphMap.containsKey(graph)) {
+			String oldRevisionGraph = RevisionManagement.getRevisionInformation(graph, format);
+			
+			oldRevisionGraphMap.put(graph, oldRevisionGraph);
+		}else{
+			throw new InternalErrorException("Error in parallel access to the same graph by save old graph information vor merging");
+		}	
+	}
+	
+	/**
+	 * load old revision information of Graph 
+	 * @throws InternalErrorException */
+	public static String loadGraphVorMergingFromMap(String graphName) throws InternalErrorException{
+		
+		if(oldRevisionGraphMap.containsKey(graphName)) {
+			String oldGraphInfo = oldRevisionGraphMap.get(graphName);
+			oldRevisionGraphMap.remove(graphName);
+			return oldGraphInfo;
+			
+		}else{
+			throw new InternalErrorException("Error in parallel access to the same graph by load old graph information vor merging");
+		}		
+	}
+	
+	
+	
 	
 	/**
 	 * load old revision information of Graph */
