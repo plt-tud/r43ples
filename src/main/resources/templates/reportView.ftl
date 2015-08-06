@@ -1,6 +1,6 @@
 <html class="no-js" lang= "en">
 	<head>
-	<title><h1>Report</h1></title> 
+	<title>Report View</title> 
 	<meta name="author" content="Markus Graube">
 	<meta name="description" content="R43ples web application">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -31,13 +31,13 @@
 	    $(document).ready(function () {
 	        //DataTable
 	        var table = $('#example').DataTable( {
-	        "scrollY": "300px",
-	        "paging": true
+
+	        //"scrollY": "30.6em",	
+	        "scrollY": "13.2em",
+	        "paging": false,
+	        "ordering": false,
+        	"info": false
 	         } );
-	        var table = $('#example1').DataTable( {
-	        "scrollY": "280.5px",
-	        "paging": false
-	        } );
 
 	        $('a.toggle-vis').on( 'click', function (e) {
 	        e.preventDefault();
@@ -58,6 +58,8 @@
 			    }
 			});
 
+
+
 	        var conflict = $('#haveConflict').text();
 	        if(conflict == "1") {
 	        	alert("Es gibt noch Konflikten , bitte zurueck zu MERGE Tabelle !" + conflict);
@@ -66,7 +68,11 @@
 	        	alert("Alles ist in Ordnung" + conflict);
 	        }
 
-
+	        var tripleTableColor = "YellowGreen";
+	        var tripleConflictColor = "Tomato";
+	        //when triple resolved, change the color
+	        $(".resolved").parent().css('background',tripleTableColor );
+	        $(".conflictColor").parent().css('background',tripleConflictColor);
 
 	    });
 	</script>
@@ -93,11 +99,36 @@
 		    display: none;
 		}
 
+		fieldset {
+         	border:solid 3px black;
+        }
+
+
+        .dataTables_scrollBody  {
+        	border-bottom: solid 2px black !important;
+        	
+        }
+
+        table {
+			table-layout: fixed;
+			border:solid 2px black;
+		}
+
+
+		td {
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			text-align: center !important;
+		}
+
+     
 	</style>	
 	</head>
 	<body style="background-color:WhiteSmoke;">
+		<#include "superNav.ftl">
 
-		<div class="container">
+		<div class="container wsmall">
 			<div class = "row">
 				<div class = "small-12 columns">
 					<div class="panel radius" style="background-color:white;">
@@ -160,7 +191,7 @@
 	                    </div>
 	                   
 	                    <hr/>	                    
-                        <table id="example" class="cell-border stripe" cellspacing="0" style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">
+                        <table id="example" class="cell-border stripe" cellspacing="0" style="width:100%;">
 		                    <thead>
 		                        <tr>
                                     <th style = "width:10%">Subject</th>
@@ -177,36 +208,59 @@
 		        
 		             
 		                    <tbody>
-		                    	<#list reportTableRowList as row>  
+		                    	<#list reportTableRowList as row> 		         
 			                        <tr>
-	                                    <th style = "width:10%">${row.subject} </th>
-	                                    <th style = "width:10%">${row.predicate} </th>
-	                                    <th style = "width:10%">${row.object} </th>
-	                                    <th style = "width:18%">${row.stateA} (${row.revisionA!"  "})</th>
-	                                    <th style = "width:18%">${row.stateB} (${row.revisionB!"  "})</th>
+	                                    <td style = "width:10%">${row.subject} </td>
+	                                    <td style = "width:10%">${row.predicate} </td>
+	                                    <td style = "width:10%">${row.object} </td>
+	                                    
+	                                      <#if row.stateA == "ORIGINAL">
+								            <td style = "width:18%">&nbsp<img src="/static/images/Original.svg"/>&nbsp&nbsp<span>(${row.revisionA?substring(0,8)}...${row.revisionA?substring(22)})</span></td>
+								          <#elseif row.stateA == "DELETED">
+								            <td style = "width:18%">&nbsp<img src="/static/images/Deleted.svg"/>&nbsp&nbsp<span>(${row.revisionA?substring(0,8)}...${row.revisionA?substring(22)})</span></td>
+								          <#elseif row.stateA == "ADDED">
+								            <td style = "width:18%">&nbsp<img src="/static/images/Added.svg"/>&nbsp&nbsp<span>(${row.revisionA?substring(0,8)}...${row.revisionA?substring(22)})</span></td>
+								          <#else>
+								            <td style = "width:18%;">&nbsp<img src="/static/images/NotIncluded.svg"/>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</td>
+								          </#if>
+
+								          <#if row.stateB == "ORIGINAL">
+								            <td style = "width:18%">&nbsp<img src="/static/images/Original.svg"/>&nbsp&nbsp<span>(${row.revisionB?substring(0,8)}...${row.revisionB?substring(22)})</span></td>
+								          <#elseif row.stateB == "DELETED">
+								            <td style = "width:18%">&nbsp<img src="/static/images/Deleted.svg"/>&nbsp&nbsp<span>(${row.revisionB?substring(0,8)}...${row.revisionB?substring(22)})</span></td>
+								          <#elseif row.stateB == "ADDED">
+								            <td style = "width:18%">&nbsp<img src="/static/images/Added.svg"/>&nbsp&nbsp<span>(${row.revisionB?substring(0,8)}...${row.revisionB?substring(22)})</span></td>
+								          <#else>
+								            <td style = "width:18%;">&nbsp<img src="/static/images/NotIncluded.svg"/>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</td>
+								          </#if>
+
 
 	                                    <#if row.conflicting == "1">
-                                        <td style = "width:9%;text-align: center;"><a><img src="/static/images/Conflict.png"/></a></td>
+	                                    	<#if !(row.approved == "RESOLVED")>
+                                        		<td class = "conflictColor" style = "width:9%;"><a><img src="/static/images/Conflict.png"/></a></td>
+                                        	<#else>
+                                        		<td style = "width:9%;"><a><img src="/static/images/Conflict.png"/></a></td>
+                                        	</#if>
                                       	<#else>
-                                        <td style = "width:9%;text-align: center;"><a><img src="/static/images/Difference.png"/></a></td>
+                                        <td style = "width:9%;"><a><img src="/static/images/Difference.png"/></a></td>
                                       	</#if>
 
                                       	<#if row.automaticResolutionState == "ADDED">
-                                        <td style = "width:9%;text-align: center;"><a><img src="/static/images/Added.svg"/></a></td>
+                                        <td style = "width:9%;"><a><img src="/static/images/Added.svg"/></a></td>
                                       	<#else>
-                                        <td style = "width:9%;text-align: center;"><a><img src="/static/images/Deleted.svg"/></a></td>
+                                        <td style = "width:9%;"><a><img src="/static/images/Deleted.svg"/></a></td>
                                       	</#if>
 
                                       	<#if row.resolutionState == "ADDED">
-                                        <td style = "width:9%;text-align: center;"><a><img src="/static/images/Added.svg"/></a></td>
+                                        <td style = "width:9%;"><a><img src="/static/images/Added.svg"/></a></td>
                                       	<#else>
-                                        <td style = "width:9%;text-align: center;"><a><img src="/static/images/Deleted.svg"/></a></td>
+                                        <td style = "width:9%;"><a><img src="/static/images/Deleted.svg"/></a></td>
                                       	</#if>
 
                                       	<#if row.approved == "RESOLVED">
-                                        <td style = "width:9%;text-align: center;"><a><img src="/static/images/Resolved.png"/></a></td>
+                                        <td class="resolved" style = "width:9%;"><a><img src="/static/images/Resolved.png"/></a></td>
                                       	<#else>
-                                        <td style = "width:9%;text-align: center;"><a><img src="/static/images/NotApproved.svg"/></a></td>
+                                        <td style = "width:9%;"><a><img src="/static/images/NotApproved.svg"/></a></td>
                                       	</#if>
 
 	                              	</tr>
@@ -220,9 +274,9 @@
                       	<div class="small-3 push-1 columns">
                   			<!--check ob isRebase or three way merge-->
                       		<#if isRebase>
-	                          <a href ="rebasePushProcessNew"><button id="push" type="button" class="button tiny expand default">Push</button></a>
+	                          <a href ="rebasePushProcessNew?graph=${graphName}"><button id="push" type="button" class="button tiny expand default">Push</button></a>
 	                        <#else>
-	                          <a href ="pushProcessNew"><button id="push" type="button" class="button tiny expand default">Push</button></a>
+	                          <a href ="pushProcessNew?graph=${graphName}"><button id="push" type="button" class="button tiny expand default">Push</button></a>
 	                        </#if>            	
                       	</div>
                       	<div class="small-3 pull-1 columns">

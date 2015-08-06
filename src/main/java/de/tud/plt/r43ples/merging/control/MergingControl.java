@@ -55,35 +55,47 @@ import javax.ws.rs.core.Response;
 
 public class MergingControl {
 	private static Logger logger = Logger.getLogger(MergingControl.class);
-	private static DifferenceModel differenceModel = new DifferenceModel();
-	private static List<TreeNode> treeList = new ArrayList<TreeNode>();
-	private static TableModel tableModel = new TableModel();
+	private DifferenceModel differenceModel = new DifferenceModel();
+	private List<TreeNode> treeList = new ArrayList<TreeNode>();
+	private TableModel tableModel = new TableModel();
 	
 	
-	private static HighLevelChangeModel highLevelChangeModel = new HighLevelChangeModel();
+	private HighLevelChangeModel highLevelChangeModel = new HighLevelChangeModel();
 	
 	/**read the HighLevelChangeModel and create the highLevelChangeTableModel*/
-	private static HighLevelChangeTableModel highLevelChangeTableModel = new HighLevelChangeTableModel();
+	private HighLevelChangeTableModel highLevelChangeTableModel = new HighLevelChangeTableModel();
 	
 	/** The individual model of branch A. **/
-	private static IndividualModel individualModelBranchA;
+	private IndividualModel individualModelBranchA;
 	/** The individual model of branch B. **/
-	private static IndividualModel individualModelBranchB;	
+	private IndividualModel individualModelBranchB;	
 	/** The properties array list. **/
-	private static ArrayList<String> propertyList;
+	private ArrayList<String> propertyList;
 	/** Merg Query Model. **/
-	private static CommitModel commitModel;
+	private CommitModel commitModel;
 	
 	/** The revision number of the branch A. **/
-	private static String revisionNumberBranchA;
+	private String revisionNumberBranchA;
 	/** The revision number of the branch B. **/
-	private static String revisionNumberBranchB;
+	private String revisionNumberBranchB;
 	
 	/** The report result. **/
-	private static ReportResult reportResult;
+	private ReportResult reportResult;
 	
-	private static boolean isRebase = false;
+	private boolean isRebase = false;
 	
+	/**The RebaseControl for the Rebae Merging**/
+	private RebaseControl rebaseControl = null;
+	
+	
+	//set and get the rebaseControl in MergingControl
+	public void setRebaseControl(){
+		this.rebaseControl = new RebaseControl(this);
+	}
+	
+	public RebaseControl getRebaseControl(){
+		return rebaseControl;
+	}
 	
 //	public static String getHtmlOutput(String graphName) {
 //		MustacheFactory mf = new DefaultMustacheFactory();
@@ -147,7 +159,7 @@ public class MergingControl {
 		return sw.toString();
 	}
 	
-	public static String getViewHtmlOutput() throws TemplateException, IOException {	
+	public String getViewHtmlOutput() throws TemplateException, IOException {	
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		freemarker.template.Template temp = null; 
@@ -183,8 +195,8 @@ public class MergingControl {
 	 	}
 	 	
 	 	if(isRebase){
-	 		logger.info("commitGraphname: " + RebaseControl.getCommitModel().getGraphName());
-		 	scope.put("graphName", RebaseControl.getCommitModel().getGraphName());		 	
+	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
 	 	}else{
 	 		logger.info("commitGraphname: " + commitModel.getGraphName());
 		 	scope.put("graphName", commitModel.getGraphName());	 	
@@ -207,7 +219,7 @@ public class MergingControl {
 	
 	
 	/**get the new graph after der three way merging, with difference tree und triple table*/
-	public static String getUpdatedViewHtmlOutput() throws TemplateException, IOException, ConfigurationException, InternalErrorException {	
+	public String getUpdatedViewHtmlOutput() throws TemplateException, IOException, ConfigurationException, InternalErrorException {	
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		freemarker.template.Template temp = null; 
@@ -278,7 +290,7 @@ public class MergingControl {
 	
 	/**get the new graph after three way merging , with old graph and new graph , ohne difference tree and triple table*/
 	
-	public static String getThreeWayReportView(String graphName) throws TemplateException, IOException{
+	public String getThreeWayReportView(String graphName) throws TemplateException, IOException{
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		freemarker.template.Template temp = null; 
@@ -322,26 +334,9 @@ public class MergingControl {
 		return branchInformation.toString();
 	}
 	
-	/**check the condition for fast forward strategy
-	 * @param graphName : name of named graph
-	 * @param branch1 : name of branch1
-	 * @param branch2 : name of branch2
-	 * @throws InternalErrorException */
+
 	
-	public static boolean fastForwardCheck(String graphName, String branch1 , String branch2) throws InternalErrorException {
-		if(branch1.equals(branch2)) {
-			return false;
-		}
-		
-		//get last revision of each branch
-		String revisionUriA = RevisionManagement.getRevisionUri(graphName, branch1);
-		String revisionUriB = RevisionManagement.getRevisionUri(graphName, branch2);
-		
-		return StrategyManagement.isFastForward(revisionUriA, revisionUriB);
-	}
-	
-	
-	public static void getMergeProcess(Response response, String graphName, String branchNameA, String branchNameB) throws IOException, ConfigurationException, InternalErrorException{
+	public void getMergeProcess(Response response, String graphName, String branchNameA, String branchNameB) throws IOException, ConfigurationException, InternalErrorException{
 		if (isRebase) {
 			
 			ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel);
@@ -444,7 +439,7 @@ public class MergingControl {
 		}	
 	}
 	
-	public static String getIndividualView() throws TemplateException, IOException{
+	public String getIndividualView() throws TemplateException, IOException{
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		freemarker.template.Template temp = null; 
@@ -459,8 +454,18 @@ public class MergingControl {
         } catch (IOException e) {  
             e.printStackTrace();  
         }  
-			 	
-		scope.put("individualTableList", MergingControl.createTableModelSemanticEnrichmentAllIndividualsList());
+		
+		
+		if(isRebase){
+	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+	 	}else{
+	 		logger.info("commitGraphname: " + commitModel.getGraphName());
+		 	scope.put("graphName", commitModel.getGraphName());	 	
+	 	}
+		
+		
+		scope.put("individualTableList", createTableModelSemanticEnrichmentAllIndividualsList());
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
 		scope.put("git", GitRepositoryState.getGitRepositoryState());
@@ -474,7 +479,7 @@ public class MergingControl {
 	 * @param individualB individual of Branch B
 	 * return response of updated triple table by individual 
 	 * */
-	public static String getIndividualFilter(String individualA , String individualB) throws ConfigurationException, TemplateException, IOException {
+	public String getIndividualFilter(String individualA , String individualB) throws ConfigurationException, TemplateException, IOException {
 		//updated tableModel
 		ProcessManagement.createTableModel(differenceModel, tableModel);
 		
@@ -502,7 +507,15 @@ public class MergingControl {
         } catch (IOException e) {  
             e.printStackTrace();  
         }  
-			 	
+		
+		if(isRebase){
+	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+	 	}else{
+	 		logger.info("commitGraphname: " + commitModel.getGraphName());
+		 	scope.put("graphName", commitModel.getGraphName());	 	
+	 	}
+		
 		scope.put("updatedTripleRowList", updatedTripleRowList);
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
@@ -519,7 +532,7 @@ public class MergingControl {
 	 * @throws IOException 
 	 * @throws TemplateException 
 	 * @throws ConfigurationException */
-	public static String getHighLevelView() throws TemplateException, IOException, ConfigurationException {
+	public String getHighLevelView() throws TemplateException, IOException, ConfigurationException {
 		
 		//get high level change model
 		ProcessManagement.createHighLevelChangeRenamingModel(highLevelChangeModel, differenceModel);
@@ -543,7 +556,15 @@ public class MergingControl {
         } catch (IOException e) {  
             e.printStackTrace();  
         }  
-			 	
+		
+		if(isRebase){
+	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+	 	}else{
+	 		logger.info("commitGraphname: " + commitModel.getGraphName());
+		 	scope.put("graphName", commitModel.getGraphName());	 	
+	 	}
+		
 		scope.put("highLevelRowList", highLevelRowList);
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
@@ -559,7 +580,7 @@ public class MergingControl {
 	 * return response of updated triple table
 	 * @throws ConfigurationException */
 	
-	public static String updateTripleTable(String properties) throws TemplateException, IOException, ConfigurationException{
+	public String updateTripleTable(String properties) throws TemplateException, IOException, ConfigurationException{
 		
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
@@ -598,6 +619,14 @@ public class MergingControl {
 			}					
 		}
 		
+		if(isRebase){
+	 		logger.info("rebasecommitGraphname: " + rebaseControl.getCommitModel().getGraphName());
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+	 	}else{
+	 		logger.info("mergingcommitGraphname: " + commitModel.getGraphName());
+		 	scope.put("graphName", commitModel.getGraphName());	 	
+	 	}
+		
 		scope.put("tableRowList", updatedTripleRowList);
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
@@ -613,7 +642,7 @@ public class MergingControl {
 	 * return response of updated triple table
 	 * @throws ConfigurationException */
 	
-	public static String updateTripleTableByTree(String triples) throws TemplateException, IOException, ConfigurationException{
+	public String updateTripleTableByTree(String triples) throws TemplateException, IOException, ConfigurationException{
 		
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
@@ -661,6 +690,14 @@ public class MergingControl {
 			}					
 		}
 		
+		if(isRebase){
+	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+	 	}else{
+	 		logger.info("commitGraphname: " + commitModel.getGraphName());
+		 	scope.put("graphName", commitModel.getGraphName());	 	
+	 	}
+		
 		logger.info("tree table list: "+ updatedTripleRowList.size());
 		scope.put("tableRowList", updatedTripleRowList);
 		
@@ -675,7 +712,7 @@ public class MergingControl {
 	
 	/**get triple view after changed view
 	 * @throws ConfigurationException */
-	public static String getTripleView() throws TemplateException, IOException, ConfigurationException{
+	public String getTripleView() throws TemplateException, IOException, ConfigurationException{
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		freemarker.template.Template temp = null; 
@@ -693,6 +730,14 @@ public class MergingControl {
 		
 		//updated tableModel	 	
 		ProcessManagement.createTableModel(differenceModel, tableModel);	
+		
+		if(isRebase){
+	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+	 	}else{
+	 		logger.info("commitGraphname: " + commitModel.getGraphName());
+		 	scope.put("graphName", commitModel.getGraphName());	 	
+	 	}
 		
 		scope.put("tableRowList", tableModel.getTripleRowList());
 		
@@ -721,7 +766,7 @@ public class MergingControl {
 	 * @param id: to approved Triple id 
 	 * @param isChecked : status of approved Triple*/
 	
-	public static void approveToDifferenceModel(String id, String isChecked){
+	public void approveToDifferenceModel(String id, String isChecked){
 		
 		// Count for Conflict;
 		int count = 0;
@@ -818,7 +863,7 @@ public class MergingControl {
 	 * @param id: to approved Triple id 
 	 * @param isChecked : status of approved Triple*/
 	
-	public static void approveHighLevelToDifferenceModel(String id, String isChecked){
+	public void approveHighLevelToDifferenceModel(String id, String isChecked){
 		
 		// Count for Conflict;
 		int count = 0;
@@ -999,7 +1044,7 @@ public class MergingControl {
 	 * @throws ConfigurationException 
 	 */
 	
-	public static String createReportProcess() throws TemplateException, IOException, ConfigurationException {
+	public String createReportProcess() throws TemplateException, IOException, ConfigurationException {
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		freemarker.template.Template temp = null; 
@@ -1026,10 +1071,18 @@ public class MergingControl {
 		}
 		
 		if(isRebase) {
-			scope.put("commit", RebaseControl.getCommitModel());
+			scope.put("commit", rebaseControl.getCommitModel());
 		}else{
 			scope.put("commit", commitModel);
 		}
+		
+		if(isRebase){
+	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+	 	}else{
+	 		logger.info("commitGraphname: " + commitModel.getGraphName());
+		 	scope.put("graphName", commitModel.getGraphName());	 	
+	 	}
 		
 		// three way merging
 		scope.put("isRebase", false);
@@ -1059,7 +1112,7 @@ public class MergingControl {
 	 * @throws ConfigurationException 
 	 */
 	
-	public static String createRebaseReportProcess() throws TemplateException, IOException, ConfigurationException {
+	public String createRebaseReportProcess() throws TemplateException, IOException, ConfigurationException {
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		freemarker.template.Template temp = null; 
@@ -1086,8 +1139,10 @@ public class MergingControl {
 		}
 		
 		
+		scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+	 	
 		scope.put("isRebase", true);
-		scope.put("commit", RebaseControl.getCommitModel());
+		scope.put("commit", rebaseControl.getCommitModel());
 		
 		scope.put("report", report);
 		scope.put("reportTableRowList", reportTableRowList);
@@ -1119,7 +1174,7 @@ public class MergingControl {
 	 * @throws IOException 
 	 */
 	
-	public static String updateMergeQueryNew () throws IOException, InternalErrorException {
+	public String updateMergeQueryNew () throws IOException, InternalErrorException {
 		
 		if (reportResult != null) {
 			if (reportResult.getConflictsNotApproved() == 0){
@@ -1193,8 +1248,8 @@ public class MergingControl {
 	}
 	
 	/**updated the difference model in rebase control */
-	public static void transformDifferenceModelToRebase(){
-		RebaseControl.updateRebaseDifferenceModel(differenceModel);
+	public void transformDifferenceModelToRebase(){
+		rebaseControl.updateRebaseDifferenceModel(differenceModel);
 	}
 	
 		
@@ -1207,7 +1262,7 @@ public class MergingControl {
 	 * @throws IOException 
 	 */
 	
-	public static String updateMergeQuery (String triplesId) throws IOException, InternalErrorException {
+	public String updateMergeQuery (String triplesId) throws IOException, InternalErrorException {
 		//update DifferenceModel by triples id 
 		updateDifferenceModel(triplesId);
 		String user = commitModel.getUser();
@@ -1257,18 +1312,18 @@ public class MergingControl {
 	
 	
 	
-	public static void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2, String strategy,String type){
+	public void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2, String strategy,String type){
 		commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2, strategy,type);
 	}
 	
-	public static CommitModel getCommitModel(){
+	public CommitModel getCommitModel(){
 		return commitModel;
 	}
 	
 	
 	/** update difference model nach checkebox in triple table*/
 	
-	public static void updateDifferenceModel(String triplesId) {
+	public void updateDifferenceModel(String triplesId) {
 		String[] idArray = triplesId.split(",");
 			
 		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
@@ -1336,7 +1391,7 @@ public class MergingControl {
 	/**
 	 * Create the semantic enrichment List of all individuals.
 	 */
-	public static List<TableEntrySemanticEnrichmentAllIndividuals> createTableModelSemanticEnrichmentAllIndividualsList() {
+	public List<TableEntrySemanticEnrichmentAllIndividuals> createTableModelSemanticEnrichmentAllIndividualsList() {
 		List<TableEntrySemanticEnrichmentAllIndividuals> individualTableList = new ArrayList<TableEntrySemanticEnrichmentAllIndividuals>();
 		
 		if(individualModelBranchA == null || individualModelBranchB == null) {
@@ -1387,12 +1442,16 @@ public class MergingControl {
 		return individualTableList;
 	}
 	
-	public static void openRebaseModel() {
+	public void openRebaseModel() {
 		isRebase = true;
 	}
 	
-	public static void closeRebaseModel(){
+	public void closeRebaseModel(){
 		isRebase = false;
+	}
+	
+	public boolean getIsRebase(){
+		return this.isRebase;
 	}
 	
 }

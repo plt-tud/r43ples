@@ -1,9 +1,14 @@
     <script type="text/javascript">
+      var graphName = "${graphName}";
+      var tripleTableColor = "YellowGreen";
+      var individualTabelColor = "LemonChiffon"
     	$(function(){
+
     		$("#individualBody").find("tr").click(function() {
+              
               if((this.style.background == "" || this.style.background =="white")) {
               	  $("#individualBody").find("tr").css('background', 'white');
-                  $(this).css('background', 'red');
+                  $(this).css('background', individualTabelColor);
                   var individualA = $(this).find('td:first').text();
               	  var individualB = $(this).find('td:last').text();
 				  
@@ -11,7 +16,8 @@
               	  $.post("individualFilter",
                   {
                     individualA: individualA,
-                    individualB: individualB
+                    individualB: individualB,
+                    graph: graphName
                   },
                   function(data, status){
 				  	        $("#individualFilter").empty();
@@ -20,7 +26,7 @@
                     $("#individualTripleTable :button").each(function (){
                        if($(this).text() == "Approved") {
                           $(this).parent().prev().children().prop({"disabled":true});
-                          $(this).parent().parent().css('background','green');
+                          $(this).parent().parent().css('background',tripleTableColor);
                        }else{
                           $(this).parent().prev().children().prop({"disabled":false});
                           $(this).parent().parent().css('background','white');
@@ -99,7 +105,7 @@
                   </tr>
                   <tr>
                     <td>
-                      <div class="scrollData childTbl" style = "height:166px;">
+                      <div class="scrollDataIndividual childTbl" style = "height:166px;">
                         <table style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">						 				
                 
                         </table>

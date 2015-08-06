@@ -57,6 +57,12 @@
     		.wsmall{
     		  -webkit-transform: scale(0.8,0.8); /* Safari and Chrome */
     		}
+
+        fieldset{
+          border:solid 3px black;
+
+        }
+        
       </style>
 	  
 

@@ -146,6 +146,10 @@ public class Endpoint {
 	private final static Logger logger = Logger.getLogger(Endpoint.class);
 	
 	
+	/**map for MergingControl for the parallel execute and use the static value in MergControl **/
+	private static HashMap<String, MergingControl> mergingControlMap = new  HashMap<String, MergingControl>();
+	
+	
 	/**
 	 * Creates sample datasets
 	 * @return information provided as HTML response
@@ -214,6 +218,11 @@ public class Endpoint {
 		if (graph.equals("rebase") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetRebase());
 		}
+		
+		if (graph.equals("fastforward") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataSetFastForward());
+		}
+		
 	    htmlMap.put("graphs", graphs);
 	    
 	  //ftl
@@ -440,7 +449,7 @@ public class Endpoint {
 			@QueryParam("branch1") @DefaultValue("") final String branch1, @QueryParam("branch2") @DefaultValue("") final String branch2) throws IOException, InternalErrorException {
 		logger.info("graph name test: "+ "--"+graphName+"--");
 		logger.info("branch name test: " + "--"+branch1+"--"+branch2+"--");
-		return MergingControl.fastForwardCheck(graphName, branch1, branch2);
+		return FastForwardControl.fastForwardCheck(graphName, branch1, branch2);
 		
 		
 	}
@@ -496,7 +505,7 @@ public class Endpoint {
 			}else{
 				type = null;
 			}
-/****************************************not parallel************************************************/	
+/****************************************parallel************************************************/	
 		
 			FastForwardControl fastForwardControl = new FastForwardControl();
 			
@@ -544,6 +553,8 @@ public class Endpoint {
 			//type = RebaseQueryTypeEnum.FORCE;
 			
 			String rebaseQuery = StrategyManagement.createRebaseQuery(graphName, sddName, user, message, branch1, branch2, type, null);
+			StrategyManagement.saveGraphVorMergingInMap(graphName, "application/json");
+			
 			logger.info("rebase query test: "+ rebaseQuery);
 			
 			String userCommit = null;
@@ -561,8 +572,25 @@ public class Endpoint {
 				rebaseQuery = messageMatcher.replaceAll("");
 			}
 			
+			//for each client ,create a rebaseControl, first check ,ob namedgraph exist .
+			//first create the mergingcontrol and than create the rebasecontrol
 			
-			RebaseControl.createCommitModel(graphName, sddName, userCommit, messageCommit, branch1, branch2, "Rebase", type.toString());
+			MergingControl mergingControl;
+			
+			if(!mergingControlMap.containsKey(graphName)){
+				mergingControl = new MergingControl();
+				mergingControlMap.put(graphName, mergingControl);
+			}else {
+				//throw new InternalErrorException("Merging Request to the same Named Graph, please wait a moment ! ");
+				mergingControl = mergingControlMap.get(graphName);
+			}
+			
+			mergingControl.setRebaseControl();
+			mergingControl.closeRebaseModel();
+			
+			RebaseControl rebaseControl = mergingControl.getRebaseControl();
+			
+			rebaseControl.createCommitModel(graphName, sddName, userCommit, messageCommit, branch1, branch2, "Rebase", type.toString());
 			
 			
 			if (patternRebaseQuery.matcher(rebaseQuery).find()) {
@@ -585,7 +613,7 @@ public class Endpoint {
 				// to do manual arbeit
 				logger.info("rebase unfreundlich !");
 				
-				response.entity(RebaseControl.showRebaseDialogView());
+				response.entity(rebaseControl.showRebaseDialogView());
 				
 				return response.build();
 			
@@ -596,7 +624,7 @@ public class Endpoint {
 			}
 			
 			
-			String rebaseResultView = RebaseControl.getRebaseReportView(graphName);
+			String rebaseResultView = rebaseControl.getRebaseReportView(graphName);
 			response.entity(rebaseResultView);
 			
 			return response.build();
@@ -617,14 +645,28 @@ public class Endpoint {
 				type = MergeQueryTypeEnum.MANUAL;
 			}
 			
-			//save commit information in MergingControl
-			MergingControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way", type.toString());
+			//for each client ,create a mergingControl, first check ,ob namedgraph exist.
+			MergingControl mergingControl;
 			
-			//ob auto merging
-			if(type == MergeQueryTypeEnum.AUTO){
-				//save the graph information vor merging 
-				StrategyManagement.saveGraphVorMerging(MergingControl.getCommitModel().getGraphName(), "application/json");
+			if(!mergingControlMap.containsKey(graphName)){
+				mergingControl = new MergingControl();
+				mergingControlMap.put(graphName, mergingControl);
+			}else {
+				//throw new InternalErrorException("Merging Request to the same Named Graph, please wait a moment ! ");
+				mergingControl = mergingControlMap.get(graphName);
 			}
+			
+			mergingControl.closeRebaseModel();
+			
+			//save commit information in MergingControl
+			mergingControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way", type.toString());
+			
+			//MergingControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way", type.toString());
+			
+			
+			//save the graph information vor merging 
+			StrategyManagement.saveGraphVorMergingInMap(mergingControl.getCommitModel().getGraphName(), "application/json" );
+			//StrategyManagement.saveGraphVorMerging(MergingControl.getCommitModel().getGraphName(), "application/json");
 				
 			String mergeQuery = ProcessManagement.createMergeQuery(graphName, sddName, user, message, type, branch1, branch2, null);
 			logger.info("yxy test mergeQuery:"+mergeQuery);
@@ -652,14 +694,23 @@ public class Endpoint {
 				
 
 //			logger.info("Inhalt von Response Entity:"+responsePost.getEntity().toString());	
-				
-			MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
 			
-			if(type == MergeQueryTypeEnum.AUTO) {
-				response.entity(MergingControl.getThreeWayReportView(null));
+			if(!(responsePost.getStatusInfo() == Response.Status.CONFLICT)){
+				response.entity(mergingControl.getThreeWayReportView(null));				
 				return response.build();
 			}
-			response.entity(MergingControl.getViewHtmlOutput());
+			
+			
+			mergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
+			//MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
+//			if(type == MergeQueryTypeEnum.AUTO) {
+//				response.entity(mergingControl.getThreeWayReportView(null));
+//				
+//				return response.build();
+//			}
+			
+			//response.entity(MergingControl.getViewHtmlOutput());
+			response.entity(mergingControl.getViewHtmlOutput());
 			return response.build();
 		}	
 
@@ -724,14 +775,16 @@ public class Endpoint {
 	@Path("forceRebaseProcess")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response forceRebaseProcessGET() throws InternalErrorException, TemplateException, IOException{
+	public final Response forceRebaseProcessGET(@QueryParam("graph") @DefaultValue("") final String graph ) throws InternalErrorException, TemplateException, IOException{
 
 		ResponseBuilder response = Response.ok();
 		
+		//get rebaseControl form map
+		RebaseControl rebaseControl = mergingControlMap.get(graph).getRebaseControl();
+		//RebaseControl.forceRebaseProcess(RebaseControl.getCommitModel().getGraphName());
+		rebaseControl.forceRebaseProcess(graph);
 		
-		RebaseControl.forceRebaseProcess(RebaseControl.getCommitModel().getGraphName());
-		
-		response.entity(RebaseControl.getRebaseReportView(null));
+		response.entity(rebaseControl.getRebaseReportView(null));
 		
 		return response.build();
 
@@ -747,15 +800,20 @@ public class Endpoint {
 	@Path("manualRebaseProcess")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response manualRebaseProcessGET() throws InternalErrorException, ConfigurationException, IOException, TemplateException{
+	public final Response manualRebaseProcessGET( @QueryParam("graph") @DefaultValue("") final String graph ) throws InternalErrorException, ConfigurationException, IOException, TemplateException{
 
 		ResponseBuilder response = Response.ok();
 		
-		RebaseControl.manualRebaseProcess();
+		//get MergingControl and rebaseControl form map
+		
+		MergingControl mergingControl = mergingControlMap.get(graph);
+		RebaseControl rebaseControl = mergingControl.getRebaseControl();
+		
+		rebaseControl.manualRebaseProcess();
 		
 		
-		response.entity(MergingControl.getViewHtmlOutput());
-		MergingControl.closeRebaseModel();
+		response.entity(mergingControl.getViewHtmlOutput());
+		//mergingControl.closeRebaseModel();
 		
 		return response.build();
 
@@ -766,10 +824,12 @@ public class Endpoint {
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final void approvePOST(@HeaderParam("Accept") final String formatHeader, @FormParam("isChecked") @DefaultValue("") final String isChecked,
-			@FormParam("id") @DefaultValue("") final String id) throws IOException, InternalErrorException {
+			@FormParam("id") @DefaultValue("") final String id, @FormParam("graph") @DefaultValue("") final String graph) throws IOException, InternalErrorException {
 		logger.info("approve test: "+id);
 		logger.info("isChecked: " + isChecked);
-		MergingControl.approveToDifferenceModel(id, isChecked);
+		MergingControl mergingControl = mergingControlMap.get(graph);
+		
+		mergingControl.approveToDifferenceModel(id, isChecked);
 		
 		
 	}
@@ -778,10 +838,13 @@ public class Endpoint {
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final void approveHighLevelPOST(@HeaderParam("Accept") final String formatHeader, @FormParam("isChecked") @DefaultValue("") final String isChecked,
-			@FormParam("id") @DefaultValue("") final String id) throws IOException, InternalErrorException {
+			@FormParam("id") @DefaultValue("") final String id, @FormParam("graph") @DefaultValue("") final String graph) throws IOException, InternalErrorException {
 		logger.info("approve high test: "+id);
 		logger.info("isChecked: " + isChecked);
-		MergingControl.approveHighLevelToDifferenceModel(id, isChecked);
+		
+		MergingControl mergingControl = mergingControlMap.get(graph);
+		
+		mergingControl.approveHighLevelToDifferenceModel(id, isChecked);
 		
 		
 	}
@@ -798,11 +861,13 @@ public class Endpoint {
 	@Path("reportProcess")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response reportGET() throws IOException, InternalErrorException, TemplateException, ConfigurationException {
+	public final Response reportGET( @QueryParam("graph") @DefaultValue("") final String graph ) throws IOException, InternalErrorException, TemplateException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
 		
-		response.entity(MergingControl.createReportProcess());
+		MergingControl mergingControl = mergingControlMap.get(graph);
+		
+		response.entity(mergingControl.createReportProcess());
 	
 		return response.build();
 		
@@ -821,12 +886,15 @@ public class Endpoint {
 	@Path("rebaseReportProcess")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response rebaseReportGET() throws IOException, InternalErrorException, TemplateException, ConfigurationException {
+	public final Response rebaseReportGET(@QueryParam("graph") @DefaultValue("") final String graph) throws IOException, InternalErrorException, TemplateException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
+		MergingControl mergingControl = mergingControlMap.get(graph);
 		
-		response.entity(MergingControl.createRebaseReportProcess());
-	
+		response.entity(mergingControl.createRebaseReportProcess());
+		
+		//close rebase model
+		mergingControl.closeRebaseModel();
 		return response.build();
 		
 	}	
@@ -838,16 +906,17 @@ public class Endpoint {
 	@Path("pushProcessNew")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response pushReportGET() throws IOException, InternalErrorException, ConfigurationException, TemplateException {
+	public final Response pushReportGET( @QueryParam("graph") @DefaultValue("") final String graph ) throws IOException, InternalErrorException, ConfigurationException, TemplateException {
 		
 		ResponseBuilder response = Response.ok();
 		
 		Response responsePost = null;
 		
+		MergingControl mergingControl = mergingControlMap.get(graph);
 		//save the graph information vor merging 
-		StrategyManagement.saveGraphVorMerging(MergingControl.getCommitModel().getGraphName(), "application/json");
+		StrategyManagement.saveGraphVorMergingInMap(graph, "application/json");
 		
-		String mergeQuery = MergingControl.updateMergeQueryNew();
+		String mergeQuery = mergingControl.updateMergeQueryNew();
 		
 		String userCommit = null;
 		Matcher userMatcher = patternUser.matcher(mergeQuery);
@@ -876,7 +945,9 @@ public class Endpoint {
 		//MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
 		
 
-		response.entity(MergingControl.getThreeWayReportView(null));
+		response.entity(mergingControl.getThreeWayReportView(null));
+		
+		mergingControlMap.remove(graph);
 		return response.build();
 
 	}	
@@ -888,19 +959,23 @@ public class Endpoint {
 	@Path("rebasePushProcessNew")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response rebasePushReportGET() throws IOException, InternalErrorException, ConfigurationException, TemplateException {
+	public final Response rebasePushReportGET(@QueryParam("graph") @DefaultValue("") final String graph ) throws IOException, InternalErrorException, ConfigurationException, TemplateException {
 		
 		ResponseBuilder response = Response.ok();
+		MergingControl mergingControl = mergingControlMap.get(graph);
+		RebaseControl rebaseControl = mergingControl.getRebaseControl();
+		
+		mergingControl.transformDifferenceModelToRebase();
+		
+		rebaseControl.createCommonManualRebaseProcess();
 		
 		
-		MergingControl.transformDifferenceModelToRebase();
-		
-		RebaseControl.createCommonManualRebaseProcess();
-		
-		
-		String rebaseResultView = RebaseControl.getRebaseReportView(null);
+		String rebaseResultView = rebaseControl.getRebaseReportView(null);
 		
 		response.entity(rebaseResultView);
+		
+		//after push remove the graph and release the space
+		mergingControlMap.remove(graph);
 		return response.build();
 
 	}	
@@ -912,15 +987,16 @@ public class Endpoint {
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response pushPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("options") @DefaultValue("") final String triplesId) throws IOException, InternalErrorException {
+			@FormParam("options") @DefaultValue("") final String triplesId, @FormParam("graph") @DefaultValue("") final String graph) throws IOException, InternalErrorException {
 		
 		ResponseBuilder response = Response.ok();
+		MergingControl mergingControl = mergingControlMap.get(graph);
 		
 		Response responsePost = null;
 
 		logger.info("format_header"+ formatHeader);
 		logger.info("Push get Array :"+ triplesId);
-		String mergeQuery = MergingControl.updateMergeQuery(triplesId);
+		String mergeQuery = mergingControl.updateMergeQuery(triplesId);
 		
 		String userCommit = null;
 		Matcher userMatcher = patternUser.matcher(mergeQuery);
@@ -959,13 +1035,13 @@ public class Endpoint {
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response pushGET(@HeaderParam("Accept") final String formatHeader,
-			 @QueryParam("options") @DefaultValue("") final String triplesId) throws IOException, InternalErrorException, TemplateException, ConfigurationException {
+			 @QueryParam("options") @DefaultValue("") final String triplesId, @QueryParam("graph") @DefaultValue("") final String graph ) throws IOException, InternalErrorException, TemplateException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
-		
+		MergingControl mergingControl = mergingControlMap.get(graph);
 
 
-		response.entity(MergingControl.getUpdatedViewHtmlOutput());
+		response.entity(mergingControl.getUpdatedViewHtmlOutput());
 //		response.entity("push test GET");
 		return response.build();
 
@@ -978,14 +1054,18 @@ public class Endpoint {
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response filterPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("properties") @DefaultValue("") final String properties) throws TemplateException, IOException, ConfigurationException {
+			@FormParam("properties") @DefaultValue("") final String properties, @FormParam("graph") @DefaultValue("") final String graph, @FormParam("client") @DefaultValue("") final String client ) throws TemplateException, IOException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
+		
+		MergingControl mergingControl = mergingControlMap.get(graph);
+		
 		logger.info("format_header"+ formatHeader);
 		logger.info("Filter post Array :"+ properties);
-
+		logger.info("local Client: " + client);
 		
-		response.entity(MergingControl.updateTripleTable(properties));
+		response.entity(mergingControl.updateTripleTable(properties));
+		
 		return response.build();
 
 	}	
@@ -997,14 +1077,15 @@ public class Endpoint {
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response treeFilterPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("triples") @DefaultValue("") final String triples) throws TemplateException, IOException, ConfigurationException {
+			@FormParam("triples") @DefaultValue("") final String triples, @FormParam("graph") @DefaultValue("") final String graph) throws TemplateException, IOException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
+		MergingControl mergingControl = mergingControlMap.get(graph);
 		logger.info("format_header"+ formatHeader);
 		logger.info("Tree Filter post Array :"+ triples);
 
 		
-		response.entity(MergingControl.updateTripleTableByTree(triples));
+		response.entity(mergingControl.updateTripleTableByTree(triples));
 		return response.build();
 
 	}	
@@ -1016,11 +1097,12 @@ public class Endpoint {
 	@Path("individualView")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response individualGET() throws TemplateException, IOException {
-		
+	public final Response individualGET( @QueryParam("graph") @DefaultValue("") final String graph ) throws TemplateException, IOException {
+		logger.info("graph name transformation: "+ graph);
 		ResponseBuilder response = Response.ok();
-
-		response.entity(MergingControl.getIndividualView());
+		MergingControl mergingControl = mergingControlMap.get(graph);
+		
+		response.entity(mergingControl.getIndividualView());
 		return response.build();
 
 	}
@@ -1033,11 +1115,12 @@ public class Endpoint {
 	@Path("tripleView")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response tripleViewGET() throws TemplateException, IOException, ConfigurationException {
+	public final Response tripleViewGET(@QueryParam("graph") @DefaultValue("") final String graph) throws TemplateException, IOException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
+		MergingControl mergingControl = mergingControlMap.get(graph);
 
-		response.entity(MergingControl.getTripleView());
+		response.entity(mergingControl.getTripleView());
 		return response.build();
 
 	}
@@ -1049,11 +1132,12 @@ public class Endpoint {
 	@Path("highLevelView")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response highLevelGET() throws TemplateException, IOException, ConfigurationException {
+	public final Response highLevelGET(@QueryParam("graph") @DefaultValue("") final String graph) throws TemplateException, IOException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
+		MergingControl mergingControl = mergingControlMap.get(graph);
 		
-		response.entity(MergingControl.getHighLevelView());
+		response.entity(mergingControl.getHighLevelView());
 		return response.build();
 
 	}
@@ -1067,18 +1151,20 @@ public class Endpoint {
 	@Path("individualFilter")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response filterPOST(@HeaderParam("Accept") final String formatHeader,
+	public final Response individualFilterPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("individualA") @DefaultValue("null") final String individualA,
-			@FormParam("individualB") @DefaultValue("null") final String individualB) throws TemplateException, IOException, ConfigurationException {
+			@FormParam("individualB") @DefaultValue("null") final String individualB, @FormParam("graph") @DefaultValue("") final String graph) throws TemplateException, IOException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
+		MergingControl mergingControl = mergingControlMap.get(graph);
+		
 		logger.info("format_header"+ formatHeader);
 		logger.info("individualFilter A Array :"+ individualA);
 		logger.info("individualFilter B Array :"+ individualB);
 		
 		// individual filter the triple in triple table
 		
-		String individualFilter = MergingControl.getIndividualFilter(individualA, individualB);
+		String individualFilter = mergingControl.getIndividualFilter(individualA, individualB);
 		
 		
 		
@@ -1918,7 +2004,7 @@ public class Endpoint {
 			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));
 			
 			// check ob fast forward strategy executable
-			boolean canFastForward = MergingControl.fastForwardCheck(graphName, branchNameA, branchNameB);
+			boolean canFastForward = FastForwardControl.fastForwardCheck(graphName, branchNameA, branchNameB);
 			if(canFastForward == false) {
 				
 				responseBuilder.header(graphStrategy, "fast-forward-unexecutable");
@@ -1980,7 +2066,7 @@ public class Endpoint {
 			
 			String action = m.group("action");
 			//String command = m.group("command");
-			
+			logger.info("test action: "+ action);
 			String graphName = m.group("graph");
 			String sdd = m.group("sdd");
 			String sddURI = m.group("sddURI");
@@ -1988,13 +2074,63 @@ public class Endpoint {
 			String branchNameB = m.group("branchNameB").toLowerCase();
 			String with = m.group("with");
 			String triples = m.group("triples");
+			String type;
+			if(action ==null) {
+				type = "COMMON";
+			}else if (action.equalsIgnoreCase("AUTO")){
+				type = "AUTO";
+			}else if(action.equalsIgnoreCase("FORCE")){
+				type = "FORCE";
+			}else if(action.equalsIgnoreCase("MANUAL")){
+				type = "MANUAL";
+			}else {
+				throw new InternalErrorException("Error in SPARQL Merge Anfrage , type is not right.");
+			}
+			
+//			MergingControl mergingControl = mergingControlMap.get(graphName);
+//			RebaseControl rebaseControl = mergingControl.getRebaseControl();
+			MergingControl mergingControl;
+			RebaseControl rebaseControl;
+			
+			if(mergingControlMap.containsKey(graphName)) {
+				mergingControl = mergingControlMap.get(graphName);
+				rebaseControl = mergingControl.getRebaseControl();
+			}else{
+				mergingControl = new MergingControl();
+				//mergingControlMap.put(graphName, mergingControl);
+				mergingControl.setRebaseControl();
+				rebaseControl = mergingControl.getRebaseControl();
+				rebaseControl.createCommitModel(graphName, sdd, user, commitMessage, branchNameA, branchNameB, "Rebase", type);
+			}
+			
+			//
+//			MergingControl mergingControl;
+//			
+//			if(!mergingControlMap.containsKey(graphName)){
+//				mergingControl = new MergingControl();
+//				mergingControlMap.put(graphName, mergingControl);
+//			}else {
+//				//throw new InternalErrorException("Merging Request to the same Named Graph, please wait a moment ! ");
+//				mergingControl = mergingControlMap.get(graphName);
+//			}
+//			
+//			mergingControl.setRebaseControl();
+//			mergingControl.closeRebaseModel();
+//			
+//			RebaseControl rebaseControl = mergingControl.getRebaseControl();
+//			
+//			rebaseControl.createCommitModel(graphName, sddName, userCommit, messageCommit, branch1, branch2, "Rebase", type.toString());
+			//
+			
+			
+			
 			
 			// get the last revision of each branch
 			String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
 			String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
 			
 			//save the alte revision information of the named graph
-			StrategyManagement.saveGraphVorMerging(graphName,"application/json");
+			//StrategyManagement.saveGraphVorMerging(graphName,"application/json");
 			
 			// Check ob the graph already exist
 			if (!RevisionManagement.checkGraphExistence(graphName)){
@@ -2053,7 +2189,7 @@ public class Endpoint {
 				logger.info("revision--patch: " + iter.next().toString() );
 			}
 			 
-			RebaseControl.createPatchGroupOfBranch(revisionUriB, revisionList);
+			rebaseControl.createPatchGroupOfBranch(revisionUriB, revisionList);
 			
 			
 			// transform the response to the rebase freundlich check process
@@ -2081,7 +2217,7 @@ public class Endpoint {
 			
 			
 			if((action!= null) && (action.equalsIgnoreCase("FORCE"))) {
-				RebaseControl.forceRebaseProcess(graphName);	
+				rebaseControl.forceRebaseProcess(graphName);	
 				
 		//		responseBuilder = Response.status(Response.Status.ACCEPTED);
 				
@@ -2114,7 +2250,7 @@ public class Endpoint {
 				String addedAsNTriples = addedAndRemovedTriples.get(0);
 				String removedAsNTriples = addedAndRemovedTriples.get(1);
 				
-				String basisRevisionNumber = RebaseControl.forceRebaseProcess(graphName);
+				String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
 				newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
 						user, commitMessage, basisRevisionNumber);
 				
@@ -2127,7 +2263,7 @@ public class Endpoint {
 				String addedAsNTriples = addedAndRemovedTriples.get(0);
 				String removedAsNTriples = addedAndRemovedTriples.get(1);
 				
-				String basisRevisionNumber = RebaseControl.forceRebaseProcess(graphName);
+				String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
 				newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
 						user, commitMessage, basisRevisionNumber);
 				
@@ -2138,7 +2274,7 @@ public class Endpoint {
 				//get the possiable Triples
 				String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format);
 				
-				String newTriples = RebaseControl.filterUnfreundlichTriples(differenceModelString, triples);
+				String newTriples = rebaseControl.filterUnfreundlichTriples(differenceModelString, triples);
 				
 				logger.info("rebase new triples: "+ newTriples);
 				
@@ -2147,7 +2283,7 @@ public class Endpoint {
 				String addedAsNTriples = addedAndRemovedTriples.get(0);
 				String removedAsNTriples = addedAndRemovedTriples.get(1);
 				
-				String basisRevisionNumber = RebaseControl.forceRebaseProcess(graphName);
+				String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
 				newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
 						user, commitMessage, basisRevisionNumber);
 				
@@ -2162,22 +2298,26 @@ public class Endpoint {
 						+ "	} %n"
 						+ "}", graphNameDiff);
 				logger.info("yxy test :"+TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK));
+				
+				//get the difference Model String 
+				String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format);
 				if (TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK)) {
 					// Difference model contains conflicts
 					// Return the conflict model to the client
 					logger.info("rebase conflict");
 					responseBuilder = Response.status(Response.Status.CONFLICT);
 					responseBuilder.header(graphStrategy, "rebase-unfreundlich");
+					//initial the differenceGraphModel in rebaseControl
+					rebaseControl.checkRebaseFreundlichkeit(differenceModelString, graphName, branchNameA, branchNameB);
 					// write the diffenece model in the response builder
 					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
 				} else{
-					String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format);
 					
-					boolean isRebaeFreundlich = RebaseControl.checkRebaseFreundlichkeit(differenceModelString, graphName, branchNameA, branchNameB);
+					boolean isRebaeFreundlich = rebaseControl.checkRebaseFreundlichkeit(differenceModelString, graphName, branchNameA, branchNameB);
 					
 					if(isRebaeFreundlich) {
 						// reabase freundlich force rebase
-						RebaseControl.forceRebaseProcess(graphName);
+						rebaseControl.forceRebaseProcess(graphName);
 						responseBuilder.header(graphStrategy, "rebase-freundlich");
 					}else{
 						responseBuilder.header(graphStrategy, "rebase-unfreundlich");

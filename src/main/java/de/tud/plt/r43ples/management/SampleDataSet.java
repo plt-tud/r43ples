@@ -95,6 +95,9 @@ public class SampleDataSet {
 
 		// Create new example graph
 		//DatasetGenerationManagement.createNewGraph(graphName);
+		//delete the old graph
+		RevisionManagement.purgeGraph(graphName);
+		
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 
 		// Initial commit
@@ -158,6 +161,57 @@ public class SampleDataSet {
 	/**
 	 * Create an example graph of the following structure,
 	 * 
+	 *                  ADD: D                ADD: E
+	 *               +-----X---------------------X--------- (Branch B1)
+	 *               |  DEL: A                DEL: B
+	 * ADD: A,B,C    |
+	 * ---X----------+ (Master)
+	 * DEL: -                      
+	 * 
+	 * 
+	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
+	 *
+	 */
+	public static String createSampleDataSetFastForward() throws InternalErrorException, TemplateException, IOException {
+		String graphName = "http://test.com/r43ples-dataset-fastforward";
+		RevisionManagement.purgeGraph(graphName);
+		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
+		
+		// Initial commit
+		String triples = "<http://example.com/testS> <http://example.com/testP> \"A\". \n"
+				+ "<http://example.com/testS> <http://example.com/testP> \"B\". \n"
+				+ "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
+
+		String revision1 = RevisionManagement.createNewRevision(graphName, triples, null, user, "Initial commit", revision0);
+		
+		// Create a new branch B1
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, revision1, "B1");
+		
+		// First commit to B1
+		String triplesInsert = "<http://example.com/testS> <http://example.com/testP> \"D\". \n";
+		String triplesDelete = "<http://example.com/testS> <http://example.com/testP> \"A\". \n";
+		
+		String revisionB1_0 = RevisionManagement.createNewRevision(graphName, triplesInsert, triplesDelete, user, "First commit to B1", "B1".toLowerCase());
+		
+		// Second commit to B1
+		triplesInsert = "<http://example.com/testS> <http://example.com/testP> \"E\". \n";
+		triplesDelete = "<http://example.com/testS> <http://example.com/testP> \"B\". \n";
+
+		RevisionManagement.createNewRevision(graphName, triplesInsert, triplesDelete, user, "Second commit to B1", revisionB1_0);
+		
+		logger.info("Example graph <" + graphName +"> created.");
+		return graphName;
+		
+		
+	}
+	
+		
+	
+	/**
+	 * Create an example graph of the following structure,
+	 * 
 	 *                  ADD: D,E              ADD: G
 	 *               +-----X---------------------X--------- (Branch B1)
 	 *               |  DEL: -                DEL: -
@@ -165,7 +219,7 @@ public class SampleDataSet {
 	 * ---X----------+ (Master)
 	 * DEL: -        |
 	 *               |  ADD: D,H              ADD: I    ADD: J
-	 *               +-----X---------------------X---------X----- (Branch B2)  rebase unfreundlich by C,A
+	 *               +-----X---------------------X---------X----- (Branch B2)  rebase unfreundlich by C
 	 *                  DEL: C                DEL: -    DEL: -
 	 * 
 	 * 
@@ -179,6 +233,9 @@ public class SampleDataSet {
 
 		// Create new example graph
 		//DatasetGenerationManagement.createNewGraph(graphName);
+		
+		//delete the old graph
+		RevisionManagement.purgeGraph(graphName);
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 
 		// Initial commit
@@ -259,6 +316,9 @@ public class SampleDataSet {
 
 		// Create new example graph
 		//DatasetGenerationManagement.createNewGraph(graphName);
+		//delete the old graph
+		RevisionManagement.purgeGraph(graphName);
+		
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 
 		// Initial commit
@@ -336,6 +396,9 @@ public class SampleDataSet {
 
 		// Create new example graph
 		//DatasetGenerationManagement.createNewGraph(graphName);
+		
+		//delete the old graph
+		RevisionManagement.purgeGraph(graphName);
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 
 		// Initial commit

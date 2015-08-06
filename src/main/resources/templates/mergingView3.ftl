@@ -76,13 +76,21 @@
         }
         
         .childTbl th {
-		  border: 2px solid black;
-		  text-align: center;
-		}
+    		  border: 2px solid black;
+    		  text-align: center;
+    		}
         .scrollData {
           width: 690;
           height: 366px;
           overflow-x: hidden;
+          border:solid 2px black;
+        }
+
+        .scrollDataIndividual {
+          width: 690;
+          height: 266px;
+          overflow-x: hidden;
+          border:solid 2px black;
         }
 
 
@@ -115,24 +123,45 @@
         	border-color: black;
         }    
         table tr td {
-		  padding: 0rem;
-		  font-size: 1rem;
-		  margin-bottom: 0.5rem;
-		}
-		
-		table tr th {
-			padding: 0.3rem;
-			font-size: 1rem;	
-		}
-			
-		button, .button {	 
-		  margin-top: 0.5rem;
-		  margin-bottom: 0.5rem;
-		}
-		
-		.wsmall{
-		  -webkit-transform: scale(0.8,0.8); /* Safari and Chrome */
-		}
+		    padding: 0rem;
+  		  font-size: 1rem;
+  		  margin-bottom: 0.5rem;
+    		}
+    		
+    		table tr th {
+    			padding: 0.3rem;
+    			font-size: 1rem;	
+    		}
+    			
+    		button, .button {	 
+    		  margin-top: 0.5rem;
+    		  margin-bottom: 0.5rem;
+    		}
+
+        .scrollData button {
+          margin : 0em;
+        }
+    		
+    		.wsmall{
+    		  -webkit-transform: scale(0.8,0.8); /* Safari and Chrome */
+    		}
+
+        fieldset{
+          border:solid 3px black;
+
+        }
+
+        #svg{
+          border:2px solid black; 
+          margin:1px; 
+          overflow:hidden;
+          
+        }
+
+        #allSelect,#allSelectIndividual,#allSelectHighLevel{
+          margin-top: -0.6em;      
+        }
+
       </style>
 	  
 
@@ -143,10 +172,13 @@
       <script type="text/javascript">
         $(document).foundation();      
         $(document).ready(function(){
-
-
+            var graphName = "${graphName}";
+            var clientName = localStorage.clientName;
+            var tripleTableColor = "YellowGreen";
+            var individualTabelColor = "LemonChiffon"
             // von report seite go back , triple table bleibt
             $(window).load(function() {
+
               var checked = [];
               var properties;
               $("input[name='pFilter']:checked").each(function (){
@@ -157,7 +189,9 @@
 
               $.post("filterProcess",
                 {
-                  properties: properties
+                  properties: properties,
+                  graph: graphName,
+                  client: clientName
                 },
                 function(data, status){
                   $("#tripleTable").empty();
@@ -165,7 +199,7 @@
                   $("#tripleTable :button").each(function (){
                      if($(this).text() == "Approved") {
                         $(this).parent().prev().children().prop({"disabled":true});
-                        $(this).parent().parent().css('background','green');
+                        $(this).parent().parent().css('background',tripleTableColor);
                      }else{
                         $(this).parent().prev().children().prop({"disabled":false});
                         $(this).parent().parent().css('background','white');
@@ -234,7 +268,8 @@
 
             //  $.post("pushProcess",{options: options});
               $.post("pushProcess",
-              {
+              {    
+                  graph: graphName, 
                   options: options
               },
               function(data, status){
@@ -258,7 +293,7 @@
               $("#tripleView").hide();
               $("#highLevelView").hide();
               // $("#right").css("width", "100%");
-              $("#individualView").load("individualView",function(){
+              $("#individualView").load("individualView?graph=${graphName}",function(){
                 $("#individualView").show();
       //          window.location.href = "#";
               });
@@ -273,13 +308,13 @@
               $("#right").addClass("large-9 columns");
               //updated tripleView
               $("#tripleView").children().remove();
-              $("#tripleView").load("tripleView",function(){
+              $("#tripleView").load("tripleView?graph=${graphName}",function(){
                 $("#tripleView").show();
                 
                 $("#tripleTable :button").each(function (){
                    if($(this).text() == "Approved") {
                       $(this).parent().prev().children().prop({"disabled":true});
-                      $(this).parent().parent().css('background','green');
+                      $(this).parent().parent().css('background',tripleTableColor);
                    }else{
                       $(this).parent().prev().children().prop({"disabled":false});
                       $(this).parent().parent().css('background','white');
@@ -314,13 +349,13 @@
               $("#right").addClass("large-12 columns");
               $("#tripleView").hide();
               $("#individualView").hide();
-              $("#highLevelView").load("highLevelView", function(){
+              $("#highLevelView").load("highLevelView?graph=${graphName}", function(){
                 $("#highLevelView").show();
       //          window.location.href = "#";
                 $("#highLevelTable :button").each(function (){
                    if($(this).text() == "Approved") {
                       $(this).parent().prev().children().prop({"disabled":true});
-                      $(this).parent().parent().css('background','green');
+                      $(this).parent().parent().css('background',tripleTableColor);
                    }else{
                       $(this).parent().prev().children().prop({"disabled":false});
                       $(this).parent().parent().css('background','white');
@@ -350,7 +385,8 @@
                 alert(properties);
                 $.post("filterProcess",
                   {
-                    properties: properties
+                    properties: properties,
+                    graph: graphName
                   },
                   function(data, status){
                     $("#tripleTable").empty();
@@ -358,7 +394,7 @@
                     $("#tripleTable :button").each(function (){
                        if($(this).text() == "Approved") {
                           $(this).parent().prev().children().prop({"disabled":true});
-                          $(this).parent().parent().css('background','green');
+                          $(this).parent().parent().css('background',tripleTableColor);
                        }else{
                           $(this).parent().prev().children().prop({"disabled":false});
                           $(this).parent().parent().css('background','white');
@@ -385,7 +421,8 @@
               //post to server to select the triple table
               $.post("treeFilterProcess", 
                 {
-                  triples : triples
+                  triples : triples,
+                  graph : graphName
                 },
                 function(data, status){
                   $("#tripleTable").empty();
@@ -393,7 +430,7 @@
                   $("#tripleTable :button").each(function (){
                      if($(this).text() == "Approved") {
                         $(this).parent().prev().children().prop({"disabled":true});
-                        $(this).parent().parent().css('background','green');
+                        $(this).parent().parent().css('background',tripleTableColor);
                      }else{
                         $(this).parent().prev().children().prop({"disabled":false});
                         $(this).parent().parent().css('background','white');
@@ -430,18 +467,19 @@
 
               if(box.attr("disabled")){
                 box.prop({"disabled":false});
-                $(this).parent().parent().css('background','white');
+                $(this).parent().parent().css('background',tripleTableColor);
                 $(this).text("Confirm");
               }else{
                 box.prop({"disabled":true});
-                $(this).parent().parent().css('background','green');
+                $(this).parent().parent().css('background',tripleTableColor);
                 $(this).text("Approved");
               }
               
               $.post("approveProcess",
                   {
                     id: id,
-                    isChecked: isChecked
+                    isChecked: isChecked,
+                    graph: graphName
                   }
               );
 
@@ -465,12 +503,13 @@
                   // $(this).parent().parent().css('background','white');
                 }else{
                   $(this).prop({"disabled":true});
-                  $(this).parent().parent().css('background','green');
+                  $(this).parent().parent().css('background',tripleTableColor);
                   $(this).parent().next().children().text("Approved");
                   $.post("approveProcess",
                     {
                       id: id,
-                      isChecked: isChecked
+                      isChecked: isChecked,
+                      graph: graphName
                     }
                   );
                 }
@@ -478,8 +517,6 @@
               });
 
             });
-
-
         });
       </script>
 
@@ -491,7 +528,7 @@
         <div class="row panel radius" style="background-color:white;width:100%" >
 
           <!--Merging Client-->
-             <fieldset style="padding-top:0px" >
+             <fieldset style="padding-top:0px ; border:solid 6px black" >
              <legend><h3><strong>R43ples Merge</strong></h3></legend>
 
                     <!--Button grouo-->
@@ -513,7 +550,7 @@
                 </div>
 
                 <div class="columns small-6">
-                      <ul class="button-group radius right" style="margin-top:16px">
+                      <ul class="button-group radius right">
                         <li><a href="#" id="triple" class="button tiny">Triple view</a></li>
                         <li><a href="#" id="individual" class="button tiny">Individual</a></li>
                         <li><a href="#" id="highLevel" class="button tiny">High level</a></li>              
@@ -524,9 +561,9 @@
              
               
               <div id = "left" class="large-3 columns" style="margin:0px;padding:0px;">
-                <fieldset style="padding-top:0px;padding-bottom:6px;height:519px;" >
+                <fieldset style="padding-top:0px;padding-bottom:6px;height:519px;"  >
                   <legend><strong>Differences</strong></legend>
-                  <div id="diffTree" style="overflow:auto; height:486px; width:266px; padding:0px">
+                  <div id="diffTree" style="overflow:auto; height:486px; width:16em;">
                     <#if conStatus=="1">
                       <ul>
                           <li data-jstree='{"opened" : true}'><a><img src="/static/images/Conflict.png"/> Conflict</a>
@@ -668,7 +705,7 @@
                 <fieldset style="padding-bottom:0px;" >
                   <legend><strong>Revision graph</strong></legend>
                   <div id="visualisation" class="live map">
-                   <svg id="svg"  width="100%" height="368" style="border:1px solid #000000; margin:1px; overflow:hidden;"><g/></svg>
+                   <svg id="svg"  width="100%" height="368" ><g/></svg>
                   </div> 
                   <div class="form columns small-5 " style="margin:0px;padding-bottom:0px">
                     <input type="checkbox" id="toogle-tags" class="checkbox-inline"><label for="toogle-tags" class="checkbox-inline">Tags</label>
@@ -715,8 +752,29 @@
                                       <td style = "width:12%">${row.subject} </td>
                                       <td style = "width:12%">${row.predicate}</td>
                                       <td style = "width:12%">${row.object}</td>
-                                      <td style = "width:18%">${row.stateA} (${row.revisionA!"  "})</td>
-                                      <td style = "width:18%">${row.stateB} (${row.revisionB!"  "})</td>
+
+                                      <#if row.stateA == "ORIGINAL">
+                                        <td style = "width:18%">&nbsp<img src="/static/images/Original.svg"/>&nbsp&nbsp<span>(${row.revisionA?substring(0,6)}...${row.revisionA?substring(25)})</span></td>
+                                      <#elseif row.stateA == "DELETED">
+                                        <td style = "width:18%">&nbsp<img src="/static/images/Deleted.svg"/>&nbsp&nbsp<span>(${row.revisionA?substring(0,6)}...${row.revisionA?substring(25)})</span></td>
+                                      <#elseif row.stateA == "ADDED">
+                                        <td style = "width:18%">&nbsp<img src="/static/images/Added.svg"/>&nbsp&nbsp<span>(${row.revisionA?substring(0,6)}...${row.revisionA?substring(25)})</span></td>
+                                      <#else>
+                                        <td style = "width:18%; text-align:left">&nbsp&nbsp&nbsp&nbsp<img src="/static/images/NotIncluded.svg"/></td>
+                                      </#if>
+
+                                      <#if row.stateB == "ORIGINAL">
+                                        <td style = "width:18%">&nbsp<img src="/static/images/Original.svg"/>&nbsp&nbsp<span>(${row.revisionB?substring(0,6)}...${row.revisionB?substring(25)})</span></td>
+                                      <#elseif row.stateB == "DELETED">
+                                        <td style = "width:18%">&nbsp<img src="/static/images/Deleted.svg"/>&nbsp&nbsp<span>(${row.revisionB?substring(0,6)}...${row.revisionB?substring(25)})</span></td>
+                                      <#elseif row.stateB == "ADDED">
+                                        <td style = "width:18%">&nbsp<img src="/static/images/Added.svg"/>&nbsp&nbsp<span>(${row.revisionB?substring(0,6)}...${row.revisionB?substring(25)})</span></td>
+                                      <#else>
+                                        <td style = "width:18%; text-align:left">&nbsp&nbsp&nbsp&nbsp<img src="/static/images/NotIncluded.svg"/></td>
+                                      </#if>
+
+
+                            
                                       <#if row.conflicting == "1">
                                         <td style = "width:9%;text-align: center;"><a><img src="/static/images/Conflict.png"/></a></td>
                                       <#else>
@@ -799,9 +857,9 @@
                <div class= "small-12 columns">              
                    
                   <#if isRebase>
-                    <a href ="rebaseReportProcess" ><button id="Report" type="button" class="button tiny expand radius success">Report</button></a>
+                    <a href ="rebaseReportProcess?graph=${graphName}" ><button id="Report" type="button" class="button tiny expand radius success">Report</button></a>
                   <#else>
-                    <a href ="reportProcess"><button id="Report" type="button" class="button tiny expand radius success">Report</button></a>
+                    <a href ="reportProcess?graph=${graphName}"><button id="Report" type="button" class="button tiny expand radius success">Report</button></a>
                   </#if>                       
                </div>
              </div>

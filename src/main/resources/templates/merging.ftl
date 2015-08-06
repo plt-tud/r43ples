@@ -1,7 +1,27 @@
 <#include "superHeader.ftl">
+<style>
+  fieldset {
+    border:solid 3px black;
+  }
+
+  .setBorder{
+    border:solid 3px black;
+  }
+</style>
 
 <script type="text/javascript">
+      //local 
+    //localStorage.lastname = document.getElementById("user").innerHTML;
+    // var x = document.getElementById("user").innerHTML;
+    // alert(x);
+   // alert(localStorage.lastname);
+   
+   function setLocalClient(){
+     localStorage.clientName = document.getElementById("user").value;
+   }
+
     $(document).ready(function(){
+
       $("#btn-add").click(function(){
       $("#tb").append("<tr><th><input class=\"form-control\" placeholder=\"User\"></th><th><input class=\"form-control\"   placeholder=\"User\"></th><th><button type=\"button\" class=\"btn btn-block btn-primary btn-xs\" onclick=\"$(this).parent().parent().remove()\">delete</button></th></tr>");
       });  
@@ -19,9 +39,12 @@
 						
 	  	}
 	  });
+
     }); 
+
+    
     //Ajax graph->branch
-        function showCustomer(str){
+      function showCustomer(str){
         var xmlhttp;
         if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
           xmlhttp=new XMLHttpRequest();
@@ -113,7 +136,7 @@
                         </div>
                       </fieldset>
                       </br>
-                      <div class="row collapse prefix-radius" >
+                      <div class="row collapse prefix-radius setBorder" >
                         <div class="small-2 columns" >
                           <span class="prefix"><strong>GRAPH:</strong></span>
                         </div>
@@ -127,20 +150,20 @@
                         </div>
                       </div>
                       </br>
-                      <div class="row collapse prefix-radius" >
+                      <div class="row collapse prefix-radius setBorder" >
                         <div class="small-2 columns" >
-                          <span class="prefix"><strong>Strategie:</strong></span>
+                          <span class="prefix"><strong>Strategy:</strong></span>
                         </div>
                         <div class="small-10 columns" >
                           <select class="radius" id="strategie" name="strategie" onchange="showIllustration(this.value)">
-                             <option value="1">Fast-Forward Merge Strategie</option>
-                             <option value="2">Three-Way Merge Strategie</option>
-                             <option value="3">Rebase Merge Strategie</option>
+                             <option value="1">Fast-Forward Merge Strategy</option>
+                             <option value="2">Three-Way Merge Strategy</option>
+                             <option value="3">Rebase Merge Strategy</option>
                           </select>
                         </div>
                       </div>
                       </br>
-                      <div class="row collapse prefix-radius" >
+                      <div class="row collapse prefix-radius setBorder" >
                           <div class="small-2 columns" >
                             <span class="prefix"><strong>SDD:</strong></span>
                           </div>
@@ -151,44 +174,44 @@
                           </div>
                       </div>
                       </br>
-                      <div class="row collapse prefix-radius">
-                        <div class="small-2 columns">
+                      <div class="row collapse prefix-radius ">
+                        <div class="small-2 columns setBorder">
                           <span class="prefix"><strong>MERGE:</strong></span>
                         </div>
-                        <div class="small-3 columns">
+                        <div class="small-3 columns setBorder">
                           <select class="radius" id="Branch1" name="Branch1" onchange="checkFastForward()">    
                              <option value="no"></option>
                           </select>          
                         </div>
-                        <div class="small-2 small-offset-2 columns">
+                        <div class="small-2 small-offset-2 columns setBorder">
                           <span class="prefix"><strong>INTO:</strong></span>
                         </div>
-                        <div class="small-3 columns">
+                        <div class="small-3 columns setBorder">
                           <select class="radius" id="Branch2" name="Branch2" onchange="checkFastForward()">
                              <option value="no"></option>
                           </select>          
                         </div>
                       </div>
                       </br>  
-                      <div class="row collapse prefix-radius">
+                      <div class="row collapse prefix-radius setBorder">
                           <div class="small-2 columns">
                             <span class="prefix"><strong>USER:</strong></span>
                           </div>
                           <div class="small-10 columns">
-                            <input type="text" placeholder="User" id="user" name="user">
+                            <input type="text" style="margin:0px" placeholder="User" id="user" name="user">
                           </div>
                        </div>    
                       </br>
                       <div class="row">
                            <label class="small-2 columns"><div align=center><strong>MESSAGE:</strong></div></label>
-                           <div class="small-10 columns">
-                           <textarea class="form-control" rows="6" id="message" name="message"></textarea>
+                           <div class="small-10 columns ">
+                           <textarea class="form-control setBorder" rows="6" id="message" name="message"></textarea>
                            </div>
                       </div>
                       </br>
                       <div class="row">
                           <div class="small-6 columns">
-                            <button id="sub" type="submit" class="button tiny expand default">Submit</button>
+                            <button id="sub" type="submit" class="button tiny expand default" onclick="setLocalClient()">Submit</button>
                           </div>
                           <div class="small-6 columns">
                             <button id="can" type="button" class="button tiny expand alert ">Cancel</button>
@@ -203,7 +226,7 @@
        <div class= "small-5 columns">
           <div class="panel radius" style="height:566px; width:486;margin-top:56px;background-color:white;">
           <fieldset style="background-color:white">
-            <legend><h4><strong>Strategie Illustration</strong></h4></legend>
+            <legend><h4><strong>Strategy Illustration</strong></h4></legend>
             <div class="panel-body" id="illustration" style="height:486px; width:406px ;">
             </div>
           </fieldset>

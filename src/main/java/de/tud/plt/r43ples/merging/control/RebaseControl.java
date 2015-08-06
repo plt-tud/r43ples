@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -31,7 +30,6 @@ import de.tud.plt.r43ples.management.ResolutionState;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SDDTripleStateEnum;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
-import de.tud.plt.r43ples.merging.management.ReportManagement;
 import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.merging.model.structure.CommitModel;
 import de.tud.plt.r43ples.merging.model.structure.Difference;
@@ -39,8 +37,6 @@ import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
 import de.tud.plt.r43ples.merging.model.structure.Patch;
 import de.tud.plt.r43ples.merging.model.structure.PatchGroup;
-import de.tud.plt.r43ples.merging.model.structure.ReportTableRow;
-import de.tud.plt.r43ples.merging.model.structure.TableRow;
 import de.tud.plt.r43ples.merging.model.structure.Triple;
 import de.tud.plt.r43ples.webservice.Endpoint;
 import freemarker.template.Configuration;
@@ -48,31 +44,36 @@ import freemarker.template.TemplateException;
 
 public class RebaseControl {
 	private static Logger logger = Logger.getLogger(FastForwardControl.class);
-	private static CommitModel commitModel;
-	private static PatchGroup patchGroup = new PatchGroup(null, null);
-	private static DifferenceModel differenceModel = new DifferenceModel();
+	private CommitModel commitModel;
+	private PatchGroup patchGroup = new PatchGroup(null, null);
+	private DifferenceModel differenceModel = new DifferenceModel();
 	
-	private static String differenceGraphModel = null;
+	private String differenceGraphModel = null;
 	
 	/** The revision number of the branch A. **/
-	private static String revisionNumberBranchA;
+	private String revisionNumberBranchA;
 	/** The revision number of the branch B. **/
-	private static String revisionNumberBranchB;
+	private String revisionNumberBranchB;
+	private MergingControl mergingControl = null;
 	
 	
+	/**create the RebaseControl*/
+	public RebaseControl(MergingControl mergingControl){
+		this.mergingControl = mergingControl;
+	}
 	
 	/**save the commit information and later output it */
-	public static void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2, String strategy, String type){
+	public void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2, String strategy, String type){
 		commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2, strategy, type);
 	}
 	
 	/**save the commit information and later output it */
-	public static CommitModel getCommitModel(){
+	public CommitModel getCommitModel(){
 		return commitModel;
 	}
 	
 	/**for each revision in branchA , create a patch */
-	public static void createPatchGroupOfBranch(String basisRevisionUri, LinkedList<String> revisionList) {
+	public void createPatchGroupOfBranch(String basisRevisionUri, LinkedList<String> revisionList) {
 		
 		LinkedHashMap<String, Patch> patchMap = new LinkedHashMap<String, Patch>();
 		
@@ -110,7 +111,7 @@ public class RebaseControl {
 	
 	/**force rebase beginn , for each patch in patch graup will a new revision created 
 	 * @throws InternalErrorException */
-	public static String forceRebaseProcess( String graphName ) throws InternalErrorException{
+	public String forceRebaseProcess( String graphName ) throws InternalErrorException{
 		
 		logger.info("patchGroup 1:" + patchGroup.getBasisRevisionNumber());
 		logger.info("patchGroup 2:" + patchGroup.getPatchMap().size());
@@ -159,23 +160,27 @@ public class RebaseControl {
 	 * @throws IOException 
 	 * @throws ConfigurationException 
 	 * */
-	public static void manualRebaseProcess() throws InternalErrorException, ConfigurationException, IOException {
+	public void manualRebaseProcess() throws InternalErrorException, ConfigurationException, IOException {
 		
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		
-		responseBuilder.entity(differenceGraphModel);
+		logger.info("difference Graph Model by manuealRebase: "+ differenceGraphModel);
+		responseBuilder.entity(this.differenceGraphModel);
 		
 		Response response = responseBuilder.build();	
 		
 		
-		MergingControl.openRebaseModel();
+		mergingControl.openRebaseModel();
+		logger.info("open rebase model: "+ mergingControl.getClass().toString());
 		
-		MergingControl.getMergeProcess(response, commitModel.getGraphName(), commitModel.getBranch1(), commitModel.getBranch2());
+		logger.info("is Rebase: "+ mergingControl.getIsRebase());
+		
+		mergingControl.getMergeProcess(response, commitModel.getGraphName(), commitModel.getBranch1(), commitModel.getBranch2());
  			
 	}
 	
 	/**read the difference model and set the automatic resolution state for the triple and create */
-	public static ArrayList<String> getAutomaticAddedTriplesAndRemovedTriples() {
+	public ArrayList<String> getAutomaticAddedTriplesAndRemovedTriples() {
 		ArrayList<String> list = new ArrayList<String>();
 		
 		String triplesToInsert = "";
@@ -227,7 +232,7 @@ public class RebaseControl {
 	
 	
 	/**read the difference model and set the automatic resolution state for the triple and create */
-	public static ArrayList<String> getManualAddedTriplesAndRemovedTriples() {
+	public ArrayList<String> getManualAddedTriplesAndRemovedTriples() {
 		// The result list
 		ArrayList<String> list = new ArrayList<String>();
 		
@@ -287,10 +292,10 @@ public class RebaseControl {
 	 * @throws InternalErrorException 
 	 * 
 	 * */
-	public static void createCommonManualRebaseProcess() throws InternalErrorException {
+	public void createCommonManualRebaseProcess() throws InternalErrorException {
 		//check action command , auto or common
 		
-		ArrayList<String> addedAndRemovedTriples = RebaseControl.getManualAddedTriplesAndRemovedTriples();
+		ArrayList<String> addedAndRemovedTriples = getManualAddedTriplesAndRemovedTriples();
 		String addedAsNTriples = addedAndRemovedTriples.get(0);
 		String removedAsNTriples = addedAndRemovedTriples.get(1);
 		
@@ -306,14 +311,15 @@ public class RebaseControl {
 	/**rebase process beginn , read the difference model and check the freundlichkeit of Rebase
 	 * @throws IOException 
 	 * @throws InternalErrorException */
-	public static boolean checkRebaseFreundlichkeit( String differGraphModel, String graphName, String branchNameA, String branchNameB) throws IOException, InternalErrorException{
+	public boolean checkRebaseFreundlichkeit( String differGraphModel, String graphName, String branchNameA, String branchNameB) throws IOException, InternalErrorException{
 		
 		// Save the current revision numbers
 		revisionNumberBranchA = RevisionManagement.getRevisionNumber(graphName, branchNameA);
 		revisionNumberBranchB = RevisionManagement.getRevisionNumber(graphName, branchNameB);
 	//	response = responsePost;
 		
-		differenceGraphModel = differGraphModel;
+		
+		this.differenceGraphModel = differGraphModel;
 		boolean isRebaseFreundlich = true;
 		
 //		if(response.getStatusInfo() == Response.Status.CONFLICT){
@@ -323,7 +329,9 @@ public class RebaseControl {
 		
 		//have not conflict, rebase freundlichkeit checked
 		
+		logger.info("difference graph Model by check unfreundlich:" + differenceGraphModel);
 		ProcessManagement.readDifferenceModel(differenceGraphModel, differenceModel);
+		logger.info("i did check rebase freundlich");
 		
 		//get difference group
 		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
@@ -364,7 +372,7 @@ public class RebaseControl {
 	
 	/**get die triples, die rebase unfreundlich ausloesen
 	 * @throws IOException */
-	public static ArrayList<Triple> getRebaseUnfreundlichbehaftetTriples(String differGraphModel) throws IOException{
+	public ArrayList<Triple> getRebaseUnfreundlichbehaftetTriples(String differGraphModel) throws IOException{
 		ArrayList<Triple> tripleList = new ArrayList<Triple>();
 		
 		ProcessManagement.readDifferenceModel(differGraphModel, differenceModel);
@@ -407,7 +415,7 @@ public class RebaseControl {
 	/**get the right triples in with set
 	 * @throws IOException */
 	
-	public static String filterUnfreundlichTriples(String differGraphModel, String triples) throws IOException {
+	public String filterUnfreundlichTriples(String differGraphModel, String triples) throws IOException {
 		ArrayList<Triple> unfreundlichTripleList = getRebaseUnfreundlichbehaftetTriples(differGraphModel);
 		
 		// MERGE WITH query - conflicting triple
@@ -460,7 +468,7 @@ public class RebaseControl {
 	 * @throws ConfigurationException 
 	 */
 	
-	public static String showRebaseDialogView() throws TemplateException, IOException, ConfigurationException {
+	public String showRebaseDialogView() throws TemplateException, IOException, ConfigurationException {
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		freemarker.template.Template temp = null; 
@@ -475,7 +483,8 @@ public class RebaseControl {
         } catch (IOException e) {  
             e.printStackTrace();  
         }  
-				
+		
+		scope.put("graphName", commitModel.getGraphName());
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
 		scope.put("git", GitRepositoryState.getGitRepositoryState());
 		
@@ -486,7 +495,7 @@ public class RebaseControl {
 	}
 	
 	/**get the result graph view by rebase of the named graph*/
-	public static String getRebaseReportView(String graphName) throws TemplateException, IOException{
+	public String getRebaseReportView(String graphName) throws TemplateException, IOException{
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		freemarker.template.Template temp = null; 
@@ -518,7 +527,7 @@ public class RebaseControl {
 	
 	
 	/**update differencemodel*/
-	public static void updateRebaseDifferenceModel(DifferenceModel updatedDifferenceModel){		
+	public void updateRebaseDifferenceModel(DifferenceModel updatedDifferenceModel){		
 		differenceModel.clear();
 		differenceModel = updatedDifferenceModel;
 	}

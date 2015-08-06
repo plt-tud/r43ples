@@ -10,7 +10,10 @@
      //          }
      //        });
     	// });
-    	
+    
+    var graphName = "${graphName}";	
+    var tripleTableColor = "YellowGreen";
+    var individualTabelColor = "LemonChiffon"
     	//approve triples in server and update difference model
     $("#tripleTable :button").click(function(){
       var box = $(this).parent().prev().children();
@@ -31,14 +34,15 @@
         $(this).text("Confirm");
       }else{
         box.prop({"disabled":true});
-        $(this).parent().parent().css('background','green');
+        $(this).parent().parent().css('background',tripleTableColor);
         $(this).text("Approved");
       }
       
       $.post("approveProcess",
           {
             id: id,
-            isChecked: isChecked
+            isChecked: isChecked,
+            graph: graphName
           }
       );
 
@@ -63,12 +67,13 @@
 	          // $(this).parent().parent().css('background','white');
 	        }else{
 	          $(this).prop({"disabled":true});
-	          $(this).parent().parent().css('background','green');
+	          $(this).parent().parent().css('background',tripleTableColor);
 	          $(this).parent().next().children().text("Approved");
 	          $.post("approveProcess",
 	            {
 	              id: id,
-                isChecked: isChecked
+                isChecked: isChecked,
+                graph: graphName
 	            }
 	          );
 	        }
@@ -115,8 +120,29 @@
                           <td style = "width:12%">${row.subject} </td>
                           <td style = "width:12%">${row.predicate}</td>
                           <td style = "width:12%">${row.object}</td>
-                          <td style = "width:18%">${row.stateA} (${row.revisionA!"  "})</td>
-                          <td style = "width:18%">${row.stateB} (${row.revisionB!"  "})</td>
+                          
+                          <#if row.stateA == "ORIGINAL">
+                            <td style = "width:18%">&nbsp<img src="/static/images/Original.svg"/>&nbsp&nbsp<span>(${row.revisionA?substring(0,6)}...${row.revisionA?substring(25)})</span></td>
+                          <#elseif row.stateA == "DELETED">
+                            <td style = "width:18%">&nbsp<img src="/static/images/Deleted.svg"/>&nbsp&nbsp<span>(${row.revisionA?substring(0,6)}...${row.revisionA?substring(25)})</span></td>
+                          <#elseif row.stateA == "ADDED">
+                            <td style = "width:18%">&nbsp<img src="/static/images/Added.svg"/>&nbsp&nbsp<span>(${row.revisionA?substring(0,6)}...${row.revisionA?substring(25)})</span></td>
+                          <#else>
+                            <td style = "width:18%; text-align:left">&nbsp&nbsp&nbsp&nbsp<img src="/static/images/NotIncluded.svg"/></td>
+                          </#if>
+
+                          <#if row.stateB == "ORIGINAL">
+                            <td style = "width:18%">&nbsp<img src="/static/images/Original.svg"/>&nbsp&nbsp<span>(${row.revisionB?substring(0,6)}...${row.revisionB?substring(25)})</span></td>
+                          <#elseif row.stateB == "DELETED">
+                            <td style = "width:18%">&nbsp<img src="/static/images/Deleted.svg"/>&nbsp&nbsp<span>(${row.revisionB?substring(0,6)}...${row.revisionB?substring(25)})</span></td>
+                          <#elseif row.stateB == "ADDED">
+                            <td style = "width:18%">&nbsp<img src="/static/images/Added.svg"/>&nbsp&nbsp<span>(${row.revisionB?substring(0,6)}...${row.revisionB?substring(25)})</span></td>
+                          <#else>
+                            <td style = "width:18%; text-align:left">&nbsp&nbsp&nbsp&nbsp<img src="/static/images/NotIncluded.svg"/></td>
+                          </#if>
+
+                          
+                          
                           <#if row.conflicting == "1">
                             <td style = "width:9%;text-align: center;"><a><img src="/static/images/Conflict.png"/></a></td>
                           <#else>

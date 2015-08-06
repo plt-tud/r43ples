@@ -3,12 +3,17 @@
 <script type="text/javascript">
   
 </script>
+<style>
+   fieldset {
+      border : solid 3px black;
+   }
+</style>
 
 <div class="container">
 			<div class="row" >
 				<div class="small-6 columns push-3">
                 <div class="panel radius" style="background-color:white;">
-                  <fieldset>
+                  <fieldset style = "border: solid black 5px">
                     <legend><h4><strong>Rebase Unfreundlich</strong></h4></legend>
                     </br>
                      <fieldset style="background-color:white">
@@ -27,10 +32,10 @@
 
                     <div class="row">
                       <div class="small-6 columns">
-                       <a href="manualRebaseProcess"><button type="submit" class="button tiny expand default">Manually Rebase</button></a>
+                       <a href="manualRebaseProcess?graph=${graphName}"><button type="submit" class="button tiny expand default">Manually Rebase</button></a>
                       </div>
                       <div class="small-6 columns">
-                        <a href="forceRebaseProcess"><button type="button" class="button tiny expand alert ">Force Rebase</button>
+                        <a href="forceRebaseProcess?graph=${graphName}"><button type="button" class="button tiny expand alert ">Force Rebase</button>
                       </div></a>
                     </div>
                     <div class="row">

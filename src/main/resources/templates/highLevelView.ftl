@@ -10,7 +10,9 @@
 	     //    });
 	            
 	    	// });
-
+          var graphName = "${graphName}";
+          var tripleTableColor = "YellowGreen";
+          var individualTabelColor = "LemonChiffon"
           $("#highLevelTable :button").click(function(){
               var box = $(this).parent().prev().children();
               var id = box.val();
@@ -30,14 +32,15 @@
                 $(this).text("Confirm");
               }else{
                 box.prop({"disabled":true});
-                $(this).parent().parent().css('background','green');
+                $(this).parent().parent().css('background',tripleTableColor);
                 $(this).text("Approved");
               }
               
               $.post("approveHighLevelProcess",
                   {
                     id: id,
-                    isChecked: isChecked
+                    isChecked: isChecked,
+                    graph: graphName
                   }
               );
 
@@ -62,12 +65,13 @@
                 // $(this).parent().parent().css('background','white');
               }else{
                 $(this).prop({"disabled":true});
-                $(this).parent().parent().css('background','green');
+                $(this).parent().parent().css('background',tripleTableColor);
                 $(this).parent().next().children().text("Approved");
                 $.post("approveHighLevelProcess",
                   {
                     id: id,
-                    isChecked: isChecked
+                    isChecked: isChecked,
+                    graph: graphName
                   }
                 );
               }

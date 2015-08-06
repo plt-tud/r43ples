@@ -105,13 +105,11 @@ public class StrategyManagement {
 	 * save old revision information of Graph 
 	 * @throws InternalErrorException */
 	public static void saveGraphVorMergingInMap(String graph, String format) throws InternalErrorException{
-		if(!oldRevisionGraphMap.containsKey(graph)) {
+		//can not parallel on the same name graph execute
 			String oldRevisionGraph = RevisionManagement.getRevisionInformation(graph, format);
 			
 			oldRevisionGraphMap.put(graph, oldRevisionGraph);
-		}else{
-			throw new InternalErrorException("Error in parallel access to the same graph by save old graph information vor merging");
-		}	
+		
 	}
 	
 	/**
@@ -161,7 +159,7 @@ public class StrategyManagement {
 		String queryTemplateManual = 
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
-				+ "MERGE MANUAL GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\" WITH { %n"
+				+ "REBASE MANUAL GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\" WITH { %n"
 				+ "	%s"
 				+ "}";
 		

@@ -7,7 +7,10 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.GitRepositoryState;
+import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.merging.model.structure.CommitModel;
 import de.tud.plt.r43ples.webservice.Endpoint;
 import freemarker.template.Configuration;
@@ -15,13 +18,13 @@ import freemarker.template.TemplateException;
 
 public class FastForwardControl {
 	private static Logger logger = Logger.getLogger(FastForwardControl.class);
-	private static CommitModel commitModel;
+	private CommitModel commitModel;
 	
 	/**get the report page of fast forward query
 	 * @throws IOException 
 	 * @throws TemplateException */
 
-	public static String getFastForwardReportView(String graphName) throws TemplateException, IOException{
+	public String getFastForwardReportView(String graphName) throws TemplateException, IOException{
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		freemarker.template.Template temp = null; 
@@ -46,7 +49,26 @@ public class FastForwardControl {
 		return sw.toString();	
 	}
 	
-	public static void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2, String strategy, String type){
+	/**check the condition for fast forward strategy
+	 * @param graphName : name of named graph
+	 * @param branch1 : name of branch1
+	 * @param branch2 : name of branch2
+	 * @throws InternalErrorException */
+	
+	public static boolean fastForwardCheck(String graphName, String branch1 , String branch2) throws InternalErrorException {
+		if(branch1.equals(branch2)) {
+			return false;
+		}
+		
+		//get last revision of each branch
+		String revisionUriA = RevisionManagement.getRevisionUri(graphName, branch1);
+		String revisionUriB = RevisionManagement.getRevisionUri(graphName, branch2);
+		
+		return StrategyManagement.isFastForward(revisionUriA, revisionUriB);
+	}
+	
+	
+	public void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2, String strategy, String type){
 		commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2, strategy, type);
 	}
 	
