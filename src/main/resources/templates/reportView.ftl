@@ -274,9 +274,9 @@
                       	<div class="small-3 push-1 columns">
                   			<!--check ob isRebase or three way merge-->
                       		<#if isRebase>
-	                          <a href ="rebasePushProcessNew?graph=${graphName}"><button id="push" type="button" class="button tiny expand default">Push</button></a>
+	                          <a href ="rebasePushProcessNew?graph=${graphName}&client=${clientName}"><button id="push" type="button" class="button tiny expand default">Push</button></a>
 	                        <#else>
-	                          <a href ="pushProcessNew?graph=${graphName}"><button id="push" type="button" class="button tiny expand default">Push</button></a>
+	                          <a href ="pushProcessNew?graph=${graphName}&client=${clientName}"><button id="push" type="button" class="button tiny expand default">Push</button></a>
 	                        </#if>            	
                       	</div>
                       	<div class="small-3 pull-1 columns">

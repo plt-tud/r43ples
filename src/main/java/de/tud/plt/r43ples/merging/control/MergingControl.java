@@ -197,10 +197,12 @@ public class MergingControl {
 	 	
 	 	if(isRebase){
 	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
-		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());
+		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
 	 	}else{
 	 		logger.info("commitGraphname: " + commitModel.getGraphName());
-		 	scope.put("graphName", commitModel.getGraphName());	 	
+		 	scope.put("graphName", commitModel.getGraphName());	
+		 	scope.put("clientName", commitModel.getUser());
 	 	}
 	 	
 	 	scope.put("isRebase", isRebase);
@@ -276,6 +278,7 @@ public class MergingControl {
 	 	scope.put("isRebase",isRebase);
 	 	scope.put("tableRowList", tableModel.getTripleRowList());
 	 	scope.put("graphName", commitModel.getGraphName());	
+	 	scope.put("clientName", commitModel.getUser());
 		scope.put("conList",conList);
 		scope.put("diffList",diffList);
 		scope.put("conStatus", conStatus);
@@ -312,6 +315,7 @@ public class MergingControl {
 		}
 		
 		scope.put("graphName", graphName);
+		scope.put("clientName", commitModel.getUser());
 		scope.put("commit", commitModel);
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
 		scope.put("git", GitRepositoryState.getGitRepositoryState());
@@ -459,10 +463,12 @@ public class MergingControl {
 		
 		if(isRebase){
 	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
-		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());	
+		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
 	 	}else{
 	 		logger.info("commitGraphname: " + commitModel.getGraphName());
-		 	scope.put("graphName", commitModel.getGraphName());	 	
+		 	scope.put("graphName", commitModel.getGraphName());	 
+		 	scope.put("clientName", commitModel.getUser());
 	 	}
 		
 		
@@ -511,10 +517,12 @@ public class MergingControl {
 		
 		if(isRebase){
 	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
-		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());	
+		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
 	 	}else{
 	 		logger.info("commitGraphname: " + commitModel.getGraphName());
-		 	scope.put("graphName", commitModel.getGraphName());	 	
+		 	scope.put("graphName", commitModel.getGraphName());	
+		 	scope.put("clientName", commitModel.getUser());
 	 	}
 		
 		scope.put("updatedTripleRowList", updatedTripleRowList);
@@ -560,10 +568,12 @@ public class MergingControl {
 		
 		if(isRebase){
 	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
-		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());
+		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
 	 	}else{
 	 		logger.info("commitGraphname: " + commitModel.getGraphName());
-		 	scope.put("graphName", commitModel.getGraphName());	 	
+		 	scope.put("graphName", commitModel.getGraphName());	 
+		 	scope.put("clientName", commitModel.getUser());
 	 	}
 		
 		scope.put("highLevelRowList", highLevelRowList);
@@ -622,10 +632,12 @@ public class MergingControl {
 		
 		if(isRebase){
 	 		logger.info("rebasecommitGraphname: " + rebaseControl.getCommitModel().getGraphName());
-		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());	
+		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
 	 	}else{
 	 		logger.info("mergingcommitGraphname: " + commitModel.getGraphName());
-		 	scope.put("graphName", commitModel.getGraphName());	 	
+		 	scope.put("graphName", commitModel.getGraphName());	 
+		 	scope.put("clientName", commitModel.getUser());
 	 	}
 		
 		scope.put("tableRowList", updatedTripleRowList);
@@ -693,10 +705,12 @@ public class MergingControl {
 		
 		if(isRebase){
 	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
-		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());	
+		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
 	 	}else{
 	 		logger.info("commitGraphname: " + commitModel.getGraphName());
-		 	scope.put("graphName", commitModel.getGraphName());	 	
+		 	scope.put("graphName", commitModel.getGraphName());	
+		 	scope.put("clientName", commitModel.getUser());
 	 	}
 		
 		logger.info("tree table list: "+ updatedTripleRowList.size());
@@ -734,10 +748,12 @@ public class MergingControl {
 		
 		if(isRebase){
 	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
-		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());	
+		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
 	 	}else{
 	 		logger.info("commitGraphname: " + commitModel.getGraphName());
-		 	scope.put("graphName", commitModel.getGraphName());	 	
+		 	scope.put("graphName", commitModel.getGraphName());	 
+		 	scope.put("clientName", commitModel.getUser());
 	 	}
 		
 		scope.put("tableRowList", tableModel.getTripleRowList());
@@ -1079,10 +1095,12 @@ public class MergingControl {
 		
 		if(isRebase){
 	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
-		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());
+		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
 	 	}else{
 	 		logger.info("commitGraphname: " + commitModel.getGraphName());
-		 	scope.put("graphName", commitModel.getGraphName());	 	
+		 	scope.put("graphName", commitModel.getGraphName());	 
+		 	scope.put("clientName", commitModel.getUser());
 	 	}
 		
 		// three way merging
@@ -1140,7 +1158,8 @@ public class MergingControl {
 		}
 		
 		
-		scope.put("graphName", rebaseControl.getCommitModel().getGraphName());		 	
+		scope.put("graphName", rebaseControl.getCommitModel().getGraphName());	
+		scope.put("clientName", rebaseControl.getCommitModel().getUser());
 	 	
 		scope.put("isRebase", true);
 		scope.put("commit", rebaseControl.getCommitModel());

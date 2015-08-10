@@ -1,5 +1,7 @@
     <script type="text/javascript">
       var graphName = "${graphName}";
+      var clientName = "${clientName}";
+
       var tripleTableColor = "YellowGreen";
       var individualTabelColor = "LemonChiffon"
     	$(function(){
@@ -17,7 +19,8 @@
                   {
                     individualA: individualA,
                     individualB: individualB,
-                    graph: graphName
+                    graph: graphName,
+                    client: clientName
                   },
                   function(data, status){
 				  	        $("#individualFilter").empty();

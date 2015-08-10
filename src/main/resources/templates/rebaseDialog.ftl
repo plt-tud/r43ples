@@ -32,10 +32,10 @@
 
                     <div class="row">
                       <div class="small-6 columns">
-                       <a href="manualRebaseProcess?graph=${graphName}"><button type="submit" class="button tiny expand default">Manually Rebase</button></a>
+                       <a href="manualRebaseProcess?graph=${graphName}&client=${clientName}"><button type="submit" class="button tiny expand default">Manually Rebase</button></a>
                       </div>
                       <div class="small-6 columns">
-                        <a href="forceRebaseProcess?graph=${graphName}"><button type="button" class="button tiny expand alert ">Force Rebase</button>
+                        <a href="forceRebaseProcess?graph=${graphName}&client=${clientName}"><button type="button" class="button tiny expand alert ">Force Rebase</button>
                       </div></a>
                     </div>
                     <div class="row">

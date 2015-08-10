@@ -485,6 +485,7 @@ public class RebaseControl {
         }  
 		
 		scope.put("graphName", commitModel.getGraphName());
+		scope.put("clientName", commitModel.getUser());
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
 		scope.put("git", GitRepositoryState.getGitRepositoryState());
 		
@@ -516,6 +517,7 @@ public class RebaseControl {
 		}
 		
 		scope.put("graphName", graphName);
+		scope.put("clientName", commitModel.getUser());
 		scope.put("commit", commitModel);
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
 		scope.put("git", GitRepositoryState.getGitRepositoryState());

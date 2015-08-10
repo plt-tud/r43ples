@@ -173,7 +173,8 @@
         $(document).foundation();      
         $(document).ready(function(){
             var graphName = "${graphName}";
-            var clientName = localStorage.clientName;
+            var clientName = "${clientName}";
+
             var tripleTableColor = "YellowGreen";
             var individualTabelColor = "LemonChiffon"
             // von report seite go back , triple table bleibt
@@ -270,7 +271,9 @@
               $.post("pushProcess",
               {    
                   graph: graphName, 
-                  options: options
+                  options: options,
+                  client: clientName
+
               },
               function(data, status){
                 if (confirm("Push process : " + status + "Show push result ?") == true) {
@@ -293,7 +296,7 @@
               $("#tripleView").hide();
               $("#highLevelView").hide();
               // $("#right").css("width", "100%");
-              $("#individualView").load("individualView?graph=${graphName}",function(){
+              $("#individualView").load("individualView?graph=${graphName}&client=${clientName}",function(){
                 $("#individualView").show();
       //          window.location.href = "#";
               });
@@ -308,7 +311,7 @@
               $("#right").addClass("large-9 columns");
               //updated tripleView
               $("#tripleView").children().remove();
-              $("#tripleView").load("tripleView?graph=${graphName}",function(){
+              $("#tripleView").load("tripleView?graph=${graphName}&client=${clientName}",function(){
                 $("#tripleView").show();
                 
                 $("#tripleTable :button").each(function (){
@@ -349,7 +352,7 @@
               $("#right").addClass("large-12 columns");
               $("#tripleView").hide();
               $("#individualView").hide();
-              $("#highLevelView").load("highLevelView?graph=${graphName}", function(){
+              $("#highLevelView").load("highLevelView?graph=${graphName}&client=${clientName}", function(){
                 $("#highLevelView").show();
       //          window.location.href = "#";
                 $("#highLevelTable :button").each(function (){
@@ -386,7 +389,8 @@
                 $.post("filterProcess",
                   {
                     properties: properties,
-                    graph: graphName
+                    graph: graphName,
+                    client: clientName
                   },
                   function(data, status){
                     $("#tripleTable").empty();
@@ -422,7 +426,8 @@
               $.post("treeFilterProcess", 
                 {
                   triples : triples,
-                  graph : graphName
+                  graph : graphName,
+                  client : clientName
                 },
                 function(data, status){
                   $("#tripleTable").empty();
@@ -479,7 +484,8 @@
                   {
                     id: id,
                     isChecked: isChecked,
-                    graph: graphName
+                    graph: graphName,
+                    client: clientName
                   }
               );
 
@@ -509,7 +515,8 @@
                     {
                       id: id,
                       isChecked: isChecked,
-                      graph: graphName
+                      graph: graphName,
+                      client: clientName
                     }
                   );
                 }
@@ -857,9 +864,9 @@
                <div class= "small-12 columns">              
                    
                   <#if isRebase>
-                    <a href ="rebaseReportProcess?graph=${graphName}" ><button id="Report" type="button" class="button tiny expand radius success">Report</button></a>
+                    <a href ="rebaseReportProcess?graph=${graphName}&client=${clientName}" ><button id="Report" type="button" class="button tiny expand radius success">Report</button></a>
                   <#else>
-                    <a href ="reportProcess?graph=${graphName}"><button id="Report" type="button" class="button tiny expand radius success">Report</button></a>
+                    <a href ="reportProcess?graph=${graphName}&client=${clientName}"><button id="Report" type="button" class="button tiny expand radius success">Report</button></a>
                   </#if>                       
                </div>
              </div>

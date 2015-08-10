@@ -11,6 +11,7 @@
 	            
 	    	// });
           var graphName = "${graphName}";
+          var clientName = "${clientName}";
           var tripleTableColor = "YellowGreen";
           var individualTabelColor = "LemonChiffon"
           $("#highLevelTable :button").click(function(){
@@ -40,7 +41,8 @@
                   {
                     id: id,
                     isChecked: isChecked,
-                    graph: graphName
+                    graph: graphName,
+                    client: clientName
                   }
               );
 
@@ -71,7 +73,8 @@
                   {
                     id: id,
                     isChecked: isChecked,
-                    graph: graphName
+                    graph: graphName,
+                    client: clientName
                   }
                 );
               }

@@ -12,6 +12,7 @@
 	    	// });
             //approve triples in server and update difference model
       var graphName = "${graphName}";
+      var clientName = "${clientName}";
       var tripleTableColor = "YellowGreen";
       var individualTabelColor = "LemonChiffon"
       $("#individualTripleTable :button").click(function(){
@@ -41,7 +42,8 @@
               {
                 id: id,
                 isChecked: isChecked,
-                graph: graphName
+                graph: graphName,
+                client: clientName
               }
           );
 
@@ -72,7 +74,8 @@
               {
                 id: id,
                 isChecked: isChecked,
-                graph: graphName
+                graph: graphName,
+                client: clientName
               }
             );
           }

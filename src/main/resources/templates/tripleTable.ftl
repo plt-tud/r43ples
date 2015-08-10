@@ -11,6 +11,7 @@
      //        });
     	// });
     	var graphName = "${graphName}";
+      var clientName = "${clientName}";
       var tripleTableColor = "YellowGreen";
       var individualTabelColor = "LemonChiffon"
     	//approve triples in server and update difference model
@@ -41,7 +42,8 @@
             {
               id: id,
               isChecked: isChecked,
-              graph: graphName
+              graph: graphName,
+              client: clientName
             }
         );
 
