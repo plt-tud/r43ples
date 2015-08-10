@@ -894,7 +894,7 @@ public class Endpoint {
 		response.entity(mergingControl.createRebaseReportProcess());
 		
 		//close rebase model
-		mergingControl.closeRebaseModel();
+		//mergingControl.closeRebaseModel();
 		return response.build();
 		
 	}	
@@ -967,12 +967,40 @@ public class Endpoint {
 		
 		mergingControl.transformDifferenceModelToRebase();
 		
-		rebaseControl.createCommonManualRebaseProcess();
+		// update the new rebase merge query
+		String mergeQuery = mergingControl.updateMergeQueryNew();
+		
+		logger.info("rebase updated mergequery: "+ mergeQuery);
+		// execute the getRebaseResponse()
+		String userCommit = null;
+		Matcher userMatcher = patternUser.matcher(mergeQuery);
+		logger.info("yxy test mergeQuery:"+mergeQuery);
+		if (userMatcher.find()) {
+			userCommit = userMatcher.group("user");
+			mergeQuery = userMatcher.replaceAll("");
+		}
+		String messageCommit = null;
+		Matcher messageMatcher = patternCommitMessage.matcher(mergeQuery);
+		if (messageMatcher.find()) {
+			messageCommit = messageMatcher.group("message");
+			mergeQuery = messageMatcher.replaceAll("");
+		}
+		
+		logger.info("yxy test mergeQuery nach verarbeit:"+mergeQuery);
+
+		if (patternRebaseQuery.matcher(mergeQuery).find()) {
+			getRebaseResponse(mergeQuery, userCommit, messageCommit, "HTML");
+		}
+		
+		//rebaseControl.createCommonManualRebaseProcess();
 		
 		
 		String rebaseResultView = rebaseControl.getRebaseReportView(null);
 		
 		response.entity(rebaseResultView);
+		
+		//close rebase model
+		mergingControl.closeRebaseModel();
 		
 		//after push remove the graph and release the space
 		mergingControlMap.remove(graph);

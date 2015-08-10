@@ -22,6 +22,7 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
+import de.tud.plt.r43ples.management.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.management.ResolutionState;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SDDTripleStateEnum;
@@ -1180,10 +1181,23 @@ public class MergingControl {
 			if (reportResult.getConflictsNotApproved() == 0){
 				
 				// Get the definitions
-				String user = commitModel.getUser();
-				String message = commitModel.getMessage();
-				String graphName = commitModel.getGraphName();
-				String sdd = commitModel.getSddName();
+				String user;
+				String message;
+				String graphName;
+				String sdd;
+				
+				if(isRebase) {
+					user = rebaseControl.getCommitModel().getUser();
+					message = rebaseControl.getCommitModel().getMessage();
+					graphName = rebaseControl.getCommitModel().getGraphName();
+					sdd = rebaseControl.getCommitModel().getSddName();
+				}else{
+					user = commitModel.getUser();
+					message = commitModel.getMessage();
+					graphName = commitModel.getGraphName();
+					sdd = commitModel.getSddName();
+				}
+				
 				
 				String mergeQuery = null;
 				if (reportResult.getDifferencesResolutionChanged() > 0) {
@@ -1222,7 +1236,12 @@ public class MergingControl {
 					
 					logger.info("updated whole model: "+ triples);
 					// Execute MERGE MANUAL query
-					mergeQuery = ProcessManagement.createMergeQuery(graphName, sdd, user, message, MergeQueryTypeEnum.MANUAL, revisionNumberBranchA, revisionNumberBranchB, triples);
+					if(isRebase){
+						mergeQuery = StrategyManagement.createRebaseQuery(graphName, sdd, user, message, revisionNumberBranchA, revisionNumberBranchB, RebaseQueryTypeEnum.MANUAL, triples);
+					}else {
+						mergeQuery = ProcessManagement.createMergeQuery(graphName, sdd, user, message, MergeQueryTypeEnum.MANUAL, revisionNumberBranchA, revisionNumberBranchB, triples);
+					}
+					
 					logger.info("manualmergeQuery:"+mergeQuery);
 					
 					
@@ -1230,7 +1249,12 @@ public class MergingControl {
 					
 					String triples = ProcessManagement.getTriplesOfMergeWithQuery(differenceModel);
 					// Execute MERGE WITH query
-					mergeQuery = ProcessManagement.createMergeQuery(graphName, sdd, user, message, MergeQueryTypeEnum.WITH, revisionNumberBranchA, revisionNumberBranchB, triples);
+					if(isRebase) {
+						mergeQuery = StrategyManagement.createRebaseQuery(graphName, sdd, user, message, revisionNumberBranchA, revisionNumberBranchB, RebaseQueryTypeEnum.AUTO, triples);
+					}else{
+						mergeQuery = ProcessManagement.createMergeQuery(graphName, sdd, user, message, MergeQueryTypeEnum.WITH, revisionNumberBranchA, revisionNumberBranchB, triples);
+					}
+					
 					logger.info("withmergeQuery:"+mergeQuery);
 				}
 				

@@ -218,7 +218,7 @@ public class SampleDataSet {
 	 * ADD: A,B,C    |
 	 * ---X----------+ (Master)
 	 * DEL: -        |
-	 *               |  ADD: D,H              ADD: I    ADD: J
+	 *               |  ADD: H              ADD: I    ADD: J
 	 *               +-----X---------------------X---------X----- (Branch B2)  rebase unfreundlich by C
 	 *                  DEL: C                DEL: -    DEL: -
 	 * 
@@ -263,8 +263,7 @@ public class SampleDataSet {
 		
 
 		// First commit to B2
-		triplesInsert = "<http://example.com/testS> <http://example.com/testP> \"D\". \n"
-				+ "<http://example.com/testS> <http://example.com/testP> \"H\". \n";
+		triplesInsert = "<http://example.com/testS> <http://example.com/testP> \"H\". \n";
 		String triplesDelete = "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
 //		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B2", graphName, "B2",
 //				triplesInsert, triplesDelete);
