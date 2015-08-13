@@ -86,15 +86,15 @@ public class RebaseControl {
 			String deltaAdded = StrategyManagement.getDeltaAddedUri(revisionUri);
 			String deltaRemoved = StrategyManagement.getDeltaRemovedUri(revisionUri);
 			
-			LinkedList<String> addedTripleList =  StrategyManagement.createAddedOrRemovedTripleSet(deltaAdded);
-			LinkedList<String> removedTripleList = StrategyManagement.createAddedOrRemovedTripleSet(deltaRemoved);
+//			LinkedList<String> addedTripleList =  StrategyManagement.createAddedOrRemovedTripleSet(deltaAdded);
+//			LinkedList<String> removedTripleList = StrategyManagement.createAddedOrRemovedTripleSet(deltaRemoved);
 			String patchNumber = StrategyManagement.getRevisionNumber(revisionUri);
 			String patchUser = StrategyManagement.getPatchUserUri(commitUri);
 			String patchMessage = StrategyManagement.getPatchMessage(commitUri);
 			
 			
-			
-			patchMap.put(patchNumber, new Patch(patchNumber, patchUser, patchMessage, addedTripleList, removedTripleList));
+			patchMap.put(patchNumber, new Patch(patchNumber, patchUser, patchMessage, deltaAdded, deltaRemoved));
+			//patchMap.put(patchNumber, new Patch(patchNumber, patchUser, patchMessage, addedTripleList, removedTripleList));
 			
 		}
 		
@@ -125,26 +125,30 @@ public class RebaseControl {
 		while(pIter.hasNext()) {
 			Entry<String, Patch> pEntry = pIter.next();
 			Patch patch = pEntry.getValue();
-			LinkedList<String> addedTripleList = patch.getAddedTripleList();
-			LinkedList<String> removedTripleList = patch.getRemovedTripleList();
+			//LinkedList<String> addedTripleList = patch.getAddedTripleList();
+			//LinkedList<String> removedTripleList = patch.getRemovedTripleList();
 			
-			String addedAsNTriples = "";
-			String removedAsNTriples = "";
-			
-			for(String triple : addedTripleList) { 
-				addedAsNTriples = addedAsNTriples + triple + ". \n";
-			}
-			
-			for(String triple : removedTripleList) { 
-				removedAsNTriples = removedAsNTriples + triple + ". \n";
-			}
-			
-			logger.info("rebase added triples: " + addedAsNTriples);
-			logger.info("rebase removed triples: " + removedAsNTriples);
+//			String addedAsNTriples = "";
+//			String removedAsNTriples = "";
+//			
+//			for(String triple : addedTripleList) { 
+//				addedAsNTriples = addedAsNTriples + triple + ". \n";
+//			}
+//			
+//			for(String triple : removedTripleList) { 
+//				removedAsNTriples = removedAsNTriples + triple + ". \n";
+//			}
+//			
+//			logger.info("rebase added triples: " + addedAsNTriples);
+//			logger.info("rebase removed triples: " + removedAsNTriples);
 
 			
 			
-			String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
+//			String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
+//					patch.getPatchUser(), patch.getPatchMessage(), basisRevisionNumber);
+			
+//			
+			String newRevisionNumber = RevisionManagement.createNewRevisionWithPatch(graphName, patch.getAddedSetUri(), patch.getRemovedSetUri(),
 					patch.getPatchUser(), patch.getPatchMessage(), basisRevisionNumber);
 			
 			basisRevisionNumber = newRevisionNumber;
@@ -175,7 +179,7 @@ public class RebaseControl {
 		
 		logger.info("is Rebase: "+ mergingControl.getIsRebase());
 		
-		mergingControl.getMergeProcess(response, commitModel.getGraphName(), commitModel.getBranch1(), commitModel.getBranch2());
+		mergingControl.getMergeProcess(response, commitModel.getGraphName(), commitModel.getBranch1(), commitModel.getBranch2(),"text/html");
  			
 	}
 	
@@ -311,7 +315,7 @@ public class RebaseControl {
 	/**rebase process beginn , read the difference model and check the freundlichkeit of Rebase
 	 * @throws IOException 
 	 * @throws InternalErrorException */
-	public boolean checkRebaseFreundlichkeit( String differGraphModel, String graphName, String branchNameA, String branchNameB) throws IOException, InternalErrorException{
+	public boolean checkRebaseFreundlichkeit( String differGraphModel, String graphName, String branchNameA, String branchNameB, String format) throws IOException, InternalErrorException{
 		
 		// Save the current revision numbers
 		revisionNumberBranchA = RevisionManagement.getRevisionNumber(graphName, branchNameA);
@@ -330,7 +334,7 @@ public class RebaseControl {
 		//have not conflict, rebase freundlichkeit checked
 		
 		logger.info("difference graph Model by check unfreundlich:" + differenceGraphModel);
-		ProcessManagement.readDifferenceModel(differenceGraphModel, differenceModel);
+		ProcessManagement.readDifferenceModel(differenceGraphModel, differenceModel, format);
 		logger.info("i did check rebase freundlich");
 		
 		//get difference group
@@ -372,10 +376,10 @@ public class RebaseControl {
 	
 	/**get die triples, die rebase unfreundlich ausloesen
 	 * @throws IOException */
-	public ArrayList<Triple> getRebaseUnfreundlichbehaftetTriples(String differGraphModel) throws IOException{
+	public ArrayList<Triple> getRebaseUnfreundlichbehaftetTriples(String differGraphModel, String format) throws IOException{
 		ArrayList<Triple> tripleList = new ArrayList<Triple>();
 		
-		ProcessManagement.readDifferenceModel(differGraphModel, differenceModel);
+		ProcessManagement.readDifferenceModel(differGraphModel, differenceModel, format);
 		
 		//get difference group
 		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
@@ -415,8 +419,8 @@ public class RebaseControl {
 	/**get the right triples in with set
 	 * @throws IOException */
 	
-	public String filterUnfreundlichTriples(String differGraphModel, String triples) throws IOException {
-		ArrayList<Triple> unfreundlichTripleList = getRebaseUnfreundlichbehaftetTriples(differGraphModel);
+	public String filterUnfreundlichTriples(String differGraphModel, String triples, String format) throws IOException {
+		ArrayList<Triple> unfreundlichTripleList = getRebaseUnfreundlichbehaftetTriples(differGraphModel, format);
 		
 		// MERGE WITH query - conflicting triple
 		Model model = JenaModelManagement.readNTripleStringToJenaModel(triples);
@@ -474,11 +478,11 @@ public class RebaseControl {
 		freemarker.template.Template temp = null; 
 		String name = "rebaseDialog.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
+            // create the configuration of template 
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
+            // set the path to the template 
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
+            // get the template page with this name 
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -502,11 +506,11 @@ public class RebaseControl {
 		freemarker.template.Template temp = null; 
 		String name = "mergingResultView.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
+            // create the configuration of template
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
+            // set the path to the template
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
+            // get the tempalte page with this name  
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  

@@ -1,7 +1,11 @@
 package de.tud.plt.r43ples.merging.model.structure;
 
-/***TableRow record the data in each row of table
- *  tripleId and triple for manual resolution state**/
+/**TableRow record the data in each row of table
+ *  tripleId and triple for manual resolution state
+ * 
+ * @author Xinyu Yang
+ * 
+ * */
 
 public class TableRow {
 	

@@ -1,5 +1,12 @@
 package de.tud.plt.r43ples.merging.model.structure;
 
+
+/**store the information of the difference model with as table row
+ * 
+ * @author Xinyu Yang
+ * 
+ * */
+
 public class ReportTableRow {
 	String subject;
 	String predicate;

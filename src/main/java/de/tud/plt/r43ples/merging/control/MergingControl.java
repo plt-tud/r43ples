@@ -98,52 +98,20 @@ public class MergingControl {
 		return rebaseControl;
 	}
 	
-//	public static String getHtmlOutput(String graphName) {
-//		MustacheFactory mf = new DefaultMustacheFactory();
-//	    Mustache mustache = mf.compile("templates/mergingView.mustache");
-//	    StringWriter sw = new StringWriter();
-//	    
-//	    Map<String, Object> scope = new HashMap<String, Object>();
-//	    
-//	    scope.put("graphName", graphName);	
-//	    scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-//		scope.put("git", GitRepositoryState.getGitRepositoryState());
-//		
-//	    mustache.execute(sw, scope);		
-//		return sw.toString();
-//	}
-	
-//	public static String getMenuHtmlOutput() {
-//		List<String> graphList = RevisionManagement.getRevisedGraphs();
-//	
-//		MustacheFactory mf = new DefaultMustacheFactory();
-//	    Mustache mustache = mf.compile("templates/merging.mustache");
-//	    StringWriter sw = new StringWriter();
-//	    
-//	    Map<String, Object> scope = new HashMap<String, Object>();
-//	    scope.put("merging_active", true);
-//		scope.put("graphList", graphList);
-//		
-//		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-//		scope.put("git", GitRepositoryState.getGitRepositoryState());
-//		
-//	    mustache.execute(sw, scope);		
-//		return sw.toString();
-//	}
 	
 	public static String getMenuHtmlOutput() throws TemplateException, IOException {
 		List<String> graphList = RevisionManagement.getRevisedGraphs();	
 	    StringWriter sw = new StringWriter();
 	    
-	    //ftl
+	    //freemarker template engine
 	    freemarker.template.Template temp = null; 
 		String name = "merging.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
+            // create the configuration of the template  
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
+            // set the path of the template 
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
+            // get the template page with this name
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -166,11 +134,8 @@ public class MergingControl {
 		freemarker.template.Template temp = null; 
 		String name = "mergingView3.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -228,11 +193,8 @@ public class MergingControl {
 		freemarker.template.Template temp = null; 
 		String name = "mergingView3.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -300,11 +262,8 @@ public class MergingControl {
 		freemarker.template.Template temp = null; 
 		String name = "mergingResultView.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -341,10 +300,10 @@ public class MergingControl {
 	
 
 	
-	public void getMergeProcess(Response response, String graphName, String branchNameA, String branchNameB) throws IOException, ConfigurationException, InternalErrorException{
+	public void getMergeProcess(Response response, String graphName, String branchNameA, String branchNameB, String format) throws IOException, ConfigurationException, InternalErrorException{
 		if (isRebase) {
 			
-			ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel);
+			ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel, format);
 			
 			
 			ProcessManagement.createDifferenceTree(differenceModel, treeList);
@@ -391,7 +350,7 @@ public class MergingControl {
 			if (response.getStatusInfo() == Response.Status.CONFLICT){
 				logger.info("Merge query produced conflicts.");
 				
-				ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel);
+				ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel,"text/html");
 				
 				
 				ProcessManagement.createDifferenceTree(differenceModel, treeList);
@@ -450,11 +409,8 @@ public class MergingControl {
 		freemarker.template.Template temp = null; 
 		String name = "individualView.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -505,11 +461,8 @@ public class MergingControl {
 		freemarker.template.Template temp = null; 
 		String name = "individualFilterTable.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -556,11 +509,8 @@ public class MergingControl {
 		freemarker.template.Template temp = null; 
 		String name = "highLevelView.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -599,11 +549,8 @@ public class MergingControl {
 		String name = "tripleTable.ftl";
 		
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -616,11 +563,7 @@ public class MergingControl {
 		List<TableRow> TripleRowList = tableModel.getTripleRowList();
 		List<TableRow> updatedTripleRowList = new ArrayList<TableRow>();
 		for(String property: propertyArray) {
-			
-//			if(property.equals("rdf:type")){
-//				logger.info("property type ");
-//				property = "a";
-//			}
+		
 			Iterator<TableRow> itu = TripleRowList.iterator();
 			while(itu.hasNext()){
 				TableRow tableRow = itu.next();
@@ -663,11 +606,8 @@ public class MergingControl {
 		String name = "tripleTable.ftl";
 		
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -733,11 +673,8 @@ public class MergingControl {
 		freemarker.template.Template temp = null; 
 		String name = "tripleView.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -1067,11 +1004,8 @@ public class MergingControl {
 		freemarker.template.Template temp = null; 
 		String name = "reportView.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -1137,11 +1071,8 @@ public class MergingControl {
 		freemarker.template.Template temp = null; 
 		String name = "reportView.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -1269,7 +1200,7 @@ public class MergingControl {
 					String triples = ProcessManagement.getTriplesOfMergeWithQuery(differenceModel);
 					// Execute MERGE WITH query
 					if(isRebase) {
-						mergeQuery = StrategyManagement.createRebaseQuery(graphName, sdd, user, message, revisionNumberBranchA, revisionNumberBranchB, RebaseQueryTypeEnum.AUTO, triples);
+						mergeQuery = StrategyManagement.createRebaseQuery(graphName, sdd, user, message, revisionNumberBranchA, revisionNumberBranchB, RebaseQueryTypeEnum.WITH, triples);
 					}else{
 						mergeQuery = ProcessManagement.createMergeQuery(graphName, sdd, user, message, MergeQueryTypeEnum.WITH, revisionNumberBranchA, revisionNumberBranchB, triples);
 					}

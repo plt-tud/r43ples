@@ -71,6 +71,7 @@ import freemarker.template.TemplateException;
  * 
  * @author Stephan Hensel
  * @author Markus Graube
+ * @author Xinyu Yang
  * 
  */
 @Path("/")
@@ -159,39 +160,6 @@ public class Endpoint {
 	 * @return information provided as HTML response
 	 * @throws IOException 
 	 * @throws InternalErrorException 
-	 */
-//	@Path("createSampleDataset")
-//	@GET
-//	@Template(name = "/exampleDatasetGeneration.mustache")
-//	public final List<String> createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws IOException, InternalErrorException {
-//		List<String> graphs = new ArrayList<>();
-//		if (graph.equals("1") || graph.equals("all")){
-//			graphs.add(SampleDataSet.createSampleDataset1());
-//		}
-//		if (graph.equals("2") || graph.equals("all")){
-//			graphs.add(SampleDataSet.createSampleDataset2());
-//		}
-//		if (graph.equals("merging") || graph.equals("all")){
-//			graphs.add(SampleDataSet.createSampleDataSetMerging());
-//		}
-//		if (graph.equals("merging-classes") || graph.equals("all")){
-//			graphs.add(SampleDataSet.createSampleDataSetMergingClasses());
-//		}
-//		if (graph.equals("renaming") || graph.equals("all")){
-//			graphs.add(SampleDataSet.createSampleDataSetRenaming());
-//		}
-//		if (graph.equals("complex-structure") || graph.equals("all")){
-//			graphs.add(SampleDataSet.createSampleDataSetComplexStructure());
-//		}
-//	    htmlMap.put("graphs", graphs);
-//		return graphs;
-//	}
-	
-	/**
-	 * Creates sample datasets
-	 * @return information provided as HTML response
-	 * @throws IOException 
-	 * @throws InternalErrorException 
 	 * @throws TemplateException 
 	 */
 	@Path("createSampleDataset")
@@ -223,6 +191,10 @@ public class Endpoint {
 			graphs.add(SampleDataSet.createSampleDataSetRebase());
 		}
 		
+		if (graph.equals("forcerebase") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataSetForceRebase());
+		}
+		
 		if (graph.equals("fastforward") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetFastForward());
 		}
@@ -233,11 +205,11 @@ public class Endpoint {
 	    freemarker.template.Template temp = null; 
 		String name = "exampleDatasetGeneration.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
+            // create the the configuration  
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
+            // set the path to the template
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
+            // get the template page with the name 
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -387,23 +359,6 @@ public class Endpoint {
 		return htmlMap;
 	}
 	
-	/**
-	 * HTTP GET merging interface.
-	 * This is the HTML front end  for the merging functionalities of R43ples
-	 *
-	 */
-//	@Path("merging")
-//	@GET
-//	@Template(name = "/merging.mustache")
-//	public final Map<String, Object> getMerging() {
-//		logger.info("Merging form requested");
-//		List<String> graphList = RevisionManagement.getRevisedGraphs();
-//		
-//		logger.info("Get Merging interface");
-//		htmlMap.put("merging_active", true);
-//		htmlMap.put("graphList", graphList);
-//		return htmlMap;
-//	}
 	
 	@Path("mergingConfiguration")
 	@GET
@@ -521,17 +476,6 @@ public class Endpoint {
 			
 			String fastForwardView = fastForwardControl.getFastForwardReportView(graphName);
 			
-/****************************************not parallel************************************************/
-			//save commit information in FastForwardControl
-//			FastForwardControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Fast-Forward", type.toString());	
-			
-			//save the old graph information
-//			StrategyManagement.saveGraphVorMerging(graphName, "application/json");
-//			
-//			
-//		    getFastForwardResponse(fastForwardQuery, userCommit, messageCommit);
-//			
-//			String fastForwardView = FastForwardControl.getFastForwardReportView(graphName);
 			
 			response.entity(fastForwardView);
 				
@@ -598,14 +542,6 @@ public class Endpoint {
 			}
 					
 			
-//			if(!mergingControlMap.containsKey(graphName)){
-//				mergingControl = new MergingControl();
-//				mergingControlMap.put(graphName, mergingControl);
-//			}else {
-//				//throw new InternalErrorException("Merging Request to the same Named Graph, please wait a moment ! ");
-//				mergingControl = mergingControlMap.get(graphName);
-//			}
-			
 			mergingControl.setRebaseControl();
 			mergingControl.closeRebaseModel();
 			
@@ -629,7 +565,7 @@ public class Endpoint {
 				// to do show force rebase html view , show the rebase result graph
 				//RebaseControl.forceRebaseProcess(graphName);
 				
-//				boolean isRebaeFreundlich = RebaseControl.checkRebaseFreundlichkeit(responsePost, graphName, branch1, branch2);
+				//boolean isRebaeFreundlich = RebaseControl.checkRebaseFreundlichkeit(responsePost, graphName, branch1, branch2);
 				
 				// to do manual arbeit
 				logger.info("rebase unfreundlich !");
@@ -685,25 +621,15 @@ public class Endpoint {
 				mergingControl = mergingControlMap.get(graphName);
 			}
 								
-//			if(!mergingControlMap.containsKey(graphName)){
-//				mergingControl = new MergingControl();
-//				mergingControlMap.put(graphName, mergingControl);
-//			}else {
-//				//throw new InternalErrorException("Merging Request to the same Named Graph, please wait a moment ! ");
-//				mergingControl = mergingControlMap.get(graphName);
-//			}
 			
 			mergingControl.closeRebaseModel();
 			
 			//save commit information in MergingControl
 			mergingControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way", type.toString());
-			
-			//MergingControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way", type.toString());
-			
+						
 			
 			//save the graph information vor merging 
 			StrategyManagement.saveGraphVorMergingInMap(mergingControl.getCommitModel().getGraphName(), "application/json" );
-			//StrategyManagement.saveGraphVorMerging(MergingControl.getCommitModel().getGraphName(), "application/json");
 				
 			String mergeQuery = ProcessManagement.createMergeQuery(graphName, sddName, user, message, type, branch1, branch2, null);
 			logger.info("yxy test mergeQuery:"+mergeQuery);
@@ -722,15 +648,11 @@ public class Endpoint {
 				mergeQuery = messageMatcher.replaceAll("");
 			}
 			
-			logger.info("yxy test mergeQuery nach verarbeit:"+mergeQuery);
 
 			if (patternMergeQuery.matcher(mergeQuery).find()) {
 				responsePost= getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
-				logger.info("yxy get Post"+responsePost.toString());	
 			}
 				
-
-//			logger.info("Inhalt von Response Entity:"+responsePost.getEntity().toString());	
 			
 			if(!(responsePost.getStatusInfo() == Response.Status.CONFLICT)){
 				response.entity(mergingControl.getThreeWayReportView(null));				
@@ -738,15 +660,7 @@ public class Endpoint {
 			}
 			
 			
-			mergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
-			//MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
-//			if(type == MergeQueryTypeEnum.AUTO) {
-//				response.entity(mergingControl.getThreeWayReportView(null));
-//				
-//				return response.build();
-//			}
-			
-			//response.entity(MergingControl.getViewHtmlOutput());
+			mergingControl.getMergeProcess(responsePost, graphName, branch1, branch2, "text/html");
 			response.entity(mergingControl.getViewHtmlOutput());
 			return response.build();
 		}	
@@ -755,8 +669,6 @@ public class Endpoint {
 	
 	
 
-	
-	
 	/**
 	 * query revision information and get the graph
 	 * by ajax  */
@@ -796,7 +708,6 @@ public class Endpoint {
 
 
 		response.type(format);
-		//response.entity(StrategyManagement.loadGraphVorMerging());
 		response.entity(StrategyManagement.loadGraphVorMergingFromMap(graph));
 		
 		return response.build();
@@ -820,8 +731,6 @@ public class Endpoint {
 		//get rebaseControl form map
 		RebaseControl rebaseControl = clientMap.get(user).get(graph).getRebaseControl();
 		
-		//RebaseControl rebaseControl = mergingControlMap.get(graph).getRebaseControl();
-		//RebaseControl.forceRebaseProcess(RebaseControl.getCommitModel().getGraphName());
 		rebaseControl.forceRebaseProcess(graph);
 		
 		response.entity(rebaseControl.getRebaseReportView(null));
@@ -848,14 +757,12 @@ public class Endpoint {
 		//get MergingControl and rebaseControl form map
 		MergingControl mergingControl = clientMap.get(user).get(graph);
 		
-		//MergingControl mergingControl = mergingControlMap.get(graph);
 		RebaseControl rebaseControl = mergingControl.getRebaseControl();
 		
 		rebaseControl.manualRebaseProcess();
 		
 		
 		response.entity(mergingControl.getViewHtmlOutput());
-		//mergingControl.closeRebaseModel();
 		
 		return response.build();
 
@@ -872,7 +779,6 @@ public class Endpoint {
 		logger.info("isChecked: " + isChecked);
 		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//MergingControl mergingControl = mergingControlMap.get(graph);
 		
 		mergingControl.approveToDifferenceModel(id, isChecked);
 		
@@ -889,7 +795,6 @@ public class Endpoint {
 		logger.info("isChecked: " + isChecked);
 		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//MergingControl mergingControl = mergingControlMap.get(graph);
 		
 		mergingControl.approveHighLevelToDifferenceModel(id, isChecked);
 		
@@ -914,7 +819,6 @@ public class Endpoint {
 		ResponseBuilder response = Response.ok();
 		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//MergingControl mergingControl = mergingControlMap.get(graph);
 		
 		response.entity(mergingControl.createReportProcess());
 	
@@ -940,12 +844,9 @@ public class Endpoint {
 		
 		ResponseBuilder response = Response.ok();
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//MergingControl mergingControl = mergingControlMap.get(graph);
 		
 		response.entity(mergingControl.createRebaseReportProcess());
 		
-		//close rebase model
-		//mergingControl.closeRebaseModel();
 		return response.build();
 		
 	}	
@@ -965,7 +866,6 @@ public class Endpoint {
 		Response responsePost = null;
 		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//MergingControl mergingControl = mergingControlMap.get(graph);
 		//save the graph information vor merging 
 		StrategyManagement.saveGraphVorMergingInMap(graph, "application/json");
 		
@@ -993,11 +893,6 @@ public class Endpoint {
 		}
 			
 
-//		logger.info("Inhalt von Response Entity:"+responsePost.getEntity().toString());	
-			
-		//MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
-		
-
 		response.entity(mergingControl.getThreeWayReportView(null));
 		
 		clientMap.get(user).remove(graph);
@@ -1005,7 +900,6 @@ public class Endpoint {
 			clientMap.remove(user);
 		}
 		
-		//mergingControlMap.remove(graph);
 		return response.build();
 
 	}	
@@ -1023,7 +917,6 @@ public class Endpoint {
 		ResponseBuilder response = Response.ok();
 		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//MergingControl mergingControl = mergingControlMap.get(graph);
 		RebaseControl rebaseControl = mergingControl.getRebaseControl();
 		
 		mergingControl.transformDifferenceModelToRebase();
@@ -1052,9 +945,7 @@ public class Endpoint {
 		if (patternRebaseQuery.matcher(mergeQuery).find()) {
 			getRebaseResponse(mergeQuery, userCommit, messageCommit, "HTML");
 		}
-		
-		//rebaseControl.createCommonManualRebaseProcess();
-		
+				
 		
 		String rebaseResultView = rebaseControl.getRebaseReportView(null);
 		
@@ -1069,7 +960,6 @@ public class Endpoint {
 			clientMap.remove(user);
 		}
 		
-		//mergingControlMap.remove(graph);
 		return response.build();
 
 	}	
@@ -1086,7 +976,6 @@ public class Endpoint {
 		
 		ResponseBuilder response = Response.ok();
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//MergingControl mergingControl = mergingControlMap.get(graph);
 		
 		Response responsePost = null;
 
@@ -1115,13 +1004,6 @@ public class Endpoint {
 			logger.info("yxy get Post"+responsePost.toString());	
 		}
 			
-
-//		logger.info("Inhalt von Response Entity:"+responsePost.getEntity().toString());	
-			
-		//MergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
-		
-
-//		response.entity("push test GET");
 		return response.build();
 
 	}	
@@ -1136,11 +1018,9 @@ public class Endpoint {
 		
 		ResponseBuilder response = Response.ok();
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//MergingControl mergingControl = mergingControlMap.get(graph);
 
 
 		response.entity(mergingControl.getUpdatedViewHtmlOutput());
-//		response.entity("push test GET");
 		return response.build();
 
 	}
@@ -1158,11 +1038,6 @@ public class Endpoint {
 		ResponseBuilder response = Response.ok();
 		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//MergingControl mergingControl = mergingControlMap.get(graph);
-		
-		logger.info("format_header"+ formatHeader);
-		logger.info("Filter post Array :"+ properties);
-		//logger.info("local Client: " + client);
 		
 		response.entity(mergingControl.updateTripleTable(properties));
 		
@@ -1183,11 +1058,9 @@ public class Endpoint {
 		ResponseBuilder response = Response.ok();
 		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//MergingControl mergingControl = mergingControlMap.get(graph);
-		logger.info("format_header"+ formatHeader);
+		
 		logger.info("Tree Filter post Array :"+ triples);
 
-		
 		response.entity(mergingControl.updateTripleTableByTree(triples));
 		return response.build();
 
@@ -1206,7 +1079,6 @@ public class Endpoint {
 		ResponseBuilder response = Response.ok();
 		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//MergingControl mergingControl = mergingControlMap.get(graph);
 		
 		response.entity(mergingControl.getIndividualView());
 		return response.build();
@@ -1227,7 +1099,6 @@ public class Endpoint {
 		ResponseBuilder response = Response.ok();
 		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//MergingControl mergingControl = mergingControlMap.get(graph);
 
 		response.entity(mergingControl.getTripleView());
 		return response.build();
@@ -1246,7 +1117,6 @@ public class Endpoint {
 		
 		ResponseBuilder response = Response.ok();
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//MergingControl mergingControl = mergingControlMap.get(graph);
 		
 		response.entity(mergingControl.getHighLevelView());
 		return response.build();
@@ -1269,17 +1139,12 @@ public class Endpoint {
 		
 		ResponseBuilder response = Response.ok();
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//MergingControl mergingControl = mergingControlMap.get(graph);
 		
-		logger.info("format_header"+ formatHeader);
 		logger.info("individualFilter A Array :"+ individualA);
 		logger.info("individualFilter B Array :"+ individualB);
 		
-		// individual filter the triple in triple table
 		
 		String individualFilter = mergingControl.getIndividualFilter(individualA, individualB);
-		
-		
 		
 		logger.info(individualB.isEmpty());
 		response.entity(individualFilter);
@@ -1363,21 +1228,18 @@ public class Endpoint {
 	 * @throws TemplateException 
 	 */
 	private String getHTMLDebugResponse() throws TemplateException, IOException {		
-		//mustache
-//		MustacheFactory mf = new DefaultMustacheFactory();
-//	    Mustache mustache = mf.compile("templates/debug.mustache");
+
 	    StringWriter sw = new StringWriter();
 		
-		//freemarker
-	    
+		//freemarker engine
 		freemarker.template.Template temp = null; 
 		String name = "debug.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
+            // create configuration of freemarker
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
+            // set the path to get the template
             cfg.setClassForTemplateLoading(Endpoint.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
+            // get the template page with this name
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -1389,7 +1251,6 @@ public class Endpoint {
 	    htmlMap.put("triplestore", Config.jena_tdb_directory);
 	    htmlMap.put("sdd_graph", Config.sdd_graph);
 	    htmlMap.put("debug_active", true);
-	    //mustache.execute(sw, htmlMap);		
 		
 	    temp.process(htmlMap,sw);	
 		String content = sw.toString();
@@ -1458,7 +1319,39 @@ public class Endpoint {
 	 * Using mustache templates. 
 	 * 
 	 * @return HTML response for SPARQL form
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
+	
+	// endpoint.ftl als response return
+//	private Response getHTMLResponse() throws TemplateException, IOException{
+//		
+//		List<String> graphList = RevisionManagement.getRevisedGraphs();
+//		StringWriter sw = new StringWriter();
+//		
+//		//ftl
+//	    freemarker.template.Template temp = null; 
+//		String name = "endpoint.ftl";
+//		try {  
+//            // create the the configuration  
+//            Configuration cfg = new Configuration();  
+//            // set the path to the template
+//            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
+//            // get the template page with the name 
+//            temp = cfg.getTemplate(name);  
+//        } catch (IOException e) {  
+//            e.printStackTrace();  
+//        }  
+//		
+//		htmlMap.put("graphList", graphList);
+//	    htmlMap.put("endpoint_active", true);
+//		
+//		temp.process(htmlMap,sw);	
+//		
+//		return Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML).build();
+//	}
+	
+	
 	private Response getHTMLResponse() {
 		logger.info("SPARQL form requested");
 		List<String> graphList = RevisionManagement.getRevisedGraphs();
@@ -1475,6 +1368,8 @@ public class Endpoint {
 		
 		return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
 	}
+	
+	
 
 	
 	/**
@@ -2128,8 +2023,13 @@ public class Endpoint {
 			
 			//save the old graph information
 			//StrategyManagement.saveGraphVorMerging(graphName, "application/json");
-			
+			String branchUriA = RevisionManagement.getBranchUri(graphName, branchNameA);
 			String branchUriB = RevisionManagement.getBranchUri(graphName, branchNameB);
+			
+			String fullGraphUriA = RevisionManagement.getFullGraphUri(branchUriA);
+			String fullGraphUriB = RevisionManagement.getFullGraphUri(branchUriB);
+
+			logger.info("ff fullgraph : "+ branchUriA + branchUriB + fullGraphUriA+ fullGraphUriB);
 			String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
 			String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
 			
@@ -2137,9 +2037,7 @@ public class Endpoint {
 			
 			StrategyManagement.updateRevisionOfBranch(branchUriB, revisionUriB, revisionUriA);	
 			
-//			String fastForwardView = FastForwardControl.getFastForwardReportView(graphName);
-					
-//			response.entity(fastForwardView);
+			StrategyManagement.fullGraphCopy(fullGraphUriA, fullGraphUriB);
 			
 			responseBuilder.header(graphStrategy, "fast-forward-execute");
 
@@ -2200,12 +2098,11 @@ public class Endpoint {
 				throw new InternalErrorException("Error in SPARQL Merge Anfrage , type is not right.");
 			}
 			
-//			MergingControl mergingControl = mergingControlMap.get(graphName);
-//			RebaseControl rebaseControl = mergingControl.getRebaseControl();
 			MergingControl mergingControl;
 			RebaseControl rebaseControl;
 			
-			if(clientMap.get(user).containsKey(graphName)) {
+		
+			if(clientMap.containsKey(user) && (clientMap.get(user).containsKey(graphName))) {
 				mergingControl = clientMap.get(user).get(graphName);
 				rebaseControl = mergingControl.getRebaseControl();
 			}else{
@@ -2215,46 +2112,12 @@ public class Endpoint {
 				rebaseControl = mergingControl.getRebaseControl();
 				rebaseControl.createCommitModel(graphName, sdd, user, commitMessage, branchNameA, branchNameB, "Rebase", type);
 			}
-			
-//			if(mergingControlMap.containsKey(graphName)) {
-//				mergingControl = mergingControlMap.get(graphName);
-//				rebaseControl = mergingControl.getRebaseControl();
-//			}else{
-//				mergingControl = new MergingControl();
-//				//mergingControlMap.put(graphName, mergingControl);
-//				mergingControl.setRebaseControl();
-//				rebaseControl = mergingControl.getRebaseControl();
-//				rebaseControl.createCommitModel(graphName, sdd, user, commitMessage, branchNameA, branchNameB, "Rebase", type);
-//			}
-			
-			//
-//			MergingControl mergingControl;
-//			
-//			if(!mergingControlMap.containsKey(graphName)){
-//				mergingControl = new MergingControl();
-//				mergingControlMap.put(graphName, mergingControl);
-//			}else {
-//				//throw new InternalErrorException("Merging Request to the same Named Graph, please wait a moment ! ");
-//				mergingControl = mergingControlMap.get(graphName);
-//			}
-//			
-//			mergingControl.setRebaseControl();
-//			mergingControl.closeRebaseModel();
-//			
-//			RebaseControl rebaseControl = mergingControl.getRebaseControl();
-//			
-//			rebaseControl.createCommitModel(graphName, sddName, userCommit, messageCommit, branch1, branch2, "Rebase", type.toString());
-			//
-			
-			
-			
+						
 			
 			// get the last revision of each branch
 			String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
 			String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
 			
-			//save the alte revision information of the named graph
-			//StrategyManagement.saveGraphVorMerging(graphName,"application/json");
 			
 			// Check ob the graph already exist
 			if (!RevisionManagement.checkGraphExistence(graphName)){
@@ -2313,6 +2176,7 @@ public class Endpoint {
 				logger.info("revision--patch: " + iter.next().toString() );
 			}
 			 
+			// create the patch and patch group
 			rebaseControl.createPatchGroupOfBranch(revisionUriB, revisionList);
 			
 			
@@ -2396,14 +2260,14 @@ public class Endpoint {
 			} else if ((action == null) && (with != null) && (triples != null)) {
 				logger.info("REBASE WITH query detected");
 				//get the possiable Triples
-				String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format);
+//				String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format);
+//				
+//				String newTriples = rebaseControl.filterUnfreundlichTriples(differenceModelString, triples);
+//				logger.info("rebase old triples: "+ triples);
+//				logger.info("rebase new triples: "+ newTriples);
 				
-				String newTriples = rebaseControl.filterUnfreundlichTriples(differenceModelString, triples);
-				
-				logger.info("rebase new triples: "+ newTriples);
-				
-				// Create the merged revision
-				ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, RebaseQueryTypeEnum.WITH, newTriples);
+				// Create the merged revision -- newTriples
+				ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, RebaseQueryTypeEnum.WITH, triples);
 				String addedAsNTriples = addedAndRemovedTriples.get(0);
 				String removedAsNTriples = addedAndRemovedTriples.get(1);
 				
@@ -2432,12 +2296,12 @@ public class Endpoint {
 					responseBuilder = Response.status(Response.Status.CONFLICT);
 					responseBuilder.header(graphStrategy, "rebase-unfreundlich");
 					//initial the differenceGraphModel in rebaseControl
-					rebaseControl.checkRebaseFreundlichkeit(differenceModelString, graphName, branchNameA, branchNameB);
+					rebaseControl.checkRebaseFreundlichkeit(differenceModelString, graphName, branchNameA, branchNameB, format);
 					// write the diffenece model in the response builder
 					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
 				} else{
 					
-					boolean isRebaeFreundlich = rebaseControl.checkRebaseFreundlichkeit(differenceModelString, graphName, branchNameA, branchNameB);
+					boolean isRebaeFreundlich = rebaseControl.checkRebaseFreundlichkeit(differenceModelString, graphName, branchNameA, branchNameB,format);
 					
 					if(isRebaeFreundlich) {
 						// reabase freundlich force rebase

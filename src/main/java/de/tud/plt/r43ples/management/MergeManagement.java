@@ -917,13 +917,13 @@ public class MergeManagement {
 		// Get the full graph name of branch B
 		String graphNameOfBranchB = RevisionManagement.getReferenceGraph(graphName, branchNameB);
 		
-		if(type.equals(RebaseQueryTypeEnum.WITH)){
-			// Add the string to the result list
-			list.add(String.format(triples));
-			list.add(null);
-					
-			return list;
-		}
+//		if(type.equals(RebaseQueryTypeEnum.WITH)){
+//			// Add the string to the result list
+//			list.add(String.format(triples));
+//			list.add(null);
+//					
+//			return list;
+//		}
 		
 		logger.info("the triples: "+ triples);
 		if (type.equals(RebaseQueryTypeEnum.MANUAL)) {

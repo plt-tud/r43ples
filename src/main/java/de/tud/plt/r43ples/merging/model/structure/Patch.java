@@ -11,19 +11,32 @@ public class Patch {
 	String patchNumber;
 	String patchUser;
 	String patchMessage;
-	LinkedList<String> addedTripleList;
-	LinkedList<String> removedTripleList;
+	//LinkedList<String> addedTripleList;
+	//LinkedList<String> removedTripleList;
+	String addedSetUri;
+	String removedSetUri;
+	
+//	public Patch(String patchNumber, String patchUser, String patchMessage,
+//			LinkedList<String> addedTripleList,
+//			LinkedList<String> removedTripleList) {
+//		
+//		this.patchNumber = patchNumber;
+//		this.patchUser = patchUser;
+//		this.patchMessage = patchMessage;
+//		this.addedTripleList = addedTripleList;
+//		this.removedTripleList = removedTripleList;
+//		
+//	}
 	
 	public Patch(String patchNumber, String patchUser, String patchMessage,
-			LinkedList<String> addedTripleList,
-			LinkedList<String> removedTripleList) {
+			String addedSetUri,
+			String removedSetUri) {
 		
 		this.patchNumber = patchNumber;
 		this.patchUser = patchUser;
 		this.patchMessage = patchMessage;
-		this.addedTripleList = addedTripleList;
-		this.removedTripleList = removedTripleList;
-		
+		this.addedSetUri = addedSetUri;
+		this.removedSetUri = removedSetUri;	
 	}
 
 	public String getPatchNumber() {
@@ -50,20 +63,39 @@ public class Patch {
 		this.patchMessage = patchMessage;
 	}
 
-	public LinkedList<String> getAddedTripleList() {
-		return addedTripleList;
+	public String getAddedSetUri() {
+		return addedSetUri;
 	}
 
-	public void setAddedTripleList(LinkedList<String> addedTripleList) {
-		this.addedTripleList = addedTripleList;
+	public void setAddedSetUri(String addedSetUri) {
+		this.addedSetUri = addedSetUri;
 	}
 
-	public LinkedList<String> getRemovedTripleList() {
-		return removedTripleList;
+	public String getRemovedSetUri() {
+		return removedSetUri;
 	}
 
-	public void setRemovedTripleList(LinkedList<String> removedTripleList) {
-		this.removedTripleList = removedTripleList;
-	}	
+	public void setRemovedSetUri(String removedSetUri) {
+		this.removedSetUri = removedSetUri;
+	}
+	
+	
+//	public LinkedList<String> getAddedTripleList() {
+//		return addedTripleList;
+//	}
+//
+//	public void setAddedTripleList(LinkedList<String> addedTripleList) {
+//		this.addedTripleList = addedTripleList;
+//	}
+//
+//	public LinkedList<String> getRemovedTripleList() {
+//		return removedTripleList;
+//	}
+//
+//	public void setRemovedTripleList(LinkedList<String> removedTripleList) {
+//		this.removedTripleList = removedTripleList;
+//	}	
+	
+	
 	
 }

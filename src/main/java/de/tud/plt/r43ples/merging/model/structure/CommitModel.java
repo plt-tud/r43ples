@@ -1,5 +1,11 @@
 package de.tud.plt.r43ples.merging.model.structure;
 
+/**store the information of merge in commit model
+ * 
+ * @author Xinyu Yang
+ * 
+ * */
+
 public class CommitModel {
 	String graphName = null;
 	String sddName = null;

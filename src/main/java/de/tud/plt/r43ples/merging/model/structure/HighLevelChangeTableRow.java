@@ -1,5 +1,12 @@
 package de.tud.plt.r43ples.merging.model.structure;
 
+
+/**store the information of difference model as high level table
+ * 
+ * @author Xinyu Yang
+ * 
+ * */
+
 public class HighLevelChangeTableRow {
 	String tripleId = null;
 	HighLevelChangeRenaming  highLevelChangeRenaming;

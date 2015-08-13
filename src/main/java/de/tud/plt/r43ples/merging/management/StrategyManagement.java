@@ -163,6 +163,13 @@ public class StrategyManagement {
 				+ "	%s"
 				+ "}";
 		
+		String queryTemplateWith = 
+				  "USER \"%s\" %n"
+				+ "MESSAGE \"%s\" %n"
+				+ "REBASE GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\" WITH { %n"
+				+ "	%s"
+				+ "}";
+		
 		if (type.equals(RebaseQueryTypeEnum.COMMON)) {
 			query = String.format(queryTemplateCommon, user, commitMessage, graphName, sdd, branchNameA, branchNameB);
 		} else if (type.equals(RebaseQueryTypeEnum.AUTO)) {
@@ -171,6 +178,8 @@ public class StrategyManagement {
 			query = String.format(queryTemplateForce, user, commitMessage, graphName, sdd, branchNameA, branchNameB);
 		} else if (type.equals(RebaseQueryTypeEnum.MANUAL)) {
 			query = String.format(queryTemplateManual, user, commitMessage, graphName, sdd, branchNameA, branchNameB, triples);
+		} else if (type.equals(RebaseQueryTypeEnum.WITH)) {
+			query = String.format(queryTemplateWith, user, commitMessage, graphName, sdd, branchNameA, branchNameB, triples);
 		}
 		
 		return query;
@@ -323,6 +332,12 @@ public class StrategyManagement {
 		return null;
 	}
 	
+	// copy fullgraph of branchA to fullgraph of branchB
+	public static void fullGraphCopy(String fullGraphUriA, String fullGraphUriB) {	
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(
+				"COPY GRAPH <" + fullGraphUriA + "> TO GRAPH <"
+						+ fullGraphUriB + ">");
+	}
 	
 	
 }

@@ -12,43 +12,9 @@ import de.tud.plt.r43ples.webservice.Endpoint;
 
 public class QueryManagement {
 	private final static int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
-	
-	private final Pattern patternSelectAskConstructQuery = Pattern.compile(
-			"(?<type>SELECT|ASK|CONSTRUCT).*WHERE\\s*\\{(?<where>.*)\\}", 
-			patternModifier);
+
 	private final static Pattern patternSelectFromPart = Pattern.compile(
 			"(?<type>FROM|GRAPH)\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
-			patternModifier);
-	
-	private final Pattern patternUpdateQuery = Pattern.compile(
-			"(?<action>INSERT|DELETE).*<(?<graph>[^>]*)>",
-			patternModifier);
-	private final Pattern patternUpdateRevision = Pattern.compile(
-			"(?<action>INSERT|DELETE|WHERE)(?<data>\\s*DATA){0,1}\\s*\\{\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
-			patternModifier);
-	private final Pattern patternEmptyGraphPattern = Pattern.compile(
-			"GRAPH\\s*<(?<graph>[^>]*)>\\s*\\{\\s*\\}",
-			patternModifier);
-	private final Pattern patternGraphWithRevision = Pattern.compile(
-			"GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
-			patternModifier);
-	private final Pattern patternCreateGraph = Pattern.compile(
-			"CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
-			patternModifier);
-	private final Pattern patternDropGraph = Pattern.compile(
-			"DROP\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
-			patternModifier);
-	private final Pattern patternBranchOrTagQuery = Pattern.compile(
-			"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"\\s*TO\\s*\"(?<name>[^\"]*)\"",
-			patternModifier);
-	private final Pattern patternUser = Pattern.compile(
-			"USER\\s*\"(?<user>[^\"]*)\"",
-			patternModifier);
-	private final Pattern patternCommitMessage = Pattern.compile(
-			"MESSAGE\\s*\"(?<message>[^\"]*)\"", 
-			patternModifier);
-	private final Pattern patternMergeQuery =  Pattern.compile(
-			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
 			patternModifier);
 	
 	

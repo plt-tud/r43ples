@@ -119,12 +119,12 @@ public class ProcessManagement {
 	 */
 	
 	
-	public static void readDifferenceModel(String differenceModelToRead, DifferenceModel differenceModel) throws IOException {
+	public static void readDifferenceModel(String differenceModelToRead, DifferenceModel differenceModel, String format) throws IOException {
 		logger.info("Start reading difference model.");
 		differenceModel.clear();
 		
 		logger.info("differenceModelToRead: "+ differenceModelToRead);
-		Model model = readTurtleStringToJenaModel(differenceModelToRead);
+		Model model = readTurtleStringToJenaModel(differenceModelToRead, format);
 		
 		// Query all difference groups
 		String queryDifferenceGroups = prefixes + String.format(
@@ -289,12 +289,14 @@ public class ProcessManagement {
 	 * 
 	 */
 	
-	public static Model readTurtleStringToJenaModel(String triples) throws IOException {
+	public static Model readTurtleStringToJenaModel(String triples, String format) throws IOException {
 		Model model = null;
 		model = ModelFactory.createDefaultModel();
 		InputStream is = new ByteArrayInputStream(triples.getBytes());
-		model.read(is, null, "TURTLE");
+		model.read(is, null, "Turtle");
 		is.close();
+		
+		logger.info("i did it auch!");
 		
 		return model;
 	}
@@ -379,14 +381,6 @@ public class ProcessManagement {
 	 * @param triple the triple
 	 * @return the formatted predicate
 	 */
-	
-//	public static String getPredicate(Triple triple) {
-//		if (triple.getPredicate().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#type")) {
-//			return "a";
-//		} else {
-//			return "<" + triple.getPredicate() + ">";
-//		}
-//	}
 	
 	public static String getPredicate(Triple triple) {
 		
@@ -1181,7 +1175,7 @@ public class ProcessManagement {
 		logger.debug(result);
 		logger.info("WholeContent Result: "+result);		
 
-		return readTurtleStringToJenaModel(result);
+		return readTurtleStringToJenaModel(result,"text/html");
 	}
 	
 	

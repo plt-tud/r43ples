@@ -30,11 +30,11 @@ public class FastForwardControl {
 		freemarker.template.Template temp = null; 
 		String name = "mergingResultView.ftl";
 		try {  
-            // 通过Freemarker的Configuration读取相应的Ftl  
+			// create the configuration of template
             Configuration cfg = new Configuration();  
-            // 设定去哪里读取相应的ftl模板  
+            // set the path to the template engine
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // 在模板文件目录中寻找名称为name的模板文件  
+            // get the template page with this name 
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  

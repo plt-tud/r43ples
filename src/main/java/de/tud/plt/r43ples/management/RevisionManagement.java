@@ -20,6 +20,7 @@ import com.hp.hpl.jena.util.FileUtils;
 
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.revisionTree.Revision;
 import de.tud.plt.r43ples.revisionTree.Tree;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
@@ -129,6 +130,34 @@ public class RevisionManagement {
 		list.add(usedRevisionNumber);
 		return createNewRevision(graphName, addedAsNTriples, removedAsNTriples, user, commitMessage, list);
 	}
+	
+	/**
+	 * Create a new revision.
+	 * 
+	 * @param graphName
+	 *            the graph name
+	 * @param addSetGraphUri
+	 *           uri of the data set of added triples as N-Triples
+	 * @param removeSetGraphUri
+	 *           uri of the data set of removed triples as N-Triples
+	 * @param user
+	 *            the user name who creates the revision
+	 * @param commitMessage
+	 *            the title of the revision
+	 * @param usedRevisionNumber
+	 *            the number of the revision which is used for creation of the
+	 *            new revision 
+	 * @return new revision number
+	 * @throws InternalErrorException 
+	 */
+	
+	//create new revision with patch with addedUri and removedUri
+	public static String createNewRevisionWithPatch(final String graphName, final String addSetGraphUri, final String removeSetGraphUri,
+			final String user, final String commitMessage, final String usedRevisionNumber) throws InternalErrorException {
+		ArrayList<String> list = new ArrayList<String>();
+		list.add(usedRevisionNumber);
+		return createNewRevisionWithPatch(graphName, addSetGraphUri, removeSetGraphUri, user, commitMessage, list);
+	}
 
 	/**
 	 * Create a new revision with multiple prior revisions
@@ -207,6 +236,75 @@ public class RevisionManagement {
 //			query += String.format("DROP SILENT GRAPH <%s>%n", removeBranchFullGraph);
 //			TripleStoreInterfaceSingleton.get().executeQueryWithAuthorization(query);
 //		}
+
+		return newRevisionNumber;
+	}
+
+	
+	
+	
+	/**
+	 * Create a new revision with multiple prior revisions
+	 * 
+	 * @param graphName
+	 *            the graph name
+	 * @param addSetGraphUri
+	 *            uri of the data set of added triples as N-Triples
+	 * @param removeSetGraphUri
+	 *            uri of the data set of removed triples as N-Triples
+	 * @param user
+	 *            the user name who creates the revision
+	 * @param commitMessage
+	 *            the title of the revision
+	 * @param usedRevisionNumber
+	 *            the number of the revision which is used for creation of the
+	 *            new revision 
+	 *            (for creation of merged maximal two revision are  allowed
+	 *            - the first revision in array list specifies the branch where the merged revision will be created)
+	 * @return new revision number
+	 * @throws InternalErrorException 
+	 */
+	public static String createNewRevisionWithPatch(final String graphName, final String addSetGraphUri,
+			final String removeSetGraphUri, final String user, final String commitMessage,
+			final ArrayList<String> usedRevisionNumber) throws InternalErrorException {
+		logger.info("Start creation of new revision!");
+
+		// General variables
+		String newRevisionNumber = getNextRevisionNumber(graphName, usedRevisionNumber.get(0));
+		//String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
+		//String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
+		String referenceGraph = getReferenceGraph(graphName, usedRevisionNumber.get(0));
+
+		// Add Meta Information
+		addMetaInformationForNewRevision(graphName, user, commitMessage, usedRevisionNumber,
+				newRevisionNumber, addSetGraphUri, removeSetGraphUri);
+		
+		//get Triplelist of addedset and deletedset 
+		LinkedList<String> addedTripleList =  StrategyManagement.createAddedOrRemovedTripleSet(addSetGraphUri);
+		LinkedList<String> removedTripleList = StrategyManagement.createAddedOrRemovedTripleSet(removeSetGraphUri);
+		
+		String addedAsNTriples = "";
+		String removedAsNTriples = "";
+		
+		for(String triple : addedTripleList) { 
+			addedAsNTriples = addedAsNTriples + triple + ". \n";
+		}
+		
+		for(String triple : removedTripleList) { 
+			removedAsNTriples = removedAsNTriples + triple + ". \n";
+		}
+		
+		logger.info("rebase added triples: " + addedAsNTriples);
+		logger.info("rebase removed triples: " + removedAsNTriples);
+		
+		// Update full graph of branch
+		if (removedAsNTriples!=null && !removedAsNTriples.isEmpty()) {
+			RevisionManagement.executeDELETE(referenceGraph, removedAsNTriples);
+		}
+		if (addedAsNTriples!=null && !addedAsNTriples.isEmpty()) {
+			RevisionManagement.executeINSERT(referenceGraph, addedAsNTriples);
+		}
+
 
 		return newRevisionNumber;
 	}
@@ -1154,6 +1252,23 @@ public class RevisionManagement {
 				+ "} }", Config.revision_graph, graphList);
 		String header = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryConstruct, FileUtils.langTurtle);
 		return header;
+	}
+	
+	public static String getFullGraphUri(String branchURI) {
+		String query = String.format(
+				  "SELECT ?fullGraphURI %n"
+			    + "WHERE { GRAPH <%s> {%n"
+				+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#fullGraph> ?fullGraphURI . %n"
+				+ "} }", Config.revision_graph, branchURI);
+			
+		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
+		
+		if (results.hasNext()) {
+			QuerySolution qs = results.next();
+			return qs.getResource("?fullGraphURI").toString();
+		} else {
+			return null;
+		}
 	}
 
 
