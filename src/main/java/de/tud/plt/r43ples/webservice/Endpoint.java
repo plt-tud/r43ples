@@ -118,7 +118,7 @@ public class Endpoint {
 			patternModifier);
 	//fast forward merg query
 	private final Pattern patternFastForwardQuery =  Pattern.compile(
-			"MERGE\\s*ff\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"",
+			"MERGE\\s*FF\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"",
 			patternModifier);
 	
 	//rebase merg query
@@ -769,6 +769,10 @@ public class Endpoint {
 	}	
 	
 	
+	/**
+	 * by triple approve to server call this method
+	 */
+	
 	@Path("approveProcess")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
@@ -785,6 +789,10 @@ public class Endpoint {
 		
 	}
 	
+	
+	/**
+	 * by high level view approve to server call this method
+	 */
 	@Path("approveHighLevelProcess")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
@@ -965,65 +973,7 @@ public class Endpoint {
 	}	
 	
 	
-	
-	/**alter push process without reportview*/
-	@Path("pushProcess")
-	@POST
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response pushPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("options") @DefaultValue("") final String triplesId, @FormParam("graph") @DefaultValue("") final String graph,
-			@FormParam("client") @DefaultValue("") final String user ) throws IOException, InternalErrorException {
-		
-		ResponseBuilder response = Response.ok();
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-		
-		Response responsePost = null;
 
-		logger.info("format_header"+ formatHeader);
-		logger.info("Push get Array :"+ triplesId);
-		String mergeQuery = mergingControl.updateMergeQuery(triplesId);
-		
-		String userCommit = null;
-		Matcher userMatcher = patternUser.matcher(mergeQuery);
-		logger.info("yxy test mergeQuery:"+mergeQuery);
-		if (userMatcher.find()) {
-			userCommit = userMatcher.group("user");
-			mergeQuery = userMatcher.replaceAll("");
-		}
-		String messageCommit = null;
-		Matcher messageMatcher = patternCommitMessage.matcher(mergeQuery);
-		if (messageMatcher.find()) {
-			messageCommit = messageMatcher.group("message");
-			mergeQuery = messageMatcher.replaceAll("");
-		}
-		
-		logger.info("yxy test mergeQuery nach verarbeit:"+mergeQuery);
-
-		if (patternMergeQuery.matcher(mergeQuery).find()) {
-			responsePost= getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
-			logger.info("yxy get Post"+responsePost.toString());	
-		}
-			
-		return response.build();
-
-	}	
-
-
-	@Path("pushProcess")
-	@GET
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response pushGET(@HeaderParam("Accept") final String formatHeader,
-			 @QueryParam("options") @DefaultValue("") final String triplesId, @QueryParam("graph") @DefaultValue("") final String graph,
-			 @QueryParam("client") @DefaultValue("") final String user ) throws IOException, InternalErrorException, TemplateException, ConfigurationException {
-		
-		ResponseBuilder response = Response.ok();
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-
-
-		response.entity(mergingControl.getUpdatedViewHtmlOutput());
-		return response.build();
-
-	}
 	
 	/**
 	 * select property and get the new triple table
@@ -1044,6 +994,7 @@ public class Endpoint {
 		return response.build();
 
 	}	
+	
 	
 	/**
 	 * select the difference in difference tree and renew the triple table
@@ -1068,7 +1019,7 @@ public class Endpoint {
 	
 	
 	/**load individual View
-	 * todo */
+	  */
 	
 	@Path("individualView")
 	@GET
@@ -1087,7 +1038,6 @@ public class Endpoint {
 	
 	
 	/**load updated triple View
-	 * todo 
 	 * @throws ConfigurationException */
 	
 	@Path("tripleView")
@@ -1107,6 +1057,8 @@ public class Endpoint {
 	
 	
 	/**load High Level Change Table View 
+	 * @throws TemplateException *
+	 * @throws IOException *
 	 * @throws ConfigurationException */
 	
 	@Path("highLevelView")
@@ -1323,52 +1275,52 @@ public class Endpoint {
 	 * @throws TemplateException 
 	 */
 	
-	// endpoint.ftl als response return
-//	private Response getHTMLResponse() throws TemplateException, IOException{
-//		
-//		List<String> graphList = RevisionManagement.getRevisedGraphs();
-//		StringWriter sw = new StringWriter();
-//		
-//		//ftl
-//	    freemarker.template.Template temp = null; 
-//		String name = "endpoint.ftl";
-//		try {  
-//            // create the the configuration  
-//            Configuration cfg = new Configuration();  
-//            // set the path to the template
-//            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-//            // get the template page with the name 
-//            temp = cfg.getTemplate(name);  
-//        } catch (IOException e) {  
-//            e.printStackTrace();  
-//        }  
-//		
-//		htmlMap.put("graphList", graphList);
-//	    htmlMap.put("endpoint_active", true);
-//		
-//		temp.process(htmlMap,sw);	
-//		
-//		return Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML).build();
-//	}
-	
-	
-	private Response getHTMLResponse() {
-		logger.info("SPARQL form requested");
+	// endpoint.ftl as response return
+	private Response getHTMLResponse() throws TemplateException, IOException{
+		
 		List<String> graphList = RevisionManagement.getRevisedGraphs();
+		StringWriter sw = new StringWriter();
 		
-		MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/endpoint.mustache");
-	    StringWriter sw = new StringWriter();
-	    
-	    htmlMap.put("graphList", graphList);
+		//ftl
+	    freemarker.template.Template temp = null; 
+		String name = "endpoint.ftl";
+		try {  
+            // create the the configuration  
+            Configuration cfg = new Configuration();  
+            // set the path to the template
+            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
+            // get the template page with the name 
+            temp = cfg.getTemplate(name);  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+		
+		htmlMap.put("graphList", graphList);
 	    htmlMap.put("endpoint_active", true);
-	    mustache.execute(sw, htmlMap);		
 		
-		String content = sw.toString();
+		temp.process(htmlMap,sw);	
 		
-		return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
+		return Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML).build();
 	}
 	
+	// endpoint.mustache as response return
+//	private Response getHTMLResponse() {
+//		logger.info("SPARQL form requested");
+//		List<String> graphList = RevisionManagement.getRevisedGraphs();
+//		
+//		MustacheFactory mf = new DefaultMustacheFactory();
+//	    Mustache mustache = mf.compile("templates/endpoint.mustache");
+//	    StringWriter sw = new StringWriter();
+//	    
+//	    htmlMap.put("graphList", graphList);
+//	    htmlMap.put("endpoint_active", true);
+//	    mustache.execute(sw, htmlMap);		
+//		
+//		String content = sw.toString();
+//		
+//		return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
+//	}
+//	
 	
 
 	
@@ -1788,7 +1740,7 @@ public class Endpoint {
 	/** 
 	 * Creates a merge between the specified branches.
 	 * 
-	 * Using command: MERGE GRAPH <graphURI> BRANCH "branchNameA" INTO "branchNameB"
+	 * Using command: MERGE GRAPH \<graphURI\> BRANCH "branchNameA" INTO "branchNameB"
 	 * 
 	 * @param sparqlQuery the SPARQL query
 	 * @param format the result format
@@ -1963,7 +1915,7 @@ public class Endpoint {
 	/** 
 	 * Creates fast forward merging.
 	 * 
-	 * Using command: MERGE GRAPH <graphURI> -ff BRANCH "branchNameA" INTO "branchNameB"
+	 * Using command: MERGE FF GRAPH /<graphURI/> BRANCH "branchNameA" INTO "branchNameB"
 	 * 
 	 * @param sparqlQuery the SPARQL query
 	 * @throws InternalErrorException 
@@ -2054,7 +2006,7 @@ public class Endpoint {
 	/** 
 	 * Creates response query and get Response of it.
 	 * 
-	 * Using command: RESBASE (AUTO) GRAPH <graphURI> (-force) BRANCH "branchNameA" INTO "branchNameB"
+	 * Using command: RESBASE (AUTO|FORCE|MANUAL) GRAPH <graphURI> BRANCH "branchNameA" INTO "branchNameB"
 	 * 
 	 * @param sparqlQuery the SPARQL query
 	 * @throws InternalErrorException 

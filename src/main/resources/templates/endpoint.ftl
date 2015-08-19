@@ -1,6 +1,7 @@
 <#include "superHeader.ftl">
 
-
+<script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
+		
 <style>
 
 	li {
@@ -17,10 +18,33 @@
     max-width: none;
 	}
 
+	h5 {
+    font-size: 1.125rem;
+    font-weight: bold;
+	}
+
+	.accordion-navigation .button {
+		margin: 0rem;
+	}
 </style> 
 
 
 <script type="text/javascript">
+		
+		$(document).ready(function(){
+			$('.accordion-navigation :button').click(function(){
+			var query = $(this).siblings('pre').text();
+
+			$("#query").val(query);
+
+				//alert(query);
+			});
+					    
+		});
+		
+
+	
+	
  //  $(function() {
 	// $i=1;
 	// $(".accordion > div").addClass("panel panel-default");
@@ -43,8 +67,7 @@
 	// 	$("#query").val($(this).next().text());
  //  	}); 
  //  });
-  $(document).foundation();
-  $(document).foundation('accordion', 'reflow');
+  
 
 </script>
 
@@ -57,7 +80,7 @@
 				<form action="/r43ples/sparql" method="post" role="form">
 					<div class="row">
 						<div class="columns small-12">
-							<label for="query">Query Text</label><br />
+							<label for="query" style= "font-weight: bold">Query Text</label><br />
 							<textarea name="query" class="form-control" id="query" rows="16" placeholder="Insert R43ples/SPARQL query text or copy it from examples"></textarea>
 						</div>
 					</div>
@@ -162,82 +185,94 @@
 				</div>
 	</div>
 	
-	<div id="examples" class="columns small-6">
+	<div id="examples" class="columns small-6" style="margin-top: 1.2rem;">
 		<h2>Example Queries</h2>
-		<ul class="accordion" data-accordion>
-		    <li class="accordion-navigation">
-				<a href="#panel1a"><h3>Create Graph under Version Control</h3></a>
+		<ul class="accordion" data-accordion style= "margin-top: 2rem;">
+		  <li class="accordion-navigation">
+				<a href="#panel1a"><h5>Create Graph under Version Control</h5></a>
 				<div id="panel1a" class="content active">
 					<pre>CREATE SILENT GRAPH &lt;http://test.com/r43ples-dataset-new&gt;</pre>
+					<hr/>
+					<button class='button default tiny expand'><span class='fa fa-reply'</span> copy to form</button>
 				</div>
 			</li>
 
 			<li class="accordion-navigation">
-				<a href="#panel2a"><h3>Select Query</h3></a>
+				<a href="#panel2a"><h5>Select Query</h5></a>
 				<div id="panel2a" class="content">
 				<pre>SELECT * 
-					FROM &lt;http://test.com/r43ples-dataset-1&gt; REVISION "3"
-					WHERE {
-						?s ?p ?o. 
-					}</pre>
+FROM &lt;http://test.com/r43ples-dataset-1&gt; REVISION "3"
+WHERE {
+ ?s ?p ?o. 
+}</pre>
+				<hr/>
+					<button class='button default tiny expand'><span class='fa fa-reply'</span> copy to form</button>
 				</div>
 			</li>
 
 			<li class="accordion-navigation">
-				<a href="#panel3a"><h3>Select Query II</h3></a>
+				<a href="#panel3a"><h5>Select Query II</h5></a>
 				<div id="panel3a" class="content">
 				<pre>SELECT * 
-					WHERE {
-					  GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "3" {
-					    ?s ?p ?o.
-					  } 
-					}</pre>
+WHERE {
+  GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "3" {
+    ?s ?p ?o.
+  } 
+}</pre>
+				<hr/>
+				<button class='button default tiny expand'><span class='fa fa-reply'</span> copy to form</button>
 				</div>
 			</li>
 
 			<li class="accordion-navigation">
-				<a href="#panel4a"><h3>Select Query - Multiple Graphs</h3></a>
+				<a href="#panel4a"><h5>Select Query - Multiple Graphs</h5></a>
 				<div id="panel4a" class="content">
 				<pre>OPTION r43ples:SPARQL_JOIN
-					SELECT ?s ?p ?o 
-					FROM &lt;http://test.com/r43ples-dataset-1&gt; REVISION "master"
-					FROM &lt;http://test.com/r43ples-dataset-2&gt; REVISION "2"
-					WHERE {
-					  ?s ?p ?o. 
-					}</pre>
+SELECT ?s ?p ?o 
+FROM &lt;http://test.com/r43ples-dataset-1&gt; REVISION "master"
+FROM &lt;http://test.com/r43ples-dataset-2&gt; REVISION "2"
+WHERE {
+  ?s ?p ?o. 
+}</pre>
+				<hr/>
+					<button class='button default tiny expand'><span class='fa fa-reply'</span> copy to form</button>
 				</div>
 			</li>
 
 			<li class="accordion-navigation">
 
-				<a href="#panel5a"><h3>Update Query</h3></a>
+				<a href="#panel5a"><h5>Update Query</h5></a>
 				<div id="panel5a" class="content">
 					<pre>USER "mgraube"
-					MESSAGE "test commit"
-					INSERT DATA {
-					  GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "4" {
-					    &lt;a&gt; &lt;b&gt; &lt;c&gt; .
-					  }
-					}</pre>
+MESSAGE "test commit"
+INSERT DATA {
+	GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "4" {
+  			&lt;a&gt; &lt;b&gt; &lt;c&gt; .
+	}
+}</pre>
+					<hr/>
+					<button class='button default tiny expand'><span class='fa fa-reply'</span> copy to form</button>
 				</div>
 			</li>
 
 			<li class="accordion-navigation">
-				<a href="#panel6a"><h3>Branching</h3></a>
+				<a href="#panel6a"><h5>Branching</h5></a>
 				<div id="panel6a" class="content">
 				<pre>USER "mgraube"
-					MESSAGE "test branch commit"
-					BRANCH GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "unstable"
-				</pre>
+MESSAGE "test branch commit"
+BRANCH GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "unstable"</pre>
+				<hr/>
+					<button class='button default tiny expand'><span class='fa fa-reply'</span> copy to form</button>
 				</div>
 			</li>
 			<li class="accordion-navigation">
-				<a href="#panel7a"><h3>Tagging</h3></a>
+				<a href="#panel7a"><h5>Tagging</h5></a>
 				<div id="panel7a" class="content">
 				<pre>USER "mgraube"
-					MESSAGE "test tag commit"
-					TAG GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "v0.3-alpha"
-				</pre>
+MESSAGE "test tag commit"
+TAG GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "v0.3-alpha"</pre>
+				<hr/>
+					<button class='button default tiny expand'><span class='fa fa-reply'</span> copy to form</button>
 				</div>
 			</li>
 		</ul>

@@ -5,7 +5,6 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.GitRepositoryState;
@@ -17,7 +16,6 @@ import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
 public class FastForwardControl {
-	private static Logger logger = Logger.getLogger(FastForwardControl.class);
 	private CommitModel commitModel;
 	
 	/**get the report page of fast forward query

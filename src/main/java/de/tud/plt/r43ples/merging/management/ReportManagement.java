@@ -22,6 +22,10 @@ public class ReportManagement {
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(ProcessManagement.class);
 	
+	
+	/**initial report result and create report list
+	 * @param difference model
+	 * */
 	public static ReportResult initialReportResult(DifferenceModel differenceModel) {
 		ReportResult reportResult = new ReportResult();
 		
@@ -55,6 +59,7 @@ public class ReportManagement {
 	
 	
 	/**read neue difference model and create report table row list
+	 * @param difference model
 	 * @throws ConfigurationException 
 	 * */
 	public static List<ReportTableRow> createReportTableRowList(DifferenceModel differenceModel) throws ConfigurationException{

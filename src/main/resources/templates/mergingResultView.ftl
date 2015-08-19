@@ -158,7 +158,7 @@
       <div class = "columns small-5 pull-1" id="rightContainer" >
 
         <fieldset style="padding-bottom:0px;" >
-          <legend><strong>Graph after Merging</strong></legend>
+          <legend><strong>Current Graph</strong></legend>
           <div id="visualisation-right" class="live map">
             <svg id="right"  width="100%" height="468" style="border:1px solid #000000; margin:1px; overflow:hidden;"><g/></svg>
           </div> 

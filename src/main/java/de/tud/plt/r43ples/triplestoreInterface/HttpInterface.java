@@ -66,8 +66,6 @@ public class HttpInterface extends TripleStoreInterface {
 	 * 
 	 * @param query the SPARQL query
 	 * @return the result of the query in XML serialisation
-	 * @throws IOException 
-	 * @throws HttpException 
 	 */
 	private InputStream executeQueryWithAuthorization(String query) {
 		return executeQueryWithAuthorization(query, "application/sparql-results+xml");
@@ -81,8 +79,6 @@ public class HttpInterface extends TripleStoreInterface {
 	 * @param query the SPARQL query
 	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
 	 * @return the result of the query in the specified format
-	 * @throws IOException 
-	 * @throws HttpException 
 	 */
 	private InputStream executeQueryWithAuthorization(String query, String format) {
 		HttpResponse response = executeQueryWithAuthorizationResponse(query, format);
@@ -108,9 +104,6 @@ public class HttpInterface extends TripleStoreInterface {
 	 * @param query the SPARQL query
 	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
 	 * @return the result of the query in the specified format
-	 * @throws  
-	 * @throws IOException 
-	 * @throws HttpException 
 	 */
 	private HttpResponse executeQueryWithAuthorizationResponse(String query, String format) {
 		logger.debug("Execute query on SPARQL endpoint:\n"+ query);

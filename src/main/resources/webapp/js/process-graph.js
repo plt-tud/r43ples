@@ -378,7 +378,7 @@ var drawGraph = function (_JSON, _showBranches, _showTags) {
         g.graph().ranksep = 10;
         g.graph().nodesep = 10;
         g.graph().edgesep = 10;
-        g.graph().rankdir = "LR";
+        g.graph().rankdir = "RL";
 //        g.setGraph({
 //          nodesep:10,
 //          ranksep:10,
@@ -449,7 +449,7 @@ var drawGraph = function (_JSON, _showBranches, _showTags) {
                     color = branches[revisions[commits[commit].used[i]].revisionOfBranch].color;
                 }
                 // Kante von der Ursprungsrevision zur Revision, die der Commit erzeugt hat, erzeugen
-                g.setEdge(commits[commit].used[i], commits[commit].generated, {
+                g.setEdge(commits[commit].generated, commits[commit].used[i], {
                     // Mindestabstand 4
                     minlen: 4,
                     // Farben setzen

@@ -14,12 +14,12 @@
 				<div class="small-6 columns push-3">
                 <div class="panel radius" style="background-color:white;">
                   <fieldset style = "border: solid black 5px">
-                    <legend><h4><strong>Rebase Unfreundlich</strong></h4></legend>
+                    <legend><h4><strong>Rebase Unfriendly</strong></h4></legend>
                     </br>
                      <fieldset style="background-color:white">
-                      <legend><h6><strong>Rebase Unfreundlich</strong></h6></legend>
+                      <legend><h6><strong>Rebase Unfriendly</strong></h6></legend>
                       <div class="panel-body">
-                        <p>Rebase process stop, because it is rebase unfreundlich!</p>
+                        <p>Rebase process stop, because it is rebase unfriendly!</p>
                         <p>Please select: Force Rabase or Manually operation! </p>
                         <p>Force Rebase is dangers and suggest manually operation!</p>
 

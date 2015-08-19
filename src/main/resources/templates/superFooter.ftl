@@ -7,6 +7,11 @@
 <script src="/static/js/foundation.js"></script>
 <script src="/static/js/foundation.accordion.js"></script>
 
+<script>
+	$(document).ready(function(){
+	  $(document).foundation();
+	});
+</script>
 
 </body>
 </html>

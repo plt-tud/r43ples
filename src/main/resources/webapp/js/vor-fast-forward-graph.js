@@ -383,6 +383,7 @@ var drawGraphOld = function (_JSON, _showBranches, _showTags) {
         g.graph().ranksep = 10;
         g.graph().nodesep = 10;
         g.graph().edgesep = 10;
+        g.graph().rankdir = "BT";
         // Revisionen aus dem Datenmodell als Knoten erstellen
         // Dazu über alle Revisionen iterieren
         Object.keys(revisions).forEach(function (revision) {
@@ -427,7 +428,7 @@ var drawGraphOld = function (_JSON, _showBranches, _showTags) {
                     color = branches[revisions[commits[commit].used[i]].revisionOfBranch].color;
                 }
                 // Kante von der Ursprungsrevision zur Revision, die der Commit erzeugt hat, erzeugen
-                g.setEdge(commits[commit].used[i], commits[commit].generated, {
+                g.setEdge(commits[commit].generated, commits[commit].used[i], {
                     // Mindestabstand 4
                     minlen: 4,
                     // Farben setzen

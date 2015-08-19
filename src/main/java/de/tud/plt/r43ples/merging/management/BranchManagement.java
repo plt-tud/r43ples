@@ -27,7 +27,9 @@ public class BranchManagement {
 
 	
 	
-	
+	/**get all the name of branch of a named graph
+	 * @param graphName name of graph
+	 * @return list of the name of branch*/
 	public static ArrayList<String> getAllBranchNamesOfGraph(String graphName) throws IOException {
 		logger.info("Get all branch names of graph.");
 		ArrayList<String> list = new ArrayList<String>();	

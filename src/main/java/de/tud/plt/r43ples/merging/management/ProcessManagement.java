@@ -65,6 +65,16 @@ public class ProcessManagement {
 			+ "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n";
 
 	
+	/**create the merge query
+	 * @param graphName name of graph
+	 * @param sdd the sdd model name 
+	 * @param user client name 
+	 * @param commitMessage messsage of client
+	 * @param type type of merging
+	 * @param branchNameA name of branch 1
+	 * @param branchNameB name of branch 2
+	 * @param type of merging
+	 * @param triples triple set*/
 	
 	public static String createMergeQuery(String graphName, String sdd, String user, String commitMessage, MergeQueryTypeEnum type, String branchNameA, String branchNameB, String triples) throws IOException {
 		logger.info("Execute merge query of type " + type.toString());
@@ -443,10 +453,6 @@ public class ProcessManagement {
 	
 	
 	
-	/**save the current version numbers 
-	 * todo ?*/
-
-	
 	
 	/** Create the individual models of both branches*/
 	
@@ -634,7 +640,7 @@ public class ProcessManagement {
 	 * @param individualA the individual of Branch A 
 	 * @param individualModelBranchA the individual model of Branch A
 	 * @param individualModelBranchB the individual model of Branch b
-	 * @param individualTableModel read the information in individual table model
+	 * @param tableModel read the information in individual table model
 	 * @throws ConfigurationException 
 	 
 	 */

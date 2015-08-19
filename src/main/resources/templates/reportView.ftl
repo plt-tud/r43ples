@@ -33,7 +33,7 @@
 	        var table = $('#example').DataTable( {
 
 	        //"scrollY": "30.6em",	
-	        "scrollY": "13.2em",
+	        "scrollY": "17.6em",
 	        "paging": false,
 	        "ordering": false,
         	"info": false

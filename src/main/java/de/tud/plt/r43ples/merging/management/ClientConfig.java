@@ -33,7 +33,7 @@ public class ClientConfig {
 	 * Read the configuration information from local file.
 	 * 
 	 * @param configFilePath path to configuration file
-	 * @throws ConfigurationException
+	 * @throws ConfigurationException error about configuration 
 	 */
 	public static void readConfig(final String configFilePath) throws ConfigurationException{
 		config = new PropertiesConfiguration(configFilePath);

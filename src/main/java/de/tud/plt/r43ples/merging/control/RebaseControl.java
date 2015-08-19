@@ -532,7 +532,7 @@ public class RebaseControl {
 	
 	
 	
-	/**update differencemodel*/
+	/**update difference model*/
 	public void updateRebaseDifferenceModel(DifferenceModel updatedDifferenceModel){		
 		differenceModel.clear();
 		differenceModel = updatedDifferenceModel;

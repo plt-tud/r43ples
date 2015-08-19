@@ -1,10 +1,10 @@
 package de.tud.plt.r43ples.merging.management;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.QuerySolution;
@@ -13,7 +13,6 @@ import com.hp.hpl.jena.query.ResultSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.MergeManagement;
-import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
@@ -35,7 +34,10 @@ public class StrategyManagement {
 			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n";
 
 
-	
+	/**check if fast forward can
+	 * @param last revision uri of branch A
+	 * @param last revision uri of branch B
+	 * */
 	public static boolean isFastForward(String revisionBranchA , String revisionBranchB){
 
 		
@@ -49,6 +51,14 @@ public class StrategyManagement {
 			
 	}
 	
+	/**create fast forward query
+	 * @param graphName
+	 * @param sdd model name
+	 * @param client name 
+	 * @param messsage of client
+	 * @param name of branch A
+	 * @param name of branch B
+	 * */
 	public static String createFastForwardQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB ){
 		String query = "";
 		
@@ -64,6 +74,12 @@ public class StrategyManagement {
 		
 	}
 	
+	
+	/**move the reference to the top of branch B
+	 * @param name of branch B
+	 * @param uri of branch B
+	 * @param uri of branch A
+	 *  */
 	public static void moveBranchReference(String branchNameB, String revisionUriB, String revisionUriA){
 		// delete alte reference
 		String query = prefixes + String.format("DELETE DATA { GRAPH <%s> { <%s> rmo:references <%s>. } };%n",
@@ -77,6 +93,12 @@ public class StrategyManagement {
 				
 	}
 	
+	
+	/**update the named graph of branch
+	 * @param uri of branch B
+	 * @param uri of last revision of branch B
+	 * @param uri of last revision of branch A
+	 * */
 	public static void updateRevisionOfBranch(String branchUriB, String revisionUriB, String revisionUriA ){
 		LinkedList<String> revisionList =  MergeManagement.getPathBetweenStartAndTargetRevision(revisionUriB, revisionUriA);
 		
@@ -96,13 +118,17 @@ public class StrategyManagement {
 	}
 	
 	/**
-	 * save old revision information of Graph */
+	 * save old revision information of Graph
+	 * @param name of graph
+	 * @param format of the information */
 	public static void saveGraphVorMerging(String graph, String format){
 		revisionInformation = RevisionManagement.getRevisionInformation(graph, format);
 	}
 	
 	/**
 	 * save old revision information of Graph 
+	 * @param name of graph
+	 * @param format of the information
 	 * @throws InternalErrorException */
 	public static void saveGraphVorMergingInMap(String graph, String format) throws InternalErrorException{
 		//can not parallel on the same name graph execute
@@ -114,6 +140,7 @@ public class StrategyManagement {
 	
 	/**
 	 * load old revision information of Graph 
+	 * @param name of the named graph
 	 * @throws InternalErrorException */
 	public static String loadGraphVorMergingFromMap(String graphName) throws InternalErrorException{
 		
@@ -136,7 +163,15 @@ public class StrategyManagement {
 		return revisionInformation;
 	}
 	
-	/**create rebase query*/
+	/**create rebase query
+	 * @param graphName
+	 * @param sdd model name
+	 * @param client name 
+	 * @param messsage of client
+	 * @param name of branch A
+	 * @param name of branch B
+	 * @param type of rebase
+	 * @param triple set*/
 	public static String createRebaseQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB, RebaseQueryTypeEnum type, String triples){
 		logger.info("Execute rebase query of type " + type.toString());
 		String query = "";
@@ -185,7 +220,8 @@ public class StrategyManagement {
 		return query;
 	}
 	
-	/**get commitUri of the revisionUri*/
+	/**get commitUri of the revisionUri
+	 * @param uri of the revision*/
 	public static String getCommitUri(String revisionUri){
 		
 		String query = String.format(
@@ -208,7 +244,8 @@ public class StrategyManagement {
 		return null;
 	}
 	
-	/**get delta added with versionUri*/
+	/**get delta added with versionUri
+	 * @param uri of the added set*/
 	public static String getDeltaAddedUri(String revisionUri) {
 		String query = prefixes + String.format(""
 				+"SELECT DISTINCT ?deltaAdded %n"
@@ -227,7 +264,8 @@ public class StrategyManagement {
 		return null;
 	}
 	
-	/** get the delta removed width versionUri*/
+	/** get the delta removed width versionUri
+	 * @param uri of the deleted set*/
 	public static String getDeltaRemovedUri(String revisionUri) {
 		String query = prefixes + String.format(""
 				+"SELECT DISTINCT ?deltaRemoved %n"
@@ -246,7 +284,8 @@ public class StrategyManagement {
 		return null;
 	}
 	
-	/** get the delta removed width versionUri*/
+	/** get the delta removed width versionUri
+	 * @param uri of the added or removed triple set*/
 	public static LinkedList<String> createAddedOrRemovedTripleSet(String addedOrRemovedDelta) {
 		String query = prefixes + String.format(""
 				+"SELECT DISTINCT ?s ?p ?o %n"
@@ -276,6 +315,8 @@ public class StrategyManagement {
 		return tripleList;
 	}
 	
+	/** get number of revision
+	 * @param uri of revision*/
 	public static String getRevisionNumber(String revisionUri){
 		String query = prefixes + String.format(""
 				+"SELECT DISTINCT ?revisionNumber %n"
@@ -294,6 +335,8 @@ public class StrategyManagement {
 		return null;
 	}
 	
+	/** get client name
+	 * @param uri of commit */
 	public static String getPatchUserUri(String commitUri) {
 		String query = prefixes + String.format(""
 				+"SELECT DISTINCT ?user %n"
@@ -314,6 +357,8 @@ public class StrategyManagement {
 		return null;
 	}
 	
+	/** get client message
+	 * @param uri of commit*/
 	public static String getPatchMessage(String commitUri) {
 		String query = prefixes + String.format(""
 				+"SELECT DISTINCT ?message %n"
@@ -332,7 +377,10 @@ public class StrategyManagement {
 		return null;
 	}
 	
-	// copy fullgraph of branchA to fullgraph of branchB
+	/** copy fullgraph of branchA to fullgraph of branchB
+	 * @param uri of full graph A
+	 * @param uri of full graph B */
+	
 	public static void fullGraphCopy(String fullGraphUriA, String fullGraphUriB) {	
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(
 				"COPY GRAPH <" + fullGraphUriA + "> TO GRAPH <"

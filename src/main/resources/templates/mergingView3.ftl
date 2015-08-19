@@ -162,6 +162,57 @@
           margin-top: -0.6em;      
         }
 
+        .breadcrumbs > * {
+            margin: 0;
+            float: left;
+            font-size: 1.0875rem;
+            line-height: 66%;
+            text-transform: uppercase;
+            color: #008CBA;
+            font-weight: bolder;
+        }
+
+        .breadcrumbs > *:before {
+            content: "|";
+            color: white;
+            margin: 0 0.75rem;
+            position: relative;
+            top: 1px;
+        }
+
+        .breadcrumbs > :first-child > *:after {
+            content: "|";
+            color: white;
+            margin: 0 0.75rem;
+            position: relative;
+            top: 1px;
+        }
+
+        .breadcrumbs > :first-child {
+            margin-left: 2rem;
+        }
+
+        .breadcrumbs {
+            display: block;
+            padding: 0.5625rem 0.875rem 0.5625rem;
+            overflow: hidden;
+            margin-left: 0rem;
+            margin-bottom: 0rem;
+            list-style: none;
+            border-style: solid;
+            border-width: 0px;
+            border-top: 0px;
+            background-color: #CCC;
+          /*border-color: gainsboro;*/
+          /*background-color: #f4f4f4;*/
+            border-color : black;
+            border-radius: 3px;
+        }
+
+        .breadcrumbs > *.current a{
+            cursor: default;
+            color: white;
+        }
       </style>
 	  
 
@@ -290,6 +341,10 @@
 
             //change to individual view
             $("#individual").click(function(){
+              $("#triple").parent().removeClass("current");
+              $("#highLevel").parent().removeClass("current");
+              $("#individual").parent().addClass("current");
+
               $("#left").hide();
               $("#right").removeClass();
               $("#right").addClass("large-12 columns");
@@ -304,6 +359,10 @@
 
             //change to triple view
             $("#triple").click(function(){
+              $("#triple").parent().addClass("current");
+              $("#individual").parent().removeClass("current");
+              $("#highLevel").parent().removeClass("current");
+
               $("#individualView").hide();
               $("#highLevelView").hide();
               $("#left").show();
@@ -347,6 +406,10 @@
             
 
             $("#highLevel").click(function(){
+              $("#triple").parent().removeClass("current");
+              $("#individual").parent().removeClass("current");
+              $("#highLevel").parent().addClass("current");
+
               $("#left").hide();
               $("#right").removeClass();
               $("#right").addClass("large-12 columns");
@@ -527,19 +590,23 @@
         });
       </script>
 
-  <#include "superNav.ftl">
+  <#include "superNavBreadcrumbs.ftl">
 
   <!-- body content here -->
+             
       
-    <div class="container wsmall" style="margin-top:-66px;">  
+    <div class="container wsmall" style="margin-top:-46px;"> 
         <div class="row panel radius" style="background-color:white;width:100%" >
 
+            
+
           <!--Merging Client-->
-             <fieldset style="padding-top:0px ; border:solid 6px black" >
-             <legend><h3><strong>R43ples Merge</strong></h3></legend>
+             <fieldset style="padding-top:6px ; border:solid 6px black" >
+               <legend><h3><strong>R43ples Merge</strong></h3></legend>
+               
 
                     <!--Button grouo-->
-             <div class="row" style="padding-left:16px;padding-right:16px">
+             <!-- <div class="row" style="padding-left:16px;padding-right:16px">
                 <div class="columns small-5" >
 
 
@@ -553,7 +620,7 @@
                           <li><a href ="reportProcess"><button id="Report" class="button tiny">Report</button></a></li>
                         </#if>                       
                       </ul>
-                    -->
+                    
                 </div>
 
                 <div class="columns small-6">
@@ -563,17 +630,17 @@
                         <li><a href="#" id="highLevel" class="button tiny">High level</a></li>              
                       </ul>
                 </div>
-             </div> 
+             </div> -->
 
              
               
               <div id = "left" class="large-3 columns" style="margin:0px;padding:0px;">
-                <fieldset style="padding-top:0px;padding-bottom:6px;height:519px;"  >
+                <fieldset style="padding-top:0px; padding-bottom:6px;height:519px;"  >
                   <legend><strong>Differences</strong></legend>
                   <div id="diffTree" style="overflow:auto; height:486px; width:16em;">
                     <#if conStatus=="1">
                       <ul>
-                          <li data-jstree='{"opened" : true}'><a><img src="/static/images/Conflict.png"/> Conflict</a>
+                          <li data-jstree='{"opened" : true}'><a class="jstree-clicked"><img src="/static/images/Conflict.png"/> Conflict</a>
                             <ul>
                               <#list conList as node>
                                 <li ><a><img src="/static/images/Conflict.png"/> ${node.differenceGroup}</a>
@@ -588,14 +655,14 @@
                             </ul>
                            </li>
                            
-                           <li data-jstree='{"opened" : true}'><a><img src="/static/images/Difference.png"/> Difference</a>
+                           <li data-jstree='{"opened" : true}'><a class="jstree-clicked"><img src="/static/images/Difference.png"/> Difference</a>
                             <ul>
                               <#list diffList as node>
                                 <li ><a><img src="/static/images/Difference.png"/> ${node.differenceGroup}</a>
                                   <ul>
                                       <#assign triples = node.tripleList>
                                       <#list triples as triple>
-                                          <li ><a><img src="/static/images/Difference.png"/> ${triple}</a></li>              
+                                          <li ><a ><img src="/static/images/Difference.png"/> ${triple}</a></li>              
                                       </#list>
                                   </ul>
                                 </li>          
@@ -606,7 +673,7 @@
                       
                      <#else>
                         <ul>
-                           <li data-jstree='{"opened" : true}'><a><img src="/static/images/Difference.png"/> Difference</a>
+                           <li data-jstree='{"opened" : true}' ><a class="jstree-clicked"><img src="/static/images/Difference.png"/> Difference</a>
                             <ul>
                               <#list diffList as node>
                                 <li ><a><img src="/static/images/Difference.png"/> ${node.differenceGroup}</a>
@@ -860,7 +927,7 @@
               </div>
 
              </div>
-             <div class="row" style="padding-left:16px;padding-right:16px">
+             <!--<div class="row" style="padding-left:16px;padding-right:16px">
                <div class= "small-12 columns">              
                    
                   <#if isRebase>
@@ -869,7 +936,7 @@
                     <a href ="reportProcess?graph=${graphName}&client=${clientName}"><button id="Report" type="button" class="button tiny expand radius success">Report</button></a>
                   </#if>                       
                </div>
-             </div>
+             </div>-->
 
             </fieldset>
         </div>       

@@ -96,7 +96,7 @@ public class TestFastForwardMerge {
 		
 		// Merge B1 into B2
 		
-		executeR43plesQuery(createFastForwardMergeQuery(graphName, sdd, user, "Merge B1 into Master", "B1", "master"));
+		executeR43plesQuery(createFastForwardMergeQuery(graphName, user, "Merge B1 into Master", "B1", "master"));
 		// Test branch B1
 		String result1 = executeR43plesQuery(createSelectQuery(graphName, "master"));
 		
@@ -137,10 +137,10 @@ public class TestFastForwardMerge {
 	 * @param branchNameB the branch name B
 	 * @return the query
 	 */
-	private String createFastForwardMergeQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB) {
+	private String createFastForwardMergeQuery(String graphName, String user, String commitMessage, String branchNameA, String branchNameB) {
 		return String.format( "USER \"%s\" %n"
 							+ "MESSAGE \"%s\" %n"
-							+ "MERGE ff GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\"", user, commitMessage, graphName, sdd, branchNameA, branchNameB);
+							+ "MERGE FF GRAPH <%s> BRANCH \"%s\" INTO \"%s\"", user, commitMessage, graphName, branchNameA, branchNameB);
 	}
 
 	

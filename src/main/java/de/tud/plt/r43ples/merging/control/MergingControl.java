@@ -12,15 +12,12 @@ import java.util.Map.Entry;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
+
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.update.UpdateAction;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.GitRepositoryState;
-import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.management.ResolutionState;
@@ -99,6 +96,7 @@ public class MergingControl {
 	}
 	
 	
+	/**show merging start view*/
 	public static String getMenuHtmlOutput() throws TemplateException, IOException {
 		List<String> graphList = RevisionManagement.getRevisedGraphs();	
 	    StringWriter sw = new StringWriter();
@@ -128,6 +126,8 @@ public class MergingControl {
 		return sw.toString();
 	}
 	
+	
+	/**show triple merging view*/
 	public String getViewHtmlOutput() throws TemplateException, IOException {	
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
@@ -253,6 +253,7 @@ public class MergingControl {
 		logger.info("updated view fertig!");
 		return sw.toString();		
 	}
+	
 	
 	/**get the new graph after three way merging , with old graph and new graph , ohne difference tree and triple table*/
 	
@@ -403,6 +404,7 @@ public class MergingControl {
 		}	
 	}
 	
+	/**show individual view of the merging */	
 	public String getIndividualView() throws TemplateException, IOException{
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
@@ -1285,11 +1287,20 @@ public class MergingControl {
 	}
 	
 	
-	
+	/**create Commit Model and save in the mergingControl
+	 * @param graphName
+	 * @param sdd model name
+	 * @param client name 
+	 * @param messsage of client
+	 * @param name of branch 1
+	 * @param name of branch 2
+	 * @param name of merging strategy 
+	 * @param type of merging */
 	public void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2, String strategy,String type){
 		commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2, strategy,type);
 	}
 	
+	/**get the commit model*/
 	public CommitModel getCommitModel(){
 		return commitModel;
 	}

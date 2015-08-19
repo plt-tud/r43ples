@@ -61,7 +61,9 @@
         xmlhttp.open("GET","merging?q=1&graph="+str,true);
         xmlhttp.send();
        }; 
-           //js Stragegie->illustration mit Graph
+
+        //js Stragegie->illustration with Graph
+        
         function showIllustration(num){
           if(num == 0){
             document.getElementById("illustration").innerHTML="";
@@ -74,6 +76,16 @@
           }
           if(num == 3){ 
             document.getElementById("illustration").innerHTML="<img class=\"pull-left\" src=\"/static/images/rebase-strategie.png\" alt=\"rebase\"     style=\"width:416px;height:466px;margin-left:6px\">";
+          }
+
+          // by fast forward hide the common,auto fieldset and sdd selector
+          if(num == 1){
+            $('#methodField').hide();
+            $('#sddField').hide();
+          } else{
+
+            $('#methodField').show();
+            $('#sddField').show();
           }
 
         }; 
@@ -94,7 +106,6 @@
             function(data,stauts){
               // get data and check
               $('#strategie').val('0');
-              alert(data);
               if(data == "false"){
                 $('#strategie').children('option').each(function(){
                   if($(this).val() === "1"){
@@ -124,7 +135,7 @@
                     <legend><h4><strong>Start Merging</strong></h4></legend>
                     </br>
                     <form action="mergingProcess" method="post" role="form">
-                      <fieldset>
+                      <fieldset id="methodField">
                         <legend><em>Fieldset</em></legend>
                         <div class="row">
                           <div class="small-6 columns">
@@ -156,14 +167,15 @@
                         </div>
                         <div class="small-10 columns" >
                           <select class="radius" id="strategie" name="strategie" onchange="showIllustration(this.value)">
-                             <option value="1">Fast-Forward Merge Strategy</option>
+                             <option value="0"> &lt; Select Strategy &gt;</option>
                              <option value="2">Three-Way Merge Strategy</option>
                              <option value="3">Rebase Merge Strategy</option>
+                             <option value="1">Fast-Forward Merge Strategy</option>
                           </select>
                         </div>
                       </div>
                       </br>
-                      <div class="row collapse prefix-radius setBorder" >
+                      <div id = "sddField" class="row collapse prefix-radius setBorder" >
                           <div class="small-2 columns" >
                             <span class="prefix"><strong>SDD:</strong></span>
                           </div>
