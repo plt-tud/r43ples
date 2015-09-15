@@ -1,6 +1,5 @@
 package de.tud.plt.r43ples.merging.model.structure;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**Tree Node fuer jede Triple in difference Model

@@ -1,7 +1,6 @@
 package de.tud.plt.r43ples.test.merge;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.hamcrest.core.StringContains.containsString;
 
 import java.io.IOException;
 
