@@ -169,13 +169,13 @@ public class Endpoint {
 		StringWriter sw = new StringWriter();
 		
 		if (graph.equals("1") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataset1());
+			graphs.add(SampleDataSet.createSampleDataset1().graphName);
 		}
 		if (graph.equals("2") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataset2());
+			graphs.add(SampleDataSet.createSampleDataset2().graphName);
 		}
 		if (graph.equals("merging") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataSetMerging());
+			graphs.add(SampleDataSet.createSampleDataSetMerging().graphName);
 		}
 		if (graph.equals("merging-classes") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetMergingClasses());

@@ -89,13 +89,8 @@ public class TestFastForwardMerge {
 	 */
 	@Test
 	public void testFastForwardMerge() throws SAXException, IOException, InternalErrorException, TemplateException {
-		// The SDD to use
-		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
-		
-		// Merge B1 into B2
 		
 		executeR43plesQuery(createFastForwardMergeQuery(graphName, user, "Merge B1 into Master", "B1", "master"));
-		// Test branch B1
 		String result1 = executeR43plesQuery(createSelectQuery(graphName, "master"));
 		
 		System.out.println("result1 : "+ result1);

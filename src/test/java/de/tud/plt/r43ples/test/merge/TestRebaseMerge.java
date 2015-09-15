@@ -199,7 +199,7 @@ public class TestRebaseMerge {
 	public void testCommonRebaseMerge() throws IOException, SAXException, InternalErrorException, TemplateException {
 		
 		// Create the initial data set
-		String graphWithConflict = SampleDataSet.createSampleDataSetMerging();
+		String graphWithConflict = SampleDataSet.createSampleDataSetMerging().graphName;
 		
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";

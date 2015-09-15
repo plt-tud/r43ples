@@ -53,7 +53,7 @@ public class TestThreeWayMerge {
 	@Before
 	public void setUp() throws InternalErrorException, TemplateException, IOException {
 		// Create the initial data set
-		graphName = SampleDataSet.createSampleDataSetMerging();
+		graphName = SampleDataSet.createSampleDataSetMerging().graphName;
 	}
 	
 	
