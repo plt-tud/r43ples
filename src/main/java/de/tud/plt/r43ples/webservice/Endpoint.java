@@ -116,19 +116,16 @@ public class Endpoint {
 	private final Pattern patternMergeQuery =  Pattern.compile(
 			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
 			patternModifier);
-	//fast forward merg query
+	// fast forward merge query
 	private final Pattern patternFastForwardQuery =  Pattern.compile(
 			"MERGE\\s*FF\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"",
 			patternModifier);
 	
-	//rebase merg query
+	// rebase merge query
 	private final Pattern patternRebaseQuery =  Pattern.compile(
 			"REBASE\\s*(?<action>AUTO|MANUAL|FORCE)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
 			patternModifier);
-	//rebase force query
-	private final Pattern patternRebaseForceQuery =  Pattern.compile(
-			"REBASE\\s*force\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"",
-			patternModifier);
+
 	
 	@Context
 	private UriInfo uriInfo;
@@ -290,11 +287,7 @@ public class Endpoint {
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
 			@FormParam("join_option") final boolean join_option) throws InternalErrorException, TemplateException, IOException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
-		
-		logger.info("yxy test format:"+format);
-		logger.info("yxy test sparqlQuery:"+sparqlQuery);
-
-
+		logger.debug("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
 		return sparql(format, sparqlQuery, join_option);
 	}
 		
@@ -365,7 +358,6 @@ public class Endpoint {
 	@Template(name = "/mergingConfiguration.mustache")
 	public final Map<String, Object> getMerging() {
 		logger.info("Merging form requested");		
-		logger.info("Get Merging interface");
 		
 		htmlMap.put("mergingConfiguration_active", true);
 		return htmlMap;
@@ -381,12 +373,9 @@ public class Endpoint {
     @Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
 		 MediaType.APPLICATION_SVG_XML })
 	public final Object getMerging(@HeaderParam("Accept") final String format_header,
-		@DefaultValue("0") @QueryParam("q") final String q,@QueryParam("graph") final String graph) throws IOException, TemplateException {
-		logger.info("in merging yxy");
-		logger.info("Get q: " + q);
-		logger.info("Get graph: " + graph);
-		logger.info(format_header);
-		
+		@DefaultValue("0") @QueryParam("q") final String q, @QueryParam("graph") final String graph) throws IOException, TemplateException {
+		// FIXME: What is q?
+		logger.info("Merging -- q: " + q + ", graph: " + graph);		
 		ResponseBuilder response = Response.ok();
 		
 		if (q.equals("0")) {
@@ -508,7 +497,7 @@ public class Endpoint {
 			String userCommit = null;
 			
 			Matcher userMatcher = patternUser.matcher(rebaseQuery);
-			logger.info("yxy test mergeQuery:"+rebaseQuery);
+			logger.debug("test mergeQuery:"+rebaseQuery);
 			if (userMatcher.find()) {
 				userCommit = userMatcher.group("user");
 				rebaseQuery = userMatcher.replaceAll("");
@@ -552,14 +541,12 @@ public class Endpoint {
 			
 			if (patternRebaseQuery.matcher(rebaseQuery).find()) {
 				responsePost= getRebaseResponse(rebaseQuery, userCommit, messageCommit, "HTML");
-				logger.info("yxy rebase response status: "+responsePost.getStatusInfo().toString());	
-				logger.info("yxy rebase response Header: "+responsePost.getHeaders().get("merging-strategy-information").get(0).toString());	
-				logger.info("yxy rebase response Header: "+responsePost.getHeaders().keySet().toString());	
+				logger.debug("rebase response status: "+responsePost.getStatusInfo().toString());	
+				logger.debug("rebase response Header: "+responsePost.getHeaders().get("merging-strategy-information").get(0).toString());	
+				logger.debug("rebase response Header: "+responsePost.getHeaders().keySet().toString());	
 
 
 			}
-			
-			
 			
 			if((responsePost.getHeaders().get("merging-strategy-information").get(0).toString().equals("rebase-unfreundlich"))) {
 				// to do show force rebase html view , show the rebase result graph

@@ -50,10 +50,7 @@ public class RebaseControl {
 	
 	private String differenceGraphModel = null;
 	
-	/** The revision number of the branch A. **/
-	private String revisionNumberBranchA;
-	/** The revision number of the branch B. **/
-	private String revisionNumberBranchB;
+
 	private MergingControl mergingControl = null;
 	
 	
@@ -316,13 +313,7 @@ public class RebaseControl {
 	 * @throws IOException 
 	 * @throws InternalErrorException */
 	public boolean checkRebaseFreundlichkeit( String differGraphModel, String graphName, String branchNameA, String branchNameB, String format) throws IOException, InternalErrorException{
-		
-		// Save the current revision numbers
-		revisionNumberBranchA = RevisionManagement.getRevisionNumber(graphName, branchNameA);
-		revisionNumberBranchB = RevisionManagement.getRevisionNumber(graphName, branchNameB);
-	//	response = responsePost;
-		
-		
+				
 		this.differenceGraphModel = differGraphModel;
 		boolean isRebaseFreundlich = true;
 		

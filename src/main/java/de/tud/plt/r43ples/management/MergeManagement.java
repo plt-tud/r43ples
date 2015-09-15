@@ -122,8 +122,6 @@ public class MergeManagement {
 				previousResource = qs.getResource("?previousRevision").toString();
 			}
 			
-			logger.info("i am resource:"+resource);
-			logger.info("i am previousResource"+previousResource);
 			if (resultMap.containsKey(resource)) {
 				resultMap.get(resource).add(previousResource);
 			} else {
@@ -142,7 +140,6 @@ public class MergeManagement {
 			
 			// Check if start revision was already reached
 			if (currentPathElement.equals(startRevision)) {
-				logger.info("list ist:"+list.size());
 				return list;
 			}
 			

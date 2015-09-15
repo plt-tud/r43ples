@@ -159,12 +159,7 @@ public class ProcessManagement {
 	    	SDDTripleStateEnum tripleStateB = convertSDDStringToSDDTripleState(qsDifferenceGroups.getResource("?tripleStateB").toString());
 	    	SDDTripleStateEnum automaticResolutionState = convertSDDStringToSDDTripleState(qsDifferenceGroups.getResource("?automaticResolutionState").toString());
 	    	boolean conflicting = qsDifferenceGroups.getLiteral("?conflicting").toString().equals("true^^http://www.w3.org/2001/XMLSchema#boolean");   
-	    	
-	    	//Wert von conflicting is "true^^http://www.w3.org/2001/XMLSchema#boolean" not "1^^http://www.w3.org/2001/XMLSchema#integer".
-	    	//boolean conflicting = qsDifferenceGroups.getLiteral("?conflicting").toString().equals("1^^http://www.w3.org/2001/XMLSchema#integer");   
-	    		
-	    	logger.info("Original wert von Conflict: "+ qsDifferenceGroups.getLiteral("?conflicting").toString());
-	    	logger.info("YXY Test conflicting:" + conflicting );
+	    	logger.debug("Original value of conflict: "+ qsDifferenceGroups.getLiteral("?conflicting").toString());
 
 	    	ResolutionState resolutionState = ResolutionState.DIFFERENCE;
 	    	if (conflicting) {
@@ -280,7 +275,7 @@ public class ProcessManagement {
 		    	
 		    	Difference difference = new Difference(triple, referencedRevisionA, referencedRevisionLabelA, referencedRevisionB, referencedRevisionLabelB, automaticResolutionState, resolutionState);
 		    	differenceGroup.addDifference(tripleToString(triple), difference);
-		    	logger.info("yxytree: "+ differenceGroup.getDifferences().entrySet().toString());
+		    	logger.debug("tree: "+ differenceGroup.getDifferences().entrySet().toString());
 		    }
 	    	differenceModel.addDifferenceGroup(differenceGroup.getTripleStateA().toString() + "-" + differenceGroup.getTripleStateB().toString(), differenceGroup);
 	    }
@@ -492,15 +487,9 @@ public class ProcessManagement {
 				+ "ORDER BY ?individualUri", graphName, revisionName);
 		logger.debug(query);
 		
-		logger.info("yxy did query before");
 		
 		
 		String result = QueryManagement.getSelectConstructAskResponseClassic(query, "text/xml");
-		
-		logger.info("yxy did query after");
-
-		//here difference with mergingClient
-//		String result = TripleStoreInterface.executeQueryWithoutAuthorization(query, "text/xml");
 		logger.debug(result);
 		
 		// Iterate over all individuals
