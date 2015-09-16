@@ -21,7 +21,6 @@ import de.tud.plt.r43ples.management.DataSetGenerationResult;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Endpoint;
-import freemarker.template.TemplateException;
 
 
 public class TestEndpoint {
@@ -34,7 +33,7 @@ public class TestEndpoint {
 	
 	
 	@BeforeClass
-	public static void setUpBeforeClass() throws ConfigurationException, URISyntaxException, IOException, InternalErrorException, TemplateException{
+	public static void setUpBeforeClass() throws ConfigurationException, URISyntaxException, IOException, InternalErrorException {
 		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.test.conf");
 		DataSetGenerationResult ds = SampleDataSet.createSampleDataSetMerging();
@@ -43,7 +42,7 @@ public class TestEndpoint {
 	
 	
 	@Test
-	public void testSelect() throws InternalErrorException, SAXException, IOException, TemplateException {
+	public void testSelect() throws InternalErrorException, SAXException, IOException {
 		String query = String.format(""
 				+ "SELECT * FROM <%s> REVISION \"B2\" "
 				+ "WHERE { ?s ?p ?o. }"
@@ -55,7 +54,7 @@ public class TestEndpoint {
 	
 	
 	@Test
-	public void testSelectSparqlJoinOption() throws IOException, SAXException, InternalErrorException, TemplateException{		
+	public void testSelectSparqlJoinOption() throws IOException, SAXException, InternalErrorException {		
 		String query = String.format(""
 						+ "SELECT ?s ?p ?o "
 						+ "WHERE { "
@@ -70,14 +69,14 @@ public class TestEndpoint {
 	
 
 	@Test
-	public void testHtmlQueryForm() throws IOException, InternalErrorException, TemplateException{
+	public void testHtmlQueryForm() throws IOException, InternalErrorException {
 		String result = ep.sparql(MediaType.TEXT_HTML, "").getEntity().toString();
 		Assert.assertThat(result, containsString("<form"));
 	}
 	
 	
 	@Test
-	public void testSelectQueryWithoutRevision() throws IOException, SAXException, InternalErrorException, TemplateException {
+	public void testSelectQueryWithoutRevision() throws IOException, SAXException, InternalErrorException {
 		String query = String.format(""
 				+ "select * from <%s> %n"
 				+ "where { ?s ?p ?o. } %n"
@@ -94,7 +93,7 @@ public class TestEndpoint {
 	 * @throws InternalErrorException 
 	 * @throws TemplateException 
 	 */
-	@Test public void testExampleQueries() throws IOException, InternalErrorException, TemplateException {
+	@Test public void testExampleQueries() throws IOException, InternalErrorException {
 		DataSetGenerationResult ds1 = SampleDataSet.createSampleDataset1();
 		DataSetGenerationResult ds2 = SampleDataSet.createSampleDataset2();
 		

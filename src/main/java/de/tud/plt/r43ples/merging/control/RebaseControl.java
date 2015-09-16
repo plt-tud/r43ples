@@ -309,24 +309,21 @@ public class RebaseControl {
 	
 
 	
-	/**rebase process beginn , read the difference model and check the freundlichkeit of Rebase
-	 * @throws IOException 
+	/** rebase process beginn, read the difference model and check the freundlichkeit of Rebase
 	 * @throws InternalErrorException */
-	public boolean checkRebaseFreundlichkeit( String differGraphModel, String graphName, String branchNameA, String branchNameB, String format) throws IOException, InternalErrorException{
+	public boolean checkRebaseFreundlichkeit( String differGraphModel, String graphName, String branchNameA, String branchNameB, String format) throws InternalErrorException{
 				
 		this.differenceGraphModel = differGraphModel;
 		boolean isRebaseFreundlich = true;
-		
-//		if(response.getStatusInfo() == Response.Status.CONFLICT){
-//			// has conflict rebase unfreundlich
-//			return isRebaseFreundlich;
-//		}
-		
-		//have not conflict, rebase freundlichkeit checked
+	
 		
 		logger.info("difference graph Model by check unfreundlich:" + differenceGraphModel);
-		ProcessManagement.readDifferenceModel(differenceGraphModel, differenceModel, format);
-		logger.info("i did check rebase freundlich");
+		try {
+			ProcessManagement.readDifferenceModel(differenceGraphModel, differenceModel, format);
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new InternalErrorException(e.getMessage());			
+		}
 		
 		//get difference group
 		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();

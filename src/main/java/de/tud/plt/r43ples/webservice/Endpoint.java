@@ -161,7 +161,7 @@ public class Endpoint {
 	 */
 	@Path("createSampleDataset")
 	@GET
-	public final String createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws IOException, InternalErrorException, TemplateException {
+	public final String createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws InternalErrorException {
 		List<String> graphs = new ArrayList<>();
 		StringWriter sw = new StringWriter();
 		
@@ -202,17 +202,16 @@ public class Endpoint {
 	    freemarker.template.Template temp = null; 
 		String name = "exampleDatasetGeneration.ftl";
 		try {  
-            // create the the configuration  
             Configuration cfg = new Configuration();  
-            // set the path to the template
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // get the template page with the name 
             temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
+            temp.process(htmlMap,sw);	
+        } catch (IOException | TemplateException e) {  
             e.printStackTrace();  
+            throw new InternalErrorException(e.getMessage());
         }  
 		
-		temp.process(htmlMap,sw);	
+		
 		return sw.toString();
 			
 	}
@@ -276,8 +275,6 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @return the response
 	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
 	 */
 	@Path("sparql")
 	@POST
@@ -285,7 +282,7 @@ public class Endpoint {
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("format") final String formatQuery, 
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
-			@FormParam("join_option") final boolean join_option) throws InternalErrorException, TemplateException, IOException {
+			@FormParam("join_option") final boolean join_option) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		logger.debug("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
 		return sparql(format, sparqlQuery, join_option);
@@ -306,8 +303,6 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @return the response
 	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
 	 */
 	@Path("sparql")
 	@GET
@@ -315,7 +310,7 @@ public class Endpoint {
 	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
 			@QueryParam("format") final String formatQuery, 
 			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
-			@QueryParam("join_option") final boolean join_option) throws InternalErrorException, TemplateException, IOException {
+			@QueryParam("join_option") final boolean join_option) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		
 		String sparqlQueryDecoded;
@@ -331,7 +326,7 @@ public class Endpoint {
 	
 	@Path("debug")
 	@GET
-	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws TemplateException, IOException {
+	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws InternalErrorException {
 		if (sparqlQuery.equals("")) {
 			return getHTMLDebugResponse();
 		} else {
@@ -1108,7 +1103,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws TemplateException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException, TemplateException, IOException {
+	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException {
 		if (sparqlQuery.equals("")) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
@@ -1135,7 +1130,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws TemplateException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException, TemplateException, IOException {
+	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException {
 		return sparql(format, sparqlQuery, false);
 	}
 
@@ -1163,10 +1158,9 @@ public class Endpoint {
 	 * Using mustache templates. 
 	 * 
 	 * @return HTML response for SPARQL form
-	 * @throws IOException 
-	 * @throws TemplateException 
+	 * @throws InternalErrorException 
 	 */
-	private String getHTMLDebugResponse() throws TemplateException, IOException {		
+	private String getHTMLDebugResponse() throws InternalErrorException {		
 
 	    StringWriter sw = new StringWriter();
 		
@@ -1174,11 +1168,8 @@ public class Endpoint {
 		freemarker.template.Template temp = null; 
 		String name = "debug.ftl";
 		try {  
-            // create configuration of freemarker
             Configuration cfg = new Configuration();  
-            // set the path to get the template
             cfg.setClassForTemplateLoading(Endpoint.class, "/templates");
-            // get the template page with this name
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -1191,7 +1182,12 @@ public class Endpoint {
 	    htmlMap.put("sdd_graph", Config.sdd_graph);
 	    htmlMap.put("debug_active", true);
 		
-	    temp.process(htmlMap,sw);	
+	    try {
+			temp.process(htmlMap,sw);
+		} catch (TemplateException | IOException e) {
+			logger.error(e);
+			throw new InternalErrorException("Something went wrong with the template engine.");
+		}	
 		String content = sw.toString();
 		return content;
 	}
@@ -1208,7 +1204,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws TemplateException 
 	 */
-	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean join_option) throws InternalErrorException, TemplateException, IOException {
+	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean join_option) throws InternalErrorException {
 		logger.info("SPARQL query was requested. Query: " + sparqlQuery);
 		String user = null;
 		Matcher userMatcher = patternUser.matcher(sparqlQuery);
@@ -1258,25 +1254,21 @@ public class Endpoint {
 	 * Using mustache templates. 
 	 * 
 	 * @return HTML response for SPARQL form
-	 * @throws IOException 
-	 * @throws TemplateException 
+	 * @throws InternalErrorException 
 	 */
 	
 	// endpoint.ftl as response return
-	private Response getHTMLResponse() throws TemplateException, IOException{
-		
+	private Response getHTMLResponse() throws InternalErrorException {
+		logger.info("SPARQL form requested");
 		List<String> graphList = RevisionManagement.getRevisedGraphs();
 		StringWriter sw = new StringWriter();
 		
 		//ftl
 	    freemarker.template.Template temp = null; 
 		String name = "endpoint.ftl";
-		try {  
-            // create the the configuration  
+		try {    
             Configuration cfg = new Configuration();  
-            // set the path to the template
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // get the template page with the name 
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -1285,31 +1277,16 @@ public class Endpoint {
 		htmlMap.put("graphList", graphList);
 	    htmlMap.put("endpoint_active", true);
 		
-		temp.process(htmlMap,sw);	
+		try {
+			temp.process(htmlMap,sw);
+		} catch (TemplateException | IOException e) {
+			logger.error(e);
+			throw new InternalErrorException("Something went wrong with the template engine.");
+		}	
 		
 		return Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML).build();
 	}
 	
-	// endpoint.mustache as response return
-//	private Response getHTMLResponse() {
-//		logger.info("SPARQL form requested");
-//		List<String> graphList = RevisionManagement.getRevisedGraphs();
-//		
-//		MustacheFactory mf = new DefaultMustacheFactory();
-//	    Mustache mustache = mf.compile("templates/endpoint.mustache");
-//	    StringWriter sw = new StringWriter();
-//	    
-//	    htmlMap.put("graphList", graphList);
-//	    htmlMap.put("endpoint_active", true);
-//	    mustache.execute(sw, htmlMap);		
-//		
-//		String content = sw.toString();
-//		
-//		return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
-//	}
-//	
-	
-
 	
 	/**
 	 * Provides the SPARQL Endpoint description of the original sparql endpoint
@@ -1496,11 +1473,10 @@ public class Endpoint {
 			if (revisionNumberMap.containsKey(revisionName)) {
 				newRevisionNumber = revisionNumberMap.get(revisionName);
 			}else {
-				newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
+				newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName);
 				revisionNumberMap.put(revisionName, newRevisionNumber);
 			}
-			
-//			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);						
+								
 			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
 			String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
 			
@@ -1541,7 +1517,7 @@ public class Endpoint {
 			if (revisionNumberMap.containsKey(revisionName)) {
 				newRevisionNumber = revisionNumberMap.get(revisionName);
 			}else {
-				newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
+				newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName);
 				revisionNumberMap.put(revisionName, newRevisionNumber);
 			}
 			
@@ -1909,7 +1885,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws TemplateException 
 	 */
-	private Response getFastForwardResponse(final String sparqlQuery, final String user, final String commitMessage) throws InternalErrorException, TemplateException, IOException{
+	private Response getFastForwardResponse(final String sparqlQuery, final String user, final String commitMessage) throws InternalErrorException {
 		
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		
@@ -2001,7 +1977,7 @@ public class Endpoint {
 	 * @throws TemplateException 
 	 */
 	
-	private Response getRebaseResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException, TemplateException, IOException{
+	private Response getRebaseResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
 		
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		
