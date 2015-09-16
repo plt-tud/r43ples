@@ -118,7 +118,7 @@ public class Interface {
 			if (data == null)
 				data = "";
 			
-			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
+			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName);
 			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
 			String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
 			if (!RevisionManagement.isBranch(graphName, revisionName)) {
@@ -151,7 +151,7 @@ public class Interface {
 																		// numbers or reference
 																		// names
 			// General variables
-			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
+			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName);
 			String referenceFullGraph = RevisionManagement.getReferenceGraph(graphName, revisionName);
 			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
 			String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
@@ -306,8 +306,6 @@ public class Interface {
 			throw new InternalErrorException("Non terminal nodes were used: " + sparqlQuery);
 		}
 
-		
-		
 		
 		// Differ between MERGE query with specified SDD and without SDD			
 		String usedSDDURI = null;

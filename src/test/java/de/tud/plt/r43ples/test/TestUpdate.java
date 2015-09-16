@@ -20,40 +20,45 @@ import org.xml.sax.SAXException;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.DataSetGenerationResult;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Endpoint;
+import freemarker.template.TemplateException;
 
 public class TestUpdate {
 	
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(TestUpdate.class);
-	/** The graph name. **/
-	private static String graphName;
-	private static String graph_test;
+	
+	private DataSetGenerationResult dsm;
+	private static DataSetGenerationResult ds1;
 	
 	private final static String format = "application/sparql-results+xml";
 	
 	private final Endpoint 	ep = new Endpoint();
+
+
+	
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
-		graph_test = SampleDataSet.createSampleDataset1();
+		ds1 = SampleDataSet.createSampleDataset1();
 	}
 
 	@Before
-	public void setUp() throws  ConfigurationException, InternalErrorException{
-		graphName= SampleDataSet.createSampleDataSetMerging();
+	public void setUp() throws  ConfigurationException, InternalErrorException, TemplateException, IOException{
+		dsm = SampleDataSet.createSampleDataSetMerging();
 	}
 	
 
 	@Test
-	public void test_insert_existing_triples() throws SAXException, IOException, InternalErrorException {
+	public void test_insert_existing_triples() throws SAXException, IOException, InternalErrorException, TemplateException {
         String query_template = ""
-        		+ "SELECT ?s ?p ?o FROM <"+graph_test+"> REVISION \"%d\"%n"
+        		+ "SELECT ?s ?p ?o FROM <"+ds1.graphName+"> REVISION \"%s\"%n"
         		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
 		
 		ArrayList<String> list = new ArrayList<String>();
@@ -62,24 +67,25 @@ public class TestUpdate {
 		String insert_template = ""
 				+ "USER \"test_user\" %n"
 				+ "MESSAGE \"test commit message 6 (same as 5)\" %n"
-        		+ "INSERT DATA { GRAPH <%s> REVISION \"5\" { %s } }; %n"
-        		+ "DELETE DATA { GRAPH <%s> REVISION \"5\" { %s } } ";
+        		+ "INSERT DATA { GRAPH <%1$s> REVISION \"%2$s\" { %3$s } }; %n"
+        		+ "DELETE DATA { GRAPH <%1$s> REVISION \"%2$s\" { %4$s } } ";
 		ep.sparql(format, String.format(insert_template, 
-				graph_test,	ResourceManagement.getContentFromResource("samples/dataset1/added-5.nt"), 
-				graph_test, ResourceManagement.getContentFromResource("samples/dataset1/removed-5.nt")));
+				ds1.graphName, ds1.revisions.get("master-5"), 
+				ResourceManagement.getContentFromResource("samples/dataset1/added-5.nt"), 
+				ResourceManagement.getContentFromResource("samples/dataset1/removed-5.nt")));
 		
-        String result = ep.sparql(format, String.format(query_template, 6)).getEntity().toString();
+        String result = ep.sparql(format, String.format(query_template, "master")).getEntity().toString();
         String expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev5.xml");
         assertXMLEqual(expected, result);
         
-        result = ep.sparql(format, String.format(query_template, 5)).getEntity().toString();
+        result = ep.sparql(format, String.format(query_template, ds1.revisions.get("master-5"))).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev5.xml");
         assertXMLEqual(expected, result);
 	}
 	
 	@Test
-	public void testRestructuring() throws SAXException, IOException, InternalErrorException {
-		String query = "SELECT ?s ?p ?o FROM <"+graphName+"> REVISION \"B2\"\n"
+	public void testRestructuring() throws SAXException, IOException, InternalErrorException, TemplateException {
+		String query = "SELECT ?s ?p ?o FROM <"+dsm.graphName+"> REVISION \"B2\"\n"
         		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
 		String result = ep.sparql(format, query).getEntity().toString();
         String expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2.xml");
@@ -90,23 +96,23 @@ public class TestUpdate {
 		query = String.format(""
 				+ "USER \"shensel\" %n"
 				+ "MESSAGE \"restructure commit to B2.\" %n"
-				+ "INSERT { GRAPH <%s> REVISION \"B2\" {"
+				+ "INSERT { GRAPH <%1$s> REVISION \"B2\" {"
 				+ " <http://example.com/newTestS> <http://example.com/newTestP> ?o."
 				+ "} } %n"
-				+ "WHERE { GRAPH <%s> REVISION \"B2\" {"
+				+ "WHERE { GRAPH <%1$s> REVISION \"B2\" {"
 				+ "	<http://example.com/testS> <http://example.com/testP> ?o"
 				+ "} };"
-				+ "DELETE { GRAPH <%s> REVISION \"B2\" {"
+				+ "DELETE { GRAPH <%1$s> REVISION \"B2\" {"
 				+ " <http://example.com/testS> <http://example.com/testP> ?o."
 				+ "} } %n"
-				+ "WHERE { GRAPH <%s> REVISION \"B2\" {"
+				+ "WHERE { GRAPH <%1$s> REVISION \"B2\" {"
 				+ "	<http://example.com/testS> <http://example.com/testP> ?o"
 				+ "} }", 
-				graphName, graphName, graphName, graphName);
+				dsm.graphName);
 		logger.debug("Execute query: \n" + query);
 		result = ep.sparql(format, query).toString();
 		
-		query = "SELECT ?s ?p ?o FROM <"+graphName+"> REVISION \"B2\"\n"
+		query = "SELECT ?s ?p ?o FROM <"+dsm.graphName+"> REVISION \"B2\"\n"
         		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
 		result = ep.sparql(format, query).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2-restructured.xml");
@@ -114,12 +120,12 @@ public class TestUpdate {
 	}
 	
 	@Test
-	public void testConstructQuery() throws InternalErrorException {
+	public void testConstructQuery() throws InternalErrorException, TemplateException, IOException {
 		String query = String.format(""
 				+ "CONSTRUCT {?s ?p ?o} "
-				+ "FROM <%s> REVISION \"1\""
+				+ "FROM <%s> REVISION \"%s\""
 				+ "WHERE { ?s ?p ?o. }"
-				+ "ORDER BY ASC(?o)", graphName);
+				+ "ORDER BY ASC(?o)", dsm.graphName, dsm.revisions.get("master-1"));
 		Response response = ep.sparql("text/turtle", query);
 		String result = response.getEntity().toString();
 		

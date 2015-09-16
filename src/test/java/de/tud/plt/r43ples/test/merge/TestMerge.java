@@ -20,6 +20,7 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Endpoint;
+import freemarker.template.TemplateException;
 
 
 public class TestMerge {
@@ -46,10 +47,12 @@ public class TestMerge {
 	/**
 	 * Set up.
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	
 	 */
 	@Before
-	public void setUp() throws InternalErrorException {
+	public void setUp() throws InternalErrorException, TemplateException, IOException {
 		// Create the initial data set
 		graphName = SampleDataSet.createSampleDataSetComplexStructure();
 	}
@@ -62,9 +65,10 @@ public class TestMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
+	 * @throws TemplateException 
 	 */
 	@Test
-	public void testCreatedGraph() throws IOException, SAXException, InternalErrorException {
+	public void testCreatedGraph() throws IOException, SAXException, InternalErrorException, TemplateException {
 		// Test branch B1
 		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B1"));
 		String expected1 = ResourceManagement.getContentFromResource("merge/response-B1.xml");
@@ -98,9 +102,10 @@ public class TestMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
+	 * @throws TemplateException 
 	 */
 	@Test
-	public void testAutoMerge() throws SAXException, IOException, InternalErrorException {
+	public void testAutoMerge() throws SAXException, IOException, InternalErrorException, TemplateException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
@@ -146,9 +151,10 @@ public class TestMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
+	 * @throws TemplateException 
 	 */
 	@Test
-	public void testCommonMerge() throws IOException, SAXException, InternalErrorException {
+	public void testCommonMerge() throws IOException, SAXException, InternalErrorException, TemplateException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
@@ -211,9 +217,10 @@ public class TestMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
+	 * @throws TemplateException 
 	 */
 	@Test
-	public void testManualMerge() throws IOException, SAXException, InternalErrorException {
+	public void testManualMerge() throws IOException, SAXException, InternalErrorException, TemplateException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
@@ -364,8 +371,10 @@ public class TestMerge {
 	 * @param query the SPARQL query
 	 * @return the result of the query
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public static String executeR43plesQuery(String query) throws InternalErrorException {
+	public static String executeR43plesQuery(String query) throws InternalErrorException, TemplateException, IOException {
 		return executeR43plesQueryWithFormat(query, "application/xml");
 	}
 	
@@ -376,8 +385,10 @@ public class TestMerge {
 	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
 	 * @return the result of the query
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public static String executeR43plesQueryWithFormat(String query, String format) throws InternalErrorException {
+	public static String executeR43plesQueryWithFormat(String query, String format) throws InternalErrorException, TemplateException, IOException {
 		Endpoint ep = new Endpoint();
 		Response response = ep.sparql(format, query);
 		if (response.getEntity()!=null)
@@ -393,8 +404,10 @@ public class TestMerge {
 	 * @param query the SPARQL query
 	 * @return the response
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public static Response executeR43plesQueryResponse(String query) throws InternalErrorException {
+	public static Response executeR43plesQueryResponse(String query) throws InternalErrorException, TemplateException, IOException {
 		Endpoint ep = new Endpoint();
 		return ep.sparql("application/xml", query);
 	}

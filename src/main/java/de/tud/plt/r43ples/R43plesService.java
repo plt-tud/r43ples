@@ -17,7 +17,6 @@ import org.glassfish.jersey.server.mvc.mustache.MustacheMvcFeature;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
-import com.hp.hpl.jena.query.Dataset;
 
 import de.tud.plt.r43ples.client.R43plesArgs;
 import de.tud.plt.r43ples.management.Config;
@@ -41,8 +40,6 @@ public class R43plesService {
 	private static Logger logger = Logger.getLogger(R43plesService.class);
 	/** The HTTP server. **/
 	private static HttpServer server;
-	/** The TDB dataset. **/
-	public static Dataset dataset;
 	
 	
 	/**
