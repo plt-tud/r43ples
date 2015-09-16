@@ -614,11 +614,10 @@ public class Endpoint {
 			StrategyManagement.saveGraphVorMergingInMap(mergingControl.getCommitModel().getGraphName(), "application/json" );
 				
 			String mergeQuery = ProcessManagement.createMergeQuery(graphName, sddName, user, message, type, branch1, branch2, null);
-			logger.info("yxy test mergeQuery:"+mergeQuery);
+			logger.debug("test mergeQuery:"+mergeQuery);
 			
 			String userCommit = null;
 			Matcher userMatcher = patternUser.matcher(mergeQuery);
-			logger.info("yxy test mergeQuery:"+mergeQuery);
 			if (userMatcher.find()) {
 				userCommit = userMatcher.group("user");
 				mergeQuery = userMatcher.replaceAll("");
@@ -659,13 +658,9 @@ public class Endpoint {
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response mergingGET(@HeaderParam("Accept") final String formatHeader,
 			 @QueryParam("graph") @DefaultValue("") final String graph, @QueryParam("optradio") @DefaultValue("") final String format_new) throws InternalErrorException {
-		System.out.println("2 mal merging Process");
 		ResponseBuilder response = Response.ok();
 		String format = "application/json";
-		logger.info("format_header"+ formatHeader);
-		logger.info("yxy graphName"+ graph);
-		logger.info("yxy format_new"+ format_new);
-
+		logger.info("Merging Process: "+ graph);
 
 		response.type(format);
 		response.entity(RevisionManagement.getRevisionInformation(graph, format));
@@ -684,10 +679,7 @@ public class Endpoint {
 
 		ResponseBuilder response = Response.ok();
 		String format = "application/json";
-		logger.info("format_header"+ formatHeader);
-		logger.info("yxy graphName"+ graph);
-		logger.info("yxy format_new"+ format_new);
-
+		logger.info("loadOldGraphProcess: "+ graph);
 
 		response.type(format);
 		response.entity(StrategyManagement.loadGraphVorMergingFromMap(graph));
@@ -842,7 +834,7 @@ public class Endpoint {
 	}	
 
 	
-	/**neue push process with report view
+	/** new push process with report view
 	 * @throws TemplateException 
 	 * @throws ConfigurationException */
 	@Path("pushProcessNew")
@@ -852,18 +844,15 @@ public class Endpoint {
 			@QueryParam("client") @DefaultValue("") final String user) throws IOException, InternalErrorException, ConfigurationException, TemplateException {
 		
 		ResponseBuilder response = Response.ok();
-		
-		Response responsePost = null;
-		
+			
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//save the graph information vor merging 
+		//save the graph information before merging 
 		StrategyManagement.saveGraphVorMergingInMap(graph, "application/json");
 		
 		String mergeQuery = mergingControl.updateMergeQueryNew();
 		
 		String userCommit = null;
 		Matcher userMatcher = patternUser.matcher(mergeQuery);
-		logger.info("yxy test mergeQuery:"+mergeQuery);
 		if (userMatcher.find()) {
 			userCommit = userMatcher.group("user");
 			mergeQuery = userMatcher.replaceAll("");
@@ -874,15 +863,11 @@ public class Endpoint {
 			messageCommit = messageMatcher.group("message");
 			mergeQuery = messageMatcher.replaceAll("");
 		}
-		
-		logger.info("yxy test mergeQuery nach verarbeit:"+mergeQuery);
 
 		if (patternMergeQuery.matcher(mergeQuery).find()) {
-			responsePost= getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
-			logger.info("yxy get Post"+responsePost.toString());	
+			getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
 		}
 			
-
 		response.entity(mergingControl.getThreeWayReportView(null));
 		
 		clientMap.get(user).remove(graph);
@@ -914,11 +899,10 @@ public class Endpoint {
 		// update the new rebase merge query
 		String mergeQuery = mergingControl.updateMergeQueryNew();
 		
-		logger.info("rebase updated mergequery: "+ mergeQuery);
+		logger.info("rebase updated merge query: "+ mergeQuery);
 		// execute the getRebaseResponse()
 		String userCommit = null;
 		Matcher userMatcher = patternUser.matcher(mergeQuery);
-		logger.info("yxy test mergeQuery:"+mergeQuery);
 		if (userMatcher.find()) {
 			userCommit = userMatcher.group("user");
 			mergeQuery = userMatcher.replaceAll("");
@@ -929,8 +913,6 @@ public class Endpoint {
 			messageCommit = messageMatcher.group("message");
 			mergeQuery = messageMatcher.replaceAll("");
 		}
-		
-		logger.info("yxy test mergeQuery nach verarbeit:"+mergeQuery);
 
 		if (patternRebaseQuery.matcher(mergeQuery).find()) {
 			getRebaseResponse(mergeQuery, userCommit, messageCommit, "HTML");
@@ -1796,15 +1778,12 @@ public class Endpoint {
 			String uriA = "http://eatld.et.tu-dresden.de/branch-A";
 			String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 			
-			logger.info("YXYtest commonRevision " + commonRevision);
+			logger.debug("commonRevision " + commonRevision);
 
 			MergeManagement.createRevisionProgresses(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA), graphNameA, uriA, MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
 			
-			logger.info("YXY Processgraph A " +RevisionManagement.getContentOfGraphByConstruct(graphNameA, "HTML"));
-			logger.info("YXY Processgraph B " +RevisionManagement.getContentOfGraphByConstruct(graphNameB, "HTML"));
-
-			
-			logger.info("YXY TEST Nach CreateRevisionProcess " +RevisionManagement.getContentOfGraphByConstruct(graphName, "TURTLE"));
+			logger.debug("Processgraph A " +RevisionManagement.getContentOfGraphByConstruct(graphNameA, "HTML"));
+			logger.debug("Processgraph B " +RevisionManagement.getContentOfGraphByConstruct(graphNameB, "HTML"));
 
 			// Create difference model
 			MergeManagement.createDifferenceTripleModel(graphName,  graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI);
@@ -1831,7 +1810,6 @@ public class Endpoint {
 						+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
 						+ "	} %n"
 						+ "}", graphNameDiff);
-				logger.info("yxy test :"+TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK));
 				if (TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK)) {
 					// Difference model contains conflicts
 					// Return the conflict model to the client
@@ -2193,6 +2171,9 @@ public class Endpoint {
 				responseBuilder.header(graphStrategy, "with-rebase");
 							
 			} else if ((action == null) && (with == null) && (triples == null)) {
+				//get the difference Model String 
+				String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format);
+				
 				// Check if difference model contains conflicts
 				String queryASK = String.format(
 						  "ASK { %n"
@@ -2200,10 +2181,6 @@ public class Endpoint {
 						+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
 						+ "	} %n"
 						+ "}", graphNameDiff);
-				logger.info("yxy test :"+TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK));
-				
-				//get the difference Model String 
-				String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format);
 				if (TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK)) {
 					// Difference model contains conflicts
 					// Return the conflict model to the client
