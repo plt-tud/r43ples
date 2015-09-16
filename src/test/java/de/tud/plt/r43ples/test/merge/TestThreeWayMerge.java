@@ -124,6 +124,10 @@ public class TestThreeWayMerge {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
+		// conflicts in merging, therefore no success
+		executeR43plesQueryResponse(createCommonMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
+		
+		
 		// Merge B1 into B2 (WITH)
 		String triples = "<http://example.com/testS> <http://example.com/testP> \"D\". \n";
 		
