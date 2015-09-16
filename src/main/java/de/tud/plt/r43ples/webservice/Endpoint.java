@@ -383,7 +383,7 @@ public class Endpoint {
 	}
 	
 	/**
-	 * through graph name , branch1 and branch2 to check the right of fast forward strategy
+	 * through graph name, branch1 and branch2 to check the right of fast forward strategy
 	 * */
 	@Path("fastForwardCheckProcess")
 	@GET
@@ -393,8 +393,6 @@ public class Endpoint {
 		logger.info("graph name test: "+ "--"+graphName+"--");
 		logger.info("branch name test: " + "--"+branch1+"--"+branch2+"--");
 		return FastForwardControl.fastForwardCheck(graphName, branch1, branch2);
-		
-		
 	}
 	
 	/**
@@ -406,7 +404,6 @@ public class Endpoint {
 	 * @throws TemplateException 
 	 * @throws ConfigurationException 
 	 */
-	
 	@Path("mergingProcess")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
@@ -504,7 +501,7 @@ public class Endpoint {
 				rebaseQuery = messageMatcher.replaceAll("");
 			}
 			
-			//for each client ,create a mergingControlMap and for each named graph create a mergingControl, first check ,ob namedgraph exist .
+			//for each client, create a mergingControlMap and for each named graph create a mergingControl, first check, if namedgraph exist .
 			//first create the mergingcontrol and than create the rebasecontrol
 			
 			MergingControl mergingControl;
