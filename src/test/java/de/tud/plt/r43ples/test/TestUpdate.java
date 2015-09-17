@@ -86,14 +86,14 @@ public class TestUpdate {
 	@Test
 	public void testRestructuring() throws SAXException, IOException, InternalErrorException, TemplateException {
 		String query = "SELECT ?s ?p ?o FROM <"+dsm.graphName+"> REVISION \"B2\"\n"
-        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
+        		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
 		String result = ep.sparql(format, query).getEntity().toString();
         String expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2.xml");
         assertXMLEqual(expected, result);
         
 		// restructure commit to B2
-		logger.info("Restructure commit to B2");
-		query = String.format(""
+		logger.debug("Restructure commit to B2");
+		String query_restructure = String.format(""
 				+ "USER \"shensel\" %n"
 				+ "MESSAGE \"restructure commit to B2.\" %n"
 				+ "INSERT { GRAPH <%1$s> REVISION \"B2\" {"
@@ -109,12 +109,11 @@ public class TestUpdate {
 				+ "	<http://example.com/testS> <http://example.com/testP> ?o"
 				+ "} }", 
 				dsm.graphName);
-		logger.debug("Execute query: \n" + query);
-		result = ep.sparql(format, query).toString();
+		logger.debug("Execute query: \n" + query_restructure);
+		result = ep.sparql(format, query_restructure).toString();
 		
-		query = "SELECT ?s ?p ?o FROM <"+dsm.graphName+"> REVISION \"B2\"\n"
-        		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
 		result = ep.sparql(format, query).getEntity().toString();
+		logger.debug("Result: "+result);
         expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2-restructured.xml");
         assertXMLEqual(expected, result);
 	}

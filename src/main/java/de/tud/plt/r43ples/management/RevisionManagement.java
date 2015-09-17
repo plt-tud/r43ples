@@ -2,7 +2,6 @@ package de.tud.plt.r43ples.management;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.rmi.server.UID;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -16,7 +15,6 @@ import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.util.FileUtils;
 
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
@@ -721,9 +719,9 @@ public class RevisionManagement {
 					+ "WHERE { GRAPH <%s> {"
 					+ "	?rev a rmo:Revision; rmo:revisionOf <%s>; rmo:revisionNumber ?nr ."
 					+ " } "
-					+ "}ORDER BY DESC(?nr)", Config.revision_graph, graphName);
-		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
+					+ "}ORDER BY DESC(xsd:int(?nr))", Config.revision_graph, graphName);
 		try {
+			ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 			QuerySolution qs = results.next();
 			nextNumber = qs.getLiteral("?nr").getInt()+1;
 		}
