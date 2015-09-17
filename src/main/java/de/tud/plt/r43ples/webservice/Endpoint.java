@@ -63,7 +63,6 @@ import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.visualisation.VisualisationBatik;
 import de.tud.plt.r43ples.visualisation.VisualisationD3;
-import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
 /**
@@ -118,14 +117,7 @@ public class Endpoint {
 	private UriInfo uriInfo;
 	
 	
-	private Map<String, Object> htmlMap;
-	 {
-		Map<String, Object> aMap = new HashMap<String, Object>();
-		aMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		aMap.put("git", GitRepositoryState.getGitRepositoryState());
-		htmlMap= aMap;
-	}
-		
+	private Map<String, Object> htmlMap = new HashMap<String, Object>();
 	
 	/** default logger for this class */
 	private final static Logger logger = Logger.getLogger(Endpoint.class);
@@ -140,15 +132,13 @@ public class Endpoint {
 	/**
 	 * Creates sample datasets
 	 * @return information provided as HTML response
-	 * @throws IOException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
 	 */
 	@Path("createSampleDataset")
 	@GET
-	public final String createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws InternalErrorException {
+	@Template(name = "/exampleDatasetGeneration.mustache")
+	public final Map<String, Object> createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws InternalErrorException {
 		List<String> graphs = new ArrayList<>();
-		StringWriter sw = new StringWriter();
 		
 		if (graph.equals("1") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataset1().graphName);
@@ -179,22 +169,7 @@ public class Endpoint {
 		}
 	    htmlMap.put("graphs", graphs);
 	    
-	  //ftl
-	    freemarker.template.Template temp = null; 
-		String name = "exampleDatasetGeneration.ftl";
-		try {  
-            Configuration cfg = new Configuration();  
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            temp = cfg.getTemplate(name);  
-            temp.process(htmlMap,sw);	
-        } catch (IOException | TemplateException e) {  
-            e.printStackTrace();  
-            throw new InternalErrorException(e.getMessage());
-        }  
-		
-		
-		return sw.toString();
-			
+		return htmlMap;			
 	}
 	
 	/**
@@ -335,19 +310,10 @@ public class Endpoint {
 		MustacheFactory mf = new DefaultMustacheFactory();
 	    Mustache mustache = mf.compile("templates/home.mustache");
 	    StringWriter sw = new StringWriter();
+		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());
 	    mustache.execute(sw, htmlMap);		
 		return Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML).build();
-	}
-	
-	
-	@Path("mergingConfiguration")
-	@GET
-	@Template(name = "/mergingConfiguration.mustache")
-	public final Map<String, Object> getMerging() {
-		logger.info("Merging form requested");		
-		
-		htmlMap.put("mergingConfiguration_active", true);
-		return htmlMap;
 	}
 	
 	/**
@@ -768,8 +734,6 @@ public class Endpoint {
 		MergingControl mergingControl = clientMap.get(user).get(graph);
 		
 		mergingControl.approveHighLevelToDifferenceModel(id, isChecked);
-		
-		
 	}
 	
 	
@@ -1122,6 +1086,9 @@ public class Endpoint {
 	 * @throws InternalErrorException 
 	 */
 	private String getHTMLDebugResponse() throws InternalErrorException {		
+		logger.info("Get Debug page");
+		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());
 		htmlMap.put("graphs", TripleStoreInterfaceSingleton.get().getGraphs());
 	    htmlMap.put("revisionGraph", Config.revision_graph);
 	    htmlMap.put("triplestore_type", Config.triplestore_type);
@@ -1130,17 +1097,11 @@ public class Endpoint {
 	    htmlMap.put("debug_active", true);
 	    StringWriter sw = new StringWriter();
 		
-		try {  
-            Configuration cfg = new Configuration();  
-            cfg.setClassForTemplateLoading(Endpoint.class, "/templates");
-            freemarker.template.Template temp = cfg.getTemplate("debug.ftl");  
-       		temp.process(htmlMap,sw);
-		} catch (TemplateException | IOException e) {
-			logger.error(e);
-			throw new InternalErrorException("Something went wrong with the template engine.");
-		}	
-		String content = sw.toString();
-		return content;
+	    
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/debug.mustache");
+	    mustache.execute(sw, htmlMap);		
+		return sw.toString();
 	}
 	
 
@@ -1149,37 +1110,22 @@ public class Endpoint {
 	 * Using mustache templates. 
 	 * 
 	 * @return HTML response for SPARQL form
-	 * @throws InternalErrorException 
 	 */
-	
-	// endpoint.ftl as response return
-	private Response getHTMLResponse() throws InternalErrorException {
+	private Response getHTMLResponse() {
 		logger.info("SPARQL form requested");
 		List<String> graphList = RevisionManagement.getRevisedGraphs();
-		StringWriter sw = new StringWriter();
 		
-		//ftl
-	    freemarker.template.Template temp = null; 
-		String name = "endpoint.ftl";
-		try {    
-            Configuration cfg = new Configuration();  
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
-		
-		htmlMap.put("graphList", graphList);
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/endpoint.mustache");
+	    StringWriter sw = new StringWriter();
+	    
+	    htmlMap.put("graphList", graphList);
 	    htmlMap.put("endpoint_active", true);
+	    mustache.execute(sw, htmlMap);		
 		
-		try {
-			temp.process(htmlMap,sw);
-		} catch (TemplateException | IOException e) {
-			logger.error(e);
-			throw new InternalErrorException("Something went wrong with the template engine.");
-		}	
+		String content = sw.toString();
 		
-		return Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML).build();
+		return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
 	}
 
 

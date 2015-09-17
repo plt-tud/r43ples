@@ -12,7 +12,9 @@ import java.util.Map.Entry;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 
-
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.update.UpdateAction;
 
@@ -99,31 +101,17 @@ public class MergingControl {
 	/**show merging start view*/
 	public static String getMenuHtmlOutput() throws TemplateException, IOException {
 		List<String> graphList = RevisionManagement.getRevisedGraphs();	
-	    StringWriter sw = new StringWriter();
-	    
-	    //freemarker template engine
-	    freemarker.template.Template temp = null; 
-		String name = "merging.ftl";
-		try {  
-            // create the configuration of the template  
-            Configuration cfg = new Configuration();  
-            // set the path of the template 
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // get the template page with this name
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
-	    
 	    Map<String, Object> scope = new HashMap<String, Object>();
 	    scope.put("merging_active", true);
 		scope.put("graphList", graphList);
 		
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
-		
-		temp.process(scope,sw);	
-		return sw.toString();
+	    StringWriter sw = new StringWriter();
+	    MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merging.mustache");
+
+	    mustache.execute(sw, scope);		
+	    
+	    return sw.toString();
 	}
 	
 	

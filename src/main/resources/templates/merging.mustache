@@ -1,30 +1,30 @@
 {{<templates/super}}
 
-{{$title}}R43ples Merging Interface{{/title}}
-
 {{$script_extra}}
 <script type="text/javascript">
+
+   function setLocalClient(){
+     localStorage.clientName = document.getElementById("user").value;
+   }
+
     $(document).ready(function(){
-      $("#btn-add").click(function(){
-      $("#tb").append("<tr><th><input class=\"form-control\" placeholder=\"User\"></th><th><input class=\"form-control\"   placeholder=\"User\"></th><th><button type=\"button\" class=\"btn btn-block btn-primary btn-xs\" onclick=\"$(this).parent().parent().remove()\">delete</button></th></tr>");
-      });  
-      //$(".panel-collapse").first().addClass("out");
-      // $("#btn-delete").click(function(){$(this).parent().parent().remove()});
-     
+
      //confirm and go on merging  
 	  $("#sub").click(function(){
 	  	var r=alert("MergeQuery success created, press Confirm to go on merging process!");
 	  	if(r==true){
-//	  		$("#div").append("<button type=\"button\" class=\"btn btn-block btn-success\">Confirm</button>");
 			$('#con').removeAttr('disabled');
 			$('#sub').prop("disabled", true);
 			$('#can').prop("disabled", true);
 						
 	  	}
 	  });
+
     }); 
+
+    
     //Ajax graph->branch
-        function showCustomer(str){
+      function showCustomer(str){
         var xmlhttp;
         if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
           xmlhttp=new XMLHttpRequest();
@@ -41,7 +41,9 @@
         xmlhttp.open("GET","merging?q=1&graph="+str,true);
         xmlhttp.send();
        }; 
-           //js Stragegie->illustration mit Graph
+
+        //js Stragegie->illustration with Graph
+        
         function showIllustration(num){
           if(num == 0){
             document.getElementById("illustration").innerHTML="";
@@ -56,140 +58,170 @@
             document.getElementById("illustration").innerHTML="<img class=\"pull-left\" src=\"/static/images/rebase-strategie.png\" alt=\"rebase\"     style=\"width:416px;height:466px;margin-left:6px\">";
           }
 
+          // by fast forward hide the common,auto fieldset and sdd selector
+          if(num == 1){
+            $('#methodField').hide();
+            $('#sddField').hide();
+          } else{
+
+            $('#methodField').show();
+            $('#sddField').show();
+          }
+
         }; 
-          //confirm and go on merging 
-     
+
+        // branch onchange check : if reachable with fast forward
+        function checkFastForward (){
+          var graph = $('#graph').val();
+          var branch1 = $('#Branch1').val();
+          var branch2 = $('#Branch2').val();
+
+
+          $.get("fastForwardCheckProcess", 
+            {
+              graph : graph,
+              branch1 : branch1,
+              branch2 : branch2
+            },
+            function(data,stauts){
+              // get data and check
+              $('#strategie').val('0');
+              if(data == "false"){
+                $('#strategie').children('option').each(function(){
+                  if($(this).val() === "1"){
+                    $(this).attr('disabled', true);
+                  }
+                });
+              }else{
+                $('#strategie').children('option').each(function(){
+                  if($(this).val() === "1"){
+                    $(this).attr('disabled', false);
+                  }
+                });
+              }
+
+            });
+        }
 </script>
 {{/script_extra}}
 
 {{$content}}
 <div class="container">
 			<div class="row" >
-				<div class="small-7 columns">
-                <div class="panel radius" style="background-color:white;">
-                  <fieldset>
-                    <legend><h4><strong>Start Merging</strong></h4></legend>
-                    </br>
+				<div class="col-sm-7">
+                  <legend><h4><strong>Start Merging</strong></h4></legend>
                     <form action="mergingProcess" method="post" role="form">
-                      <fieldset>
-                        <legend><em>Fieldset</em></legend>
-                        <div class="row">
-                          <div class="small-6 columns">
-                              <input type="radio" name="optradio" value="common" checked><label><strong>Common</strong></label>
-                          </div>
-                          <div class=" small-6 columns">
-                              <input type="radio" name="optradio" value="auto"><label><strong>AUTO</strong></label>
-                          </div>
-                        </div>
-                      </fieldset>
-                      </br>
-                      <div class="row collapse prefix-radius" >
-                        <div class="small-2 columns" >
+                      <div class="row" >
+                        <div class="col-sm-2" >
                           <span class="prefix"><strong>GRAPH:</strong></span>
                         </div>
-                        <div class="small-10 columns" >
+                        <div class="col-sm-10" >
                           <select class="radius" id="graph" name="graph" onchange="showCustomer(this.value)">
                              <option value="no">None</option>
-							               {{#graphList}}
-                             <option value="{{toString}}">{{toString}}</option>
+                             {{#graphList}}
+                             <option value="{{toString}}">{{toString}}</option>                        
                              {{/graphList}}
                           </select>
                         </div>
                       </div>
                       </br>
-                      <div class="row collapse prefix-radius" >
-                        <div class="small-2 columns" >
-                          <span class="prefix"><strong>Strategie:</strong></span>
+                      <div class="row" >
+                        <div class="col-sm-2" >
+                          <span class="prefix"><strong>Strategy:</strong></span>
                         </div>
-                        <div class="small-10 columns" >
+                        <div class="col-sm-10" >
                           <select class="radius" id="strategie" name="strategie" onchange="showIllustration(this.value)">
-                             <option value="0">None</option>
-                             <option value="1">Fast-Forward Merge Strategie</option>
-                             <option value="2">Three-Way Merge Strategie</option>
-                             <option value="3">Rebase Merge Strategie</option>
+                             <option value="0"> &lt; Select Strategy &gt;</option>
+                             <option value="2">Three-Way Merge Strategy</option>
+                             <option value="3">Rebase Merge Strategy</option>
+                             <option value="1">Fast-Forward Merge Strategy</option>
                           </select>
                         </div>
                       </div>
-                      </br>
-                      <div class="row collapse prefix-radius" >
-                          <div class="small-2 columns" >
+                      <fieldset>
+                    
+                      <fieldset id="methodField">
+                        <div class="row">
+                         <div class="col-sm-2">
+                              <span class="prefix"><strong>Automic Conflict Resolution:</strong></span>
+                          </div>
+                          <div class="col-sm-5">
+                              <input type="radio" name="optradio" value="common" checked><label><strong>Common</strong></label>
+                          </div>
+                          <div class=" col-sm-5">
+                              <input type="radio" name="optradio" value="auto"><label><strong>AUTO</strong></label>
+                          </div>
+                        </div>
+                      </fieldset>
+                      <div id = "sddField" class="row" >
+                          <div class="col-sm-2" >
                             <span class="prefix"><strong>SDD:</strong></span>
                           </div>
-                          <div class="small-10 columns">          
+                          <div class="col-sm-10">          
                             <select class="radius" id="sdd" name="sdd">
                              <option value="http://eatld.et.tu-dresden.de/sdd#defaultSDD">sdd:defaultSDD</option>
                             </select>
                           </div>
                       </div>
                       </br>
-                      <div class="row collapse prefix-radius">
-                        <div class="small-2 columns">
+                      <div class="row">
+                        <div class="col-sm-2">
                           <span class="prefix"><strong>MERGE:</strong></span>
                         </div>
-                        <div class="small-3 columns">
-                          <select class="radius" id="Branch1" name="Branch1">    
+                        <div class="col-sm-3">
+                          <select class="radius" id="Branch1" name="Branch1" onchange="checkFastForward()">    
                              <option value="no"></option>
                           </select>          
                         </div>
-                        <div class="small-2 small-offset-2 columns">
+                        <div class="col-sm-2">
                           <span class="prefix"><strong>INTO:</strong></span>
                         </div>
-                        <div class="small-3 columns">
-                          <select class="radius" id="Branch2" name="Branch2">
+                        <div class="col-sm-3">
+                          <select class="radius" id="Branch2" name="Branch2" onchange="checkFastForward()">
                              <option value="no"></option>
                           </select>          
                         </div>
                       </div>
                       </br>  
-                      <div class="row collapse prefix-radius">
-                          <div class="small-2 columns">
+                      <div class="row">
+                          <div class="col-sm-2">
                             <span class="prefix"><strong>USER:</strong></span>
                           </div>
-                          <div class="small-10 columns">
+                          <div class="col-sm-10">
                             <input type="text" placeholder="User" id="user" name="user">
                           </div>
                        </div>    
                       </br>
                       <div class="row">
-                           <label class="small-2 columns"><div align=center><strong>MESSAGE:</strong></div></label>
-                           <div class="small-10 columns">
-                           <textarea class="form-control" rows="6" id="message" name="message"></textarea>
+                           <label class="col-sm-2"><div align=center><strong>MESSAGE:</strong></div></label>
+                           <div class="col-sm-10 ">
+                           <textarea class="form-control setBorder" rows="6" id="message" name="message"></textarea>
                            </div>
                       </div>
                       </br>
                       <div class="row">
-                          <div class="small-6 columns">
-                            <button id="sub" type="submit" class="button tiny expand default">Submit</button>
+                          <div class="col-sm-6">
+                            <button id="sub" type="submit" class="btn default" onclick="setLocalClient()">Submit</button>
                           </div>
-                          <div class="small-6 columns">
-                            <button id="can" type="button" class="button tiny expand alert ">Cancel</button>
+                          <div class="col-sm-6">
+                            <button id="can" type="button" class="btn alert ">Cancel</button>
                           </div>
                       </div>
                     </form>
-                        <div class="row">
-                          <div class="small-12 columns" style="margin-top:6px">
-                            <button id ="con" type="button" class="button tiny  expand success" disabled onclick="window.location.href='/r43ples/mergingView?optradio=common&graph=http://test.com/r43ples-dataset-merging'">Confirm</button>
-                          </div>
-                        </div>
+       
                   </fieldset>
-                </div>
 			 </div>
 
-       <div class= "small-5 columns">
-          <div class="panel radius" style="height:566px; width:486;margin-top:56px;background-color:white;">
-          <fieldset style="background-color:white">
-            <legend><h4><strong>Strategie Illustration</strong></h4></legend>
+       <div class= "col-sm-5">
+            <legend><h4><strong>Strategy Illustration</strong></h4></legend>
             <div class="panel-body" id="illustration" style="height:486px; width:406px ;">
             </div>
-          </fieldset>
           </div>
-       </div>
 		</div>
    </div>
-		
-		
 {{/content}}
 
 
 {{/templates/super}}
-
+	
+		
