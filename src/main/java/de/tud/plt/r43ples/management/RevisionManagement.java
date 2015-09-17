@@ -16,6 +16,7 @@ import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Literal;
 import com.hp.hpl.jena.util.FileUtils;
 
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
@@ -720,15 +721,31 @@ public class RevisionManagement {
 		// create UID and check whether the uid number already in named graph exist, if yes , than create it once again,
 		// if not , return this one
 		
-		UID nextNumberUid = new UID();
-		String nextNumber = nextNumberUid.toString();
+		//UID nextNumberUid = new UID();
+		//String nextNumber = nextNumberUid.toString();
+		int nextNumber = 0;
 		
-		while (checkExistUID(nextNumber,graphName)){
-			UID newNextNumberUid = new UID();
-			nextNumber = newNextNumberUid.toString();		
+		String query = prefixes
+				+ String.format(
+					"SELECT ?nr "
+					+ "WHERE { GRAPH <%s> {"
+					+ "	?rev a rmo:Revision; rmo:revisionOf <%s>; rmo:revisionNumber ?nr ."
+					+ " } "
+					+ "}ORDER BY DESC(?nr)", Config.revision_graph, graphName);
+		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
+		try {
+			QuerySolution qs = results.next();
+			nextNumber = qs.getLiteral("?nr").getInt()+1;
+		}
+		catch (Exception e){
+			nextNumber = 0;
 		}
 		
-		return nextNumber;
+		while (checkExistUID(""+nextNumber,graphName)){
+			nextNumber++;		
+		}
+		
+		return ""+nextNumber;
 	}
 	
 	/**
@@ -739,8 +756,12 @@ public class RevisionManagement {
 	public static boolean checkExistUID(final String revisionUid, final String graphName) {
 		String queryASK = prefixes
 				+ String.format(""
-						+ "ASK { GRAPH <%s> { " 
-						+ " ?rev a rmo:Revision; rmo:revisionOf <%s>; rmo:revisionNumber \"%s\". }} ",
+						+ "ASK {"
+						+ "	GRAPH <%s> { " 
+						+ " 	{ ?rev a rmo:Revision; rmo:revisionOf <%1$s>; rmo:revisionNumber \"%2$s\". }"
+						+ "		UNION "
+						+ "		{?rev a rmo:Revision; rmo:revisionOf <%s1$>. ?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%2$s\" .}"
+						+ "} } ",
 						Config.revision_graph, graphName, revisionUid);
 		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
 	}
