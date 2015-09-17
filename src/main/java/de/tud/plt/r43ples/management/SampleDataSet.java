@@ -505,20 +505,21 @@ public class SampleDataSet {
 	public static String createSampleDataSetComplexStructure() throws InternalErrorException {
 		String graphName = "http://test.com/r43ples-dataset-complex-structure";
 		
-		// Create new example graph
-		DatasetGenerationManagement.createNewGraph(graphName);
+		//delete the old graph
+		RevisionManagement.purgeGraph(graphName);
+		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 		
 		// Initial commit
 		String triples =  "<http://example.com/testS> <http://example.com/testP> \"A\". \n"
 						+ "<http://example.com/testS> <http://example.com/testP> \"B\". \n"
 						+ "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
-		DatasetGenerationManagement.executeInsertQuery(user, "Initial commit", graphName, "master", triples);
+		String revision1 = RevisionManagement.createNewRevision(graphName, triples, null, user, "Initial commit", revision0);
 		
 		// Create a new branch B1
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, "master", "B1");
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, revision1, "B1");
 		
 		// Create a new branch B2
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2", graphName, "master", "B2");
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2", graphName, revision1, "B2");
 		
 		// First commit to B1
 		String triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"D\". \n"

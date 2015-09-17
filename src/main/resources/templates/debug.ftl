@@ -27,7 +27,7 @@
 			<h2>Debug information</h2>
 			<h3>Configuration</h3>
 			<ul>
-				<li>Version: <#if version??>${version}<#else> Git: ${git.commitIdAbbrev} - ${git.branch!"  "}</#if></li>
+				<li>Version: <#if version??>${version}<#else> Git: ${git.commitIdAbbrev!"  "} - ${git.branch!"  "}</#if></li>
 				<li>Triplestore: <samp>${triplestore_type} - ${triplestore_url}</samp></li>
 				<li>Revision Graph: <samp>${revisionGraph}</samp></li>
 				<li>SDD Graph: <samp>${sdd_graph}</samp></li>

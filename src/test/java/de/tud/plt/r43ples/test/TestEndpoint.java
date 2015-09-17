@@ -213,7 +213,7 @@ public class TestEndpoint extends JerseyTest {
 	@Test
 	public void testMergingPage() {
 		String result = target("merging").request().get(String.class);
-		Assert.assertThat(result, containsString("Development is Work in Progress"));
+		Assert.assertThat(result, containsString("SDD"));
 	}
 	
 	@Test
