@@ -83,7 +83,7 @@
               branch1 : branch1,
               branch2 : branch2
             },
-            function(data,stauts){
+            function(data,status){
               // get data and check
               $('#strategie').val('0');
               if(data == "false"){
@@ -110,13 +110,11 @@
 			<div class="row" >
 				<div class="col-sm-7">
                   <legend><h4><strong>Start Merging</strong></h4></legend>
-                    <form action="mergingProcess" method="post" role="form">
-                      <div class="row" >
-                        <div class="col-sm-2" >
-                          <span class="prefix"><strong>GRAPH:</strong></span>
-                        </div>
+                    <form class="form-horizontal" action="mergingProcess" method="post" role="form">
+                      <div class="form-group" >
+                      	<label for="graph" class="col-sm-2">Graph</label>
                         <div class="col-sm-10" >
-                          <select class="radius" id="graph" name="graph" onchange="showCustomer(this.value)">
+                          <select class="form-control" id="graph" name="graph" onchange="showCustomer(this.value)">
                              <option value="no">None</option>
                              {{#graphList}}
                              <option value="{{toString}}">{{toString}}</option>                        
@@ -124,87 +122,62 @@
                           </select>
                         </div>
                       </div>
-                      </br>
-                      <div class="row" >
-                        <div class="col-sm-2" >
-                          <span class="prefix"><strong>Strategy:</strong></span>
+                      <div class="form-group">
+                      	<label for="Branch1" class="col-sm-2">Merge</label>
+                        <div class="col-sm-3">
+                          <select class="form-control" id="Branch1" name="Branch1" onchange="checkFastForward()">    
+                             <option value="no"></option>
+                          </select>          
                         </div>
+                        <label for="Branch2" class="col-sm-2">Into</label>
+                        <div class="col-sm-3">
+                          <select class="form-control" id="Branch2" name="Branch2" onchange="checkFastForward()">
+                             <option value="no"></option>
+                          </select>          
+                        </div>
+                      </div>
+                      <div class="form-group" >
+                        <label for="strategie" class="col-sm-2">Strategy</label>
                         <div class="col-sm-10" >
-                          <select class="radius" id="strategie" name="strategie" onchange="showIllustration(this.value)">
+                          <select class="form-control" class="form-control" id="strategie" name="strategie" onchange="showIllustration(this.value)">
                              <option value="0"> &lt; Select Strategy &gt;</option>
                              <option value="2">Three-Way Merge Strategy</option>
                              <option value="3">Rebase Merge Strategy</option>
                              <option value="1">Fast-Forward Merge Strategy</option>
                           </select>
                         </div>
+                      </div>                    
+                      <div id="methodField" class="form-group">
+                      	<label class="col-sm-2">Method (?)</label>
+                              <label class="col-sm-5"><input type="radio" name="optradio" value="common" checked> Common</label>
+                              <label class="col-sm-5"><input type="radio" name="optradio" value="auto"> Auto</label>
                       </div>
-                      <fieldset>
-                    
-                      <fieldset id="methodField">
-                        <div class="row">
-                         <div class="col-sm-2">
-                              <span class="prefix"><strong>Automic Conflict Resolution:</strong></span>
-                          </div>
-                          <div class="col-sm-5">
-                              <input type="radio" name="optradio" value="common" checked><label><strong>Common</strong></label>
-                          </div>
-                          <div class=" col-sm-5">
-                              <input type="radio" name="optradio" value="auto"><label><strong>AUTO</strong></label>
-                          </div>
-                        </div>
-                      </fieldset>
-                      <div id = "sddField" class="row" >
-                          <div class="col-sm-2" >
-                            <span class="prefix"><strong>SDD:</strong></span>
-                          </div>
+                      <div id="sddField" class="form-group" >
+                          <label for="sdd" class="col-sm-2">SDD</label>
                           <div class="col-sm-10">          
-                            <select class="radius" id="sdd" name="sdd">
+                            <select class="form-control" id="sdd" name="sdd">
                              <option value="http://eatld.et.tu-dresden.de/sdd#defaultSDD">sdd:defaultSDD</option>
                             </select>
                           </div>
                       </div>
-                      </br>
-                      <div class="row">
-                        <div class="col-sm-2">
-                          <span class="prefix"><strong>MERGE:</strong></span>
-                        </div>
-                        <div class="col-sm-3">
-                          <select class="radius" id="Branch1" name="Branch1" onchange="checkFastForward()">    
-                             <option value="no"></option>
-                          </select>          
-                        </div>
-                        <div class="col-sm-2">
-                          <span class="prefix"><strong>INTO:</strong></span>
-                        </div>
-                        <div class="col-sm-3">
-                          <select class="radius" id="Branch2" name="Branch2" onchange="checkFastForward()">
-                             <option value="no"></option>
-                          </select>          
-                        </div>
-                      </div>
-                      </br>  
-                      <div class="row">
-                          <div class="col-sm-2">
-                            <span class="prefix"><strong>USER:</strong></span>
-                          </div>
+                      <div class="form-group">
+                          <label for="user" class="col-sm-2">User</label>
                           <div class="col-sm-10">
-                            <input type="text" placeholder="User" id="user" name="user">
+                            <input class="form-control" type="text" placeholder="User" id="user" name="user">
                           </div>
                        </div>    
-                      </br>
-                      <div class="row">
-                           <label class="col-sm-2"><div align=center><strong>MESSAGE:</strong></div></label>
+                      <div class="form-group">
+                           <label for="message" class="col-sm-2">Message</label>
                            <div class="col-sm-10 ">
-                           <textarea class="form-control setBorder" rows="6" id="message" name="message"></textarea>
+                           	<textarea class="form-control" rows="6" id="message" name="message"></textarea>
                            </div>
                       </div>
-                      </br>
-                      <div class="row">
-                          <div class="col-sm-6">
-                            <button id="sub" type="submit" class="btn default" onclick="setLocalClient()">Submit</button>
+                      <div class="form-group">
+                          <div class="col-sm-offset-2 col-sm-5">
+                            <button id="sub" type="submit" class="btn btn-primary btn-block" onclick="setLocalClient()">Submit</button>
                           </div>
-                          <div class="col-sm-6">
-                            <button id="can" type="button" class="btn alert ">Cancel</button>
+                          <div class="col-sm-5">
+                            <button id="can" type="button" class="btn btn-default btn-block">Cancel</button>
                           </div>
                       </div>
                     </form>
