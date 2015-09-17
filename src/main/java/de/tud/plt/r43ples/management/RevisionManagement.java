@@ -57,16 +57,7 @@ public class RevisionManagement {
 	public static String putGraphUnderVersionControl(final String graphName) {
 		logger.info("Put existing graph under version control with the name " + graphName);
 
-		// General variables
-		//call: create graph response
-		//int revisionNumber = 0;
-		UID revisionNumberUid = new UID();
-		String revisionNumber = revisionNumberUid.toString();
-		
-		while (checkExistUID(revisionNumber, graphName)){
-			UID newRevisionNumberUid = new UID();
-			revisionNumber = newRevisionNumberUid.toString();		
-		}
+		String revisionNumber = getNextRevisionNumber(graphName);
 		
 		
 		String revisionUri = graphName + "-revision-" + revisionNumber;
@@ -715,9 +706,8 @@ public class RevisionManagement {
 	 * @param graphName
 	 * @param revisionIdentifier
 	 * @return
-	 * @throws InternalErrorException
 	 */
-	public static String getNextRevisionNumber(final String graphName) throws InternalErrorException {
+	public static String getNextRevisionNumber(final String graphName) {
 		// create UID and check whether the uid number already in named graph exist, if yes , than create it once again,
 		// if not , return this one
 		
@@ -741,7 +731,7 @@ public class RevisionManagement {
 			nextNumber = 0;
 		}
 		
-		while (checkExistUID(""+nextNumber,graphName)){
+		while (existRevisionNumber(""+nextNumber,graphName)){
 			nextNumber++;		
 		}
 		
@@ -749,11 +739,11 @@ public class RevisionManagement {
 	}
 	
 	/**
-	 * check whether the uid number already exist
-	 * @param revisionUid
+	 * checks whether the revision number already exist
+	 * @param revisionNumber
 	 * @return boolean*/
 	
-	public static boolean checkExistUID(final String revisionUid, final String graphName) {
+	public static boolean existRevisionNumber(final String revisionNumber, final String graphName) {
 		String queryASK = prefixes
 				+ String.format(""
 						+ "ASK {"
@@ -762,7 +752,7 @@ public class RevisionManagement {
 						+ "		UNION "
 						+ "		{?rev a rmo:Revision; rmo:revisionOf <%s1$>. ?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%2$s\" .}"
 						+ "} } ",
-						Config.revision_graph, graphName, revisionUid);
+						Config.revision_graph, graphName, revisionNumber);
 		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
 	}
 	
