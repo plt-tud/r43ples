@@ -1,7 +1,6 @@
 package de.tud.plt.r43ples.test.merge;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.hamcrest.core.StringContains.containsString;
 
 import java.io.IOException;
 
@@ -54,7 +53,7 @@ public class TestThreeWayMerge {
 	@Before
 	public void setUp() throws InternalErrorException, TemplateException, IOException {
 		// Create the initial data set
-		graphName = SampleDataSet.createSampleDataSetMerging();
+		graphName = SampleDataSet.createSampleDataSetMerging().graphName;
 	}
 	
 	
@@ -124,6 +123,10 @@ public class TestThreeWayMerge {
 	public void testCommonMerge() throws IOException, SAXException, InternalErrorException, TemplateException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
+		
+		// conflicts in merging, therefore no success
+		executeR43plesQueryResponse(createCommonMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
+		
 		
 		// Merge B1 into B2 (WITH)
 		String triples = "<http://example.com/testS> <http://example.com/testP> \"D\". \n";

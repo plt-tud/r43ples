@@ -17,10 +17,10 @@ import org.xml.sax.SAXException;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.DataSetGenerationResult;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Endpoint;
-import freemarker.template.TemplateException;
 
 
 public class TestEndpoint {
@@ -33,15 +33,16 @@ public class TestEndpoint {
 	
 	
 	@BeforeClass
-	public static void setUpBeforeClass() throws ConfigurationException, URISyntaxException, IOException, InternalErrorException, TemplateException{
+	public static void setUpBeforeClass() throws ConfigurationException, URISyntaxException, IOException, InternalErrorException {
 		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.test.conf");
-		graphName = SampleDataSet.createSampleDataSetMerging();
+		DataSetGenerationResult ds = SampleDataSet.createSampleDataSetMerging();
+		graphName = ds.graphName;
 	}
 	
 	
 	@Test
-	public void testSelect() throws InternalErrorException, SAXException, IOException, TemplateException {
+	public void testSelect() throws InternalErrorException, SAXException, IOException {
 		String query = String.format(""
 				+ "SELECT * FROM <%s> REVISION \"B2\" "
 				+ "WHERE { ?s ?p ?o. }"
@@ -53,7 +54,7 @@ public class TestEndpoint {
 	
 	
 	@Test
-	public void testSelectSparqlJoinOption() throws IOException, SAXException, InternalErrorException, TemplateException{		
+	public void testSelectSparqlJoinOption() throws IOException, SAXException, InternalErrorException {		
 		String query = String.format(""
 						+ "SELECT ?s ?p ?o "
 						+ "WHERE { "
@@ -68,14 +69,14 @@ public class TestEndpoint {
 	
 
 	@Test
-	public void testHtmlQueryForm() throws IOException, InternalErrorException, TemplateException{
+	public void testHtmlQueryForm() throws IOException, InternalErrorException {
 		String result = ep.sparql(MediaType.TEXT_HTML, "").getEntity().toString();
 		Assert.assertThat(result, containsString("<form"));
 	}
 	
 	
 	@Test
-	public void testSelectQueryWithoutRevision() throws IOException, SAXException, InternalErrorException, TemplateException {
+	public void testSelectQueryWithoutRevision() throws IOException, SAXException, InternalErrorException {
 		String query = String.format(""
 				+ "select * from <%s> %n"
 				+ "where { ?s ?p ?o. } %n"
@@ -92,42 +93,47 @@ public class TestEndpoint {
 	 * @throws InternalErrorException 
 	 * @throws TemplateException 
 	 */
-	@Test public void testExampleQueries() throws IOException, InternalErrorException, TemplateException {
-		String graph1 = SampleDataSet.createSampleDataset1();
-		String graph2 = SampleDataSet.createSampleDataset2();
+	@Test public void testExampleQueries() throws IOException, InternalErrorException {
+		DataSetGenerationResult ds1 = SampleDataSet.createSampleDataset1();
+		DataSetGenerationResult ds2 = SampleDataSet.createSampleDataset2();
 		
-		String query = "SELECT * FROM <" + graph1 + "> REVISION \"3\" WHERE { ?s ?p ?o. }";
+		String query = String.format(
+				"SELECT * FROM <%s> REVISION \"%s\" WHERE { ?s ?p ?o. }",
+				ds1.graphName, ds1.revisions.get("master-3"));
 				
 		String result = ep.sparql(format, query).getEntity().toString();
 		Assert.assertThat(result, containsString("http://test.com/Adam"));
 		
-		query = ""
-		+ "	SELECT ?s ?p ?o"
-		+ "	FROM <" + graph1 + "> REVISION \"master\""
-		+ "	FROM <" + graph2 + "> REVISION \"2\""
-		+ "	WHERE {"
-		+ "	?s ?p ?o."
-		+ "	}";
+		query = String.format(""
+				+ "	SELECT ?s ?p ?o"
+				+ "	FROM <%s> REVISION \"master\""
+				+ "	FROM <%s> REVISION \"%s\""
+				+ "	WHERE {"
+				+ "	?s ?p ?o."
+				+ "	}", ds1.graphName, ds2.graphName, ds2.revisions.get("master-2"));
 		result = ep.sparql(format, query).getEntity().toString();
 		Assert.assertThat(result, containsString("http://test.com/Adam"));
 		
-		query = ""
-		+ "USER \"mgraube\""
-		+ "MESSAGE \"test commit\""
-		+ "	INSERT DATA { GRAPH <" + graph1 + "> REVISION \"5\""
-		+ "	{	<a> <b> <c> .	}}";
+		query = String.format(""
+				+ "USER \"mgraube\""
+				+ "MESSAGE \"test commit\""
+				+ "	INSERT DATA { GRAPH <%s> REVISION \"%s\""
+				+ "	{	<a> <b> <c> .	}}",
+				ds1.graphName, ds1.revisions.get("master-5"));	
 		result = ep.sparql(format, query).getEntity().toString();
 		
-		query = ""
-		+ "USER \"mgraube\""
-		+ "MESSAGE \"test branch commit\""
-		+ "	BRANCH GRAPH <" + graph1 + "> REVISION \"2\" TO \"unstable\"";
+		query = String.format(""
+				+ "USER \"mgraube\" "
+				+ "MESSAGE \"test branch commit\" "
+				+ "BRANCH GRAPH <%s> REVISION \"%s\" TO \"unstable\"",
+				ds1.graphName, ds1.revisions.get("master-2"));
 		result = ep.sparql(format, query).getEntity().toString();
 		
-		query = ""
-		+ "USER \"mgraube\" "
-		+ "MESSAGE \"test tag commit\" "
-		+ "TAG GRAPH <" + graph1 + "> REVISION \"2\" TO \"v0.3-alpha\"";
+		query = String.format(""
+				+ "USER \"mgraube\" "
+				+ "MESSAGE \"test tag commit\" "
+				+ "TAG GRAPH <%s> REVISION \"%s\" TO \"v0.3-alpha\"",
+				ds1.graphName, ds1.revisions.get("master-5"));
 		result = ep.sparql(format, query).getEntity().toString();
 	
 	}

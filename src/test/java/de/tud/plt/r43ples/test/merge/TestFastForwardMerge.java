@@ -1,7 +1,6 @@
 package de.tud.plt.r43ples.test.merge;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.hamcrest.core.StringContains.containsString;
 
 import java.io.IOException;
 
@@ -9,7 +8,6 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -20,7 +18,6 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Endpoint;
-import freemarker.template.TemplateException;
 
 
 public class TestFastForwardMerge {
@@ -47,12 +44,10 @@ public class TestFastForwardMerge {
 	/**
 	 * Set up.
 	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
 	
 	 */
 	@Before
-	public void setUp() throws InternalErrorException, TemplateException, IOException {
+	public void setUp() throws InternalErrorException {
 		// Create the initial data set
 		graphName = SampleDataSet.createSampleDataSetFastForward();
 	}
@@ -65,10 +60,9 @@ public class TestFastForwardMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
 	 */
 	@Test
-	public void testCreatedGraph() throws IOException, SAXException, InternalErrorException, TemplateException {
+	public void testCreatedGraph() throws IOException, SAXException, InternalErrorException {
 		// Test branch B1
 		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B1"));
 		String expected1 = ResourceManagement.getContentFromResource("fastforward/response-B1.xml");
@@ -84,27 +78,16 @@ public class TestFastForwardMerge {
 	/**
 	 * Test FastForward Merge.
 	 * 
+	 * @throws InternalErrorException 
 	 * @throws IOException 
 	 * @throws SAXException 
-	 * @throws InternalErrorException 
-	 * @throws TemplateException 
 	 */
 	@Test
-	public void testFastForwardMerge() throws SAXException, IOException, InternalErrorException, TemplateException {
-		// The SDD to use
-		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
-		
-		// Merge B1 into B2
-		
+	public void testFastForwardMerge() throws InternalErrorException, SAXException, IOException {
 		executeR43plesQuery(createFastForwardMergeQuery(graphName, user, "Merge B1 into Master", "B1", "master"));
-		// Test branch B1
-		String result1 = executeR43plesQuery(createSelectQuery(graphName, "master"));
-		
-		System.out.println("result1 : "+ result1);
+		String result1 = executeR43plesQuery(createSelectQuery(graphName, "master"));		
 		String expected1 = ResourceManagement.getContentFromResource("fastforward/response-B1-into-Master-Master.xml");
-		System.out.println("result1 : "+ expected1);
-		assertXMLEqual(expected1, result1);
-		
+		assertXMLEqual(expected1, result1);	
 	}
 	
 	
@@ -150,10 +133,8 @@ public class TestFastForwardMerge {
 	 * @param query the SPARQL query
 	 * @return the result of the query
 	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
 	 */
-	public static String executeR43plesQuery(String query) throws InternalErrorException, TemplateException, IOException {
+	public static String executeR43plesQuery(String query) throws InternalErrorException {
 		return executeR43plesQueryWithFormat(query, "application/xml");
 	}
 	
@@ -164,10 +145,8 @@ public class TestFastForwardMerge {
 	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
 	 * @return the result of the query
 	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
 	 */
-	public static String executeR43plesQueryWithFormat(String query, String format) throws InternalErrorException, TemplateException, IOException {
+	public static String executeR43plesQueryWithFormat(String query, String format) throws InternalErrorException {
 		Endpoint ep = new Endpoint();
 		Response response = ep.sparql(format, query);
 		if (response.getEntity()!=null)
@@ -183,10 +162,8 @@ public class TestFastForwardMerge {
 	 * @param query the SPARQL query
 	 * @return the response
 	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
 	 */
-	public static Response executeR43plesQueryResponse(String query) throws InternalErrorException, TemplateException, IOException {
+	public static Response executeR43plesQueryResponse(String query) throws InternalErrorException {
 		Endpoint ep = new Endpoint();
 		return ep.sparql("application/xml", query);
 	}

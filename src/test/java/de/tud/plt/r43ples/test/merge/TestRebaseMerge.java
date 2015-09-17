@@ -1,7 +1,6 @@
 package de.tud.plt.r43ples.test.merge;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.hamcrest.core.StringContains.containsString;
 
 import java.io.IOException;
 
@@ -20,7 +19,6 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Endpoint;
-import freemarker.template.TemplateException;
 
 
 public class TestRebaseMerge {
@@ -47,12 +45,9 @@ public class TestRebaseMerge {
 	/**
 	 * Set up.
 	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
-	
 	 */
 	@Before
-	public void setUp() throws InternalErrorException, TemplateException, IOException {
+	public void setUp() throws InternalErrorException {
 		// Create the initial data set
 		graphName = SampleDataSet.createSampleDataSetRebase();
 	}
@@ -62,13 +57,11 @@ public class TestRebaseMerge {
 	/**
 	 * Test the created graph.
 	 * 
-	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
 	 */
 	@Test
-	public void testCreatedGraph() throws IOException, SAXException, InternalErrorException, TemplateException {
+	public void testCreatedGraph() throws IOException, SAXException, InternalErrorException {
 		// Test branch B1
 		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B1"));
 		String expected1 = ResourceManagement.getContentFromResource("rebase/response-B1.xml");
@@ -95,10 +88,9 @@ public class TestRebaseMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
 	 */
 	@Test
-	public void testRebaseMerge1() throws SAXException, IOException, InternalErrorException, TemplateException {
+	public void testRebaseMerge1() throws SAXException, IOException, InternalErrorException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
@@ -106,8 +98,6 @@ public class TestRebaseMerge {
 		executeR43plesRebaseQuery(createCommonRebaseMergeQuery(graphName, sdd, user, "Merge B1 into Master", "B1", "master"));
 		// Test branch master
 		String result1 = executeR43plesQuery(createSelectQuery(graphName, "master"));
-		System.out.println("result master1 "+ result1);
-		
 		String expected1 = ResourceManagement.getContentFromResource("rebase/response-B1-into-Master.xml");
 		assertXMLEqual(expected1, result1);;
 		
@@ -119,10 +109,9 @@ public class TestRebaseMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
 	 */
 	@Test
-	public void testRebaseMerge2() throws SAXException, IOException, InternalErrorException, TemplateException {
+	public void testRebaseMerge2() throws SAXException, IOException, InternalErrorException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
@@ -130,8 +119,6 @@ public class TestRebaseMerge {
 		executeR43plesRebaseQuery(createCommonRebaseMergeQuery(graphName, sdd, user, "Merge B2 into Master", "B2", "master"));
 		// Test branch master
 		String result2 = executeR43plesQuery(createSelectQuery(graphName, "master"));
-		System.out.println("result master2 "+ result2);
-		
 		String expected2 = ResourceManagement.getContentFromResource("rebase/response-B2-into-Master.xml");
 		assertXMLEqual(expected2, result2);
 		
@@ -143,10 +130,9 @@ public class TestRebaseMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
 	 */
 	@Test
-	public void testForceRebaseMerge() throws SAXException, IOException, InternalErrorException, TemplateException {
+	public void testForceRebaseMerge() throws SAXException, IOException, InternalErrorException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
@@ -154,8 +140,6 @@ public class TestRebaseMerge {
 		executeR43plesQuery(createForceRebaseMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
 		// Test branch B1
 		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B2"));
-		System.out.println("result 1 "+ result1);
-		
 		String expected1 = ResourceManagement.getContentFromResource("rebase/force/response-B1-into-B2.xml");
 		assertXMLEqual(expected1, result1);
 		
@@ -168,10 +152,9 @@ public class TestRebaseMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
 	 */
 	@Test
-	public void testAutoRebaseMerge() throws SAXException, IOException, InternalErrorException, TemplateException {
+	public void testAutoRebaseMerge() throws SAXException, IOException, InternalErrorException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
@@ -179,9 +162,6 @@ public class TestRebaseMerge {
 		executeR43plesQuery(createAutoRebaseMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
 		// Test branch B1
 		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B2"));
-		System.out.println("result 2 "+ result1);
-
-		
 		String expected1 = ResourceManagement.getContentFromResource("rebase/auto/response-B1-into-B2.xml");
 		assertXMLEqual(expected1, result1);
 		
@@ -194,13 +174,12 @@ public class TestRebaseMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
 	 */
 	@Test
-	public void testCommonRebaseMerge() throws IOException, SAXException, InternalErrorException, TemplateException {
+	public void testCommonRebaseMerge() throws IOException, SAXException, InternalErrorException {
 		
 		// Create the initial data set
-		String graphWithConflict = SampleDataSet.createSampleDataSetMerging();
+		String graphWithConflict = SampleDataSet.createSampleDataSetMerging().graphName;
 		
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
@@ -213,11 +192,6 @@ public class TestRebaseMerge {
 
 		// Test branch B2
 		String result1 = executeR43plesQuery(createSelectQuery(graphWithConflict, "B2"));
-		
-		System.out.println("result 3 "+ result1);
-
-		
-
 		String expected1 = ResourceManagement.getContentFromResource("rebase/common/response-B1-into-B2.xml");
 		assertXMLEqual(expected1, result1);
 
@@ -230,10 +204,9 @@ public class TestRebaseMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
 	 */
 	@Test
-	public void testManualRebaseMerge() throws IOException, SAXException, InternalErrorException, TemplateException {
+	public void testManualRebaseMerge() throws IOException, SAXException, InternalErrorException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";		
 		
@@ -249,9 +222,6 @@ public class TestRebaseMerge {
 		
 		// Test branch B2
 		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B2"));
-		
-		System.out.println("result 4 "+ result1);
-
 		String expected1 = ResourceManagement.getContentFromResource("rebase/manual/response-B1-into-B2.xml");
 		assertXMLEqual(expected1, result1);
 		
@@ -376,14 +346,12 @@ public class TestRebaseMerge {
 	 * @param query the SPARQL query
 	 * @return the result of the query
 	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
 	 */
-	public static String executeR43plesQuery(String query) throws InternalErrorException, TemplateException, IOException {
+	public static String executeR43plesQuery(String query) throws InternalErrorException{
 		return executeR43plesQueryWithFormat(query, "application/xml");
 	}
 	
-	public static String executeR43plesRebaseQuery(String query) throws InternalErrorException, TemplateException, IOException {
+	public static String executeR43plesRebaseQuery(String query) throws InternalErrorException {
 		return executeR43plesQueryWithFormat(query, "text/html");
 	}
 	
@@ -394,10 +362,8 @@ public class TestRebaseMerge {
 	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
 	 * @return the result of the query
 	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
 	 */
-	public static String executeR43plesQueryWithFormat(String query, String format) throws InternalErrorException, TemplateException, IOException {
+	public static String executeR43plesQueryWithFormat(String query, String format) throws InternalErrorException {
 		Endpoint ep = new Endpoint();
 		Response response = ep.sparql(format, query);
 		if (response.getEntity()!=null)
@@ -413,10 +379,8 @@ public class TestRebaseMerge {
 	 * @param query the SPARQL query
 	 * @return the response
 	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
 	 */
-	public static Response executeR43plesQueryResponse(String query) throws InternalErrorException, TemplateException, IOException {
+	public static Response executeR43plesQueryResponse(String query) throws InternalErrorException {
 		Endpoint ep = new Endpoint();
 		return ep.sparql("application/xml", query);
 	}

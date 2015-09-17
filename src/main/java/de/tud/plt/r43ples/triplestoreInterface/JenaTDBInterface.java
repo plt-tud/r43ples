@@ -76,11 +76,8 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	@Override
 	public ResultSet executeSelectQuery(String selectQueryString) {
 		dataset.begin(ReadWrite.READ);
-		System.out.println(selectQueryString);
-		
-		logger.info("yxy did query TDB before");
+		logger.debug(selectQueryString);
 		QueryExecution qExec = QueryExecutionFactory.create(selectQueryString, dataset);
-		logger.info("yxy did query TDB after");
 
 		ResultSet result = qExec.execSelect();
 		dataset.end();
@@ -100,7 +97,6 @@ public class JenaTDBInterface extends TripleStoreInterface {
 		QueryExecution qExec = QueryExecutionFactory.create(constructQueryString, dataset);
 		Model result = qExec.execConstruct();
 		dataset.end();
-		logger.info("Construct did it"+ result);
 		return result;
 	}
 	

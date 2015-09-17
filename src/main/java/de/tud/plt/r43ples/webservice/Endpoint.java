@@ -116,19 +116,16 @@ public class Endpoint {
 	private final Pattern patternMergeQuery =  Pattern.compile(
 			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
 			patternModifier);
-	//fast forward merg query
+	// fast forward merge query
 	private final Pattern patternFastForwardQuery =  Pattern.compile(
 			"MERGE\\s*FF\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"",
 			patternModifier);
 	
-	//rebase merg query
+	// rebase merge query
 	private final Pattern patternRebaseQuery =  Pattern.compile(
 			"REBASE\\s*(?<action>AUTO|MANUAL|FORCE)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
 			patternModifier);
-	//rebase force query
-	private final Pattern patternRebaseForceQuery =  Pattern.compile(
-			"REBASE\\s*force\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"",
-			patternModifier);
+
 	
 	@Context
 	private UriInfo uriInfo;
@@ -164,18 +161,18 @@ public class Endpoint {
 	 */
 	@Path("createSampleDataset")
 	@GET
-	public final String createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws IOException, InternalErrorException, TemplateException {
+	public final String createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws InternalErrorException {
 		List<String> graphs = new ArrayList<>();
 		StringWriter sw = new StringWriter();
 		
 		if (graph.equals("1") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataset1());
+			graphs.add(SampleDataSet.createSampleDataset1().graphName);
 		}
 		if (graph.equals("2") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataset2());
+			graphs.add(SampleDataSet.createSampleDataset2().graphName);
 		}
 		if (graph.equals("merging") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataSetMerging());
+			graphs.add(SampleDataSet.createSampleDataSetMerging().graphName);
 		}
 		if (graph.equals("merging-classes") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetMergingClasses());
@@ -205,17 +202,16 @@ public class Endpoint {
 	    freemarker.template.Template temp = null; 
 		String name = "exampleDatasetGeneration.ftl";
 		try {  
-            // create the the configuration  
             Configuration cfg = new Configuration();  
-            // set the path to the template
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // get the template page with the name 
             temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
+            temp.process(htmlMap,sw);	
+        } catch (IOException | TemplateException e) {  
             e.printStackTrace();  
+            throw new InternalErrorException(e.getMessage());
         }  
 		
-		temp.process(htmlMap,sw);	
+		
 		return sw.toString();
 			
 	}
@@ -279,8 +275,6 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @return the response
 	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
 	 */
 	@Path("sparql")
 	@POST
@@ -288,13 +282,9 @@ public class Endpoint {
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("format") final String formatQuery, 
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
-			@FormParam("join_option") final boolean join_option) throws InternalErrorException, TemplateException, IOException {
+			@FormParam("join_option") final boolean join_option) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
-		
-		logger.info("yxy test format:"+format);
-		logger.info("yxy test sparqlQuery:"+sparqlQuery);
-
-
+		logger.debug("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
 		return sparql(format, sparqlQuery, join_option);
 	}
 		
@@ -313,8 +303,6 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @return the response
 	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
 	 */
 	@Path("sparql")
 	@GET
@@ -322,7 +310,7 @@ public class Endpoint {
 	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
 			@QueryParam("format") final String formatQuery, 
 			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
-			@QueryParam("join_option") final boolean join_option) throws InternalErrorException, TemplateException, IOException {
+			@QueryParam("join_option") final boolean join_option) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		
 		String sparqlQueryDecoded;
@@ -338,7 +326,7 @@ public class Endpoint {
 	
 	@Path("debug")
 	@GET
-	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws TemplateException, IOException {
+	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws InternalErrorException {
 		if (sparqlQuery.equals("")) {
 			return getHTMLDebugResponse();
 		} else {
@@ -378,7 +366,6 @@ public class Endpoint {
 //	@Template(name = "/mergingConfiguration.mustache")
 	public final Object getMergingConfiguration() throws TemplateException, IOException {
 		logger.info("Merging form requested");		
-		logger.info("Get Merging interface");
 		
 		StringWriter sw = new StringWriter();
 	    
@@ -412,12 +399,9 @@ public class Endpoint {
     @Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
 		 MediaType.APPLICATION_SVG_XML })
 	public final Object getMerging(@HeaderParam("Accept") final String format_header,
-		@DefaultValue("0") @QueryParam("q") final String q,@QueryParam("graph") final String graph) throws IOException, TemplateException {
-		logger.info("in merging yxy");
-		logger.info("Get q: " + q);
-		logger.info("Get graph: " + graph);
-		logger.info(format_header);
-		
+		@DefaultValue("0") @QueryParam("q") final String q, @QueryParam("graph") final String graph) throws IOException, TemplateException {
+		// FIXME: What is q?
+		logger.info("Merging -- q: " + q + ", graph: " + graph);		
 		ResponseBuilder response = Response.ok();
 		
 		if (q.equals("0")) {
@@ -430,7 +414,7 @@ public class Endpoint {
 	}
 	
 	/**
-	 * through graph name , branch1 and branch2 to check the right of fast forward strategy
+	 * through graph name, branch1 and branch2 to check the right of fast forward strategy
 	 * */
 	@Path("fastForwardCheckProcess")
 	@GET
@@ -440,8 +424,6 @@ public class Endpoint {
 		logger.info("graph name test: "+ "--"+graphName+"--");
 		logger.info("branch name test: " + "--"+branch1+"--"+branch2+"--");
 		return FastForwardControl.fastForwardCheck(graphName, branch1, branch2);
-		
-		
 	}
 	
 	/**
@@ -453,7 +435,6 @@ public class Endpoint {
 	 * @throws TemplateException 
 	 * @throws ConfigurationException 
 	 */
-	
 	@Path("mergingProcess")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
@@ -539,7 +520,7 @@ public class Endpoint {
 			String userCommit = null;
 			
 			Matcher userMatcher = patternUser.matcher(rebaseQuery);
-			logger.info("yxy test mergeQuery:"+rebaseQuery);
+			logger.debug("test mergeQuery:"+rebaseQuery);
 			if (userMatcher.find()) {
 				userCommit = userMatcher.group("user");
 				rebaseQuery = userMatcher.replaceAll("");
@@ -551,7 +532,7 @@ public class Endpoint {
 				rebaseQuery = messageMatcher.replaceAll("");
 			}
 			
-			//for each client ,create a mergingControlMap and for each named graph create a mergingControl, first check ,ob namedgraph exist .
+			//for each client, create a mergingControlMap and for each named graph create a mergingControl, first check, if namedgraph exist .
 			//first create the mergingcontrol and than create the rebasecontrol
 			
 			MergingControl mergingControl;
@@ -583,14 +564,12 @@ public class Endpoint {
 			
 			if (patternRebaseQuery.matcher(rebaseQuery).find()) {
 				responsePost= getRebaseResponse(rebaseQuery, userCommit, messageCommit, "HTML");
-				logger.info("yxy rebase response status: "+responsePost.getStatusInfo().toString());	
-				logger.info("yxy rebase response Header: "+responsePost.getHeaders().get("merging-strategy-information").get(0).toString());	
-				logger.info("yxy rebase response Header: "+responsePost.getHeaders().keySet().toString());	
+				logger.debug("rebase response status: "+responsePost.getStatusInfo().toString());	
+				logger.debug("rebase response Header: "+responsePost.getHeaders().get("merging-strategy-information").get(0).toString());	
+				logger.debug("rebase response Header: "+responsePost.getHeaders().keySet().toString());	
 
 
 			}
-			
-			
 			
 			if((responsePost.getHeaders().get("merging-strategy-information").get(0).toString().equals("rebase-unfreundlich"))) {
 				// to do show force rebase html view , show the rebase result graph
@@ -663,11 +642,10 @@ public class Endpoint {
 			StrategyManagement.saveGraphVorMergingInMap(mergingControl.getCommitModel().getGraphName(), "application/json" );
 				
 			String mergeQuery = ProcessManagement.createMergeQuery(graphName, sddName, user, message, type, branch1, branch2, null);
-			logger.info("yxy test mergeQuery:"+mergeQuery);
+			logger.debug("test mergeQuery:"+mergeQuery);
 			
 			String userCommit = null;
 			Matcher userMatcher = patternUser.matcher(mergeQuery);
-			logger.info("yxy test mergeQuery:"+mergeQuery);
 			if (userMatcher.find()) {
 				userCommit = userMatcher.group("user");
 				mergeQuery = userMatcher.replaceAll("");
@@ -708,13 +686,9 @@ public class Endpoint {
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response mergingGET(@HeaderParam("Accept") final String formatHeader,
 			 @QueryParam("graph") @DefaultValue("") final String graph, @QueryParam("optradio") @DefaultValue("") final String format_new) throws InternalErrorException {
-		System.out.println("2 mal merging Process");
 		ResponseBuilder response = Response.ok();
 		String format = "application/json";
-		logger.info("format_header"+ formatHeader);
-		logger.info("yxy graphName"+ graph);
-		logger.info("yxy format_new"+ format_new);
-
+		logger.info("Merging Process: "+ graph);
 
 		response.type(format);
 		response.entity(RevisionManagement.getRevisionInformation(graph, format));
@@ -733,10 +707,7 @@ public class Endpoint {
 
 		ResponseBuilder response = Response.ok();
 		String format = "application/json";
-		logger.info("format_header"+ formatHeader);
-		logger.info("yxy graphName"+ graph);
-		logger.info("yxy format_new"+ format_new);
-
+		logger.info("loadOldGraphProcess: "+ graph);
 
 		response.type(format);
 		response.entity(StrategyManagement.loadGraphVorMergingFromMap(graph));
@@ -891,7 +862,7 @@ public class Endpoint {
 	}	
 
 	
-	/**neue push process with report view
+	/** new push process with report view
 	 * @throws TemplateException 
 	 * @throws ConfigurationException */
 	@Path("pushProcessNew")
@@ -901,18 +872,15 @@ public class Endpoint {
 			@QueryParam("client") @DefaultValue("") final String user) throws IOException, InternalErrorException, ConfigurationException, TemplateException {
 		
 		ResponseBuilder response = Response.ok();
-		
-		Response responsePost = null;
-		
+			
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//save the graph information vor merging 
+		//save the graph information before merging 
 		StrategyManagement.saveGraphVorMergingInMap(graph, "application/json");
 		
 		String mergeQuery = mergingControl.updateMergeQueryNew();
 		
 		String userCommit = null;
 		Matcher userMatcher = patternUser.matcher(mergeQuery);
-		logger.info("yxy test mergeQuery:"+mergeQuery);
 		if (userMatcher.find()) {
 			userCommit = userMatcher.group("user");
 			mergeQuery = userMatcher.replaceAll("");
@@ -923,15 +891,11 @@ public class Endpoint {
 			messageCommit = messageMatcher.group("message");
 			mergeQuery = messageMatcher.replaceAll("");
 		}
-		
-		logger.info("yxy test mergeQuery nach verarbeit:"+mergeQuery);
 
 		if (patternMergeQuery.matcher(mergeQuery).find()) {
-			responsePost= getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
-			logger.info("yxy get Post"+responsePost.toString());	
+			getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
 		}
 			
-
 		response.entity(mergingControl.getThreeWayReportView(null));
 		
 		clientMap.get(user).remove(graph);
@@ -963,11 +927,10 @@ public class Endpoint {
 		// update the new rebase merge query
 		String mergeQuery = mergingControl.updateMergeQueryNew();
 		
-		logger.info("rebase updated mergequery: "+ mergeQuery);
+		logger.info("rebase updated merge query: "+ mergeQuery);
 		// execute the getRebaseResponse()
 		String userCommit = null;
 		Matcher userMatcher = patternUser.matcher(mergeQuery);
-		logger.info("yxy test mergeQuery:"+mergeQuery);
 		if (userMatcher.find()) {
 			userCommit = userMatcher.group("user");
 			mergeQuery = userMatcher.replaceAll("");
@@ -978,8 +941,6 @@ public class Endpoint {
 			messageCommit = messageMatcher.group("message");
 			mergeQuery = messageMatcher.replaceAll("");
 		}
-		
-		logger.info("yxy test mergeQuery nach verarbeit:"+mergeQuery);
 
 		if (patternRebaseQuery.matcher(mergeQuery).find()) {
 			getRebaseResponse(mergeQuery, userCommit, messageCommit, "HTML");
@@ -1152,7 +1113,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws TemplateException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException, TemplateException, IOException {
+	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException {
 		if (sparqlQuery.equals("")) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
@@ -1179,7 +1140,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws TemplateException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException, TemplateException, IOException {
+	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException {
 		return sparql(format, sparqlQuery, false);
 	}
 
@@ -1207,10 +1168,9 @@ public class Endpoint {
 	 * Using mustache templates. 
 	 * 
 	 * @return HTML response for SPARQL form
-	 * @throws IOException 
-	 * @throws TemplateException 
+	 * @throws InternalErrorException 
 	 */
-	private String getHTMLDebugResponse() throws TemplateException, IOException {		
+	private String getHTMLDebugResponse() throws InternalErrorException {		
 
 	    StringWriter sw = new StringWriter();
 		
@@ -1218,11 +1178,8 @@ public class Endpoint {
 		freemarker.template.Template temp = null; 
 		String name = "debug.ftl";
 		try {  
-            // create configuration of freemarker
             Configuration cfg = new Configuration();  
-            // set the path to get the template
             cfg.setClassForTemplateLoading(Endpoint.class, "/templates");
-            // get the template page with this name
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -1235,7 +1192,12 @@ public class Endpoint {
 	    htmlMap.put("sdd_graph", Config.sdd_graph);
 	    htmlMap.put("debug_active", true);
 		
-	    temp.process(htmlMap,sw);	
+	    try {
+			temp.process(htmlMap,sw);
+		} catch (TemplateException | IOException e) {
+			logger.error(e);
+			throw new InternalErrorException("Something went wrong with the template engine.");
+		}	
 		String content = sw.toString();
 		return content;
 	}
@@ -1252,7 +1214,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws TemplateException 
 	 */
-	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean join_option) throws InternalErrorException, TemplateException, IOException {
+	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean join_option) throws InternalErrorException {
 		logger.info("SPARQL query was requested. Query: " + sparqlQuery);
 		String user = null;
 		Matcher userMatcher = patternUser.matcher(sparqlQuery);
@@ -1302,25 +1264,21 @@ public class Endpoint {
 	 * Using mustache templates. 
 	 * 
 	 * @return HTML response for SPARQL form
-	 * @throws IOException 
-	 * @throws TemplateException 
+	 * @throws InternalErrorException 
 	 */
 	
 	// endpoint.ftl as response return
-	private Response getHTMLResponse() throws TemplateException, IOException{
-		
+	private Response getHTMLResponse() throws InternalErrorException {
+		logger.info("SPARQL form requested");
 		List<String> graphList = RevisionManagement.getRevisedGraphs();
 		StringWriter sw = new StringWriter();
 		
 		//ftl
 	    freemarker.template.Template temp = null; 
 		String name = "endpoint.ftl";
-		try {  
-            // create the the configuration  
+		try {    
             Configuration cfg = new Configuration();  
-            // set the path to the template
             cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // get the template page with the name 
             temp = cfg.getTemplate(name);  
         } catch (IOException e) {  
             e.printStackTrace();  
@@ -1329,31 +1287,16 @@ public class Endpoint {
 		htmlMap.put("graphList", graphList);
 	    htmlMap.put("endpoint_active", true);
 		
-		temp.process(htmlMap,sw);	
+		try {
+			temp.process(htmlMap,sw);
+		} catch (TemplateException | IOException e) {
+			logger.error(e);
+			throw new InternalErrorException("Something went wrong with the template engine.");
+		}	
 		
 		return Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML).build();
 	}
 	
-	// endpoint.mustache as response return
-//	private Response getHTMLResponse() {
-//		logger.info("SPARQL form requested");
-//		List<String> graphList = RevisionManagement.getRevisedGraphs();
-//		
-//		MustacheFactory mf = new DefaultMustacheFactory();
-//	    Mustache mustache = mf.compile("templates/endpoint.mustache");
-//	    StringWriter sw = new StringWriter();
-//	    
-//	    htmlMap.put("graphList", graphList);
-//	    htmlMap.put("endpoint_active", true);
-//	    mustache.execute(sw, htmlMap);		
-//		
-//		String content = sw.toString();
-//		
-//		return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
-//	}
-//	
-	
-
 	
 	/**
 	 * Provides the SPARQL Endpoint description of the original sparql endpoint
@@ -1540,11 +1483,10 @@ public class Endpoint {
 			if (revisionNumberMap.containsKey(revisionName)) {
 				newRevisionNumber = revisionNumberMap.get(revisionName);
 			}else {
-				newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
+				newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName);
 				revisionNumberMap.put(revisionName, newRevisionNumber);
 			}
-			
-//			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);						
+								
 			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
 			String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
 			
@@ -1585,7 +1527,7 @@ public class Endpoint {
 			if (revisionNumberMap.containsKey(revisionName)) {
 				newRevisionNumber = revisionNumberMap.get(revisionName);
 			}else {
-				newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
+				newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName);
 				revisionNumberMap.put(revisionName, newRevisionNumber);
 			}
 			
@@ -1864,15 +1806,12 @@ public class Endpoint {
 			String uriA = "http://eatld.et.tu-dresden.de/branch-A";
 			String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 			
-			logger.info("YXYtest commonRevision " + commonRevision);
+			logger.debug("commonRevision " + commonRevision);
 
 			MergeManagement.createRevisionProgresses(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA), graphNameA, uriA, MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
 			
-			logger.info("YXY Processgraph A " +RevisionManagement.getContentOfGraphByConstruct(graphNameA, "HTML"));
-			logger.info("YXY Processgraph B " +RevisionManagement.getContentOfGraphByConstruct(graphNameB, "HTML"));
-
-			
-			logger.info("YXY TEST Nach CreateRevisionProcess " +RevisionManagement.getContentOfGraphByConstruct(graphName, "TURTLE"));
+			logger.debug("Processgraph A " +RevisionManagement.getContentOfGraphByConstruct(graphNameA, "HTML"));
+			logger.debug("Processgraph B " +RevisionManagement.getContentOfGraphByConstruct(graphNameB, "HTML"));
 
 			// Create difference model
 			MergeManagement.createDifferenceTripleModel(graphName,  graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI);
@@ -1899,7 +1838,6 @@ public class Endpoint {
 						+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
 						+ "	} %n"
 						+ "}", graphNameDiff);
-				logger.info("yxy test :"+TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK));
 				if (TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK)) {
 					// Difference model contains conflicts
 					// Return the conflict model to the client
@@ -1953,7 +1891,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws TemplateException 
 	 */
-	private Response getFastForwardResponse(final String sparqlQuery, final String user, final String commitMessage) throws InternalErrorException, TemplateException, IOException{
+	private Response getFastForwardResponse(final String sparqlQuery, final String user, final String commitMessage) throws InternalErrorException {
 		
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		
@@ -2045,7 +1983,7 @@ public class Endpoint {
 	 * @throws TemplateException 
 	 */
 	
-	private Response getRebaseResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException, TemplateException, IOException{
+	private Response getRebaseResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
 		
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		
@@ -2261,6 +2199,9 @@ public class Endpoint {
 				responseBuilder.header(graphStrategy, "with-rebase");
 							
 			} else if ((action == null) && (with == null) && (triples == null)) {
+				//get the difference Model String 
+				String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format);
+				
 				// Check if difference model contains conflicts
 				String queryASK = String.format(
 						  "ASK { %n"
@@ -2268,10 +2209,6 @@ public class Endpoint {
 						+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
 						+ "	} %n"
 						+ "}", graphNameDiff);
-				logger.info("yxy test :"+TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK));
-				
-				//get the difference Model String 
-				String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format);
 				if (TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK)) {
 					// Difference model contains conflicts
 					// Return the conflict model to the client

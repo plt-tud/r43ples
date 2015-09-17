@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.DataSetGenerationResult;
 import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
@@ -26,7 +27,7 @@ import freemarker.template.TemplateException;
  */
 public class TestMergeManagement {
 
-	private static String graph;
+	private static DataSetGenerationResult ds;
 	
 	/**
 	 * @throws ConfigurationException 
@@ -37,7 +38,7 @@ public class TestMergeManagement {
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException, TemplateException, IOException {
 		Config.readConfig("r43ples.test.conf");
-		graph = SampleDataSet.createSampleDataSetMerging();
+		ds = SampleDataSet.createSampleDataSetMerging();
 	}
 
 
@@ -49,8 +50,10 @@ public class TestMergeManagement {
 	 */
 	@Test
 	public final void testGetCommonRevisionWithShortestPath() {
-		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(graph+"-revision-1.0-1", graph+"-revision-1.1-1");
-		Assert.assertEquals(graph+"-revision-1", commonRevision);
+		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(
+				ds.graphName+"-revision-"+ds.revisions.get("b1-1"), 
+				ds.graphName+"-revision-"+ds.revisions.get("b2-2"));
+		Assert.assertEquals(ds.graphName+"-revision-"+ds.revisions.get("master-1"), commonRevision);
 	}
 
 	/**
@@ -58,12 +61,14 @@ public class TestMergeManagement {
 	 */
 	@Test
 	public final void testGetPathBetweenStartAndTargetRevision() {
-		LinkedList<String> path = MergeManagement.getPathBetweenStartAndTargetRevision(graph+"-revision-0", graph+"-revision-1.1-1");
+		LinkedList<String> path = MergeManagement.getPathBetweenStartAndTargetRevision(
+				ds.graphName+"-revision-"+ds.revisions.get("master-0"), 
+				ds.graphName+"-revision-"+ds.revisions.get("b2-1"));
 		LinkedList<String> expected = new LinkedList<String>();
-		expected.add(graph+"-revision-0");
-		expected.add(graph+"-revision-1");
-		expected.add(graph+"-revision-1.1-0");
-		expected.add(graph+"-revision-1.1-1");
+		expected.add(ds.graphName+"-revision-"+ds.revisions.get("master-0"));
+		expected.add(ds.graphName+"-revision-"+ds.revisions.get("master-1"));
+		expected.add(ds.graphName+"-revision-"+ds.revisions.get("b2-0"));
+		expected.add(ds.graphName+"-revision-"+ds.revisions.get("b2-1"));
 		Assert.assertEquals(expected, path);
 	}
 	
@@ -72,18 +77,21 @@ public class TestMergeManagement {
 	 */
 	@Test
 	public final void testGetPathBetweenStartAndTargetRevision2() {
-		LinkedList<String> path = MergeManagement.getPathBetweenStartAndTargetRevision(graph+"-revision-1", graph+"-revision-1.0-1");
+		LinkedList<String> path = MergeManagement.getPathBetweenStartAndTargetRevision(
+				ds.graphName+"-revision-"+ds.revisions.get("master-1"),
+				ds.graphName+"-revision-"+ds.revisions.get("b1-1"));
 		LinkedList<String> expected = new LinkedList<String>();
-		expected.add(graph+"-revision-1");
-		expected.add(graph+"-revision-1.0-0");
-		expected.add(graph+"-revision-1.0-1");
+		
+		expected.add(ds.graphName+"-revision-"+ds.revisions.get("master-1"));
+		expected.add(ds.graphName+"-revision-"+ds.revisions.get("b1-0"));
+		expected.add(ds.graphName+"-revision-"+ds.revisions.get("b1-1"));
 		Assert.assertEquals(expected, path);
 	}
 	
 	@Test
 	public void testResponseHeader() {
 		String sparql = "SELECT * "
-				+ "FROM <"+graph+">"
+				+ "FROM <"+ds.graphName+">"
 				+ "WHERE { ?s ?p ?o}";
 				
 		String result = RevisionManagement.getResponseHeaderFromQuery(sparql);
