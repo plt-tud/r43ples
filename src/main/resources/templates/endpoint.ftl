@@ -42,33 +42,6 @@
 					    
 		});
 		
-
-	
-	
- //  $(function() {
-	// $i=1;
-	// $(".accordion > div").addClass("panel panel-default");
-	// $(".accordion > div").html(function() {
- // 		  var text =	"<div class='panel-heading button tiny' data-toggle='collapse' data-parent='.accordion' href='#collapse"+$i+"'>"+
-	// 	  					"<h3 class='panel-title'>" + $(this).children("h3").text() + "</h3>" +
-	//   					"</div>" +
- //  						"<div id='collapse"+$i+"' class='panel-collapse collapse'>"+
- //  							"<div class='panel-body'>" +
- //  								"<button class='copy button tiny default'><span class='fa fa-reply'</span> copy to form</button>" +
- //  								"<pre>" + $(this).children("pre").html() + "</pre>" +
- //  								"</div>" +		
- //  							"</div>" +
-	//   					"</div>";
-	// 	  $i++;
-	// 	  return text;
-	// });
-	// $(".accordion .panel-collapse").first().addClass("in");
- //  	$(".copy").click(function() {
-	// 	$("#query").val($(this).next().text());
- //  	}); 
- //  });
-  
-
 </script>
 
 <div class="row">

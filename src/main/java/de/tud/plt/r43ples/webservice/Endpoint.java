@@ -360,15 +360,46 @@ public class Endpoint {
 	}
 	
 	
+//	@Path("mergingConfiguration")
+//	@GET
+//	@Template(name = "/mergingConfiguration.mustache")
+//	public final Map<String, Object> getMerging() {
+//		logger.info("Merging form requested");		
+//		logger.info("Get Merging interface");
+//		
+//		htmlMap.put("mergingConfiguration_active", true);
+//		return htmlMap;
+//	}
+	
+	
+	// ftl page
 	@Path("mergingConfiguration")
 	@GET
-	@Template(name = "/mergingConfiguration.mustache")
-	public final Map<String, Object> getMerging() {
+//	@Template(name = "/mergingConfiguration.mustache")
+	public final Object getMergingConfiguration() throws TemplateException, IOException {
 		logger.info("Merging form requested");		
 		logger.info("Get Merging interface");
 		
+		StringWriter sw = new StringWriter();
+	    
+	    //freemarker template engine
+	    freemarker.template.Template temp = null; 
+		String name = "mergingConfiguration.ftl";
+		try {  
+            // create the configuration of the template  
+            Configuration cfg = new Configuration();  
+            // set the path of the template 
+            cfg.setClassForTemplateLoading(Endpoint.class, "/templates");
+            // get the template page with this name
+            temp = cfg.getTemplate(name);  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+		
 		htmlMap.put("mergingConfiguration_active", true);
-		return htmlMap;
+		
+		temp.process(htmlMap,sw);	
+		return sw.toString();
 	}
 	
 	/**

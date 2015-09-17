@@ -18,29 +18,7 @@
    
    function setLocalClient(){
      localStorage.clientName = document.getElementById("user").value;
-   }
-
-    $(document).ready(function(){
-
-      $("#btn-add").click(function(){
-      $("#tb").append("<tr><th><input class=\"form-control\" placeholder=\"User\"></th><th><input class=\"form-control\"   placeholder=\"User\"></th><th><button type=\"button\" class=\"btn btn-block btn-primary btn-xs\" onclick=\"$(this).parent().parent().remove()\">delete</button></th></tr>");
-      });  
-      //$(".panel-collapse").first().addClass("out");
-      // $("#btn-delete").click(function(){$(this).parent().parent().remove()});
-     
-     //confirm and go on merging  
-	  $("#sub").click(function(){
-	  	var r=alert("MergeQuery success created, press Confirm to go on merging process!");
-	  	if(r==true){
-//	  		$("#div").append("<button type=\"button\" class=\"btn btn-block btn-success\">Confirm</button>");
-			$('#con').removeAttr('disabled');
-			$('#sub').prop("disabled", true);
-			$('#can').prop("disabled", true);
-						
-	  	}
-	  });
-
-    }); 
+   } 
 
     
     //Ajax graph->branch
