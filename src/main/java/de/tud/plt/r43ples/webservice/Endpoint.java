@@ -326,12 +326,14 @@ public class Endpoint {
     @Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
 		 MediaType.APPLICATION_SVG_XML })
 	public final Object getMerging(@HeaderParam("Accept") final String format_header,
-		@DefaultValue("0") @QueryParam("q") final String q, @QueryParam("graph") final String graph) throws IOException, TemplateException {
+		@DefaultValue("0") @QueryParam("q") final String getBranch, @QueryParam("graph") final String graph) throws IOException, TemplateException {
 		// FIXME: What is q?
-		logger.info("Merging -- q: " + q + ", graph: " + graph);		
+		logger.info("Merging -- getBranch: " + getBranch + ", graph: " + graph);		
 		ResponseBuilder response = Response.ok();
 		
-		if (q.equals("0")) {
+		// getBranch = 0 --> merging 
+		// getBranch = 1 --> show branch information
+		if (getBranch.equals("0")) {
 			response.entity(MergingControl.getMenuHtmlOutput()).type(MediaType.TEXT_HTML);
 		}
 		else {
@@ -494,8 +496,6 @@ public class Endpoint {
 				logger.debug("rebase response status: "+responsePost.getStatusInfo().toString());	
 				logger.debug("rebase response Header: "+responsePost.getHeaders().get("merging-strategy-information").get(0).toString());	
 				logger.debug("rebase response Header: "+responsePost.getHeaders().keySet().toString());	
-
-
 			}
 			
 			if((responsePost.getHeaders().get("merging-strategy-information").get(0).toString().equals("rebase-unfreundlich"))) {
@@ -510,10 +510,7 @@ public class Endpoint {
 				response.entity(rebaseControl.showRebaseDialogView());
 				
 				return response.build();
-			
-				
 			}else{
-			
 				logger.info("sparql query is force rebase! ");	
 			}
 			
@@ -684,17 +681,13 @@ public class Endpoint {
 		ResponseBuilder response = Response.ok();
 		
 		//get MergingControl and rebaseControl form map
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-		
-		RebaseControl rebaseControl = mergingControl.getRebaseControl();
-		
+		MergingControl mergingControl = clientMap.get(user).get(graph);	
+		RebaseControl rebaseControl = mergingControl.getRebaseControl();	
 		rebaseControl.manualRebaseProcess();
-		
 		
 		response.entity(mergingControl.getViewHtmlOutput());
 		
 		return response.build();
-
 	}	
 	
 	
@@ -895,7 +888,7 @@ public class Endpoint {
 	/**
 	 * select property and get the new triple table
 	 *  */
-	@Path("filterProcess")
+	@Path("api/filterProcess")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response filterPOST(@HeaderParam("Accept") final String formatHeader,
@@ -916,7 +909,7 @@ public class Endpoint {
 	/**
 	 * select the difference in difference tree and renew the triple table
 	 * */
-	@Path("treeFilterProcess")
+	@Path("api/treeFilterProcess")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response treeFilterPOST(@HeaderParam("Accept") final String formatHeader,

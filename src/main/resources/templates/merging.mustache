@@ -7,31 +7,10 @@
      localStorage.clientName = document.getElementById("user").value;
    }
 
-    $(document).ready(function(){
-
-     //confirm and go on merging  
-	  $("#sub").click(function(){
-	  	var r=alert("MergeQuery success created, press Confirm to go on merging process!");
-	  	if(r==true){
-			$('#con').removeAttr('disabled');
-			$('#sub').prop("disabled", true);
-			$('#can').prop("disabled", true);
-						
-	  	}
-	  });
-
-    }); 
-
-    
+   
     //Ajax graph->branch
       function showCustomer(str){
-        var xmlhttp;
-        if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
-          xmlhttp=new XMLHttpRequest();
-        }
-        else{// code for IE6, IE5
-          xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-        }
+        var xmlhttp=new XMLHttpRequest();
         xmlhttp.onreadystatechange=function(){
           if (xmlhttp.readyState==4 && xmlhttp.status==200){
             document.getElementById("Branch1").innerHTML=xmlhttp.responseText;
@@ -109,7 +88,7 @@
 <div class="container">
 			<div class="row" >
 				<div class="col-sm-7">
-                  <legend><h4><strong>Start Merging</strong></h4></legend>
+                  <legend><h3>Start Merging</h3></legend>
                     <form class="form-horizontal" action="mergingProcess" method="post" role="form">
                       <div class="form-group" >
                       	<label for="graph" class="col-sm-2">Graph</label>
@@ -181,12 +160,11 @@
                           </div>
                       </div>
                     </form>
-       
-                  </fieldset>
+
 			 </div>
 
        <div class= "col-sm-5">
-            <legend><h4><strong>Strategy Illustration</strong></h4></legend>
+            <legend><h3>Strategy Illustration</h3></legend>
             <div class="panel-body" id="illustration" style="height:486px; width:406px ;">
             </div>
           </div>

@@ -116,21 +116,16 @@ public class MergingControl {
 	
 	
 	/**show triple merging view*/
-	public String getViewHtmlOutput() throws TemplateException, IOException {	
+	public String getViewHtmlOutput() {	
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
-		freemarker.template.Template temp = null; 
-		String name = "mergingView3.ftl";
-		try {  
-            Configuration cfg = new Configuration();  
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
+	    MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merge/mergingView3.mustache");
 		
-		/**conList fuer conflict triple
-		 * diffList fuer deference triple*/
+		/** 
+		 * conList for conflict triple
+		 * diffList for deference triple
+		 * */
 		List<TreeNode> conList = new ArrayList<TreeNode>();
 		List<TreeNode> diffList = new ArrayList<TreeNode>();
 		Iterator<TreeNode> itG = treeList.iterator();
@@ -158,6 +153,7 @@ public class MergingControl {
 		 	scope.put("clientName", commitModel.getUser());
 	 	}
 	 	
+	 	scope.put("merging_active", true);
 	 	scope.put("isRebase", isRebase);
 	 	scope.put("tableRowList", tableModel.getTripleRowList());
 	 		
@@ -166,10 +162,7 @@ public class MergingControl {
 		scope.put("conStatus", conStatus);
 		scope.put("propertyList", propertyList);	
 		
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
-		
-		temp.process(scope,sw);		
+		mustache.execute(sw, scope);		
 		return sw.toString();		
 	}
 	

@@ -17,6 +17,9 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryExecution;
 import com.hp.hpl.jena.query.QueryExecutionFactory;
@@ -24,7 +27,6 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.JenaModelManagement;
 import de.tud.plt.r43ples.management.ResolutionState;
 import de.tud.plt.r43ples.management.RevisionManagement;
@@ -38,8 +40,6 @@ import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
 import de.tud.plt.r43ples.merging.model.structure.Patch;
 import de.tud.plt.r43ples.merging.model.structure.PatchGroup;
 import de.tud.plt.r43ples.merging.model.structure.Triple;
-import de.tud.plt.r43ples.webservice.Endpoint;
-import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
 public class RebaseControl {
@@ -106,8 +106,10 @@ public class RebaseControl {
 		
 	}
 	
-	/**force rebase beginn , for each patch in patch graup will a new revision created 
-	 * @throws InternalErrorException */
+	/**
+	 * force rebase begin, for each patch in patch group will a new revision created 
+	 * @throws InternalErrorException 
+	 * */
 	public String forceRebaseProcess( String graphName ) throws InternalErrorException{
 		
 		logger.info("patchGroup 1:" + patchGroup.getBasisRevisionNumber());
@@ -122,29 +124,7 @@ public class RebaseControl {
 		while(pIter.hasNext()) {
 			Entry<String, Patch> pEntry = pIter.next();
 			Patch patch = pEntry.getValue();
-			//LinkedList<String> addedTripleList = patch.getAddedTripleList();
-			//LinkedList<String> removedTripleList = patch.getRemovedTripleList();
-			
-//			String addedAsNTriples = "";
-//			String removedAsNTriples = "";
-//			
-//			for(String triple : addedTripleList) { 
-//				addedAsNTriples = addedAsNTriples + triple + ". \n";
-//			}
-//			
-//			for(String triple : removedTripleList) { 
-//				removedAsNTriples = removedAsNTriples + triple + ". \n";
-//			}
-//			
-//			logger.info("rebase added triples: " + addedAsNTriples);
-//			logger.info("rebase removed triples: " + removedAsNTriples);
-
-			
-			
-//			String newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
-//					patch.getPatchUser(), patch.getPatchMessage(), basisRevisionNumber);
-			
-//			
+		
 			String newRevisionNumber = RevisionManagement.createNewRevisionWithPatch(graphName, patch.getAddedSetUri(), patch.getRemovedSetUri(),
 					patch.getPatchUser(), patch.getPatchMessage(), basisRevisionNumber);
 			
@@ -165,7 +145,7 @@ public class RebaseControl {
 		
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		
-		logger.info("difference Graph Model by manuealRebase: "+ differenceGraphModel);
+		logger.info("difference Graph Model by manualRebase: "+ differenceGraphModel);
 		responseBuilder.entity(this.differenceGraphModel);
 		
 		Response response = responseBuilder.build();	
@@ -460,61 +440,38 @@ public class RebaseControl {
 	 * @throws ConfigurationException 
 	 */
 	
-	public String showRebaseDialogView() throws TemplateException, IOException, ConfigurationException {
+	public String showRebaseDialogView() {
 		Map<String, Object> scope = new HashMap<String, Object>();
-		StringWriter sw = new StringWriter();
-		freemarker.template.Template temp = null; 
-		String name = "rebaseDialog.ftl";
-		try {  
-            // create the configuration of template 
-            Configuration cfg = new Configuration();  
-            // set the path to the template 
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // get the template page with this name 
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merge/rebaseDialog.mustache");
+	    StringWriter sw = new StringWriter(); 
 		
 		scope.put("graphName", commitModel.getGraphName());
 		scope.put("clientName", commitModel.getUser());
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
 		
-		temp.process(scope,sw);		
+		mustache.execute(sw, scope);		
 		return sw.toString();	
 		
 		
 	}
 	
-	/**get the result graph view by rebase of the named graph*/
-	public String getRebaseReportView(String graphName) throws TemplateException, IOException{
+	/** get the HTML result graph view by rebase of the named graph
+	 * @param graphName
+	 * */
+	public String getRebaseReportView(String graphName) {
 		Map<String, Object> scope = new HashMap<String, Object>();
-		StringWriter sw = new StringWriter();
-		freemarker.template.Template temp = null; 
-		String name = "mergingResultView.ftl";
-		try {  
-            // create the configuration of template
-            Configuration cfg = new Configuration();  
-            // set the path to the template
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // get the tempalte page with this name  
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
-		
-		if(graphName == null) {
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merge/resultView.mustache");
+	    StringWriter sw = new StringWriter();
+	    
+	    if(graphName == null) {
 			graphName = commitModel.getGraphName();
 		}
-		
 		scope.put("graphName", graphName);
 		scope.put("clientName", commitModel.getUser());
 		scope.put("commit", commitModel);
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
 		
-		temp.process(scope,sw);		
+	    mustache.execute(sw, scope);			
 		return sw.toString();	
 	}
 	
