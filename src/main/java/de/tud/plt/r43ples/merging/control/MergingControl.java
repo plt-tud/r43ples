@@ -120,7 +120,8 @@ public class MergingControl {
 		scope.put("graphList", graphList);
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		scope.put("gitCommit", GitRepositoryState.getGitRepositoryState().commitIdAbbrev);
+		scope.put("gitBranch", GitRepositoryState.getGitRepositoryState().branch);
 		
 		temp.process(scope,sw);	
 		return sw.toString();
@@ -179,7 +180,8 @@ public class MergingControl {
 		scope.put("propertyList", propertyList);	
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		scope.put("gitCommit", GitRepositoryState.getGitRepositoryState().commitIdAbbrev);
+		scope.put("gitBranch", GitRepositoryState.getGitRepositoryState().branch);
 		
 		temp.process(scope,sw);		
 		return sw.toString();		
@@ -247,7 +249,8 @@ public class MergingControl {
 		scope.put("propertyList", propertyList);	
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		scope.put("gitCommit", GitRepositoryState.getGitRepositoryState().commitIdAbbrev);
+		scope.put("gitBranch", GitRepositoryState.getGitRepositoryState().branch);
 		
 		temp.process(scope,sw);
 		logger.info("updated view fertig!");
@@ -278,7 +281,8 @@ public class MergingControl {
 		scope.put("clientName", commitModel.getUser());
 		scope.put("commit", commitModel);
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		scope.put("gitCommit", GitRepositoryState.getGitRepositoryState().commitIdAbbrev);
+		scope.put("gitBranch", GitRepositoryState.getGitRepositoryState().branch);
 		
 		temp.process(scope,sw);		
 		return sw.toString();	
@@ -432,7 +436,8 @@ public class MergingControl {
 		scope.put("individualTableList", createTableModelSemanticEnrichmentAllIndividualsList());
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		scope.put("gitCommit", GitRepositoryState.getGitRepositoryState().commitIdAbbrev);
+		scope.put("gitBranch", GitRepositoryState.getGitRepositoryState().branch);
 		
 		temp.process(scope,sw);		
 		return sw.toString();	
@@ -482,7 +487,8 @@ public class MergingControl {
 		scope.put("updatedTripleRowList", updatedTripleRowList);
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		scope.put("gitCommit", GitRepositoryState.getGitRepositoryState().commitIdAbbrev);
+		scope.put("gitBranch", GitRepositoryState.getGitRepositoryState().branch);
 		
 		temp.process(scope,sw);
 		
@@ -530,7 +536,8 @@ public class MergingControl {
 		scope.put("highLevelRowList", highLevelRowList);
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		scope.put("gitCommit", GitRepositoryState.getGitRepositoryState().commitIdAbbrev);
+		scope.put("gitBranch", GitRepositoryState.getGitRepositoryState().branch);
 		
 		temp.process(scope,sw);
 		
@@ -587,7 +594,8 @@ public class MergingControl {
 		scope.put("tableRowList", updatedTripleRowList);
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		scope.put("gitCommit", GitRepositoryState.getGitRepositoryState().commitIdAbbrev);
+		scope.put("gitBranch", GitRepositoryState.getGitRepositoryState().branch);
 		
 		temp.process(scope,sw);	
 		
@@ -658,7 +666,8 @@ public class MergingControl {
 		scope.put("tableRowList", updatedTripleRowList);
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		scope.put("gitCommit", GitRepositoryState.getGitRepositoryState().commitIdAbbrev);
+		scope.put("gitBranch", GitRepositoryState.getGitRepositoryState().branch);
 		
 		temp.process(scope,sw);	
 		
@@ -697,7 +706,8 @@ public class MergingControl {
 		scope.put("tableRowList", tableModel.getTripleRowList());
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		scope.put("gitCommit", GitRepositoryState.getGitRepositoryState().commitIdAbbrev);
+		scope.put("gitBranch", GitRepositoryState.getGitRepositoryState().branch);
 		
 		temp.process(scope,sw);		
 		return sw.toString();	
@@ -1045,7 +1055,8 @@ public class MergingControl {
 		scope.put("reportTableRowList", reportTableRowList);
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		scope.put("gitCommit", GitRepositoryState.getGitRepositoryState().commitIdAbbrev);
+		scope.put("gitBranch", GitRepositoryState.getGitRepositoryState().branch);
 		
 		temp.process(scope,sw);		
 		return sw.toString();	
@@ -1100,7 +1111,8 @@ public class MergingControl {
 		scope.put("reportTableRowList", reportTableRowList);
 		
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		scope.put("gitCommit", GitRepositoryState.getGitRepositoryState().commitIdAbbrev);
+		scope.put("gitBranch", GitRepositoryState.getGitRepositoryState().branch);
 		
 		temp.process(scope,sw);		
 		return sw.toString();	

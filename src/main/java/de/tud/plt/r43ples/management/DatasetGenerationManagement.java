@@ -10,6 +10,7 @@ import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.webservice.Endpoint;
+import freemarker.template.TemplateException;
 
 /**
  * Provides methods for generation of example graphs.
@@ -30,8 +31,10 @@ public class DatasetGenerationManagement {
 	 * 
 	 * @param graphName the graph name
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public static void createNewGraph(String graphName) throws InternalErrorException {
+	public static void createNewGraph(String graphName) throws InternalErrorException, TemplateException, IOException {
 		// Purge silent example graph
 		String query = String.format("DROP SILENT GRAPH <%s>", graphName);
 		ep.sparql(MediaType.TEXT_HTML, query, false);
@@ -53,8 +56,10 @@ public class DatasetGenerationManagement {
 	 * @param revision the revision
 	 * @param branchName the branch name
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public static void createNewBranch(String user, String message, String graphName, String revision, String branchName) throws InternalErrorException {
+	public static void createNewBranch(String user, String message, String graphName, String revision, String branchName) throws InternalErrorException, TemplateException, IOException {
 		String query = String.format(""
 				+ "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
@@ -76,7 +81,7 @@ public class DatasetGenerationManagement {
 	 * @throws IOException 
 	 * @throws TemplateException 
 	 */
-	 public static void executeInsertQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
+	 public static void executeInsertQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException, TemplateException, IOException {
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
@@ -98,8 +103,10 @@ public class DatasetGenerationManagement {
 	 * @param revision the revision
 	 * @param triples the triples to delete
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public static void executeDeleteQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
+	public static void executeDeleteQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException, TemplateException, IOException {
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
@@ -121,8 +128,10 @@ public class DatasetGenerationManagement {
 	 * @param revision the revision
 	 * @param triples the triples to delete
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public static void executeDeleteWhereQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
+	public static void executeDeleteWhereQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException, TemplateException, IOException {
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
@@ -150,8 +159,10 @@ public class DatasetGenerationManagement {
 	 * @param triplesInsert the triples to insert
 	 * @param triplesDelete the triples to delete
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public static void executeInsertDeleteQuery(String user, String message, String graphName, String revision, String triplesInsert, String triplesDelete) throws InternalErrorException {
+	public static void executeInsertDeleteQuery(String user, String message, String graphName, String revision, String triplesInsert, String triplesDelete) throws InternalErrorException, TemplateException, IOException {
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"

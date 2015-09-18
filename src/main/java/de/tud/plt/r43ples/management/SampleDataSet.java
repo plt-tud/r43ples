@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import freemarker.template.TemplateException;
 
 /**
  * 
@@ -103,7 +104,7 @@ public class SampleDataSet {
 	 * @throws TemplateException 
 	 *
 	 */
-	public static DataSetGenerationResult createSampleDataSetMerging() throws InternalErrorException {
+	public static DataSetGenerationResult createSampleDataSetMerging() throws InternalErrorException, TemplateException, IOException {
 		DataSetGenerationResult result = new DataSetGenerationResult();		
 		String graphName = "http://test.com/r43ples-dataset-merging";
 		result.graphName = graphName;
@@ -180,7 +181,7 @@ public class SampleDataSet {
 	 * @throws TemplateException 
 	 *
 	 */
-	public static String createSampleDataSetFastForward() throws InternalErrorException {
+	public static String createSampleDataSetFastForward() throws InternalErrorException, TemplateException, IOException {
 		String graphName = "http://test.com/r43ples-dataset-fastforward";
 		RevisionManagement.purgeGraph(graphName);
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
@@ -234,7 +235,7 @@ public class SampleDataSet {
 	 * @throws TemplateException 
 	 *
 	 */
-	public static String createSampleDataSetRebase() throws InternalErrorException {
+	public static String createSampleDataSetRebase() throws InternalErrorException, TemplateException, IOException {
 		String graphName = "http://test.com/r43ples-dataset-rebase";
 
 		//delete the old graph
@@ -302,7 +303,7 @@ public class SampleDataSet {
 	 * @throws TemplateException 
 	 *
 	 */
-	public static String createSampleDataSetForceRebase() throws InternalErrorException {
+	public static String createSampleDataSetForceRebase() throws InternalErrorException, TemplateException, IOException {
 		String graphName = "http://test.com/r43ples-dataset-force-rebase";
 
 		//delete the old graph
@@ -356,8 +357,10 @@ public class SampleDataSet {
 	 * 
 	 * @returns graphName
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public static String createSampleDataSetMergingClasses() throws InternalErrorException {		
+	public static String createSampleDataSetMergingClasses() throws InternalErrorException, TemplateException, IOException {		
 		String graphName = "http://test.com/r43ples-dataset-merging-classes";
 		/** The initial content file path **/
 		String initialContentFilePath = "verification/ExampleGraphClasses_initial.triples";
@@ -435,8 +438,10 @@ public class SampleDataSet {
 	 * 
 	 * @returns graphName
 	 * @throws InternalErrorException
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public static String createSampleDataSetRenaming() throws InternalErrorException {
+	public static String createSampleDataSetRenaming() throws InternalErrorException, TemplateException, IOException {
 		String graphName = "http://test.com/r43ples-dataset-renaming";
 
 		//delete the old graph
@@ -507,8 +512,10 @@ public class SampleDataSet {
 	 * 
 	 * @returns graphName
 	 * @throws InternalErrorException
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	public static String createSampleDataSetComplexStructure() throws InternalErrorException {
+	public static String createSampleDataSetComplexStructure() throws InternalErrorException, TemplateException, IOException {
 		String graphName = "http://test.com/r43ples-dataset-complex-structure";
 		
 		// Create new example graph

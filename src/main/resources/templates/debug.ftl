@@ -1,5 +1,5 @@
 <#include "superHeader.ftl">
-	<div class="row">
+	<div class="row" style="margin-top:-42%">
 		<div id="main" class="small-6 columns">
 			<div id="query_form">
 				<h2>Query Form</h2>

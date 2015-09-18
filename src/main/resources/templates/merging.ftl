@@ -22,7 +22,7 @@
 
     
     //Ajax graph->branch
-      function showCustomer(str){
+      function showBranchList(str){
         var xmlhttp;
         if (window.XMLHttpRequest){// code for IE7+, Firefox, Chrome, Opera, Safari
           xmlhttp=new XMLHttpRequest();
@@ -36,7 +36,7 @@
             document.getElementById("Branch2").innerHTML=xmlhttp.responseText;
           }
         }
-        xmlhttp.open("GET","merging?q=1&graph="+str,true);
+        xmlhttp.open("GET","merging?getBranch=1&graph="+str,true);
         xmlhttp.send();
        }; 
 
@@ -130,9 +130,9 @@
                           <span class="prefix"><strong>GRAPH:</strong></span>
                         </div>
                         <div class="small-10 columns" >
-                          <select class="radius" id="graph" name="graph" onchange="showCustomer(this.value)">
+                          <select class="radius" id="graph" name="graph" onchange="showBranchList(this.value)">
                              <option value="no">None</option>
-							 <#list graphList as graphName>							     
+							               <#list graphList as graphName>							     
                              <option value="${graphName}">${graphName}</option>                        
                              </#list>
                           </select>

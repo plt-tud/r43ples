@@ -41,7 +41,8 @@ public class FastForwardControl {
 		scope.put("graphName", graphName);
 		scope.put("commit", commitModel);
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		scope.put("gitCommit", GitRepositoryState.getGitRepositoryState().commitIdAbbrev);
+		scope.put("gitBranch", GitRepositoryState.getGitRepositoryState().branch);
 		
 		temp.process(scope,sw);		
 		return sw.toString();	

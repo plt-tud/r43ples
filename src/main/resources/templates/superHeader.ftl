@@ -22,6 +22,7 @@
 <!-- Custom styles for this template -->
 <link href="/static/css/r43ples.css" rel="stylesheet" />
 
+
 <style>
 .wsmall{
       -webkit-transform: scale(0.8,0.8); /* Safari and Chrome */
@@ -67,18 +68,25 @@
             <#else>
               <li ><a href="mergingConfiguration"><i class="fa fa-cog fa-fw"></i> Configuration</a></li>
             </#if>
-
+           
             <li class="divider"></li>
+
           </ul>
 
           <!-- Left Nav Section -->
           <ul class="right">
-            <li><div style="margin:6px; padding:3px;" ><em style="margin:16px; padding:8px; color:white;"> <#if version??>Version: ${version!"  "} 
-              <#else>Git: ${git.commitIdAbbrev!" "} - ${git.branch!" "}</#if> </em></div></li>
+            <li>
+              <div style="margin:6px; padding:3px;" >
+                <em style="margin:16px; padding:8px; color:white;"> <#if version??>Version: ${version!"  "} 
+                  <#else>Git: ${gitCommit!" "} - ${gitBranch!" "}</#if> 
+                </em>
+              </div>
+            </li>
             <li class="divider"></li>
             <li><a href="http://plt-tud.github.io/r43ples/"><i class="fa fa-globe"></i> Website</a></li>
             <li><a href="https://github.com/plt-tud/r43ples"><i class="fa fa-github"></i> GitHub</a></li>
           </ul>
+           
         </section>
       </nav>
 

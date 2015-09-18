@@ -33,11 +33,7 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.log4j.Logger;
-import org.glassfish.jersey.server.mvc.Template;
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
@@ -135,7 +131,10 @@ public class Endpoint {
 	 {
 		Map<String, Object> aMap = new HashMap<String, Object>();
 		aMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		aMap.put("git", GitRepositoryState.getGitRepositoryState());
+		aMap.put("gitCommit", GitRepositoryState.getGitRepositoryState().commitIdAbbrev);
+		aMap.put("gitBranch", GitRepositoryState.getGitRepositoryState().branch);
+		
+		
 		htmlMap= aMap;
 	}
 		
@@ -161,7 +160,7 @@ public class Endpoint {
 	 */
 	@Path("createSampleDataset")
 	@GET
-	public final String createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws InternalErrorException {
+	public final String createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws InternalErrorException, TemplateException, IOException {
 		List<String> graphs = new ArrayList<>();
 		StringWriter sw = new StringWriter();
 		
@@ -222,13 +221,15 @@ public class Endpoint {
 	 * @param graph
 	 *            Provide only information about this graph (if not null)
 	 * @return RDF model of revision information
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
 	@Path("revisiongraph")
 	@GET
 	@Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
 			MediaType.APPLICATION_SVG_XML })
 	public final Object getRevisionGraph(@HeaderParam("Accept") final String format_header,
-			@QueryParam("format") final String format_query, @QueryParam("graph") @DefaultValue("") final String graph) {
+			@QueryParam("format") final String format_query, @QueryParam("graph") @DefaultValue("") final String graph) throws TemplateException, IOException {
 		logger.info("Get Revision Graph: " + graph);
 		String format = (format_query != null) ? format_query : format_header;
 		logger.info("format: " + format);
@@ -275,6 +276,8 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @return the response
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
 	@Path("sparql")
 	@POST
@@ -282,7 +285,7 @@ public class Endpoint {
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("format") final String formatQuery, 
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
-			@FormParam("join_option") final boolean join_option) throws InternalErrorException {
+			@FormParam("join_option") final boolean join_option) throws InternalErrorException, TemplateException, IOException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		logger.debug("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
 		return sparql(format, sparqlQuery, join_option);
@@ -303,6 +306,8 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @return the response
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
 	@Path("sparql")
 	@GET
@@ -310,7 +315,7 @@ public class Endpoint {
 	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
 			@QueryParam("format") final String formatQuery, 
 			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
-			@QueryParam("join_option") final boolean join_option) throws InternalErrorException {
+			@QueryParam("join_option") final boolean join_option) throws InternalErrorException, TemplateException, IOException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		
 		String sparqlQueryDecoded;
@@ -326,7 +331,7 @@ public class Endpoint {
 	
 	@Path("debug")
 	@GET
-	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws InternalErrorException {
+	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws InternalErrorException, TemplateException, IOException {
 		if (sparqlQuery.equals("")) {
 			return getHTMLDebugResponse();
 		} else {
@@ -337,14 +342,43 @@ public class Endpoint {
 	
 	/**
 	 * Landing page
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 *
 	 */
+//	@Path("/")
+//	@GET
+//	@Template(name = "/home.mustache")
+//	public final Map<String, Object> getLandingPage() {
+//		logger.info("Get Landing page");
+//		return htmlMap;
+//	}
+	
+	// get ftl home page
 	@Path("/")
 	@GET
-	@Template(name = "/home.mustache")
-	public final Map<String, Object> getLandingPage() {
+	//@Template(name = "/home.ftl")
+	public final Object getLandingPage() throws TemplateException, IOException {
+		StringWriter sw = new StringWriter();
+	    
+	    //freemarker template engine
+	    freemarker.template.Template temp = null; 
+		String name = "home.ftl";
+		try {  
+            // create the configuration of the template  
+            Configuration cfg = new Configuration();  
+            // set the path of the template 
+            cfg.setClassForTemplateLoading(Endpoint.class, "/templates");
+            // get the template page with this name
+            temp = cfg.getTemplate(name);  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+		
 		logger.info("Get Landing page");
-		return htmlMap;
+		
+		temp.process(htmlMap,sw);	
+		return sw.toString();
 	}
 	
 	
@@ -399,12 +433,14 @@ public class Endpoint {
     @Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
 		 MediaType.APPLICATION_SVG_XML })
 	public final Object getMerging(@HeaderParam("Accept") final String format_header,
-		@DefaultValue("0") @QueryParam("q") final String q, @QueryParam("graph") final String graph) throws IOException, TemplateException {
+		@DefaultValue("0") @QueryParam("getBranch") final String getBranch, @QueryParam("graph") final String graph) throws IOException, TemplateException {
 		// FIXME: What is q?
-		logger.info("Merging -- q: " + q + ", graph: " + graph);		
+		logger.info("Merging -- getBranch: " + getBranch + ", graph: " + graph);		
 		ResponseBuilder response = Response.ok();
 		
-		if (q.equals("0")) {
+		//getBranch = 0 --> merging 
+		//getBrnach = 1 --> show branch information
+		if (getBranch.equals("0")) {
 			response.entity(MergingControl.getMenuHtmlOutput());
 		}
 		else {
@@ -1113,7 +1149,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws TemplateException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException {
+	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException, TemplateException, IOException {
 		if (sparqlQuery.equals("")) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
@@ -1140,7 +1176,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws TemplateException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException {
+	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException, TemplateException, IOException {
 		return sparql(format, sparqlQuery, false);
 	}
 
@@ -1151,8 +1187,10 @@ public class Endpoint {
 	 * @param sparqlQuery
 	 * 			string containing the SPARQL query
 	 * @return HTTP response of evaluating the sparql query 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	private String getSparqlDebugResponse(final String sparqlQuery) {
+	private String getSparqlDebugResponse(final String sparqlQuery) throws TemplateException, IOException {
 		logger.info("Debug query was requested. Query: " + sparqlQuery);
 		if (sparqlQuery.contains("INSERT")) {
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(sparqlQuery);
@@ -1214,7 +1252,7 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws TemplateException 
 	 */
-	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean join_option) throws InternalErrorException {
+	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean join_option) throws InternalErrorException, TemplateException, IOException {
 		logger.info("SPARQL query was requested. Query: " + sparqlQuery);
 		String user = null;
 		Matcher userMatcher = patternUser.matcher(sparqlQuery);
@@ -1359,8 +1397,10 @@ public class Endpoint {
 	 * @return the response with HTTP header for every graph (revision number
 	 *         and MASTER revision number)
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	private Response getSelectConstructAskResponse(final String query, final String format, final boolean join_option) throws InternalErrorException {
+	private Response getSelectConstructAskResponse(final String query, final String format, final boolean join_option) throws InternalErrorException, TemplateException, IOException {
 		ResponseBuilder responseBuilder = Response.ok();
 		String result;
 		
@@ -1387,17 +1427,45 @@ public class Endpoint {
 	 * @param query
 	 * @param responseBuilder
 	 * @param result
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	private String getHTMLResult(final String result, String query) {
-		MustacheFactory mf = new DefaultMustacheFactory();
-		Mustache mustache = mf.compile("templates/result.mustache");
+	// get ftl page
+	private String getHTMLResult(final String result, String query) throws TemplateException, IOException {
+		
 		StringWriter sw = new StringWriter();
+	    
+	    //freemarker template engine
+	    freemarker.template.Template temp = null; 
+		String name = "result.ftl";
+		try {  
+            // create the configuration of the template  
+            Configuration cfg = new Configuration();  
+            // set the path of the template 
+            cfg.setClassForTemplateLoading(Endpoint.class, "/templates");
+            // get the template page with this name
+            temp = cfg.getTemplate(name);  
+        } catch (IOException error) {  
+            error.printStackTrace();  
+        }  
+		
 		htmlMap.put("result", result);
 		htmlMap.put("query", query);
-		mustache.execute(sw, htmlMap);		
+		
+		temp.process(htmlMap,sw);
 		return sw.toString();
 	}
 	
+//	private String getHTMLResult(final String result, String query) {
+//		MustacheFactory mf = new DefaultMustacheFactory();
+//		Mustache mustache = mf.compile("templates/result.mustache");
+//		StringWriter sw = new StringWriter();
+//		htmlMap.put("result", result);
+//		htmlMap.put("query", query);
+//		mustache.execute(sw, htmlMap);		
+//		return sw.toString();
+//	}
+//	
 
 	/**
 	 * @param query
@@ -1455,9 +1523,11 @@ public class Endpoint {
 	 * @return the response with HTTP header for every graph (revision number
 	 *         and MASTER revision number)
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
 	private Response getUpdateResponse(final String query, final String user, final String commitMessage,
-			final String format) throws InternalErrorException {
+			final String format) throws InternalErrorException, TemplateException, IOException {
 		logger.info("Update detected");
 		
 		// the HashMap to recode new RevisionNumber 
@@ -1589,8 +1659,10 @@ public class Endpoint {
 	 * @param format
 	 *            the result format
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	private Response getCreateGraphResponse(final String query, final String format) throws InternalErrorException {
+	private Response getCreateGraphResponse(final String query, final String format) throws InternalErrorException, TemplateException, IOException {
 		logger.info("Graph creation detected");
 
 		String graphName = null;
@@ -1634,8 +1706,10 @@ public class Endpoint {
 	 * @param format
 	 *            the result format
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
-	private Response getDropGraphResponse(final String query, final String format) throws InternalErrorException {
+	private Response getDropGraphResponse(final String query, final String format) throws InternalErrorException, TemplateException, IOException {
 		// Clear R43ples information for specified graphs
 		Matcher m = patternDropGraph.matcher(query);
 		boolean found = false;
@@ -1670,9 +1744,11 @@ public class Endpoint {
 	 * @param format
 	 *            the result format
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
 	private Response getBranchOrTagResponse(final String sparqlQuery, final String user, final String commitMessage,
-			final String format) throws InternalErrorException {
+			final String format) throws InternalErrorException, TemplateException, IOException {
 		logger.info("Tag or branch creation detected");
 
 		// Add R43ples information

@@ -1,7 +1,6 @@
-{{<templates/super}}
+<#include "superHeader.ftl">
 
 
-{{$script_extra}}
 	<script>
 		$(document)
 				.ready(
@@ -11,21 +10,19 @@
 							$("#graphDownload").attr("href", "data:image/svg+xml;base64," + b64);
 						});
 	</script>
-{{/script_extra}}
     
-{{$content}}
 	<div class="row">
 	    <h1>Revision Graph</h1>
-	    <h3><samp>&lt;{{graphName}}&gt;</samp></h3>
+	    <h3><samp>&lt;${graphName}&gt;</samp></h3>
 		
 		<div id="revisiongraph">
-		{{{svg_content}}}
+		<!-- {{{svg_content}}} -->
+			${svg_content}
 		</div>
 		<br/>
 		<a class="button small default" href="sparql">Back to Endpoint</a>
-		<a class="button small default" id="graphDownload" href-lang='image/svg+xml' title='revisiongraph_{{graphName}}.svg' download='revisiongraph_{{graphName}}.svg'>Download</a><br/>
+		<a class="button small default" id="graphDownload" href-lang='image/svg+xml' title='revisiongraph_${graphName}.svg' download='revisiongraph_${graphName}.svg'>Download</a><br/>
 	</div>
-{{/content}}
 
 
-{{/templates/super}}
+<#include "superFooter.ftl">

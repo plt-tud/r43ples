@@ -1,21 +1,20 @@
-{{<templates/super}}
-   
-{{$content}}
+
+<#include "superHeader.ftl">
+
 <div class="row">
 	<div id="main" class="large-10 large-offset-1 columns">
 		<div id="results">
 			<h2>Results</h2>
-			<pre>{{ result }}</pre>
+			<#escape x as x?html>
+			<pre>${result}</pre>
+			</#escape>
 		</div>
 		
-		{{# query }}
 	  	<div id="query">
 	  		<h2>Query</h2>
-	  		<pre>{{ toString }}</pre> 
-			{{/query}}
+	  		<pre>${query}</pre> 
 		</div>
 	</div>
 </div>
-{{/content}}
 
-{{/templates/super}}
+<#include "superFooter.ftl">

@@ -1,6 +1,7 @@
 package de.tud.plt.r43ples.visualisation;
 
 import java.awt.Dimension;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collections;
@@ -18,8 +19,12 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
+import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.revisionTree.Commit;
 import de.tud.plt.r43ples.revisionTree.StructuredTree;
+import de.tud.plt.r43ples.webservice.Endpoint;
+import freemarker.template.Configuration;
+import freemarker.template.TemplateException;
 
 public class VisualisationBatik {
 	
@@ -90,25 +95,63 @@ public class VisualisationBatik {
 		return writer.toString();
 	}
 
-	public static String getHtmlOutput(String graphName) {
+//	public static String getHtmlOutput(String graphName) {
+//		// initialise mustache template
+//		MustacheFactory mf = new DefaultMustacheFactory();
+//		Mustache mustache = mf.compile("templates/graphvisualisation_batik.mustache");
+//		StringWriter sw = new StringWriter();
+//
+//		// get graph tree
+//		StructuredTree graphTree = StructuredTree.getTreeOfGraph(graphName);
+//		VisualisationBatik visu = new VisualisationBatik(graphTree);
+//		
+//		Map<String, Object> scope = new HashMap<String, Object>();
+//		scope.put("graphName", graphName);
+//		try {
+//			scope.put("svg_content", visu.buildSVG());
+//		} catch (SVGGraphics2DIOException e) {
+//			scope.put("svg_content", "Error while creating SVG");
+//		}
+//
+//		mustache.execute(sw, scope);
+//		return sw.toString();
+//	}
+	
+	//show ftl page
+	public static String getHtmlOutput(String graphName) throws TemplateException, IOException {
 		// initialise mustache template
-		MustacheFactory mf = new DefaultMustacheFactory();
-		Mustache mustache = mf.compile("templates/graphvisualisation_batik.mustache");
 		StringWriter sw = new StringWriter();
-
+	    
+	    //freemarker template engine
+	    freemarker.template.Template temp = null; 
+		String name = "graphvisualisation_batik.ftl";
+		try {  
+            // create the configuration of the template  
+            Configuration cfg = new Configuration();  
+            // set the path of the template 
+            cfg.setClassForTemplateLoading(Endpoint.class, "/templates");
+            // get the template page with this name
+            temp = cfg.getTemplate(name);  
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }  
+		
 		// get graph tree
 		StructuredTree graphTree = StructuredTree.getTreeOfGraph(graphName);
 		VisualisationBatik visu = new VisualisationBatik(graphTree);
 		
 		Map<String, Object> scope = new HashMap<String, Object>();
 		scope.put("graphName", graphName);
+		scope.put("version", Endpoint.class.getPackage().getImplementationVersion());
+	    scope.put("git", GitRepositoryState.getGitRepositoryState());
 		try {
 			scope.put("svg_content", visu.buildSVG());
 		} catch (SVGGraphics2DIOException e) {
 			scope.put("svg_content", "Error while creating SVG");
 		}
-
-		mustache.execute(sw, scope);
+		
+		temp.process(scope,sw);
+		
 		return sw.toString();
 	}
 }
