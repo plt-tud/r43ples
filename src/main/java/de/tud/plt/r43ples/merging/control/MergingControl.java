@@ -387,18 +387,7 @@ public class MergingControl {
 	/**show individual view of the merging */	
 	public String getIndividualView() throws TemplateException, IOException{
 		Map<String, Object> scope = new HashMap<String, Object>();
-		StringWriter sw = new StringWriter();
-		freemarker.template.Template temp = null; 
-		String name = "individualView.ftl";
-		try {  
-            Configuration cfg = new Configuration();  
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
-		
-		
+		StringWriter sw = new StringWriter();		
 		if(isRebase){
 	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
 		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());	
@@ -408,14 +397,12 @@ public class MergingControl {
 		 	scope.put("graphName", commitModel.getGraphName());	 
 		 	scope.put("clientName", commitModel.getUser());
 	 	}
-		
-		
 		scope.put("individualTableList", createTableModelSemanticEnrichmentAllIndividualsList());
 		
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
-		
-		temp.process(scope,sw);		
+	    MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merge/individualView.mustache");
+
+	    mustache.execute(sw, scope);		
 		return sw.toString();	
 		
 	}
@@ -975,24 +962,12 @@ public class MergingControl {
 	 * ##                                                                                                                                                                      ##
 	 * ##########################################################################################################################################################################
 	 * ##########################################################################################################################################################################
-	 * @throws IOException 
-	 * @throws TemplateException 
 	 * @throws ConfigurationException 
 	 */
 	
-	public String createReportProcess() throws TemplateException, IOException, ConfigurationException {
+	public String createReportProcess() throws ConfigurationException {
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
-		freemarker.template.Template temp = null; 
-		String name = "reportView.ftl";
-		try {  
-            Configuration cfg = new Configuration();  
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
-		
 		
 		List<ReportTableRow>  reportTableRowList = ReportManagement.createReportTableRowList(differenceModel) ;
 		
@@ -1021,17 +996,13 @@ public class MergingControl {
 		
 		// three way merging
 		scope.put("isRebase", false);
-		
 		scope.put("report", report);
 		scope.put("reportTableRowList", reportTableRowList);
-		
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
-		
-		temp.process(scope,sw);		
+		    
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merge/reportView.mustache");
+	    mustache.execute(sw, scope);		
 		return sw.toString();	
-		
-		
 	}
 	
 	/**

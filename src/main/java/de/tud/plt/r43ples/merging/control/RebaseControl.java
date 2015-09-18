@@ -484,16 +484,3 @@ public class RebaseControl {
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

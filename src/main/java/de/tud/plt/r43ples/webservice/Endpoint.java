@@ -734,15 +734,13 @@ public class Endpoint {
 	 * reportResult create
 	 * save the triplesId in checkbox
 	 * todo 
-	 * @throws TemplateException 
-	 * @throws ConfigurationException */
-	
-	
+	 * @throws ConfigurationException 
+	*/
 	@Path("reportProcess")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response reportGET( @QueryParam("graph") @DefaultValue("") final String graph,
-			@QueryParam("client") @DefaultValue("") final String user ) throws IOException, InternalErrorException, TemplateException, ConfigurationException {
+			@QueryParam("client") @DefaultValue("") final String user ) throws InternalErrorException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
 		
@@ -750,8 +748,7 @@ public class Endpoint {
 		
 		response.entity(mergingControl.createReportProcess());
 	
-		return response.build();
-		
+		return response.build();	
 	}	
 	
 	
@@ -936,14 +933,13 @@ public class Endpoint {
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response individualGET( @QueryParam("graph") @DefaultValue("") final String graph,
 			 @QueryParam("client") @DefaultValue("") final String user ) throws TemplateException, IOException {
-		logger.info("graph name transformation: "+ graph);
+		logger.info("Get individual view: "+ graph);
 		ResponseBuilder response = Response.ok();
 		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
 		
 		response.entity(mergingControl.getIndividualView());
 		return response.build();
-
 	}
 	
 	
@@ -1088,9 +1084,7 @@ public class Endpoint {
 	    htmlMap.put("triplestore_url", Config.triplestore_url);
 	    htmlMap.put("sdd_graph", Config.sdd_graph);
 	    htmlMap.put("debug_active", true);
-	    StringWriter sw = new StringWriter();
-		
-	    
+	    StringWriter sw = new StringWriter();	    
 		MustacheFactory mf = new DefaultMustacheFactory();
 	    Mustache mustache = mf.compile("templates/debug.mustache");
 	    mustache.execute(sw, htmlMap);		
