@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.management;
+package de.tud.plt.r43ples.merging;
 
 /**
  * Merge query state enum.
@@ -6,6 +6,6 @@ package de.tud.plt.r43ples.management;
  * @author Stephan Hensel
  *
  */
-public enum MergeQueryState {
+public enum MergeQueryStateEnum {
 	CONFLICTED, CREATED, ERROR
 }

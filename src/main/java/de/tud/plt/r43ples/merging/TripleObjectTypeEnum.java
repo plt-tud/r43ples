@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.management;
+package de.tud.plt.r43ples.merging;
 
 /**
  * The triple object type enum specifies if the object is a literal or resource.

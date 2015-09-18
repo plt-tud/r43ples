@@ -25,10 +25,10 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.ResolutionState;
-import de.tud.plt.r43ples.management.SDDTripleStateEnum;
-import de.tud.plt.r43ples.management.TripleObjectTypeEnum;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
+import de.tud.plt.r43ples.merging.ResolutionStateEnum;
+import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
+import de.tud.plt.r43ples.merging.TripleObjectTypeEnum;
 import de.tud.plt.r43ples.merging.model.structure.Difference;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
@@ -76,7 +76,7 @@ public class ProcessManagement {
 	 * @param type of merging
 	 * @param triples triple set*/
 	
-	public static String createMergeQuery(String graphName, String sdd, String user, String commitMessage, MergeQueryTypeEnum type, String branchNameA, String branchNameB, String triples) throws IOException {
+	public static String createMergeQuery(String graphName, String sdd, String user, String commitMessage, MergeQueryTypeEnum type, String branchNameA, String branchNameB, String triples) {
 		logger.info("Execute merge query of type " + type.toString());
 		String query = "";
 		
@@ -114,7 +114,6 @@ public class ProcessManagement {
 		}
 		
 		return query;
-
 	}
 	
 	
@@ -161,9 +160,9 @@ public class ProcessManagement {
 	    	boolean conflicting = qsDifferenceGroups.getLiteral("?conflicting").toString().equals("true^^http://www.w3.org/2001/XMLSchema#boolean");   
 	    	logger.debug("Original value of conflict: "+ qsDifferenceGroups.getLiteral("?conflicting").toString());
 
-	    	ResolutionState resolutionState = ResolutionState.DIFFERENCE;
+	    	ResolutionStateEnum resolutionState = ResolutionStateEnum.DIFFERENCE;
 	    	if (conflicting) {
-	    		resolutionState = ResolutionState.CONFLICT;
+	    		resolutionState = ResolutionStateEnum.CONFLICT;
 	    	}
 	    	
 	    	DifferenceGroup differenceGroup = new DifferenceGroup(tripleStateA, tripleStateB, automaticResolutionState, conflicting);
@@ -468,10 +467,9 @@ public class ProcessManagement {
 	 * @param graphName the graph name
 	 * @param revisionName the revision name
 	 * @return the array list of individual URIs
-	 * @throws IOException 
 	 * @throws InternalErrorException 
 	 */
-	public static ArrayList<String> getAllIndividualsOfRevision(String graphName, String revisionName) throws IOException, InternalErrorException {
+	public static ArrayList<String> getAllIndividualsOfRevision(String graphName, String revisionName) throws InternalErrorException {
 		logger.info("Get all individuals of revision.");
 		
 		// Result array list
@@ -513,7 +511,7 @@ public class ProcessManagement {
 	 * @throws IOException 
 	 * @throws InternalErrorException 
 	 */
-	public static HashMap<String, TripleIndividualStructure> getAllTriplesOfIndividual(String graphName, String revisionName, String individualUri, DifferenceModel differenceModel) throws IOException, InternalErrorException {
+	public static HashMap<String, TripleIndividualStructure> getAllTriplesOfIndividual(String graphName, String revisionName, String individualUri, DifferenceModel differenceModel) throws InternalErrorException {
 		logger.info("Get all corresponding triples of specified individual.");
 		
 		// Result hash map
@@ -530,7 +528,6 @@ public class ProcessManagement {
 		logger.debug(query);
 		
 		//here difference with mergingClient
-//		String result = TripleStoreInterface.executeQueryWithoutAuthorization(query, "text/xml");
 		String result = QueryManagement.getSelectConstructAskResponseClassic(query, "text/xml");
 		
 		logger.debug(result);
@@ -587,7 +584,6 @@ public class ProcessManagement {
 				return differenceGroup.getDifferences().get(tripleIdentifier);
 			};
 		}
-
 		return null;
 	}
 	
@@ -603,7 +599,7 @@ public class ProcessManagement {
 	 * @throws IOException 
 	 * @throws InternalErrorException 
 	 */
-	public static IndividualModel createIndividualModelOfRevision(String graphName, String revisionName, DifferenceModel differenceModel) throws IOException, InternalErrorException {
+	public static IndividualModel createIndividualModelOfRevision(String graphName, String revisionName, DifferenceModel differenceModel) throws InternalErrorException {
 		IndividualModel individualModel = new IndividualModel();
 		
 		ArrayList<String> individualURIs = getAllIndividualsOfRevision(graphName, revisionName);
@@ -630,11 +626,9 @@ public class ProcessManagement {
 	 * @param individualModelBranchA the individual model of Branch A
 	 * @param individualModelBranchB the individual model of Branch b
 	 * @param tableModel read the information in individual table model
-	 * @throws ConfigurationException 
-	 
 	 */
 	public static List<TableRow> createIndividualTableList (String individualA, String individualB, IndividualModel individualModelBranchA, 
-			IndividualModel individualModelBranchB, TableModel tableModel) throws ConfigurationException {
+			IndividualModel individualModelBranchB, TableModel tableModel) {
 		
 		List<TableRow> TripleRowList = tableModel.getTripleRowList();
 		List<TableRow> updatedTripleRowList = new ArrayList<TableRow>();
@@ -781,11 +775,7 @@ public class ProcessManagement {
 				logger.info("High Level Change Model Test: " + ent.getKey().toString());
 				logger.info("High Level Additon Value : "+ ent.getValue().getAdditionDifference().getTriple().getObject().toString());
 				logger.info("High Level Deletion Value : "+ ent.getValue().getDeletionDifference().getTriple().getObject().toString());
-
-				
-
-			}
-			
+			}		
 		}
 	}
 	
@@ -808,7 +798,7 @@ public class ProcessManagement {
 			Difference currentDifference = differenceMap.get(currentKey);
 			Triple currentTriple = currentDifference.getTriple();
 			String currentPrefix = "<" + currentTriple.getSubject() + "> <" + currentTriple.getPredicate() + "> ";
-			if (!resultList.containsKey(currentPrefix) && currentTriple.getObjectType().equals(TripleObjectTypeEnum.LITERAL) && !currentDifference.getResolutionState().equals(ResolutionState.RESOLVED)) {
+			if (!resultList.containsKey(currentPrefix) && currentTriple.getObjectType().equals(TripleObjectTypeEnum.LITERAL) && !currentDifference.getResolutionState().equals(ResolutionStateEnum.RESOLVED)) {
 				resultList.put(currentPrefix, currentDifference);
 			}
 		}
@@ -840,7 +830,7 @@ public class ProcessManagement {
 				if (currentKey.startsWith(prefix)) {
 					Difference currentDifference = tailMap.get(currentKey);
 					Triple currentTriple = currentDifference.getTriple();
-					if (currentTriple.getObjectType().equals(TripleObjectTypeEnum.LITERAL) && !currentDifference.getResolutionState().equals(ResolutionState.RESOLVED)) {
+					if (currentTriple.getObjectType().equals(TripleObjectTypeEnum.LITERAL) && !currentDifference.getResolutionState().equals(ResolutionStateEnum.RESOLVED)) {
 						// Add corresponding difference to result list
 						result.add(currentDifference);
 					}
@@ -858,8 +848,8 @@ public class ProcessManagement {
 	/**create High level change Table Model from high level change Model
 	 * @param highLevelChangeModel the model to be read 
 	 * @param hightLevelChangeTableModel the Model to be created 
-	 * @throws ConfigurationException */
-	public static void createHighLevelChangeTableModel (HighLevelChangeModel highLevelChangeModel, HighLevelChangeTableModel highLevelChangeTableModel) throws ConfigurationException{
+	 *  */
+	public static void createHighLevelChangeTableModel (HighLevelChangeModel highLevelChangeModel, HighLevelChangeTableModel highLevelChangeTableModel) {
 		highLevelChangeTableModel.clear();
 		Iterator<Entry<String, HighLevelChangeRenaming>> iterHL = highLevelChangeModel.getHighLevelChangesRenaming().entrySet().iterator();
 		while(iterHL.hasNext()){
@@ -879,8 +869,8 @@ public class ProcessManagement {
 			//get approved button state
 			String isRenaming = "no";
 			String isResolved = "no";
-			if(additionDifference.getResolutionState() == ResolutionState.RESOLVED
-					&& deletionDifference.getResolutionState() == ResolutionState.RESOLVED) {
+			if(additionDifference.getResolutionState() == ResolutionStateEnum.RESOLVED
+					&& deletionDifference.getResolutionState() == ResolutionStateEnum.RESOLVED) {
 				if(additionDifference.getTripleResolutionState() == SDDTripleStateEnum.ADDED
 						&& deletionDifference.getTripleResolutionState() == SDDTripleStateEnum.DELETED) {
 					isRenaming = "yes";
@@ -925,7 +915,7 @@ public class ProcessManagement {
 	
 	/** read difference model and create treelist*/
 	
-	public static void createDifferenceTree(DifferenceModel differenceModel, List<TreeNode> treeList) throws ConfigurationException{
+	public static void createDifferenceTree(DifferenceModel differenceModel, List<TreeNode> treeList) {
 //		List<TreeNode> treeList = new ArrayList<TreeNode>();
 		treeList.clear();	
 		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
@@ -976,8 +966,8 @@ public class ProcessManagement {
 		logger.info("Difference Tree successful created.");
 	}
 	/**read difference model and create table model
-	 * @throws ConfigurationException */
-	public static void createTableModel(DifferenceModel differenceModel, TableModel tableModel) throws ConfigurationException{
+	 * */
+	public static void createTableModel(DifferenceModel differenceModel, TableModel tableModel) {
 		tableModel.clear();
 		
 		//get difference group
@@ -998,7 +988,7 @@ public class ProcessManagement {
 				//get triple
 				Triple triple = entryDF.getValue().getTriple();
 				
-				ResolutionState resolutionState = entryDF.getValue().getResolutionState();
+				ResolutionStateEnum resolutionState = entryDF.getValue().getResolutionState();
 				
 				SDDTripleStateEnum autoResolutionState = entryDF.getValue().getTripleResolutionState();
 				
@@ -1037,11 +1027,7 @@ public class ProcessManagement {
 	 * @return the converted triple string or input string
 	 * @throws ConfigurationException 
 	 */
-	public static String convertTripleStringToPrefixTripleString(String tripleString) throws ConfigurationException {
-		//read clent.conf to get the prefix map
-		ClientConfig.readConfig("client.conf");
-		logger.info("Prefix Mapping geted: "+ClientConfig.prefixMappings.entrySet().toString());
-		
+	public static String convertTripleStringToPrefixTripleString(String tripleString) {		
 		if (tripleString.contains("<") && tripleString.contains(">")) {
 			String tripleStringConverted = tripleString.trim().replaceAll("<", "").replaceAll(">", "");
 			int lastIndexSlash = tripleStringConverted.lastIndexOf("/");
@@ -1060,10 +1046,6 @@ public class ProcessManagement {
 				String subString = tripleStringConverted.substring(0, index);
 				
 				logger.info("get substring: "+subString);
-				// Try to find the prefix
-				if (ClientConfig.prefixMappings.containsKey(subString)) {
-					return ClientConfig.prefixMappings.get(subString) + ":" + tripleStringConverted.substring(index, tripleStringConverted.length());
-				}
 			}
 		}
 		return tripleString;
@@ -1089,11 +1071,9 @@ public class ProcessManagement {
 	 * @param branchNameA the branch name A
 	 * @param branchNameB the branch name B
 	 * @return the array list of property URIs
-	 * @throws IOException 
 	 * @throws InternalErrorException 
-	 * @throws ConfigurationException 
 	 */
-	public static ArrayList<String> getPropertiesOfRevision(String graphName, String branchNameA, String branchNameB) throws IOException, InternalErrorException, ConfigurationException {
+	public static ArrayList<String> getPropertiesOfRevision(String graphName, String branchNameA, String branchNameB) throws InternalErrorException {
 		logger.info("Get all properties of branches.");
 		
 		// Result array list
@@ -1130,7 +1110,6 @@ public class ProcessManagement {
 			list.add(kqs);
 
 		}
-
 		return list;
 	}
 	
@@ -1162,9 +1141,6 @@ public class ProcessManagement {
 				+ "WHERE { %n"
 				+ "	?s ?p ?o %n"
 				+ "}", graphName, revision);
-//		String result = TripleStoreInterface.executeQueryWithoutAuthorization(query, "text/xml");
-//		String result = QueryManagement.getSelectConstructAskResponseClassic(query, "text/xml");
-
 		String result = QueryManagement.getSelectConstructAskResponseClassic(query, "text/turtle");
 		
 		logger.debug(result);
@@ -1200,7 +1176,7 @@ public class ProcessManagement {
 				
 				// Get the triple state to use
 				SDDTripleStateEnum tripleState;
-				if (difference.getResolutionState().equals(ResolutionState.RESOLVED)) {
+				if (difference.getResolutionState().equals(ResolutionStateEnum.RESOLVED)) {
 					// Use the approved triple state
 					tripleState = difference.getTripleResolutionState();					
 				} else {
@@ -1231,23 +1207,3 @@ public class ProcessManagement {
 	}	
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

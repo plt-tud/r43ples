@@ -203,13 +203,7 @@ public class TestEndpoint extends JerseyTest {
 		String result = target("sparql").queryParam("format", "text/turtle").request().get(String.class);
 		Assert.assertThat(result, containsString("sd:r43ples"));
 	}
-	
-	@Test
-	public void testLandingPage() {
-		String result = target().request().get(String.class);
-		Assert.assertThat(result, containsString("R43ples (Revision for triples) is an open source Revision Management Tool for the Semantic Web"));
-	}
-	
+
 	@Test
 	public void testMergingPage() {
 		String result = target("merging").request().get(String.class);

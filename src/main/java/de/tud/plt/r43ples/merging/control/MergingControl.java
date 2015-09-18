@@ -21,11 +21,10 @@ import com.hp.hpl.jena.update.UpdateAction;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.RebaseQueryTypeEnum;
-import de.tud.plt.r43ples.management.ResolutionState;
 import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.management.SDDTripleStateEnum;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
-import de.tud.plt.r43ples.merging.management.BranchManagement;
+import de.tud.plt.r43ples.merging.ResolutionStateEnum;
+import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
 import de.tud.plt.r43ples.merging.management.ReportManagement;
 import de.tud.plt.r43ples.merging.management.StrategyManagement;
@@ -47,8 +46,6 @@ import de.tud.plt.r43ples.merging.model.structure.TableRow;
 import de.tud.plt.r43ples.merging.model.structure.TreeNode;
 import de.tud.plt.r43ples.merging.model.structure.Triple;
 import de.tud.plt.r43ples.webservice.Endpoint;
-import freemarker.template.Configuration;
-import freemarker.template.TemplateException;
 
 import javax.ws.rs.core.Response;
 
@@ -99,7 +96,7 @@ public class MergingControl {
 	
 	
 	/**show merging start view*/
-	public static String getMenuHtmlOutput() throws TemplateException, IOException {
+	public static String getMenuHtmlOutput() {
 		List<String> graphList = RevisionManagement.getRevisedGraphs();	
 	    Map<String, Object> scope = new HashMap<String, Object>();
 	    scope.put("merging_active", true);
@@ -166,18 +163,9 @@ public class MergingControl {
 	
 	
 	/**get the new graph after der three way merging, with difference tree und triple table*/
-	public String getUpdatedViewHtmlOutput() throws TemplateException, IOException, ConfigurationException, InternalErrorException {	
+	public String getUpdatedViewHtmlOutput() throws IOException, ConfigurationException, InternalErrorException {	
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
-		freemarker.template.Template temp = null; 
-		String name = "mergingView3.ftl";
-		try {  
-            Configuration cfg = new Configuration();  
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        } 
 		
 		/** updated tree structure, table structure, property list and individual model*/
 		ProcessManagement.createDifferenceTree(differenceModel, treeList);
@@ -228,67 +216,39 @@ public class MergingControl {
 		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
 		scope.put("git", GitRepositoryState.getGitRepositoryState());
 		
-		temp.process(scope,sw);
-		logger.info("updated view fertig!");
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merge/mergingView3.mustache");
+	    mustache.execute(sw, scope);		
 		return sw.toString();		
 	}
 	
 	
 	/**get the new graph after three way merging , with old graph and new graph , ohne difference tree and triple table*/
 	
-	public String getThreeWayReportView(String graphName) throws TemplateException, IOException{
+	public String getThreeWayReportView(String graphName) {
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
-		freemarker.template.Template temp = null; 
-		String name = "mergingResultView.ftl";
-		try {  
-            Configuration cfg = new Configuration();  
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
 		
 		if(graphName == null) {
 			graphName = commitModel.getGraphName();
 		}
-		
 		scope.put("graphName", graphName);
 		scope.put("clientName", commitModel.getUser());
 		scope.put("commit", commitModel);
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
 		
-		temp.process(scope,sw);		
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merge/mergingResultView.mustache");
+	    mustache.execute(sw, scope);		
 		return sw.toString();	
-	}
-	
-	
-	/**
-	 * get branch information through the graphName
-	 * @param graph : name of graph
-	 * return branch name*/
-	public static String getBranchInformation(String graph) throws IOException {
-		List<String> branchList = BranchManagement.getAllBranchNamesOfGraph(graph);
-		StringBuilder branchInformation = new StringBuilder();
-		for(String branchName:branchList){
-			branchInformation.append("<option value="+"\""+branchName+"\""+">"+branchName+"</option>");
-		}
-		return branchInformation.toString();
 	}
 	
 
 	
-	public void getMergeProcess(Response response, String graphName, String branchNameA, String branchNameB, String format) throws IOException, ConfigurationException, InternalErrorException{
+	public void getMergeProcess(Response response, String graphName, String branchNameA, String branchNameB, String format) throws InternalErrorException, IOException {
 		if (isRebase) {
-			
-			ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel, format);
-			
-			
-			ProcessManagement.createDifferenceTree(differenceModel, treeList);
-			
+			ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel, format);		
+			ProcessManagement.createDifferenceTree(differenceModel, treeList);	
 			ProcessManagement.createTableModel(differenceModel, tableModel);
-			
 			
 			// Save the current revision numbers
 			revisionNumberBranchA = RevisionManagement.getRevisionNumber(graphName, branchNameA);
@@ -306,15 +266,11 @@ public class MergingControl {
 				Entry<String,IndividualStructure> entryInd = itEnt.next();
 				logger.info("Individual Sturcture Uri Test" + entryInd.getValue().getIndividualUri());
 				logger.info("Individual Sturcture Triples Test" + entryInd.getValue().getTriples().keySet().toString());
-
-				
 			}
 
 			individualModelBranchB = ProcessManagement.createIndividualModelOfRevision(graphName, branchNameB, differenceModel);
 			logger.info("Individual Model B Test : " + individualModelBranchB.getIndividualStructures().keySet().toString());
-
-			
-			
+		
 			// Create the property list of revisions
 			propertyList = ProcessManagement.getPropertiesOfRevision(graphName, branchNameA, branchNameB);
 			
@@ -329,13 +285,9 @@ public class MergingControl {
 			if (response.getStatusInfo() == Response.Status.CONFLICT){
 				logger.info("Merge query produced conflicts.");
 				
-				ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel,"text/html");
-				
-				
-				ProcessManagement.createDifferenceTree(differenceModel, treeList);
-				
+				ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel,"text/html");		
+				ProcessManagement.createDifferenceTree(differenceModel, treeList);		
 				ProcessManagement.createTableModel(differenceModel, tableModel);
-				
 				
 				// Save the current revision numbers
 				revisionNumberBranchA = RevisionManagement.getRevisionNumber(graphName, branchNameA);
@@ -353,14 +305,10 @@ public class MergingControl {
 					Entry<String,IndividualStructure> entryInd = itEnt.next();
 					logger.info("Individual Sturcture Uri Test" + entryInd.getValue().getIndividualUri());
 					logger.info("Individual Sturcture Triples Test" + entryInd.getValue().getTriples().keySet().toString());
-
-					
 				}
 
 				individualModelBranchB = ProcessManagement.createIndividualModelOfRevision(graphName, branchNameB, differenceModel);
 				logger.info("Individual Model B Test : " + individualModelBranchB.getIndividualStructures().keySet().toString());
-
-				
 				
 				// Create the property list of revisions
 				propertyList = ProcessManagement.getPropertiesOfRevision(graphName, branchNameA, branchNameB);
@@ -369,12 +317,9 @@ public class MergingControl {
 				while(pit.hasNext()){
 					logger.info("propertyList Test : " + pit.next().toString());
 				}
-				
-				
-				
+		
 			} else if (response.getStatusInfo() == Response.Status.CREATED){
-				logger.info("Merge query produced no conflicts. Merged revision was created.");
-				
+				logger.info("Merge query produced no conflicts. Merged revision was created.");			
 			} else {
 				// error occurred 
 				throw new InternalErrorException("Error in response : " + response);
@@ -383,7 +328,7 @@ public class MergingControl {
 	}
 	
 	/**show individual view of the merging */	
-	public String getIndividualView() throws TemplateException, IOException{
+	public String getIndividualView() {
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();		
 		if (isRebase) {
@@ -409,7 +354,7 @@ public class MergingControl {
 	 * @param individualB individual of Branch B
 	 * return response of updated triple table by individual 
 	 * */
-	public String getIndividualFilter(String individualA , String individualB) throws ConfigurationException, TemplateException, IOException {
+	public String getIndividualFilter(String individualA , String individualB) {
 		//updated tableModel
 		ProcessManagement.createTableModel(differenceModel, tableModel);
 		
@@ -425,16 +370,7 @@ public class MergingControl {
 		
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
-		freemarker.template.Template temp = null; 
-		String name = "individualFilterTable.ftl";
-		try {  
-            Configuration cfg = new Configuration();  
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
-		
+				
 		if(isRebase){
 	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
 		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());	
@@ -447,16 +383,15 @@ public class MergingControl {
 		
 		scope.put("updatedTripleRowList", updatedTripleRowList);
 		
-		temp.process(scope,sw);
-		
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merge/individualFilterTable.mustache");
+	    mustache.execute(sw, scope);		
 		return sw.toString();	
-		
-		
 	}
 	
 	/**getHighLevel View
-	 * @throws ConfigurationException */
-	public String getHighLevelView() throws ConfigurationException {
+	 * */
+	public String getHighLevelView() {
 		
 		//get high level change model
 		ProcessManagement.createHighLevelChangeRenamingModel(highLevelChangeModel, differenceModel);
@@ -493,7 +428,7 @@ public class MergingControl {
 	 * @throws ConfigurationException 
 	 * */
 	
-	public String updateTripleTable(String properties) throws ConfigurationException {		
+	public String updateTripleTable(String properties) {		
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		
@@ -531,9 +466,9 @@ public class MergingControl {
 	
 	/**@param triples :  triple list of Difference Tree by checkbox select
 	 * return response of updated triple table
-	 * @throws ConfigurationException */
+	 *  */
 	
-	public String updateTripleTableByTree(String triples) throws ConfigurationException {
+	public String updateTripleTableByTree(String triples) {
 		
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
@@ -656,39 +591,39 @@ public class MergingControl {
 				
 				logger.info("tripleString : "+ tripleString);
 				Difference difference = entryDF.getValue();
-				ResolutionState resolutionState = difference.getResolutionState();
+				ResolutionStateEnum resolutionState = difference.getResolutionState();
 
 				
 				if (ProcessManagement.tripleToString(checkedTriple).equals(tripleString)){
 					
-					if(resolutionState == ResolutionState.RESOLVED){
+					if(resolutionState == ResolutionStateEnum.RESOLVED){
 						if(!tripleState.equals(automaticState) && !conflicting) {
 							reportResult.decrementCounterDifferencesResolutionChanged();
 							difference.setTripleResolutionState(automaticState);
 						}
 						
-						difference.setResolutionState(ResolutionState.DIFFERENCE);
+						difference.setResolutionState(ResolutionStateEnum.DIFFERENCE);
 						if (conflicting) {
-							difference.setResolutionState(ResolutionState.CONFLICT);
+							difference.setResolutionState(ResolutionStateEnum.CONFLICT);
 							if(!tripleState.equals(automaticState)){
 								difference.setTripleResolutionState(automaticState);
 							}
 						}
 					}else{
 						
-						if(resolutionState == ResolutionState.DIFFERENCE && (!tripleState.equals(automaticState))) {
+						if(resolutionState == ResolutionStateEnum.DIFFERENCE && (!tripleState.equals(automaticState))) {
 							reportResult.incrementCounterDifferencesResolutionChanged();
 							difference.setTripleResolutionState(tripleState);
-						}else if (resolutionState == ResolutionState.CONFLICT && (!tripleState.equals(automaticState))){
+						}else if (resolutionState == ResolutionStateEnum.CONFLICT && (!tripleState.equals(automaticState))){
 							difference.setTripleResolutionState(tripleState);
 						}
 						
-						difference.setResolutionState(ResolutionState.RESOLVED);
+						difference.setResolutionState(ResolutionStateEnum.RESOLVED);
 					}
 					
 				}
 				
-				if(difference.getResolutionState().equals(ResolutionState.CONFLICT)){
+				if(difference.getResolutionState().equals(ResolutionStateEnum.CONFLICT)){
 					count ++;
 				}
 			}
@@ -768,26 +703,26 @@ public class MergingControl {
 				while(iterDIF.hasNext()){					
 					Entry<String, Difference> entryDF = iterDIF.next();
 					Difference difference = entryDF.getValue();
-					ResolutionState resolutionState = difference.getResolutionState();
+					ResolutionStateEnum resolutionState = difference.getResolutionState();
 					
 					if(difference.equals(additionDifference)){
 						
-						if(resolutionState == ResolutionState.DIFFERENCE && (!additionDifferenceSDDState.equals(automaticState))){
+						if(resolutionState == ResolutionStateEnum.DIFFERENCE && (!additionDifferenceSDDState.equals(automaticState))){
 							reportResult.incrementCounterDifferencesResolutionChanged();						
 						}
 						
 						difference.setTripleResolutionState(additionDifferenceSDDState);
-						difference.setResolutionState(ResolutionState.RESOLVED);			
+						difference.setResolutionState(ResolutionStateEnum.RESOLVED);			
 						
 					}
 					if(difference.equals(deletionDifference)){
 						
-						if(resolutionState == ResolutionState.DIFFERENCE && (!deletionDifferenceSDDState.equals(automaticState))){
+						if(resolutionState == ResolutionStateEnum.DIFFERENCE && (!deletionDifferenceSDDState.equals(automaticState))){
 							reportResult.incrementCounterDifferencesResolutionChanged();						
 						}
 						
 						difference.setTripleResolutionState(deletionDifferenceSDDState);
-						difference.setResolutionState(ResolutionState.RESOLVED);			
+						difference.setResolutionState(ResolutionStateEnum.RESOLVED);			
 						
 					}
 								
@@ -817,9 +752,9 @@ public class MergingControl {
 							reportResult.decrementCounterDifferencesResolutionChanged();
 							difference.setTripleResolutionState(automaticState);						
 						}
-						difference.setResolutionState(ResolutionState.DIFFERENCE);
+						difference.setResolutionState(ResolutionStateEnum.DIFFERENCE);
 						if (conflicting) {
-							difference.setResolutionState(ResolutionState.CONFLICT);
+							difference.setResolutionState(ResolutionStateEnum.CONFLICT);
 							if(!differenceSDDState.equals(automaticState)){
 								difference.setTripleResolutionState(automaticState);
 							}
@@ -832,9 +767,9 @@ public class MergingControl {
 							reportResult.decrementCounterDifferencesResolutionChanged();
 							difference.setTripleResolutionState(automaticState);						
 						}
-						difference.setResolutionState(ResolutionState.DIFFERENCE);
+						difference.setResolutionState(ResolutionStateEnum.DIFFERENCE);
 						if (conflicting) {
-							difference.setResolutionState(ResolutionState.CONFLICT);
+							difference.setResolutionState(ResolutionStateEnum.CONFLICT);
 							if(!differenceSDDState.equals(automaticState)){
 								difference.setTripleResolutionState(automaticState);
 							}
@@ -863,7 +798,7 @@ public class MergingControl {
 				logger.info("tripleString : "+ tripleString);
 				Difference difference = entryDF.getValue();
 				
-				if(difference.getResolutionState().equals(ResolutionState.CONFLICT)){
+				if(difference.getResolutionState().equals(ResolutionStateEnum.CONFLICT)){
 					count ++;
 				}
 			}

@@ -24,7 +24,6 @@ import de.tud.plt.r43ples.management.DataSetGenerationResult;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Endpoint;
-import freemarker.template.TemplateException;
 
 public class TestUpdate {
 	
@@ -50,13 +49,13 @@ public class TestUpdate {
 	}
 
 	@Before
-	public void setUp() throws  ConfigurationException, InternalErrorException, TemplateException, IOException{
+	public void setUp() throws  ConfigurationException, InternalErrorException, IOException{
 		dsm = SampleDataSet.createSampleDataSetMerging();
 	}
 	
 
 	@Test
-	public void test_insert_existing_triples() throws SAXException, IOException, InternalErrorException, TemplateException {
+	public void test_insert_existing_triples() throws SAXException, IOException, InternalErrorException {
         String query_template = ""
         		+ "SELECT ?s ?p ?o FROM <"+ds1.graphName+"> REVISION \"%s\"%n"
         		+ "WHERE {?s ?p ?o} ORDER By ?s ?p ?o";
@@ -84,7 +83,7 @@ public class TestUpdate {
 	}
 	
 	@Test
-	public void testRestructuring() throws SAXException, IOException, InternalErrorException, TemplateException {
+	public void testRestructuring() throws SAXException, IOException, InternalErrorException {
 		String query = "SELECT ?s ?p ?o FROM <"+dsm.graphName+"> REVISION \"B2\"\n"
         		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
 		String result = ep.sparql(format, query).getEntity().toString();
@@ -119,7 +118,7 @@ public class TestUpdate {
 	}
 	
 	@Test
-	public void testConstructQuery() throws InternalErrorException, TemplateException, IOException {
+	public void testConstructQuery() throws InternalErrorException, IOException {
 		String query = String.format(""
 				+ "CONSTRUCT {?s ?p ?o} "
 				+ "FROM <%s> REVISION \"%s\""

@@ -21,7 +21,6 @@ import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Endpoint;
-import freemarker.template.TemplateException;
 
 /**
  * @author Markus Graube
@@ -64,10 +63,9 @@ public class TestMultipleGraph {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
 	 */
 	@Test
-	public final void testMultipleGraphs() throws SAXException, IOException, InternalErrorException, TemplateException {
+	public final void testMultipleGraphs() throws SAXException, IOException, InternalErrorException {
 		result = ep.sparql(format, get_query_template("master-1", "master-1")).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-1-1.xml");
 		assertXMLEqual(expected, result);
@@ -85,10 +83,9 @@ public class TestMultipleGraph {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
 	 */
 	@Test
-	public final void testMultipleGraphsSparqlJoin() throws SAXException, IOException, InternalErrorException, TemplateException {
+	public final void testMultipleGraphsSparqlJoin() throws SAXException, IOException, InternalErrorException {
 		result = ep.sparql(format, get_query_template("master-1", "master-1"), true).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-1-1.xml");
 		assertXMLEqual(expected, result);

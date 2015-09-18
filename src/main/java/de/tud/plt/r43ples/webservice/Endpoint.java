@@ -49,21 +49,21 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.JenaModelManagement;
-import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
+import de.tud.plt.r43ples.merging.MergeManagement;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.control.FastForwardControl;
 import de.tud.plt.r43ples.merging.control.MergingControl;
 import de.tud.plt.r43ples.merging.control.RebaseControl;
+import de.tud.plt.r43ples.merging.management.BranchManagement;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
 import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.visualisation.VisualisationBatik;
 import de.tud.plt.r43ples.visualisation.VisualisationD3;
-import freemarker.template.TemplateException;
 
 /**
  * Provides SPARQL endpoint via [host]:[port]/r43ples/.
@@ -117,7 +117,7 @@ public class Endpoint {
 	private UriInfo uriInfo;
 	
 	
-	private Map<String, Object> htmlMap = new HashMap<String, Object>();
+
 	
 	/** default logger for this class */
 	private final static Logger logger = Logger.getLogger(Endpoint.class);
@@ -167,6 +167,7 @@ public class Endpoint {
 		if (graph.equals("fastforward") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetFastForward());
 		}
+		Map<String, Object> htmlMap = new HashMap<String, Object>();
 	    htmlMap.put("graphs", graphs);
 	    
 		return htmlMap;			
@@ -306,9 +307,10 @@ public class Endpoint {
 	 */
 	@GET
 	@Template(name = "/home.mustache")
-	@Produces(MediaType.TEXT_HTML)
+	//@Produces(MediaType.TEXT_HTML)
 	public final Map<String, Object> getLandingPage() {
 		logger.info("Get Landing page");
+		Map<String, Object> htmlMap = new HashMap<String, Object>();
 		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
 		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());	
 		return htmlMap;
@@ -316,28 +318,25 @@ public class Endpoint {
 	
 	/**
 	 * get merging seite and input merging information
-	 * @throws TemplateException 
-	 * 
 	 * */
 	@Path("merging")
 	@GET
     @Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
 		 MediaType.APPLICATION_SVG_XML })
-	public final Response getMerging(@HeaderParam("Accept") final String format_header,
-		@DefaultValue("0") @QueryParam("q") final String getBranch, @QueryParam("graph") final String graph) throws IOException, TemplateException {
-		// FIXME: What is q?
-		logger.info("Merging -- getBranch: " + getBranch + ", graph: " + graph);		
+	public final Response getMerging(
+			@HeaderParam("Accept") final String format_header,
+			@QueryParam("graph") final String graph) {
+		logger.info("Merging -- graph: " + graph);		
 		ResponseBuilder response = Response.ok();
-		
-		// getBranch = 0 --> merging 
-		// getBranch = 1 --> show branch information
-		if (getBranch.equals("0")) {
-			response.entity(MergingControl.getMenuHtmlOutput()).type(MediaType.TEXT_HTML);
-		}
-		else {
-			response.entity(MergingControl.getBranchInformation(graph));
-		}
+		response.entity(MergingControl.getMenuHtmlOutput()).type(MediaType.TEXT_HTML);
 		return response.build();
+	}
+	
+	@Path("api/getBranches")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	public final ArrayList<String> getBranchesOfGraph(@QueryParam("graph") final String graph) throws IOException {
+		return BranchManagement.getAllBranchNamesOfGraph(graph);
 	}
 	
 	/**
@@ -358,9 +357,8 @@ public class Endpoint {
 	 * create RevisionProcess Model A
 	 * create RevisionProcess Model B
 	 * create Difference model 
-	 * @throws IOException 
-	 * @throws TemplateException 
 	 * @throws ConfigurationException 
+	 * @throws IOException 
 	 */
 	@Path("mergingProcess")
 	@POST
@@ -373,7 +371,7 @@ public class Endpoint {
 			@FormParam("Branch1") final String branch1,
 			@FormParam("Branch2") final String branch2,
 			@FormParam("user") @DefaultValue("") final String user,
-			@FormParam("message") @DefaultValue("") final String message) throws InternalErrorException, IOException, TemplateException, ConfigurationException {
+			@FormParam("message") @DefaultValue("") final String message) throws InternalErrorException, ConfigurationException, IOException {
 			
 		ResponseBuilder response = Response.ok();
 		
@@ -583,7 +581,6 @@ public class Endpoint {
 		response.type(format);
 		response.entity(RevisionManagement.getRevisionInformation(graph, format));
 		return response.build();
-
 	}	
 	
 	/**
@@ -603,7 +600,6 @@ public class Endpoint {
 		response.entity(StrategyManagement.loadGraphVorMergingFromMap(graph));
 		
 		return response.build();
-
 	}	
 	
 	/**
@@ -616,7 +612,7 @@ public class Endpoint {
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response forceRebaseProcessGET(@QueryParam("graph") @DefaultValue("") final String graph, 
-			@QueryParam("client") @DefaultValue("") final String user ) throws InternalErrorException, TemplateException, IOException{
+			@QueryParam("client") @DefaultValue("") final String user ) throws InternalErrorException {
 
 		ResponseBuilder response = Response.ok();
 		//get rebaseControl form map
@@ -624,21 +620,19 @@ public class Endpoint {
 		rebaseControl.forceRebaseProcess(graph);
 		response.entity(rebaseControl.getRebaseReportView(null));
 		return response.build();
-
 	}	
 	
 	/**
 	 * by rebase unfreundlich, select the manuell rebase process
 	 * @throws InternalErrorException 
-	 * @throws IOException 
 	 * @throws ConfigurationException 
-	 * @throws TemplateException 
+	 * @throws IOException 
 	 */
 	@Path("manualRebaseProcess")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response manualRebaseProcessGET( @QueryParam("graph") @DefaultValue("") final String graph, 
-			@QueryParam("client") @DefaultValue("") final String user ) throws InternalErrorException, ConfigurationException, IOException, TemplateException{
+			@QueryParam("client") @DefaultValue("") final String user ) throws InternalErrorException, ConfigurationException, IOException {
 
 		ResponseBuilder response = Response.ok();
 		
@@ -713,12 +707,13 @@ public class Endpoint {
 	
 	/** new push process with report view
 	 * @throws TemplateException 
-	 * @throws ConfigurationException */
+	 * @throws ConfigurationException 
+	 * @throws IOException */
 	@Path("pushProcessNew")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response pushReportGET( @QueryParam("graph") @DefaultValue("") final String graph,
-			@QueryParam("client") @DefaultValue("") final String user) throws IOException, InternalErrorException, ConfigurationException, TemplateException {
+			@QueryParam("client") @DefaultValue("") final String user) throws InternalErrorException, ConfigurationException, IOException {
 		
 		ResponseBuilder response = Response.ok();
 			
@@ -764,7 +759,7 @@ public class Endpoint {
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response rebasePushReportGET(@QueryParam("graph") @DefaultValue("") final String graph,
-			@QueryParam("client") @DefaultValue("") final String user ) throws IOException, InternalErrorException, ConfigurationException, TemplateException {
+			@QueryParam("client") @DefaultValue("") final String user ) throws IOException, InternalErrorException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
 		
@@ -824,7 +819,7 @@ public class Endpoint {
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response filterPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("properties") @DefaultValue("") final String properties, @FormParam("graph") @DefaultValue("") final String graph, 
-			@FormParam("client") @DefaultValue("") final String user ) throws TemplateException, IOException, ConfigurationException {
+			@FormParam("client") @DefaultValue("") final String user ) {
 		
 		ResponseBuilder response = Response.ok();
 		MergingControl mergingControl = clientMap.get(user).get(graph);
@@ -841,7 +836,7 @@ public class Endpoint {
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response treeFilterPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("triples") @DefaultValue("") final String triples, @FormParam("graph") @DefaultValue("") final String graph, 
-			@FormParam("client") @DefaultValue("") final String user ) throws TemplateException, IOException, ConfigurationException {
+			@FormParam("client") @DefaultValue("") final String user ) {
 		
 		ResponseBuilder response = Response.ok();
 		
@@ -851,7 +846,6 @@ public class Endpoint {
 
 		response.entity(mergingControl.updateTripleTableByTree(triples));
 		return response.build();
-
 	}	
 	
 	
@@ -862,7 +856,7 @@ public class Endpoint {
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response individualGET( @QueryParam("graph") @DefaultValue("") final String graph,
-			 @QueryParam("client") @DefaultValue("") final String user ) throws TemplateException, IOException {
+			 @QueryParam("client") @DefaultValue("") final String user ) {
 		logger.info("Get individual view: "+ graph);
 		ResponseBuilder response = Response.ok();
 		
@@ -897,7 +891,7 @@ public class Endpoint {
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response highLevelGET(@QueryParam("graph") @DefaultValue("") final String graph,
-			@QueryParam("client") @DefaultValue("") final String user ) throws TemplateException, IOException, ConfigurationException {
+			@QueryParam("client") @DefaultValue("") final String user ) {
 		
 		ResponseBuilder response = Response.ok();
 		MergingControl mergingControl = clientMap.get(user).get(graph);
@@ -917,7 +911,7 @@ public class Endpoint {
 	public final Response individualFilterPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("individualA") @DefaultValue("null") final String individualA,
 			@FormParam("individualB") @DefaultValue("null") final String individualB, @FormParam("graph") @DefaultValue("") final String graph, 
-			@FormParam("client") @DefaultValue("") final String user ) throws TemplateException, IOException, ConfigurationException {
+			@FormParam("client") @DefaultValue("") final String user ) {
 		
 		ResponseBuilder response = Response.ok();
 		MergingControl mergingControl = clientMap.get(user).get(graph);
@@ -925,13 +919,11 @@ public class Endpoint {
 		logger.info("individualFilter A Array :"+ individualA);
 		logger.info("individualFilter B Array :"+ individualB);
 		
-		
 		String individualFilter = mergingControl.getIndividualFilter(individualA, individualB);
 		
 		logger.info(individualB.isEmpty());
 		response.entity(individualFilter);
 		return response.build();
-
 	}	
 	
 	
@@ -1000,6 +992,7 @@ public class Endpoint {
 	 */
 	private String getHTMLDebugResponse() throws InternalErrorException {		
 		logger.info("Get Debug page");
+		Map<String, Object> htmlMap = new HashMap<String, Object>();
 		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
 		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());
 		htmlMap.put("graphs", TripleStoreInterfaceSingleton.get().getGraphs());
@@ -1027,6 +1020,7 @@ public class Endpoint {
 		MustacheFactory mf = new DefaultMustacheFactory();
 	    Mustache mustache = mf.compile("templates/endpoint.mustache");
 	    StringWriter sw = new StringWriter();
+		Map<String, Object> htmlMap = new HashMap<String, Object>();
 	    htmlMap.put("graphList", RevisionManagement.getRevisedGraphs());
 	    htmlMap.put("endpoint_active", true);
 	    mustache.execute(sw, htmlMap);		
@@ -1045,6 +1039,7 @@ public class Endpoint {
 		MustacheFactory mf = new DefaultMustacheFactory();
 		Mustache mustache = mf.compile("templates/result.mustache");
 		StringWriter sw = new StringWriter();
+		Map<String, Object> htmlMap = new HashMap<String, Object>();
 		htmlMap.put("result", result);
 		htmlMap.put("query", query);
 		mustache.execute(sw, htmlMap);		
@@ -1470,7 +1465,7 @@ public class Endpoint {
 							
 			} else if ((action == null) && (with == null) && (triples == null)) {
 				//get the difference Model String 
-				String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format);
+				String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, "text/html");
 				
 				// Check if difference model contains conflicts
 				String queryASK = String.format(

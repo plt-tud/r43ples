@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.management;
+package de.tud.plt.r43ples.merging;
 
 /**
  * Resolution state enum.
@@ -7,6 +7,6 @@ package de.tud.plt.r43ples.management;
  * @author Stephan Hensel
  *
  */
-public enum ResolutionState {
+public enum ResolutionStateEnum {
 	RESOLVED, DIFFERENCE, CONFLICT 
 }

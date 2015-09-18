@@ -1,7 +1,7 @@
 package de.tud.plt.r43ples.merging.model.structure;
 
-import de.tud.plt.r43ples.management.ResolutionState;
-import de.tud.plt.r43ples.management.SDDTripleStateEnum;
+import de.tud.plt.r43ples.merging.ResolutionStateEnum;
+import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
 
 
 /**
@@ -25,7 +25,7 @@ public class Difference {
 	/** The triple resolution state. **/
 	private SDDTripleStateEnum tripleResolutionState;
 	/** The resolution state of this difference. **/
-	private ResolutionState resolutionState;
+	private ResolutionStateEnum resolutionState;
 	
 	
 	/**
@@ -39,7 +39,7 @@ public class Difference {
 	 * @param tripleResolutionState the triple resolution state
 	 * @param resolutionState the resolution state
 	 */
-	public Difference(Triple triple, String referencedRevisionA, String referencedRevisionLabelA, String referencedRevisionB, String referencedRevisionLabelB, SDDTripleStateEnum tripleResolutionState, ResolutionState resolutionState) {
+	public Difference(Triple triple, String referencedRevisionA, String referencedRevisionLabelA, String referencedRevisionB, String referencedRevisionLabelB, SDDTripleStateEnum tripleResolutionState, ResolutionStateEnum resolutionState) {
 		this.triple = triple;
 		this.referencedRevisionA = referencedRevisionA;
 		this.referencedRevisionLabelA = referencedRevisionLabelA;
@@ -175,7 +175,7 @@ public class Difference {
 	 * 
 	 * @return the resolutionState
 	 */
-	public ResolutionState getResolutionState() {
+	public ResolutionStateEnum getResolutionState() {
 		return resolutionState;
 	}
 
@@ -185,7 +185,7 @@ public class Difference {
 	 * 
 	 * @param resolutionState the resolutionState to set
 	 */
-	public void setResolutionState(ResolutionState resolutionState) {
+	public void setResolutionState(ResolutionStateEnum resolutionState) {
 		this.resolutionState = resolutionState;
 	}
 	

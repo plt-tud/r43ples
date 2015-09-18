@@ -3,23 +3,22 @@
 {{$script_extra}}
 <script type="text/javascript">
 
-   function setLocalClient(){
-     localStorage.clientName = document.getElementById("user").value;
-   }
+	function setLocalClient(){
+	  localStorage.clientName = document.getElementById("user").value;
+	}
 
    
-    //Ajax graph->branch
-      function showCustomer(str){
-        var xmlhttp=new XMLHttpRequest();
-        xmlhttp.onreadystatechange=function(){
-          if (xmlhttp.readyState==4 && xmlhttp.status==200){
-            document.getElementById("Branch1").innerHTML=xmlhttp.responseText;
-            document.getElementById("Branch2").innerHTML=xmlhttp.responseText;
-          }
-        }
-        xmlhttp.open("GET","merging?q=1&graph="+str,true);
-        xmlhttp.send();
-       }; 
+    // update branches for each selected graph
+    $("#graph").change(function(){
+ 		$.get("api/getBranches", {graph : $(this).val() }, function(data,status){
+        	var listitems = '' ;
+        	$.each(data,function(key, value) {
+        		listitems += '<option>' + value + '</option>';
+        	});
+        	$("#Branch1").html(listitems);
+    		$("#Branch2").html(listitems);
+        });
+    });
 
         //js Stragegie->illustration with Graph
         
@@ -54,7 +53,6 @@
           var branch1 = $('#Branch1').val();
           var branch2 = $('#Branch2').val();
 
-
           $.get("fastForwardCheckProcess", 
             {
               graph : graph,
@@ -85,7 +83,7 @@
                       <div class="form-group" >
                       	<label for="graph" class="col-sm-2 control-label">Graph</label>
                         <div class="col-sm-10" >
-                          <select class="form-control" id="graph" name="graph" onchange="showCustomer(this.value)">
+                          <select class="form-control" id="graph" name="graph">
                              <option value="no">None</option>
                              {{#graphList}}
                              <option value="{{toString}}">{{toString}}</option>                        
@@ -110,7 +108,7 @@
                       <div class="form-group" >
                         <label for="strategie" class="col-sm-2 control-label">Strategy</label>
                         <div class="col-sm-10" >
-                          <select class="form-control" class="form-control" id="strategie" name="strategie" onchange="showIllustration(this.value)">
+                          <select class="form-control" id="strategie" name="strategie" onchange="showIllustration(this.value)">
                              <option value="2">Three-Way Merge</option>
                              <option value="3">Rebase</option>
                              <option value="1">Fast-Forward</option>

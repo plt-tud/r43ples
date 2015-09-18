@@ -8,8 +8,8 @@ import java.util.Map.Entry;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 
-import de.tud.plt.r43ples.management.ResolutionState;
-import de.tud.plt.r43ples.management.SDDTripleStateEnum;
+import de.tud.plt.r43ples.merging.ResolutionStateEnum;
+import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
 import de.tud.plt.r43ples.merging.model.structure.Difference;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
@@ -44,7 +44,7 @@ public class ReportManagement {
 								
 				Difference difference = entryDF.getValue();
 				
-				if(difference.getResolutionState().equals(ResolutionState.CONFLICT)){
+				if(difference.getResolutionState().equals(ResolutionStateEnum.CONFLICT)){
 					count ++;
 				}
 				
@@ -89,7 +89,7 @@ public class ReportManagement {
 				//get triple
 				Triple triple = difference.getTriple();
 				
-				ResolutionState approvedState = difference.getResolutionState();
+				ResolutionStateEnum approvedState = difference.getResolutionState();
 				
 				SDDTripleStateEnum tripleResolutionState = difference.getTripleResolutionState();
 				

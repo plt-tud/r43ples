@@ -18,8 +18,6 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.webservice.Endpoint;
-import freemarker.template.TemplateException;
 
 
 public class TestThreeWayMerge {
@@ -47,11 +45,11 @@ public class TestThreeWayMerge {
 	 * Set up.
 	 * @throws InternalErrorException 
 	 * @throws IOException 
-	 * @throws TemplateException 
+	 *  
 	
 	 */
 	@Before
-	public void setUp() throws InternalErrorException, TemplateException, IOException {
+	public void setUp() throws InternalErrorException, IOException {
 		// Create the initial data set
 		graphName = SampleDataSet.createSampleDataSetMerging().graphName;
 	}
@@ -61,27 +59,26 @@ public class TestThreeWayMerge {
 	/**
 	 * Test the created graph.
 	 * 
-	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
+	 * @throws IOException 
 	 */
 	@Test
-	public void testCreatedGraph() throws IOException, SAXException, InternalErrorException, TemplateException {
+	public void testCreatedGraph() throws SAXException, InternalErrorException, IOException {
 		// Test branch B1
-		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B1"));
+		String result1 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B1"));
 		String expected1 = ResourceManagement.getContentFromResource("threeway/response-B1.xml");
 		assertXMLEqual(expected1, result1);
 		
 		
 		// Test branch B2
-		String result3 = executeR43plesQuery(createSelectQuery(graphName, "B2"));
+		String result3 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B2"));
 		String expected3 = ResourceManagement.getContentFromResource("threeway/response-B2.xml");
 		assertXMLEqual(expected3, result3);
 		
 		
 		// Test branch MASTER
-		String result5 = executeR43plesQuery(createSelectQuery(graphName, "master"));
+		String result5 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "master"));
 		String expected5 = ResourceManagement.getContentFromResource("threeway/response-MASTER.xml");
 		assertXMLEqual(expected5, result5);
 	}
@@ -93,17 +90,17 @@ public class TestThreeWayMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
+	 *  
 	 */
 	@Test
-	public void testAutoMerge() throws SAXException, IOException, InternalErrorException, TemplateException {
+	public void testAutoMerge() throws SAXException, IOException, InternalErrorException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
 		// Merge B1 into B2
-		executeR43plesQuery(createAutoMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
+		TestMerge.executeR43plesQuery(createAutoMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
 		// Test branch B1
-		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B2"));
+		String result1 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B2"));
 		
 		String expected1 = ResourceManagement.getContentFromResource("threeway/auto/response-B1-into-B2.xml");
 		assertXMLEqual(expected1, result1);
@@ -117,25 +114,25 @@ public class TestThreeWayMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
+	 *  
 	 */
 	@Test
-	public void testCommonMerge() throws IOException, SAXException, InternalErrorException, TemplateException {
+	public void testCommonMerge() throws IOException, SAXException, InternalErrorException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
 		// conflicts in merging, therefore no success
-		executeR43plesQueryResponse(createCommonMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
+		TestMerge.executeR43plesQueryResponse(createCommonMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
 		
 		
 		// Merge B1 into B2 (WITH)
 		String triples = "<http://example.com/testS> <http://example.com/testP> \"D\". \n";
 		
-		Response queryResult1 = executeR43plesQueryResponse(createMergeWithQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
+		Response queryResult1 = TestMerge.executeR43plesQueryResponse(createMergeWithQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
 		Assert.assertNull(queryResult1.getEntity());
 
 		// Test branch B2
-		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B2"));
+		String result1 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B2"));
 		
 
 		String expected1 = ResourceManagement.getContentFromResource("threeway/common/response-B1-into-B2.xml");
@@ -150,10 +147,10 @@ public class TestThreeWayMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
-	 * @throws TemplateException 
+	 *  
 	 */
 	@Test
-	public void testManualMerge() throws IOException, SAXException, InternalErrorException, TemplateException {
+	public void testManualMerge() throws IOException, SAXException, InternalErrorException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";		
 		
@@ -166,10 +163,10 @@ public class TestThreeWayMerge {
 				+ "<http://example.com/testS> <http://example.com/testP> \"I\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP> \"J\". \n";
 		
-		executeR43plesQuery(createManualMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
+		TestMerge.executeR43plesQuery(createManualMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
 		
 		// Test branch B2
-		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B2"));
+		String result1 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B2"));
 		String expected1 = ResourceManagement.getContentFromResource("threeway/manual/response-B1-into-B2.xml");
 		assertXMLEqual(expected1, result1);
 		
@@ -267,54 +264,6 @@ public class TestThreeWayMerge {
 							+ "MERGE MANUAL GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\" WITH { %n"
 							+ "	%s %n"
 							+ "}", user, commitMessage, graphName, sdd, branchNameA, branchNameB, triples);
-	}
-
-	
-	/**
-	 * Executes a SPARQL-query against the R43ples r43ples_endpoint
-	 * 
-	 * @param query the SPARQL query
-	 * @return the result of the query
-	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
-	 */
-	public static String executeR43plesQuery(String query) throws InternalErrorException, TemplateException, IOException {
-		return executeR43plesQueryWithFormat(query, "application/xml");
-	}
-	
-	/**
-	 * Executes a SPARQL-query against the R43ples r43ples_endpoint
-	 * 
-	 * @param query the SPARQL query
-	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
-	 * @return the result of the query
-	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
-	 */
-	public static String executeR43plesQueryWithFormat(String query, String format) throws InternalErrorException, TemplateException, IOException {
-		Endpoint ep = new Endpoint();
-		Response response = ep.sparql(format, query);
-		if (response.getEntity()!=null)
-			return response.getEntity().toString();
-		else
-			return "";
-	}
-	
-	
-	/**
-	 * Executes a SPARQL-query against the triple store without authorization using HTTP-POST.
-	 * 
-	 * @param query the SPARQL query
-	 * @return the response
-	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
-	 */
-	public static Response executeR43plesQueryResponse(String query) throws InternalErrorException, TemplateException, IOException {
-		Endpoint ep = new Endpoint();
-		return ep.sparql("application/xml", query);
 	}
 
 }

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**stores all information in TableModel with Freemarker to display
+/**stores all information in TableModel 
  * 
  * @author Xinyu Yang
  * 

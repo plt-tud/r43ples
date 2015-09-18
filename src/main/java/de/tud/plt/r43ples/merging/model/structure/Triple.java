@@ -1,6 +1,6 @@
 package de.tud.plt.r43ples.merging.model.structure;
 
-import de.tud.plt.r43ples.management.TripleObjectTypeEnum;
+import de.tud.plt.r43ples.merging.TripleObjectTypeEnum;
 
 
 /**

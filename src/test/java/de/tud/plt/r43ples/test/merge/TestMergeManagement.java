@@ -16,9 +16,9 @@ import org.junit.Test;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.DataSetGenerationResult;
-import de.tud.plt.r43ples.management.MergeManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
+import de.tud.plt.r43ples.merging.MergeManagement;
 
 /**
  * @author Markus Graube

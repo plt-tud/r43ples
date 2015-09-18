@@ -28,9 +28,9 @@ import com.hp.hpl.jena.rdf.model.Model;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.JenaModelManagement;
-import de.tud.plt.r43ples.management.ResolutionState;
 import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.management.SDDTripleStateEnum;
+import de.tud.plt.r43ples.merging.ResolutionStateEnum;
+import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
 import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.merging.model.structure.CommitModel;
@@ -40,7 +40,6 @@ import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
 import de.tud.plt.r43ples.merging.model.structure.Patch;
 import de.tud.plt.r43ples.merging.model.structure.PatchGroup;
 import de.tud.plt.r43ples.merging.model.structure.Triple;
-import freemarker.template.TemplateException;
 
 public class RebaseControl {
 	private static Logger logger = Logger.getLogger(FastForwardControl.class);
@@ -83,16 +82,11 @@ public class RebaseControl {
 			String deltaAdded = StrategyManagement.getDeltaAddedUri(revisionUri);
 			String deltaRemoved = StrategyManagement.getDeltaRemovedUri(revisionUri);
 			
-//			LinkedList<String> addedTripleList =  StrategyManagement.createAddedOrRemovedTripleSet(deltaAdded);
-//			LinkedList<String> removedTripleList = StrategyManagement.createAddedOrRemovedTripleSet(deltaRemoved);
 			String patchNumber = StrategyManagement.getRevisionNumber(revisionUri);
 			String patchUser = StrategyManagement.getPatchUserUri(commitUri);
 			String patchMessage = StrategyManagement.getPatchMessage(commitUri);
 			
-			
-			patchMap.put(patchNumber, new Patch(patchNumber, patchUser, patchMessage, deltaAdded, deltaRemoved));
-			//patchMap.put(patchNumber, new Patch(patchNumber, patchUser, patchMessage, addedTripleList, removedTripleList));
-			
+			patchMap.put(patchNumber, new Patch(patchNumber, patchUser, patchMessage, deltaAdded, deltaRemoved));			
 		}
 		
 		String basisRevisionNumber = StrategyManagement.getRevisionNumber(basisRevisionUri);
@@ -100,10 +94,7 @@ public class RebaseControl {
 		patchGroup.setBasisRevisionNumber(basisRevisionNumber);
 		patchGroup.setPatchMap(patchMap);
 		
-		
 		logger.info("patchGroup initial successful!" + patchGroup.getPatchMap().size());
-
-		
 	}
 	
 	/**
@@ -233,7 +224,7 @@ public class RebaseControl {
 				
 				// Get the triple state to use
 				SDDTripleStateEnum tripleState;
-				if (difference.getResolutionState().equals(ResolutionState.RESOLVED)) {
+				if (difference.getResolutionState().equals(ResolutionStateEnum.RESOLVED)) {
 					// Use the approved triple state
 					tripleState = difference.getTripleResolutionState();					
 				} else {

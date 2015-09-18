@@ -18,7 +18,6 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.webservice.Endpoint;
 
 
 public class TestRebaseMerge {
@@ -63,19 +62,19 @@ public class TestRebaseMerge {
 	@Test
 	public void testCreatedGraph() throws IOException, SAXException, InternalErrorException {
 		// Test branch B1
-		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B1"));
+		String result1 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B1"));
 		String expected1 = ResourceManagement.getContentFromResource("rebase/response-B1.xml");
 		assertXMLEqual(expected1, result1);
 		
 		
 		// Test branch B2
-		String result2 = executeR43plesQuery(createSelectQuery(graphName, "B2"));
+		String result2 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B2"));
 		String expected2 = ResourceManagement.getContentFromResource("rebase/response-B2.xml");
 		assertXMLEqual(expected2, result2);
 		
 		
 		// Test branch MASTER
-		String result3 = executeR43plesQuery(createSelectQuery(graphName, "master"));
+		String result3 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "master"));
 		String expected3 = ResourceManagement.getContentFromResource("rebase/response-MASTER.xml");
 		assertXMLEqual(expected3, result3);
 	}
@@ -95,12 +94,11 @@ public class TestRebaseMerge {
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
 		// Merge B1 into Master
-		executeR43plesRebaseQuery(createCommonRebaseMergeQuery(graphName, sdd, user, "Merge B1 into Master", "B1", "master"));
+		TestMerge.executeR43plesQuery(createCommonRebaseMergeQuery(graphName, sdd, user, "Merge B1 into Master", "B1", "master"));
 		// Test branch master
-		String result1 = executeR43plesQuery(createSelectQuery(graphName, "master"));
+		String result1 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "master"));
 		String expected1 = ResourceManagement.getContentFromResource("rebase/response-B1-into-Master.xml");
 		assertXMLEqual(expected1, result1);;
-		
 	}
 	
 	/**
@@ -116,9 +114,9 @@ public class TestRebaseMerge {
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
 		// Merge B2 into Master
-		executeR43plesRebaseQuery(createCommonRebaseMergeQuery(graphName, sdd, user, "Merge B2 into Master", "B2", "master"));
+		TestMerge.executeR43plesQuery(createCommonRebaseMergeQuery(graphName, sdd, user, "Merge B2 into Master", "B2", "master"));
 		// Test branch master
-		String result2 = executeR43plesQuery(createSelectQuery(graphName, "master"));
+		String result2 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "master"));
 		String expected2 = ResourceManagement.getContentFromResource("rebase/response-B2-into-Master.xml");
 		assertXMLEqual(expected2, result2);
 		
@@ -137,9 +135,9 @@ public class TestRebaseMerge {
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
 		// Merge B1 into B2
-		executeR43plesQuery(createForceRebaseMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
+		TestMerge.executeR43plesQuery(createForceRebaseMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
 		// Test branch B1
-		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B2"));
+		String result1 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B2"));
 		String expected1 = ResourceManagement.getContentFromResource("rebase/force/response-B1-into-B2.xml");
 		assertXMLEqual(expected1, result1);
 		
@@ -159,9 +157,9 @@ public class TestRebaseMerge {
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
 		// Merge B1 into B2
-		executeR43plesQuery(createAutoRebaseMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
+		TestMerge.executeR43plesQuery(createAutoRebaseMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
 		// Test branch B1
-		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B2"));
+		String result1 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B2"));
 		String expected1 = ResourceManagement.getContentFromResource("rebase/auto/response-B1-into-B2.xml");
 		assertXMLEqual(expected1, result1);
 		
@@ -187,11 +185,11 @@ public class TestRebaseMerge {
 		// Merge B1 into B2 (WITH)
 		String triples = "<http://example.com/testS> <http://example.com/testP> \"D\". \n";
 		
-		Response queryResult1 = executeR43plesQueryResponse(createRebaseMergeWithQuery(graphWithConflict, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
+		Response queryResult1 = TestMerge.executeR43plesQueryResponse(createRebaseMergeWithQuery(graphWithConflict, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
 		Assert.assertNull(queryResult1.getEntity());
 
 		// Test branch B2
-		String result1 = executeR43plesQuery(createSelectQuery(graphWithConflict, "B2"));
+		String result1 = TestMerge.executeR43plesQuery(createSelectQuery(graphWithConflict, "B2"));
 		String expected1 = ResourceManagement.getContentFromResource("rebase/common/response-B1-into-B2.xml");
 		assertXMLEqual(expected1, result1);
 
@@ -218,10 +216,10 @@ public class TestRebaseMerge {
 				+ "<http://example.com/testS> <http://example.com/testP> \"G\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP> \"E\". \n" ;
 		
-		executeR43plesQuery(createManualRebaseMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
+		TestMerge.executeR43plesQuery(createManualRebaseMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
 		
 		// Test branch B2
-		String result1 = executeR43plesQuery(createSelectQuery(graphName, "B2"));
+		String result1 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B2"));
 		String expected1 = ResourceManagement.getContentFromResource("rebase/manual/response-B1-into-B2.xml");
 		assertXMLEqual(expected1, result1);
 		
@@ -337,52 +335,6 @@ public class TestRebaseMerge {
 							+ "REBASE MANUAL GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\" WITH { %n"
 							+ "	%s %n"
 							+ "}", user, commitMessage, graphName, sdd, branchNameA, branchNameB, triples);
-	}
-
-	
-	/**
-	 * Executes a SPARQL-query against the R43ples r43ples_endpoint
-	 * 
-	 * @param query the SPARQL query
-	 * @return the result of the query
-	 * @throws InternalErrorException 
-	 */
-	public static String executeR43plesQuery(String query) throws InternalErrorException{
-		return executeR43plesQueryWithFormat(query, "application/xml");
-	}
-	
-	public static String executeR43plesRebaseQuery(String query) throws InternalErrorException {
-		return executeR43plesQueryWithFormat(query, "text/html");
-	}
-	
-	/**
-	 * Executes a SPARQL-query against the R43ples r43ples_endpoint
-	 * 
-	 * @param query the SPARQL query
-	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
-	 * @return the result of the query
-	 * @throws InternalErrorException 
-	 */
-	public static String executeR43plesQueryWithFormat(String query, String format) throws InternalErrorException {
-		Endpoint ep = new Endpoint();
-		Response response = ep.sparql(format, query);
-		if (response.getEntity()!=null)
-			return response.getEntity().toString();
-		else
-			return "";
-	}
-	
-	
-	/**
-	 * Executes a SPARQL-query against the triple store without authorization using HTTP-POST.
-	 * 
-	 * @param query the SPARQL query
-	 * @return the response
-	 * @throws InternalErrorException 
-	 */
-	public static Response executeR43plesQueryResponse(String query) throws InternalErrorException {
-		Endpoint ep = new Endpoint();
-		return ep.sparql("application/xml", query);
 	}
 
 }

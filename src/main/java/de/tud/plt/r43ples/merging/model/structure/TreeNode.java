@@ -3,7 +3,7 @@ package de.tud.plt.r43ples.merging.model.structure;
 import java.util.List;
 
 /**Tree Node fuer jede Triple in difference Model
- *  The data will with Freemarker in Html display
+ *  The data will in Html display
  * 
  * @author Xinyu Yang
  * 
