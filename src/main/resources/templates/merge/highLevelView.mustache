@@ -1,17 +1,6 @@
 	    <script type="text/javascript">
-	    	// $(function(){
-	    	// 	$("#highLevelTable").find("tr").click(function() {
-	     //          if((this.style.background == "" || this.style.background =="white")) {
-	     //              $(this).css('background', 'green');	              	  
-	     //          }
-	     //          else {
-	     //              $(this).css('background', 'white');
-	     //          }
-	     //    });
-	            
-	    	// });
-          var graphName = "${graphName}";
-          var clientName = "${clientName}";
+          var graphName = "{{graphName}}";
+          var clientName = "{{clientName}}";
           var tripleTableColor = "YellowGreen";
           var individualTabelColor = "LemonChiffon"
           $("#highLevelTable :button").click(function(){
@@ -84,17 +73,12 @@
           });
 	    </script>
         
-        <fieldset style="padding-bottom:0px;padding-top:0px;margin-bottom:6px">
-            <legend><strong>Resolution</strong></legend>
+        <fieldset>
+            <legend>Resolution</legend>
               <div id="allSelectHighLevel" class="columns large-2 push-10"><button type="button" class="button tiny radius" onclick="'">Approve All</button></div>
               <hr style="margin:8px;"/>
               <div class = "parentTbl">
-                <table  style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">
-                  <tr>
-                    <td>
-                      <div class = "childTbl">
-                        <table  style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;" class = "childTbl">
-                          <tr>
+                <table id = "highLevelTable" class="table" style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">
                             <th style = "width:18%">Subject</th>
                             <th style = "width:18%">Predicate</th>
                             <th style = "width:18%">Object</th>
@@ -102,43 +86,16 @@
                             <th style = "width:18%">Rename yes or no</th>
                             <th style = "width:10%">Approve</th>
                           </tr>
-                        </table>
-                      </div>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div id = "highLevelTable" class="scrollData childTbl">
-                        <table style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">
-
-                          <#list highLevelRowList as row>
+                          {{#highLevelRowList}}
                             <tr>
-                              <td style = "width:18%">${row.subject} </td>
-                              <td style = "width:18%">${row.predicate}</td>
-                              <td style = "width:18%">${row.objectAlt}</td>
-                              <td style = "width:18%">${row.objectNew}</td>
-
-                              <#if row.isRenaming == "yes">
-                                <td style = "width:18% ;text-align: center;"><input type="checkbox" id ="opt" name="options" checked value=${row.tripleId}>
-                                </td>
-                              <#else>
-                                 <td style = "width:18% ;text-align: center;"><input type="checkbox" id ="opt" name="options" value=${row.tripleId}>
-                                </td>
-                              </#if>
-
-                              <#if row.isResolved == "yes">
-                                <td><button type="button" class="button tiny expand radius" >Approved</button></td>
-                              <#else>
-                                <td><button type="button" class="button tiny expand radius" >Confirm</button></td>
-                              </#if>
-
+                              <td style = "width:18%">{{subject}}</td>
+                              <td style = "width:18%">{{predicate}}</td>
+                              <td style = "width:18%">{{objectAlt}}</td>
+                              <td style = "width:18%">{{objectNew}}</td>
+                              <td style = "width:18% ;text-align: center;"><input type="checkbox" id ="opt" name="options" {{#isRenaming}}checked{{/isRenaming}} value={{tripleId}}></td>
+                              <td><button type="button" class="btn">{{#isResolved}}Approved{{/isResolved}}{{^isResolved}}Confirm{{/isResolved}}</button></td>
                             </tr>
-                          </#list>   
-                
-                        </table>
-                      </div>
-                    </td>
-                  </tr>
+                          {{/highLevelRowList}}   
                 </table>
               </div>                     
      	  </fieldset>

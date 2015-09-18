@@ -25,10 +25,10 @@ import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.merge.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.ResolutionState;
 import de.tud.plt.r43ples.management.SDDTripleStateEnum;
 import de.tud.plt.r43ples.management.TripleObjectTypeEnum;
+import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.merging.model.structure.Difference;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;

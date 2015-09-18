@@ -17,8 +17,8 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.util.FileUtils;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.merge.MergeQueryTypeEnum;
-import de.tud.plt.r43ples.merge.SDDTripleState;
+import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
+import de.tud.plt.r43ples.merging.SDDTripleState;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 /**

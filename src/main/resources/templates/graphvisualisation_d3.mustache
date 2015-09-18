@@ -2,19 +2,14 @@
 
 {{$head_extra}}
     <!--CSS Dateien für den Version Graph, tipsy und Font Awesome für Symbole -->
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/tipsy/1.0/stylesheets/tipsy.css">
+    <link rel="stylesheet" href="/static/css/tipsy.css">
     <link rel="stylesheet" href="/static/css/version-graph.css">
 {{/head_extra}}
  
 {{$script_extra}}   
-    <!--Einbinden der externen Bibliotheken-->
-	<!--D3.js-->
-	<script src="//cdn.jsdelivr.net/d3js/3.5.5/d3.min.js"></script>
-	<!--dagre-d3-->
-	<script src="//cpettitt.github.io/project/dagre-d3/latest/dagre-d3.min.js"></script>
-	<!--tipsy-->
-	<script src="//cdn.jsdelivr.net/tipsy/1.0/javascripts/jquery.tipsy.js"></script>
-	<!--Version Graph-->
+	<script src="/static/js/d3.min.js"></script>
+	<script src="/static/js/dagre-d3.min.js"></script>
+	<script src="/static/js/jquery.tipsy.js"></script>
 	<script src="/static/js/version-graph.js"></script>
 
 	<script type="text/javascript">
@@ -70,8 +65,6 @@
 </div>
 </div>
 {{/content}}
-
-
 
 
 {{/templates/super}}

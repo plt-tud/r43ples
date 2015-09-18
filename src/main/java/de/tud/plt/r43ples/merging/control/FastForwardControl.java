@@ -1,49 +1,36 @@
 package de.tud.plt.r43ples.merging.control;
 
-import java.io.IOException;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.merging.model.structure.CommitModel;
-import de.tud.plt.r43ples.webservice.Endpoint;
-import freemarker.template.Configuration;
-import freemarker.template.TemplateException;
 
 public class FastForwardControl {
 	private CommitModel commitModel;
 	
-	/**get the report page of fast forward query
-	 * @throws IOException 
-	 * @throws TemplateException */
+	/**
+	 * get the report page of fast forward query
+	 * @param graphName
+	 * */
 
-	public String getFastForwardReportView(String graphName) throws TemplateException, IOException{
+	public String getFastForwardReportView(String graphName) {
 		Map<String, Object> scope = new HashMap<String, Object>();
-		StringWriter sw = new StringWriter();
-		freemarker.template.Template temp = null; 
-		String name = "mergingResultView.ftl";
-		try {  
-			// create the configuration of template
-            Configuration cfg = new Configuration();  
-            // set the path to the template engine
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            // get the template page with this name 
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
-		
+		MustacheFactory mf = new DefaultMustacheFactory();
+		Mustache mustache = mf.compile("templates/merge/mergingResultView.mustache");
+		StringWriter sw = new StringWriter();		
 		scope.put("graphName", graphName);
 		scope.put("commit", commitModel);
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
+		scope.put("merging_active", true);
 		
-		temp.process(scope,sw);		
+		mustache.execute(sw, scope);	
 		return sw.toString();	
 	}
 	

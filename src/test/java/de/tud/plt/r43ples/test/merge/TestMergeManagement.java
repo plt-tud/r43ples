@@ -44,7 +44,7 @@ public class TestMergeManagement {
 
 
 	/**
-	 * Test method for {@link de.tud.plt.r43ples.merge.MergeManagement#getCommonRevisionWithShortestPath(java.lang.String, java.lang.String)}.
+	 * Test method for {@link de.tud.plt.r43ples.merging.MergeManagement#getCommonRevisionWithShortestPath(java.lang.String, java.lang.String)}.
 	 */
 	@Test
 	public final void testGetCommonRevisionWithShortestPath() {
@@ -55,7 +55,7 @@ public class TestMergeManagement {
 	}
 
 	/**
-	 * Test method for {@link de.tud.plt.r43ples.merge.MergeManagement#getPathBetweenStartAndTargetRevision(java.lang.String, java.lang.String)}.
+	 * Test method for {@link de.tud.plt.r43ples.merging.MergeManagement#getPathBetweenStartAndTargetRevision(java.lang.String, java.lang.String)}.
 	 */
 	@Test
 	public final void testGetPathBetweenStartAndTargetRevision() {
@@ -71,7 +71,7 @@ public class TestMergeManagement {
 	}
 	
 	/**
-	 * Test method for {@link de.tud.plt.r43ples.merge.MergeManagement#getPathBetweenStartAndTargetRevision(java.lang.String, java.lang.String)}.
+	 * Test method for {@link de.tud.plt.r43ples.merging.MergeManagement#getPathBetweenStartAndTargetRevision(java.lang.String, java.lang.String)}.
 	 */
 	@Test
 	public final void testGetPathBetweenStartAndTargetRevision2() {

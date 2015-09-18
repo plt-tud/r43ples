@@ -20,11 +20,11 @@ import com.hp.hpl.jena.update.UpdateAction;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.GitRepositoryState;
-import de.tud.plt.r43ples.merge.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.management.ResolutionState;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SDDTripleStateEnum;
+import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.merging.management.BranchManagement;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
 import de.tud.plt.r43ples.merging.management.ReportManagement;
@@ -71,7 +71,7 @@ public class MergingControl {
 	private IndividualModel individualModelBranchB;	
 	/** The properties array list. **/
 	private ArrayList<String> propertyList;
-	/** Merg Query Model. **/
+	/** Merge Query Model. **/
 	private CommitModel commitModel;
 	
 	/** The revision number of the branch A. **/
@@ -107,10 +107,8 @@ public class MergingControl {
 		
 	    StringWriter sw = new StringWriter();
 	    MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/merging.mustache");
-
+	    Mustache mustache = mf.compile("templates/merge_start.mustache");
 	    mustache.execute(sw, scope);		
-	    
 	    return sw.toString();
 	}
 	
@@ -388,11 +386,11 @@ public class MergingControl {
 	public String getIndividualView() throws TemplateException, IOException{
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();		
-		if(isRebase){
+		if (isRebase) {
 	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
 		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());	
 		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
-	 	}else{
+	 	} else {
 	 		logger.info("commitGraphname: " + commitModel.getGraphName());
 		 	scope.put("graphName", commitModel.getGraphName());	 
 		 	scope.put("clientName", commitModel.getUser());
@@ -401,11 +399,11 @@ public class MergingControl {
 		
 	    MustacheFactory mf = new DefaultMustacheFactory();
 	    Mustache mustache = mf.compile("templates/merge/individualView.mustache");
-
 	    mustache.execute(sw, scope);		
 		return sw.toString();	
-		
 	}
+	
+	
 	/**
 	 * @param individualA individual of Branch A
 	 * @param individualB individual of Branch B
@@ -449,9 +447,6 @@ public class MergingControl {
 		
 		scope.put("updatedTripleRowList", updatedTripleRowList);
 		
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
-		
 		temp.process(scope,sw);
 		
 		return sw.toString();	
@@ -460,10 +455,8 @@ public class MergingControl {
 	}
 	
 	/**getHighLevel View
-	 * @throws IOException 
-	 * @throws TemplateException 
 	 * @throws ConfigurationException */
-	public String getHighLevelView() throws TemplateException, IOException, ConfigurationException {
+	public String getHighLevelView() throws ConfigurationException {
 		
 		//get high level change model
 		ProcessManagement.createHighLevelChangeRenamingModel(highLevelChangeModel, differenceModel);
@@ -475,15 +468,6 @@ public class MergingControl {
 		
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
-		freemarker.template.Template temp = null; 
-		String name = "highLevelView.ftl";
-		try {  
-            Configuration cfg = new Configuration();  
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
 		
 		if(isRebase){
 	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
@@ -497,33 +481,21 @@ public class MergingControl {
 		
 		scope.put("highLevelRowList", highLevelRowList);
 		
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
-		
-		temp.process(scope,sw);
-		
-		return sw.toString();		
-		
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merge/highLevelView.mustache");
+	    mustache.execute(sw, scope);		
+		return sw.toString();	
 	}
 	
-	/**@param properties :  property list of Filter by property
-	 * return response of updated triple table
-	 * @throws ConfigurationException */
+	/**
+	 * @param properties :  property list of Filter by property
+	 * @return response of updated triple table
+	 * @throws ConfigurationException 
+	 * */
 	
-	public String updateTripleTable(String properties) throws TemplateException, IOException, ConfigurationException{
-		
+	public String updateTripleTable(String properties) throws ConfigurationException {		
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
-		freemarker.template.Template temp = null; 
-		String name = "tripleTable.ftl";
-		
-		try {  
-            Configuration cfg = new Configuration();  
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        } 
 		
 		//updated tableModel	 	
 		ProcessManagement.createTableModel(differenceModel, tableModel);
@@ -532,7 +504,6 @@ public class MergingControl {
 		List<TableRow> TripleRowList = tableModel.getTripleRowList();
 		List<TableRow> updatedTripleRowList = new ArrayList<TableRow>();
 		for(String property: propertyArray) {
-		
 			Iterator<TableRow> itu = TripleRowList.iterator();
 			while(itu.hasNext()){
 				TableRow tableRow = itu.next();
@@ -541,46 +512,31 @@ public class MergingControl {
 				}
 			}					
 		}
-		
-		if(isRebase){
+		if (isRebase) {
 	 		logger.info("rebasecommitGraphname: " + rebaseControl.getCommitModel().getGraphName());
 		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());	
 		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
-	 	}else{
+	 	} else {
 	 		logger.info("mergingcommitGraphname: " + commitModel.getGraphName());
 		 	scope.put("graphName", commitModel.getGraphName());	 
 		 	scope.put("clientName", commitModel.getUser());
-	 	}
-		
+	 	}	
 		scope.put("tableRowList", updatedTripleRowList);
 		
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
-		
-		temp.process(scope,sw);	
-		
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merge/tripleView.mustache");
+	    mustache.execute(sw, scope);		
 		return sw.toString();	
-		
 	}
 	
 	/**@param triples :  triple list of Difference Tree by checkbox select
 	 * return response of updated triple table
 	 * @throws ConfigurationException */
 	
-	public String updateTripleTableByTree(String triples) throws TemplateException, IOException, ConfigurationException{
+	public String updateTripleTableByTree(String triples) throws ConfigurationException {
 		
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
-		freemarker.template.Template temp = null; 
-		String name = "tripleTable.ftl";
-		
-		try {  
-            Configuration cfg = new Configuration();  
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        } 
 		
 		//updated tableModel	 	
 		ProcessManagement.createTableModel(differenceModel, tableModel);
@@ -607,8 +563,6 @@ public class MergingControl {
 				if((prefixTriple.trim()).equals(triple.trim())) {
 					updatedTripleRowList.add(tableRow);
 				}
-				
-				
 			}					
 		}
 		
@@ -625,29 +579,17 @@ public class MergingControl {
 		logger.info("tree table list: "+ updatedTripleRowList.size());
 		scope.put("tableRowList", updatedTripleRowList);
 		
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
-		
-		temp.process(scope,sw);	
-		
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merge/tripleView.mustache");
+	    mustache.execute(sw, scope);		
 		return sw.toString();	
-		
 	}
 	
 	/**get triple view after changed view
 	 * @throws ConfigurationException */
-	public String getTripleView() throws TemplateException, IOException, ConfigurationException{
+	public String getTripleView() throws ConfigurationException {
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
-		freemarker.template.Template temp = null; 
-		String name = "tripleView.ftl";
-		try {  
-            Configuration cfg = new Configuration();  
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
 		
 		//updated tableModel	 	
 		ProcessManagement.createTableModel(differenceModel, tableModel);	
@@ -664,12 +606,10 @@ public class MergingControl {
 		
 		scope.put("tableRowList", tableModel.getTripleRowList());
 		
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
-		
-		temp.process(scope,sw);		
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merge/tripleView.mustache");
+	    mustache.execute(sw, scope);		
 		return sw.toString();	
-		
 	}
 	
 	/**
@@ -995,7 +935,7 @@ public class MergingControl {
 	 	}
 		
 		// three way merging
-		scope.put("isRebase", false);
+		scope.put("isRebase", isRebase);
 		scope.put("report", report);
 		scope.put("reportTableRowList", reportTableRowList);
 		    
@@ -1005,60 +945,6 @@ public class MergingControl {
 		return sw.toString();	
 	}
 	
-	/**
-	 * ##########################################################################################################################################################################
-	 * ##########################################################################################################################################################################
-	 * ##                                                                                                                                                                      ##
-	 * ## create Rebase Report Process : get report result                                                                                                                             ##
-	 * ##                                                                                                                                                                      ##
-	 * ##########################################################################################################################################################################
-	 * ##########################################################################################################################################################################
-	 * @throws IOException 
-	 * @throws TemplateException 
-	 * @throws ConfigurationException 
-	 */
-	
-	public String createRebaseReportProcess() throws TemplateException, IOException, ConfigurationException {
-		Map<String, Object> scope = new HashMap<String, Object>();
-		StringWriter sw = new StringWriter();
-		freemarker.template.Template temp = null; 
-		String name = "reportView.ftl";
-		try {  
-            Configuration cfg = new Configuration();  
-            cfg.setClassForTemplateLoading(MergingControl.class, "/templates");
-            temp = cfg.getTemplate(name);  
-        } catch (IOException e) {  
-            e.printStackTrace();  
-        }  
-		
-		
-		List<ReportTableRow>  reportTableRowList = ReportManagement.createReportTableRowList(differenceModel) ;
-		
-		String report = null;
-		if(reportResult.getConflictsNotApproved() > 0){
-			report = "1";
-		}else {
-			report = "0";
-		}
-		
-		
-		scope.put("graphName", rebaseControl.getCommitModel().getGraphName());	
-		scope.put("clientName", rebaseControl.getCommitModel().getUser());
-	 	
-		scope.put("isRebase", true);
-		scope.put("commit", rebaseControl.getCommitModel());
-		
-		scope.put("report", report);
-		scope.put("reportTableRowList", reportTableRowList);
-		
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
-		
-		temp.process(scope,sw);		
-		return sw.toString();	
-		
-		
-	}
 	
 	
 	/**

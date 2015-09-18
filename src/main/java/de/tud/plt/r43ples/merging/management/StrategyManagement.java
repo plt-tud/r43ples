@@ -38,16 +38,13 @@ public class StrategyManagement {
 	 * @param last revision uri of branch B
 	 * */
 	public static boolean isFastForward(String revisionBranchA , String revisionBranchB){
-
-		
 		String query = prefixes
 				+ String.format("ASK { GRAPH <%s> { "
 						+ "<%s> prov:wasDerivedFrom+ <%s> ."
 						+ " }} ",
 						Config.revision_graph, revisionBranchA, revisionBranchB);
 			
-		return TripleStoreInterfaceSingleton.get().executeAskQuery(query);
-			
+		return TripleStoreInterfaceSingleton.get().executeAskQuery(query);	
 	}
 	
 	/**create fast forward query

@@ -461,17 +461,13 @@ public class RebaseControl {
 	public String getRebaseReportView(String graphName) {
 		Map<String, Object> scope = new HashMap<String, Object>();
 		MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/merge/resultView.mustache");
-	    StringWriter sw = new StringWriter();
-	    
-	    if(graphName == null) {
-			graphName = commitModel.getGraphName();
-		}
+		Mustache mustache = mf.compile("templates/merge/mergingResultView.mustache");
+		StringWriter sw = new StringWriter();		
 		scope.put("graphName", graphName);
-		scope.put("clientName", commitModel.getUser());
 		scope.put("commit", commitModel);
+		scope.put("merging_active", true);
 		
-	    mustache.execute(sw, scope);			
+		mustache.execute(sw, scope);	
 		return sw.toString();	
 	}
 	

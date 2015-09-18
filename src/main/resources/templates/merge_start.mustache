@@ -42,7 +42,6 @@
             $('#methodField').hide();
             $('#sddField').hide();
           } else{
-
             $('#methodField').show();
             $('#sddField').show();
           }
@@ -64,21 +63,14 @@
             },
             function(data,status){
               // get data and check
-              $('#strategie').val('0');
+              $('#strategie option[value="1"]').attr('disabled', true);
               if(data == "false"){
-                $('#strategie').children('option').each(function(){
-                  if($(this).val() === "1"){
-                    $(this).attr('disabled', true);
-                  }
-                });
+            	  $('#strategie option[value="1"]').attr('disabled', true);
               }else{
-                $('#strategie').children('option').each(function(){
-                  if($(this).val() === "1"){
-                    $(this).attr('disabled', false);
-                  }
-                });
+            	  $('#strategie option[value="1"]').attr('disabled', false);
+            	  $('#strategie').val(1);
+            	  showIllustration(1);
               }
-
             });
         }
 </script>
@@ -88,7 +80,7 @@
 <div class="container">
 			<div class="row" >
 				<div class="col-sm-7">
-                  <legend><h3>Start Merging</h3></legend>
+                  <h3>Start Merging</h3>
                     <form class="form-horizontal" action="mergingProcess" method="post" role="form">
                       <div class="form-group" >
                       	<label for="graph" class="col-sm-2 control-label">Graph</label>
@@ -119,15 +111,14 @@
                         <label for="strategie" class="col-sm-2 control-label">Strategy</label>
                         <div class="col-sm-10" >
                           <select class="form-control" class="form-control" id="strategie" name="strategie" onchange="showIllustration(this.value)">
-                             <option value="0"> &lt; Select Strategy &gt;</option>
-                             <option value="2">Three-Way Merge Strategy</option>
-                             <option value="3">Rebase Merge Strategy</option>
-                             <option value="1">Fast-Forward Merge Strategy</option>
+                             <option value="2">Three-Way Merge</option>
+                             <option value="3">Rebase</option>
+                             <option value="1">Fast-Forward</option>
                           </select>
                         </div>
                       </div>                    
                       <div id="methodField" class="form-group">
-                      	<label class="col-sm-2 control-label">Method (?)</label>
+                      	<label class="col-sm-2 control-label">Method</label>
                               <label class="col-sm-5"><input type="radio" name="optradio" value="common" checked> Common</label>
                               <label class="col-sm-5"><input type="radio" name="optradio" value="auto"> Auto</label>
                       </div>
@@ -164,7 +155,7 @@
 			 </div>
 
        <div class= "col-sm-5">
-            <legend><h3>Strategy Illustration</h3></legend>
+            <h3>Strategy Illustration</h3>
             <div class="panel-body" id="illustration" style="height:486px; width:406px ;">
             </div>
           </div>

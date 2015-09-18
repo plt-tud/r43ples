@@ -1,0 +1,31 @@
+ <fieldset>
+	<legend>Resolution</legend>
+	<div id="allSelect" class="col-lg-2 col-lg-offset-10">
+	  	<button type="button" class="btn">Approve All</button>
+	</div>
+	<table id="tripleTable" class="table" style="width:100%;table-layout:fixed;word-break: break-all; word-wrap: break-word;">
+		<tr>
+        	<th style="width:12%">Subject</th>
+			<th style="width:12%">Predicate</th>
+			<th style="width:12%">Object</th>
+			<th style="width:18%">State B1</th>
+			<th style="width:18%">State B2</th>
+			<th style="width:9%">Conflicting</th>
+			<th style="width:9%">Resolution State</th>
+			<th style="width:10%">Approve</th>
+		</tr>
+		{{#tableRowList}}               
+	  	<tr>
+		    <td style="width:12%">{{subject}} </td>
+			<td style="width:12%">{{predicate}}</td>
+			<td style="width:12%">{{object}}</td>
+			<td style="width:18%" class="state-{{stateA}}"> {{revisionA}}</td>
+			<td style="width:18%" class="state-{{stateB}}"> {{revisionB}}</td>
+			<td style="width:9%; text-align: center;" class="conflict-{{conflicting}}"></td>
+			<td style="width:9% ;text-align: center;"><input type="checkbox" id="opt" name="options" value={{tripleId}}></td>
+	        <td><button type="button" class="btn btn-default">Confirm</button></td>
+        </tr>
+      {{/tableRowList}}   
+    </table>
+</fieldset>
+                     

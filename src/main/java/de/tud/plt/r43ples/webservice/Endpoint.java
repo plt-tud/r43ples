@@ -50,11 +50,11 @@ import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.JenaModelManagement;
 import de.tud.plt.r43ples.management.MergeManagement;
-import de.tud.plt.r43ples.merge.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.management.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.merge.MergeResult;
+import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
+import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.control.FastForwardControl;
 import de.tud.plt.r43ples.merging.control.MergingControl;
 import de.tud.plt.r43ples.merging.control.RebaseControl;
@@ -305,15 +305,13 @@ public class Endpoint {
 	 *
 	 */
 	@GET
-	public final Response getLandingPage() {
+	@Template(name = "/home.mustache")
+	@Produces(MediaType.TEXT_HTML)
+	public final Map<String, Object> getLandingPage() {
 		logger.info("Get Landing page");
-		MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/home.mustache");
-	    StringWriter sw = new StringWriter();
 		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());
-	    mustache.execute(sw, htmlMap);		
-		return Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML).build();
+		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());	
+		return htmlMap;
 	}
 	
 	/**
@@ -325,7 +323,7 @@ public class Endpoint {
 	@GET
     @Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
 		 MediaType.APPLICATION_SVG_XML })
-	public final Object getMerging(@HeaderParam("Accept") final String format_header,
+	public final Response getMerging(@HeaderParam("Accept") final String format_header,
 		@DefaultValue("0") @QueryParam("q") final String getBranch, @QueryParam("graph") final String graph) throws IOException, TemplateException {
 		// FIXME: What is q?
 		logger.info("Merging -- getBranch: " + getBranch + ", graph: " + graph);		
@@ -376,60 +374,43 @@ public class Endpoint {
 			@FormParam("Branch2") final String branch2,
 			@FormParam("user") @DefaultValue("") final String user,
 			@FormParam("message") @DefaultValue("") final String message) throws InternalErrorException, IOException, TemplateException, ConfigurationException {
-				
-		if(strategie.equals("1")){
-			ResponseBuilder response = Response.ok();
 			
+		ResponseBuilder response = Response.ok();
+		
+		// fast forward
+		if(strategie.equals("1")){
 			String fastForwardQuery = StrategyManagement.createFastForwardQuery(graphName, sddName, user, message, branch1, branch2);
 			
-			String userCommit = null;
 			Matcher userMatcher = patternUser.matcher(fastForwardQuery);
 			if (userMatcher.find()) {
-				userCommit = userMatcher.group("user");
 				fastForwardQuery = userMatcher.replaceAll("");
 			}
-			String messageCommit = null;
 			Matcher messageMatcher = patternCommitMessage.matcher(fastForwardQuery);
 			if (messageMatcher.find()) {
-				messageCommit = messageMatcher.group("message");
 				fastForwardQuery = messageMatcher.replaceAll("");
 			}
 			
-			
 			RebaseQueryTypeEnum type = null;
-			
 			if (model.equals("auto")) {
 				type = RebaseQueryTypeEnum.AUTO;
 			} else if (model.equals("common")) {
 				type = RebaseQueryTypeEnum.COMMON;
-			}else{
-				type = null;
 			}
-/****************************************parallel************************************************/	
 		
 			FastForwardControl fastForwardControl = new FastForwardControl();
-			
 			fastForwardControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Fast-Forward", type.toString());	
 			
 			StrategyManagement.saveGraphVorMergingInMap(graphName, "application/json");
 			
-			getFastForwardResponse(fastForwardQuery, userCommit, messageCommit);
+			executeFastForward(graphName, branch1, branch2);
 			
 			String fastForwardView = fastForwardControl.getFastForwardReportView(graphName);
-			
-			
 			response.entity(fastForwardView);
-				
-			return response.build();
-			
-		}else if(strategie.equals("3")){
-			//rebase todo
-			
-			ResponseBuilder response = Response.ok();
-			
-			RebaseQueryTypeEnum type = null;
-			Response responsePost = null;
-			
+			return response.build();	
+		}
+		// Rebase
+		else if(strategie.equals("3")){
+			RebaseQueryTypeEnum type = null;			
 			if (model.equals("auto")) {
 				type = RebaseQueryTypeEnum.AUTO;
 			} else if(model.equals("common")){
@@ -437,10 +418,7 @@ public class Endpoint {
 			} else{
 				type = RebaseQueryTypeEnum.MANUAL;
 			}
-			
-			// only for test , type als force rebase
-			//type = RebaseQueryTypeEnum.FORCE;
-			
+		
 			String rebaseQuery = StrategyManagement.createRebaseQuery(graphName, sddName, user, message, branch1, branch2, type, null);
 			StrategyManagement.saveGraphVorMergingInMap(graphName, "application/json");
 			
@@ -463,7 +441,6 @@ public class Endpoint {
 			
 			//for each client, create a mergingControlMap and for each named graph create a mergingControl, first check, if namedgraph exist .
 			//first create the mergingcontrol and than create the rebasecontrol
-			
 			MergingControl mergingControl;
 			HashMap<String, MergingControl> mergingControlMap;
 			
@@ -490,7 +467,7 @@ public class Endpoint {
 			
 			rebaseControl.createCommitModel(graphName, sddName, userCommit, messageCommit, branch1, branch2, "Rebase", type.toString());
 			
-			
+			Response responsePost = null;
 			if (patternRebaseQuery.matcher(rebaseQuery).find()) {
 				responsePost= getRebaseResponse(rebaseQuery, userCommit, messageCommit, "HTML");
 				logger.debug("rebase response status: "+responsePost.getStatusInfo().toString());	
@@ -513,23 +490,17 @@ public class Endpoint {
 			}else{
 				logger.info("sparql query is force rebase! ");	
 			}
-			
-			
+
 			String rebaseResultView = rebaseControl.getRebaseReportView(graphName);
 			response.entity(rebaseResultView);
-			
-			return response.build();
-		
-		}else{
-			
-			ResponseBuilder response = Response.ok();
+			return response.build();		
+		}
+		// Three Way Merge
+		else {
 			Response responsePost = null;
-			
 			MergeQueryTypeEnum type = null;
-			
 			if (model.equals("auto")) {
 				type = MergeQueryTypeEnum.AUTO;
-				
 			} else if (model.equals("common")) {
 				type = MergeQueryTypeEnum.COMMON;
 			} else {
@@ -554,8 +525,7 @@ public class Endpoint {
 				mergingControlMap = clientMap.get(user);
 				mergingControl = mergingControlMap.get(graphName);
 			}
-								
-			
+
 			mergingControl.closeRebaseModel();
 			
 			//save commit information in MergingControl
@@ -580,24 +550,20 @@ public class Endpoint {
 				messageCommit = messageMatcher.group("message");
 				mergeQuery = messageMatcher.replaceAll("");
 			}
-			
 
 			if (patternMergeQuery.matcher(mergeQuery).find()) {
 				responsePost= getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
 			}
-				
-			
+							
 			if(!(responsePost.getStatusInfo() == Response.Status.CONFLICT)){
 				response.entity(mergingControl.getThreeWayReportView(null));				
 				return response.build();
 			}
-			
-			
+
 			mergingControl.getMergeProcess(responsePost, graphName, branch1, branch2, "text/html");
 			response.entity(mergingControl.getViewHtmlOutput());
 			return response.build();
 		}	
-
 	}
 	
 	
@@ -653,14 +619,10 @@ public class Endpoint {
 			@QueryParam("client") @DefaultValue("") final String user ) throws InternalErrorException, TemplateException, IOException{
 
 		ResponseBuilder response = Response.ok();
-		
 		//get rebaseControl form map
 		RebaseControl rebaseControl = clientMap.get(user).get(graph).getRebaseControl();
-		
 		rebaseControl.forceRebaseProcess(graph);
-		
 		response.entity(rebaseControl.getRebaseReportView(null));
-		
 		return response.build();
 
 	}	
@@ -743,37 +705,9 @@ public class Endpoint {
 			@QueryParam("client") @DefaultValue("") final String user ) throws InternalErrorException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
-		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		
 		response.entity(mergingControl.createReportProcess());
-	
 		return response.build();	
-	}	
-	
-	
-	/**push check : coflict approved check , difference approved change check
-	 * reportResult create
-	 * save the triplesId in checkbox
-	 * isrebase = true
-	 * todo 
-	 * @throws TemplateException 
-	 * @throws ConfigurationException */
-	
-	
-	@Path("rebaseReportProcess")
-	@GET
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response rebaseReportGET(@QueryParam("graph") @DefaultValue("") final String graph, 
-			@QueryParam("client") @DefaultValue("") final String user ) throws IOException, InternalErrorException, TemplateException, ConfigurationException {
-		
-		ResponseBuilder response = Response.ok();
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-		
-		response.entity(mergingControl.createRebaseReportProcess());
-		
-		return response.build();
-		
 	}	
 
 	
@@ -893,13 +827,9 @@ public class Endpoint {
 			@FormParam("client") @DefaultValue("") final String user ) throws TemplateException, IOException, ConfigurationException {
 		
 		ResponseBuilder response = Response.ok();
-		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		
 		response.entity(mergingControl.updateTripleTable(properties));
-		
 		return response.build();
-
 	}	
 	
 	
@@ -950,15 +880,11 @@ public class Endpoint {
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	public final Response tripleViewGET(@QueryParam("graph") @DefaultValue("") final String graph, 
-			@QueryParam("client") @DefaultValue("") final String user ) throws TemplateException, IOException, ConfigurationException {
-		
+			@QueryParam("client") @DefaultValue("") final String user ) throws ConfigurationException {
 		ResponseBuilder response = Response.ok();
-		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-
 		response.entity(mergingControl.getTripleView());
 		return response.build();
-
 	}
 	
 	
@@ -975,10 +901,8 @@ public class Endpoint {
 		
 		ResponseBuilder response = Response.ok();
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		
 		response.entity(mergingControl.getHighLevelView());
 		return response.build();
-
 	}
 	
 	
@@ -1100,18 +1024,13 @@ public class Endpoint {
 	 */
 	private Response getHTMLResponse() {
 		logger.info("SPARQL form requested");
-		List<String> graphList = RevisionManagement.getRevisedGraphs();
-		
 		MustacheFactory mf = new DefaultMustacheFactory();
 	    Mustache mustache = mf.compile("templates/endpoint.mustache");
 	    StringWriter sw = new StringWriter();
-	    
-	    htmlMap.put("graphList", graphList);
+	    htmlMap.put("graphList", RevisionManagement.getRevisedGraphs());
 	    htmlMap.put("endpoint_active", true);
 	    mustache.execute(sw, htmlMap);		
-		
 		String content = sw.toString();
-		
 		return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();
 	}
 
@@ -1131,9 +1050,7 @@ public class Endpoint {
 		mustache.execute(sw, htmlMap);		
 		return sw.toString();
 	}
-	
-	
-	
+
 	
 	/**
 	 * @param format
@@ -1182,7 +1099,7 @@ public class Endpoint {
 			result = "Tagging or branching successful";
 		}
 		else if (patternFastForwardQuery.matcher(sparqlQuery).find()) {					
-			return getFastForwardResponse(sparqlQuery, user, message);
+			result = getFastForwardResponse(sparqlQuery, user, message);
 		}
 		else if (patternRebaseQuery.matcher(sparqlQuery).find()) {
 			return getRebaseResponse(sparqlQuery, user, message, format);
@@ -1304,85 +1221,51 @@ public class Endpoint {
 	 * @throws IOException 
 	 * @throws TemplateException 
 	 */
-	private Response getFastForwardResponse(final String sparqlQuery, final String user, final String commitMessage) throws InternalErrorException {
-		
-		ResponseBuilder responseBuilder = Response.created(URI.create(""));
-		
+	private String getFastForwardResponse(final String sparqlQuery, final String user, final String commitMessage) throws InternalErrorException {
 		Matcher m = patternFastForwardQuery.matcher(sparqlQuery);
-		
-//		String format = "application/json";
-		
-		boolean foundEntry = false;
-		while (m.find()) {
-			foundEntry = true;
-			
-			String graphName = m.group("graph");
-//			String sdd = m.group("sdd");
-//			String sddURI = m.group("sddURI");
-			String branchNameA = m.group("branchNameA").toLowerCase();
-			String branchNameB = m.group("branchNameB").toLowerCase();
-			
-			
-			// transform the response to the rebase freundlich check process
-			String graphNameHeader;
-			try {
-				graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				graphNameHeader = graphName;
-			}
-			
-			// transform the graph strategy to the httpheader
-			String graphStrategy = null;
-			try {
-				graphStrategy = URLEncoder.encode("merging-strategy-information", "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				graphStrategy = "merging-strategy-information";
-			}
-			
-			// Return the revision number which were used (convert tag or branch identifier to revision number)
-			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(graphName, branchNameA));
-			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));
-			
-			// check ob fast forward strategy executable
-			boolean canFastForward = FastForwardControl.fastForwardCheck(graphName, branchNameA, branchNameB);
-			if(canFastForward == false) {
-				
-				responseBuilder.header(graphStrategy, "fast-forward-unexecutable");
-				
-				return responseBuilder.build();	
-				
-			}
-			
-			//save the old graph information
-			//StrategyManagement.saveGraphVorMerging(graphName, "application/json");
-			String branchUriA = RevisionManagement.getBranchUri(graphName, branchNameA);
-			String branchUriB = RevisionManagement.getBranchUri(graphName, branchNameB);
-			
-			String fullGraphUriA = RevisionManagement.getFullGraphUri(branchUriA);
-			String fullGraphUriB = RevisionManagement.getFullGraphUri(branchUriB);
-
-			logger.info("ff fullgraph : "+ branchUriA + branchUriB + fullGraphUriA+ fullGraphUriB);
-			String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
-			String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
-			
-			StrategyManagement.moveBranchReference(branchUriB, revisionUriB, revisionUriA);
-			
-			StrategyManagement.updateRevisionOfBranch(branchUriB, revisionUriB, revisionUriA);	
-			
-			StrategyManagement.fullGraphCopy(fullGraphUriA, fullGraphUriB);
-			
-			responseBuilder.header(graphStrategy, "fast-forward-execute");
-
-		}
-			
-		if (!foundEntry){
+		if (!m.find())
 			throw new InternalErrorException("Error in query: " + sparqlQuery);
-		}
 			
-		return responseBuilder.build();
+		String graphName = m.group("graph");
+		String branchNameA = m.group("branchNameA").toLowerCase();
+		String branchNameB = m.group("branchNameB").toLowerCase();
 		
+		if (executeFastForward(graphName, branchNameA, branchNameB)) {
+			return "Fast Forward succesful";
+		}
+		else {	
+			return "Fast Forward not possible";
+		}
+	}
+	
+	/**
+	 * 
+	 * @param graphName
+	 * @param branchNameA
+	 * @param branchNameB
+	 * 
+	 * @return if fast-forward was successful
+	 * @throws InternalErrorException 
+	 */
+	private boolean executeFastForward(String graphName, String branchNameA, String branchNameB) throws InternalErrorException
+	{
+		if (!FastForwardControl.fastForwardCheck(graphName, branchNameA, branchNameB)) {
+			return false;
+		}
+		String branchUriA = RevisionManagement.getBranchUri(graphName, branchNameA);
+		String branchUriB = RevisionManagement.getBranchUri(graphName, branchNameB);
+		
+		String fullGraphUriA = RevisionManagement.getFullGraphUri(branchUriA);
+		String fullGraphUriB = RevisionManagement.getFullGraphUri(branchUriB);
+
+		logger.info("ff fullgraph : "+ branchUriA + branchUriB + fullGraphUriA+ fullGraphUriB);
+		String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
+		String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
+		
+		StrategyManagement.moveBranchReference(branchUriB, revisionUriB, revisionUriA);
+		StrategyManagement.updateRevisionOfBranch(branchUriB, revisionUriB, revisionUriA);	
+		StrategyManagement.fullGraphCopy(fullGraphUriA, fullGraphUriB);
+		return true;
 	}
 	
 	/** 
@@ -1399,10 +1282,7 @@ public class Endpoint {
 	private Response getRebaseResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
 		
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
-
-
 		Matcher m = patternRebaseQuery.matcher(sparqlQuery);
-		
 		
 		boolean foundEntry = false;
 		while (m.find()) {
@@ -1410,8 +1290,6 @@ public class Endpoint {
 			String newRevisionNumber = null;
 			
 			String action = m.group("action");
-			//String command = m.group("command");
-			logger.info("test action: "+ action);
 			String graphName = m.group("graph");
 			String sdd = m.group("sdd");
 			String sddURI = m.group("sddURI");
@@ -1434,32 +1312,27 @@ public class Endpoint {
 			
 			MergingControl mergingControl;
 			RebaseControl rebaseControl;
-			
 		
 			if(clientMap.containsKey(user) && (clientMap.get(user).containsKey(graphName))) {
 				mergingControl = clientMap.get(user).get(graphName);
 				rebaseControl = mergingControl.getRebaseControl();
 			}else{
 				mergingControl = new MergingControl();
-				//mergingControlMap.put(graphName, mergingControl);
 				mergingControl.setRebaseControl();
 				rebaseControl = mergingControl.getRebaseControl();
 				rebaseControl.createCommitModel(graphName, sdd, user, commitMessage, branchNameA, branchNameB, "Rebase", type);
 			}
 						
-			
 			// get the last revision of each branch
 			String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
 			String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
-			
-			
-			// Check ob the graph already exist
+				
+			// Check if graph already exists
 			if (!RevisionManagement.checkGraphExistence(graphName)){
 				logger.error("Graph <"+graphName+"> does not exist.");
 				throw new InternalErrorException("Graph <"+graphName+"> does not exist.");
 			}
 				
-			
 			// Check if A and B are different revisions
 			if (RevisionManagement.getRevisionNumber(graphName, branchNameA).equals(RevisionManagement.getRevisionNumber(graphName, branchNameB))) {
 				// Branches are equal - throw error
@@ -1536,19 +1409,10 @@ public class Endpoint {
 				graphStrategy = "merging-strategy-information";
 			}
  			
-			
-			
 			if((action!= null) && (action.equalsIgnoreCase("FORCE"))) {
 				rebaseControl.forceRebaseProcess(graphName);	
-				
-		//		responseBuilder = Response.status(Response.Status.ACCEPTED);
-				
-				
 				responseBuilder.header(graphStrategy, "force-rebase");
-				
 				return responseBuilder.build();	
-				//to do show html view
-				
 			}
 				
 			// Create the revision progress for A and B
@@ -1593,13 +1457,6 @@ public class Endpoint {
 				
 			} else if ((action == null) && (with != null) && (triples != null)) {
 				logger.info("REBASE WITH query detected");
-				//get the possiable Triples
-//				String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format);
-//				
-//				String newTriples = rebaseControl.filterUnfreundlichTriples(differenceModelString, triples);
-//				logger.info("rebase old triples: "+ triples);
-//				logger.info("rebase new triples: "+ newTriples);
-				
 				// Create the merged revision -- newTriples
 				ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, RebaseQueryTypeEnum.WITH, triples);
 				String addedAsNTriples = addedAndRemovedTriples.get(0);
@@ -1643,8 +1500,7 @@ public class Endpoint {
 					}else{
 						responseBuilder.header(graphStrategy, "rebase-unfreundlich");
 						// write the diffenece model in the response builder
-						responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
-						
+						responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));				
 					}
 				}
 						
@@ -1652,24 +1508,16 @@ public class Endpoint {
 				throw new InternalErrorException("This is not a valid MERGE query: " + sparqlQuery);
 			}				
 		
-			
 			if (newRevisionNumber != null) {
 				// Respond with next revision number
 		    	responseBuilder.header(graphNameHeader + "-revision-number", newRevisionNumber);
 				responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
 				logger.debug("Respond with new revision number " + newRevisionNumber + ".");
-			}
-				
-			// Return the revision number which were used (convert tag or branch identifier to revision number)
-			
-			//responseBuilder.header(graphStrategy, "no merging strategy");	
-			
-		}
-			
+			}	
+		}			
 		if (!foundEntry){
 			throw new InternalErrorException("Error in query: " + sparqlQuery);
 		}			
-		
 		return responseBuilder.build();			
 	}
 	

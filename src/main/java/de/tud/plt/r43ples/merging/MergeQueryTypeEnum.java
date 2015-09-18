@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.merge;
+package de.tud.plt.r43ples.merging;
 
 /**
  * The merge query type enum. Specifies the type of the current merge query.

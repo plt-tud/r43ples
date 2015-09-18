@@ -4,10 +4,10 @@
 {{$title}}Merge View{{/title}}
 
 {{$head_extra}}
-      <link rel="stylesheet" href="//cdn.jsdelivr.net/tipsy/1.0/stylesheets/tipsy.css">
+      <link rel="stylesheet" href="/static/css/tipsy.css">
       <link rel="stylesheet" href="/static/css/process-graph.css">
-      <link rel="stylesheet" href="/static/css/process-graph.css">      
-      <link rel="stylesheet" href="/static/css/style.min.css" />
+      <link rel="stylesheet" href="/static/css/process-graph.css">
+      <link rel="stylesheet" href="/static/css/jsTreeStyle.css">            
           	
       <style>
       	.state-ADDED:before {
@@ -51,9 +51,9 @@
 
 {{$script_extra}}
 <script src="/static/js/jstree.min.js"></script>
-<script src="//cdn.jsdelivr.net/d3js/3.5.5/d3.min.js"></script>
-<script src="//cpettitt.github.io/project/dagre-d3/latest/dagre-d3.min.js"></script>
-<script src="//cdn.jsdelivr.net/tipsy/1.0/javascripts/jquery.tipsy.js"></script>
+<script src="/static/js/d3.min.js"></script>
+<script src="/static/js/dagre-d3.js"></script>
+<script src="/static/js/jquery.tipsy.js"></script>
 <script src="/static/js/process-graph.js"></script>
 <script type="text/javascript">
 	//jsTree
@@ -61,7 +61,10 @@
     $('#diffTree').jstree({ plugins : ["checkbox","sort","types","wholerow"], "core" : { "themes" : { "icons" : false } } });
 </script>
 <script type="text/javascript">
-	function updateFilter(graphName, clientName) {
+	var tripleTableColor = "YellowGreen";
+	var individualTabelColor = "LemonChiffon"
+
+	function updateFilter() {
 		var checked = [];
         var properties;
         $("input[name='pFilter']:checked").each(function (){
@@ -72,12 +75,12 @@
    		$.post("api/filterProcess",
            {
              properties: properties,
-             graph: graphName,
-             client: clientName
+             graph: "{{graphName}}",
+             client: "{{clientName}}"
            },
            function(data, status){
-             $("#tripleTable").empty();
-             $("#tripleTable").prepend(data);
+             $("#tripleView").empty();
+             $("#tripleView").prepend(data);
              $("#tripleTable :button").each(function (){
                 if($(this).text() == "Approved") {
                    $(this).parent().prev().children().prop({"disabled":true});
@@ -87,14 +90,55 @@
                    $(this).parent().parent().css('background','white');
                 }
              });
-                     
-
            }); 
 	}
 	
-	function initRevisionGraphVisualisation() {
+	//initApproveAllButton
+  	
+    $("#allSelect").click(function(){
+        $("#tripleTable input[name='options']").each(function(){
+          var id = $(this).val();
+          var isChecked;
+          if($(this).is(':checked')){
+            //triple added
+            isChecked = 1;
+          }else{
+            //triple deleted
+            isChecked = 0;
+          }
+
+          if($(this).attr("disabled")){
+            // $(this).prop({"disabled":false});
+            // $(this).parent().parent().css('background','white');
+          }else{
+            $(this).prop({"disabled":true});
+            $(this).parent().parent().css('background',tripleTableColor);
+            $(this).parent().next().children().text("Approved");
+            $.post("approveProcess",
+              {
+                id: id,
+                isChecked: isChecked,
+                graph: "{{graphName}}",
+                client: "{{clientName}}"
+              }
+            );
+          }
+        });
+      });
+	
+	
+	$(document).ready(function(){
+	      var graphName="{{graphName}}";
+	      var clientName="{{clientName}}";
+
+	      var tripleTableColor = "YellowGreen";
+	      var individualTabelColor = "LemonChiffon"
+	      
+	      
+	
+		// init Revision graph visualisation
 		var toogleBranches = $('#toogle-branches');
-		var toogleTags = $('#toogle-tags');
+	 	var toogleTags = $('#toogle-tags');
 		
 		drawGraph("mergingProcess?graph={{graphName}}&optradio=application/json", toogleBranches.prop("checked"), toogleTags.prop("checked"));
 		
@@ -107,17 +151,50 @@
 		toogleBranches.change(function () {
 		    $(this).prop('checked')?showBranches():hideBranches();
 		});
-	}
-   
-  $(document).ready(function(){
-      var graphName="{{graphName}}";
-      var clientName="{{clientName}}";
+		
+		
+		
 
-      var tripleTableColor = "YellowGreen";
-      var individualTabelColor = "LemonChiffon"
+	
+	
+	// initApproveButtons
+	      $("#tripleTable :button").click(function(){
+	          var box = $(this).parent().prev().children();
+	          var id = box.val();
+	          var isChecked;
+	          alert(box.is(':checked'));
+	          if(box.is(':checked')){
+	            //triple added
+	            isChecked = 1;
+	          }else{
+	            //triple deleted
+	            isChecked = 0;
+	          }
+
+	          if(box.attr("disabled")){
+	            box.prop({"disabled":false});
+	            $(this).parent().parent().css('background',tripleTableColor);
+	            $(this).text("Confirm");
+	          }else{
+	            box.prop({"disabled":true});
+	            $(this).parent().parent().css('background',tripleTableColor);
+	            $(this).text("Approved");
+	          }
+	          $.post("approveProcess",
+	              {
+	                id: id,
+	                isChecked: isChecked,
+	                graph: "{{graphName}}",
+	                client: "{{clientName}}"
+	              }
+	          );
+	        });
+	
+
+   
+
+      updateFilter();
       
-      updateFilter(graphName, clientName);
-      initRevisionGraphVisualisation();
 
       //get resolutionstate of Triples
       $("#push").click(function(){
@@ -145,8 +222,6 @@
         });
 
       });
-
-
 
       //change to individual view
       $("#individual").click(function(){
@@ -274,74 +349,6 @@
           });
 
       });
-
-      $("#tripleTable :button").click(function(){
-        var box = $(this).parent().prev().children();
-        var id = box.val();
-        var isChecked;
-        alert(box.is(':checked'));
-        if(box.is(':checked')){
-          //triple added
-          isChecked = 1;
-        }else{
-          //triple deleted
-          isChecked = 0;
-        }
-
-        if(box.attr("disabled")){
-          box.prop({"disabled":false});
-          $(this).parent().parent().css('background',tripleTableColor);
-          $(this).text("Confirm");
-        }else{
-          box.prop({"disabled":true});
-          $(this).parent().parent().css('background',tripleTableColor);
-          $(this).text("Approved");
-        }
-        
-        $.post("approveProcess",
-            {
-              id: id,
-              isChecked: isChecked,
-              graph: graphName,
-              client: clientName
-            }
-        );
-
-      });
-
-      $("#allSelect").click(function(){
-        $("#tripleTable input[name='options']").each(function(){
-          var id = $(this).val();
-          var isChecked;
-
-          if($(this).is(':checked')){
-            //triple added
-            isChecked = 1;
-          }else{
-            //triple deleted
-            isChecked = 0;
-          }
-
-          if($(this).attr("disabled")){
-            // $(this).prop({"disabled":false});
-            // $(this).parent().parent().css('background','white');
-          }else{
-            $(this).prop({"disabled":true});
-            $(this).parent().parent().css('background',tripleTableColor);
-            $(this).parent().next().children().text("Approved");
-            $.post("approveProcess",
-              {
-                id: id,
-                isChecked: isChecked,
-                graph: graphName,
-                client: clientName
-              }
-            );
-          }
-
-        });
-
-      });
   });
 </script>
 {{/script_extra}}
@@ -352,7 +359,7 @@
           <!--Merging Client-->
               <div id="left" class="col-lg-3">
                 <fieldset>
-                  <legend><strong>Differences</strong></legend>
+                  <legend>Differences</legend>
                   <div id="diffTree" style="overflow:auto; height:486px; width:16em;">
                       <ul>
                           <li data-jstree='{"opened" : true}'><a class="jstree-clicked"><img src="/static/images/Conflict.png"/> Conflict</a>
@@ -387,8 +394,8 @@
                 </fieldset>
 
                 <fieldset>
-                  <legend><strong>Filters</strong></legend> 
-                        <table>
+                  <legend>Filters</legend> 
+                        <table id="propertyBody" class="table">
                         	<tr>
                                <th style="width:50%">Property</th>
                                <th style="width:50%">Select</th>
@@ -405,7 +412,7 @@
 
               <div id="right" class="col-lg-9">
                 <fieldset>
-                  <legend><strong>Revision graph</strong></legend>
+                  <legend>Revision graph</legend>
                   <div id="visualisation" class="live map">
                    <svg id="svg" width="100%" height="368" ><g/></svg>
                   </div> 
@@ -419,37 +426,9 @@
                 <div id="highLevelView"></div>  
 
                 <div id="tripleView">
-                <fieldset>
-                    <legend><strong>Resolution</strong></legend>
-                     <div id="allSelect" class="col-lg-2 col-lg-offset-10">
-                      	<button type="button" class="btn">Approve All</button>
-                     </div>
-                     <table id="tripleTable" class="table" style="width:100%;table-layout:fixed;word-break: break-all; word-wrap: break-word;">
-						<tr>
-                         <th style="width:12%">Subject</th>
-                         <th style="width:12%">Predicate</th>
-                         <th style="width:12%">Object</th>
-                         <th style="width:18%">State B1</th>
-                         <th style="width:18%">State B2</th>
-                         <th style="width:9%">Conflicting</th>
-                         <th style="width:9%">Resolution State</th>
-                         <th style="width:10%">Approve</th>
-                       </tr>
-                       {{#tableRowList}}               
-                         <tr>
-                           <td style="width:12%">{{subject}} </td>
-                           <td style="width:12%">{{predicate}}</td>
-                           <td style="width:12%">{{object}}</td>
-                           <td style="width:18%" class="state-{{stateA}}"> {{revisionA}}</td>
-                           <td style="width:18%" class="state-{{stateB}}"> {{revisionB}}</td>
-                           <td style="width:9%; text-align: center;" class="conflict-{{conflicting}}"></td>
-                           <td style="width:9% ;text-align: center;"><input type="checkbox" id="opt" name="options" value={{tripleId}}></td>
-                           <td><button type="button" class="btn btn-tiny">Confirm</button></td>
-                         </tr>
-                       {{/tableRowList}}   
-                     </table>
-              </fieldset>
-              </div>
+                	{{> templates/merge/tripleView}}
+              	</div>
+              	
              </div>
         </div>       
  

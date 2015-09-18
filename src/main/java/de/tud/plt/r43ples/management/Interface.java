@@ -12,9 +12,9 @@ import com.hp.hpl.jena.query.ResultSet;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
-import de.tud.plt.r43ples.merge.MergeManagement;
-import de.tud.plt.r43ples.merge.MergeQueryTypeEnum;
-import de.tud.plt.r43ples.merge.MergeResult;
+import de.tud.plt.r43ples.merging.MergeManagement;
+import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
+import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 public class Interface {

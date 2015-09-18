@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.merge;
+package de.tud.plt.r43ples.merging;
 
 public class MergeResult {
 	
