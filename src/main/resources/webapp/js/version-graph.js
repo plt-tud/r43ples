@@ -43,8 +43,6 @@ var center = function () {
         .translate([(svg.attr("width") - g.graph().width * scale) / 2, (svg.attr("height") - g.graph().height * scale) / 2])
         .scale(scale)
         .event(svg);
-    // Loader ausblenden
-    $(spinner).hide();
 };
 
 
@@ -175,8 +173,6 @@ var bindTags = function () {
 
 // Funktion um Tags einzublenden
 var showTags = function () {
-    // Loader einblenden
-    $(spinner).show();
     // Tag-Knoten und Kanten erstellen
     createTags();
     // Graph rendern und ins DOM einbinden
@@ -189,8 +185,6 @@ var showTags = function () {
 
 // Funktion um Tags auszublenden
 var hideTags = function () {
-    // Loader einblenden
-    $(spinner).show();
     // Alle Knoten mit D3 erfassen, Tags herausfiltern und löschen
     inner.selectAll("g.node").filter(function (v) {
         return referenceCommits[v] != null;
@@ -206,8 +200,6 @@ var hideTags = function () {
 
 // Funktion um Branches einzubinden
 var showBranches = function () {
-    // Loader einbinden
-    $(spinner).show();
     // Branch-Knoten und Kanten erstellen
     createBranches();
     // Graph rendern und in DOM einbinden
@@ -218,8 +210,6 @@ var showBranches = function () {
 
 // Funktion um Branches auszublenden
 var hideBranches = function () {
-    // Loader einblenden
-    $(spinner).show();
     // Alle Knoten mit D3 erfassen, Branches herausfiltern und löschen
     inner.selectAll("g.node").filter(function (v) {
         return branches[v] != null;
@@ -479,6 +469,8 @@ var drawGraph = function (_JSON, _showBranches, _showTags) {
         }
         // Graph skalieren und positionieren
         center();
+        // Loader ausblenden
+        $(spinner).hide();
     });
     
     
