@@ -1,40 +1,12 @@
-{{<templates/super}}
+{{<super}}
 
 
 {{$title}}Report View{{/title}}
 
 
 {{$head_extra}}
-
+<link rel="stylesheet" href="/static/css/r43ples.merging.css">
       <style>
-      	.state-ADDED:before {
-			content: url('/static/images/Added.svg');
-		}
-		.state-ORIGINAL:before {
-			content: url('/static/images/Original.svg');
-		}
-		.state-DELETED:before {
-			content: url('/static/images/Deleted.svg');
-		}
-		.state-NOTINCLUDED:before {
-			content: url('/static/images/NotIncluded.svg');
-		}
-		
-		.conflict-0:before {
-			content: url('/static/images/Difference.png');
-		}
-		.conflict-1:before {
-			content: url('/static/images/Conflict.png');
-		}
-		
-		.approved-RESOLVED:before {
-			content: url('/static/images/Resolved.png');
-		}
-		.approved-NOTAPPROVED:before {
-			content: url('/static/images/NotApproved.svg');
-		}
-
-		
         td:hover {
             cursor: pointer;
         }  
@@ -50,13 +22,10 @@
         	word-wrap: break-word;
         }
 
-        
-
         #svg {
           border:2px solid black; 
           margin:1px; 
-          overflow:hidden;
-          
+          overflow:hidden;          
         }
       </style>
 {{/head_extra}}
@@ -165,6 +134,4 @@
                       	</div>
 {{/content}}
 
-{{/templates/super}}     
-
-
+{{/super}}

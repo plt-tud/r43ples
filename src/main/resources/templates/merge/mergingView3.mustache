@@ -1,4 +1,4 @@
-{{<templates/super}}
+{{<super}}
 
 
 {{$title}}Merge View{{/title}}
@@ -8,28 +8,9 @@
       <link rel="stylesheet" href="/static/css/process-graph.css">
       <link rel="stylesheet" href="/static/css/process-graph.css">
       <link rel="stylesheet" href="/static/css/jsTreeStyle.css">            
-          	
+      <link rel="stylesheet" href="/static/css/r43ples.merging.css">
+      
       <style>
-      	.state-ADDED:before {
-			content: url('/static/images/Added.svg');
-		}
-		.state-ORIGINAL:before {
-			content: url('/static/images/Original.svg');
-		}
-		.state-DELETED:before {
-			content: url('/static/images/Deleted.svg');
-		}
-		.state-NOTINCLUDED:before {
-			content: url('/static/images/NotIncluded.svg');
-		}
-		
-		.conflict-0:before {
-			content: url('/static/images/Difference.png');
-		}
-		.conflict-1:before {
-			content: url('/static/images/Conflict.png');
-		}
-		
         td:hover {
             cursor: pointer;
         }  
@@ -434,7 +415,4 @@
  
 {{/content}}
 
-{{/templates/super}}     
-
-  
-
+{{/super}}

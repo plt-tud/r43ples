@@ -1,4 +1,8 @@
-svg {
+.revisionGraphVisualisation svg {
+	height: 468px;
+	border:1px solid #000000;
+	margin:1px;
+	overflow:hidden;
     background-color: #FFF;
     cursor: default;
     -webkit-user-select: none;
@@ -7,7 +11,7 @@ svg {
     -o-user-select: none;
     user-select: none;
 }
-text {
+.revisionGraphVisualisation text {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 12px;
 }
