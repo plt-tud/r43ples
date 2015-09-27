@@ -20,7 +20,7 @@
       var box = $(this).parent().prev().children();
       var id = box.val();
       var isChecked;
-      alert(box.is(':checked'));
+      //alert(box.is(':checked'));
       if(box.is(':checked')){
         //triple added
         isChecked = 1;
@@ -90,7 +90,7 @@
         
     <fieldset style="padding-bottom:0px;padding-top:0px;margin-bottom:6px">
         <legend><strong>Resolution</strong></legend>
-          <div id="allSelect" class="columns large-2 push-10"><button type="button" class="button tiny expand radius" onclick="'">Approve All</button></div>
+          <div id="allSelect" class="columns large-2 push-10"><button type="button" class="button tiny radius" onclick="'">Approve All</button></div>
 
           <hr style="margin:8px;"/>
           <div class = "parentTbl">

@@ -19,7 +19,7 @@
         var box = $(this).parent().prev().children();
         var id = box.val();
         var isChecked;
-        alert(box.is(':checked'));
+        //alert(box.is(':checked'));
         if(box.is(':checked')){
           //triple added
           isChecked = 1;

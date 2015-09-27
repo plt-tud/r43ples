@@ -1,0 +1,19 @@
+@media only screen and (min-width: 40.063em){
+
+   .top-bar {
+       overflow: hidden;
+       height: 2.8125rem;
+       line-height: 2.8125rem;
+       position: relative;
+       background: #333333;
+       margin-bottom: 0;
+   }
+ }
+
+@media only screen and (min-width: 60.063em){
+   .top-bar {
+       background: #333333;
+       overflow: visible;
+   }
+
+ } 

@@ -22,7 +22,8 @@
 <!-- Custom styles for this template -->
 <link href="/static/css/r43ples.css" rel="stylesheet" />
 
-
+<!-- patch css -->
+<link rel="stylesheet" href="/static/css/top-bar-patch.css">
 <style>
 .wsmall{
       -webkit-transform: scale(0.8,0.8); /* Safari and Chrome */

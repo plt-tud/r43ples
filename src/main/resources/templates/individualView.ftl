@@ -14,7 +14,7 @@
                   var individualA = $(this).find('td:first').text();
               	  var individualB = $(this).find('td:last').text();
 				  
-              	  alert(individualA + individualB);
+              	  //alert(individualA + individualB);
               	  $.post("individualFilter",
                   {
                     individualA: individualA,

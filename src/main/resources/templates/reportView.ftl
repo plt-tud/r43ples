@@ -65,7 +65,7 @@
 	        	alert("Es gibt noch Konflikten , bitte zurueck zu MERGE Tabelle !" + conflict);
 	        	$('#push').disable(true);
 	        } else {
-	        	alert("Alles ist in Ordnung" + conflict);
+	        	alert("Alles ist in Ordnung !" + conflict);
 	        }
 
 	        var tripleTableColor = "YellowGreen";

@@ -51,178 +51,39 @@
     	<script src="/static/js/process-graph.js"></script>
 
     	
-        <!--DataTable-->
+      <!--DataTable-->
         
       <script src="https://cdn.datatables.net/1.10.6/js/jquery.dataTables.min.js"></script>
       <script src="https://cdn.datatables.net/plug-ins/1.10.6/integration/foundation/dataTables.foundation.js"></script>
 
-      <style>
-        .parentTbl table {
-          border-spacing: 0;
-          border-collapse: collapse;
-          border: 0;
-          width: 690px;
-        }
-        .childTbl table {
-          border-spacing: 0;
-          border-collapse: collapse;
-          border: 1px solid #d7d7d7;
-          width: 665px;
-        }
-        
-        .childTbl td {
-          border: 1px solid #d7d7d7;
-          text-align: center;
-        }
-        
-        .childTbl th {
-    		  border: 2px solid black;
-    		  text-align: center;
-    		}
-        .scrollData {
-          width: 690;
-          height: 366px;
-          overflow-x: hidden;
-          border:solid 2px black;
-        }
+      <!--css patch -->
+      <link rel="stylesheet" href="/static/css/top-bar-patch.css">
+      <link rel="stylesheet" href="/static/css/foundation-patch.css">
 
-        .scrollDataIndividual {
-          width: 690;
-          height: 266px;
-          overflow-x: hidden;
-          border:solid 2px black;
-        }
-
-
-        .childTbl td:hover{
-            cursor: pointer;
-        }  
-
-        .childTbl tr:hover{
-            background-color: #ccc;
-        }  
-
-        #example tr {
-            background-color: #eee;
-            border-top: 1px solid #fff;
-        }
-        #example tr:hover {
-            background-color: #ccc;
-        }
-        #example th {
-            background-color: #fff;
-        }
-        #example th, #example td {
-            padding: 3px 5px;
-        }
-        #example td:hover {
-            cursor: pointer;
-        } 
-        
-        table {
-        	border-color: black;
-        }    
-        table tr td {
-		    padding: 0rem;
-  		  font-size: 1rem;
-  		  margin-bottom: 0.5rem;
-    		}
-    		
-    		table tr th {
-    			padding: 0.3rem;
-    			font-size: 1rem;	
-    		}
-    			
-    		button, .button {	 
-    		  margin-top: 0.5rem;
-    		  margin-bottom: 0.5rem;
-    		}
-
-        .scrollData button {
-          margin : 0em;
-        }
-    		
-    		.wsmall{
-    		  -webkit-transform: scale(0.8,0.8); /* Safari and Chrome */
-    		}
-
-        fieldset{
-          border:solid 3px black;
-
-        }
-
-        #svg{
-          border:2px solid black; 
-          margin:1px; 
-          overflow:hidden;
-          
-        }
-
-        #allSelect,#allSelectIndividual,#allSelectHighLevel{
-          margin-top: -0.6em;      
-        }
-
-        .breadcrumbs > * {
-            margin: 0;
-            float: left;
-            font-size: 1.0875rem;
-            line-height: 66%;
-            text-transform: uppercase;
-            color: #008CBA;
-            font-weight: bolder;
-        }
-
-        .breadcrumbs > *:before {
-            content: "|";
-            color: white;
-            margin: 0 0.75rem;
-            position: relative;
-            top: 1px;
-        }
-
-        .breadcrumbs > :first-child > *:after {
-            content: "|";
-            color: white;
-            margin: 0 0.75rem;
-            position: relative;
-            top: 1px;
-        }
-
-        .breadcrumbs > :first-child {
-            margin-left: 2rem;
-        }
-
-        .breadcrumbs {
-            display: block;
-            padding: 0.5625rem 0.875rem 0.5625rem;
-            overflow: hidden;
-            margin-left: 0rem;
-            margin-bottom: 0rem;
-            list-style: none;
-            border-style: solid;
-            border-width: 0px;
-            border-top: 0px;
-            background-color: #CCC;
-          /*border-color: gainsboro;*/
-          /*background-color: #f4f4f4;*/
-            border-color : black;
-            border-radius: 3px;
-        }
-
-        .breadcrumbs > *.current a{
-            cursor: default;
-            color: white;
-        }
-      </style>
-	  
-
- 
+	 
 </head>
 
 <body>       
       <script type="text/javascript">
         $(document).foundation();      
         $(document).ready(function(){
+
+            //responsive design of the screen  
+            $(window).resize(function () {
+              if ($(window).width() > 868)
+              {
+                $('#left').removeClass('large-3').addClass('small-3');
+                $('#right').removeClass('large-9').addClass('small-9');
+              } 
+              else
+              {
+                $('#left').removeClass('small-3').addClass('large-3');
+                $('#right').removeClass('small-9').addClass('large-9');
+              }
+            });
+            
+
+
             var graphName = "${graphName}";
             var clientName = "${clientName}";
 
@@ -448,7 +309,8 @@
                     checked.push($(this).val());
                 });
                 properties = checked.join(",");
-                alert(properties);
+               
+                //alert(properties);
                 $.post("filterProcess",
                   {
                     properties: properties,
@@ -524,7 +386,7 @@
               var box = $(this).parent().prev().children();
               var id = box.val();
               var isChecked;
-              alert(box.is(':checked'));
+              //alert(box.is(':checked'));
               if(box.is(':checked')){
                 //triple added
                 isChecked = 1;
@@ -634,10 +496,10 @@
 
              
               
-              <div id = "left" class="large-3 columns" style="margin:0px;padding:0px;">
+              <div id = "left" class="small-3 columns" style="margin:0px;padding:0px;">
                 <fieldset style="padding-top:0px; padding-bottom:6px;height:519px;"  >
                   <legend><strong>Differences</strong></legend>
-                  <div id="diffTree" style="overflow:auto; height:486px; width:16em;">
+                  <div id="diffTree" style=" height:486px; width:100%; overflow:scroll">
                     <#if conStatus=="1">
                       <ul>
                           <li data-jstree='{"opened" : true}'><a class="jstree-clicked"><img src="/static/images/Conflict.png"/> Conflict</a>
@@ -677,7 +539,7 @@
                             <ul>
                               <#list diffList as node>
                                 <li ><a><img src="/static/images/Difference.png"/> ${node.differenceGroup}</a>
-                                  <ul>
+                                  <ul style="border:solid 2px black; width:66px">
                                       <#assign triples = node.tripleList>
                                       <#list triples as triple>
                                           <li ><a><img src="/static/images/Difference.png"/> ${triple}</a></li>              
@@ -775,7 +637,7 @@
               </fieldset>
               </div>
 
-              <div id="right" class="large-9 columns" style="margin:0px;padding:0px;">
+              <div id="right" class="small-9 columns" style="margin:0px;padding:0px;">
                 <fieldset style="padding-bottom:0px;" >
                   <legend><strong>Revision graph</strong></legend>
                   <div id="visualisation" class="live map">
