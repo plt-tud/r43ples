@@ -1,5 +1,13 @@
 package de.tud.plt.r43ples.merging.model.structure;
 
+import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
+
 /**store the information of merge in commit model
  * 
  * @author Xinyu Yang
@@ -90,6 +98,18 @@ public class CommitModel {
 	
 	public void setType(String type){
 		this.type = type;
+	}
+	
+	public String getReportView() {
+		Map<String, Object> scope = new HashMap<String, Object>();
+		StringWriter sw = new StringWriter();
+		scope.put("commit", this);
+		scope.put("merging_active", true);
+		
+		MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merge_report.mustache");
+	    mustache.execute(sw, scope);		
+		return sw.toString();	
 	}
 }
 

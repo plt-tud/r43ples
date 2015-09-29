@@ -47,29 +47,6 @@ public class StrategyManagement {
 		return TripleStoreInterfaceSingleton.get().executeAskQuery(query);	
 	}
 	
-	/**create fast forward query
-	 * @param graphName
-	 * @param sdd model name
-	 * @param client name 
-	 * @param messsage of client
-	 * @param name of branch A
-	 * @param name of branch B
-	 * */
-	public static String createFastForwardQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB ){
-		String query = "";
-		
-		String queryTemplateFastForward = 
-				  "USER \"%s\" %n"
-				+ "MESSAGE \"%s\" %n"
-				+ "MERGE ff GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\"";
-		
-		query = String.format(queryTemplateFastForward, user, commitMessage, graphName, sdd, branchNameA, branchNameB);
-		
-		logger.info("fast forward query" + query);
-		return query;
-		
-	}
-	
 	
 	/**move the reference to the top of branch B
 	 * @param name of branch B
@@ -129,9 +106,7 @@ public class StrategyManagement {
 	public static void saveGraphVorMergingInMap(String graph, String format) throws InternalErrorException{
 		//can not parallel on the same name graph execute
 			String oldRevisionGraph = RevisionManagement.getRevisionInformation(graph, format);
-			
 			oldRevisionGraphMap.put(graph, oldRevisionGraph);
-		
 	}
 	
 	/**

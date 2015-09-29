@@ -160,10 +160,7 @@ var showTags = function () {
     $(spinner).show();
     // Tag-Knoten und Kanten erstellen
     createTags();
-    // Graph rendern und ins DOM einbinden
     render(inner, g);
-    // tipsy-Funktion an die eingebundenen Knoten binden
-//  bindTags();
     // Graph neu skalieren und positionieren
     center();
     //color change on click
@@ -417,14 +414,8 @@ var drawGraph = function (_JSON, _showBranches, _showTags) {
             	value.style = "stroke:" + branches[revisions[revision].revisionOfBranch].color + ";";
             }
             
-//            var html = "<div class=version-node>";
-//            html += "<span class="+status+">"+"<font color = grey>"+version_head+"</font>"+"</span>";
-//            html += "<span class=name-label>"+"<font color = grey>"+version_body+"</font>"+"</span>";
-//            html += "</div>";
             
-            var html = version_head + version_body;
-            
-//            value.labelType = "html";
+            var html = version_head + version_body;            
             value.label = html;
             // Höhe setzen
             value.height = 30;

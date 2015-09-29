@@ -19,7 +19,6 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.update.UpdateAction;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
@@ -45,7 +44,6 @@ import de.tud.plt.r43ples.merging.model.structure.TableModel;
 import de.tud.plt.r43ples.merging.model.structure.TableRow;
 import de.tud.plt.r43ples.merging.model.structure.TreeNode;
 import de.tud.plt.r43ples.merging.model.structure.Triple;
-import de.tud.plt.r43ples.webservice.Endpoint;
 
 import javax.ws.rs.core.Response;
 
@@ -115,7 +113,7 @@ public class MergingControl {
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 	    MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/merge/mergingView3.mustache");
+	    Mustache mustache = mf.compile("templates/merge_process.mustache");
 		
 		/** 
 		 * conList for conflict triple
@@ -213,11 +211,8 @@ public class MergingControl {
 		scope.put("conStatus", conStatus);
 		scope.put("propertyList", propertyList);	
 		
-		scope.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		scope.put("git", GitRepositoryState.getGitRepositoryState());
-		
 		MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/merge/mergingView3.mustache");
+	    Mustache mustache = mf.compile("templates/merge_process.mustache");
 	    mustache.execute(sw, scope);		
 		return sw.toString();		
 	}
@@ -232,12 +227,11 @@ public class MergingControl {
 		if(graphName == null) {
 			graphName = commitModel.getGraphName();
 		}
-		scope.put("graphName", graphName);
 		scope.put("clientName", commitModel.getUser());
 		scope.put("commit", commitModel);
 		
 		MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/merge/mergingResultView.mustache");
+	    Mustache mustache = mf.compile("templates/merge_report.mustache");
 	    mustache.execute(sw, scope);		
 		return sw.toString();	
 	}
@@ -965,10 +959,7 @@ public class MergingControl {
 					}else {
 						mergeQuery = ProcessManagement.createMergeQuery(graphName, sdd, user, message, MergeQueryTypeEnum.MANUAL, revisionNumberBranchA, revisionNumberBranchB, triples);
 					}
-					
 					logger.info("manualmergeQuery:"+mergeQuery);
-					
-					
 				}else{
 					
 					String triples = ProcessManagement.getTriplesOfMergeWithQuery(differenceModel);
@@ -1002,61 +993,6 @@ public class MergingControl {
 	
 		
 	
-	/**
-	 * Push the changes to the remote repository.
-	 * @param triplesId id of triples, what als added in end version selected
-	 * @throws InternalErrorException 
-	 * 
-	 * @throws IOException 
-	 */
-	
-	public String updateMergeQuery (String triplesId) throws IOException, InternalErrorException {
-		//update DifferenceModel by triples id 
-		updateDifferenceModel(triplesId);
-		String user = commitModel.getUser();
-		String message = commitModel.getMessage();
-		String graphName = commitModel.getGraphName();
-		String sdd = commitModel.getSddName();
-		
-		//create Triples
-		Model wholeContentModel = ProcessManagement.getWholeContentOfRevision(graphName, revisionNumberBranchB);
-		logger.debug("Whole model as N-Triples: \n" + ProcessManagement.writeJenaModelToNTriplesString(wholeContentModel));
-		
-		logger.info("whole model: " + ProcessManagement.writeJenaModelToNTriplesString(wholeContentModel));
-
-		// Update dataset with local data
-		ArrayList<String> list = ProcessManagement.getAllTriplesDividedIntoInsertAndDelete(differenceModel, wholeContentModel);
-		
-		logger.debug("INSERT: \n" + list.get(0));
-		logger.debug("DELETE: \n" + list.get(1));
-		
-		logger.info("insert Triple: "+list.get(0));
-		logger.info("delete Triple: "+list.get(1));
-
-		
-		String updateQueryInsert = String.format(
-				  "INSERT DATA { %n"
-				+ "	%s %n"
-				+ "}", list.get(0));
-		UpdateAction.parseExecute(updateQueryInsert, wholeContentModel);
-		
-		String updateQueryDelete = String.format(
-				  "DELETE DATA { %n"
-				+ " %s %n"
-				+ "}", list.get(1));
-		UpdateAction.parseExecute(updateQueryDelete, wholeContentModel);
-		
-		String triples = ProcessManagement.writeJenaModelToNTriplesString(wholeContentModel);
-		logger.debug("Updated model as N-Triples: \n" + triples); 
-		
-		logger.info("updated whole model: "+ triples);
-		
-		String mergeQuery = ProcessManagement.createMergeQuery(graphName, sdd, user, message, MergeQueryTypeEnum.MANUAL, revisionNumberBranchA, revisionNumberBranchB, triples);
-		logger.info("UpdatedmergeQuery:"+mergeQuery);
-		
-		return mergeQuery;
-		
-	}
 	
 	
 	/**create Commit Model and save in the mergingControl

@@ -4,8 +4,6 @@
 {{$title}}Merge View{{/title}}
 
 {{$head_extra}}
-      <link rel="stylesheet" href="/static/css/tipsy.css">
-      <link rel="stylesheet" href="/static/css/process-graph.css">
       <link rel="stylesheet" href="/static/css/process-graph.css">
       <link rel="stylesheet" href="/static/css/jsTreeStyle.css">            
       <link rel="stylesheet" href="/static/css/r43ples.merging.css">
@@ -34,7 +32,6 @@
 <script src="/static/js/jstree.min.js"></script>
 <script src="/static/js/d3.min.js"></script>
 <script src="/static/js/dagre-d3.js"></script>
-<script src="/static/js/jquery.tipsy.js"></script>
 <script src="/static/js/process-graph.js"></script>
 <script type="text/javascript">
 	//jsTree
@@ -335,7 +332,7 @@
 {{/script_extra}}
 
 {{$content}}
-	{{> templates/merge/superNavBreadcrumbs}}
+	{{> merge/superNavBreadcrumbs}}
         <div class="row ">
           <!--Merging Client-->
               <div id="left" class="col-lg-3">
@@ -407,7 +404,7 @@
                 <div id="highLevelView"></div>  
 
                 <div id="tripleView">
-                	{{> templates/merge/tripleView}}
+                	{{> merge/tripleView}}
               	</div>
               	
              </div>

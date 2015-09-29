@@ -1,8 +1,8 @@
 {{<super}}
 
 {{$head_extra}}
+    <link rel="stylesheet" href="/static/css/r43ples.versiongraph.css">
     <link rel="stylesheet" href="/static/css/tipsy.css">
-    <link rel="stylesheet" href="/static/css/version-graph.css">
 {{/head_extra}}
  
 {{$script_extra}}   
@@ -23,15 +23,11 @@
 	<div class= "col-sm-12">
 	<h1>Revision Graph</h1>
 	    <h2><samp>&lt;{{graphName}}&gt;</samp></h2>
-		<div id="visualisation"/>
-	</div>
-</div>
-<div class="row">
-	<div class= "col-sm-12">
-		<a class="btn btn-block btn-default" href="sparql">Back to Endpoint</a>
+		<div id="visualisation"></div>
+		<br>
+		<a class="btn btn-default" href="sparql">Back to Endpoint</a>
 	</div>
 </div>
 {{/content}}
-
 
 {{/super}}

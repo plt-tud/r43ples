@@ -31,7 +31,7 @@ public class BranchManagement {
 	 * @param graphName name of graph
 	 * @return list of the name of branch*/
 	public static ArrayList<String> getAllBranchNamesOfGraph(String graphName) throws IOException {
-		logger.info("Get all branch names of graph.");
+		logger.info("Get all branch names of graph "+ graphName);
 		ArrayList<String> list = new ArrayList<String>();	
 		if (graphName != null) {
 			
@@ -53,7 +53,7 @@ public class BranchManagement {
 				list.add(qs.getLiteral("label").toString());
 			}		
 		}
-		logger.info(list);
+		logger.debug("All branches: " +list);
 		return list;
 	}
 }

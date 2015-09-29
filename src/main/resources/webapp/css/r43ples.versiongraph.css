@@ -1,9 +1,9 @@
 .revisionGraphVisualisation svg {
+	background-color: WhiteSmoke;
 	height: 468px;
 	border:1px solid #000000;
 	margin:1px;
 	overflow:hidden;
-    background-color: #FFF;
     cursor: default;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -24,7 +24,6 @@
 
 .node rect {
     fill: #fff;
-    height:10px;
 }
 
 .edgePath path {

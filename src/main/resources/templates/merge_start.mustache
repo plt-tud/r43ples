@@ -20,28 +20,27 @@
         });
     });
 
+    
+    //js Stragegie->illustration with Graph
     var strategyImage = {
     		'Three-Way Merge': '/static/images/three-way-strategie.png',
     		'Rebase': '/static/images/rebase-strategie.png',
     		'Fast-Forward': '/static/images/fast-forward-strategie.png',
-    };
-        //js Stragegie->illustration with Graph
+    };    
         
-        
-        function showIllustration(num){
-         document.getElementById("illustration").innerHTML="<img src='" + strategyImage[num] +"' alt='"+num+"' style=\"width:100%\">";
+    function showIllustration(num){
+     document.getElementById("illustration").innerHTML="<img src='" + strategyImage[num] +"' alt='"+num+"' style=\"width:100%\">";
 
-          // by fast forward hide the common,auto fieldset and sdd selector
-          if(num == "Fast-Forward"){
-            $('#methodField').attr("disabled", true);
-            $('#sddField').hide();
-          } else{
-            $('#methodField').show();
-            $('#sddField').show();
-          }
-
-        }; 
-        showIllustration("Three-Way Merge");
+      // by fast forward hide the common,auto fieldset and sdd selector
+      if(num == "Fast-Forward"){
+        $('#methodField').hide();
+        $('#sddField').hide();
+      } else{
+        $('#methodField').show();
+        $('#sddField').show();
+      }
+    }; 
+    showIllustration("Three-Way Merge");
 
         // branch onchange check : if reachable with fast forward
         function checkFastForward (){
@@ -49,7 +48,7 @@
           var branch1 = $('#Branch1').val();
           var branch2 = $('#Branch2').val();
 
-          $.get("fastForwardCheckProcess", 
+          $.get("api/fastForwardCheckProcess", 
             {
               graph : graph,
               branch1 : branch1,
@@ -57,13 +56,12 @@
             },
             function(data,status){
               // get data and check
-              $('#strategie option[value="1"]').attr('disabled', true);
               if(data == "false"){
-            	  $('#strategie option[value="1"]').attr('disabled', true);
+            	  $('#strategie option[value="Fast-Forward"]').attr('disabled', true);
               }else{
-            	  $('#strategie option[value="1"]').attr('disabled', false);
-            	  $('#strategie').val(1);
-            	  showIllustration(1);
+            	  $('#strategie option[value="Fast-Forward"]').attr('disabled', false);
+            	  $('#strategie').val("Fast-Forward");
+            	  showIllustration("Fast-Forward");
               }
             });
         }
@@ -105,9 +103,9 @@
                         <label for="strategie" class="col-sm-2 control-label">Strategy</label>
                         <div class="col-sm-10" >
                           <select class="form-control" id="strategie" name="strategie" onchange="showIllustration(this.value)">
-                             <option>Three-Way Merge</option>
-                             <option>Rebase</option>
-                             <option>Fast-Forward</option>
+                             <option value="Three-Way Merge">Three-Way Merge</option>
+                             <option value="Rebase">Rebase</option>
+                             <option value="Fast-Forward">Fast-Forward</option>
                           </select>
                         </div>
                       </div>                    
