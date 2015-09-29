@@ -58,7 +58,6 @@ import de.tud.plt.r43ples.merging.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.merging.control.FastForwardControl;
 import de.tud.plt.r43ples.merging.control.MergingControl;
 import de.tud.plt.r43ples.merging.control.RebaseControl;
-import de.tud.plt.r43ples.merging.management.BranchManagement;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
 import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.merging.model.structure.CommitModel;
@@ -126,7 +125,7 @@ public class Endpoint {
 	
 	/**map for client and mergingControlMap
 	 * for each client there is a mergingControlMap**/
-	private static HashMap<String, HashMap<String, MergingControl>> clientMap = new HashMap<String, HashMap<String, MergingControl>>();
+	protected static HashMap<String, HashMap<String, MergingControl>> clientMap = new HashMap<String, HashMap<String, MergingControl>>();
 	
 	
 	
@@ -333,25 +332,7 @@ public class Endpoint {
 		return response.build();
 	}
 	
-	@Path("api/getBranches")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public final ArrayList<String> getBranchesOfGraph(@QueryParam("graph") final String graph) throws IOException {
-		return BranchManagement.getAllBranchNamesOfGraph(graph);
-	}
 	
-	/**
-	 * through graph name, branch1 and branch2 to check the right of fast forward strategy
-	 * */
-	@Path("api/fastForwardCheckProcess")
-	@GET
-	@Produces(MediaType.TEXT_PLAIN)
-	public final boolean fastForwardCheckGET(@HeaderParam("Accept") final String formatHeader, @QueryParam("graph") @DefaultValue("") final String graphName,
-			@QueryParam("branch1") @DefaultValue("") final String branch1, @QueryParam("branch2") @DefaultValue("") final String branch2) throws IOException, InternalErrorException {
-		logger.info("graph name test: "+ "--"+graphName+"--");
-		logger.info("branch name test: " + "--"+branch1+"--"+branch2+"--");
-		return FastForwardControl.fastForwardCheck(graphName, branch1, branch2);
-	}
 	
 	/**
 	 * mergingProcess: create mergingQuery 
@@ -741,43 +722,10 @@ public class Endpoint {
 	
 
 	
-	/**
-	 * select property and get the new triple table
-	 *  */
-	@Path("api/filterProcess")
-	@POST
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response filterPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("properties") @DefaultValue("") final String properties, @FormParam("graph") @DefaultValue("") final String graph, 
-			@FormParam("client") @DefaultValue("") final String user ) {
-		
-		ResponseBuilder response = Response.ok();
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-		response.entity(mergingControl.updateTripleTable(properties));
-		return response.build();
-	}	
-	
-	
-	/**
-	 * select the difference in difference tree and renew the triple table
-	 * */
-	@Path("api/treeFilterProcess")
-	@POST
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response treeFilterPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("triples") @DefaultValue("") final String triples, @FormParam("graph") @DefaultValue("") final String graph, 
-			@FormParam("client") @DefaultValue("") final String user ) {
-		
-		ResponseBuilder response = Response.ok();
-		
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-		
-		logger.info("Tree Filter post Array :"+ triples);
 
-		response.entity(mergingControl.updateTripleTableByTree(triples));
-		return response.build();
-	}	
 	
+	
+
 	
 	/**load individual View
 	  */
