@@ -49,12 +49,12 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.JenaModelManagement;
-import de.tud.plt.r43ples.management.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.merging.MergeManagement;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.merging.MergeResult;
+import de.tud.plt.r43ples.merging.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.merging.control.FastForwardControl;
 import de.tud.plt.r43ples.merging.control.MergingControl;
 import de.tud.plt.r43ples.merging.control.RebaseControl;
@@ -659,7 +659,7 @@ public class Endpoint {
 		//save the graph information before merging 
 		StrategyManagement.saveGraphVorMergingInMap(graph, "application/json");
 		
-		String mergeQuery = mergingControl.updateMergeQueryNew();
+		String mergeQuery = mergingControl.updateMergeQuery();
 		
 		String userCommit = null;
 		Matcher userMatcher = patternUser.matcher(mergeQuery);
@@ -706,26 +706,20 @@ public class Endpoint {
 		mergingControl.transformDifferenceModelToRebase();
 		
 		// update the new rebase merge query
-		String mergeQuery = mergingControl.updateMergeQueryNew();
+		String mergeQuery = mergingControl.updateMergeQuery();
 		
 		logger.info("rebase updated merge query: "+ mergeQuery);
 		// execute the getRebaseResponse()
-		String userCommit = null;
 		Matcher userMatcher = patternUser.matcher(mergeQuery);
 		if (userMatcher.find()) {
-			userCommit = userMatcher.group("user");
 			mergeQuery = userMatcher.replaceAll("");
 		}
-		String messageCommit = null;
 		Matcher messageMatcher = patternCommitMessage.matcher(mergeQuery);
 		if (messageMatcher.find()) {
-			messageCommit = messageMatcher.group("message");
 			mergeQuery = messageMatcher.replaceAll("");
 		}
 
-		if (patternRebaseQuery.matcher(mergeQuery).find()) {
-			getRebaseResponse(mergeQuery, userCommit, messageCommit, "HTML");
-		}
+		getRebaseResponse(mergeQuery, user, mergingControl.getCommitModel().getMessage(), "HTML");
 				
 		
 		String rebaseResultView = rebaseControl.getRebaseReportView(null);

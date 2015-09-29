@@ -20,7 +20,7 @@ import de.tud.plt.r43ples.merging.model.structure.Triple;
 public class ReportManagement {
 	
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(ProcessManagement.class);
+	private static Logger logger = Logger.getLogger(ReportManagement.class);
 	
 	
 	/**initial report result and create report list
@@ -28,7 +28,6 @@ public class ReportManagement {
 	 * */
 	public static ReportResult initialReportResult(DifferenceModel differenceModel) {
 		ReportResult reportResult = new ReportResult();
-		
 		
 		// Count for Conflict;
 		int count = 0;
@@ -112,13 +111,12 @@ public class ReportManagement {
 		Iterator<ReportTableRow> idt = reportTableRowList.iterator();
 		while(idt.hasNext()){
 			ReportTableRow tr = idt.next();
-			logger.info("TableModel ID Test:" + tr.getRevisionA() + tr.getResolutionState() + tr.getApproved());
+			logger.debug("TableModel ID Test:" + tr.getRevisionA() + tr.getResolutionState() + tr.getApproved());
 		}
 		
 		
 		logger.info("TableModel successful created.");
 		
 		return reportTableRowList;
-			
 	}
 }

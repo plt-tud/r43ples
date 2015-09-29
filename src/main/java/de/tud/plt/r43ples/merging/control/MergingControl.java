@@ -19,9 +19,10 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.update.UpdateAction;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.RebaseQueryTypeEnum;
+import de.tud.plt.r43ples.management.JenaModelManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
+import de.tud.plt.r43ples.merging.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.merging.ResolutionStateEnum;
 import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
@@ -893,7 +894,7 @@ public class MergingControl {
 	 * @throws IOException 
 	 */
 	
-	public String updateMergeQueryNew () throws IOException, InternalErrorException {
+	public String updateMergeQuery () throws IOException, InternalErrorException {
 		
 		if (reportResult != null) {
 			if (reportResult.getConflictsNotApproved() == 0){
@@ -923,18 +924,15 @@ public class MergingControl {
 					//create Triples
 					// Get the whole dataset
 					Model wholeContentModel = ProcessManagement.getWholeContentOfRevision(graphName, revisionNumberBranchB);
-					logger.debug("Whole model as N-Triples: \n" + ProcessManagement.writeJenaModelToNTriplesString(wholeContentModel));
 					
-					logger.info("whole model: " + ProcessManagement.writeJenaModelToNTriplesString(wholeContentModel));
+					logger.debug("Whole model as N-Triples: \n" + JenaModelManagement.convertJenaModelToNTriple(wholeContentModel));
+					
 
 					// Update dataset with local data
 					ArrayList<String> list = ProcessManagement.getAllTriplesDividedIntoInsertAndDelete(differenceModel, wholeContentModel);
 					
 					logger.debug("INSERT: \n" + list.get(0));
 					logger.debug("DELETE: \n" + list.get(1));
-					
-					logger.info("insert Triple: "+list.get(0));
-					logger.info("delete Triple: "+list.get(1));
 
 					
 					String updateQueryInsert = String.format(
@@ -949,7 +947,7 @@ public class MergingControl {
 							+ "}", list.get(1));
 					UpdateAction.parseExecute(updateQueryDelete, wholeContentModel);
 					
-					String triples = ProcessManagement.writeJenaModelToNTriplesString(wholeContentModel);
+					String triples = JenaModelManagement.convertJenaModelToNTriple(wholeContentModel);
 					logger.debug("Updated model as N-Triples: \n" + triples); 
 					
 					logger.info("updated whole model: "+ triples);
@@ -1014,7 +1012,7 @@ public class MergingControl {
 	}
 	
 	
-	/** update difference model nach checkebox in triple table*/
+	/** update difference model after checkbox in triple table*/
 	
 	public void updateDifferenceModel(String triplesId) {
 		String[] idArray = triplesId.split(",");

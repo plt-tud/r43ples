@@ -9,12 +9,11 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 
 public class BranchManagement {
-	private static Logger logger = Logger.getLogger(RevisionManagement.class);
+	private static Logger logger = Logger.getLogger(BranchManagement.class);
 	/** The SPARQL prefixes. **/
 	public static final String prefixes = 
 			  "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> \n"

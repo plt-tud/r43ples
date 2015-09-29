@@ -11,9 +11,9 @@ import com.hp.hpl.jena.query.ResultSet;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.MergeManagement;
+import de.tud.plt.r43ples.merging.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 public class StrategyManagement {
@@ -54,7 +54,7 @@ public class StrategyManagement {
 	 * @param uri of branch A
 	 *  */
 	public static void moveBranchReference(String branchNameB, String revisionUriB, String revisionUriA){
-		// delete alte reference
+		// delete old reference
 		String query = prefixes + String.format("DELETE DATA { GRAPH <%s> { <%s> rmo:references <%s>. } };%n",
 				Config.revision_graph, branchNameB, revisionUriB);
 		// added new reference
@@ -75,19 +75,16 @@ public class StrategyManagement {
 	public static void updateRevisionOfBranch(String branchUriB, String revisionUriB, String revisionUriA ){
 		LinkedList<String> revisionList =  MergeManagement.getPathBetweenStartAndTargetRevision(revisionUriB, revisionUriA);
 		
-		logger.info("revisionlist size: "+ revisionList.size());
 		Iterator<String> riter = revisionList.iterator();
 		while(riter.hasNext()) {
 			String revision = riter.next();
 			String query = prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:revisionOfBranch <%s>. } };%n",
 					Config.revision_graph, revision, branchUriB);
 			
-			logger.info("revisionlist info" + revision);
-
-			logger.info("updated info" + query);
+			logger.debug("revisionlist info" + revision);
+			logger.debug("updated info" + query);
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);			
 		}
-		
 	}
 	
 	/**
@@ -230,9 +227,10 @@ public class StrategyManagement {
 			QuerySolution qs = resultSet.next();
 			return qs.getResource("?deltaAdded").toString();
 		}
-		
-		logger.info("No deltaAdded could be found.");
-		return null;
+		else {
+			logger.info("No deltaAdded could be found.");
+			return null;
+		}
 	}
 	
 	/** get the delta removed width versionUri
@@ -250,9 +248,10 @@ public class StrategyManagement {
 			QuerySolution qs = resultSet.next();
 			return qs.getResource("?deltaRemoved").toString();
 		}
-		
-		logger.info("No deltaRemoved could be found.");
-		return null;
+		else {
+			logger.info("No deltaRemoved could be found.");
+			return null;
+		}
 	}
 	
 	/** get the delta removed width versionUri

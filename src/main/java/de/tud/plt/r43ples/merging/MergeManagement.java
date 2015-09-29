@@ -19,7 +19,6 @@ import com.hp.hpl.jena.util.FileUtils;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.JenaModelManagement;
-import de.tud.plt.r43ples.management.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
@@ -900,14 +899,6 @@ public class MergeManagement {
 		String graphNameOfBranchA = RevisionManagement.getReferenceGraph(graphName, branchNameA);
 		// Get the full graph name of branch B
 		String graphNameOfBranchB = RevisionManagement.getReferenceGraph(graphName, branchNameB);
-		
-//		if(type.equals(RebaseQueryTypeEnum.WITH)){
-//			// Add the string to the result list
-//			list.add(String.format(triples));
-//			list.add(null);
-//					
-//			return list;
-//		}
 		
 		logger.info("the triples: "+ triples);
 		if (type.equals(RebaseQueryTypeEnum.MANUAL)) {

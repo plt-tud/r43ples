@@ -1,16 +1,13 @@
 package de.tud.plt.r43ples.merging.management;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.Map.Entry;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
@@ -21,10 +18,11 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.Interface;
+import de.tud.plt.r43ples.management.JenaModelManagement;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.merging.ResolutionStateEnum;
 import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
@@ -126,14 +124,12 @@ public class ProcessManagement {
 	 * @param differenceModel the difference model where the result should be stored
 	 * @throws IOException 
 	 */
-	
-	
 	public static void readDifferenceModel(String differenceModelToRead, DifferenceModel differenceModel, String format) throws IOException {
 		logger.info("Start reading difference model.");
 		differenceModel.clear();
 		
 		logger.info("differenceModelToRead: "+ differenceModelToRead);
-		Model model = readTurtleStringToJenaModel(differenceModelToRead, format);
+		Model model = JenaModelManagement.readStringToJenaModel(differenceModelToRead, format);
 		
 		// Query all difference groups
 		String queryDifferenceGroups = prefixes + String.format(
@@ -284,41 +280,6 @@ public class ProcessManagement {
 	}
 	
 	
-	/**
-	 * Read Turtle string to jena model.
-	 * 
-	 * @param triples the triples in Turtle serialization
-	 * @return the model
-	 * @throws IOException
-	 * 
-	 */
-	
-	public static Model readTurtleStringToJenaModel(String triples, String format) throws IOException {
-		Model model = null;
-		model = ModelFactory.createDefaultModel();
-		InputStream is = new ByteArrayInputStream(triples.getBytes());
-		model.read(is, null, "Turtle");
-		is.close();
-		
-		logger.info("i did it auch!");
-		
-		return model;
-	}
-	
-	
-	/**
-	 * Write jena model to N-Triples string.
-	 * 
-	 * @param model the model
-	 * @return the N-Triples string
-	 */
-	public static String writeJenaModelToNTriplesString(Model model) {
-		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		
-		model.write(stream, "N-TRIPLES");
-		
-		return stream.toString();
-	}
 	
 	
 	/**
@@ -354,14 +315,9 @@ public class ProcessManagement {
 	public static String tripleToString(Triple triple) {
 		if (triple.getObjectType().equals(TripleObjectTypeEnum.LITERAL)) {
 			logger.debug(String.format("<%s> %s \"%s\" .", triple.getSubject(), getPredicate(triple), triple.getObject()));
-			
-			logger.info("LITERAL Triple");
 			return String.format("<%s> %s \"%s\" .", triple.getSubject(), getPredicate(triple), triple.getObject());
-			
 		} else {
 			logger.debug(String.format("<%s> %s <%s> .", triple.getSubject(), getPredicate(triple), triple.getObject()));
-			logger.info("Ohne LITERAL Triple");
-
 			return String.format("<%s> %s <%s> .", triple.getSubject(), getPredicate(triple), triple.getObject());
 		}
 	}
@@ -486,8 +442,7 @@ public class ProcessManagement {
 		logger.debug(query);
 		
 		
-		
-		String result = QueryManagement.getSelectConstructAskResponseClassic(query, "text/xml");
+		String result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query, "text/xml");
 		logger.debug(result);
 		
 		// Iterate over all individuals
@@ -528,7 +483,7 @@ public class ProcessManagement {
 		logger.debug(query);
 		
 		//here difference with mergingClient
-		String result = QueryManagement.getSelectConstructAskResponseClassic(query, "text/xml");
+		String result = Interface.sparqlSelectConstructAsk(query, "text/xml", false);
 		
 		logger.debug(result);
 		
@@ -1081,8 +1036,7 @@ public class ProcessManagement {
 
     	// Query all properties (DISTINCT because there can be multiple property occurrences)
 		String query = String.format(
-				  "OPTION r43ples:SPARQL_JOIN %n"
-				+ "SELECT DISTINCT ?propertyUri %n"
+				"SELECT DISTINCT ?propertyUri %n"
 				+ "FROM <%s> REVISION \"%s\" %n"
 				+ "FROM <%s> REVISION \"%s\" %n"
 				+ "WHERE { %n"
@@ -1092,9 +1046,8 @@ public class ProcessManagement {
 		logger.debug(query);
 		
 		//here difference with mergingClient
-		//String result = TripleStoreInterface.executeQueryWithoutAuthorization(query, "text/xml");
-		//String result = QueryManagement.getSelectConstructAskResponseClassic(query, "text/xml");
-		String result = QueryManagement.getSelectConstructAskResponse(query, "text/xml");
+		
+		String result = Interface.sparqlSelectConstructAsk(query, "text/xml", true);
 		
 		logger.debug(result);
 		
@@ -1141,12 +1094,10 @@ public class ProcessManagement {
 				+ "WHERE { %n"
 				+ "	?s ?p ?o %n"
 				+ "}", graphName, revision);
-		String result = QueryManagement.getSelectConstructAskResponseClassic(query, "text/turtle");
+		String result = Interface.sparqlSelectConstructAsk(query, "text/turtle", false);
 		
-		logger.debug(result);
-		logger.info("WholeContent Result: "+result);		
-
-		return readTurtleStringToJenaModel(result,"text/html");
+		logger.debug("WholeContent Result: "+result);		
+		return JenaModelManagement.readStringToJenaModel(result,"text/html");
 	}
 	
 	
