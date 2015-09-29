@@ -20,25 +20,20 @@
         });
     });
 
+    var strategyImage = {
+    		'Three-Way Merge': '/static/images/three-way-strategie.png',
+    		'Rebase': '/static/images/rebase-strategie.png',
+    		'Fast-Forward': '/static/images/fast-forward-strategie.png',
+    };
         //js Stragegie->illustration with Graph
         
+        
         function showIllustration(num){
-          if(num == 0){
-            document.getElementById("illustration").innerHTML="";
-          }
-          if(num == 1){
-            document.getElementById("illustration").innerHTML="<img class=\"pull-left\" src=\"/static/images/fast-forward-strategie.png\" alt=\"fast-forward\" style=\"width:416px;height:466px;margin-left:6px\">";
-          }
-          if(num == 2){
-            document.getElementById("illustration").innerHTML="<img class=\"pull-left\" src=\"/static/images/three-way-strategie.png\" alt=\"three-way\" style=\"width:416px;height:466px;margin-left:6px\">";
-          }
-          if(num == 3){ 
-            document.getElementById("illustration").innerHTML="<img class=\"pull-left\" src=\"/static/images/rebase-strategie.png\" alt=\"rebase\"     style=\"width:416px;height:466px;margin-left:6px\">";
-          }
+         document.getElementById("illustration").innerHTML="<img src='" + strategyImage[num] +"' alt='"+num+"' style=\"width:100%\">";
 
           // by fast forward hide the common,auto fieldset and sdd selector
-          if(num == 1){
-            $('#methodField').hide();
+          if(num == "Fast-Forward"){
+            $('#methodField').attr("disabled", true);
             $('#sddField').hide();
           } else{
             $('#methodField').show();
@@ -46,6 +41,7 @@
           }
 
         }; 
+        showIllustration("Three-Way Merge");
 
         // branch onchange check : if reachable with fast forward
         function checkFastForward (){
@@ -109,9 +105,9 @@
                         <label for="strategie" class="col-sm-2 control-label">Strategy</label>
                         <div class="col-sm-10" >
                           <select class="form-control" id="strategie" name="strategie" onchange="showIllustration(this.value)">
-                             <option value="2">Three-Way Merge</option>
-                             <option value="3">Rebase</option>
-                             <option value="1">Fast-Forward</option>
+                             <option>Three-Way Merge</option>
+                             <option>Rebase</option>
+                             <option>Fast-Forward</option>
                           </select>
                         </div>
                       </div>                    
@@ -131,13 +127,13 @@
                       <div class="form-group">
                           <label for="user" class="col-sm-2 control-label">User</label>
                           <div class="col-sm-10">
-                            <input class="form-control" type="text" placeholder="User" id="user" name="user">
+                            <input class="form-control" type="text" placeholder="Committing User" id="user" name="user">
                           </div>
                        </div>    
                       <div class="form-group">
                            <label for="message" class="col-sm-2 control-label">Message</label>
                            <div class="col-sm-10 ">
-                           	<textarea class="form-control" rows="6" id="message" name="message"></textarea>
+                           	<textarea class="form-control" rows="6" placeholder="Commit Message" id="message" name="message"></textarea>
                            </div>
                       </div>
                       <div class="form-group">
@@ -154,7 +150,7 @@
 
        <div class= "col-sm-5">
             <h3>Strategy Illustration</h3>
-            <div class="panel-body" id="illustration" style="height:486px; width:406px ;">
+            <div id="illustration">
             </div>
           </div>
 		</div>
