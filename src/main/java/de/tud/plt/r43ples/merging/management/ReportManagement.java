@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 
-import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.merging.ResolutionStateEnum;
@@ -59,9 +58,8 @@ public class ReportManagement {
 	
 	/**read neue difference model and create report table row list
 	 * @param difference model
-	 * @throws ConfigurationException 
 	 * */
-	public static List<ReportTableRow> createReportTableRowList(DifferenceModel differenceModel) throws ConfigurationException{
+	public static List<ReportTableRow> createReportTableRowList(DifferenceModel differenceModel) {
 		
 		//new a List for ReportTableRow
 		List<ReportTableRow> reportTableRowList = new ArrayList<ReportTableRow>();

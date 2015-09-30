@@ -239,7 +239,7 @@ public class MergingControl {
 	
 
 	
-	public void getMergeProcess(Response response, String graphName, String branchNameA, String branchNameB, String format) throws InternalErrorException, IOException {
+	public void getMergeProcess(Response response, String graphName, String branchNameA, String branchNameB, String format) throws InternalErrorException {
 		if (isRebase) {
 			ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel, format);		
 			ProcessManagement.createDifferenceTree(differenceModel, treeList);	
@@ -516,8 +516,9 @@ public class MergingControl {
 	}
 	
 	/**get triple view after changed view
-	 * @throws ConfigurationException */
-	public String getTripleView() throws ConfigurationException {
+	 *
+	 * */
+	public String getTripleView() {
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		
@@ -835,7 +836,7 @@ public class MergingControl {
 	 * @throws ConfigurationException 
 	 */
 	
-	public String createReportProcess() throws ConfigurationException {
+	public String createReportProcess() {
 		Map<String, Object> scope = new HashMap<String, Object>();
 		StringWriter sw = new StringWriter();
 		
@@ -894,7 +895,7 @@ public class MergingControl {
 	 * @throws IOException 
 	 */
 	
-	public String updateMergeQuery () throws IOException, InternalErrorException {
+	public String updateMergeQuery () throws InternalErrorException {
 		
 		if (reportResult != null) {
 			if (reportResult.getConflictsNotApproved() == 0){

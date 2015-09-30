@@ -129,10 +129,8 @@ public class RebaseControl {
 	
 	/**manual rebase beginn , for each patch in patch graup will a new revision created 
 	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws ConfigurationException 
 	 * */
-	public void manualRebaseProcess() throws InternalErrorException, ConfigurationException, IOException {
+	public void manualRebaseProcess() throws InternalErrorException {
 		
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		
@@ -148,7 +146,6 @@ public class RebaseControl {
 		logger.info("is Rebase: "+ mergingControl.getIsRebase());
 		
 		mergingControl.getMergeProcess(response, commitModel.getGraphName(), commitModel.getBranch1(), commitModel.getBranch2(),"text/html");
- 			
 	}
 	
 	/**read the difference model and set the automatic resolution state for the triple and create */
@@ -281,6 +278,11 @@ public class RebaseControl {
 
 	
 	/** rebase process beginn, read the difference model and check the freundlichkeit of Rebase
+	 * @param differGraphModel	string of difference model for this rebase
+	 * @param graphName	name of the graph to be rebased
+	 * @param branchNameA name of branch A
+	 * @param branchNameB name of branch B
+	 * @param format rdf serialisation format of differGraphModel
 	 * @throws InternalErrorException */
 	public boolean checkRebaseFreundlichkeit( String differGraphModel, String graphName, String branchNameA, String branchNameB, String format) throws InternalErrorException{
 				
@@ -289,12 +291,7 @@ public class RebaseControl {
 	
 		
 		logger.info("difference graph Model by check unfreundlich:" + differenceGraphModel);
-		try {
-			ProcessManagement.readDifferenceModel(differenceGraphModel, differenceModel, format);
-		} catch (IOException e) {
-			e.printStackTrace();
-			throw new InternalErrorException(e.getMessage());			
-		}
+		ProcessManagement.readDifferenceModel(differenceGraphModel, differenceModel, format);
 		
 		//get difference group
 		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();

@@ -122,9 +122,9 @@ public class ProcessManagement {
 	 * 
 	 * @param differenceModelToRead the difference model to read
 	 * @param differenceModel the difference model where the result should be stored
-	 * @throws IOException 
+	 * @param format rdf serialisation of differenceModelToRead
 	 */
-	public static void readDifferenceModel(String differenceModelToRead, DifferenceModel differenceModel, String format) throws IOException {
+	public static void readDifferenceModel(String differenceModelToRead, DifferenceModel differenceModel, String format) {
 		logger.info("Start reading difference model.");
 		differenceModel.clear();
 		
@@ -1084,10 +1084,9 @@ public class ProcessManagement {
 	 * @param graphName the graph name
 	 * @param revision the revision
 	 * @return the whole content of the revision of the graph as jena model
-	 * @throws IOException 
 	 * @throws InternalErrorException 
 	 */
-	public static Model getWholeContentOfRevision(String graphName, String revision) throws IOException, InternalErrorException {
+	public static Model getWholeContentOfRevision(String graphName, String revision) throws InternalErrorException {
 		String query = String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
 				+ "FROM <%s> REVISION \"%s\" %n"
