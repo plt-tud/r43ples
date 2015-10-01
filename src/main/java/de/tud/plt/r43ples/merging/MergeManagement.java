@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.merge;
+package de.tud.plt.r43ples.merging;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -567,38 +567,38 @@ public class MergeManagement {
 			String sparqlQueryRevisionB = null;			
 			
 			// A
-			if (currentTripleStateA.equals(SDDTripleState.ADDED.getSddRepresentation())) {
+			if (currentTripleStateA.equals(SDDTripleStateEnum.ADDED.getSddRepresentation())) {
 				// In revision A the triple was added
 				querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
-				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.ADDED.getRpoRepresentation());
-			} else if (currentTripleStateA.equals(SDDTripleState.DELETED.getSddRepresentation())) {
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleStateEnum.ADDED.getRpoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleStateEnum.DELETED.getSddRepresentation())) {
 				// In revision A the triple was deleted
 				querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
-				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.DELETED.getRpoRepresentation());
-			} else if (currentTripleStateA.equals(SDDTripleState.ORIGINAL.getSddRepresentation())) {
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleStateEnum.DELETED.getRpoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleStateEnum.ORIGINAL.getSddRepresentation())) {
 				// In revision A the triple is original
 				querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
-				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.ORIGINAL.getRpoRepresentation());
-			} else if (currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleStateEnum.ORIGINAL.getRpoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
 				// In revision A the triple is not included
 				querySelectPart = String.format(querySelectPart, "", "%s");
 				sparqlQueryRevisionA = sparqlTemplateNotExistsRevisionA;
 			}
 			
 			// B
-			if (currentTripleStateB.equals(SDDTripleState.ADDED.getSddRepresentation())) {
+			if (currentTripleStateB.equals(SDDTripleStateEnum.ADDED.getSddRepresentation())) {
 				// In revision B the triple was added
 				querySelectPart = String.format(querySelectPart, "?revisionB");
-				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.ADDED.getRpoRepresentation());
-			} else if (currentTripleStateB.equals(SDDTripleState.DELETED.getSddRepresentation())) {
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleStateEnum.ADDED.getRpoRepresentation());
+			} else if (currentTripleStateB.equals(SDDTripleStateEnum.DELETED.getSddRepresentation())) {
 				// In revision B the triple was deleted
 				querySelectPart = String.format(querySelectPart, "?revisionB");
-				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.DELETED.getRpoRepresentation());
-			} else if (currentTripleStateB.equals(SDDTripleState.ORIGINAL.getSddRepresentation())) {
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleStateEnum.DELETED.getRpoRepresentation());
+			} else if (currentTripleStateB.equals(SDDTripleStateEnum.ORIGINAL.getSddRepresentation())) {
 				// In revision B the triple is original
 				querySelectPart = String.format(querySelectPart, "?revisionB");
-				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.ORIGINAL.getRpoRepresentation());
-			} else if (currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleStateEnum.ORIGINAL.getRpoRepresentation());
+			} else if (currentTripleStateB.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
 				// In revision B the triple is not included
 				querySelectPart = String.format(querySelectPart, "");
 				sparqlQueryRevisionB = sparqlTemplateNotExistsRevisionB;
@@ -631,15 +631,15 @@ public class MergeManagement {
 				
 				// Create the references A and B part of the query
 				String referencesAB = ". %n";
-				if (!currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation()) && !currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+				if (!currentTripleStateA.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation()) && !currentTripleStateB.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
 					referencesAB = String.format(
 							  "			rpo:referencesA <%s> ; %n"
 							+ "			rpo:referencesB <%s> %n", qsQuery.getResource("?revisionA").toString(), 
 																qsQuery.getResource("?revisionB").toString());
-				} else if (currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation()) && !currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+				} else if (currentTripleStateA.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation()) && !currentTripleStateB.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
 					referencesAB = String.format(
 							  "			rpo:referencesB <%s> %n", qsQuery.getResource("?revisionB").toString());
-				} else if (!currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation()) && currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+				} else if (!currentTripleStateA.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation()) && currentTripleStateB.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
 					referencesAB = String.format(
 							  "			rpo:referencesA <%s> %n", qsQuery.getResource("?revisionA").toString());
 				}
@@ -775,7 +775,7 @@ public class MergeManagement {
 							type.equals(MergeQueryTypeEnum.COMMON) || 
 							(type.equals(MergeQueryTypeEnum.WITH) && !currentDifferencGroupConflict) ) {
 						// MERGE AUTO or common MERGE query
-						if (currentDifferencGroupAutomaticResolutionState.equals(SDDTripleState.ADDED.getSddRepresentation())) {
+						if (currentDifferencGroupAutomaticResolutionState.equals(SDDTripleStateEnum.ADDED.getSddRepresentation())) {
 							// Triple should be added
 							triplesToAdd += subject + " " + predicate + " " + object + " . \n";
 						} else {
@@ -866,6 +866,202 @@ public class MergeManagement {
 		usedRevisionNumbers.add(branchNameB);
 		usedRevisionNumbers.add(branchNameA);
 		return RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, usedRevisionNumbers);
+	}
+	
+	/**
+	 * Create a rebase merged revision.
+	 * 
+	 * @param graphName the graph name
+	 * @param branchNameA the name of branch A
+	 * @param branchNameB the name of branch B
+	 * @param user the user
+	 * @param commitMessage the commit message
+	 * @param graphNameDifferenceTripleModel the graph name of the difference triple model
+	 * @param graphNameRevisionProgressA the graph name of the revisions progress A
+	 * @param uriA the URI A
+	 * @param graphNameRevisionProgressB the graph name of the revisions progress B
+	 * @param uriB the URI B
+	 * @param uriSDD the URI of the SDD
+	 * @param type the merge query type
+	 * @param triples the triples which are belonging to the current merge query in N-Triple serialization
+	 * @return new revision number
+	 * @throws InternalErrorException 
+	 */
+	public static ArrayList<String> createRebaseMergedTripleList(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, RebaseQueryTypeEnum type, String triples) throws InternalErrorException {
+		//set the triple list
+		ArrayList<String> list = new ArrayList<String>();
+		
+		// Create an empty temporary graph which will contain the merged full content
+		String graphNameOfMerged = graphName + "-RM-MERGED-TEMP";
+		createNewGraph(graphNameOfMerged);
+		
+		// Get the full graph name of branch A
+		String graphNameOfBranchA = RevisionManagement.getReferenceGraph(graphName, branchNameA);
+		// Get the full graph name of branch B
+		String graphNameOfBranchB = RevisionManagement.getReferenceGraph(graphName, branchNameB);
+		
+		logger.info("the triples: "+ triples);
+		if (type.equals(RebaseQueryTypeEnum.MANUAL)) {
+			// Manual merge query
+			RevisionManagement.executeINSERT(graphNameOfMerged, triples);
+		} else {	
+			// Copy graph B to temporary merged graph
+			String queryCopy = String.format("COPY <%s> TO <%s>", graphNameOfBranchB, graphNameOfMerged);
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryCopy);
+			
+			// Get the triples from branch A which should be added to/removed from the merged revision
+			String triplesToAdd = "";
+			String triplesToDelete = "";
+			
+			// Get all difference groups
+			String queryDifferenceGroup = prefixes + String.format(
+					  "SELECT ?differenceCombinationURI ?automaticResolutionState ?tripleStateA ?tripleStateB ?conflict %n"
+					+ "WHERE { GRAPH <%s> { %n"
+					+ "	?differenceCombinationURI a rpo:DifferenceGroup ; %n"
+					+ "		sddo:automaticResolutionState ?automaticResolutionState ; %n"
+					+ "		sddo:hasTripleStateA ?tripleStateA ; %n"
+					+ "		sddo:hasTripleStateB ?tripleStateB ; %n"
+					+ "		sddo:isConflicting ?conflict . %n"
+					+ "} }", graphNameDifferenceTripleModel);
+	
+			// Iterate over all difference groups
+			ResultSet resultSetDifferenceGroups = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryDifferenceGroup);
+			while (resultSetDifferenceGroups.hasNext()) {
+				QuerySolution qsCurrentDifferenceGroup = resultSetDifferenceGroups.next();
+	
+				String currentDifferencGroupURI = qsCurrentDifferenceGroup.getResource("?differenceCombinationURI").toString();
+				String currentDifferencGroupAutomaticResolutionState = qsCurrentDifferenceGroup.getResource("?automaticResolutionState").toString();
+//				Currently not needed
+//				String currentDifferencGroupTripleStateA = qsCurrentDifferenceGroup.getResource("?tripleStateA").toString();
+//				String currentDifferencGroupTripleStateB = qsCurrentDifferenceGroup.getResource("?tripleStateB").toString();
+				boolean currentDifferencGroupConflict = qsCurrentDifferenceGroup.getLiteral("?conflict").getBoolean();
+				
+				// Get all differences (triples) of current difference group
+				String queryDifference = prefixes + String.format(
+						  "SELECT ?s ?p ?o %n"
+						+ "WHERE { GRAPH <%s> { %n"
+						+ "	<%s> a rpo:DifferenceGroup ; %n"
+						+ "		rpo:hasDifference ?blankDifference . %n"
+						+ "	?blankDifference a rpo:Difference ; %n"
+						+ "		rpo:hasTriple ?triple . %n"
+						+ "	?triple rdf:subject ?s . %n"
+						+ "	?triple rdf:predicate ?p . %n"
+						+ "	?triple rdf:object ?o . %n"
+						+ "} }", graphNameDifferenceTripleModel, currentDifferencGroupURI);
+				
+				// Iterate over all differences (triples)
+				ResultSet resultSetDifferences = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryDifference);
+				while (resultSetDifferences.hasNext()) {
+					QuerySolution qsCurrentDifference = resultSetDifferences.next();
+					
+					String subject = "<" + qsCurrentDifference.getResource("?s").toString() + ">";
+					String predicate = "<" + qsCurrentDifference.getResource("?p").toString() + ">";
+	
+					// Differ between literal and resource
+					String object = "";
+					if (qsCurrentDifference.get("?o").isLiteral()) {
+						object = "\"" + qsCurrentDifference.getLiteral("?o").toString() + "\"";
+					} else {
+						object = "<" + qsCurrentDifference.getResource("?o").toString() + ">";
+					}
+					
+					if (	type.equals(RebaseQueryTypeEnum.AUTO) || 
+							type.equals(RebaseQueryTypeEnum.COMMON) || 
+							(type.equals(RebaseQueryTypeEnum.WITH) && !currentDifferencGroupConflict) ) {
+						
+						// MERGE AUTO or common MERGE query
+						if (currentDifferencGroupAutomaticResolutionState.equals(SDDTripleStateEnum.ADDED.getSddRepresentation())) {
+							// Triple should be added
+							triplesToAdd += subject + " " + predicate + " " + object + " . \n";
+						} else {
+							// Triple should be deleted
+							triplesToDelete += subject + " " + predicate + " " + object + " . \n";
+						}
+					}else {
+						
+						// MERGE WITH query - conflicting triple
+						Model model = JenaModelManagement.readNTripleStringToJenaModel(triples);
+						// Create ASK query which will check if the model contains the specified triple
+						String queryAsk = String.format(
+								  "ASK { %n"
+								+ " %s %s %s %n"
+								+ "}", subject, predicate, object);
+						Query query = QueryFactory.create(queryAsk);
+						QueryExecution qe = QueryExecutionFactory.create(query, model);
+						boolean resultAsk = qe.execAsk();
+						qe.close();
+						model.close();
+						if (resultAsk) {
+							// Model contains the specified triple
+							// Triple should be added
+							triplesToAdd += subject + " " + predicate + " " + object + " . \n";
+						} else {
+							// Triple should be deleted
+							triplesToDelete += subject + " " + predicate + " " + object + " . \n";
+						}
+					}
+				}
+				// Update the merged graph
+				// Insert triplesToAdd
+				RevisionManagement.executeINSERT(graphNameOfMerged, triplesToAdd);
+				// Delete triplesToDelete
+				RevisionManagement.executeDELETE(graphNameOfMerged, triplesToDelete);
+			}
+		}
+		
+		// Calculate the add and delete sets
+		
+		// Get all added triples (concatenate all triples which are in MERGED but not in A and all triples which are in MERGED but not in B)
+		String queryAddedTriples = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "WHERE { %n"
+				+ "	GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	FILTER NOT EXISTS { %n"
+				+ "		GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	} %n"
+				+ "}", graphNameOfMerged, graphNameOfBranchA);
+		
+		String addedTriples = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
+		
+		queryAddedTriples = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "WHERE { %n"
+				+ "	GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	FILTER NOT EXISTS { %n"
+				+ "		GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	} %n"
+				+ "}", graphNameOfMerged, graphNameOfBranchB);
+
+		addedTriples += TripleStoreInterfaceSingleton.get().executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
+		
+		// Get all removed triples (concatenate all triples which are in A but not in MERGED and all triples which are in B but not in MERGED)
+		String queryRemovedTriples = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "WHERE { %n"
+				+ "	GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	FILTER NOT EXISTS { %n"
+				+ "		GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	} %n"
+				+ "}", graphNameOfBranchA, graphNameOfMerged);
+		
+		String removedTriples = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
+		
+		queryRemovedTriples = String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "WHERE { %n"
+				+ "	GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	FILTER NOT EXISTS { %n"
+				+ "		GRAPH <%s> { ?s ?p ?o } %n"
+				+ "	} %n"
+				+ "}", graphNameOfBranchB, graphNameOfMerged);
+		
+		removedTriples += TripleStoreInterfaceSingleton.get().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
+		
+		// Add the string to the result list
+		list.add(String.format(addedTriples));
+		list.add(String.format(removedTriples));
+				
+		return list;
 	}
 
 	

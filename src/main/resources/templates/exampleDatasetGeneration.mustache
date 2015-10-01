@@ -1,15 +1,17 @@
-{{<templates/super}}
+{{<super}}
 
 {{$content}}
+<div class= "row">
  Following example data sets have been generating including a revision graph:
 
 <ul>
- 	{{#iterator}}
+ 	{{#graphs}}
 	<li>{{toString}}</li>
-	{{/iterator}}
+	{{/graphs}}
 </ul>
 
 <a class="btn btn-default" href="sparql">Back to Endpoint</a>
+</div>
 {{/content}}
 
-{{/templates/super}}
+{{/super}}

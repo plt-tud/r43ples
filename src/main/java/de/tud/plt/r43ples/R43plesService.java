@@ -17,12 +17,12 @@ import org.glassfish.jersey.server.mvc.mustache.MustacheMvcFeature;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
-import com.hp.hpl.jena.query.Dataset;
 
 import de.tud.plt.r43ples.client.R43plesArgs;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import de.tud.plt.r43ples.webservice.API;
 import de.tud.plt.r43ples.webservice.Endpoint;
 import de.tud.plt.r43ples.webservice.ExceptionMapper;
 
@@ -41,8 +41,6 @@ public class R43plesService {
 	private static Logger logger = Logger.getLogger(R43plesService.class);
 	/** The HTTP server. **/
 	private static HttpServer server;
-	/** The TDB dataset. **/
-	public static Dataset dataset;
 	
 	
 	/**
@@ -102,7 +100,7 @@ public class R43plesService {
 		URI BASE_URI;
 		
 		ResourceConfig rc = new ResourceConfig()
-			.registerClasses(Endpoint.class)
+			.registerClasses(Endpoint.class, API.class)
 			.property(MustacheMvcFeature.TEMPLATE_BASE_PATH, "templates")
 			.register(MustacheMvcFeature.class)
 			.register(ExceptionMapper.class)

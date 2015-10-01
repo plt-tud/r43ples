@@ -69,6 +69,8 @@ public class DatasetGenerationManagement {
 	 * @param revision the revision
 	 * @param triples the triples to insert
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
 	 public static void executeInsertQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
 		String query = String.format(
