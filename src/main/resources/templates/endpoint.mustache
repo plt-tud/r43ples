@@ -54,9 +54,9 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label for="join_option" class="col-sm-3 control-label" >JOIN Option:</label>
+						<label for="query_rewriting" class="col-sm-3 control-label" >JOIN Option:</label>
 						<div class="col-sm-9">
-							<input type="checkbox" name="join_option" value="on">
+							<input type="checkbox" name="query_rewriting" value="on">
 						</div>
 					</div>
 					<div class="form-group">
@@ -161,8 +161,7 @@ WHERE {
 
 <div>
 			<h3>Select Query - Multiple Graphs</h3>
-			<pre>OPTION r43ples:SPARQL_JOIN
-# Find all triples that are both in revision 2 and in the master revision
+			<pre># Find all triples that are both in revision 2 and in the master revision
 SELECT ?s ?p ?o 
 WHERE {
   GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "master" { ?s ?p ?o. }

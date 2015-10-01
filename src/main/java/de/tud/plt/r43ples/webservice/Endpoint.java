@@ -228,6 +228,8 @@ public class Endpoint {
 	 *            format specified in the HTTP parameters
 	 * @param sparqlQuery
 	 *            the SPARQL query
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
 	 * @return the response
 	 * @throws InternalErrorException 
 	 */
@@ -237,10 +239,10 @@ public class Endpoint {
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("format") final String formatQuery, 
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
-			@FormParam("join_option") @DefaultValue("") final String join_option) throws InternalErrorException {
+			@FormParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		logger.debug("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
-		return sparql(format, sparqlQuery, join_option);
+		return sparql(format, sparqlQuery, query_rewriting);
 	}
 		
 	
@@ -256,6 +258,8 @@ public class Endpoint {
 	 *            format specified in the HTTP parameters
 	 * @param sparqlQuery
 	 *            the SPARQL query
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
 	 * @return the response
 	 * @throws InternalErrorException 
 	 */
@@ -265,7 +269,7 @@ public class Endpoint {
 	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
 			@QueryParam("format") final String formatQuery, 
 			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
-			@QueryParam("join_option") @DefaultValue("") final String join_option) throws InternalErrorException {
+			@QueryParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		
 		String sparqlQueryDecoded;
@@ -275,7 +279,7 @@ public class Endpoint {
 			e.printStackTrace();
 			sparqlQueryDecoded = sparqlQuery;
 		}
-		return sparql(format, sparqlQueryDecoded, join_option);
+		return sparql(format, sparqlQueryDecoded, query_rewriting);
 	}
 	
 	
@@ -799,10 +803,12 @@ public class Endpoint {
 	 *            mime type for response format
 	 * @param sparqlQuery
 	 *            decoded SPARQL query
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
 	 * @return the response
 	 * @throws InternalErrorException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException {
+	public final Response sparql(final String format, final String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
 		if (sparqlQuery.equals("")) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
@@ -810,12 +816,23 @@ public class Endpoint {
 				return getServiceDescriptionResponse(format);
 			}
 		} else {
-			return getSparqlResponse(format, sparqlQuery, join_option);
+			return getSparqlResponse(format, sparqlQuery, query_rewriting);
 		}
 	}
 	
-	private final Response sparql(final String format, final String sparqlQuery, final String join_option) throws InternalErrorException {
-		String option = join_option.toLowerCase();
+	/**
+	 * 
+	 * @param format
+	 *            mime type for response format
+	 * @param sparqlQuery
+	 *            decoded SPARQL query
+	 * @param query_rewriting
+	 * 			  string determining if query rewriting option be used
+	 * @return
+	 * @throws InternalErrorException
+	 */
+	private final Response sparql(final String format, final String sparqlQuery, final String query_rewriting) throws InternalErrorException {
+		String option = query_rewriting.toLowerCase();
 		if (option.equals("on") || option.equals("true") || option.equals("new"))
 			return sparql(format, sparqlQuery, true);
 		else
@@ -920,11 +937,13 @@ public class Endpoint {
 	 * 			requested mime type 
 	 * @param sparqlQuery
 	 * 			string containing the SPARQL query
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
 	 * @return HTTP response of evaluating the sparql query 
 	 * @throws InternalErrorException
 	 */
-	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean join_option) throws InternalErrorException {
-		logger.info(String.format("SPARQL request (format=%s, join_option=%s) -> %n %s", format, join_option, sparqlQuery));
+	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
+		logger.info(String.format("SPARQL request (format=%s, query_rewriting=%s) -> %n %s", format, query_rewriting, sparqlQuery));
 		String user = null;
 		Matcher userMatcher = patternUser.matcher(sparqlQuery);
 		if (userMatcher.find()) {
@@ -940,7 +959,7 @@ public class Endpoint {
 		
 		String result;
 		if (patternSelectAskConstructQuery.matcher(sparqlQuery).find()) {
-			result = Interface.sparqlSelectConstructAsk(sparqlQuery, format, join_option);
+			result = Interface.sparqlSelectConstructAsk(sparqlQuery, format, query_rewriting);
 		}
 		else if (patternUpdateQuery.matcher(sparqlQuery).find()) {
 			Interface.sparqlUpdate(sparqlQuery, user, message);
@@ -972,7 +991,7 @@ public class Endpoint {
 
 		ResponseBuilder responseBuilder = Response.ok();
 		if (format.equals("text/html")){
-			if (join_option) {
+			if (query_rewriting) {
 				responseBuilder.entity(getHTMLResult(result, sparqlQuery, SparqlRewriter.rewriteQuery(sparqlQuery)));
 			}
 			else {

@@ -28,14 +28,14 @@ public class Interface {
 	 * 
 	 * @param query R43ples query string
 	 * @param format serialisation format of the result 
-	 * @param join_option JOIN option
+	 * @param query_rewriting option if query rewriting should be enabled
 	 * @return string containing result of the query
 	 * @throws InternalErrorException
 	 */
-	public static String sparqlSelectConstructAsk(final String query, final String format, final boolean join_option)
+	public static String sparqlSelectConstructAsk(final String query, final String format, final boolean query_rewriting)
 			throws InternalErrorException {
 		String result;
-		if (join_option) {
+		if (query_rewriting) {
 			String query_rewritten = SparqlRewriter.rewriteQuery(query);
 			result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query_rewritten, format);
 		}
@@ -117,7 +117,7 @@ public class Interface {
 			String action = m.group("action");															
 			
 			if (action.equalsIgnoreCase("WHERE")) {
-				// TODO: replace generateFullGraphOfRevision with SPARQL JOIN
+				// TODO: replace generateFullGraphOfRevision with query rewriting option
 				String tempGraphName = graphName + "-temp";
 				RevisionManagement.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
 				queryM = m.replaceFirst(String.format("WHERE { GRAPH <%s>", tempGraphName));
