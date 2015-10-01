@@ -10,42 +10,45 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="373.27499"
-   height="128.8"
+   width="238.46037"
+   height="78.056"
    id="svg2"
    version="1.1"
-   inkscape:version="0.48.4 r9939"
-   sodipodi:docname="r43ples-logo.svg"
-   inkscape:export-filename="/home/mgraube/Desktop/r43ples-r-logo.png"
+   inkscape:version="0.48.5 r10040"
+   sodipodi:docname="r43ples-logo.v04.svg"
+   inkscape:export-filename="./r43ples-logo.v04.png"
    inkscape:export-xdpi="300"
-   inkscape:export-ydpi="300">
+   inkscape:export-ydpi="300"
+   style="enable-background:new">
   <defs
      id="defs4">
     <marker
        inkscape:stockid="Arrow1Mstart"
        orient="auto"
-       refY="0.0"
-       refX="0.0"
+       refY="0"
+       refX="0"
        id="Arrow1Mstart"
        style="overflow:visible">
       <path
          id="path3918"
-         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
-         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt"
-         transform="scale(0.4) translate(10,0)" />
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt"
+         transform="matrix(0.4,0,0,0.4,4,0)"
+         inkscape:connector-curvature="0" />
     </marker>
     <marker
        inkscape:stockid="Arrow1Lstart"
        orient="auto"
-       refY="0.0"
-       refX="0.0"
+       refY="0"
+       refX="0"
        id="Arrow1Lstart"
        style="overflow:visible">
       <path
          id="path3912"
-         d="M 0.0,0.0 L 5.0,-5.0 L -12.5,0.0 L 5.0,5.0 L 0.0,0.0 z "
-         style="fill-rule:evenodd;stroke:#000000;stroke-width:1.0pt"
-         transform="scale(0.8) translate(12.5,0)" />
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt"
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         inkscape:connector-curvature="0" />
     </marker>
     <linearGradient
        id="linearGradient5435">
@@ -89,15 +92,17 @@
        inkscape:label="Cubes"
        inkscape:menu="Scatter"
        inkscape:menu-tooltip="Scattered cubes; adjust the Morphology primitive to vary size"
-       color-interpolation-filters="sRGB">
+       color-interpolation-filters="sRGB"
+       width="1.2">
       <feTurbulence
          id="feTurbulence5073"
-         baseFrequency="0.36700000000000005"
-         numOctaves="1"
-         type="fractalNoise" />
+         baseFrequency="0.33821138211382118"
+         numOctaves="5"
+         type="fractalNoise"
+         seed="576" />
       <feColorMatrix
          id="feColorMatrix5075"
-         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 6 -3.5 "
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 5.5 -3.5 "
          result="result5" />
       <feComposite
          id="feComposite5077"
@@ -108,7 +113,7 @@
       <feMorphology
          id="feMorphology5079"
          result="result3"
-         radius="3"
+         radius="2.5"
          operator="dilate"
          in="result6" />
       <feDisplacementMap
@@ -126,7 +131,7 @@
          result="result2"
          k1="1"
          k3="1"
-         k2="0"
+         k2="2.7755576e-17"
          k4="0" />
       <feBlend
          id="feBlend5085"
@@ -160,6 +165,26 @@
        x2="324.39618"
        y2="362.03241"
        gradientUnits="userSpaceOnUse" />
+    <filter
+       inkscape:collect="always"
+       id="filter3827"
+       color-interpolation-filters="sRGB">
+      <feBlend
+         inkscape:collect="always"
+         mode="darken"
+         in2="BackgroundImage"
+         id="feBlend3829" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter4211"
+       color-interpolation-filters="sRGB">
+      <feBlend
+         inkscape:collect="always"
+         mode="multiply"
+         in2="BackgroundImage"
+         id="feBlend4213" />
+    </filter>
   </defs>
   <sodipodi:namedview
      id="base"
@@ -168,9 +193,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.979899"
-     inkscape:cx="191.21017"
-     inkscape:cy="146.14306"
+     inkscape:zoom="3.959798"
+     inkscape:cx="95.522787"
+     inkscape:cy="40.181782"
      inkscape:document-units="px"
      inkscape:current-layer="layer2"
      showgrid="false"
@@ -179,10 +204,10 @@
      inkscape:window-x="62"
      inkscape:window-y="-3"
      inkscape:window-maximized="1"
-     fit-margin-top="-10"
-     fit-margin-left="-30"
-     fit-margin-right="-30"
-     fit-margin-bottom="-10" />
+     fit-margin-top="3"
+     fit-margin-left="3"
+     fit-margin-right="3"
+     fit-margin-bottom="3" />
   <metadata
      id="metadata7">
     <rdf:RDF>
@@ -199,12 +224,12 @@
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="Original"
-     transform="translate(6.2683,1.735265)"
-     style="opacity:0.95999995;display:inline">
+     transform="translate(9.6,32.471895)"
+     style="opacity:0.46256684;display:inline;filter:url(#filter4211)">
     <flowRoot
        xml:space="preserve"
        id="flowRoot2985-2"
-       style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:5;stroke-miterlimit:3.70000004999999987;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:GE Inspira;-inkscape-font-specification:GE Inspira;stroke-linejoin:round;stroke-linecap:square"
+       style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:3.70000005;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:Garuda;-inkscape-font-specification:Garuda"
        transform="translate(-159.5625,-332.3573)"
        inkscape:export-filename="/home/mgraube/Desktop/r43ples-logo.png"
        inkscape:export-xdpi="300"
@@ -215,27 +240,25 @@
            height="202.85715"
            x="148.57143"
            y="300.93362"
-           style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:5;stroke-miterlimit:3.70000004999999987;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:GE Inspira;-inkscape-font-specification:GE Inspira;stroke-linejoin:round;stroke-linecap:square" /></flowRegion><flowPara
+           style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:3.70000005;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:Garuda;-inkscape-font-specification:Garuda" /></flowRegion><flowPara
          id="flowPara2991-5"
-         style="font-weight:normal;stroke:#000000;stroke-width:5;stroke-miterlimit:3.70000004999999987;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;-inkscape-font-specification:GE Inspira;stroke-linejoin:round;stroke-linecap:square"><flowSpan
-           style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:-16px;writing-mode:lr-tb;text-anchor:start;fill:#379546;fill-opacity:1;fill-rule:nonzero;stroke:#379546;stroke-width:5;stroke-miterlimit:3.70000004999999987;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:GE Inspira;-inkscape-font-specification:GE Inspira;stroke-linejoin:round;stroke-linecap:square"
-           id="flowSpan3789-8">R</flowSpan><flowSpan
-           style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:-16px;writing-mode:lr-tb;text-anchor:start;fill:#97be34;fill-opacity:1;fill-rule:nonzero;stroke:#97be34;stroke-width:5;stroke-miterlimit:3.70000004999999987;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:GE Inspira;-inkscape-font-specification:GE Inspira;stroke-linejoin:round;stroke-linecap:square"
-           id="flowSpan2993-8">43</flowSpan><flowSpan
-           style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#379546;fill-opacity:1;stroke:#379546;stroke-width:5;stroke-miterlimit:3.70000004999999987;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:GE Inspira;-inkscape-font-specification:GE Inspira;stroke-linejoin:round;stroke-linecap:square"
-           id="flowSpan3787-7"><flowSpan
-   style="font-weight:normal;letter-spacing:0px;stroke:#379546;stroke-width:5;stroke-miterlimit:3.70000004999999987;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;-inkscape-font-specification:GE Inspira;stroke-linejoin:round;stroke-linecap:square"
-   id="flowSpan4615-0">pl</flowSpan>es</flowSpan></flowPara></flowRoot>  </g>
+         style="font-size:72px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:3.70000005;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold"><flowSpan
+   style="letter-spacing:-2px;stroke-width:1;stroke-miterlimit:3.70000005;stroke-dasharray:none"
+   id="flowSpan3076">R</flowSpan><flowSpan
+   style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:-6px;writing-mode:lr-tb;text-anchor:start;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:3.70000005;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold"
+   id="flowSpan3789-8">4</flowSpan><flowSpan
+   style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:-4px;writing-mode:lr-tb;text-anchor:start;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold;stroke-width:1;stroke-miterlimit:3.70000005;stroke-dasharray:none"
+   id="flowSpan3030">3</flowSpan>ples</flowPara></flowRoot>  </g>
   <g
      inkscape:label="Blöcke"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(241.5134,-184.49534)"
-     style="display:inline">
+     transform="translate(244.8451,-153.75871)"
+     style="display:inline;filter:url(#filter3827)">
     <flowRoot
        xml:space="preserve"
        id="flowRoot2985"
-       style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#000000;stroke-opacity:1;filter:url(#filter5071);font-family:GE Inspira;-inkscape-font-specification:GE Inspira"
+       style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#000000;stroke-opacity:1;filter:url(#filter5071);font-family:Garuda;-inkscape-font-specification:Garuda"
        transform="translate(-394.96965,-145.46196)"
        inkscape:export-filename="/home/mgraube/Desktop/r43ples-logo.png"
        inkscape:export-xdpi="600.10382"
@@ -246,15 +269,17 @@
            height="202.85715"
            x="148.57143"
            y="300.93362"
-           style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#000000;stroke-opacity:1;font-family:GE Inspira;-inkscape-font-specification:GE Inspira" /></flowRegion><flowPara
+           style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#000000;stroke-opacity:1;font-family:Garuda;-inkscape-font-specification:Garuda" /></flowRegion><flowPara
          id="flowPara2991"
-         style="font-weight:normal;-inkscape-font-specification:GE Inspira"><flowSpan
-           style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:-16px;writing-mode:lr-tb;text-anchor:start;fill:#379546;fill-opacity:1;fill-rule:nonzero;stroke:none;font-family:GE Inspira;-inkscape-font-specification:GE Inspira"
+         style="font-size:72px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;writing-mode:lr-tb;text-anchor:start;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold"><flowSpan
+           style="font-size:72px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:-2px;writing-mode:lr-tb;text-anchor:start;fill:#379546;fill-opacity:1;fill-rule:nonzero;stroke:none;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold"
            id="flowSpan3789">R</flowSpan><flowSpan
-           style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:-16px;writing-mode:lr-tb;text-anchor:start;fill:#97be34;fill-opacity:1;fill-rule:nonzero;stroke:none;font-family:GE Inspira;-inkscape-font-specification:GE Inspira"
-           id="flowSpan2993">43</flowSpan><flowSpan
-           style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#379546;fill-opacity:1;stroke:none;font-family:GE Inspira;-inkscape-font-specification:GE Inspira"
-           id="flowSpan3787"><flowSpan
-   style="font-weight:normal;letter-spacing:0px;-inkscape-font-specification:GE Inspira"
-   id="flowSpan4615">pl</flowSpan>es</flowSpan></flowPara></flowRoot>  </g>
+           style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#97be34;fill-opacity:1;fill-rule:nonzero;stroke:none;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold"
+           id="flowSpan2993"><flowSpan
+             style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:-6px;writing-mode:lr-tb;text-anchor:start;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold"
+             id="flowSpan4205">4</flowSpan><flowSpan
+             style="letter-spacing:-4px"
+             id="flowSpan3084">3</flowSpan></flowSpan><flowSpan
+           style="font-size:72px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#379546;fill-opacity:1;stroke:none;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold"
+           id="flowSpan3787">ples</flowSpan></flowPara></flowRoot>  </g>
 </svg>
