@@ -187,13 +187,13 @@ public class TestEndpoint extends JerseyTest {
 		Assert.assertThat(result, containsString("rmo:Revision"));
 		result = target("revisiongraph").queryParam("format", "application/rdf+xml").queryParam("graph", dsm.graphName).request().get(String.class);
 		Assert.assertThat(result, containsString("http://eatld.et.tu-dresden.de/rmo#Revision"));
-		result = target("revisiongraph").queryParam("format", "batik").queryParam("graph", graphNameDataset1).request().get(String.class);
+		result = target("revisiongraph").queryParam("format", "batik").queryParam("graph", ds1.graphName).request().get(String.class);
 		Assert.assertThat(result, containsString("svg"));
-		result = target("revisiongraph").queryParam("format", "d3").queryParam("graph", graphNameDataset1).request().get(String.class);
+		result = target("revisiongraph").queryParam("format", "d3").queryParam("graph", ds1.graphName).request().get(String.class);
 		Assert.assertThat(result, containsString("visualisation"));
-		result = target("revisiongraph").queryParam("format", "batik").queryParam("graph", graphNameMerging).request().get(String.class);
+		result = target("revisiongraph").queryParam("format", "batik").queryParam("graph", dsm.graphName).request().get(String.class);
 		Assert.assertThat(result, containsString("svg"));
-		result = target("revisiongraph").queryParam("format", "d3").queryParam("graph", graphNameMerging).request().get(String.class);
+		result = target("revisiongraph").queryParam("format", "d3").queryParam("graph", dsm.graphName).request().get(String.class);
 		Assert.assertThat(result, containsString("visualisation"));
 	}
 	
