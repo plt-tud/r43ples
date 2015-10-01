@@ -1,4 +1,4 @@
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+﻿@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
 @prefix : <http://eatld.et.tu-dresden.de/rmo#> .
@@ -66,6 +66,41 @@
                   rdfs:range :Branch ;
                   
                   rdfs:domain :Revision .
+
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#usedBranchA
+
+:usedBranchA rdf:type owl:ObjectProperty ;
+                  
+                  rdfs:label "Benutzung der Branch A"@de ,
+                             "used of branch A"@en ;
+                  
+                  rdfs:comment "Gibt an, welches Branch bei Mergingprozess aktiver Zweig ist."@de ,
+                               "Specifies on which branch active branch is."@en ;
+                  
+                  rdfs:range :Branch;
+                  
+                  rdfs:domain :MergeCommit .
+
+
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#usedBranchB
+
+:usedBranchB rdf:type owl:ObjectProperty ;
+                  
+                  rdfs:label "Benutzung der Branch B"@de ,
+                             "used of branch B"@en ;
+                  
+                  rdfs:comment "Gibt an, welches Branch bei Mergingprozess Hauptzweig ist."@de ,
+                               "Specifies on which branch main branch is."@en ;
+                  
+                  rdfs:range :Branch;
+                  
+                  rdfs:domain :MergeCommit .
 
 
 
@@ -191,6 +226,55 @@
         rdfs:subClassOf prov:Activity .
 
 
+###  http://eatld.et.tu-dresden.de/rmo#MergeCommit
+
+:MergeCommit rdf:type owl:Class;
+        
+        rdfs:label " Merging Commit"@de ,
+                   "merge commit"@en ;
+        
+        rdfs:subClassOf rmo:Commit .
+
+
+###  http://eatld.et.tu-dresden.de/rmo#ThreeWayCommit
+
+:ThreeWayCommit rdf:type owl:Class;
+        
+        rdfs:label "Commit von Drei Weg Strategie"@de ,
+                   " commit of three way strategy "@en ;
+        
+        rdfs:subClassOf rmo:MergeCommit.
+
+
+###  http://eatld.et.tu-dresden.de/rmo#RebaseCommit
+
+:RebaseCommit rdf:type owl:Class;
+        
+        rdfs:label " Commit von Rebase Strategie"@de ,
+                   "commit of rebase strategy"@en ;
+        
+        rdfs:subClassOf rmo:MergeCommit.
+
+
+###  http://eatld.et.tu-dresden.de/rmo#FastForwardCommit
+
+:FastForwardCommit rdf:type owl:Class;
+        
+        rdfs:label " Commit von Fast Forward Strategie"@de ,
+                   "commit of fast forward strategy"@en ;
+        
+        rdfs:subClassOf rmo:MergeCommit.
+
+###  http://eatld.et.tu-dresden.de/rmo#AdvancedRebaseCommit
+
+:AdvancedRebaseCommit rdf:type owl:Class;
+        
+        rdfs:label " Commit von fortgeschritter Rebase Strategie"@de ,
+                   "commit of advanced rebase strategy"@en ;
+        
+        rdfs:subClassOf rmo:MergeCommit.
+
+
 
 ###  http://eatld.et.tu-dresden.de/rmo#Graph
 
@@ -200,6 +284,8 @@
                   "graph"@en ;
        
        rdfs:subClassOf prov:Entity .
+
+
 
 
 
