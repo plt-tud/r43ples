@@ -182,11 +182,11 @@ public class TestEndpoint extends JerseyTest {
 		result = target("revisiongraph").queryParam("format", "batik").queryParam("graph", graphNameDataset1).request().get(String.class);
 		Assert.assertThat(result, containsString("svg"));
 		result = target("revisiongraph").queryParam("format", "d3").queryParam("graph", graphNameDataset1).request().get(String.class);
-		Assert.assertThat(result, containsString("svg"));
+		Assert.assertThat(result, containsString("visualisation"));
 		result = target("revisiongraph").queryParam("format", "batik").queryParam("graph", graphNameMerging).request().get(String.class);
 		Assert.assertThat(result, containsString("svg"));
 		result = target("revisiongraph").queryParam("format", "d3").queryParam("graph", graphNameMerging).request().get(String.class);
-		Assert.assertThat(result, containsString("svg"));
+		Assert.assertThat(result, containsString("visualisation"));
 		
 	}
 	
