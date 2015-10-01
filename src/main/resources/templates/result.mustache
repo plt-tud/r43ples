@@ -12,8 +12,15 @@
 	  	<div id="query">
 	  		<h2>Query</h2>
 	  		<pre>{{ toString }}</pre> 
-			{{/query}}
 		</div>
+		{{/query}}
+		
+		{{# query_rewritten }}
+	  	<div id="query">
+	  		<h2>Rewritten query executed on Triplestore</h2>
+	  		<pre>{{ toString }}</pre> 
+		</div>
+		{{/query_rewritten}}
 	</div>
 </div>
 {{/content}}

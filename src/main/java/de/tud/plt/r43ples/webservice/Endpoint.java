@@ -48,6 +48,7 @@ import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.JenaModelManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
+import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.merging.MergeManagement;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.merging.MergeResult;
@@ -887,17 +888,28 @@ public class Endpoint {
 
 	
 	/**
-	 * @param query
-	 * @param responseBuilder
-	 * @param result
+	 * Generates HTML representation of SPARQL query result 
+	 * @param query SPARQL query which was passed to R43ples
+	 * @param result result from the attached triplestore
 	 */
 	private String getHTMLResult(final String result, String query) {
+		return getHTMLResult(result, query, null);
+	}
+	
+	/**
+	 * Generates HTML representation of SPARQL query result including the rewritten query 
+	 * @param query SPARQL query which was passed to R43ples
+	 * @param query_rewritten rewritten SPARQL query passed to triplestore
+	 * @param result result from the attached triplestore
+	 */
+	private String getHTMLResult(final String result, String query, String query_rewritten) {
 		MustacheFactory mf = new DefaultMustacheFactory();
 		Mustache mustache = mf.compile("templates/result.mustache");
 		StringWriter sw = new StringWriter();
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
 		htmlMap.put("result", result);
 		htmlMap.put("query", query);
+		htmlMap.put("query_rewritten", query_rewritten);
 		mustache.execute(sw, htmlMap);		
 		return sw.toString();
 	}
@@ -960,7 +972,12 @@ public class Endpoint {
 
 		ResponseBuilder responseBuilder = Response.ok();
 		if (format.equals("text/html")){
-			responseBuilder.entity(getHTMLResult(result, sparqlQuery));
+			if (join_option) {
+				responseBuilder.entity(getHTMLResult(result, sparqlQuery, SparqlRewriter.rewriteQuery(sparqlQuery)));
+			}
+			else {
+				responseBuilder.entity(getHTMLResult(result, sparqlQuery));
+			}
 		} else {
 			responseBuilder.entity(result);
 		}
