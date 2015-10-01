@@ -1,3 +1,0 @@
-SELECT *
-FROM <http://dbpedia.org>
-WHERE { ?s ?p <http://schema.org/Country> }
