@@ -1,4 +1,4 @@
-!/#bin/bash
+#!/bin/bash
 
 #
 # This script is run by travis-ci and pushes the first commit
