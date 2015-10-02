@@ -85,7 +85,7 @@ public class TestMultipleGraph {
 	 * @throws InternalErrorException 
 	 */
 	@Test
-	public final void testMultipleGraphsSparqlJoin() throws SAXException, IOException, InternalErrorException {
+	public final void testMultipleGraphsQueryRewriting() throws SAXException, IOException, InternalErrorException {
 		result = ep.sparql(format, get_query_template("master-1", "master-1"), true).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-1-1.xml");
 		assertXMLEqual(expected, result);

@@ -1,4 +1,6 @@
 {{<super}}
+
+{{$title}}Endpoint{{/title}}
    
 {{$script_extra}}
 <script type="text/javascript">
@@ -34,7 +36,7 @@
 					
 			<div class="col-xs-12">
 				<h2>Query Form</h2>
-				<form action="/r43ples/sparql" method="post" role="form" class="form-horizontal">
+				<form method="post" role="form" class="form-horizontal">
 					<div class="form-group">
 						<div class="col-xs-12">
 							<label class="control-label" for="query">Query Text</label><br />
@@ -42,7 +44,7 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label for="format" class="col-sm-3 control-label">Results Format:</label>
+						<label for="format" class="col-sm-3 control-label">Result Format:</label>
 						<div class="col-sm-9">
 							<select	name="format" class="form-control" id="name">
 								<option value="text/html">HTML</option>
@@ -54,9 +56,9 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label for="join_option" class="col-sm-3 control-label" >JOIN Option:</label>
+						<label for="query_rewriting" class="col-sm-3 control-label" >JOIN Option:</label>
 						<div class="col-sm-9">
-							<input type="checkbox" name="join_option" value="on">
+							<input type="checkbox" name="query_rewriting" value="on">
 						</div>
 					</div>
 					<div class="form-group">
@@ -161,8 +163,7 @@ WHERE {
 
 <div>
 			<h3>Select Query - Multiple Graphs</h3>
-			<pre>OPTION r43ples:SPARQL_JOIN
-# Find all triples that are both in revision 2 and in the master revision
+			<pre># Find all triples that are both in revision 2 and in the master revision
 SELECT ?s ?p ?o 
 WHERE {
   GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "master" { ?s ?p ?o. }

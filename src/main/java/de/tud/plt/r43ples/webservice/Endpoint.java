@@ -48,6 +48,7 @@ import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.JenaModelManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
+import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.merging.MergeManagement;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.merging.MergeResult;
@@ -183,10 +184,8 @@ public class Endpoint {
 			MediaType.APPLICATION_SVG_XML, "application/ld+json" })
 	public final Response getRevisionGraph(@HeaderParam("Accept") final String format_header,
 			@QueryParam("format") final String format_query, @QueryParam("graph") @DefaultValue("") final String graph) {
-		logger.info("Get Revision Graph: " + graph);
 		String format = (format_query != null) ? format_query : format_header;
-		logger.info("format: " + format);
-		logger.info("format_header"+ format_header);
+		logger.info("Get Revision Graph: " + graph + " (format: " + format+")");
 		
 		ResponseBuilder response = Response.ok();
 		if (format.equals("batik")) {
@@ -214,7 +213,7 @@ public class Endpoint {
 			@QueryParam("format") @DefaultValue("application/json") final String format_query) {
 		logger.info("Get Revised Graphs");
 		String format = (format_query != null) ? format_query : format_header;
-		logger.info("format: " + format);
+		logger.debug("format: " + format);
 		return RevisionManagement.getRevisedGraphsSparql(format);
 	}
 
@@ -227,7 +226,9 @@ public class Endpoint {
 	 *            format specified in the HTTP parameters
 	 * @param sparqlQuery
 	 *            the SPARQL query
-	 * @return the response
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
+	 * @return HTTP response
 	 * @throws InternalErrorException 
 	 */
 	@Path("sparql")
@@ -236,10 +237,10 @@ public class Endpoint {
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("format") final String formatQuery, 
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
-			@FormParam("join_option") @DefaultValue("") final String join_option) throws InternalErrorException {
+			@FormParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		logger.debug("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
-		return sparql(format, sparqlQuery, join_option);
+		return sparql(format, sparqlQuery, query_rewriting);
 	}
 		
 	
@@ -255,7 +256,9 @@ public class Endpoint {
 	 *            format specified in the HTTP parameters
 	 * @param sparqlQuery
 	 *            the SPARQL query
-	 * @return the response
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
+	 * @return HTTP response
 	 * @throws InternalErrorException 
 	 */
 	@Path("sparql")
@@ -264,7 +267,7 @@ public class Endpoint {
 	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
 			@QueryParam("format") final String formatQuery, 
 			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
-			@QueryParam("join_option") @DefaultValue("") final String join_option) throws InternalErrorException {
+			@QueryParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		
 		String sparqlQueryDecoded;
@@ -274,17 +277,24 @@ public class Endpoint {
 			e.printStackTrace();
 			sparqlQueryDecoded = sparqlQuery;
 		}
-		return sparql(format, sparqlQueryDecoded, join_option);
+		return sparql(format, sparqlQueryDecoded, query_rewriting);
 	}
 	
 	
 	@Path("debug")
 	@GET
-	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws UnsupportedEncodingException, InternalErrorException {
+	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws InternalErrorException {
 		if (sparqlQuery.equals("")) {
+			logger.info("Get Debug page");
 			return getHTMLDebugResponse();
 		} else {
-			String query =  URLDecoder.decode(sparqlQuery, "UTF-8");
+			String query;
+			try {
+				query = URLDecoder.decode(sparqlQuery, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				query = sparqlQuery;
+			}
 			logger.info("Debug query was requested. Query: " + query);
 			if (sparqlQuery.contains("INSERT")) {
 				TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
@@ -418,13 +428,13 @@ public class Endpoint {
 				//boolean isRebaeFreundlich = RebaseControl.checkRebaseFreundlichkeit(responsePost, graphName, branch1, branch2);
 				
 				// to do manual arbeit
-				logger.info("rebase unfreundlich !");
+				logger.debug("rebase unfreundlich !");
 				
 				response.entity(rebaseControl.showRebaseDialogView());
 				
 				return response.build();
 			}else{
-				logger.info("sparql query is force rebase! ");	
+				logger.debug("sparql query is force rebase! ");	
 			}
 
 			String rebaseResultView = rebaseControl.getRebaseReportView(graphName);
@@ -566,11 +576,10 @@ public class Endpoint {
 			@FormParam("id")        @DefaultValue("") final String id, 
 			@FormParam("graph")     @DefaultValue("") final String graph,
 			@FormParam("client")    @DefaultValue("") final String user) throws InternalErrorException {
-		logger.info("approve test: "+id);
-		logger.info("isChecked: " + isChecked);
+		
+		logger.info("ApprovePorcess test: "+id+" - isChecked: " + isChecked);		
 		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		
 		mergingControl.approveToDifferenceModel(id, isChecked);
 	}
 	
@@ -585,11 +594,10 @@ public class Endpoint {
 			@FormParam("id")        @DefaultValue("") final String id, 
 			@FormParam("graph")     @DefaultValue("") final String graph, 
 			@FormParam("client")    @DefaultValue("") final String user) throws InternalErrorException {
-		logger.info("approve high test: "+id);
-		logger.info("isChecked: " + isChecked);
+		
+		logger.info("ApproveHighLevelProcess test: "+id + " - isChecked: " + isChecked);
 		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
-		
 		mergingControl.approveHighLevelToDifferenceModel(id, isChecked);
 	}
 	
@@ -677,7 +685,8 @@ public class Endpoint {
 		// update the new rebase merge query
 		String mergeQuery = mergingControl.updateMergeQuery();
 		
-		logger.info("rebase updated merge query: "+ mergeQuery);
+		logger.info("rebasePushProcess: "+ mergeQuery);
+		
 		// execute the getRebaseResponse()
 		Matcher userMatcher = patternUser.matcher(mergeQuery);
 		if (userMatcher.find()) {
@@ -777,12 +786,10 @@ public class Endpoint {
 		ResponseBuilder response = Response.ok();
 		MergingControl mergingControl = clientMap.get(user).get(graph);
 		
-		logger.info("individualFilter A Array :"+ individualA);
-		logger.info("individualFilter B Array :"+ individualB);
+		logger.info("individualFilter (A:"+ individualA +" B:"+ individualB+")");
 		
 		String individualFilter = mergingControl.getIndividualFilter(individualA, individualB);
 		
-		logger.info(individualB.isEmpty());
 		response.entity(individualFilter);
 		return response.build();
 	}	
@@ -799,10 +806,12 @@ public class Endpoint {
 	 *            mime type for response format
 	 * @param sparqlQuery
 	 *            decoded SPARQL query
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
 	 * @return the response
 	 * @throws InternalErrorException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery, final boolean join_option) throws InternalErrorException {
+	public final Response sparql(final String format, final String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
 		if (sparqlQuery.equals("")) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
@@ -810,12 +819,23 @@ public class Endpoint {
 				return getServiceDescriptionResponse(format);
 			}
 		} else {
-			return getSparqlResponse(format, sparqlQuery, join_option);
+			return getSparqlResponse(format, sparqlQuery, query_rewriting);
 		}
 	}
 	
-	private final Response sparql(final String format, final String sparqlQuery, final String join_option) throws InternalErrorException {
-		String option = join_option.toLowerCase();
+	/**
+	 * 
+	 * @param format
+	 *            mime type for response format
+	 * @param sparqlQuery
+	 *            decoded SPARQL query
+	 * @param query_rewriting
+	 * 			  string determining if query rewriting option be used
+	 * @return
+	 * @throws InternalErrorException
+	 */
+	private final Response sparql(final String format, final String sparqlQuery, final String query_rewriting) throws InternalErrorException {
+		String option = query_rewriting.toLowerCase();
 		if (option.equals("on") || option.equals("true") || option.equals("new"))
 			return sparql(format, sparqlQuery, true);
 		else
@@ -888,17 +908,28 @@ public class Endpoint {
 
 	
 	/**
-	 * @param query
-	 * @param responseBuilder
-	 * @param result
+	 * Generates HTML representation of SPARQL query result 
+	 * @param query SPARQL query which was passed to R43ples
+	 * @param result result from the attached triplestore
 	 */
 	private String getHTMLResult(final String result, String query) {
+		return getHTMLResult(result, query, null);
+	}
+	
+	/**
+	 * Generates HTML representation of SPARQL query result including the rewritten query 
+	 * @param query SPARQL query which was passed to R43ples
+	 * @param query_rewritten rewritten SPARQL query passed to triplestore
+	 * @param result result from the attached triplestore
+	 */
+	private String getHTMLResult(final String result, String query, String query_rewritten) {
 		MustacheFactory mf = new DefaultMustacheFactory();
 		Mustache mustache = mf.compile("templates/result.mustache");
 		StringWriter sw = new StringWriter();
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
 		htmlMap.put("result", result);
 		htmlMap.put("query", query);
+		htmlMap.put("query_rewritten", query_rewritten);
 		mustache.execute(sw, htmlMap);		
 		return sw.toString();
 	}
@@ -909,11 +940,13 @@ public class Endpoint {
 	 * 			requested mime type 
 	 * @param sparqlQuery
 	 * 			string containing the SPARQL query
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
 	 * @return HTTP response of evaluating the sparql query 
 	 * @throws InternalErrorException
 	 */
-	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean join_option) throws InternalErrorException {
-		logger.info(String.format("SPARQL request (format=%s, join_option=%s) -> %n %s", format, join_option, sparqlQuery));
+	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
+		logger.info(String.format("SPARQL request (format=%s, query_rewriting=%s) -> %n %s", format, query_rewriting, sparqlQuery));
 		String user = null;
 		Matcher userMatcher = patternUser.matcher(sparqlQuery);
 		if (userMatcher.find()) {
@@ -929,7 +962,7 @@ public class Endpoint {
 		
 		String result;
 		if (patternSelectAskConstructQuery.matcher(sparqlQuery).find()) {
-			result = Interface.sparqlSelectConstructAsk(sparqlQuery, format, join_option);
+			result = Interface.sparqlSelectConstructAsk(sparqlQuery, format, query_rewriting);
 		}
 		else if (patternUpdateQuery.matcher(sparqlQuery).find()) {
 			Interface.sparqlUpdate(sparqlQuery, user, message);
@@ -961,7 +994,12 @@ public class Endpoint {
 
 		ResponseBuilder responseBuilder = Response.ok();
 		if (format.equals("text/html")){
-			responseBuilder.entity(getHTMLResult(result, sparqlQuery));
+			if (query_rewriting) {
+				responseBuilder.entity(getHTMLResult(result, sparqlQuery, SparqlRewriter.rewriteQuery(sparqlQuery)));
+			}
+			else {
+				responseBuilder.entity(getHTMLResult(result, sparqlQuery));
+			}
 		} else {
 			responseBuilder.entity(result);
 		}

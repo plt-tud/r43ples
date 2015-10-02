@@ -286,8 +286,7 @@
 									<mapper>
 										<type>perm</type>
 										<prefix>/usr/share/${project.artifactId}</prefix>
-										<user>loader</user>
-										<group>loader</group>
+										<user>r43ples</user>
 									</mapper>
 								</data>
 
@@ -297,6 +296,18 @@
 									<linkName>/usr/share/${project.artifactId}/${project.artifactId}.jar</linkName>
 									<linkTarget>/usr/share/${project.artifactId}/${project.build.finalName}-jar-with-dependencies.jar</linkTarget>
 								</data>
+                                                                
+                                                                <data>
+                                                                    FIXME
+									<src>${project.build.directory}/classes/r43ples.dist.conf</src>
+                                                                    FIXME
+									<type>file</type>
+									<mapper>
+										<type>perm</type>
+										<prefix>/etc/default/r43ples</prefix>
+										<user>r43ples</user>
+									</mapper>
+								</data>
 
 								<data>
 									<src>${basedir}/src/deb/init.d</src>
@@ -304,8 +315,7 @@
 									<mapper>
 										<type>perm</type>
 										<prefix>/etc/init.d</prefix>
-										<user>loader</user>
-										<group>loader</group>
+										<user>r43ples</user>
 										<filemode>755</filemode>
 									</mapper>
 								</data>

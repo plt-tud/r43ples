@@ -89,11 +89,11 @@ public class TestEndpoint extends JerseyTest {
 	
 	
 	@Test
-	public void testSelectSparqlJoinOption() throws SAXException, IOException{		
+	public void testSelectSparqlQueryRewritingOption() throws SAXException, IOException{		
 		String result = target("sparql").
 				queryParam("query", URLEncoder.encode(query_union_b1_b2, "UTF-8")).
 				queryParam("format", format).
-				queryParam("join_option", "true").
+				queryParam("query_rewriting", "true").
 				request().get(String.class);
 		String expected = ResourceManagement.getContentFromResource("response-b1-b2.xml");
 		assertXMLEqual(expected, result);

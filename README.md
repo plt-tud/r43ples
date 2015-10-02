@@ -132,13 +132,13 @@ There are some additional keywords which can be used to control the revisions of
 		MERGE GRAPH <test> BRANCH "branch-1" INTO "branch-2"
 
 
-SPARQL Join option
-------------------
+Query Rewriting option
+----------------------
 There is a new option for R43ples which improves the performance. The necessary revision is not temporarily generated anymore.
 The SPARQL query is rewritten in such a way that the branch and the change sets are directly joined inside the query. This includes the order of the change sets.
 It is currently under development and further research.
 
-The option can be enabled by passing an additional parameter "join_option=true"
+The option can be enabled by passing an additional parameter "query_rewriting=true"
 
 It currently supports:
 

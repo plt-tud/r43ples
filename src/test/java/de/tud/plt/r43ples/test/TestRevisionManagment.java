@@ -198,7 +198,7 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void testSelect2Pattern_sparql_join() throws SAXException, IOException, InternalErrorException {
+	public void testSelect2Pattern_query_rewriting() throws SAXException, IOException, InternalErrorException {
 		expected = ResourceManagement.getContentFromResource("2patterns/response-rev3.xml");
 		result = ep.sparql(format, String.format(query_template_2_triples_filter,ds.revisions.get("master-3")), true).getEntity().toString();
 		assertXMLEqual(expected, result);
@@ -248,7 +248,7 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void test_minus_sparql_join() throws SAXException, IOException, InternalErrorException {
+	public void test_minus_query_rewriting() throws SAXException, IOException, InternalErrorException {
 		expected = ResourceManagement.getContentFromResource("minus/response-rev2.xml");
 		result = ep.sparql(format, String.format(query_template_minus,ds.revisions.get("master-2")), true).getEntity().toString();
 		assertXMLEqual(expected, result);

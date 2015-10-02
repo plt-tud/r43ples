@@ -120,11 +120,8 @@ public class RebaseControl {
 					patch.getPatchUser(), patch.getPatchMessage(), basisRevisionNumber);
 			
 			basisRevisionNumber = newRevisionNumber;
-			
 		}
-		
-		return basisRevisionNumber;
- 			
+		return basisRevisionNumber;	
 	}
 	
 	/**manual rebase beginn , for each patch in patch graup will a new revision created 

@@ -23,7 +23,7 @@ function singleQuery {
 
     {
         time {
-            curl -H "Accept: application/sparql-results+xml" --data "join_option=$MODE&query=$QUERY" $ENDPOINT 
+            curl -H "Accept: application/sparql-results+xml" --data "query_rewriting=$MODE&query=$QUERY" $ENDPOINT 
         }
     } 2>>$TIME_FILE
 }
