@@ -145,7 +145,7 @@ public class RebaseControl {
 		
 		logger.info("is Rebase: "+ mergingControl.getIsRebase());
 		
-		mergingControl.getMergeProcess(response, commitModel.getGraphName(), commitModel.getBranch1(), commitModel.getBranch2(),"text/html");
+		mergingControl.getMergeProcess(response, commitModel.getGraphName(), commitModel.getBranch1(), commitModel.getBranch2());
 	}
 	
 	/**read the difference model and set the automatic resolution state for the triple and create */
@@ -291,7 +291,7 @@ public class RebaseControl {
 	
 		
 		logger.info("difference graph Model by check unfreundlich:" + differenceGraphModel);
-		ProcessManagement.readDifferenceModel(differenceGraphModel, differenceModel, format);
+		ProcessManagement.readDifferenceModel(differenceGraphModel, differenceModel);
 		
 		//get difference group
 		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
@@ -335,7 +335,7 @@ public class RebaseControl {
 	public ArrayList<Triple> getRebaseUnfreundlichbehaftetTriples(String differGraphModel, String format) throws IOException{
 		ArrayList<Triple> tripleList = new ArrayList<Triple>();
 		
-		ProcessManagement.readDifferenceModel(differGraphModel, differenceModel, format);
+		ProcessManagement.readDifferenceModel(differGraphModel, differenceModel);
 		
 		//get difference group
 		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();

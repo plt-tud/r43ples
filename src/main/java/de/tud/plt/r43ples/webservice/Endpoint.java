@@ -304,7 +304,7 @@ public class Endpoint {
 	 */
 	@GET
 	@Template(name = "/home.mustache")
-	//@Produces(MediaType.TEXT_HTML)
+	@Produces(MediaType.TEXT_HTML)
 	public final Map<String, Object> getLandingPage() {
 		logger.info("Get Landing page");
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
@@ -314,15 +314,12 @@ public class Endpoint {
 	}
 	
 	/**
-	 * get merging seite and input merging information
+	 * get merging page and input merging information
 	 * */
 	@Path("merging")
 	@GET
-    @Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
-		 MediaType.APPLICATION_SVG_XML })
-	public final Response getMerging(
-			@HeaderParam("Accept") final String format_header,
-			@QueryParam("graph") final String graph) {
+    @Produces(MediaType.TEXT_HTML)
+	public final Response getMerging(@QueryParam("graph") final String graph) {
 		logger.info("Merging -- graph: " + graph);		
 		ResponseBuilder response = Response.ok();
 		response.entity(MergingControl.getMenuHtmlOutput()).type(MediaType.TEXT_HTML);
@@ -489,7 +486,7 @@ public class Endpoint {
 				return response.build();
 			}
 
-			mergingControl.getMergeProcess(responsePost, graphName, branch1, branch2, "text/html");
+			mergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
 			response.entity(mergingControl.getViewHtmlOutput());
 			return response.build();
 		}	
@@ -504,8 +501,9 @@ public class Endpoint {
 	@Path("loadOldGraphProcess")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public final Response fastForwardGET(@HeaderParam("Accept") final String formatHeader,
-			 @QueryParam("graph") @DefaultValue("") final String graph, @QueryParam("format") @DefaultValue("application/json") final String format) throws InternalErrorException {
+	public final Response fastForwardGET(
+			 @QueryParam("graph")  @DefaultValue("") final String graph, 
+			 @QueryParam("format") @DefaultValue("application/json") final String format) throws InternalErrorException {
 
 		ResponseBuilder response = Response.ok();
 		logger.info("loadOldGraphProcess: "+ graph);
@@ -563,10 +561,11 @@ public class Endpoint {
 	
 	@Path("approveProcess")
 	@POST
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final void approvePOST(@HeaderParam("Accept") final String formatHeader, @FormParam("isChecked") @DefaultValue("") final String isChecked,
-			@FormParam("id") @DefaultValue("") final String id, @FormParam("graph") @DefaultValue("") final String graph,
-			@FormParam("client") @DefaultValue("") final String user) throws InternalErrorException {
+	public final void approvePOST(
+			@FormParam("isChecked") @DefaultValue("") final String isChecked,
+			@FormParam("id")        @DefaultValue("") final String id, 
+			@FormParam("graph")     @DefaultValue("") final String graph,
+			@FormParam("client")    @DefaultValue("") final String user) throws InternalErrorException {
 		logger.info("approve test: "+id);
 		logger.info("isChecked: " + isChecked);
 		
@@ -581,10 +580,11 @@ public class Endpoint {
 	 */
 	@Path("approveHighLevelProcess")
 	@POST
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final void approveHighLevelPOST(@HeaderParam("Accept") final String formatHeader, @FormParam("isChecked") @DefaultValue("") final String isChecked,
-			@FormParam("id") @DefaultValue("") final String id, @FormParam("graph") @DefaultValue("") final String graph, 
-			@FormParam("client") @DefaultValue("") final String user) throws InternalErrorException {
+	public final void approveHighLevelPOST(
+			@FormParam("isChecked") @DefaultValue("") final String isChecked,
+			@FormParam("id")        @DefaultValue("") final String id, 
+			@FormParam("graph")     @DefaultValue("") final String graph, 
+			@FormParam("client")    @DefaultValue("") final String user) throws InternalErrorException {
 		logger.info("approve high test: "+id);
 		logger.info("isChecked: " + isChecked);
 		
@@ -603,7 +603,8 @@ public class Endpoint {
 	@Path("reportProcess")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response reportGET( @QueryParam("graph") @DefaultValue("") final String graph,
+	public final Response reportGET(
+			@QueryParam("graph")  @DefaultValue("") final String graph,
 			@QueryParam("client") @DefaultValue("") final String user ) {
 		
 		ResponseBuilder response = Response.ok();

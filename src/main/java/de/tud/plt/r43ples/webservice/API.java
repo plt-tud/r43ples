@@ -68,7 +68,7 @@ public class API {
 	/**
 	 * select the difference in difference tree and renew the triple table
 	 * */
-	@Path("api/treeFilterProcess")
+	@Path("treeFilterProcess")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML})
 	public final Response treeFilterPOST(@HeaderParam("Accept") final String formatHeader,

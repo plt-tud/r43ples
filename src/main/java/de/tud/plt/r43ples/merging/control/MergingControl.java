@@ -138,11 +138,11 @@ public class MergingControl {
 	 	}
 	 	
 	 	if(isRebase){
-	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
+	 		logger.debug("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
 		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());
 		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
 	 	}else{
-	 		logger.info("commitGraphname: " + commitModel.getGraphName());
+	 		logger.debug("commitGraphname: " + commitModel.getGraphName());
 		 	scope.put("graphName", commitModel.getGraphName());	
 		 	scope.put("clientName", commitModel.getUser());
 	 	}
@@ -170,9 +170,6 @@ public class MergingControl {
 		ProcessManagement.createDifferenceTree(differenceModel, treeList);
 		
 		ProcessManagement.createTableModel(differenceModel, tableModel);
-		
-		logger.info("updated tableModel fertig!");
-
 		
 		// Create the individual models of both branches
 		individualModelBranchA = ProcessManagement.createIndividualModelOfRevision(commitModel.getGraphName(), commitModel.getBranch1(), differenceModel);
@@ -238,10 +235,18 @@ public class MergingControl {
 	}
 	
 
-	
-	public void getMergeProcess(Response response, String graphName, String branchNameA, String branchNameB, String format) throws InternalErrorException {
+	/**
+	 * 
+	 * @param response
+	 * @param graphName
+	 * @param branchNameA
+	 * @param branchNameB
+	 * @param format
+	 * @throws InternalErrorException
+	 */
+	public void getMergeProcess(Response response, String graphName, String branchNameA, String branchNameB) throws InternalErrorException {
 		if (isRebase) {
-			ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel, format);		
+			ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel);		
 			ProcessManagement.createDifferenceTree(differenceModel, treeList);	
 			ProcessManagement.createTableModel(differenceModel, tableModel);
 			
@@ -280,7 +285,7 @@ public class MergingControl {
 			if (response.getStatusInfo() == Response.Status.CONFLICT){
 				logger.info("Merge query produced conflicts.");
 				
-				ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel,"text/html");		
+				ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel);		
 				ProcessManagement.createDifferenceTree(differenceModel, treeList);		
 				ProcessManagement.createTableModel(differenceModel, tableModel);
 				
