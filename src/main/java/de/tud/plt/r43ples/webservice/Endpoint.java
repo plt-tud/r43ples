@@ -184,10 +184,8 @@ public class Endpoint {
 			MediaType.APPLICATION_SVG_XML, "application/ld+json" })
 	public final Response getRevisionGraph(@HeaderParam("Accept") final String format_header,
 			@QueryParam("format") final String format_query, @QueryParam("graph") @DefaultValue("") final String graph) {
-		logger.info("Get Revision Graph: " + graph);
 		String format = (format_query != null) ? format_query : format_header;
-		logger.info("format: " + format);
-		logger.info("format_header"+ format_header);
+		logger.info("Get Revision Graph: " + graph + "(format: " + format+")");
 		
 		ResponseBuilder response = Response.ok();
 		if (format.equals("batik")) {
@@ -215,7 +213,7 @@ public class Endpoint {
 			@QueryParam("format") @DefaultValue("application/json") final String format_query) {
 		logger.info("Get Revised Graphs");
 		String format = (format_query != null) ? format_query : format_header;
-		logger.info("format: " + format);
+		logger.debug("format: " + format);
 		return RevisionManagement.getRevisedGraphsSparql(format);
 	}
 
@@ -426,13 +424,13 @@ public class Endpoint {
 				//boolean isRebaeFreundlich = RebaseControl.checkRebaseFreundlichkeit(responsePost, graphName, branch1, branch2);
 				
 				// to do manual arbeit
-				logger.info("rebase unfreundlich !");
+				logger.debug("rebase unfreundlich !");
 				
 				response.entity(rebaseControl.showRebaseDialogView());
 				
 				return response.build();
 			}else{
-				logger.info("sparql query is force rebase! ");	
+				logger.debug("sparql query is force rebase! ");	
 			}
 
 			String rebaseResultView = rebaseControl.getRebaseReportView(graphName);
@@ -572,8 +570,7 @@ public class Endpoint {
 	public final void approvePOST(@HeaderParam("Accept") final String formatHeader, @FormParam("isChecked") @DefaultValue("") final String isChecked,
 			@FormParam("id") @DefaultValue("") final String id, @FormParam("graph") @DefaultValue("") final String graph,
 			@FormParam("client") @DefaultValue("") final String user) throws InternalErrorException {
-		logger.info("approve test: "+id);
-		logger.info("isChecked: " + isChecked);
+		logger.info("ApprovePorcess test: "+id+" - isChecked: " + isChecked);
 		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
 		
@@ -590,8 +587,7 @@ public class Endpoint {
 	public final void approveHighLevelPOST(@HeaderParam("Accept") final String formatHeader, @FormParam("isChecked") @DefaultValue("") final String isChecked,
 			@FormParam("id") @DefaultValue("") final String id, @FormParam("graph") @DefaultValue("") final String graph, 
 			@FormParam("client") @DefaultValue("") final String user) throws InternalErrorException {
-		logger.info("approve high test: "+id);
-		logger.info("isChecked: " + isChecked);
+		logger.info("ApproveHighLevelProcess test: "+id + " - isChecked: " + isChecked);
 		
 		MergingControl mergingControl = clientMap.get(user).get(graph);
 		
@@ -681,7 +677,8 @@ public class Endpoint {
 		// update the new rebase merge query
 		String mergeQuery = mergingControl.updateMergeQuery();
 		
-		logger.info("rebase updated merge query: "+ mergeQuery);
+		logger.info("rebasePushProcess: "+ mergeQuery);
+		
 		// execute the getRebaseResponse()
 		Matcher userMatcher = patternUser.matcher(mergeQuery);
 		if (userMatcher.find()) {
@@ -781,12 +778,10 @@ public class Endpoint {
 		ResponseBuilder response = Response.ok();
 		MergingControl mergingControl = clientMap.get(user).get(graph);
 		
-		logger.info("individualFilter A Array :"+ individualA);
-		logger.info("individualFilter B Array :"+ individualB);
+		logger.info("individualFilter (A:"+ individualA +" B:"+ individualB+")");
 		
 		String individualFilter = mergingControl.getIndividualFilter(individualA, individualB);
 		
-		logger.info(individualB.isEmpty());
 		response.entity(individualFilter);
 		return response.build();
 	}	

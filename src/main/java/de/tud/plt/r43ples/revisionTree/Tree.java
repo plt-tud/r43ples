@@ -37,7 +37,7 @@ public class Tree {
 	 *            the graph name
 	 */
 	public Tree (final String graphName) {
-		logger.info("Start creation of revision tree of graph " + graphName + "!");
+		logger.debug("Start creation of revision tree of graph " + graphName + "!");
 
 		// create query
 		String queryRevisions = RevisionManagement.prefixes + String.format(""

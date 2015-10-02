@@ -59,8 +59,7 @@ public class API {
 	@Produces(MediaType.TEXT_PLAIN)
 	public final boolean fastForwardCheckGET(@HeaderParam("Accept") final String formatHeader, @QueryParam("graph") @DefaultValue("") final String graphName,
 			@QueryParam("branch1") @DefaultValue("") final String branch1, @QueryParam("branch2") @DefaultValue("") final String branch2) throws IOException, InternalErrorException {
-		logger.info("graph name test: "+ "--"+graphName+"--");
-		logger.info("branch name test: " + "--"+branch1+"--"+branch2+"--");
+		logger.info("FastForwardCheckProcess (graph: "+ graphName+"; branch1:"+branch1+"; branch2:"+branch2+")");
 		return FastForwardControl.fastForwardCheck(graphName, branch1, branch2);
 	}
 	
@@ -74,13 +73,10 @@ public class API {
 	public final Response treeFilterPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("triples") @DefaultValue("") final String triples, @FormParam("graph") @DefaultValue("") final String graph, 
 			@FormParam("client") @DefaultValue("") final String user ) {
-		
+		logger.info("TreeFilterProcess Array: "+ triples);
 		ResponseBuilder response = Response.ok();
-		
-		MergingControl mergingControl = Endpoint.clientMap.get(user).get(graph);
-		
-		logger.info("Tree Filter post Array :"+ triples);
 
+		MergingControl mergingControl = Endpoint.clientMap.get(user).get(graph);
 		response.entity(mergingControl.updateTripleTableByTree(triples));
 		return response.build();
 	}	

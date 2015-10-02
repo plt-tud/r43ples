@@ -138,11 +138,11 @@ public class MergingControl {
 	 	}
 	 	
 	 	if(isRebase){
-	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
+	 		logger.debug("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
 		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());
 		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
 	 	}else{
-	 		logger.info("commitGraphname: " + commitModel.getGraphName());
+	 		logger.debug("commitGraphname: " + commitModel.getGraphName());
 		 	scope.put("graphName", commitModel.getGraphName());	
 		 	scope.put("clientName", commitModel.getUser());
 	 	}
@@ -170,9 +170,6 @@ public class MergingControl {
 		ProcessManagement.createDifferenceTree(differenceModel, treeList);
 		
 		ProcessManagement.createTableModel(differenceModel, tableModel);
-		
-		logger.info("updated tableModel fertig!");
-
 		
 		// Create the individual models of both branches
 		individualModelBranchA = ProcessManagement.createIndividualModelOfRevision(commitModel.getGraphName(), commitModel.getBranch1(), differenceModel);

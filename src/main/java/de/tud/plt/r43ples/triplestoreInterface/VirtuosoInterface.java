@@ -60,7 +60,7 @@ public class VirtuosoInterface extends TripleStoreInterface {
 
 	@Override
 	public void executeUpdateQuery(String updateQueryString) {
-		logger.info(updateQueryString);
+		logger.debug(updateQueryString);
 		VirtuosoUpdateRequest vqe = VirtuosoUpdateFactory.create(updateQueryString, set);
 		try {
 			vqe.exec();

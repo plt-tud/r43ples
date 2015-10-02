@@ -103,7 +103,7 @@ public class Interface {
 		final Pattern patternGraphWithRevision = Pattern.compile(
 				"GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
 				patternModifier);
-		logger.info("Update detected");
+		logger.debug("SPARQL Update detected");
 		
 		// write to add and delete sets
 		// (replace graph names in query)
@@ -363,19 +363,19 @@ public class Interface {
 		
 		// Differ between the different merge queries
 		if ((action != null) && (action.equalsIgnoreCase("AUTO")) && (with == null) && (triples == null)) {
-			logger.info("AUTO MERGE query detected");
+			logger.debug("AUTO MERGE query detected");
 			// Create the merged revision
 			mresult.newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.AUTO, "");
 		} else if ((action != null) && (action.equalsIgnoreCase("MANUAL")) && (with != null) && (triples != null)) {
-			logger.info("MANUAL MERGE query detected");
+			logger.debug("MANUAL MERGE query detected");
 			// Create the merged revision
 			mresult.newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.MANUAL, triples);
 		} else if ((action == null) && (with != null) && (triples != null)) {
-			logger.info("MERGE WITH query detected");
+			logger.debug("MERGE WITH query detected");
 			// Create the merged revision
 			mresult.newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.WITH, triples);
 		} else if ((action == null) && (with == null) && (triples == null)) {
-			logger.info("MERGE query detected");
+			logger.debug("MERGE query detected");
 			// Check if difference model contains conflicts
 			String queryASK = String.format(
 					  "ASK { %n"

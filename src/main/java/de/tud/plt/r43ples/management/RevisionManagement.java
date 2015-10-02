@@ -173,7 +173,7 @@ public class RevisionManagement {
 	public static String createNewRevision(final String graphName, final String addedAsNTriples,
 			final String removedAsNTriples, final String user, final String commitMessage,
 			final ArrayList<String> usedRevisionNumber) throws InternalErrorException {
-		logger.info("Start creation of new revision for graph " + graphName);
+		logger.info("Create new revision for graph " + graphName);
 
 		// General variables
 		String newRevisionNumber = getNextRevisionNumber(graphName);
@@ -282,8 +282,8 @@ public class RevisionManagement {
 			removedAsNTriples = removedAsNTriples + triple + ". \n";
 		}
 		
-		logger.info("rebase added triples: " + addedAsNTriples);
-		logger.info("rebase removed triples: " + removedAsNTriples);
+		logger.debug("rebase added triples: " + addedAsNTriples);
+		logger.debug("rebase removed triples: " + removedAsNTriples);
 		
 		// Update full graph of branch
 		if (removedAsNTriples!=null && !removedAsNTriples.isEmpty()) {
