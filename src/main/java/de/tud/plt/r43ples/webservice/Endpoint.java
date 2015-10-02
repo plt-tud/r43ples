@@ -185,7 +185,7 @@ public class Endpoint {
 	public final Response getRevisionGraph(@HeaderParam("Accept") final String format_header,
 			@QueryParam("format") final String format_query, @QueryParam("graph") @DefaultValue("") final String graph) {
 		String format = (format_query != null) ? format_query : format_header;
-		logger.info("Get Revision Graph: " + graph + "(format: " + format+")");
+		logger.info("Get Revision Graph: " + graph + " (format: " + format+")");
 		
 		ResponseBuilder response = Response.ok();
 		if (format.equals("batik")) {
@@ -228,7 +228,7 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @param query_rewriting
 	 * 			  should query rewriting option be used
-	 * @return the response
+	 * @return HTTP response
 	 * @throws InternalErrorException 
 	 */
 	@Path("sparql")
@@ -258,7 +258,7 @@ public class Endpoint {
 	 *            the SPARQL query
 	 * @param query_rewriting
 	 * 			  should query rewriting option be used
-	 * @return the response
+	 * @return HTTP response
 	 * @throws InternalErrorException 
 	 */
 	@Path("sparql")
@@ -283,11 +283,18 @@ public class Endpoint {
 	
 	@Path("debug")
 	@GET
-	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws UnsupportedEncodingException, InternalErrorException {
+	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws InternalErrorException {
 		if (sparqlQuery.equals("")) {
+			logger.info("Get Debug page");
 			return getHTMLDebugResponse();
 		} else {
-			String query =  URLDecoder.decode(sparqlQuery, "UTF-8");
+			String query;
+			try {
+				query = URLDecoder.decode(sparqlQuery, "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				query = sparqlQuery;
+			}
 			logger.info("Debug query was requested. Query: " + query);
 			if (sparqlQuery.contains("INSERT")) {
 				TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);

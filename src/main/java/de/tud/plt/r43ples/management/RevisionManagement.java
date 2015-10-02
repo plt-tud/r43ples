@@ -292,8 +292,6 @@ public class RevisionManagement {
 		if (addedAsNTriples!=null && !addedAsNTriples.isEmpty()) {
 			RevisionManagement.executeINSERT(referenceGraph, addedAsNTriples);
 		}
-
-
 		return newRevisionNumber;
 	}
 
