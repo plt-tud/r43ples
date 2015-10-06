@@ -110,7 +110,7 @@ public class StrategyManagement {
 	 * load old revision information of Graph 
 	 * @param name of the named graph
 	 * @throws InternalErrorException */
-	public static String loadGraphVorMergingFromMap(String graphName) throws InternalErrorException{
+	public static String loadGraphVorMergingFromMap(String graphName) throws InternalErrorException {
 		
 		if(oldRevisionGraphMap.containsKey(graphName)) {
 			String oldGraphInfo = oldRevisionGraphMap.get(graphName);

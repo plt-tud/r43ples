@@ -16,7 +16,7 @@
     <script type="text/javascript">
 	    $(document).ready(function () {
 	     // Graph mit der aktuellen Auswahl erstellen
-        	drawGraph("#leftContainer .visualisation", "loadOldGraphProcess?graph={{commit.graphName}}&format=application/json", false, true);
+        	drawGraph("#leftContainer .visualisation", "getOldRevisiongraph?graph={{commit.graphName}}", false, true);
           	drawGraph("#rightContainer .visualisation", "revisiongraph?graph={{commit.graphName}}&format=application/json",true, false);
 	    });
     </script>

@@ -323,7 +323,7 @@ public class Endpoint {
 	
 	
 	/**
-	 * mergingProcess: create mergingQuery 
+	 * Perform a Merge query on html interface
 	 * create RevisionProcess Model A
 	 * create RevisionProcess Model B
 	 * create Difference model 
@@ -490,19 +490,19 @@ public class Endpoint {
 
 
 	/**
+	 * get old revision graph which was saved before in the cache of the server by 
 	 * query revision information and get the graph
-	 * by ajax  */
-	@Path("loadOldGraphProcess")
+	 * */
+	@Path("getOldRevisiongraph")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public final Response fastForwardGET(
-			 @QueryParam("graph")  @DefaultValue("") final String graph, 
-			 @QueryParam("format") @DefaultValue("application/json") final String format) throws InternalErrorException {
+			 @QueryParam("graph")  @DefaultValue("") final String graph) throws InternalErrorException {
 
 		ResponseBuilder response = Response.ok();
-		logger.info("loadOldGraphProcess: "+ graph);
+		logger.info("Get old revision graph: "+ graph);
 
-		response.type(format);
+		response.type(MediaType.APPLICATION_JSON);
 		response.entity(StrategyManagement.loadGraphVorMergingFromMap(graph));
 		
 		return response.build();
@@ -692,7 +692,7 @@ public class Endpoint {
 	
 	@Path("individualView")
 	@GET
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	@Produces(MediaType.TEXT_HTML)
 	public final Response individualGET( @QueryParam("graph") @DefaultValue("") final String graph,
 			 @QueryParam("client") @DefaultValue("") final String user ) {
 		logger.info("Get individual view: "+ graph);
@@ -711,7 +711,7 @@ public class Endpoint {
 	
 	@Path("tripleView")
 	@GET
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	@Produces(MediaType.TEXT_HTML)
 	public final Response tripleViewGET(@QueryParam("graph") @DefaultValue("") final String graph, 
 			@QueryParam("client") @DefaultValue("") final String user ) {
 		ResponseBuilder response = Response.ok();
@@ -726,7 +726,7 @@ public class Endpoint {
 	
 	@Path("highLevelView")
 	@GET
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	@Produces(MediaType.TEXT_HTML)
 	public final Response highLevelGET(@QueryParam("graph") @DefaultValue("") final String graph,
 			@QueryParam("client") @DefaultValue("") final String user ) {
 		
