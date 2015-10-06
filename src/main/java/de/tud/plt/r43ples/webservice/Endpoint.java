@@ -202,22 +202,6 @@ public class Endpoint {
 	}
 
 	/**
-	 * Provide information about revised graphs
-	 * 
-	 * @return list of graphs which are under revision control
-	 */
-	@Path("getRevisedGraphs")
-	@GET
-	@Produces({ MediaType.APPLICATION_JSON })
-	public final String getRevisedGraphs(@HeaderParam("Accept") final String format_header,
-			@QueryParam("format") @DefaultValue("application/json") final String format_query) {
-		logger.info("Get Revised Graphs");
-		String format = (format_query != null) ? format_query : format_header;
-		logger.debug("format: " + format);
-		return RevisionManagement.getRevisedGraphsSparql(format);
-	}
-
-	/**
 	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).
 	 * 
 	 * @param formatHeader
@@ -565,23 +549,6 @@ public class Endpoint {
 	}	
 	
 	
-	/**
-	 * by triple approve to server call this method
-	 */
-	
-	@Path("approveProcess")
-	@POST
-	public final void approvePOST(
-			@FormParam("isChecked") @DefaultValue("") final String isChecked,
-			@FormParam("id")        @DefaultValue("") final String id, 
-			@FormParam("graph")     @DefaultValue("") final String graph,
-			@FormParam("client")    @DefaultValue("") final String user) throws InternalErrorException {
-		
-		logger.info("ApprovePorcess test: "+id+" - isChecked: " + isChecked);		
-		
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-		mergingControl.approveToDifferenceModel(id, isChecked);
-	}
 	
 	
 	/**

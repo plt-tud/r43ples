@@ -428,10 +428,7 @@ public class MergingControl {
 	 * @throws ConfigurationException 
 	 * */
 	
-	public String updateTripleTable(String properties) {		
-		Map<String, Object> scope = new HashMap<String, Object>();
-		StringWriter sw = new StringWriter();
-		
+	public List<TableRow> updateTripleTable(String properties) {		
 		//updated tableModel	 	
 		ProcessManagement.createTableModel(differenceModel, tableModel);
 		
@@ -447,21 +444,7 @@ public class MergingControl {
 				}
 			}					
 		}
-		if (isRebase) {
-	 		logger.info("rebasecommitGraphname: " + rebaseControl.getCommitModel().getGraphName());
-		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());	
-		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
-	 	} else {
-	 		logger.info("mergingcommitGraphname: " + commitModel.getGraphName());
-		 	scope.put("graphName", commitModel.getGraphName());	 
-		 	scope.put("clientName", commitModel.getUser());
-	 	}	
-		scope.put("tableRowList", updatedTripleRowList);
-		
-		MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/merge/tripleView.mustache");
-	    mustache.execute(sw, scope);		
-		return sw.toString();	
+		return updatedTripleRowList;
 	}
 	
 	/**@param triples :  triple list of Difference Tree by checkbox select
