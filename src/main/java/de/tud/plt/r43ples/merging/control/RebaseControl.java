@@ -42,7 +42,7 @@ import de.tud.plt.r43ples.merging.model.structure.PatchGroup;
 import de.tud.plt.r43ples.merging.model.structure.Triple;
 
 public class RebaseControl {
-	private static Logger logger = Logger.getLogger(FastForwardControl.class);
+	private static Logger logger = Logger.getLogger(RebaseControl.class);
 	private CommitModel commitModel;
 	private PatchGroup patchGroup = new PatchGroup(null, null);
 	private DifferenceModel differenceModel = new DifferenceModel();

@@ -308,7 +308,7 @@ public class Endpoint {
 	}
 	
 	/**
-	 * get merging page and input merging information
+	 * get merging HTML start page and input merging information
 	 * */
 	@Path("merging")
 	@GET
@@ -316,7 +316,16 @@ public class Endpoint {
 	public final Response getMerging(@QueryParam("graph") final String graph) {
 		logger.info("Merging -- graph: " + graph);		
 		ResponseBuilder response = Response.ok();
-		response.entity(MergingControl.getMenuHtmlOutput()).type(MediaType.TEXT_HTML);
+		List<String> graphList = RevisionManagement.getRevisedGraphsList();	
+	    Map<String, Object> scope = new HashMap<String, Object>();
+	    scope.put("merging_active", true);
+		scope.put("graphList", graphList);
+		
+	    StringWriter sw = new StringWriter();
+	    MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/merge_start.mustache");
+	    mustache.execute(sw, scope);		
+	    response.entity(sw.toString()).type(MediaType.TEXT_HTML);
 		return response.build();
 	}
 	
@@ -865,7 +874,7 @@ public class Endpoint {
 	    Mustache mustache = mf.compile("templates/endpoint.mustache");
 	    StringWriter sw = new StringWriter();
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
-	    htmlMap.put("graphList", RevisionManagement.getRevisedGraphs());
+	    htmlMap.put("graphList", RevisionManagement.getRevisedGraphsList());
 	    htmlMap.put("endpoint_active", true);
 	    mustache.execute(sw, htmlMap);		
 		String content = sw.toString();

@@ -867,7 +867,7 @@ public class RevisionManagement {
 	 * 
 	 * @return result set
 	 */
-	public static ResultSet getRevisedGraphsSparql() {
+	public static ResultSet getRevisedGraphs() {
 		String sparqlQuery = prefixes
 				+ String.format("" 
 						+ "SELECT DISTINCT ?graph " 
@@ -883,9 +883,9 @@ public class RevisionManagement {
 	 * 
 	 * @return list of strings containing the revised graphs of R43ples
 	 */
-	public static ArrayList<String> getRevisedGraphs() {
+	public static ArrayList<String> getRevisedGraphsList() {
 		ArrayList<String> list = new ArrayList<String>();
-		ResultSet results = getRevisedGraphsSparql();
+		ResultSet results = getRevisedGraphs();
 		while (results.hasNext()) {
 			QuerySolution qs = results.next();
 			list.add(qs.getResource("graph").toString());

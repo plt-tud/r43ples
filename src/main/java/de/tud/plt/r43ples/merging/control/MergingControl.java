@@ -94,20 +94,6 @@ public class MergingControl {
 	}
 	
 	
-	/**show merging start view*/
-	public static String getMenuHtmlOutput() {
-		List<String> graphList = RevisionManagement.getRevisedGraphs();	
-	    Map<String, Object> scope = new HashMap<String, Object>();
-	    scope.put("merging_active", true);
-		scope.put("graphList", graphList);
-		
-	    StringWriter sw = new StringWriter();
-	    MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/merge_start.mustache");
-	    mustache.execute(sw, scope);		
-	    return sw.toString();
-	}
-	
 	
 	/**show triple merging view*/
 	public String getViewHtmlOutput() {	
@@ -462,8 +448,7 @@ public class MergingControl {
 		String[] tripleArray = triples.split(",");
 		List<TableRow> TripleRowList = tableModel.getTripleRowList();
 		List<TableRow> updatedTripleRowList = new ArrayList<TableRow>();
-		for(String triple: tripleArray) {
-			
+		for(String triple: tripleArray) {		
 			Iterator<TableRow> itu = TripleRowList.iterator();
 			while(itu.hasNext()){
 				TableRow tableRow = itu.next();
@@ -502,6 +487,7 @@ public class MergingControl {
 	    mustache.execute(sw, scope);		
 		return sw.toString();	
 	}
+	
 	
 	/**get triple view after changed view
 	 *
@@ -664,24 +650,16 @@ public class MergingControl {
 			if (isChecked.equals("1")) {
 				// Rename - yes
 				additionDifferenceSDDState = SDDTripleStateEnum.ADDED;
-				deletionDifferenceSDDState = SDDTripleStateEnum.DELETED;
-				
-				
-				
+				deletionDifferenceSDDState = SDDTripleStateEnum.DELETED;	
 			} else {
 				// Rename - no
-				
 				additionDifferenceSDDState = SDDTripleStateEnum.DELETED;
 				deletionDifferenceSDDState = SDDTripleStateEnum.ADDED;
-	
 			}
-			
 			Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
 			while(iterDM.hasNext()) {
 				Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterDM.next();
-				DifferenceGroup differ = (DifferenceGroup) entryDG.getValue();
-//				boolean conflicting = differ.isConflicting();
-				
+				DifferenceGroup differ = (DifferenceGroup) entryDG.getValue();		
 				SDDTripleStateEnum automaticState = differ.getAutomaticResolutionState();
 				Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
 				while(iterDIF.hasNext()){					
@@ -690,24 +668,18 @@ public class MergingControl {
 					ResolutionStateEnum resolutionState = difference.getResolutionState();
 					
 					if(difference.equals(additionDifference)){
-						
 						if(resolutionState == ResolutionStateEnum.DIFFERENCE && (!additionDifferenceSDDState.equals(automaticState))){
 							reportResult.incrementCounterDifferencesResolutionChanged();						
 						}
-						
 						difference.setTripleResolutionState(additionDifferenceSDDState);
 						difference.setResolutionState(ResolutionStateEnum.RESOLVED);			
-						
 					}
 					if(difference.equals(deletionDifference)){
-						
 						if(resolutionState == ResolutionStateEnum.DIFFERENCE && (!deletionDifferenceSDDState.equals(automaticState))){
 							reportResult.incrementCounterDifferencesResolutionChanged();						
 						}
-						
 						difference.setTripleResolutionState(deletionDifferenceSDDState);
 						difference.setResolutionState(ResolutionStateEnum.RESOLVED);			
-						
 					}
 								
 				}
@@ -763,10 +735,7 @@ public class MergingControl {
 				}
 			}
 			tableRow.setIsResolved("no");
-		}
-		
-		//else fertig
-		
+		}		
 		
 		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
 		while(iterDM.hasNext()) {

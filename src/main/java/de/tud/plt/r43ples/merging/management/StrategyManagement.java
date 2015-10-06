@@ -23,22 +23,13 @@ public class StrategyManagement {
 	
 	private static HashMap<String, String> oldRevisionGraphMap = new HashMap<String, String>();
 	
-	public static final String prefixes = 
-			  "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> \n"
-			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
-			+ "PREFIX dc-terms: <http://purl.org/dc/terms/> \n" 
-			+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
-			+ "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
-			+ "PREFIX sdd: <http://eatld.et.tu-dresden.de/sdd#> \n"
-			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n";
-
 
 	/**check if fast forward can
 	 * @param last revision uri of branch A
 	 * @param last revision uri of branch B
 	 * */
 	public static boolean isFastForward(String revisionBranchA , String revisionBranchB){
-		String query = prefixes
+		String query = RevisionManagement.prefixes
 				+ String.format("ASK { GRAPH <%s> { "
 						+ "<%s> prov:wasDerivedFrom+ <%s> ."
 						+ " }} ",
@@ -55,7 +46,7 @@ public class StrategyManagement {
 	 *  */
 	public static void moveBranchReference(String branchNameB, String revisionUriB, String revisionUriA){
 		// delete old reference
-		String query = prefixes + String.format("DELETE DATA { GRAPH <%s> { <%s> rmo:references <%s>. } };%n",
+		String query = RevisionManagement.prefixes + String.format("DELETE DATA { GRAPH <%s> { <%s> rmo:references <%s>. } };%n",
 				Config.revision_graph, branchNameB, revisionUriB);
 		// added new reference
 		query += String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:references <%s>. } } ;%n", Config.revision_graph,
@@ -78,7 +69,7 @@ public class StrategyManagement {
 		Iterator<String> riter = revisionList.iterator();
 		while(riter.hasNext()) {
 			String revision = riter.next();
-			String query = prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:revisionOfBranch <%s>. } };%n",
+			String query = RevisionManagement.prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:revisionOfBranch <%s>. } };%n",
 					Config.revision_graph, revision, branchUriB);
 			
 			logger.debug("revisionlist info" + revision);
@@ -215,7 +206,7 @@ public class StrategyManagement {
 	/**get delta added with versionUri
 	 * @param uri of the added set*/
 	public static String getDeltaAddedUri(String revisionUri) {
-		String query = prefixes + String.format(""
+		String query = RevisionManagement.prefixes + String.format(""
 				+"SELECT DISTINCT ?deltaAdded %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"   {<%s> rmo:deltaAdded ?deltaAdded. } }%n",
@@ -228,7 +219,7 @@ public class StrategyManagement {
 			return qs.getResource("?deltaAdded").toString();
 		}
 		else {
-			logger.info("No deltaAdded could be found.");
+			logger.warn("No deltaAdded could be found.");
 			return null;
 		}
 	}
@@ -236,7 +227,7 @@ public class StrategyManagement {
 	/** get the delta removed width versionUri
 	 * @param uri of the deleted set*/
 	public static String getDeltaRemovedUri(String revisionUri) {
-		String query = prefixes + String.format(""
+		String query = RevisionManagement.prefixes + String.format(""
 				+"SELECT DISTINCT ?deltaRemoved %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"   {<%s> rmo:deltaRemoved ?deltaRemoved. } } %n",
@@ -249,7 +240,7 @@ public class StrategyManagement {
 			return qs.getResource("?deltaRemoved").toString();
 		}
 		else {
-			logger.info("No deltaRemoved could be found.");
+			logger.warn("No deltaRemoved could be found.");
 			return null;
 		}
 	}
@@ -257,7 +248,7 @@ public class StrategyManagement {
 	/** get the delta removed width versionUri
 	 * @param uri of the added or removed triple set*/
 	public static LinkedList<String> createAddedOrRemovedTripleSet(String addedOrRemovedDelta) {
-		String query = prefixes + String.format(""
+		String query = RevisionManagement.prefixes + String.format(""
 				+"SELECT DISTINCT ?s ?p ?o %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"		{ ?s ?p ?o . } %n"
@@ -288,7 +279,7 @@ public class StrategyManagement {
 	/** get number of revision
 	 * @param uri of revision*/
 	public static String getRevisionNumber(String revisionUri){
-		String query = prefixes + String.format(""
+		String query = RevisionManagement.prefixes + String.format(""
 				+"SELECT DISTINCT ?revisionNumber %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"   {<%s> rmo:revisionNumber ?revisionNumber. } }%n",
@@ -301,14 +292,14 @@ public class StrategyManagement {
 			return qs.getLiteral("?revisionNumber").toString();
 		}
 		
-		logger.info("No revision number could be found.");
+		logger.warn("No revision number could be found.");
 		return null;
 	}
 	
 	/** get client name
 	 * @param uri of commit */
 	public static String getPatchUserUri(String commitUri) {
-		String query = prefixes + String.format(""
+		String query = RevisionManagement.prefixes + String.format(""
 				+"SELECT DISTINCT ?user %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"   {<%s> prov:wasAssociatedWith ?user. } }%n",
@@ -330,7 +321,7 @@ public class StrategyManagement {
 	/** get client message
 	 * @param uri of commit*/
 	public static String getPatchMessage(String commitUri) {
-		String query = prefixes + String.format(""
+		String query = RevisionManagement.prefixes + String.format(""
 				+"SELECT DISTINCT ?message %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"   {<%s> dc-terms:title ?message. } }%n",
