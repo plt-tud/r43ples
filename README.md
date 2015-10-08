@@ -37,19 +37,19 @@ They just have to be unzipped and started with Java
 
     java -jar r43ples-*-with-dependencies.jar
 
-    
-There are also debian packages available. 
+
+There are also debian packages available.
 
 Compiling
 ---------
 Maven is used for compiling
 
-    mvn exec:java
-    
+    mvn compile exec:exec
+
 Packages (JAR with dependencies for the webservice, a console client and a debian package) can be be built with:
 
     mvn package
-    
+
 
 Configuration
 -------------
@@ -74,13 +74,13 @@ SPARQL endpoint is available at:
 
     [uri]:[port]/r43ples/sparql
 
-The endpoint directly accepts SPARQL queries with HTTP GET or HTTP POST parameters for *query* and *format*: 
+The endpoint directly accepts SPARQL queries with HTTP GET or HTTP POST parameters for *query* and *format*:
 
     [uri]:[port]/r43ples/sparql?query=[]&format=[]
 
 ### Supported Formats
 
-The formats can be specified as URL Path Parameter *format*, as HTTP post paramter *format* or as HTTP header parameter *Accept*: 
+The formats can be specified as URL Path Parameter *format*, as HTTP post paramter *format* or as HTTP header parameter *Accept*:
 
 * text/turtle
 * application/json
@@ -96,17 +96,17 @@ There are some additional keywords which can be used to control the revisions of
 * Create graph
 
         CREATE GRAPH <graph>
-        
+
 * Select query
 
-        SELECT * 
-        WHERE { 
+        SELECT *
+        WHERE {
         	GRAPH <graph> REVISION "23" {?s ?p ?o}
     	}
-        
+
 * Update query
 
-        USER "mgraube" MESSAGE "test commit" 
+        USER "mgraube" MESSAGE "test commit"
         INSERT {
             GRAPH <test> REVISION "2" {
                 <a> <b> <c> .
@@ -118,7 +118,7 @@ There are some additional keywords which can be used to control the revisions of
         USER "mgraube"
         MESSAGE "test commit"
         BRANCH GRAPH <test> REVISION "2" TO "unstable"
-        
+
 * Tagging
 
         USER "mgraube"
@@ -161,4 +161,3 @@ Following libraries are used in R43ples:
 * [jQuery](http://jquery.com/) as JavaScript framework
 * [Bootstrap](http://getbootstrap.com/) as HTML, CSS and JS framework
 * [Mustache](https://mustache.github.io/) as template engine
- 
