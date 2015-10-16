@@ -356,7 +356,7 @@ public class Endpoint {
 		if(strategie.equals("Fast-Forward")){
 			CommitModel commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2, "Fast-Forward", null);
 			StrategyManagement.saveGraphVorMergingInMap(graphName, "application/json");
-			executeFastForward(graphName, branch1, branch2);
+			FastForwardControl.executeFastForward(graphName, branch1, branch2);
 			response.entity(commitModel.getReportView());
 			return response.build();	
 		}
@@ -481,7 +481,7 @@ public class Endpoint {
 			}
 
 			if (patternMergeQuery.matcher(mergeQuery).find()) {
-				responsePost= getMergeResponse(mergeQuery, user, message,"HTML");
+				responsePost= getThreeWayMergeResponse(mergeQuery, user, message,"HTML");
 			}
 							
 			if(!(responsePost.getStatusInfo() == Response.Status.CONFLICT)){
@@ -628,7 +628,7 @@ public class Endpoint {
 		}
 
 		if (patternMergeQuery.matcher(mergeQuery).find()) {
-			getMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
+			getThreeWayMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
 		}
 			
 		response.entity(mergingControl.getThreeWayReportView(null));
@@ -949,7 +949,7 @@ public class Endpoint {
 			result = "Graph <"+graphName+"> successfully created";
 		}
 		else if (patternMergeQuery.matcher(sparqlQuery).find()) {
-			return getMergeResponse(sparqlQuery, user, message, format);
+			return getThreeWayMergeResponse(sparqlQuery, user, message, format);
 		}
 		else if (patternDropGraph.matcher(sparqlQuery).find()) {
 			Interface.sparqlDropGraph(sparqlQuery);
@@ -960,7 +960,10 @@ public class Endpoint {
 			result = "Tagging or branching successful";
 		}
 		else if (patternFastForwardQuery.matcher(sparqlQuery).find()) {					
-			result = getFastForwardResponse(sparqlQuery, user, message);
+			if (Interface.sparqlFastForwardMerge(sparqlQuery, user, message))
+				result = "Fast Forward Merge successful";
+			else
+				result = "Error in Fast Forward Merge";
 		}
 		else if (patternRebaseQuery.matcher(sparqlQuery).find()) {
 			return getRebaseResponse(sparqlQuery, user, message, format);
@@ -1042,11 +1045,11 @@ public class Endpoint {
 	 * @param format the result format
 	 * @throws InternalErrorException 
 	 */
-	private Response getMergeResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
+	private Response getThreeWayMergeResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
-		logger.info("Merge creation detected");
+		logger.info("Three-Way-Merge query detected");
 		
-		MergeResult mresult = Interface.sparqlMerge(sparqlQuery, user, commitMessage, format);
+		MergeResult mresult = Interface.sparqlThreeWayMerge(sparqlQuery, user, commitMessage, format);
 		
 		if (mresult.hasConflict) {
 			responseBuilder = Response.status(Response.Status.CONFLICT);
@@ -1075,60 +1078,8 @@ public class Endpoint {
 		return responseBuilder.build();	
 	}
 	
-	/** 
-	 * Creates fast forward merging.
-	 * 
-	 * Using command: MERGE FF GRAPH /<graphURI/> BRANCH "branchNameA" INTO "branchNameB"
-	 * 
-	 * @param sparqlQuery the SPARQL query
-	 * @throws InternalErrorException 
-	 */
-	private String getFastForwardResponse(final String sparqlQuery, final String user, final String commitMessage) throws InternalErrorException {
-		Matcher m = patternFastForwardQuery.matcher(sparqlQuery);
-		if (!m.find())
-			throw new InternalErrorException("Error in query: " + sparqlQuery);
-			
-		String graphName = m.group("graph");
-		String branchNameA = m.group("branchNameA").toLowerCase();
-		String branchNameB = m.group("branchNameB").toLowerCase();
-		
-		if (executeFastForward(graphName, branchNameA, branchNameB)) {
-			return "Fast Forward succesful";
-		}
-		else {	
-			return "Fast Forward not possible";
-		}
-	}
 	
-	/**
-	 * 
-	 * @param graphName
-	 * @param branchNameA
-	 * @param branchNameB
-	 * 
-	 * @return if fast-forward was successful
-	 * @throws InternalErrorException 
-	 */
-	private boolean executeFastForward(String graphName, String branchNameA, String branchNameB) throws InternalErrorException
-	{
-		if (!FastForwardControl.fastForwardCheck(graphName, branchNameA, branchNameB)) {
-			return false;
-		}
-		String branchUriA = RevisionManagement.getBranchUri(graphName, branchNameA);
-		String branchUriB = RevisionManagement.getBranchUri(graphName, branchNameB);
-		
-		String fullGraphUriA = RevisionManagement.getFullGraphUri(branchUriA);
-		String fullGraphUriB = RevisionManagement.getFullGraphUri(branchUriB);
-
-		logger.info("ff fullgraph : "+ branchUriA + branchUriB + fullGraphUriA+ fullGraphUriB);
-		String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
-		String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
-		
-		StrategyManagement.moveBranchReference(branchUriB, revisionUriB, revisionUriA);
-		StrategyManagement.updateRevisionOfBranch(branchUriB, revisionUriB, revisionUriA);	
-		StrategyManagement.fullGraphCopy(fullGraphUriA, fullGraphUriB);
-		return true;
-	}
+	
 	
 	/** 
 	 * Creates response query and get Response of it.
@@ -1142,6 +1093,12 @@ public class Endpoint {
 	private Response getRebaseResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
 		
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
+		logger.info("Three-Way-Merge query detected");
+		
+		// TODO: make it similar to ThreeWayMerge
+		//MergeResult mresult = Interface.sparqlThreeWayMerge(sparqlQuery, user, commitMessage, format);
+		
+		
 		Matcher m = patternRebaseQuery.matcher(sparqlQuery);
 		
 		boolean foundEntry = false;

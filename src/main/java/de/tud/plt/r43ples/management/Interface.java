@@ -15,6 +15,8 @@ import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.merging.MergeManagement;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.merging.MergeResult;
+import de.tud.plt.r43ples.merging.control.FastForwardControl;
+import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 public class Interface {
@@ -269,7 +271,49 @@ public class Interface {
 		}
 	}
 	
-	public static MergeResult sparqlMerge(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
+	
+	
+	/**
+	 * 
+	 * 
+	 * @return if fast-forward was successful
+	 * @throws InternalErrorException 
+	 */
+	public static boolean sparqlFastForwardMerge(final String sparqlQuery, final String user, final String commitMessage) throws InternalErrorException
+	{
+		final Pattern patternFastForwardQuery =  Pattern.compile(
+				"MERGE\\s*FF\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"",
+				patternModifier);
+		Matcher m = patternFastForwardQuery.matcher(sparqlQuery);
+		if (!m.find())
+			throw new InternalErrorException("Error in query: " + sparqlQuery);
+			
+		String graphName = m.group("graph");
+		String branchNameA = m.group("branchNameA").toLowerCase();
+		String branchNameB = m.group("branchNameB").toLowerCase();
+		
+		if (!FastForwardControl.fastForwardCheck(graphName, branchNameA, branchNameB)) {
+			return false;
+		}
+		String branchUriA = RevisionManagement.getBranchUri(graphName, branchNameA);
+		String branchUriB = RevisionManagement.getBranchUri(graphName, branchNameB);
+		
+		String fullGraphUriA = RevisionManagement.getFullGraphUri(branchUriA);
+		String fullGraphUriB = RevisionManagement.getFullGraphUri(branchUriB);
+
+		logger.info("ff fullgraph : "+ branchUriA + branchUriB + fullGraphUriA+ fullGraphUriB);
+		String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
+		String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
+		
+		StrategyManagement.moveBranchReference(branchUriB, revisionUriB, revisionUriA);
+		// TODO: add reference commit with user and commit message
+		StrategyManagement.updateRevisionOfBranch(branchUriB, revisionUriB, revisionUriA);	
+		StrategyManagement.fullGraphCopy(fullGraphUriA, fullGraphUriB);
+		return true;
+	}
+	
+	
+	public static MergeResult sparqlThreeWayMerge(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
 		final Pattern patternMergeQuery =  Pattern.compile(
 				"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
 				patternModifier);
@@ -400,6 +444,9 @@ public class Interface {
 		return mresult;
 		
 	}
+	
+	
+	
 
 
 }

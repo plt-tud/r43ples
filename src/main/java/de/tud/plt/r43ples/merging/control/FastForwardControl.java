@@ -25,4 +25,24 @@ public class FastForwardControl {
 		return StrategyManagement.isFastForward(revisionUriA, revisionUriB);
 	}
 	
+	public static boolean executeFastForward(final String graphName, final String branchNameA, final String branchNameB) throws InternalErrorException{
+		if (!fastForwardCheck(graphName, branchNameA, branchNameB)) {
+			return false;
+		}
+		String branchUriA = RevisionManagement.getBranchUri(graphName, branchNameA);
+		String branchUriB = RevisionManagement.getBranchUri(graphName, branchNameB);
+		
+		String fullGraphUriA = RevisionManagement.getFullGraphUri(branchUriA);
+		String fullGraphUriB = RevisionManagement.getFullGraphUri(branchUriB);
+
+		String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
+		String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
+		
+		StrategyManagement.moveBranchReference(branchUriB, revisionUriB, revisionUriA);
+		// TODO: add reference commit with user and commit message
+		StrategyManagement.updateRevisionOfBranch(branchUriB, revisionUriB, revisionUriA);	
+		StrategyManagement.fullGraphCopy(fullGraphUriA, fullGraphUriB);
+		return true;
+	}
+	
 }
