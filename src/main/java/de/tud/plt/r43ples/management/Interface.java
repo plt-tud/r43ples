@@ -1,6 +1,5 @@
 package de.tud.plt.r43ples.management;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
