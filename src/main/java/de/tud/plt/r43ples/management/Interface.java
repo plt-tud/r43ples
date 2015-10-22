@@ -170,36 +170,16 @@ public class Interface {
 			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
 			String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
 
-			// remove doubled data
-			// (already existing triples in add set; not existing triples in
-			// delete set)
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
-							"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }", addSetGraphUri,
-							referenceFullGraph));
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
-					"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } MINUS { GRAPH <%s> { ?s ?p ?o. } } }",
-					removeSetGraphUri, removeSetGraphUri, referenceFullGraph));
-
-			// merge change sets into reference graph
-			// (copy add set to reference graph; remove delete set from reference graph)
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
-						"INSERT { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }",
-						referenceFullGraph,	addSetGraphUri));
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
-					"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }", 
-					referenceFullGraph,	removeSetGraphUri));
-
-			// add meta information to R43ples
-			ArrayList<String> usedRevisionNumber = new ArrayList<String>();
-			usedRevisionNumber.add(revisionName);
-			RevisionManagement.addMetaInformationForNewRevision(graphName, user, commitMessage, usedRevisionNumber,
-					newRevisionNumber, addSetGraphUri, removeSetGraphUri);
+			RevisionManagement.addNewRevisionFromChangeSet(user, commitMessage, graphName, revisionName, newRevisionNumber,
+					referenceFullGraph, addSetGraphUri, removeSetGraphUri);
 			
 			
 			queryM = m.replaceAll(String.format("GRAPH <%s> ", graphName));
 			m = patternGraphWithRevision.matcher(queryM);
 		}
 	}
+
+
 	
 	public static String sparqlCreateGraph(final String query) throws QueryErrorException {
 		final Pattern patternCreateGraph = Pattern.compile(
