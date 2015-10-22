@@ -2,13 +2,10 @@
 
 # ontology
 wget http://downloads.dbpedia.org/3.9/dbpedia_3.9.owl.bz2
-bunzip2 dbpedia_3.9.owl.bz2
 
 
 # instance data (3.7 GB compressed; 38.4 GB; 260 mil triples )
 wget http://live.dbpedia.org/dumps/dbpedia_2013_07_18.nt.bz2
-bunzip2 dbpedia_2013_07_18.nt.bz2
-split --number=l/100 -d dbpedia_2013_07_18.nt dbpedia_2013_07_18.split.
 # @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 # @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 # @prefix owl: <http://www.w3.org/2002/07/owl#> .
@@ -28,6 +25,5 @@ split --number=l/100 -d dbpedia_2013_07_18.nt dbpedia_2013_07_18.split.
 #  void:distinctObjects 103060313 . 
 
 
-# download changesets
+# download changesets from 04.11.2013
 wget -r -np -nd -nH -L -e robots=off -A "gz, html" http://live.dbpedia.org/changesets/2013/11/04/13/
-gunzip *.nt.gz
