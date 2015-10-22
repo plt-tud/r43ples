@@ -161,3 +161,12 @@ Following libraries are used in R43ples:
 * [jQuery](http://jquery.com/) as JavaScript framework
 * [Bootstrap](http://getbootstrap.com/) as HTML, CSS and JS framework
 * [Mustache](https://mustache.github.io/) as template engine
+
+
+
+Revision information
+--------------------
+All information about the revision history of all named graphs is stored in the named graph **http://eatld.et.tu-dresden.de/r43ples-revisions** (as long as not configured otherwise in the configuration file).
+
+Here, the Revision Manangement Ontology (RMO) is used to model revisions, branches and tags. Furthermore commits are stored which connect each revision, tag and branch with its prior revision. 
+ 
