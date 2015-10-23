@@ -168,5 +168,10 @@ Revision information
 --------------------
 All information about the revision history of all named graphs is stored in the named graph **http://eatld.et.tu-dresden.de/r43ples-revisions** (as long as not configured otherwise in the configuration file).
 
-Here, the Revision Manangement Ontology (RMO) is used to model revisions, branches and tags. Furthermore commits are stored which connect each revision, tag and branch with its prior revision. 
+Here, the Revision Management Ontology (RMO) is used to model revisions, branches and tags. Furthermore commits are stored which connect each revision, tag and branch with its prior revision. 
+
+
+HTTP Header information
+------------------------
+Each response header contains information about the revision information of the graphs specified in the requests. This information follows the RMO and is transferred as Turtle serialisation.
  
