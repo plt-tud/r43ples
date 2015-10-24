@@ -344,7 +344,7 @@ public class Endpoint {
 			@FormParam("optradio") final String model, 
 			@FormParam("graph") @DefaultValue("") final String graphName,
 			@FormParam("sdd") final String sddName,
-			@FormParam("strategie") final String strategie,
+			@FormParam("strategy") final String strategy,
 			@FormParam("Branch1") final String branch1,
 			@FormParam("Branch2") final String branch2,
 			@FormParam("user") @DefaultValue("") final String user,
@@ -353,7 +353,7 @@ public class Endpoint {
 		ResponseBuilder response = Response.ok();
 		
 		// Fast Forward
-		if(strategie.equals("Fast-Forward")){
+		if(strategy.equals("Fast-Forward")){
 			CommitModel commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2, "Fast-Forward", null);
 			StrategyManagement.saveGraphVorMergingInMap(graphName, "application/json");
 			FastForwardControl.executeFastForward(graphName, branch1, branch2);
@@ -361,7 +361,7 @@ public class Endpoint {
 			return response.build();	
 		}
 		// Rebase
-		else if(strategie.equals("Rebase")){
+		else if(strategy.equals("Rebase")){
 			RebaseQueryTypeEnum type = null;			
 			if (model.equals("auto")) {
 				type = RebaseQueryTypeEnum.AUTO;

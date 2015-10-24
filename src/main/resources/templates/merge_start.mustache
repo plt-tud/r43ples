@@ -25,9 +25,9 @@
     
     //js Stragegie->illustration with Graph
     var strategyImage = {
-    		'Three-Way Merge': '/static/images/three-way-strategie.png',
-    		'Rebase': '/static/images/rebase-strategie.png',
-    		'Fast-Forward': '/static/images/fast-forward-strategie.png',
+    		'Three-Way Merge': '/static/images/three-way-strategy.png',
+    		'Rebase': '/static/images/rebase-strategy.png',
+    		'Fast-Forward': '/static/images/fast-forward-strategy.png',
     };    
         
     function showIllustration(num){
@@ -59,10 +59,10 @@
             function(data,status){
               // get data and check
               if(data == "false"){
-            	  $('#strategie option[value="Fast-Forward"]').attr('disabled', true);
+            	  $('#strategy ption[value="Fast-Forward"]').attr('disabled', true);
               }else{
-            	  $('#strategie option[value="Fast-Forward"]').attr('disabled', false);
-            	  $('#strategie').val("Fast-Forward");
+            	  $('#strategy option[value="Fast-Forward"]').attr('disabled', false);
+            	  $('#strategy').val("Fast-Forward");
             	  showIllustration("Fast-Forward");
               }
             });
@@ -102,9 +102,9 @@
                         </div>
                       </div>
                       <div class="form-group" >
-                        <label for="strategie" class="col-sm-2 control-label">Strategy</label>
+                        <label for="strategy" class="col-sm-2 control-label">Strategy</label>
                         <div class="col-sm-10" >
-                          <select class="form-control" id="strategie" name="strategie" onchange="showIllustration(this.value)">
+                          <select class="form-control" id="strategy" name="strategy" onchange="showIllustration(this.value)">
                              <option value="Three-Way Merge">Three-Way Merge</option>
                              <option value="Rebase">Rebase</option>
                              <option value="Fast-Forward">Fast-Forward</option>
