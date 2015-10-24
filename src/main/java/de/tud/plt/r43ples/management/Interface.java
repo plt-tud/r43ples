@@ -6,9 +6,6 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.merging.MergeManagement;
@@ -17,6 +14,7 @@ import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.control.FastForwardControl;
 import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import de.tud.plt.r43ples.webservice.Endpoint;
 
 public class Interface {
 
@@ -294,7 +292,7 @@ public class Interface {
 	
 	public static MergeResult sparqlThreeWayMerge(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
 		final Pattern patternMergeQuery =  Pattern.compile(
-				"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
+				"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(SDD\\s*<(?<sdd>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
 				patternModifier);
 		Matcher m = patternMergeQuery.matcher(sparqlQuery);
 		
@@ -304,7 +302,6 @@ public class Interface {
 		String action = m.group("action");
 		String graphName = m.group("graph");
 		String sdd = m.group("sdd");
-		String sddURI = m.group("sddURI");
 		String branchNameA = m.group("branchNameA").toLowerCase();
 		String branchNameB = m.group("branchNameB").toLowerCase();
 		String with = m.group("with");
@@ -316,7 +313,6 @@ public class Interface {
 		logger.debug("action: " + action);
 		logger.debug("graph: " + graphName);
 		logger.debug("sdd: " + sdd);
-		logger.debug("sddURI: " + sddURI);
 		logger.debug("branchNameA: " + branchNameA);
 		logger.debug("branchNameB: " + branchNameB);
 		logger.debug("with: " + with);
@@ -343,30 +339,7 @@ public class Interface {
 
 		
 		// Differ between MERGE query with specified SDD and without SDD			
-		String usedSDDURI = null;
-		if (sdd != null) {
-			// Specified SDD
-			usedSDDURI = sddURI;
-		} else {
-			// Default SDD
-			// Query the referenced SDD
-			String querySDD = String.format(
-					  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
-					+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> %n"
-					+ "SELECT ?defaultSDD %n"
-					+ "WHERE { GRAPH <%s> {	%n"
-					+ "	<%s> a rmo:Graph ;%n"
-					+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
-					+ "} }", Config.revision_graph, graphName);
-			
-			ResultSet resultSetSDD = TripleStoreInterfaceSingleton.get().executeSelectQuery(querySDD);
-			if (resultSetSDD.hasNext()) {
-				QuerySolution qs = resultSetSDD.next();
-				usedSDDURI = qs.getResource("?defaultSDD").toString();
-			} else {
-				throw new InternalErrorException("Error in revision graph! Selected graph <" + graphName + "> has no default SDD referenced.");
-			}
-		}
+		String usedSDDURI = Endpoint.getSDD(graphName, sdd);
 
 		// Get the common revision with shortest path
 		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionUriA, revisionUriB);

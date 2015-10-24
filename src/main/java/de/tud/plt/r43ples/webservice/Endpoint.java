@@ -101,13 +101,13 @@ public class Endpoint {
 			patternModifier);
 
 	private final Pattern patternMergeQuery =  Pattern.compile(
-			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
+			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(SDD\\s*<(?<sdd>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
 			patternModifier);
 	private final Pattern patternFastForwardQuery =  Pattern.compile(
 			"MERGE\\s*FF\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"",
 			patternModifier);
 	private final Pattern patternRebaseQuery =  Pattern.compile(
-			"REBASE\\s*(?<action>AUTO|MANUAL|FORCE)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
+			"REBASE\\s*(?<action>AUTO|MANUAL|FORCE)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(SDD\\s*<(?<sdd>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
 			patternModifier);
 
 	
@@ -1054,7 +1054,6 @@ public class Endpoint {
 		if (mresult.hasConflict) {
 			responseBuilder = Response.status(Response.Status.CONFLICT);
 			responseBuilder.entity(mresult.conflictModel);
-		
 		}
 		String graphNameHeader;
 		try {
@@ -1068,13 +1067,8 @@ public class Endpoint {
 		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(mresult.graph, mresult.branchA));
 		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(mresult.graph, mresult.branchB));			
 		
-		if (mresult.newRevisionNumber != null) {
-			// Respond with next revision number
-	    	responseBuilder.header(graphNameHeader + "-revision-number", mresult.newRevisionNumber);
-			responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(mresult.graph));
-			logger.debug("Respond with new revision number " + mresult.newRevisionNumber + ".");
-		}
-
+		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(sparqlQuery));	
+		
 		return responseBuilder.build();	
 	}
 	
@@ -1101,238 +1095,250 @@ public class Endpoint {
 		
 		Matcher m = patternRebaseQuery.matcher(sparqlQuery);
 		
-		boolean foundEntry = false;
-		while (m.find()) {
-			foundEntry = true;
-			String newRevisionNumber = null;
-			
-			String action = m.group("action");
-			String graphName = m.group("graph");
-			String sdd = m.group("sdd");
-			String sddURI = m.group("sddURI");
-			String branchNameA = m.group("branchNameA").toLowerCase();
-			String branchNameB = m.group("branchNameB").toLowerCase();
-			String with = m.group("with");
-			String triples = m.group("triples");
-			String type;
-			if(action ==null) {
-				type = "COMMON";
-			}else if (action.equalsIgnoreCase("AUTO")){
-				type = "AUTO";
-			}else if(action.equalsIgnoreCase("FORCE")){
-				type = "FORCE";
-			}else if(action.equalsIgnoreCase("MANUAL")){
-				type = "MANUAL";
-			}else {
-				throw new InternalErrorException("Error in SPARQL Merge Anfrage , type is not right.");
-			}
-			
-			MergingControl mergingControl;
-			RebaseControl rebaseControl;
+		if (!m.find()){
+			throw new InternalErrorException("Error in query: " + sparqlQuery);
+		}
+	
+		String action = m.group("action");
+		String graphName = m.group("graph");
+		String sdd = m.group("sdd");
+		String branchNameA = m.group("branchNameA").toLowerCase();
+		String branchNameB = m.group("branchNameB").toLowerCase();
+		String with = m.group("with");
+		String triples = m.group("triples");
+		String type;
+		if(action ==null) {
+			type = "COMMON";
+		}else if (action.equalsIgnoreCase("AUTO")){
+			type = "AUTO";
+		}else if(action.equalsIgnoreCase("FORCE")){
+			type = "FORCE";
+		}else if(action.equalsIgnoreCase("MANUAL")){
+			type = "MANUAL";
+		}else {
+			throw new InternalErrorException("Error in SPARQL Merge Anfrage , type is not right.");
+		}
 		
-			if(clientMap.containsKey(user) && (clientMap.get(user).containsKey(graphName))) {
-				mergingControl = clientMap.get(user).get(graphName);
-				rebaseControl = mergingControl.getRebaseControl();
-			}else{
-				mergingControl = new MergingControl();
-				mergingControl.setRebaseControl();
-				rebaseControl = mergingControl.getRebaseControl();
-				rebaseControl.createCommitModel(graphName, sdd, user, commitMessage, branchNameA, branchNameB, "Rebase", type);
-			}
-						
-			// get the last revision of each branch
-			String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
-			String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
-				
-			// Check if graph already exists
-			if (!RevisionManagement.checkGraphExistence(graphName)){
-				logger.error("Graph <"+graphName+"> does not exist.");
-				throw new InternalErrorException("Graph <"+graphName+"> does not exist.");
-			}
-				
-			// Check if A and B are different revisions
-			if (RevisionManagement.getRevisionNumber(graphName, branchNameA).equals(RevisionManagement.getRevisionNumber(graphName, branchNameB))) {
-				// Branches are equal - throw error
-				throw new InternalErrorException("Specified branches are equal: " + sparqlQuery);
-			}
+		MergingControl mergingControl;
+		RebaseControl rebaseControl;
+	
+		if(clientMap.containsKey(user) && (clientMap.get(user).containsKey(graphName))) {
+			mergingControl = clientMap.get(user).get(graphName);
+			rebaseControl = mergingControl.getRebaseControl();
+		}else{
+			mergingControl = new MergingControl();
+			mergingControl.setRebaseControl();
+			rebaseControl = mergingControl.getRebaseControl();
+			rebaseControl.createCommitModel(graphName, sdd, user, commitMessage, branchNameA, branchNameB, "Rebase", type);
+		}
+					
+		// get the last revision of each branch
+		String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
+		String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
 			
-			// Check if both are terminal nodes
-			if (!(RevisionManagement.isBranch(graphName, branchNameA) && RevisionManagement.isBranch(graphName, branchNameB))) {
-				throw new InternalErrorException("Non terminal nodes were used: " + sparqlQuery);
-			}
+		checkIfRebaseIsPossible(graphName, branchNameA, branchNameB);
 
-			// Differ between MERGE query with specified SDD and without SDD			
-			String usedSDDURI = null;
-			if (sdd != null) {
-				// Specified SDD
-				usedSDDURI = sddURI;
-			} else {
-				// Default SDD
-				// Query the referenced SDD
-				String querySDD = String.format(
-						  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
-						+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> %n"
-						+ "SELECT ?defaultSDD %n"
-						+ "WHERE { GRAPH <%s> {	%n"
-						+ "	<%s> a rmo:Graph ;%n"
-						+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
-						+ "} }", Config.revision_graph, graphName);
-				
-				ResultSet resultSetSDD = TripleStoreInterfaceSingleton.get().executeSelectQuery(querySDD);
-				if (resultSetSDD.hasNext()) {
-					QuerySolution qs = resultSetSDD.next();
-					usedSDDURI = qs.getResource("?defaultSDD").toString();
-				} else {
-					throw new InternalErrorException("Error in revision graph! Selected graph <" + graphName + "> has no default SDD referenced.");
-				}
-			}
+		// Differ between MERGE query with specified SDD and without SDD			
+		String usedSDDURI = getSDD(graphName, sdd);
 
-			// Get the common revision with shortest path
-			String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionUriA, revisionUriB);
+		// Get the common revision with shortest path
+		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionUriA, revisionUriB);
+		
+		
+		LinkedList<String> revisionList = MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA);
+		revisionList.remove(commonRevision);
+		 
+		Iterator<String> iter = revisionList.iterator();
+		while(iter.hasNext()) {
+			logger.info("revision--patch: " + iter.next().toString() );
+		}
+		 
+		// create the patch and patch group
+		rebaseControl.createPatchGroupOfBranch(revisionUriB, revisionList);
+		
+		
+		// transform the response to the rebase freundlich check process
+		String graphNameHeader;
+		try {
+			graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			graphNameHeader = graphName;
+		}
+		
+		// Return the revision number which were used (convert tag or branch identifier to revision number)
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(graphName, branchNameA));
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));	
+		
+		// transform the graph strategy to the httpheader
+		String graphStrategy = null;
+		try {
+			graphStrategy = URLEncoder.encode("merging-strategy-information", "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			graphStrategy = "merging-strategy-information";
+		}
+		
+		if((action!= null) && (action.equalsIgnoreCase("FORCE"))) {
+			rebaseControl.forceRebaseProcess(graphName);	
+			responseBuilder.header(graphStrategy, "force-rebase");
+			return responseBuilder.build();	
+		}
 			
+		// Create the revision progress for A and B
+		String graphNameA = graphName + "-RM-REVISION-PROGRESS-A";
+		String graphNameB = graphName + "-RM-REVISION-PROGRESS-B";
+		String graphNameDiff = graphName + "-RM-DIFFERENCE-MODEL";
+		String uriA = "http://eatld.et.tu-dresden.de/branch-A";
+		String uriB = "http://eatld.et.tu-dresden.de/branch-B";
+		
+		MergeManagement.createRevisionProgresses(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA), 
+				graphNameA, uriA, MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
+		
+		
+		// Create difference model
+		MergeManagement.createDifferenceTripleModel(graphName,  graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI);
+		
+		if ((action != null) && (action.equalsIgnoreCase("AUTO")) && (with == null) && (triples == null)) {
+			logger.info("AUTO REBASE query detected");
+			// Create the merged revision
+			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, RebaseQueryTypeEnum.AUTO, "");
+			String addedAsNTriples = addedAndRemovedTriples.get(0);
+			String removedAsNTriples = addedAndRemovedTriples.get(1);
 			
-			LinkedList<String> revisionList = MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA);
-			revisionList.remove(commonRevision);
-			 
-			Iterator<String> iter = revisionList.iterator();
-			while(iter.hasNext()) {
-				logger.info("revision--patch: " + iter.next().toString() );
-			}
-			 
-			// create the patch and patch group
-			rebaseControl.createPatchGroupOfBranch(revisionUriB, revisionList);
+			String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
+			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
+					user, commitMessage, basisRevisionNumber);
 			
-			
-			// transform the response to the rebase freundlich check process
-			String graphNameHeader;
-			try {
-				graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				graphNameHeader = graphName;
-			}
-			
-			// Return the revision number which were used (convert tag or branch identifier to revision number)
-			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(graphName, branchNameA));
-			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));	
-			
-			// transform the graph strategy to the httpheader
-			String graphStrategy = null;
-			try {
-				graphStrategy = URLEncoder.encode("merging-strategy-information", "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				graphStrategy = "merging-strategy-information";
-			}
- 			
-			if((action!= null) && (action.equalsIgnoreCase("FORCE"))) {
-				rebaseControl.forceRebaseProcess(graphName);	
-				responseBuilder.header(graphStrategy, "force-rebase");
-				return responseBuilder.build();	
-			}
-				
-			// Create the revision progress for A and B
-			String graphNameA = graphName + "-RM-REVISION-PROGRESS-A";
-			String graphNameB = graphName + "-RM-REVISION-PROGRESS-B";
-			String graphNameDiff = graphName + "-RM-DIFFERENCE-MODEL";
-			String uriA = "http://eatld.et.tu-dresden.de/branch-A";
-			String uriB = "http://eatld.et.tu-dresden.de/branch-B";
-			
-			MergeManagement.createRevisionProgresses(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA), 
-					graphNameA, uriA, MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
-			
-			
-			// Create difference model
-			MergeManagement.createDifferenceTripleModel(graphName,  graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI);
-			
-			if ((action != null) && (action.equalsIgnoreCase("AUTO")) && (with == null) && (triples == null)) {
-				logger.info("AUTO REBASE query detected");
-				// Create the merged revision
-				ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, RebaseQueryTypeEnum.AUTO, "");
-				String addedAsNTriples = addedAndRemovedTriples.get(0);
-				String removedAsNTriples = addedAndRemovedTriples.get(1);
-				
-				String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
-				newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
-						user, commitMessage, basisRevisionNumber);
-				
-				responseBuilder.header(graphStrategy, "auto-rebase");
-									
-			} else if ((action != null) && (action.equalsIgnoreCase("MANUAL")) && (with != null) && (triples != null)) {
-				logger.info("MANUAL REBASE query detected");
-				// Create the merged revision
-				ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, RebaseQueryTypeEnum.MANUAL, triples);
-				String addedAsNTriples = addedAndRemovedTriples.get(0);
-				String removedAsNTriples = addedAndRemovedTriples.get(1);
-				
-				String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
-				newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
-						user, commitMessage, basisRevisionNumber);
-				
-				responseBuilder.header(graphStrategy, "manual-rebase");
-				
-			} else if ((action == null) && (with != null) && (triples != null)) {
-				logger.info("REBASE WITH query detected");
-				// Create the merged revision -- newTriples
-				ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, RebaseQueryTypeEnum.WITH, triples);
-				String addedAsNTriples = addedAndRemovedTriples.get(0);
-				String removedAsNTriples = addedAndRemovedTriples.get(1);
-				
-				String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
-				newRevisionNumber = RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
-						user, commitMessage, basisRevisionNumber);
-				
-				responseBuilder.header(graphStrategy, "with-rebase");
-							
-			} else if ((action == null) && (with == null) && (triples == null)) {
-				
-				//get the difference Model String 
-				String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, "text/turtle");
-				boolean isRebaseFreundlich = rebaseControl.checkRebaseFreundlichkeit(differenceModelString, graphName, branchNameA, branchNameB, "TURTLE");
+			responseBuilder.header(graphStrategy, "auto-rebase");
 								
-				
-				// Check if difference model contains conflicts
-				String queryASK = String.format(
-						  "ASK { %n"
-						+ "	GRAPH <%s> { %n"
-						+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
-						+ "	} %n"
-						+ "}", graphNameDiff);
-				if (TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK)) {
-					// Difference model contains conflicts
-					// Return the conflict model to the client
-					logger.info("rebase conflict");
-					responseBuilder = Response.status(Response.Status.CONFLICT);
+		} else if ((action != null) && (action.equalsIgnoreCase("MANUAL")) && (with != null) && (triples != null)) {
+			logger.info("MANUAL REBASE query detected");
+			// Create the merged revision
+			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, RebaseQueryTypeEnum.MANUAL, triples);
+			String addedAsNTriples = addedAndRemovedTriples.get(0);
+			String removedAsNTriples = addedAndRemovedTriples.get(1);
+			
+			String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
+			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
+					user, commitMessage, basisRevisionNumber);
+			
+			responseBuilder.header(graphStrategy, "manual-rebase");
+			
+		} else if ((action == null) && (with != null) && (triples != null)) {
+			logger.info("REBASE WITH query detected");
+			// Create the merged revision -- newTriples
+			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, RebaseQueryTypeEnum.WITH, triples);
+			String addedAsNTriples = addedAndRemovedTriples.get(0);
+			String removedAsNTriples = addedAndRemovedTriples.get(1);
+			
+			String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
+			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
+					user, commitMessage, basisRevisionNumber);
+			
+			responseBuilder.header(graphStrategy, "with-rebase");
+						
+		} else if ((action == null) && (with == null) && (triples == null)) {
+			
+			//get the difference Model String 
+			String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, "text/turtle");
+			boolean isRebaseFreundlich = rebaseControl.checkRebaseFreundlichkeit(differenceModelString, graphName, branchNameA, branchNameB, "TURTLE");
+							
+			
+			// Check if difference model contains conflicts
+			String queryASK = String.format(
+					  "ASK { %n"
+					+ "	GRAPH <%s> { %n"
+					+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
+					+ "	} %n"
+					+ "}", graphNameDiff);
+			if (TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK)) {
+				// Difference model contains conflicts
+				// Return the conflict model to the client
+				logger.info("rebase conflict");
+				responseBuilder = Response.status(Response.Status.CONFLICT);
+				responseBuilder.header(graphStrategy, "rebase-unfreundlich");
+				// write the difference model in the response builder
+				responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
+			} else{
+				if(isRebaseFreundlich) {
+					// rebase freundlich force rebase
+					rebaseControl.forceRebaseProcess(graphName);
+					responseBuilder.header(graphStrategy, "rebase-freundlich");
+				}else{
 					responseBuilder.header(graphStrategy, "rebase-unfreundlich");
 					// write the difference model in the response builder
-					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
-				} else{
-					if(isRebaseFreundlich) {
-						// rebase freundlich force rebase
-						rebaseControl.forceRebaseProcess(graphName);
-						responseBuilder.header(graphStrategy, "rebase-freundlich");
-					}else{
-						responseBuilder.header(graphStrategy, "rebase-unfreundlich");
-						// write the difference model in the response builder
-						responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));				
-					}
+					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));				
 				}
-						
-			} else {
-				throw new InternalErrorException("This is not a valid MERGE query: " + sparqlQuery);
-			}				
-		
-			if (newRevisionNumber != null) {
-				// Respond with next revision number
-		    	responseBuilder.header(graphNameHeader + "-revision-number", newRevisionNumber);
-				responseBuilder.header(graphNameHeader + "-revision-number-of-MASTER", RevisionManagement.getMasterRevisionNumber(graphName));
-				logger.debug("Respond with new revision number " + newRevisionNumber + ".");
-			}	
-		}			
-		if (!foundEntry){
-			throw new InternalErrorException("Error in query: " + sparqlQuery);
-		}			
+			}
+					
+		} else {
+			throw new InternalErrorException("This is not a valid MERGE query: " + sparqlQuery);
+		}				
+	
+		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(sparqlQuery));	
+				
 		return responseBuilder.build();			
+	}
+
+	/**
+	 * @param graphName
+	 * @param sdd
+	 * @param sddURI
+	 * @return
+	 * @throws InternalErrorException
+	 */
+	public static String getSDD(String graphName, String sdd)
+			throws InternalErrorException {
+		if (sdd != null && sdd != "") {
+			// Specified SDD
+			return sdd;
+		} else {
+			// Default SDD
+			// Query the referenced SDD
+			String querySDD = String.format(
+					  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
+					+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> %n"
+					+ "SELECT ?defaultSDD %n"
+					+ "WHERE { GRAPH <%s> {	%n"
+					+ "	<%s> a rmo:Graph ;%n"
+					+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
+					+ "} }", Config.revision_graph, graphName);
+			
+			ResultSet resultSetSDD = TripleStoreInterfaceSingleton.get().executeSelectQuery(querySDD);
+			if (resultSetSDD.hasNext()) {
+				QuerySolution qs = resultSetSDD.next();
+				return qs.getResource("?defaultSDD").toString();
+			} else {
+				throw new InternalErrorException("Error in revision graph! Selected graph <" + graphName + "> has no default SDD referenced.");
+			}
+		}
+	}
+
+	/** simple checks if rebase could be possible for these two branches of a graph
+	 * @param graphName
+	 * @param branchNameA
+	 * @param branchNameB
+	 * @throws InternalErrorException throws an error if it is not possible
+	 */
+	private void checkIfRebaseIsPossible(String graphName, String branchNameA,
+			String branchNameB) throws InternalErrorException {
+		// Check if graph already exists
+		if (!RevisionManagement.checkGraphExistence(graphName)){
+			logger.error("Graph <"+graphName+"> does not exist.");
+			throw new InternalErrorException("Graph <"+graphName+"> does not exist.");
+		}
+			
+		// Check if A and B are different revisions
+		if (RevisionManagement.getRevisionNumber(graphName, branchNameA).equals(RevisionManagement.getRevisionNumber(graphName, branchNameB))) {
+			// Branches are equal - throw error
+			throw new InternalErrorException("Specified branches are equal");
+		}
+		
+		// Check if both are terminal nodes
+		if (!(RevisionManagement.isBranch(graphName, branchNameA) && RevisionManagement.isBranch(graphName, branchNameB))) {
+			throw new InternalErrorException("Non terminal nodes were used ");
+		}
 	}
 	
 }
