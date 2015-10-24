@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd data
+
 # ontology
 wget http://downloads.dbpedia.org/3.9/dbpedia_3.9.owl.bz2
 

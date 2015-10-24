@@ -1,15 +1,22 @@
 #/bin/bash
 
-P=/media/mgraube/CV_IE_VMs1/dbpedia/
+# Add dpbedia data to Stardog
+# Take care to go to data directory beforehand
+
+$DATA_DIRECTORY=data
+GRAPH=http://dbpedia.org
+
+
+# create database and add compressed data
+stardog-admin db create -n dbpedia -v --named-graph $GRAPH $DATA_DIRECTORY/dbpedia_2013_07_18.nt.bz2
 
 # add ontology data
-# stardog data add dbpedia -v --named-graph http://dbpedia.org $P/2015_06_18/dbpedia_2014.owl.bz2
+stardog data add dbpedia -v --named-graph $GRAPH $DATA_DIRECTORY/dbpedia_2014.owl.bz2
+
+stardog data add dbpedia -v --named-graph $GRAPH $DATA_DIRECTORY/2015_06_18/instance_types_en.nt.bz2
 
 
-# stardog data add dbpedia -v --named-graph http://dbpedia.org $P/2015_06_18/instance_types_en.nt.bz2
 
-
-# stardog data add dbpedia -v --named-graph http://dbpedia.org $P/dbpedia_2013_07_18.nt.bz2
 
 CONFIG_STARDOG="../../../r43ples.stardog.dbpedia.conf"
 
@@ -18,7 +25,6 @@ CONFIG=$CONFIG_STARDOG
 cd ../../
 JAR=../../../target/r43ples-console-client-jar-with-dependencies.jar
 
-GRAPH=http://dbpedia.org
 
 
 java -jar $JAR --config $CONFIG --new --graph $GRAPH
