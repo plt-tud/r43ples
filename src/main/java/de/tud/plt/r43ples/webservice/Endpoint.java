@@ -501,7 +501,7 @@ public class Endpoint {
 	}	
 	
 	/**
-	 * by rebase unfreundlich, select the force rebase process
+	 * select the force rebase process
 	 * @throws InternalErrorException 
 	 */
 	@Path("forceRebaseProcess")
@@ -519,7 +519,7 @@ public class Endpoint {
 	}	
 	
 	/**
-	 * by rebase unfreundlich, select the manuell rebase process
+	 * select the manual rebase process
 	 * @throws InternalErrorException 
 	 */
 	@Path("manualRebaseProcess")
@@ -1208,12 +1208,6 @@ public class Endpoint {
 			responseBuilder.header(graphStrategy, "with-rebase");
 						
 		} else if ((action == null) && (with == null) && (triples == null)) {
-			
-			//get the difference Model String 
-			String differenceModelString = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, "text/turtle");
-			boolean isRebaseFreundlich = rebaseControl.checkRebaseFreundlichkeit(differenceModelString, graphName, branchNameA, branchNameB, "TURTLE");
-							
-			
 			// Check if difference model contains conflicts
 			String queryASK = String.format(
 					  "ASK { %n"
@@ -1230,15 +1224,8 @@ public class Endpoint {
 				// write the difference model in the response builder
 				responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
 			} else{
-				if(isRebaseFreundlich) {
-					// rebase freundlich force rebase
-					rebaseControl.forceRebaseProcess(graphName);
-					responseBuilder.header(graphStrategy, "rebase-freundlich");
-				}else{
-					responseBuilder.header(graphStrategy, "rebase-unfreundlich");
-					// write the difference model in the response builder
-					responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));				
-				}
+				rebaseControl.forceRebaseProcess(graphName);	
+				responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));				
 			}
 					
 		} else {

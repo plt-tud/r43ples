@@ -20,14 +20,8 @@ import org.apache.log4j.Logger;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.rdf.model.Model;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.JenaModelManagement;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.ResolutionStateEnum;
 import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
@@ -39,7 +33,6 @@ import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
 import de.tud.plt.r43ples.merging.model.structure.Patch;
 import de.tud.plt.r43ples.merging.model.structure.PatchGroup;
-import de.tud.plt.r43ples.merging.model.structure.Triple;
 
 public class RebaseControl {
 	private static Logger logger = Logger.getLogger(RebaseControl.class);
@@ -273,142 +266,9 @@ public class RebaseControl {
 	}
 	
 
+
 	
-	/** rebase process beginn, read the difference model and check the freundlichkeit of Rebase
-	 * @param differGraphModel	string of difference model for this rebase
-	 * @param graphName	name of the graph to be rebased
-	 * @param branchNameA name of branch A
-	 * @param branchNameB name of branch B
-	 * @param format rdf serialisation format of differGraphModel
-	 * @throws InternalErrorException */
-	public boolean checkRebaseFreundlichkeit( String differGraphModel, String graphName, String branchNameA, String branchNameB, String format) throws InternalErrorException{
-				
-		this.differenceGraphModel = differGraphModel;
-		boolean isRebaseFreundlich = true;
 	
-		
-		logger.info("difference graph Model by check unfreundlich:" + differenceGraphModel);
-		ProcessManagement.readDifferenceModel(differenceGraphModel, differenceModel);
-		
-		//get difference group
-		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
-//		isRebaseFreundlich = true;
-		while(iterDM.hasNext()){
-			Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterDM.next();
-			DifferenceGroup differenceGroup = (DifferenceGroup) entryDG.getValue();
-			
-			
-			SDDTripleStateEnum tripleStateInBranchA = differenceGroup.getTripleStateA();
-			SDDTripleStateEnum tripleStateInBranchB = differenceGroup.getTripleStateB();
-			SDDTripleStateEnum automaticResolutionState = differenceGroup.getAutomaticResolutionState();
-			
-			// folgend 4 condition for the rebase freundlichkeit
-			if(tripleStateInBranchA == SDDTripleStateEnum.ADDED && automaticResolutionState == SDDTripleStateEnum.DELETED) {
-				isRebaseFreundlich = false;
-			}
-			
-			if(tripleStateInBranchA == SDDTripleStateEnum.DELETED && automaticResolutionState == SDDTripleStateEnum.ADDED) {
-				isRebaseFreundlich = false;
-			}
-			
-			if(tripleStateInBranchA == SDDTripleStateEnum.NOTINCLUDED &&tripleStateInBranchB == SDDTripleStateEnum.ADDED 
-					&& automaticResolutionState == SDDTripleStateEnum.DELETED){
-				isRebaseFreundlich = false;
-			}
-			
-			if(tripleStateInBranchA == SDDTripleStateEnum.ORIGINAL &&tripleStateInBranchB == SDDTripleStateEnum.DELETED 
-					&& automaticResolutionState == SDDTripleStateEnum.ADDED){
-				isRebaseFreundlich = false;
-			}		
-			
-		}
-		logger.info("check rebase freundlich: " + isRebaseFreundlich);
-		return isRebaseFreundlich;
-				
-	}
-	
-	/**get die triples, die rebase unfreundlich ausloesen
-	 * @throws IOException */
-	public ArrayList<Triple> getRebaseUnfreundlichbehaftetTriples(String differGraphModel, String format) throws IOException{
-		ArrayList<Triple> tripleList = new ArrayList<Triple>();
-		
-		ProcessManagement.readDifferenceModel(differGraphModel, differenceModel);
-		
-		//get difference group
-		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
-		
-		while(iterDM.hasNext()){
-			Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterDM.next();
-			DifferenceGroup differenceGroup = (DifferenceGroup) entryDG.getValue();
-			
-			
-			SDDTripleStateEnum tripleStateInBranchA = differenceGroup.getTripleStateA();
-			SDDTripleStateEnum tripleStateInBranchB = differenceGroup.getTripleStateB();
-			SDDTripleStateEnum automaticResolutionState = differenceGroup.getAutomaticResolutionState();
-			
-			// folgend 4 condition for the rebase freundlichkeit
-			if((tripleStateInBranchA == SDDTripleStateEnum.ADDED && automaticResolutionState == SDDTripleStateEnum.DELETED) || 
-					(tripleStateInBranchA == SDDTripleStateEnum.DELETED && automaticResolutionState == SDDTripleStateEnum.ADDED)||
-					(tripleStateInBranchA == SDDTripleStateEnum.NOTINCLUDED &&tripleStateInBranchB == SDDTripleStateEnum.ADDED 
-					&& automaticResolutionState == SDDTripleStateEnum.DELETED) ||
-					(tripleStateInBranchA == SDDTripleStateEnum.ORIGINAL &&tripleStateInBranchB == SDDTripleStateEnum.DELETED 
-					&& automaticResolutionState == SDDTripleStateEnum.ADDED)) {
-				
-				Iterator<Entry<String, Difference>> differIter = differenceGroup.getDifferences().entrySet().iterator();
-				while(differIter.hasNext()){
-					Entry<String, Difference> differ = differIter.next();
-					Triple triple = differ.getValue().getTriple();
-					
-					tripleList.add(triple);
-					
-				}		
-			}						
-		}
-		
-		return tripleList;
-		
-	}
-	
-	/**get the right triples in with set
-	 * @throws IOException */
-	
-	public String filterUnfreundlichTriples(String differGraphModel, String triples, String format) throws IOException {
-		ArrayList<Triple> unfreundlichTripleList = getRebaseUnfreundlichbehaftetTriples(differGraphModel, format);
-		
-		// MERGE WITH query - conflicting triple
-		Model model = JenaModelManagement.readNTripleStringToJenaModel(triples);
-		
-		//create new Triples, die rebase unfreundlich sind.
-		String newTriples = "";
-		
-		Iterator<Triple> tripleIter = unfreundlichTripleList.iterator();
-		while (tripleIter.hasNext()) {
-			Triple triple = tripleIter.next();
-			String subject = ProcessManagement.getSubject(triple);
-			String object = ProcessManagement.getObject(triple);
-			String predicate = ProcessManagement.getPredicate(triple);
-					
-			
-			logger.info("rebase unfreundlich spo: " + subject + object + predicate);
-			// Create ASK query which will check if the model contains the specified triple
-			String queryAsk = String.format(
-					  "ASK { %n"
-					+ " %s %s %s %n"
-					+ "}", subject, predicate, object);
-			Query query = QueryFactory.create(queryAsk);
-			QueryExecution qe = QueryExecutionFactory.create(query, model);
-			boolean resultAsk = qe.execAsk();
-			qe.close();
-			model.close();
-			if (resultAsk) {
-				// Model contains the specified triple
-				// Triple should be added
-				newTriples += subject + " " + predicate + " " + object + " . \n";
-			} 		
-		}
-		
-		return newTriples;
-	}
 	
 	
 	
