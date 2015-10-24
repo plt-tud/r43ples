@@ -8,7 +8,6 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -412,22 +411,6 @@ public class Endpoint {
 				logger.debug("rebase response status: "+responsePost.getStatusInfo().toString());	
 				logger.debug("rebase response Header: "+responsePost.getHeaders().get("merging-strategy-information").get(0).toString());	
 				logger.debug("rebase response Header: "+responsePost.getHeaders().keySet().toString());	
-			}
-			
-			if((responsePost.getHeaders().get("merging-strategy-information").get(0).toString().equals("rebase-unfreundlich"))) {
-				// to do show force rebase html view , show the rebase result graph
-				//RebaseControl.forceRebaseProcess(graphName);
-				
-				//boolean isRebaeFreundlich = RebaseControl.checkRebaseFreundlichkeit(responsePost, graphName, branch1, branch2);
-				
-				// to do manual arbeit
-				logger.debug("rebase unfreundlich !");
-				
-				response.entity(rebaseControl.showRebaseDialogView());
-				
-				return response.build();
-			}else{
-				logger.debug("sparql query is force rebase! ");	
 			}
 
 			String rebaseResultView = rebaseControl.getRebaseReportView(graphName);
@@ -1144,16 +1127,9 @@ public class Endpoint {
 		// Get the common revision with shortest path
 		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionUriA, revisionUriB);
 		
-		
-		LinkedList<String> revisionList = MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA);
-		revisionList.remove(commonRevision);
-		 
-		Iterator<String> iter = revisionList.iterator();
-		while(iter.hasNext()) {
-			logger.info("revision--patch: " + iter.next().toString() );
-		}
 		 
 		// create the patch and patch group
+		LinkedList<String> revisionList = MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA);
 		rebaseControl.createPatchGroupOfBranch(revisionUriB, revisionList);
 		
 		
@@ -1170,14 +1146,8 @@ public class Endpoint {
 		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(graphName, branchNameA));
 		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));	
 		
-		// transform the graph strategy to the httpheader
-		String graphStrategy = null;
-		try {
-			graphStrategy = URLEncoder.encode("merging-strategy-information", "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			graphStrategy = "merging-strategy-information";
-		}
+		
+		String graphStrategy = "merging-strategy-information";
 		
 		if((action!= null) && (action.equalsIgnoreCase("FORCE"))) {
 			rebaseControl.forceRebaseProcess(graphName);	
@@ -1198,7 +1168,6 @@ public class Endpoint {
 		
 		// Create difference model
 		MergeManagement.createDifferenceTripleModel(graphName,  graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI);
-		
 		if ((action != null) && (action.equalsIgnoreCase("AUTO")) && (with == null) && (triples == null)) {
 			logger.info("AUTO REBASE query detected");
 			// Create the merged revision
