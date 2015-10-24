@@ -340,13 +340,13 @@ public class Endpoint {
 	@Path("mergingProcess")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response mergingPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("optradio") final String model, 
+	public final Response mergingPOST(
 			@FormParam("graph") @DefaultValue("") final String graphName,
 			@FormParam("sdd") final String sddName,
 			@FormParam("strategy") final String strategy,
-			@FormParam("Branch1") final String branch1,
-			@FormParam("Branch2") final String branch2,
+			@FormParam("method") final String method,
+			@FormParam("branch1") final String branch1,
+			@FormParam("branch2") final String branch2,
 			@FormParam("user") @DefaultValue("") final String user,
 			@FormParam("message") @DefaultValue("") final String message) throws InternalErrorException {
 			
@@ -363,9 +363,9 @@ public class Endpoint {
 		// Rebase
 		else if(strategy.equals("Rebase")){
 			RebaseQueryTypeEnum type = null;			
-			if (model.equals("auto")) {
+			if (method.equals("auto")) {
 				type = RebaseQueryTypeEnum.AUTO;
-			} else if(model.equals("common")){
+			} else if(method.equals("common")){
 				type = RebaseQueryTypeEnum.COMMON;
 			} else{
 				type = RebaseQueryTypeEnum.MANUAL;
@@ -438,9 +438,9 @@ public class Endpoint {
 		else {
 			Response responsePost = null;
 			MergeQueryTypeEnum type = null;
-			if (model.equals("auto")) {
+			if (method.equals("auto")) {
 				type = MergeQueryTypeEnum.AUTO;
-			} else if (model.equals("common")) {
+			} else if (method.equals("common")) {
 				type = MergeQueryTypeEnum.COMMON;
 			} else {
 				type = MergeQueryTypeEnum.MANUAL;
