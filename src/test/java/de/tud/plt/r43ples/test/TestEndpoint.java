@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -72,6 +74,18 @@ public class TestEndpoint extends JerseyTest {
 				+ "WHERE { ?s ?p ?o. }"
 				+ "ORDER BY ?s ?p ?o", dsm.graphName);
 		String result = target("sparql").queryParam("query", URLEncoder.encode(query, "UTF-8")).queryParam("format", format).request().get(String.class);
+		String expected = ResourceManagement.getContentFromResource("response-1.1-3.xml");
+		assertXMLEqual(expected, result);
+	}
+	
+	@Test
+	public void testPOSTDirect() throws SAXException, IOException {
+		String query = String.format(""
+				+ "SELECT * FROM <%s> REVISION \"B2\" "
+				+ "WHERE { ?s ?p ?o. }"
+				+ "ORDER BY ?s ?p ?o", dsm.graphName);
+		Response response = target("sparql").request(format).post(Entity.entity(query, "application/sparql-query"));
+		String result = response.readEntity(String.class);
 		String expected = ResourceManagement.getContentFromResource("response-1.1-3.xml");
 		assertXMLEqual(expected, result);
 	}
