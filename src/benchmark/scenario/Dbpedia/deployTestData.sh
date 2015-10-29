@@ -2,10 +2,14 @@
 
 # Add dpbedia data to Stardog
 # Take care to go to data directory beforehand
+# Take care to configuer and epxort STARDOG_HOME and put Stardog binaries on PATH
 
-$DATA_DIRECTORY=data
-GRAPH=http://dbpedia.org
 
+DATA_DIRECTORY=data
+GRAPH="http://dbpedia.org"
+
+
+stardog-admin server start
 
 # create database and add compressed data
 stardog-admin db create -n dbpedia -v --named-graph $GRAPH $DATA_DIRECTORY/dbpedia_2013_07_18.nt.bz2
