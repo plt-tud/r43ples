@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -234,6 +235,7 @@ public class Endpoint {
 	@Path("sparql")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
 			@FormParam("format") final String formatQuery, 
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
@@ -241,6 +243,27 @@ public class Endpoint {
 		String format = (formatQuery != null) ? formatQuery : formatHeader;
 		logger.debug("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
 		return sparql(format, sparqlQuery, query_rewriting);
+	}
+	
+	/**
+	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * Direct method (http://www.w3.org/TR/2013/REC-sparql11-protocol-20130321/#query-via-post-direct)
+	 * 
+	 * @param formatHeader
+	 *            format specified in the HTTP header
+	 * @param sparqlQuery
+	 *            the SPARQL query specified in the HTTP POST body
+	 * @return HTTP response
+	 * @throws InternalErrorException 
+	 */
+	@Path("sparql")
+	@POST
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	@Consumes("application/sparql-query")
+	public final Response sparqlPOSTdirectly(@HeaderParam("Accept") final String formatHeader,
+			final String sparqlQuery) throws InternalErrorException {
+		logger.debug("SPARQL POST query directly (format: "+formatHeader+", query: "+sparqlQuery +")");
+		return sparql(formatHeader, sparqlQuery);
 	}
 		
 	
