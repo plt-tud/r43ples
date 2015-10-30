@@ -92,7 +92,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
             value.label = trimRevisionNumber(revisions[revision].revisionNumber);
             value.height = 25;
             value.shape = "circle";
-            value.style = "stroke:" + branches[revisions[revision].revisionOfBranch].color + ";";
+            value.style = "stroke:" + branches[revisions[revision].belongsTo].color + ";";
             g.setNode(revision, value);
         });
 
@@ -103,10 +103,10 @@ function drawGraph(div_selector, _JSON, _showTags) {
                 // Falls der Commit nur von einer Revision stammt
                 if (commits[commit].used.length == 1) {
                     // Wird als Farbe fÃ¼r die Kante die Revision genommen, die der Commit erzeugt hat
-                    color = branches[revisions[commits[commit].generated].revisionOfBranch].color;
+                    color = branches[revisions[commits[commit].generated].belongsTo].color;
                 } else {
                     // Ansonsten die Farbe der Ursprungsrevision
-                    color = branches[revisions[commits[commit].used[i]].revisionOfBranch].color;
+                    color = branches[revisions[commits[commit].used[i]].belongsTo].color;
                 }
                 g.setEdge(commits[commit].used[i], commits[commit].generated, {
                     style: "stroke:" + color + ";fill:none;",
@@ -175,7 +175,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
                         revisions[key].addSet = value["http://eatld.et.tu-dresden.de/rmo#addSet"][0].value;
                         revisions[key].revisionNumber = value["http://eatld.et.tu-dresden.de/rmo#revisionNumber"][0].value;
                         revisions[key].revisionOf = value["http://eatld.et.tu-dresden.de/rmo#revisionOf"][0].value;
-                        revisions[key].revisionOfBranch = value["http://eatld.et.tu-dresden.de/rmo#revisionOfBranch"][0].value;
+                        revisions[key].belongsTo = value["http://eatld.et.tu-dresden.de/rmo#belongsTo"][0].value;
                         break;
                     // Falls Branch
                     case "http://eatld.et.tu-dresden.de/rmo#Branch":
@@ -241,7 +241,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	     var tooltip = "<h1>Revision " + node.revisionNumber + "</h1>" +
 	         "<table class='properties'>" +
 	         "<tr><td>Number:</td><td>" + node.revisionNumber + "</td><td></td></tr>" +
-	         "<tr><td>Branch:</td><td>" + branches[node.revisionOfBranch].label + "</td><td><a href='" + node.revisionOfBranch + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+	         "<tr><td>Branch:</td><td>" + branches[node.belongsTo].label + "</td><td><a href='" + node.belongsTo + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
 	         "<tr><td>Revised graph:</td><td>" + node.revisionOf + "</td><td><a href='" + node.revisionOf + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
 	         "<tr><td>URL:</td><td>" + name + "</td><td></td></tr>" +
 	         "<tr><td>Add Set:</td><td>" + node.addSet + "</td><td><a href='" + node.addSet + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +

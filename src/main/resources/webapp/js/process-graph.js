@@ -317,7 +317,7 @@ var drawGraph = function (_JSON, _showBranches, _showTags) {
                         // ID der eigentlichen Daten setzen
                         revisions[key].revisionOf = value["http://eatld.et.tu-dresden.de/rmo#revisionOf"][0].value;
                         // ID des Branches setzen, zu dem die Revision gehört
-                        revisions[key].revisionOfBranch = value["http://eatld.et.tu-dresden.de/rmo#revisionOfBranch"][0].value;
+                        revisions[key].belongsTo = value["http://eatld.et.tu-dresden.de/rmo#belongsTo"][0].value;
                         break;
                     // Falls Branch
                     case "http://eatld.et.tu-dresden.de/rmo#Branch":
@@ -402,16 +402,16 @@ var drawGraph = function (_JSON, _showBranches, _showTags) {
             }
             
             // Falls die Revision am Kopf des Branches steht
-            if (branches[revisions[revision].revisionOfBranch].head == revision) {
+            if (branches[revisions[revision].belongsTo].head == revision) {
               // Wird der Kreis komplett in der Branchfarbe gefüllt
-            	version_head = branches[revisions[revision].revisionOfBranch].label+": ";
-                value.style = "fill:" + branches[revisions[revision].revisionOfBranch].color + ";stroke:none;";
+            	version_head = branches[revisions[revision].belongsTo].label+": ";
+                value.style = "fill:" + branches[revisions[revision].belongsTo].color + ";stroke:none;";
 
             	
             } else {
                 // Sonst erhält er nur einen Rand in Branchfarbe
             	version_head = "version: ";
-            	value.style = "stroke:" + branches[revisions[revision].revisionOfBranch].color + ";";
+            	value.style = "stroke:" + branches[revisions[revision].belongsTo].color + ";";
             }
             
             
@@ -434,10 +434,10 @@ var drawGraph = function (_JSON, _showBranches, _showTags) {
                 // Falls der Commit nur von einer Revision stammt
                 if (commits[commit].used.length == 1) {
                     // Wird als Farbe für die Kante die Revision genommen, die der Commit erzeugt hat
-                    color = branches[revisions[commits[commit].generated].revisionOfBranch].color;
+                    color = branches[revisions[commits[commit].generated].belongsTo].color;
                 } else {
                     // Ansonsten die Farbe der Ursprungsrevision
-                    color = branches[revisions[commits[commit].used[i]].revisionOfBranch].color;
+                    color = branches[revisions[commits[commit].used[i]].belongsTo].color;
                 }
                 // Kante von der Ursprungsrevision zur Revision, die der Commit erzeugt hat, erzeugen
                 g.setEdge(commits[commit].generated, commits[commit].used[i], {

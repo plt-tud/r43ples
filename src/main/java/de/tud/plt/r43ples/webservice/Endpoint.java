@@ -1148,7 +1148,7 @@ public class Endpoint {
 		String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
 		
 		StrategyManagement.moveBranchReference(branchUriB, revisionUriB, revisionUriA);
-		StrategyManagement.updateRevisionOfBranch(branchUriB, revisionUriB, revisionUriA);	
+		StrategyManagement.updatebelongsTo(branchUriB, revisionUriB, revisionUriA);	
 		StrategyManagement.fullGraphCopy(fullGraphUriA, fullGraphUriB);
 		return true;
 	}

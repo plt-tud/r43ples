@@ -63,7 +63,7 @@ public class RevisionManagement {
 				  "<%s> a rmo:Revision;"
 				+ "	rmo:revisionOf <%s>;"
 				+ "	rmo:revisionNumber \"%s\";"
-				+ "	rmo:revisionOfBranch <%s>. "
+				+ "	rmo:belongsTo <%s>. "
 				,  revisionUri, graphName, revisionNumber, graphName + "-master");
 		
 		// Add MASTER branch		
@@ -333,7 +333,7 @@ public class RevisionManagement {
 				+ "	rmo:addSet <%s> ; %n"
 				+ "	rmo:deleteSet <%s> ; %n"
 				+ "	rmo:revisionNumber \"%s\" ; %n"
-				+ "	rmo:revisionOfBranch <%s> . %n"
+				+ "	rmo:belongsTo <%s> . %n"
 				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, newRevisionNumber, branchUri));
 		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
 			String revUri = getRevisionUri(graphName, iterator.next());

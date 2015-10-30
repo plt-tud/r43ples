@@ -72,13 +72,13 @@ public class StrategyManagement {
 	 * @param uri of last revision of branch B
 	 * @param uri of last revision of branch A
 	 * */
-	public static void updateRevisionOfBranch(String branchUriB, String revisionUriB, String revisionUriA ){
+	public static void updatebelongsTo(String branchUriB, String revisionUriB, String revisionUriA ){
 		LinkedList<String> revisionList =  MergeManagement.getPathBetweenStartAndTargetRevision(revisionUriB, revisionUriA);
 		
 		Iterator<String> riter = revisionList.iterator();
 		while(riter.hasNext()) {
 			String revision = riter.next();
-			String query = prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:revisionOfBranch <%s>. } };%n",
+			String query = prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:belongsTo <%s>. } };%n",
 					Config.revision_graph, revision, branchUriB);
 			
 			logger.debug("revisionlist info" + revision);
