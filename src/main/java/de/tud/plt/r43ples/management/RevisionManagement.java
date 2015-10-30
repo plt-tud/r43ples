@@ -56,35 +56,29 @@ public class RevisionManagement {
 		logger.info("Put existing graph under version control with the name " + graphName);
 
 		String revisionNumber = getNextRevisionNumber(graphName);
-		
-		
 		String revisionUri = graphName + "-revision-" + revisionNumber;
-		String addSetGraphUri = graphName + "-delta-added-" + revisionNumber;
-		String removeSetGraphUri = graphName + "-delta-removed-" + revisionNumber;
 
 		// Create new revision
 		String queryContent = String.format(
-				  "<%s> a rmo:Revision ; %n"
-				+ "	rmo:revisionOf <%s> ; %n"
-				+ "	rmo:deltaAdded <%s> ; %n"
-				+ "	rmo:deltaRemoved <%s> ; %n"
-				+ "	rmo:revisionNumber \"%s\" ; %n"
-				+ "	rmo:revisionOfBranch <%s> . %n"
-				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, revisionNumber, graphName + "-master");
+				  "<%s> a rmo:Revision;"
+				+ "	rmo:revisionOf <%s>;"
+				+ "	rmo:revisionNumber \"%s\";"
+				+ "	rmo:revisionOfBranch <%s>. "
+				,  revisionUri, graphName, revisionNumber, graphName + "-master");
 		
 		// Add MASTER branch		
 		queryContent += String.format(
-				"<%s> a rmo:Master, rmo:Branch, rmo:Reference;%n"
-				+ " rmo:fullGraph <%s>;%n"
-				+ "	rmo:references <%s>;%n"
-				+ "	rdfs:label \"master\".%n",
+				"<%s> a rmo:Master, rmo:Branch, rmo:Reference;"
+				+ " rmo:fullGraph <%s>;"
+				+ "	rmo:references <%s>;"
+				+ "	rdfs:label \"master\".",
 				graphName + "-master", graphName, revisionUri);
 		
 		// Add graph element
 		// TODO Currently to every created graph the default SDD is referenced - provide possibility to choose SDD
 		queryContent += String.format(
-				"<%s> a rmo:Graph ;%n"
-				+ "sddo:hasDefaultSDD sdd:defaultSDD .", 
+				"<%s> a rmo:Graph ;"
+				+ "  sddo:hasDefaultSDD sdd:defaultSDD.", 
 				graphName);
 
 		String queryRevision = prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", Config.revision_graph, queryContent);
