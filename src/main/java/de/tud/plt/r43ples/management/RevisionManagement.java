@@ -330,8 +330,8 @@ public class RevisionManagement {
 		queryContent.append(String.format(
 				  "<%s> a rmo:Revision ; %n"
 				+ "	rmo:revisionOf <%s> ; %n"
-				+ "	rmo:deltaAdded <%s> ; %n"
-				+ "	rmo:deltaRemoved <%s> ; %n"
+				+ "	rmo:addSet <%s> ; %n"
+				+ "	rmo:deleteSet <%s> ; %n"
 				+ "	rmo:revisionNumber \"%s\" ; %n"
 				+ "	rmo:revisionOfBranch <%s> . %n"
 				,  revisionUri, graphName, addSetGraphUri, removeSetGraphUri, newRevisionNumber, branchUri));
@@ -904,8 +904,8 @@ public class RevisionManagement {
 				+ "SELECT DISTINCT ?graph "
 				+ "WHERE { GRAPH <%s> {" 
 				+ "		?rev rmo:revisionOf <%s>."
-				+ " 	{?rev rmo:deltaAdded ?graph}" 
-				+ " UNION {?rev rmo:deltaRemoved ?graph}"
+				+ " 	{?rev rmo:addSet ?graph}" 
+				+ " UNION {?rev rmo:deleteSet ?graph}"
 				+ " UNION {?ref rmo:references ?rev; rmo:fullGraph ?graph}" 
 				+ "} }", Config.revision_graph, graph);
 				
@@ -1034,7 +1034,7 @@ public class RevisionManagement {
 		String query = String.format(
 			  "SELECT ?addSetURI %n"
 			+ "WHERE { GRAPH <%s> {%n"
-			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaAdded> ?addSetURI . %n"
+			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#addSet> ?addSetURI . %n"
 			+ "} }", revisionGraph, revisionURI);
 		
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
@@ -1059,7 +1059,7 @@ public class RevisionManagement {
 		String query = String.format(
 			  "SELECT ?deleteSetURI %n"
 		    + "WHERE { GRAPH <%s> {%n"
-			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deltaRemoved> ?deleteSetURI . %n"
+			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deleteSet> ?deleteSetURI . %n"
 			+ "} }", revisionGraph, revisionURI);
 		
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);

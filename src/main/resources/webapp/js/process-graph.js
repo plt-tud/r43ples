@@ -309,9 +309,9 @@ var drawGraph = function (_JSON, _showBranches, _showTags) {
                             revisions[key] = {};
                         }
                         // ID der entfernten Daten setzen
-                        revisions[key].deltaRemoved = value["http://eatld.et.tu-dresden.de/rmo#deltaRemoved"][0].value;
+                        revisions[key].deleteSet = value["http://eatld.et.tu-dresden.de/rmo#deleteSet"][0].value;
                         // ID der hinzugefügten Daten setzen
-                        revisions[key].deltaAdded = value["http://eatld.et.tu-dresden.de/rmo#deltaAdded"][0].value;
+                        revisions[key].addSet = value["http://eatld.et.tu-dresden.de/rmo#addSet"][0].value;
                         // Revisionsnummer setzen
                         revisions[key].revisionNumber = value["http://eatld.et.tu-dresden.de/rmo#revisionNumber"][0].value;
                         // ID der eigentlichen Daten setzen

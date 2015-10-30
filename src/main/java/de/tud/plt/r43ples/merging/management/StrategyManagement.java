@@ -214,42 +214,42 @@ public class StrategyManagement {
 	
 	/**get delta added with versionUri
 	 * @param uri of the added set*/
-	public static String getDeltaAddedUri(String revisionUri) {
+	public static String getaddSetUri(String revisionUri) {
 		String query = prefixes + String.format(""
-				+"SELECT DISTINCT ?deltaAdded %n"
+				+"SELECT DISTINCT ?addSet %n"
 				+"WHERE{ GRAPH <%s> %n"
-				+"   {<%s> rmo:deltaAdded ?deltaAdded. } }%n",
+				+"   {<%s> rmo:addSet ?addSet. } }%n",
 				Config.revision_graph, revisionUri);
 		
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
-			return qs.getResource("?deltaAdded").toString();
+			return qs.getResource("?addSet").toString();
 		}
 		else {
-			logger.info("No deltaAdded could be found.");
+			logger.info("No addSet could be found.");
 			return null;
 		}
 	}
 	
 	/** get the delta removed width versionUri
 	 * @param uri of the deleted set*/
-	public static String getDeltaRemovedUri(String revisionUri) {
+	public static String getdeleteSetUri(String revisionUri) {
 		String query = prefixes + String.format(""
-				+"SELECT DISTINCT ?deltaRemoved %n"
+				+"SELECT DISTINCT ?deleteSet %n"
 				+"WHERE{ GRAPH <%s> %n"
-				+"   {<%s> rmo:deltaRemoved ?deltaRemoved. } } %n",
+				+"   {<%s> rmo:deleteSet ?deleteSet. } } %n",
 				Config.revision_graph, revisionUri);
 		
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
-			return qs.getResource("?deltaRemoved").toString();
+			return qs.getResource("?deleteSet").toString();
 		}
 		else {
-			logger.info("No deltaRemoved could be found.");
+			logger.info("No deleteSet could be found.");
 			return null;
 		}
 	}

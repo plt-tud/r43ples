@@ -171,8 +171,8 @@ function drawGraph(div_selector, _JSON, _showTags) {
                         if (revisions[key] == null) {
                             revisions[key] = {};
                         }
-                        revisions[key].deltaRemoved = value["http://eatld.et.tu-dresden.de/rmo#deltaRemoved"][0].value;
-                        revisions[key].deltaAdded = value["http://eatld.et.tu-dresden.de/rmo#deltaAdded"][0].value;
+                        revisions[key].deleteSet = value["http://eatld.et.tu-dresden.de/rmo#deleteSet"][0].value;
+                        revisions[key].addSet = value["http://eatld.et.tu-dresden.de/rmo#addSet"][0].value;
                         revisions[key].revisionNumber = value["http://eatld.et.tu-dresden.de/rmo#revisionNumber"][0].value;
                         revisions[key].revisionOf = value["http://eatld.et.tu-dresden.de/rmo#revisionOf"][0].value;
                         revisions[key].revisionOfBranch = value["http://eatld.et.tu-dresden.de/rmo#revisionOfBranch"][0].value;
@@ -244,8 +244,8 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	         "<tr><td>Branch:</td><td>" + branches[node.revisionOfBranch].label + "</td><td><a href='" + node.revisionOfBranch + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
 	         "<tr><td>Revised graph:</td><td>" + node.revisionOf + "</td><td><a href='" + node.revisionOf + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
 	         "<tr><td>URL:</td><td>" + name + "</td><td></td></tr>" +
-	         "<tr><td>Add Set:</td><td>" + node.deltaAdded + "</td><td><a href='" + node.deltaAdded + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-	         "<tr><td>Delete Set:</td><td>" + node.deltaRemoved + "</td><td><a href='" + node.deltaRemoved + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+	         "<tr><td>Add Set:</td><td>" + node.addSet + "</td><td><a href='" + node.addSet + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+	         "<tr><td>Delete Set:</td><td>" + node.deleteSet + "</td><td><a href='" + node.deleteSet + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
 	         "</table></p>";
 	        
 	     if (node.commit != null) { 
