@@ -29,3 +29,8 @@ wget http://live.dbpedia.org/dumps/dbpedia_2013_07_18.nt.bz2
 
 # download changesets from 04.11.2013
 wget -r -np -nd -nH -L -e robots=off -A "gz, html" http://live.dbpedia.org/changesets/2013/11/04/13/
+
+
+#extract everything
+gunzip *.gz
+bunzip2 -vv *.bz2
