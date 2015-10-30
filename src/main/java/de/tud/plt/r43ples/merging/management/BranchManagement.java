@@ -41,7 +41,7 @@ public class BranchManagement {
 					+ "WHERE { %n"
 					+ "	?branch a rmo:Branch ; %n"
 					+ "		rdfs:label ?label . %n"
-					+ "	?rev rmo:revisionOfBranch ?branch ;"
+					+ "	?rev rmo:belongsTo ?branch ;"
 					+ "		rmo:revisionOf <%s> . %n"
 					+ "} %n"
 					+ "ORDER BY ?label",Config.revision_graph, graphName);

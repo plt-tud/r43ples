@@ -79,14 +79,14 @@ public class RebaseControl {
 			String revisionUri = rIter.next();
 			String commitUri = StrategyManagement.getCommitUri(revisionUri);
 			
-			String deltaAdded = StrategyManagement.getDeltaAddedUri(revisionUri);
-			String deltaRemoved = StrategyManagement.getDeltaRemovedUri(revisionUri);
+			String addSet = StrategyManagement.getaddSetUri(revisionUri);
+			String deleteSet = StrategyManagement.getdeleteSetUri(revisionUri);
 			
 			String patchNumber = StrategyManagement.getRevisionNumber(revisionUri);
 			String patchUser = StrategyManagement.getPatchUserUri(commitUri);
 			String patchMessage = StrategyManagement.getPatchMessage(commitUri);
 			
-			patchMap.put(patchNumber, new Patch(patchNumber, patchUser, patchMessage, deltaAdded, deltaRemoved));			
+			patchMap.put(patchNumber, new Patch(patchNumber, patchUser, patchMessage, addSet, deleteSet));			
 		}
 		
 		String basisRevisionNumber = StrategyManagement.getRevisionNumber(basisRevisionUri);
