@@ -463,7 +463,7 @@
 						<td>  ::=  </td>
 						<td>
 							<code>
-								<a href="#rPrologue">Prologue</a> ( <a href="#rUpdate1">Update1</a> ( <span class="token">';'</span> <a href="#rUpdate">Update</a> )? )?</code>
+								<a href="#rPrologue">Prologue</a> <a href="#rCommitInformatio">CommitInformation</a> ( <a href="#rUpdate1">Update1</a> ( <span class="token">';'</span> <a href="#rUpdate">Update</a> )? )?</code>
 						</td>
 					</tr>
 					<tr valign="baseline">
@@ -2992,10 +2992,60 @@
 							</code>
 						</td>
 					</tr>
-					
 					<tr valign="baseline">
 						<td>
 							<code>[178]  </code>
+						</td>
+						<td>
+							<code>
+								<a id="rRevisionInformation" name="rRevisionInformation">CommitInformation</a>
+							</code>
+						</td>
+						<td>  ::=  </td>
+						<td>
+							<code>
+								'USER' '"' <a href="#rUserIdentifier">UserIdentifier</a> '"' 'MESSAGE' '"' <a href="#rMessageContent">MessageContent</a> '"'
+								<span class="token"/>
+							</code>
+						</td>
+					</tr>
+					<tr valign="baseline">
+						<td>
+							<code>[179]  </code>
+						</td>
+						<td>
+							<code>
+								<a id="rUserIdentifier" name="rUserIdentifier">UserIdentifier</a>
+							</code>
+						</td>
+						<td>  ::=  </td>
+						<td>
+							<code>
+								<a href="#rString">String</a>
+								<span class="token"/>
+							</code>
+						</td>
+					</tr>
+					<tr valign="baseline">
+						<td>
+							<code>[180]  </code>
+						</td>
+						<td>
+							<code>
+								<a id="rMessageContent" name="rMessageContent">MessageContent</a>
+							</code>
+						</td>
+						<td>  ::=  </td>
+						<td>
+							<code>
+								<a href="#rString">String</a>
+								<span class="token"/>
+							</code>
+						</td>
+					</tr>
+					<tr valign="baseline">
+						<td>
+							<code>[181]  </code>
 						</td>
 						<td>
 							<code>
@@ -3012,7 +3062,7 @@
 					</tr>
 					<tr valign="baseline">
 						<td>
-							<code>[179]  </code>
+							<code>[182]  </code>
 						</td>
 						<td>
 							<code>
@@ -3030,7 +3080,7 @@
 					
 					<tr valign="baseline">
 						<td>
-							<code>[180]  </code>
+							<code>[183]  </code>
 						</td>
 						<td>
 							<code>
@@ -3047,7 +3097,7 @@
 					</tr>
 					<tr valign="baseline">
 						<td>
-							<code>[181]  </code>
+							<code>[184]  </code>
 						</td>
 						<td>
 							<code>
@@ -3064,7 +3114,7 @@
 					</tr>
 					<tr valign="baseline">
 						<td>
-							<code>[182]  </code>
+							<code>[185]  </code>
 						</td>
 						<td>
 							<code>
@@ -3081,7 +3131,7 @@
 					</tr>					
 					<tr valign="baseline">
 						<td>
-							<code>[183]  </code>
+							<code>[186]  </code>
 						</td>
 						<td>
 							<code>
@@ -3098,7 +3148,7 @@
 					</tr>
 					<tr valign="baseline">
 						<td>
-							<code>[184]  </code>
+							<code>[187]  </code>
 						</td>
 						<td>
 							<code>
@@ -3115,7 +3165,7 @@
 					</tr>
 					<tr valign="baseline">
 						<td>
-							<code>[185]  </code>
+							<code>[188]  </code>
 						</td>
 						<td>
 							<code>
@@ -3132,7 +3182,7 @@
 					</tr>
 					<tr valign="baseline">
 						<td>
-							<code>[186]  </code>
+							<code>[189]  </code>
 						</td>
 						<td>
 							<code>
