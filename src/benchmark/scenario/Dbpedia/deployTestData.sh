@@ -5,19 +5,18 @@
 # Take care to configuer and epxort STARDOG_HOME and put Stardog binaries on PATH
 
 
-DATA_DIRECTORY=data
 GRAPH="http://dbpedia.org"
 
 
 stardog-admin server start
 
 # create database and add compressed data
-stardog-admin db create -n dbpedia -v --named-graph $GRAPH $DATA_DIRECTORY/dbpedia_2013_07_18.nt.bz2
+stardog-admin db create -n dbpedia -o "strict.parsing=false" -v 
 
 # add ontology data
-stardog data add dbpedia -v --named-graph $GRAPH $DATA_DIRECTORY/dbpedia_2014.owl.bz2
+stardog data add dbpedia -v --named-graph $GRAPH data/dbpedia_3.9.owl
+stardog data add dbpedia -v --named-graph $GRAPH data/dbpedia_2013_07_18.nt
 
-stardog data add dbpedia -v --named-graph $GRAPH $DATA_DIRECTORY/2015_06_18/instance_types_en.nt.bz2
 
 
 
