@@ -134,8 +134,8 @@ public class Interface {
 					newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName);
 					nextRevisionNumbers.put(graphName, newRevisionNumber);
 				}
-				String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
-				String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
+				String addSetGraphUri = graphName + "-addSet-" + newRevisionNumber;
+				String removeSetGraphUri = graphName + "-deleteSet-" + newRevisionNumber;
 				
 				String data = m.group("data");
 				if (data == null)
@@ -165,8 +165,8 @@ public class Interface {
 			// General variables
 			String newRevisionNumber = nextRevisionNumbers.get(graphName);
 			String referenceFullGraph = RevisionManagement.getReferenceGraph(graphName, revisionName);
-			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
-			String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
+			String addSetGraphUri = graphName + "-addSet-" + newRevisionNumber;
+			String removeSetGraphUri = graphName + "-deleteSet-" + newRevisionNumber;
 
 			// remove doubled data
 			// (already existing triples in add set; not existing triples in

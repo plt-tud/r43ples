@@ -171,8 +171,8 @@ public class RevisionManagement {
 
 		// General variables
 		String newRevisionNumber = getNextRevisionNumber(graphName);
-		String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
-		String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
+		String addSetGraphUri = graphName + "-addSet-" + newRevisionNumber;
+		String removeSetGraphUri = graphName + "-deleteSet-" + newRevisionNumber;
 		String referenceGraph = getReferenceGraph(graphName, usedRevisionNumber.get(0));
 
 		// Add Meta Information
@@ -187,7 +187,7 @@ public class RevisionManagement {
 			RevisionManagement.executeINSERT(referenceGraph, addedAsNTriples);
 		}
 
-		// Create new graph with delta-added-newRevisionNumber
+		// Create new graph with addSet-newRevisionNumber
 		if (addedAsNTriples!=null && !addedAsNTriples.isEmpty()) {
 			logger.debug("Create new graph with name " + addSetGraphUri);
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
@@ -195,7 +195,7 @@ public class RevisionManagement {
 			RevisionManagement.executeINSERT(addSetGraphUri, addedAsNTriples);
 		}
 
-		// Create new graph with delta-removed-newRevisionNumber
+		// Create new graph with deleteSet-newRevisionNumber
 		if (removedAsNTriples!=null && !removedAsNTriples.isEmpty()) {
 			logger.debug("Create new graph with name " + removeSetGraphUri);
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
@@ -523,8 +523,8 @@ public class RevisionManagement {
 		while (!list.isEmpty()) {
 			// add- und delete-sets could be extracted from revision tree information
 			// hard coded variant is faster
-			String graph_removed = graphName + "-delta-removed-"+ number;
-			String graph_added   = graphName + "-delta-added-"+ number;
+			String graph_removed = graphName + "-deleteSet-"+ number;
+			String graph_added   = graphName + "-addSet-"+ number;
 			// Add data to temporary graph
 			if (RevisionManagement.checkGraphExistence(graph_removed))
 				TripleStoreInterfaceSingleton.get().executeUpdateQuery("ADD GRAPH <" + graph_removed + "> TO GRAPH <" + tempGraphName + ">");
