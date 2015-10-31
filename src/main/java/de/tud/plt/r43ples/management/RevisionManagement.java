@@ -55,7 +55,25 @@ public class RevisionManagement {
 	public static String putGraphUnderVersionControl(final String graphName) {
 		logger.info("Put existing graph under version control with the name " + graphName);
 
-		String revisionNumber = getNextRevisionNumber(graphName);
+		String revisiongraph = graphName + "-revisiongraph";
+		
+		while (!checkGraphExistence(revisiongraph)){
+			revisiongraph += "x";
+		}
+		
+		String queryAddRevisionGraph = String.format(prefixes
+				+ "INSERT DATA { GRAPH <%s> {"
+				+ "  <%s> a rmo:Graph;"
+				+ "    rmo:hasRevisionGraph <%s>;"
+				+ "    prov:wasAssociatedWith <%s>;"
+				+ "	   prov:generated <%s>;"
+				+ "    sddo:hasDefaultSDD sdd:defaultSDD."
+				+ "} }",
+				Config.revision_graph, graphName, revisiongraph, "user", getDateString());
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryAddRevisionGraph);
+		 		
+		 		
+		String revisionNumber = "0";
 		String revisionUri = graphName + "-revision-" + revisionNumber;
 
 		// Create new revision
@@ -73,13 +91,6 @@ public class RevisionManagement {
 				+ "	rmo:references <%s>;"
 				+ "	rdfs:label \"master\".",
 				graphName + "-master", graphName, revisionUri);
-		
-		// Add graph element
-		// TODO Currently to every created graph the default SDD is referenced - provide possibility to choose SDD
-		queryContent += String.format(
-				"<%s> a rmo:Graph ;"
-				+ "  sddo:hasDefaultSDD sdd:defaultSDD.", 
-				graphName);
 
 		String queryRevision = prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", Config.revision_graph, queryContent);
 		
