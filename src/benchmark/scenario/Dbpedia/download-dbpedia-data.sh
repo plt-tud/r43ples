@@ -33,7 +33,7 @@ wget http://live.dbpedia.org/dumps/dbpedia_2015_06_02.nt.gz
 # download changesets from 04.11.2013
 #wget -r -np -nd -nH -L -e robots=off -A "gz, html" http://live.dbpedia.org/changesets/2013/11/04/13/
 # download changesets from 04.11.2013
-wget -r -np -nd -nH -L -e robots=off -A "gz, html" http://live.dbpedia.org/changesets/2015/06/03/
+wget -r -np -nH -L -e robots=off http://live.dbpedia.org/changesets/2015/06/03/
 
 
 #extract everything
