@@ -2,7 +2,7 @@
 
 # Add dpbedia data to Stardog
 # Take care to go to data directory beforehand
-# Take care to configuer and epxort STARDOG_HOME and put Stardog binaries on PATH
+# Take care to configure and epxort STARDOG_HOME and put Stardog binaries on PATH
 
 
 GRAPH="http://dbpedia.org"
