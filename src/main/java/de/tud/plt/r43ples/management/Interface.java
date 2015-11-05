@@ -190,7 +190,7 @@ public class Interface {
 			// add meta information to R43ples
 			ArrayList<String> usedRevisionNumber = new ArrayList<String>();
 			usedRevisionNumber.add(revisionName);
-			RevisionManagement.addMetaInformationForNewRevision(graphName, user, commitMessage, usedRevisionNumber,
+			RevisionManagement.addMetaInformationForNewRevision(graphName, user, RevisionManagement.getDateString(), commitMessage, usedRevisionNumber,
 					newRevisionNumber, addSetGraphUri, removeSetGraphUri);
 			
 			

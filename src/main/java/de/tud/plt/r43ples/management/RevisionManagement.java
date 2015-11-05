@@ -106,6 +106,35 @@ public class RevisionManagement {
 	 *            the data set of removed triples as N-Triples
 	 * @param user
 	 *            the user name who creates the revision
+	 * @param timeStamp
+	 * 				time stamp of the commit as String
+	 * @param commitMessage
+	 *            the title of the revision
+	 * @param usedRevisionNumber
+	 *            the number of the revision which is used for creation of the
+	 *            new revision 
+	 * @return new revision number
+	 * @throws InternalErrorException 
+	 */
+	public static String createNewRevision(final String graphName, final String addedAsNTriples, final String removedAsNTriples,
+			final String user, final String timeStamp, final String commitMessage, final String usedRevisionNumber) throws InternalErrorException {
+		ArrayList<String> list = new ArrayList<String>();
+		list.add(usedRevisionNumber);
+		return createNewRevision(graphName, addedAsNTriples, removedAsNTriples, user, timeStamp, commitMessage, list);
+	}
+	
+	
+	/**
+	 * Create a new revision.
+	 * 
+	 * @param graphName
+	 *            the graph name
+	 * @param addedAsNTriples
+	 *            the data set of added triples as N-Triples
+	 * @param removedAsNTriples
+	 *            the data set of removed triples as N-Triples
+	 * @param user
+	 *            the user name who creates the revision
 	 * @param commitMessage
 	 *            the title of the revision
 	 * @param usedRevisionNumber
@@ -148,6 +177,13 @@ public class RevisionManagement {
 		list.add(usedRevisionNumber);
 		return createNewRevisionWithPatch(graphName, addSetGraphUri, removeSetGraphUri, user, commitMessage, list);
 	}
+	
+	public static String createNewRevision(final String graphName, final String addedAsNTriples,
+			final String removedAsNTriples, final String user, final String commitMessage,
+			final ArrayList<String> usedRevisionNumber) throws InternalErrorException {
+		String timeStamp = getDateString();
+		return createNewRevision(graphName, addedAsNTriples, removedAsNTriples, user, timeStamp, commitMessage, usedRevisionNumber);
+	}
 
 	/**
 	 * Create a new revision with multiple prior revisions
@@ -171,7 +207,7 @@ public class RevisionManagement {
 	 * @throws InternalErrorException 
 	 */
 	public static String createNewRevision(final String graphName, final String addedAsNTriples,
-			final String removedAsNTriples, final String user, final String commitMessage,
+			final String removedAsNTriples, final String user, final String timeStamp, final String commitMessage,
 			final ArrayList<String> usedRevisionNumber) throws InternalErrorException {
 		logger.info("Start creation of new revision for graph " + graphName);
 
@@ -182,7 +218,7 @@ public class RevisionManagement {
 		String referenceGraph = getReferenceGraph(graphName, usedRevisionNumber.get(0));
 
 		// Add Meta Information
-		addMetaInformationForNewRevision(graphName, user, commitMessage, usedRevisionNumber,
+		addMetaInformationForNewRevision(graphName, user, timeStamp, commitMessage, usedRevisionNumber,
 				newRevisionNumber, addSetGraphUri, removeSetGraphUri);
 
 		// Update full graph of branch
@@ -264,7 +300,7 @@ public class RevisionManagement {
 		String referenceGraph = getReferenceGraph(graphName, usedRevisionNumber.get(0));
 
 		// Add Meta Information
-		addMetaInformationForNewRevision(graphName, user, commitMessage, usedRevisionNumber,
+		addMetaInformationForNewRevision(graphName, user, RevisionManagement.getDateString(), commitMessage, usedRevisionNumber,
 				newRevisionNumber, addSetGraphUri, removeSetGraphUri);
 		
 		//get Triplelist of addedset and deletedset 
@@ -315,10 +351,9 @@ public class RevisionManagement {
 	 *            name of the graph which holds the delete set
 	 * @throws InternalErrorException 
 	 */
-	public static void addMetaInformationForNewRevision(final String graphName, final String user,
+	public static void addMetaInformationForNewRevision(final String graphName, final String user, final String timeStamp,
 			final String commitMessage, final ArrayList<String> usedRevisionNumber,
 			final String newRevisionNumber, final String addSetGraphUri, final String removeSetGraphUri) throws InternalErrorException {
-		String dateString = getDateString();
 		String personUri = getUserName(user);
 		String revisionUri = graphName + "-revision-" + newRevisionNumber;
 		String commitUri = graphName + "-commit-" + newRevisionNumber;
@@ -328,7 +363,7 @@ public class RevisionManagement {
 		StringBuilder queryContent = new StringBuilder(1000);
 		queryContent.append(String.format("<%s> a rmo:Commit; " + "	prov:wasAssociatedWith <%s>;"
 				+ "	prov:generated <%s>;" + "	dc-terms:title \"%s\";" + "	prov:atTime \"%s\". %n", commitUri,
-				personUri, revisionUri, commitMessage, dateString));
+				personUri, revisionUri, commitMessage, timeStamp));
 		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
 			String revUri = getRevisionUri(graphName, iterator.next());
 			queryContent.append(String.format("<%s> prov:used <%s>. %n", commitUri, revUri));
