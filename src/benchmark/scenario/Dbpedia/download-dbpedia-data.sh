@@ -24,13 +24,16 @@ wget http://downloads.dbpedia.org/3.9/dbpedia_3.9.owl.bz2
 #     void:distinctSubjects 27391063 ; 
 #     void:properties 73940 ; 
 #     void:distinctObjects 103060313 . 
-wget http://live.dbpedia.org/dumps/dbpedia_2013_07_18.nt.bz2
+#wget http://live.dbpedia.org/dumps/dbpedia_2013_07_18.nt.bz2
+wget http://live.dbpedia.org/dumps/dbpedia_2015_06_02.nt.gz
 
 
 # download changesets from 04.11.2013
-wget -r -np -nd -nH -L -e robots=off -A "gz, html" http://live.dbpedia.org/changesets/2013/11/04/13/
+#wget -r -np -nd -nH -L -e robots=off -A "gz, html" http://live.dbpedia.org/changesets/2013/11/04/13/
+# download changesets from 04.11.2013
+wget -r -np -nd -nH -L -e robots=off -A "gz, html" http://live.dbpedia.org/changesets/2015/06/03/
 
 
 #extract everything
-gunzip *.gz
-bunzip2 -vv *.bz2
+gunzip -v dbpedia_2015_06_02.nt.gz
+gunzip -v changesets/2015/06/03/*/*.gz
