@@ -19,8 +19,9 @@ public class FastForwardControl {
 		}
 		
 		//get last revision of each branch
-		String revisionUriA = RevisionManagement.getRevisionUri(graphName, branch1);
-		String revisionUriB = RevisionManagement.getRevisionUri(graphName, branch2);
+		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branch1);
+		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branch2);
 		
 		return StrategyManagement.isFastForward(revisionUriA, revisionUriB);
 	}

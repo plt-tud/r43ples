@@ -287,8 +287,9 @@ public class Interface {
 		String with = m.group("with");
 		String triples = m.group("triples");
 		
-		String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
-		String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
+		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
+		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
 		
 		logger.debug("action: " + action);
 		logger.debug("graph: " + graphName);

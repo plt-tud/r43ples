@@ -66,13 +66,14 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void test_reference_uri() throws InternalErrorException {
-		String res = RevisionManagement.getBranchUri(ds.graphName, "master");
+		String revisionGraph = RevisionManagement.getRevisionGraph(ds.graphName);
+		String res = RevisionManagement.getBranchUri(revisionGraph, "master");
 		Assert.assertEquals(ds.graphName+"-master", res);
 	}
 	
 	@Test
 	public void test_revision_uri() throws InternalErrorException {
-		String uri = RevisionManagement.getRevisionUri(ds.graphName, ds.revisions.get("master-4"));
+		String uri = RevisionManagement.getRevisionUri(RevisionManagement.getRevisionGraph(ds.graphName), ds.revisions.get("master-4"));
 		Assert.assertEquals(ds.graphName+"-revision-"+ds.revisions.get("master-4"), uri);
 	}
 	

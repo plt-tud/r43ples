@@ -86,7 +86,8 @@ public class SparqlRewriter {
 		if (RevisionManagement.isBranch(graphName, revisionNumber))
 			return false;
 		else {
-			Tree tree =  new Tree(graphName);
+			String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+			Tree tree =  new Tree(revisionGraph);
 			LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
 			logger.debug("Path to revision: " + list.toString());
 			last_revision = ExprUtils.nodeToExpr(NodeFactory.createURI(list.get(0).getRevisionUri()));
@@ -113,7 +114,8 @@ public class SparqlRewriter {
 			String graphName = m2.group("graph");
 			String referenceName = m2.group("revision").toLowerCase();
 			
-			String revisionNumber = RevisionManagement.getRevisionNumber(graphName, referenceName);
+			String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+			String revisionNumber = RevisionManagement.getRevisionNumber(revisionGraph, referenceName);
 			graphs.add(graphName);
 			revisions.add(revisionNumber);
 

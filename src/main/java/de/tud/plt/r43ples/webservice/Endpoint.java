@@ -1160,15 +1160,17 @@ public class Endpoint {
 		if (!FastForwardControl.fastForwardCheck(graphName, branchNameA, branchNameB)) {
 			return false;
 		}
-		String branchUriA = RevisionManagement.getBranchUri(graphName, branchNameA);
-		String branchUriB = RevisionManagement.getBranchUri(graphName, branchNameB);
+		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+		String branchUriA = RevisionManagement.getBranchUri(revisionGraph, branchNameA);
+		String branchUriB = RevisionManagement.getBranchUri(revisionGraph, branchNameB);
 		
 		String fullGraphUriA = RevisionManagement.getFullGraphUri(branchUriA);
 		String fullGraphUriB = RevisionManagement.getFullGraphUri(branchUriB);
 
 		logger.info("ff fullgraph : "+ branchUriA + branchUriB + fullGraphUriA+ fullGraphUriB);
-		String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
-		String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
+		
+		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
+		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
 		
 		StrategyManagement.moveBranchReference(branchUriB, revisionUriB, revisionUriA);
 		StrategyManagement.updatebelongsTo(branchUriB, revisionUriB, revisionUriA);	
@@ -1230,8 +1232,9 @@ public class Endpoint {
 			}
 						
 			// get the last revision of each branch
-			String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
-			String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
+			String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+			String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
+			String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
 				
 			// Check if graph already exists
 			if (!RevisionManagement.checkGraphExistence(graphName)){
