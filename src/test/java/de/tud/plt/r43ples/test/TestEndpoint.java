@@ -223,11 +223,5 @@ public class TestEndpoint extends JerseyTest {
 		Assert.assertThat(result, containsString("SDD"));
 	}
 	
-	@Test
-	public void testGetRevisedGraphs() throws InternalErrorException{
-		String result = target("getRevisedGraphs").queryParam("format", "text/turtle").request().get(String.class);
-		Assert.assertThat(result, containsString(dsm.graphName));
-	}
-
 
 }

@@ -1196,8 +1196,8 @@ public class Endpoint {
 		}
 		
 		// Return the revision number which were used (convert tag or branch identifier to revision number)
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(graphName, branchNameA));
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));	
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(revisionGraph, branchNameA));
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(revisionGraph, branchNameB));	
 		
 		
 		String graphStrategy = "merging-strategy-information";
@@ -1338,9 +1338,10 @@ public class Endpoint {
 			logger.error("Graph <"+graphName+"> does not exist.");
 			throw new InternalErrorException("Graph <"+graphName+"> does not exist.");
 		}
-			
+	
+		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
 		// Check if A and B are different revisions
-		if (RevisionManagement.getRevisionNumber(graphName, branchNameA).equals(RevisionManagement.getRevisionNumber(graphName, branchNameB))) {
+		if (RevisionManagement.getRevisionNumber(revisionGraph, branchNameA).equals(RevisionManagement.getRevisionNumber(revisionGraph, branchNameB))) {
 			// Branches are equal - throw error
 			throw new InternalErrorException("Specified branches are equal");
 		}

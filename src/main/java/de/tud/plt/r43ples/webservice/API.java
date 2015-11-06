@@ -37,7 +37,7 @@ public class API {
 	 */
 	@Path("getRevisedGraphs")
 	@GET
-	@Produces({ MediaType.APPLICATION_JSON })
+	@Produces({MediaType.APPLICATION_JSON})
 	public final String getRevisedGraphs(@HeaderParam("Accept") final String format_header,
 			@QueryParam("format") @DefaultValue("application/json") final String format_query) {
 		logger.info("Get Revised Graphs");

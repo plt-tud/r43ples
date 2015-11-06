@@ -270,18 +270,17 @@ public class Interface {
 		String branchNameB = m.group("branchNameB").toLowerCase();
 		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
 		
-		if (!FastForwardControl.fastForwardCheck(graphName, branchNameA, branchNameB)) {
+		if (!FastForwardControl.fastForwardCheck(revisionGraph, branchNameA, branchNameB)) {
 			return false;
 		}
-		String branchUriA = RevisionManagement.getBranchUri(graphName, branchNameA);
-		String branchUriB = RevisionManagement.getBranchUri(graphName, branchNameB);
+		String branchUriA = RevisionManagement.getBranchUri(revisionGraph, branchNameA);
+		String branchUriB = RevisionManagement.getBranchUri(revisionGraph, branchNameB);
 		
 		String fullGraphUriA = RevisionManagement.getFullGraphUri(revisionGraph, branchUriA);
 		String fullGraphUriB = RevisionManagement.getFullGraphUri(revisionGraph, branchUriB);
 
-		logger.info("ff fullgraph : "+ branchUriA + branchUriB + fullGraphUriA+ fullGraphUriB);
-		String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
-		String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
+		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
+		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
 		
 		StrategyManagement.moveBranchReference(revisionGraph, branchUriB, revisionUriB, revisionUriA);
 		// TODO: add reference commit with user and commit message
