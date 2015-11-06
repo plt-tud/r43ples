@@ -217,6 +217,27 @@ public class Endpoint {
 		logger.debug("format: " + format);
 		return RevisionManagement.getRevisedGraphsSparql(format);
 	}
+	
+	/**
+	 * Provides content of graph in the attached triple store
+	 * 
+	 * @return list of graphs which are under revision control
+	 */
+	@Path("contentOfGraph")
+	@GET
+	@Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
+		MediaType.APPLICATION_SVG_XML, "application/ld+json" })
+	public final Response getContentOfGraph(
+			@HeaderParam("Accept") final String format_header,
+			@QueryParam("format") @DefaultValue("application/json") final String format_query,
+			@QueryParam("graph") final String graphName) {
+		logger.info("Get Content of graph " + graphName);
+		String format = (format_query != null) ? format_query : format_header;
+		logger.debug("format: " + format);
+		String result = RevisionManagement.getContentOfGraphByConstruct(graphName, format);
+		ResponseBuilder response = Response.ok();
+		return response.entity(result).type(format).build();
+	}
 
 	/**
 	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).
@@ -882,6 +903,11 @@ public class Endpoint {
 	}
 	
 	
+	public final Response sparql(final String sparqlQuery) throws InternalErrorException {
+		return sparql("application/xml", sparqlQuery, false);
+	}
+	
+	
 	/**
 	 * Get HTML debug response for standard sparql request form.
 	 * Using mustache templates. 
@@ -1108,8 +1134,9 @@ public class Endpoint {
 		}
 		
 		// Return the revision number which were used (convert tag or branch identifier to revision number)
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(mresult.graph, mresult.branchA));
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(mresult.graph, mresult.branchB));			
+		String revisionGraph = RevisionManagement.getRevisionGraph(mresult.graph);
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(revisionGraph, mresult.branchA));
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(revisionGraph, mresult.branchB));			
 		
 		if (mresult.newRevisionNumber != null) {
 			// Respond with next revision number
@@ -1157,23 +1184,24 @@ public class Endpoint {
 	 */
 	private boolean executeFastForward(String graphName, String branchNameA, String branchNameB) throws InternalErrorException
 	{
-		if (!FastForwardControl.fastForwardCheck(graphName, branchNameA, branchNameB)) {
+		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+		if (!FastForwardControl.fastForwardCheck(revisionGraph, branchNameA, branchNameB)) {
 			return false;
 		}
-		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+		
 		String branchUriA = RevisionManagement.getBranchUri(revisionGraph, branchNameA);
 		String branchUriB = RevisionManagement.getBranchUri(revisionGraph, branchNameB);
 		
-		String fullGraphUriA = RevisionManagement.getFullGraphUri(branchUriA);
-		String fullGraphUriB = RevisionManagement.getFullGraphUri(branchUriB);
+		String fullGraphUriA = RevisionManagement.getFullGraphUri(revisionGraph, branchUriA);
+		String fullGraphUriB = RevisionManagement.getFullGraphUri(revisionGraph, branchUriB);
 
 		logger.info("ff fullgraph : "+ branchUriA + branchUriB + fullGraphUriA+ fullGraphUriB);
 		
 		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
 		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
 		
-		StrategyManagement.moveBranchReference(branchUriB, revisionUriB, revisionUriA);
-		StrategyManagement.updatebelongsTo(branchUriB, revisionUriB, revisionUriA);	
+		StrategyManagement.moveBranchReference(revisionGraph, branchUriB, revisionUriB, revisionUriA);
+		StrategyManagement.updatebelongsTo(revisionGraph, graphName, branchUriB, revisionUriB, revisionUriA);	
 		StrategyManagement.fullGraphCopy(fullGraphUriA, fullGraphUriB);
 		return true;
 	}
@@ -1243,7 +1271,7 @@ public class Endpoint {
 			}
 				
 			// Check if A and B are different revisions
-			if (RevisionManagement.getRevisionNumber(graphName, branchNameA).equals(RevisionManagement.getRevisionNumber(graphName, branchNameB))) {
+			if (RevisionManagement.getRevisionNumber(revisionGraph, branchNameA).equals(RevisionManagement.getRevisionNumber(revisionGraph, branchNameB))) {
 				// Branches are equal - throw error
 				throw new InternalErrorException("Specified branches are equal: " + sparqlQuery);
 			}
@@ -1280,10 +1308,11 @@ public class Endpoint {
 			}
 
 			// Get the common revision with shortest path
-			String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionUriA, revisionUriB);
+			String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA, revisionUriB);
 			
 			
-			LinkedList<String> revisionList = MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA);
+			LinkedList<String> revisionList = MergeManagement.getPathBetweenStartAndTargetRevision(
+					revisionGraph, graphName, commonRevision, revisionUriA);
 			revisionList.remove(commonRevision);
 			 
 			Iterator<String> iter = revisionList.iterator();
@@ -1292,7 +1321,7 @@ public class Endpoint {
 			}
 			 
 			// create the patch and patch group
-			rebaseControl.createPatchGroupOfBranch(revisionUriB, revisionList);
+			rebaseControl.createPatchGroupOfBranch(revisionGraph, revisionUriB, revisionList);
 			
 			
 			// transform the response to the rebase freundlich check process
@@ -1305,8 +1334,8 @@ public class Endpoint {
 			}
 			
 			// Return the revision number which were used (convert tag or branch identifier to revision number)
-			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(graphName, branchNameA));
-			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(graphName, branchNameB));	
+			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(revisionGraph, branchNameA));
+			responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(revisionGraph, branchNameB));	
 			
 			// transform the graph strategy to the httpheader
 			String graphStrategy = null;
@@ -1330,8 +1359,9 @@ public class Endpoint {
 			String uriA = "http://eatld.et.tu-dresden.de/branch-A";
 			String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 			
-			MergeManagement.createRevisionProgresses(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA), 
-					graphNameA, uriA, MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
+			MergeManagement.createRevisionProgresses(revisionGraph, graphName,
+					MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, graphName, commonRevision, revisionUriA), graphNameA, uriA, 
+					MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, graphName, commonRevision, revisionUriB), graphNameB, uriB);
 			
 			
 			// Create difference model

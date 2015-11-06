@@ -642,6 +642,7 @@ public class RevisionManagement {
 				+ " ?rev a rmo:Revision."
 				+ "	{?ref rdfs:label \"%s\"} UNION {?rev rmo:revisionNumber \"%s\"}" 
 				+ "} }", revisionGraph, referenceIdentifier, referenceIdentifier);
+		logger.debug(query);
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
@@ -741,7 +742,7 @@ public class RevisionManagement {
 			nextNumber = 0;
 		}
 		
-		while (existRevisionNumber(""+nextNumber,graphName)){
+		while (existRevisionNumber(""+nextNumber, revisionGraph)){
 			nextNumber++;		
 		}
 		
@@ -753,16 +754,16 @@ public class RevisionManagement {
 	 * @param revisionNumber
 	 * @return boolean*/
 	
-	public static boolean existRevisionNumber(final String revisionNumber, final String graphName) {
+	public static boolean existRevisionNumber(final String revisionNumber, final String revisionGraph) {
 		String queryASK = prefixes
 				+ String.format(""
 						+ "ASK {"
 						+ "	GRAPH <%s> { " 
-						+ " 	{ ?rev a rmo:Revision; rmo:revisionOf <%1$s>; rmo:revisionNumber \"%2$s\". }"
+						+ " 	{ ?rev a rmo:Revision; rmo:revisionNumber \"%1$s\". }"
 						+ "		UNION "
-						+ "		{?rev a rmo:Revision; rmo:revisionOf <%s1$>. ?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%2$s\" .}"
+						+ "		{?rev a rmo:Revision. ?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%1$s\" .}"
 						+ "} } ",
-						Config.revision_graph, graphName, revisionNumber);
+						revisionGraph, revisionNumber);
 		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
 	}
 	
@@ -946,8 +947,6 @@ public class RevisionManagement {
 						, Config.revision_graph, graphName, Config.revision_graph, graphName);
 		
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryDelete);
-		
-		
 	}
 
 	/**
@@ -1116,7 +1115,6 @@ public class RevisionManagement {
 		String query = String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
 				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
-		
 		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		
 	}
 	
@@ -1152,8 +1150,7 @@ public class RevisionManagement {
 				+ " ?ref a ?type;"
 				+ "		rdfs:label ?label;"
 				+ "		rmo:references ?rev."
-				+ " ?rev rmo:revisionOf ?graph;"
-				+ "			rmo:revisionNumber ?number . %n"
+				+ " ?rev rmo:revisionNumber ?number . %n"
 				+ "} %n"
 				+ "WHERE {"
 				+ " GRAPH <%s> {"
@@ -1164,20 +1161,19 @@ public class RevisionManagement {
 				+ " ?ref a ?type;"
 				+ "		rdfs:label ?label;%n"
 				+ "		rmo:references ?rev."
-				+ " ?rev rmo:revisionOf ?graph;"
-				+ "			rmo:revisionNumber ?number . %n"
+				+ " ?rev rmo:revisionNumber ?number . %n"
 				+ "FILTER (?type IN (rmo:Tag, rmo:Master, rmo:Branch)) %n"
 				+ "} }", Config.revision_graph, graphList);
 		String header = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryConstruct, FileUtils.langTurtle);
 		return header;
 	}
 	
-	public static String getFullGraphUri(String branchURI) {
+	public static String getFullGraphUri(final String revisionGraph, final String branchURI) {
 		String query = String.format(
 				  "SELECT ?fullGraphURI %n"
 			    + "WHERE { GRAPH <%s> {%n"
 				+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#fullGraph> ?fullGraphURI . %n"
-				+ "} }", Config.revision_graph, branchURI);
+				+ "} }", revisionGraph, branchURI);
 			
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		

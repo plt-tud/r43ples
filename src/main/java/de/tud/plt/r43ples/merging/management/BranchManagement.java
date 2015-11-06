@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
-import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 
@@ -33,18 +33,16 @@ public class BranchManagement {
 		logger.info("Get all branch names of graph "+ graphName);
 		ArrayList<String> list = new ArrayList<String>();	
 		if (graphName != null) {
-			
+			String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
 			String sparqlQuery = prefixes
 					+ String.format(
 					  "SELECT DISTINCT ?label %n"
 					+ "FROM <%s> %n"
 					+ "WHERE { %n"
-					+ "	?branch a rmo:Branch ; %n"
-					+ "		rdfs:label ?label . %n"
-					+ "	?rev rmo:belongsTo ?branch ;"
-					+ "		rmo:revisionOf <%s> . %n"
+					+ "	?branch a rmo:Branch ;"
+					+ "		rdfs:label ?label . "
 					+ "} %n"
-					+ "ORDER BY ?label",Config.revision_graph, graphName);
+					+ "ORDER BY ?label", revisionGraph);
 			
 			ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(sparqlQuery);
 			while (results.hasNext()) {

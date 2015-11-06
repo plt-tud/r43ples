@@ -309,7 +309,7 @@ public class Interface {
 			
 		
 		// Check if A and B are different revisions
-		if (RevisionManagement.getRevisionNumber(graphName, branchNameA).equals(RevisionManagement.getRevisionNumber(graphName, branchNameB))) {
+		if (RevisionManagement.getRevisionNumber(revisionGraph, branchNameA).equals(RevisionManagement.getRevisionNumber(revisionGraph, branchNameB))) {
 			// Branches are equal - throw error
 			throw new InternalErrorException("Specified branches are equal: " + sparqlQuery);
 		}
@@ -347,7 +347,7 @@ public class Interface {
 		}
 
 		// Get the common revision with shortest path
-		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionUriA, revisionUriB);
+		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA, revisionUriB);
 		
 		// Create the revision progress for A and B
 		String graphNameA = graphName + "-RM-REVISION-PROGRESS-A";
@@ -357,7 +357,9 @@ public class Interface {
 		String uriA = "http://eatld.et.tu-dresden.de/branch-A";
 		String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 		
-		MergeManagement.createRevisionProgresses(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA), graphNameA, uriA, MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
+		MergeManagement.createRevisionProgresses(revisionGraph, graphName,
+				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, graphName, commonRevision, revisionUriA), graphNameA, uriA, 
+				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, graphName, commonRevision, revisionUriB), graphNameB, uriB);
 		
 		// Create difference model
 		MergeManagement.createDifferenceTripleModel(graphName,  graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI);

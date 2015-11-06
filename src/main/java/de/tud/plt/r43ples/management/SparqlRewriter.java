@@ -221,7 +221,7 @@ public class SparqlRewriter {
 
 			Node g_delete_set_full_graph = Var.alloc("g_delete_set_full_graph_" + statement_i);
 			Node g_add_set = Var.alloc("g_add_set_" + statement_i);
-			Node g_revisiongraph = NodeFactory.createURI(Config.revision_graph);			
+			Node g_revisiongraph = NodeFactory.createURI(RevisionManagement.getRevisionGraph(graphName));			
 			
 			Var var_r_delete_set = Var.alloc("r_delete_set_" + statement_i);
 			Var var_r_add_set = Var.alloc("r_add_set_" + statement_i);

@@ -69,7 +69,7 @@ public class RebaseControl {
 	}
 	
 	/**for each revision in branchA , create a patch */
-	public void createPatchGroupOfBranch(String basisRevisionUri, LinkedList<String> revisionList) {
+	public void createPatchGroupOfBranch(String revisionGraph, String basisRevisionUri, LinkedList<String> revisionList) {
 		
 		LinkedHashMap<String, Patch> patchMap = new LinkedHashMap<String, Patch>();
 		
@@ -77,19 +77,19 @@ public class RebaseControl {
 		
 		while(rIter.hasNext()) {
 			String revisionUri = rIter.next();
-			String commitUri = StrategyManagement.getCommitUri(revisionUri);
+			String commitUri = StrategyManagement.getCommitUri(revisionGraph, revisionUri);
 			
-			String addSet = StrategyManagement.getaddSetUri(revisionUri);
-			String deleteSet = StrategyManagement.getdeleteSetUri(revisionUri);
+			String addSet = StrategyManagement.getaddSetUri(revisionGraph, revisionUri);
+			String deleteSet = StrategyManagement.getdeleteSetUri(revisionGraph, revisionUri);
 			
-			String patchNumber = StrategyManagement.getRevisionNumber(revisionUri);
-			String patchUser = StrategyManagement.getPatchUserUri(commitUri);
-			String patchMessage = StrategyManagement.getPatchMessage(commitUri);
+			String patchNumber = StrategyManagement.getRevisionNumber(revisionGraph, revisionUri);
+			String patchUser = StrategyManagement.getPatchUserUri(revisionGraph, commitUri);
+			String patchMessage = StrategyManagement.getPatchMessage(revisionGraph, commitUri);
 			
 			patchMap.put(patchNumber, new Patch(patchNumber, patchUser, patchMessage, addSet, deleteSet));			
 		}
 		
-		String basisRevisionNumber = StrategyManagement.getRevisionNumber(basisRevisionUri);
+		String basisRevisionNumber = StrategyManagement.getRevisionNumber(revisionGraph, basisRevisionUri);
 		
 		patchGroup.setBasisRevisionNumber(basisRevisionNumber);
 		patchGroup.setPatchMap(patchMap);
@@ -116,7 +116,8 @@ public class RebaseControl {
 			Entry<String, Patch> pEntry = pIter.next();
 			Patch patch = pEntry.getValue();
 		
-			String newRevisionNumber = RevisionManagement.createNewRevisionWithPatch(graphName, patch.getAddedSetUri(), patch.getRemovedSetUri(),
+			String newRevisionNumber = RevisionManagement.createNewRevisionWithPatch(
+					graphName, patch.getAddedSetUri(), patch.getRemovedSetUri(),
 					patch.getPatchUser(), patch.getPatchMessage(), basisRevisionNumber);
 			
 			basisRevisionNumber = newRevisionNumber;

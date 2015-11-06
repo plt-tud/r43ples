@@ -18,6 +18,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
+import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.revisionTree.Commit;
 import de.tud.plt.r43ples.revisionTree.StructuredTree;
 
@@ -96,7 +97,8 @@ public class VisualisationBatik {
 		StringWriter sw = new StringWriter();
 
 		// get graph tree
-		StructuredTree graphTree = StructuredTree.getTreeOfGraph(graphName);
+		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+		StructuredTree graphTree = StructuredTree.getTreeOfGraph(revisionGraph);
 		VisualisationBatik visu = new VisualisationBatik(graphTree);
 		
 		Map<String, Object> scope = new HashMap<String, Object>();

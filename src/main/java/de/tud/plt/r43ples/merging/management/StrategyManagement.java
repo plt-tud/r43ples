@@ -10,7 +10,6 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.MergeManagement;
 import de.tud.plt.r43ples.merging.RebaseQueryTypeEnum;
@@ -37,12 +36,12 @@ public class StrategyManagement {
 	 * @param last revision uri of branch A
 	 * @param last revision uri of branch B
 	 * */
-	public static boolean isFastForward(String revisionBranchA , String revisionBranchB){
+	public static boolean isFastForward(String revisionGraph, String revisionBranchA , String revisionBranchB){
 		String query = prefixes
 				+ String.format("ASK { GRAPH <%s> { "
 						+ "<%s> prov:wasDerivedFrom+ <%s> ."
 						+ " }} ",
-						Config.revision_graph, revisionBranchA, revisionBranchB);
+						revisionGraph, revisionBranchA, revisionBranchB);
 			
 		return TripleStoreInterfaceSingleton.get().executeAskQuery(query);	
 	}
@@ -53,12 +52,12 @@ public class StrategyManagement {
 	 * @param uri of branch B
 	 * @param uri of branch A
 	 *  */
-	public static void moveBranchReference(String branchNameB, String revisionUriB, String revisionUriA){
+	public static void moveBranchReference(final String revisionGraph, String branchNameB, String revisionUriB, String revisionUriA){
 		// delete old reference
 		String query = prefixes + String.format("DELETE DATA { GRAPH <%s> { <%s> rmo:references <%s>. } };%n",
-				Config.revision_graph, branchNameB, revisionUriB);
+				revisionGraph, branchNameB, revisionUriB);
 		// added new reference
-		query += String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:references <%s>. } } ;%n", Config.revision_graph,
+		query += String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:references <%s>. } } ;%n", revisionGraph,
 				branchNameB, revisionUriA);
 		
 		logger.info("move info" + query);
@@ -72,14 +71,15 @@ public class StrategyManagement {
 	 * @param uri of last revision of branch B
 	 * @param uri of last revision of branch A
 	 * */
-	public static void updatebelongsTo(String branchUriB, String revisionUriB, String revisionUriA ){
-		LinkedList<String> revisionList =  MergeManagement.getPathBetweenStartAndTargetRevision(revisionUriB, revisionUriA);
+	public static void updatebelongsTo(final String revisionGraph, final String graphName, String branchUriB, String revisionUriB, String revisionUriA ){
+		LinkedList<String> revisionList =  MergeManagement.getPathBetweenStartAndTargetRevision(
+				revisionGraph, graphName, revisionUriB, revisionUriA);
 		
 		Iterator<String> riter = revisionList.iterator();
 		while(riter.hasNext()) {
 			String revision = riter.next();
 			String query = prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:belongsTo <%s>. } };%n",
-					Config.revision_graph, revision, branchUriB);
+					revisionGraph, revision, branchUriB);
 			
 			logger.debug("revisionlist info" + revision);
 			logger.debug("updated info" + query);
@@ -190,7 +190,7 @@ public class StrategyManagement {
 	
 	/**get commitUri of the revisionUri
 	 * @param uri of the revision*/
-	public static String getCommitUri(String revisionUri){
+	public static String getCommitUri(String revisionGraph, String revisionUri){
 		
 		String query = String.format(
 				  "PREFIX prov: <http://www.w3.org/ns/prov#> %n"
@@ -199,7 +199,7 @@ public class StrategyManagement {
 				+ "	GRAPH <%s> { %n"
 				+ "		?commit prov:generated <%s>."
 				+ " }"
-				+ "}", Config.revision_graph, revisionUri);
+				+ "}", revisionGraph, revisionUri);
 		
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		
@@ -214,12 +214,12 @@ public class StrategyManagement {
 	
 	/**get delta added with versionUri
 	 * @param uri of the added set*/
-	public static String getaddSetUri(String revisionUri) {
+	public static String getaddSetUri(String revisionGraph, String revisionUri) {
 		String query = prefixes + String.format(""
 				+"SELECT DISTINCT ?addSet %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"   {<%s> rmo:addSet ?addSet. } }%n",
-				Config.revision_graph, revisionUri);
+				revisionGraph, revisionUri);
 		
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		
@@ -235,12 +235,12 @@ public class StrategyManagement {
 	
 	/** get the delta removed width versionUri
 	 * @param uri of the deleted set*/
-	public static String getdeleteSetUri(String revisionUri) {
+	public static String getdeleteSetUri(String revisionGraph, String revisionUri) {
 		String query = prefixes + String.format(""
 				+"SELECT DISTINCT ?deleteSet %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"   {<%s> rmo:deleteSet ?deleteSet. } } %n",
-				Config.revision_graph, revisionUri);
+				revisionGraph, revisionUri);
 		
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		
@@ -287,12 +287,12 @@ public class StrategyManagement {
 	
 	/** get number of revision
 	 * @param uri of revision*/
-	public static String getRevisionNumber(String revisionUri){
+	public static String getRevisionNumber(String revisionGraph, String revisionUri){
 		String query = prefixes + String.format(""
 				+"SELECT DISTINCT ?revisionNumber %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"   {<%s> rmo:revisionNumber ?revisionNumber. } }%n",
-				Config.revision_graph, revisionUri);
+				revisionGraph, revisionUri);
 		
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		
@@ -307,12 +307,12 @@ public class StrategyManagement {
 	
 	/** get client name
 	 * @param uri of commit */
-	public static String getPatchUserUri(String commitUri) {
+	public static String getPatchUserUri(String revisionGraph, String commitUri) {
 		String query = prefixes + String.format(""
 				+"SELECT DISTINCT ?user %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"   {<%s> prov:wasAssociatedWith ?user. } }%n",
-				Config.revision_graph, commitUri);
+				revisionGraph, commitUri);
 		
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		
@@ -329,12 +329,12 @@ public class StrategyManagement {
 	
 	/** get client message
 	 * @param uri of commit*/
-	public static String getPatchMessage(String commitUri) {
+	public static String getPatchMessage(String revisionGraph, String commitUri) {
 		String query = prefixes + String.format(""
 				+"SELECT DISTINCT ?message %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"   {<%s> dc-terms:title ?message. } }%n",
-				Config.revision_graph, commitUri);
+				revisionGraph, commitUri);
 		
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		

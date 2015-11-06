@@ -18,6 +18,7 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
+import de.tud.plt.r43ples.webservice.Endpoint;
 
 
 public class TestThreeWayMerge {
@@ -26,6 +27,8 @@ public class TestThreeWayMerge {
 	private static String graphName;
 	/** The user. **/
 	private static String user = "xinyu";
+	
+	private final Endpoint 	ep = new Endpoint();
 	
 	
 	/**
@@ -66,19 +69,19 @@ public class TestThreeWayMerge {
 	@Test
 	public void testCreatedGraph() throws SAXException, InternalErrorException, IOException {
 		// Test branch B1
-		String result1 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B1"));
+		String result1 = ep.sparql(createSelectQuery(graphName, "B1")).getEntity().toString();
 		String expected1 = ResourceManagement.getContentFromResource("threeway/response-B1.xml");
 		assertXMLEqual(expected1, result1);
 		
 		
 		// Test branch B2
-		String result3 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B2"));
+		String result3 = ep.sparql(createSelectQuery(graphName, "B2")).getEntity().toString();
 		String expected3 = ResourceManagement.getContentFromResource("threeway/response-B2.xml");
 		assertXMLEqual(expected3, result3);
 		
 		
 		// Test branch MASTER
-		String result5 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "master"));
+		String result5 = ep.sparql(createSelectQuery(graphName, "master")).getEntity().toString();
 		String expected5 = ResourceManagement.getContentFromResource("threeway/response-MASTER.xml");
 		assertXMLEqual(expected5, result5);
 	}
@@ -98,9 +101,9 @@ public class TestThreeWayMerge {
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
 		// Merge B1 into B2
-		TestMerge.executeR43plesQuery(createAutoMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
+		ep.sparql(createAutoMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
 		// Test branch B1
-		String result1 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B2"));
+		String result1 = ep.sparql(createSelectQuery(graphName, "B2")).getEntity().toString();
 		
 		String expected1 = ResourceManagement.getContentFromResource("threeway/auto/response-B1-into-B2.xml");
 		assertXMLEqual(expected1, result1);
@@ -122,17 +125,17 @@ public class TestThreeWayMerge {
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
 		// conflicts in merging, therefore no success
-		TestMerge.executeR43plesQueryResponse(createCommonMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
+		ep.sparql(createCommonMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
 		
 		
 		// Merge B1 into B2 (WITH)
 		String triples = "<http://example.com/testS> <http://example.com/testP> \"D\". \n";
 		
-		Response queryResult1 = TestMerge.executeR43plesQueryResponse(createMergeWithQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
+		Response queryResult1 = ep.sparql(createMergeWithQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
 		Assert.assertNull(queryResult1.getEntity());
 
 		// Test branch B2
-		String result1 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B2"));
+		String result1 = ep.sparql(createSelectQuery(graphName, "B2")).getEntity().toString();
 		
 
 		String expected1 = ResourceManagement.getContentFromResource("threeway/common/response-B1-into-B2.xml");
@@ -163,10 +166,10 @@ public class TestThreeWayMerge {
 				+ "<http://example.com/testS> <http://example.com/testP> \"I\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP> \"J\". \n";
 		
-		TestMerge.executeR43plesQuery(createManualMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
+		ep.sparql(createManualMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
 		
 		// Test branch B2
-		String result1 = TestMerge.executeR43plesQuery(createSelectQuery(graphName, "B2"));
+		String result1 = ep.sparql(createSelectQuery(graphName, "B2")).getEntity().toString();
 		String expected1 = ResourceManagement.getContentFromResource("threeway/manual/response-B1-into-B2.xml");
 		assertXMLEqual(expected1, result1);
 		
