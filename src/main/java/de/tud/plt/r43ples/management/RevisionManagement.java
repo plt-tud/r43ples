@@ -236,6 +236,46 @@ public class RevisionManagement {
 		return newRevisionNumber;
 	}
 
+	/**
+	 * Add new revision from exisiting changeset in triplestore.
+	 * Applies changeset to full graph and add meta information in revision graph
+	 * 
+	 * @param user
+	 * @param commitMessage
+	 * @param graphName
+	 * @param revisionName
+	 * @param newRevisionNumber
+	 * @param referenceFullGraph
+	 * @param addSetGraphUri
+	 * @param removeSetGraphUri
+	 * @throws InternalErrorException
+	 */
+	protected static void addNewRevisionFromChangeSet(final String user, final String commitMessage,
+			String graphName, String revisionName, String newRevisionNumber, String referenceFullGraph,
+			String addSetGraphUri, String removeSetGraphUri) throws InternalErrorException {
+		// remove doubled data
+		// (already existing triples in add set; not existing triples in
+		// delete set)
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
+						"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }", addSetGraphUri,
+						referenceFullGraph));
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
+				"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } MINUS { GRAPH <%s> { ?s ?p ?o. } } }",
+				removeSetGraphUri, removeSetGraphUri, referenceFullGraph));
+
+		// merge change sets into reference graph
+		// (copy add set to reference graph; remove delete set from reference graph)
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
+					"INSERT { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }",
+					referenceFullGraph,	addSetGraphUri));
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
+				"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }", 
+				referenceFullGraph,	removeSetGraphUri));
+
+		// add meta information to R43ples
+		RevisionManagement.addMetaInformationForNewRevision(graphName, user, commitMessage, revisionName,
+				newRevisionNumber, addSetGraphUri, removeSetGraphUri);
+	}
 	
 	
 	
@@ -299,6 +339,25 @@ public class RevisionManagement {
 			RevisionManagement.executeINSERT(referenceGraph, addedAsNTriples);
 		}
 		return newRevisionNumber;
+	}
+	
+	/**
+	 * 
+	 * @param graphName
+	 * @param user
+	 * @param commitMessage
+	 * @param usedRevisionNumber
+	 * @param newRevisionNumber
+	 * @param addSetGraphUri
+	 * @param removeSetGraphUri
+	 * @throws InternalErrorException
+	 */
+	public static void addMetaInformationForNewRevision(final String graphName, final String user,
+			final String commitMessage, final String usedRevisionNumber,
+			final String newRevisionNumber, final String addSetGraphUri, final String removeSetGraphUri) throws InternalErrorException {
+		ArrayList<String> list = new ArrayList<String>();
+		list.add(usedRevisionNumber);
+		addMetaInformationForNewRevision(graphName, user, commitMessage, list, newRevisionNumber, addSetGraphUri, removeSetGraphUri);
 	}
 
 	/**
@@ -877,7 +936,7 @@ public class RevisionManagement {
 	 * 
 	 * @return result set
 	 */
-	public static ResultSet getRevisedGraphsSparql() {
+	public static ResultSet getRevisedGraphs() {
 		String sparqlQuery = prefixes
 				+ String.format("" 
 						+ "SELECT DISTINCT ?graph " 
@@ -893,9 +952,9 @@ public class RevisionManagement {
 	 * 
 	 * @return list of strings containing the revised graphs of R43ples
 	 */
-	public static ArrayList<String> getRevisedGraphs() {
+	public static ArrayList<String> getRevisedGraphsList() {
 		ArrayList<String> list = new ArrayList<String>();
-		ResultSet results = getRevisedGraphsSparql();
+		ResultSet results = getRevisedGraphs();
 		while (results.hasNext()) {
 			QuerySolution qs = results.next();
 			list.add(qs.getResource("graph").toString());

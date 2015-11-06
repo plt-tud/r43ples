@@ -225,7 +225,7 @@ public class SampleDataSet {
 	 * ---X----------+ (Master)
 	 * DEL: -        |
 	 *               |  ADD: H              ADD: I    ADD: J
-	 *               +-----X---------------------X---------X----- (Branch B2)  rebase unfreundlich by C
+	 *               +-----X---------------------X---------X----- (Branch B2)
 	 *                  DEL: C                DEL: -    DEL: -
 	 * 
 	 * 
