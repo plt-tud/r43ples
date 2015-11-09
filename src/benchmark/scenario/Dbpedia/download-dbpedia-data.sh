@@ -25,6 +25,8 @@ wget http://downloads.dbpedia.org/3.9/dbpedia_3.9.owl.bz2
 #     void:properties 73940 ; 
 #     void:distinctObjects 103060313 . 
 #wget http://live.dbpedia.org/dumps/dbpedia_2013_07_18.nt.bz2
+
+# ca. 391 million triples (uncompresses 63 GB; compressed 4GB)
 wget http://live.dbpedia.org/dumps/dbpedia_2015_06_02.nt.gz
 
 

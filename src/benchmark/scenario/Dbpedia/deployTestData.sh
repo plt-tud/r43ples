@@ -15,6 +15,7 @@ stardog-admin db create -n dbpedia -o "strict.parsing=false" -v
 
 # add ontology data
 stardog data add dbpedia -v --named-graph $GRAPH data/dbpedia_3.9.owl
+# Added 391.015.190 triples in 67:01:30.856 (ca. 32 GB dataset seize)
 stardog data add dbpedia -v --named-graph $GRAPH data/dbpedia_2013_07_18.nt
 
 
