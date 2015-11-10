@@ -1,6 +1,7 @@
 package de.tud.plt.r43ples.management;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -11,9 +12,9 @@ import com.hp.hpl.jena.query.ResultSet;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
-import de.tud.plt.r43ples.merge.MergeManagement;
-import de.tud.plt.r43ples.merge.MergeQueryTypeEnum;
-import de.tud.plt.r43ples.merge.MergeResult;
+import de.tud.plt.r43ples.merging.MergeManagement;
+import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
+import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 public class Interface {
@@ -27,14 +28,14 @@ public class Interface {
 	 * 
 	 * @param query R43ples query string
 	 * @param format serialisation format of the result 
-	 * @param join_option JOIN option
+	 * @param query_rewriting option if query rewriting should be enabled
 	 * @return string containing result of the query
 	 * @throws InternalErrorException
 	 */
-	public static String sparqlSelectConstructAsk(final String query, final String format, final boolean join_option)
+	public static String sparqlSelectConstructAsk(final String query, final String format, final boolean query_rewriting)
 			throws InternalErrorException {
 		String result;
-		if (join_option) {
+		if (query_rewriting) {
 			String query_rewritten = SparqlRewriter.rewriteQuery(query);
 			result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query_rewritten, format);
 		}
@@ -102,43 +103,54 @@ public class Interface {
 		final Pattern patternGraphWithRevision = Pattern.compile(
 				"GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
 				patternModifier);
-		logger.info("Update detected");
+		logger.debug("SPARQL Update detected");
 		
 		// write to add and delete sets
 		// (replace graph names in query)
 		String queryM = query;
+		HashMap<String, String> nextRevisionNumbers = new HashMap<String, String>();
 		Matcher m = patternUpdateRevision.matcher(queryM);
+		
 		while (m.find()) {
 			String graphName = m.group("graph");
-			String revisionName = m.group("revision").toLowerCase(); 	// can contain revision
-																		// numbers or reference
-																		// names
-			String action = m.group("action");
-			String data = m.group("data");
-			if (data == null)
-				data = "";
+			String revisionName = m.group("revision").toLowerCase(); 	// can contain revision numbers or reference names
+			String action = m.group("action");															
 			
-			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
-			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
-			String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
-			if (!RevisionManagement.isBranch(graphName, revisionName)) {
-				throw new InternalErrorException("Revision is not referenced by a branch");
-			}
-			if (action.equalsIgnoreCase("INSERT")) {
-				queryM = m.replaceFirst(String.format("INSERT %s { GRAPH <%s>", data, addSetGraphUri));
-			} else if (action.equalsIgnoreCase("DELETE")) {
-				queryM = m.replaceFirst(String.format("INSERT %s { GRAPH <%s>", data, removeSetGraphUri));
-			} else if (action.equalsIgnoreCase("WHERE")) {
-				// TODO: replace generateFullGraphOfRevision with SPARQL JOIN
+			if (action.equalsIgnoreCase("WHERE")) {
+				// TODO: replace generateFullGraphOfRevision with query rewriting option
 				String tempGraphName = graphName + "-temp";
 				RevisionManagement.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
 				queryM = m.replaceFirst(String.format("WHERE { GRAPH <%s>", tempGraphName));
+			}
+			else {
+				if (!RevisionManagement.isBranch(graphName, revisionName)) {
+					throw new InternalErrorException("Revision is not referenced by a branch");
+				}
+				String newRevisionNumber;
+				if (nextRevisionNumbers.containsKey(graphName)) {
+					newRevisionNumber = nextRevisionNumbers.get(graphName);
+				}
+				else {
+					newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName);
+					nextRevisionNumbers.put(graphName, newRevisionNumber);
+				}
+				String addSetGraphUri = graphName + "-addSet-" + newRevisionNumber;
+				String removeSetGraphUri = graphName + "-deleteSet-" + newRevisionNumber;
+				
+				String data = m.group("data");
+				if (data == null)
+					data = "";
+				if (action.equalsIgnoreCase("INSERT")) {
+					queryM = m.replaceFirst(String.format("INSERT %s { GRAPH <%s>", data, addSetGraphUri));
+				} else if (action.equalsIgnoreCase("DELETE")) {
+					queryM = m.replaceFirst(String.format("INSERT %s { GRAPH <%s>", data, removeSetGraphUri));
+				}
 			}
 			m = patternUpdateRevision.matcher(queryM);
 		}
 		
 		// Remove empty insert clauses which otherwise will lead to errors
-		m= patternEmptyGraphPattern.matcher(queryM);
+		m = patternEmptyGraphPattern.matcher(queryM);
 		queryM = m.replaceAll("");
 
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryM);
@@ -151,10 +163,10 @@ public class Interface {
 																		// numbers or reference
 																		// names
 			// General variables
-			String newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName, revisionName);
+			String newRevisionNumber = nextRevisionNumbers.get(graphName);
 			String referenceFullGraph = RevisionManagement.getReferenceGraph(graphName, revisionName);
-			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
-			String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
+			String addSetGraphUri = graphName + "-addSet-" + newRevisionNumber;
+			String removeSetGraphUri = graphName + "-deleteSet-" + newRevisionNumber;
 
 			// remove doubled data
 			// (already existing triples in add set; not existing triples in
@@ -307,8 +319,6 @@ public class Interface {
 		}
 
 		
-		
-		
 		// Differ between MERGE query with specified SDD and without SDD			
 		String usedSDDURI = null;
 		if (sdd != null) {
@@ -353,19 +363,19 @@ public class Interface {
 		
 		// Differ between the different merge queries
 		if ((action != null) && (action.equalsIgnoreCase("AUTO")) && (with == null) && (triples == null)) {
-			logger.info("AUTO MERGE query detected");
+			logger.debug("AUTO MERGE query detected");
 			// Create the merged revision
 			mresult.newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.AUTO, "");
 		} else if ((action != null) && (action.equalsIgnoreCase("MANUAL")) && (with != null) && (triples != null)) {
-			logger.info("MANUAL MERGE query detected");
+			logger.debug("MANUAL MERGE query detected");
 			// Create the merged revision
 			mresult.newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.MANUAL, triples);
 		} else if ((action == null) && (with != null) && (triples != null)) {
-			logger.info("MERGE WITH query detected");
+			logger.debug("MERGE WITH query detected");
 			// Create the merged revision
 			mresult.newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.WITH, triples);
 		} else if ((action == null) && (with == null) && (triples == null)) {
-			logger.info("MERGE query detected");
+			logger.debug("MERGE query detected");
 			// Check if difference model contains conflicts
 			String queryASK = String.format(
 					  "ASK { %n"

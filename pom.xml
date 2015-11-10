@@ -60,13 +60,13 @@
 		<dependency>
 			<groupId>org.glassfish.jersey.containers</groupId>
 			<artifactId>jersey-container-grizzly2-http</artifactId>
-			<version>2.17</version>
+			<version>2.21</version>
 		</dependency>
 		
 		<dependency>
 			<groupId>org.glassfish.jersey.ext</groupId>
 			<artifactId>jersey-mvc-mustache</artifactId>
-			<version>2.17</version>
+			<version>2.21</version>
 		</dependency>
 
 		<dependency>
@@ -140,13 +140,28 @@
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-json-jackson</artifactId>
-			<version>2.17</version>
+			<version>2.21</version>
 		</dependency>
 		<dependency>
             <groupId>org.glassfish.jersey.test-framework.providers</groupId>
 		    <artifactId>jersey-test-framework-provider-grizzly2</artifactId>
-		    <version>2.18</version>
+		    <version>2.21</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+		    <groupId>org.glassfish.jersey.media</groupId>
+		    <artifactId>jersey-media-moxy</artifactId>
+		    <version>2.21</version>
+		</dependency>
+        <dependency>
+        	<groupId>log4j</groupId>
+        	<artifactId>log4j</artifactId>
+        	<version>1.2.12</version>
+        </dependency>
+        <dependency>
+        	<groupId>org.apache.jena</groupId>
+        	<artifactId>jena-core</artifactId>
+        	<version>2.12.1</version>
         </dependency>
 	</dependencies>
 
@@ -271,8 +286,7 @@
 									<mapper>
 										<type>perm</type>
 										<prefix>/usr/share/${project.artifactId}</prefix>
-										<user>loader</user>
-										<group>loader</group>
+										<user>r43ples</user>
 									</mapper>
 								</data>
 
@@ -282,6 +296,18 @@
 									<linkName>/usr/share/${project.artifactId}/${project.artifactId}.jar</linkName>
 									<linkTarget>/usr/share/${project.artifactId}/${project.build.finalName}-jar-with-dependencies.jar</linkTarget>
 								</data>
+                                                                
+                                                                <data>
+                                                                    FIXME
+									<src>${project.build.directory}/classes/r43ples.dist.conf</src>
+                                                                    FIXME
+									<type>file</type>
+									<mapper>
+										<type>perm</type>
+										<prefix>/etc/default/r43ples</prefix>
+										<user>r43ples</user>
+									</mapper>
+								</data>
 
 								<data>
 									<src>${basedir}/src/deb/init.d</src>
@@ -289,8 +315,7 @@
 									<mapper>
 										<type>perm</type>
 										<prefix>/etc/init.d</prefix>
-										<user>loader</user>
-										<group>loader</group>
+										<user>r43ples</user>
 										<filemode>755</filemode>
 									</mapper>
 								</data>

@@ -11,7 +11,7 @@ WHERE{
                 rmo:fullGraph  ?g_delete_set_full_graph.}
         UNION
         {?r_delete_set  a  rmo:Revision ;
-            rmo:deltaRemoved  ?g_delete_set_full_graph .
+            rmo:deleteSet  ?g_delete_set_full_graph .
         FILTER ( ?r_delete_set IN () ) }
     }
     
@@ -20,7 +20,7 @@ WHERE{
         GRAPH <http://eatld.et.tu-dresden.de/r43ples-revisions> {
             ?r_delete_set prov:wasDerivedFrom* ?r_add_set.
             ?r_add_set  a  rmo:Revision ;
-                  rmo:deltaAdded  ?g_add_set .
+                  rmo:addSet  ?g_add_set .
             FILTER ( ?r_add_set IN () )
         }
     }

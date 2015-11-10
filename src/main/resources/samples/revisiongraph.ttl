@@ -30,8 +30,8 @@ pers:test_user	rdf:type	prov:Person ;
 	rmo:revisionOf	<http://test.com/r43ples-dataset> ;
 	prov:wasDerivedFrom	<http://test.com/r43ples-dataset-revision-0> ;
 	rmo:revisionNumber	"1" ;
-	rmo:deltaAdded	<http://test.com/r43ples-dataset-delta-added-1> ;
-	rmo:deltaRemoved	<http://test.com/r43ples-dataset-delta-removed-1> .
+	rmo:addSet	<http://test.com/r43ples-dataset-addSet-1> ;
+	rmo:deleteSet	<http://test.com/r43ples-dataset-deleteSet-1> .
 	
 <http://test.com/r43ples-dataset-commit-2>	rdf:type	rmo:Commit ;
 	prov:generated	<http://test.com/r43ples-dataset-revision-2> ;
@@ -44,8 +44,8 @@ pers:test_user	rdf:type	prov:Person ;
 	rmo:revisionOf	<http://test.com/r43ples-dataset> ;
 	prov:wasDerivedFrom	<http://test.com/r43ples-dataset-revision-1> ;
 	rmo:revisionNumber	"2" ;
-	rmo:deltaAdded	<http://test.com/r43ples-dataset-delta-added-2> ;
-	rmo:deltaRemoved	<http://test.com/r43ples-dataset-delta-removed-2> .
+	rmo:addSet	<http://test.com/r43ples-dataset-addSet-2> ;
+	rmo:deleteSet	<http://test.com/r43ples-dataset-deleteSet-2> .
 	
 <http://test.com/r43ples-dataset-commit-3>	rdf:type	rmo:Commit ;
 	prov:generated	<http://test.com/r43ples-dataset-revision-3> ;
@@ -58,8 +58,8 @@ pers:test_user	rdf:type	prov:Person ;
 	rmo:revisionOf	<http://test.com/r43ples-dataset> ;
 	prov:wasDerivedFrom	<http://test.com/r43ples-dataset-revision-2> ;
 	rmo:revisionNumber	"3" ;
-	rmo:deltaAdded	<http://test.com/r43ples-dataset-delta-added-3> ;
-	rmo:deltaRemoved	<http://test.com/r43ples-dataset-delta-removed-3> .
+	rmo:addSet	<http://test.com/r43ples-dataset-addSet-3> ;
+	rmo:deleteSet	<http://test.com/r43ples-dataset-deleteSet-3> .
 	
 <http://test.com/r43ples-dataset-commit-4>	rdf:type	rmo:Commit ;
 	prov:generated	<http://test.com/r43ples-dataset-revision-4> ;
@@ -72,5 +72,5 @@ pers:test_user	rdf:type	prov:Person ;
 	rmo:revisionOf	<http://test.com/r43ples-dataset> ;
 	prov:wasDerivedFrom	<http://test.com/r43ples-dataset-revision-3> ;
 	rmo:revisionNumber	"4" ;
-	rmo:deltaAdded	<http://test.com/r43ples-dataset-delta-added-4> ;
-	rmo:deltaRemoved	<http://test.com/r43ples-dataset-delta-removed-4> .
+	rmo:addSet	<http://test.com/r43ples-dataset-addSet-4> ;
+	rmo:deleteSet	<http://test.com/r43ples-dataset-deleteSet-4> .

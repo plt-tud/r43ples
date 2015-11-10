@@ -21,24 +21,7 @@ public class DatasetGenerationManagement {
 	private static Endpoint ep = new Endpoint();
 	
 	
-	/**
-	 * Create new graph.
-	 * 
-	 * @param graphName the graph name
-	 * @throws InternalErrorException 
-	 */
-	public static void createNewGraph(String graphName) throws InternalErrorException {
-		// Purge silent example graph
-		String query = String.format("DROP SILENT GRAPH <%s>", graphName);
-		ep.sparql(MediaType.TEXT_HTML, query, false);
-		
-		// Create new example graph
-		query = String.format("CREATE SILENT GRAPH <%s>", graphName);
-		ep.sparql(MediaType.TEXT_HTML, query);
-		
-		logger.info("New graph <" + graphName +"> created");
-	}
-	
+
 	
 	/**
 	 * Create new branch.
@@ -69,6 +52,8 @@ public class DatasetGenerationManagement {
 	 * @param revision the revision
 	 * @param triples the triples to insert
 	 * @throws InternalErrorException 
+	 * @throws IOException 
+	 * @throws TemplateException 
 	 */
 	 public static void executeInsertQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
 		String query = String.format(

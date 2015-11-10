@@ -46,7 +46,6 @@ public class TestMerge {
 	/**
 	 * Set up.
 	 * @throws InternalErrorException 
-	
 	 */
 	@Before
 	public void setUp() throws InternalErrorException {
@@ -62,6 +61,7 @@ public class TestMerge {
 	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
+	 * @throws TemplateException 
 	 */
 	@Test
 	public void testCreatedGraph() throws IOException, SAXException, InternalErrorException {
@@ -97,7 +97,7 @@ public class TestMerge {
 	 * 
 	 * @throws IOException 
 	 * @throws SAXException 
-	 * @throws InternalErrorException 
+	 * @throws InternalErrorException  
 	 */
 	@Test
 	public void testAutoMerge() throws SAXException, IOException, InternalErrorException {
@@ -208,12 +208,12 @@ public class TestMerge {
 	/**
 	 * Test MANUAL-MERGE.
 	 * 
-	 * @throws IOException 
 	 * @throws SAXException 
 	 * @throws InternalErrorException 
+	 * @throws IOException 
 	 */
 	@Test
-	public void testManualMerge() throws IOException, SAXException, InternalErrorException {
+	public void testManualMerge() throws SAXException, InternalErrorException, IOException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		

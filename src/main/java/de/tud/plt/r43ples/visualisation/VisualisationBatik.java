@@ -91,7 +91,6 @@ public class VisualisationBatik {
 	}
 
 	public static String getHtmlOutput(String graphName) {
-		// initialise mustache template
 		MustacheFactory mf = new DefaultMustacheFactory();
 		Mustache mustache = mf.compile("templates/graphvisualisation_batik.mustache");
 		StringWriter sw = new StringWriter();

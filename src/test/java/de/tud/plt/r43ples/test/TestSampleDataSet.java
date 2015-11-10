@@ -19,19 +19,19 @@ public class TestSampleDataSet {
 
 	@Test
 	public final void testCreateSampleDataset1() throws InternalErrorException {
-		String graph = SampleDataSet.createSampleDataset1();
+		String graph = SampleDataSet.createSampleDataset1().graphName;
 		Assert.assertEquals("http://test.com/r43ples-dataset-1", graph);
 	}
 
 	@Test
 	public final void testCreateSampleDataset2() throws InternalErrorException {
-		String graph = SampleDataSet.createSampleDataset2();
+		String graph = SampleDataSet.createSampleDataset2().graphName;
 		Assert.assertEquals("http://test.com/r43ples-dataset-2", graph);
 	}
 
 	@Test
 	public final void testCreateSampleDataSetMerging() throws InternalErrorException {
-		String graph = SampleDataSet.createSampleDataSetMerging();
+		String graph = SampleDataSet.createSampleDataSetMerging().graphName;
 		Assert.assertEquals("http://test.com/r43ples-dataset-merging", graph);
 	}
 

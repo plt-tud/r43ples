@@ -1,5 +1,6 @@
-{{<templates/super}}
+{{<super}}
 
+{{$title}}Revision Graph{{/title}}
 
 {{$script_extra}}
 	<script>
@@ -14,8 +15,9 @@
 {{/script_extra}}
     
 {{$content}}
+	<div class="row">
 	    <h1>Revision Graph</h1>
-	    <h2><samp>&lt;{{graphName}}&gt;</samp></h2>
+	    <h3><samp>&lt;{{graphName}}&gt;</samp></h3>
 		
 		<div id="revisiongraph">
 		{{{svg_content}}}
@@ -23,7 +25,8 @@
 		<br/>
 		<a class="btn btn-default" href="sparql">Back to Endpoint</a>
 		<a class="btn btn-default" id="graphDownload" href-lang='image/svg+xml' title='revisiongraph_{{graphName}}.svg' download='revisiongraph_{{graphName}}.svg'>Download</a><br/>
+	</div>
 {{/content}}
 
 
-{{/templates/super}}
+{{/super}}
