@@ -144,9 +144,11 @@ function drawGraph(div_selector, _JSON, _showTags) {
 
     function create_revision_model(data){
         // counter for coloring
+    	console.log('JSON ',data);
         var j = 1;
         $.each(data, function (key, value) {
             var types = value["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"];
+            console.log('Typen: ',value["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"], 'key ', key, 'value ', value);
             j++;
             for (var i = 0; i < types.length; i++) {
                 switch (types[i].value) {
@@ -171,8 +173,8 @@ function drawGraph(div_selector, _JSON, _showTags) {
                         if (revisions[key] == null) {
                             revisions[key] = {};
                         }
-                        revisions[key].deleteSet = value["http://eatld.et.tu-dresden.de/rmo#deleteSet"][0].value;
-                        revisions[key].addSet = value["http://eatld.et.tu-dresden.de/rmo#addSet"][0].value;
+                        revisions[key].deleteSet = (value["http://eatld.et.tu-dresden.de/rmo#deleteSet"])?value["http://eatld.et.tu-dresden.de/rmo#deleteSet"][0].value : null;
+                        revisions[key].addSet = (value["http://eatld.et.tu-dresden.de/rmo#addSet"])?value["http://eatld.et.tu-dresden.de/rmo#addSet"][0].value : null;
                         revisions[key].revisionNumber = value["http://eatld.et.tu-dresden.de/rmo#revisionNumber"][0].value;
                         revisions[key].revisionOf = value["http://eatld.et.tu-dresden.de/rmo#revisionOf"][0].value;
                         revisions[key].belongsTo = value["http://eatld.et.tu-dresden.de/rmo#belongsTo"][0].value;
