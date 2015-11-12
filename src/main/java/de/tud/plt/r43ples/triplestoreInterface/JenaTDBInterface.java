@@ -1,6 +1,5 @@
 package de.tud.plt.r43ples.triplestoreInterface;
 
-import java.io.File;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
@@ -12,7 +11,6 @@ import com.hp.hpl.jena.query.ReadWrite;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.tdb.base.file.Location;
 import com.hp.hpl.jena.update.GraphStore;
 import com.hp.hpl.jena.update.GraphStoreFactory;
 import com.hp.hpl.jena.update.UpdateExecutionFactory;
@@ -44,20 +42,17 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	public JenaTDBInterface(String databaseDirectory) {
 		
 		// if the directory does not exist, create it
-		Location location = Location.create(databaseDirectory);
-		File theDir = new File(location.getDirectoryPath());
-		if (!theDir.exists()) {
-			logger.info("creating directory: " + theDir.toString());
-		    if (theDir.mkdirs())
-		    	logger.info("Directory successfully created");
-		    else
-		    	logger.error("Could not create directory");
-		  }
+//		File theDir = new File(databaseDirectory);
+//		if (!theDir.exists()) {
+//			logger.info("creating directory: " + theDir.toString());
+//		    if (theDir.mkdirs())
+//		    	logger.info("Directory successfully created");
+//		    else
+//		    	logger.error("Could not create directory");
+//		  }
 		
 		// Initialize the database
-		dataset = TDBFactory.createDataset(location);
-
-		
+		dataset = TDBFactory.createDataset(databaseDirectory);
 	}
 	
 	@Override
