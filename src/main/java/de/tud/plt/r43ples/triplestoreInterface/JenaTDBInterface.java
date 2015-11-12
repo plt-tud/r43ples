@@ -1,5 +1,6 @@
 package de.tud.plt.r43ples.triplestoreInterface;
 
+import java.io.File;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
@@ -40,16 +41,16 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	 * @param databaseDirectory the database directory of TDB
 	 */
 	public JenaTDBInterface(String databaseDirectory) {
-		
-		// if the directory does not exist, create it
-//		File theDir = new File(databaseDirectory);
-//		if (!theDir.exists()) {
-//			logger.info("creating directory: " + theDir.toString());
-//		    if (theDir.mkdirs())
-//		    	logger.info("Directory successfully created");
-//		    else
-//		    	logger.error("Could not create directory");
-//		  }
+
+    	// if the directory does not exist, create it
+		File theDir = new File(databaseDirectory);
+		if (!theDir.exists()) {
+			logger.info("creating directory: " + theDir.toString());
+		    if (theDir.mkdirs())
+		    	logger.info("Directory successfully created");
+		    else
+		    	logger.error("Could not create directory");
+		  }
 		
 		// Initialize the database
 		dataset = TDBFactory.createDataset(databaseDirectory);
