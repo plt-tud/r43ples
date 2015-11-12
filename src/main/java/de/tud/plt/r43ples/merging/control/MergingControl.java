@@ -94,20 +94,6 @@ public class MergingControl {
 	}
 	
 	
-	/**show merging start view*/
-	public static String getMenuHtmlOutput() {
-		List<String> graphList = RevisionManagement.getRevisedGraphs();	
-	    Map<String, Object> scope = new HashMap<String, Object>();
-	    scope.put("merging_active", true);
-		scope.put("graphList", graphList);
-		
-	    StringWriter sw = new StringWriter();
-	    MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/merge_start.mustache");
-	    mustache.execute(sw, scope);		
-	    return sw.toString();
-	}
-	
 	
 	/**show triple merging view*/
 	public String getViewHtmlOutput() {	
@@ -138,11 +124,11 @@ public class MergingControl {
 	 	}
 	 	
 	 	if(isRebase){
-	 		logger.info("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
+	 		logger.debug("commitGraphname: " + rebaseControl.getCommitModel().getGraphName());
 		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());
 		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
 	 	}else{
-	 		logger.info("commitGraphname: " + commitModel.getGraphName());
+	 		logger.debug("commitGraphname: " + commitModel.getGraphName());
 		 	scope.put("graphName", commitModel.getGraphName());	
 		 	scope.put("clientName", commitModel.getUser());
 	 	}
@@ -170,9 +156,6 @@ public class MergingControl {
 		ProcessManagement.createDifferenceTree(differenceModel, treeList);
 		
 		ProcessManagement.createTableModel(differenceModel, tableModel);
-		
-		logger.info("updated tableModel fertig!");
-
 		
 		// Create the individual models of both branches
 		individualModelBranchA = ProcessManagement.createIndividualModelOfRevision(commitModel.getGraphName(), commitModel.getBranch1(), differenceModel);
@@ -238,10 +221,18 @@ public class MergingControl {
 	}
 	
 
-	
-	public void getMergeProcess(Response response, String graphName, String branchNameA, String branchNameB, String format) throws InternalErrorException {
+	/**
+	 * 
+	 * @param response
+	 * @param graphName
+	 * @param branchNameA
+	 * @param branchNameB
+	 * @param format
+	 * @throws InternalErrorException
+	 */
+	public void getMergeProcess(Response response, String graphName, String branchNameA, String branchNameB) throws InternalErrorException {
 		if (isRebase) {
-			ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel, format);		
+			ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel);		
 			ProcessManagement.createDifferenceTree(differenceModel, treeList);	
 			ProcessManagement.createTableModel(differenceModel, tableModel);
 			
@@ -280,7 +271,7 @@ public class MergingControl {
 			if (response.getStatusInfo() == Response.Status.CONFLICT){
 				logger.info("Merge query produced conflicts.");
 				
-				ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel,"text/html");		
+				ProcessManagement.readDifferenceModel(response.getEntity().toString(), differenceModel);		
 				ProcessManagement.createDifferenceTree(differenceModel, treeList);		
 				ProcessManagement.createTableModel(differenceModel, tableModel);
 				
@@ -423,10 +414,7 @@ public class MergingControl {
 	 * @throws ConfigurationException 
 	 * */
 	
-	public String updateTripleTable(String properties) {		
-		Map<String, Object> scope = new HashMap<String, Object>();
-		StringWriter sw = new StringWriter();
-		
+	public List<TableRow> updateTripleTable(String properties) {		
 		//updated tableModel	 	
 		ProcessManagement.createTableModel(differenceModel, tableModel);
 		
@@ -442,21 +430,7 @@ public class MergingControl {
 				}
 			}					
 		}
-		if (isRebase) {
-	 		logger.info("rebasecommitGraphname: " + rebaseControl.getCommitModel().getGraphName());
-		 	scope.put("graphName", rebaseControl.getCommitModel().getGraphName());	
-		 	scope.put("clientName", rebaseControl.getCommitModel().getUser());
-	 	} else {
-	 		logger.info("mergingcommitGraphname: " + commitModel.getGraphName());
-		 	scope.put("graphName", commitModel.getGraphName());	 
-		 	scope.put("clientName", commitModel.getUser());
-	 	}	
-		scope.put("tableRowList", updatedTripleRowList);
-		
-		MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/merge/tripleView.mustache");
-	    mustache.execute(sw, scope);		
-		return sw.toString();	
+		return updatedTripleRowList;
 	}
 	
 	/**@param triples :  triple list of Difference Tree by checkbox select
@@ -474,8 +448,7 @@ public class MergingControl {
 		String[] tripleArray = triples.split(",");
 		List<TableRow> TripleRowList = tableModel.getTripleRowList();
 		List<TableRow> updatedTripleRowList = new ArrayList<TableRow>();
-		for(String triple: tripleArray) {
-			
+		for(String triple: tripleArray) {		
 			Iterator<TableRow> itu = TripleRowList.iterator();
 			while(itu.hasNext()){
 				TableRow tableRow = itu.next();
@@ -514,6 +487,7 @@ public class MergingControl {
 	    mustache.execute(sw, scope);		
 		return sw.toString();	
 	}
+	
 	
 	/**get triple view after changed view
 	 *
@@ -676,24 +650,16 @@ public class MergingControl {
 			if (isChecked.equals("1")) {
 				// Rename - yes
 				additionDifferenceSDDState = SDDTripleStateEnum.ADDED;
-				deletionDifferenceSDDState = SDDTripleStateEnum.DELETED;
-				
-				
-				
+				deletionDifferenceSDDState = SDDTripleStateEnum.DELETED;	
 			} else {
 				// Rename - no
-				
 				additionDifferenceSDDState = SDDTripleStateEnum.DELETED;
 				deletionDifferenceSDDState = SDDTripleStateEnum.ADDED;
-	
 			}
-			
 			Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
 			while(iterDM.hasNext()) {
 				Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterDM.next();
-				DifferenceGroup differ = (DifferenceGroup) entryDG.getValue();
-//				boolean conflicting = differ.isConflicting();
-				
+				DifferenceGroup differ = (DifferenceGroup) entryDG.getValue();		
 				SDDTripleStateEnum automaticState = differ.getAutomaticResolutionState();
 				Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
 				while(iterDIF.hasNext()){					
@@ -702,24 +668,18 @@ public class MergingControl {
 					ResolutionStateEnum resolutionState = difference.getResolutionState();
 					
 					if(difference.equals(additionDifference)){
-						
 						if(resolutionState == ResolutionStateEnum.DIFFERENCE && (!additionDifferenceSDDState.equals(automaticState))){
 							reportResult.incrementCounterDifferencesResolutionChanged();						
 						}
-						
 						difference.setTripleResolutionState(additionDifferenceSDDState);
 						difference.setResolutionState(ResolutionStateEnum.RESOLVED);			
-						
 					}
 					if(difference.equals(deletionDifference)){
-						
 						if(resolutionState == ResolutionStateEnum.DIFFERENCE && (!deletionDifferenceSDDState.equals(automaticState))){
 							reportResult.incrementCounterDifferencesResolutionChanged();						
 						}
-						
 						difference.setTripleResolutionState(deletionDifferenceSDDState);
 						difference.setResolutionState(ResolutionStateEnum.RESOLVED);			
-						
 					}
 								
 				}
@@ -775,10 +735,7 @@ public class MergingControl {
 				}
 			}
 			tableRow.setIsResolved("no");
-		}
-		
-		//else fertig
-		
+		}		
 		
 		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
 		while(iterDM.hasNext()) {

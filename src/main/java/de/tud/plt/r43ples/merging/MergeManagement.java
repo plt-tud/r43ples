@@ -53,7 +53,7 @@ public class MergeManagement {
 	 * @param revision2 the second revision should be a terminal branch node
 	 * @return the nearest common revision
 	 */
-	public static String getCommonRevisionWithShortestPath(String revision1, String revision2) {
+	public static String getCommonRevisionWithShortestPath(final String revisionGraph, final String revision1, final String revision2) {
 		
 		logger.info("Get the common revision of <" + revision1 + "> and <" + revision2 + "> which has the shortest path.");
 		
@@ -62,19 +62,17 @@ public class MergeManagement {
 			  + "SELECT DISTINCT ?revision "
 			  + "WHERE { "
 			  + "    GRAPH <%s> {"
-			  + "        BIND ( <%s> AS ?branch1)"
-			  + "        BIND ( <%s> AS ?branch2)"
-			  + "        ?branch1 prov:wasDerivedFrom+ ?revision ."
-			  + "        ?branch2 prov:wasDerivedFrom+ ?revision ."
+			  + "        <%2$s> prov:wasDerivedFrom+ ?revision ."
+			  + "        <%3$s> prov:wasDerivedFrom+ ?revision ."
+			  + "        ?next prov:wasDerivedFrom ?revision."
 			  + "        FILTER NOT EXISTS {"
-			  + "            ?next prov:wasDerivedFrom ?revision."
-			  + "            ?branch1 prov:wasDerivedFrom+ ?next ."
-			  + "            ?branch2 prov:wasDerivedFrom+ ?next ."
+			  + "            <%2$s> prov:wasDerivedFrom+ ?next ."
+			  + "            <%3$s> prov:wasDerivedFrom+ ?next ."
 			  + "        }"
 			  + "    }"
 			  + "}"
 			  + "LIMIT 1",
-			  Config.revision_graph, revision1, revision2);
+			  revisionGraph, revision1, revision2);
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		
 		if (results.hasNext()) {
@@ -95,7 +93,9 @@ public class MergeManagement {
 	 * @param targetRevision the target revision
 	 * @return linked list with all revisions from start revision to target revision
 	 */
-	public static LinkedList<String> getPathBetweenStartAndTargetRevision(String startRevision, String targetRevision) {
+	public static LinkedList<String> getPathBetweenStartAndTargetRevision(
+			final String revisionGraph, final String graphName,
+			final String startRevision, final String targetRevision) {
 		
 		logger.info("Calculate the shortest path from revision <" + startRevision + "> to <" + targetRevision + "> .");
 		String query = String.format(
@@ -107,7 +107,7 @@ public class MergeManagement {
 			+ "		?revision prov:wasDerivedFrom* <%s>."
 			+ "		OPTIONAL{?revision prov:wasDerivedFrom ?previousRevision}"
 			+ " }"
-			+ "}", Config.revision_graph, targetRevision, startRevision);
+			+ "}", revisionGraph, targetRevision, startRevision);
 		
 		HashMap<String, ArrayList<String>> resultMap = new HashMap<String, ArrayList<String>>();
 		LinkedList<String> list = new LinkedList<String>();
@@ -171,7 +171,9 @@ public class MergeManagement {
 	 * @param uriB the URI of the revision progress of branch B
 	 * @throws InternalErrorException 
 	 */
-	public static void createRevisionProgresses(LinkedList<String> listA, String graphNameRevisionProgressA, String uriA, LinkedList<String> listB, String graphNameRevisionProgressB, String uriB) throws InternalErrorException {
+	public static void createRevisionProgresses(final String revisionGraph, final String graphName,
+			LinkedList<String> listA, String graphNameRevisionProgressA, String uriA, 
+			LinkedList<String> listB, String graphNameRevisionProgressB, String uriB) throws InternalErrorException {
 		logger.info("Create the revision progress of branch A and B.");
 		
 		// Get the common revision
@@ -185,22 +187,19 @@ public class MergeManagement {
 		// Get the revision number of first revision
 		logger.info("Get the revision number of first revision.");
 		String firstRevisionNumber = "";
-		String graphName = "";
 
 		String query = String.format(
-			  "SELECT ?number ?graph %n"
+			  "SELECT ?number %n"
 			+ "WHERE { %n"
-			+ "	GRAPH <%s> { %n"
-			+ "		<%s> <http://eatld.et.tu-dresden.de/rmo#revisionNumber> ?number . %n"
-			+ " 	<%s> <http://eatld.et.tu-dresden.de/rmo#revisionOf> ?graph . %n"
-			+ "} }", Config.revision_graph, commonRevision, commonRevision);
+			+ "	GRAPH <%s> {"
+			+ "		<%s> <http://eatld.et.tu-dresden.de/rmo#revisionNumber> ?number ."
+			+ "} }", revisionGraph, commonRevision, commonRevision);
 		
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		
 		if (results.hasNext()) {
 			QuerySolution qs = results.next();
 			firstRevisionNumber = qs.getLiteral("?number").toString();
-			graphName = qs.getResource("?graph").toString();
 		}
 		
 		// Get the full graph name of first revision or create full revision graph of first revision
@@ -216,10 +215,10 @@ public class MergeManagement {
 		}
 		
 		// Create revision progress of branch A
-		createRevisionProgress(listA, fullGraphNameCommonRevision, graphNameRevisionProgressA, uriA);
+		createRevisionProgress(revisionGraph, listA, fullGraphNameCommonRevision, graphNameRevisionProgressA, uriA);
 		
 		// Create revision progress of branch A
-		createRevisionProgress(listB, fullGraphNameCommonRevision, graphNameRevisionProgressB, uriB);
+		createRevisionProgress(revisionGraph, listB, fullGraphNameCommonRevision, graphNameRevisionProgressB, uriB);
 		
 		// Drop the temporary full graph
 		if (tempGraphWasCreated) {
@@ -239,7 +238,7 @@ public class MergeManagement {
 	 * @param uri the URI of the revision progress
 	 * @throws InternalErrorException 
 	 */
-	public static void createRevisionProgress(LinkedList<String> list, String fullGraphNameCommonRevision, String graphNameRevisionProgress, String uri) throws InternalErrorException {
+	public static void createRevisionProgress(final String revisionGraph, LinkedList<String> list, String fullGraphNameCommonRevision, String graphNameRevisionProgress, String uri) throws InternalErrorException {
 		logger.info("Create the revision progress of " + uri + " in graph " + graphNameRevisionProgress + ".");
 		
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameRevisionProgress));
@@ -273,8 +272,8 @@ public class MergeManagement {
 				String revision = iteList.next();
 				logger.info("Update content by current add and delete set of revision " + revision + " - remove old entries.");
 				// Get the ADD and DELETE set URIs
-				String addSetURI = RevisionManagement.getAddSetURI(revision, Config.revision_graph);
-				String deleteSetURI = RevisionManagement.getDeleteSetURI(revision, Config.revision_graph);
+				String addSetURI = RevisionManagement.getAddSetURI(revision, revisionGraph);
+				String deleteSetURI = RevisionManagement.getDeleteSetURI(revision, revisionGraph);
 				
 				if ((addSetURI != null) && (deleteSetURI != null)) {
 					

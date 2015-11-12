@@ -286,8 +286,7 @@
 									<mapper>
 										<type>perm</type>
 										<prefix>/usr/share/${project.artifactId}</prefix>
-										<user>loader</user>
-										<group>loader</group>
+										<user>r43ples</user>
 									</mapper>
 								</data>
 
@@ -297,6 +296,18 @@
 									<linkName>/usr/share/${project.artifactId}/${project.artifactId}.jar</linkName>
 									<linkTarget>/usr/share/${project.artifactId}/${project.build.finalName}-jar-with-dependencies.jar</linkTarget>
 								</data>
+                                                                
+                                                                <data>
+                                                                    FIXME
+									<src>${project.build.directory}/classes/r43ples.dist.conf</src>
+                                                                    FIXME
+									<type>file</type>
+									<mapper>
+										<type>perm</type>
+										<prefix>/etc/default/r43ples</prefix>
+										<user>r43ples</user>
+									</mapper>
+								</data>
 
 								<data>
 									<src>${basedir}/src/deb/init.d</src>
@@ -304,8 +315,7 @@
 									<mapper>
 										<type>perm</type>
 										<prefix>/etc/init.d</prefix>
-										<user>loader</user>
-										<group>loader</group>
+										<user>r43ples</user>
 										<filemode>755</filemode>
 									</mapper>
 								</data>
@@ -340,6 +350,27 @@
 			    <artifactId>coveralls-maven-plugin</artifactId>
 			    <version>3.1.0</version>
 			</plugin>
+                        
+                        <plugin>
+                                <groupId>org.codehaus.mojo</groupId>
+                                <artifactId>exec-maven-plugin</artifactId>
+                                <version>1.4.0</version>
+                                <executions>
+                                        <execution>
+                                                <goals>
+                                                        <goal>exec</goal>
+                                                </goals>
+                                        </execution>
+                                </executions>
+                                <configuration>
+                                    <executable>java</executable>
+                                        <arguments>
+                                            <argument>-classpath</argument>
+                                            <classpath />
+                                            <argument>${exec.java.mainclass}</argument>
+                                        </arguments>
+                                </configuration>
+                        </plugin>
 
 		</plugins>
 	</build>
@@ -440,25 +471,10 @@
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<version>1.2.1</version>
-						<executions>
-							<execution>
-								<goals>
-									<goal>java</goal>
-								</goals>
-							</execution>
-						</executions>
-						<configuration>
-							<mainClass>de.tud.plt.r43ples.R43plesService</mainClass>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
+                        <properties>
+                            <exec.java.mainclass>de.tud.plt.r43ples.R43plesService</exec.java.mainclass>
+                        </properties>
+			
 		</profile>
 		<profile>
 			<id>console</id>
@@ -467,18 +483,9 @@
 					<name>console</name>
 				</property>
 			</activation>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>exec-maven-plugin</artifactId>
-						<version>1.2.1</version>
-						<configuration>
-							<mainClass>de.tud.plt.r43ples.client.ConsoleClient</mainClass>
-						</configuration>
-					</plugin>
-				</plugins>
-			</build>
+                        <properties>
+                            <exec.java.mainclass>de.tud.plt.r43ples.client.ConsoleClient</exec.java.mainclass>
+                        </properties>
 		</profile>
 	</profiles>
 

@@ -1,6 +1,6 @@
 {{<super}}
 
-{{$title}}Merge Result View{{/title}}
+{{$title}}Merge Result{{/title}}
 
 {{$head_extra}}    		
     <link rel="stylesheet" href="/static/css/r43ples.versiongraph.css">
@@ -15,13 +15,11 @@
 
     <script type="text/javascript">
 	    $(document).ready(function () {
-	        //drawGraph("#visualisation", "revisiongraph?graph={{graphName}}&format=application/json", false, false);
 	     // Graph mit der aktuellen Auswahl erstellen
-        	drawGraph("#leftContainer .visualisation", "loadOldGraphProcess?graph={{commit.graphName}}&format=application/json", false, true);
+        	drawGraph("#leftContainer .visualisation", "getOldRevisiongraph?graph={{commit.graphName}}", false, true);
           	drawGraph("#rightContainer .visualisation", "revisiongraph?graph={{commit.graphName}}&format=application/json",true, false);
 	    });
-          
-      </script>
+    </script>
 {{/script_extra}}
 
 {{$content}}

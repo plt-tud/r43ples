@@ -37,25 +37,25 @@ They just have to be unzipped and started with Java
 
     java -jar r43ples-*-with-dependencies.jar
 
-    
-There are also debian packages available. 
+
+There are also debian packages available.
 
 Compiling
 ---------
 Maven is used for compiling
 
-    mvn exec:java
-    
+    mvn compile exec:exec
+
 Packages (JAR with dependencies for the webservice, a console client and a debian package) can be be built with:
 
     mvn package
-    
+
 
 Configuration
 -------------
 There is a configuration file named *resources/r43ples.conf*. The most important ones are the following:
 
-* *triplestore.type* - type of attached triplestore (can be tdb, virtuoso, http or http_virtuoso)
+* *triplestore.type* - type of attached triplestore (can be tdb, virtuoso [not working right now], http)
 * *triplestore.uri* - URI or path under which R43ples can access the attached triplestore
 * *triplestore.user* - user of attached triplestore if necessary
 * *triplestore.password* - password of attached triplestore if necessary
@@ -74,13 +74,13 @@ SPARQL endpoint is available at:
 
     [uri]:[port]/r43ples/sparql
 
-The endpoint directly accepts SPARQL queries with HTTP GET or HTTP POST parameters for *query* and *format*: 
+The endpoint directly accepts SPARQL queries with HTTP GET or HTTP POST parameters for *query* and *format*:
 
     [uri]:[port]/r43ples/sparql?query=[]&format=[]
 
 ### Supported Formats
 
-The formats can be specified as URL Path Parameter *format*, as HTTP post paramter *format* or as HTTP header parameter *Accept*: 
+The formats can be specified as URL Path Parameter *format*, as HTTP post paramter *format* or as HTTP header parameter *Accept*:
 
 * text/turtle
 * application/json
@@ -96,17 +96,17 @@ There are some additional keywords which can be used to control the revisions of
 * Create graph
 
         CREATE GRAPH <graph>
-        
+
 * Select query
 
-        SELECT * 
-        WHERE { 
+        SELECT *
+        WHERE {
         	GRAPH <graph> REVISION "23" {?s ?p ?o}
     	}
-        
+
 * Update query
 
-        USER "mgraube" MESSAGE "test commit" 
+        USER "mgraube" MESSAGE "test commit"
         INSERT {
             GRAPH <test> REVISION "2" {
                 <a> <b> <c> .
@@ -118,7 +118,7 @@ There are some additional keywords which can be used to control the revisions of
         USER "mgraube"
         MESSAGE "test commit"
         BRANCH GRAPH <test> REVISION "2" TO "unstable"
-        
+
 * Tagging
 
         USER "mgraube"
@@ -132,13 +132,13 @@ There are some additional keywords which can be used to control the revisions of
 		MERGE GRAPH <test> BRANCH "branch-1" INTO "branch-2"
 
 
-SPARQL Join option
-------------------
+Query Rewriting option
+----------------------
 There is a new option for R43ples which improves the performance. The necessary revision is not temporarily generated anymore.
 The SPARQL query is rewritten in such a way that the branch and the change sets are directly joined inside the query. This includes the order of the change sets.
 It is currently under development and further research.
 
-The option can be enabled by passing an additional parameter "join_option=true"
+The option can be enabled by passing an additional parameter "query_rewriting=true"
 
 It currently supports:
 
@@ -161,4 +161,17 @@ Following libraries are used in R43ples:
 * [jQuery](http://jquery.com/) as JavaScript framework
 * [Bootstrap](http://getbootstrap.com/) as HTML, CSS and JS framework
 * [Mustache](https://mustache.github.io/) as template engine
+
+
+
+Revision information
+--------------------
+All information about the revision history of all named graphs is stored in the named graph **http://eatld.et.tu-dresden.de/r43ples-revisions** (as long as not configured otherwise in the configuration file).
+
+Here, the Revision Management Ontology (RMO) is used to model revisions, branches and tags. Furthermore commits are stored which connect each revision, tag and branch with its prior revision. 
+
+
+HTTP Header information
+------------------------
+Each response header contains information about the revision information of the graphs specified in the requests. This information follows the RMO and is transferred as Turtle serialisation.
  

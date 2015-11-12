@@ -24,3 +24,7 @@
 .approved-NOTAPPROVED:before {
 	content: url('/static/images/NotApproved.svg');
 }
+
+.confirmed {
+	background: YellowGreen;
+}

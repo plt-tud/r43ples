@@ -12,7 +12,6 @@ import com.hp.hpl.jena.query.ReadWrite;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.tdb.base.file.Location;
 import com.hp.hpl.jena.update.GraphStore;
 import com.hp.hpl.jena.update.GraphStoreFactory;
 import com.hp.hpl.jena.update.UpdateExecutionFactory;
@@ -42,10 +41,9 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	 * @param databaseDirectory the database directory of TDB
 	 */
 	public JenaTDBInterface(String databaseDirectory) {
-		
-		// if the directory does not exist, create it
-		Location location = new Location(databaseDirectory);
-		File theDir = new File(location.getDirectoryPath());
+
+    	// if the directory does not exist, create it
+		File theDir = new File(databaseDirectory);
 		if (!theDir.exists()) {
 			logger.info("creating directory: " + theDir.toString());
 		    if (theDir.mkdirs())
@@ -55,9 +53,7 @@ public class JenaTDBInterface extends TripleStoreInterface {
 		  }
 		
 		// Initialize the database
-		dataset = TDBFactory.createDataset(location);
-
-		
+		dataset = TDBFactory.createDataset(databaseDirectory);
 	}
 	
 	@Override

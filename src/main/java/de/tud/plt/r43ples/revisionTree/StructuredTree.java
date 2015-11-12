@@ -14,7 +14,6 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
-import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
@@ -34,12 +33,12 @@ public class StructuredTree {
 		commit_branch_tmp = new HashMap<Commit, String>();
 	}
 
-	public static StructuredTree getTreeOfGraph(String graph) {
+	public static StructuredTree getTreeOfGraph(String revisionGraph) {
 		// new Tree
 		StructuredTree t = new StructuredTree();
-		t.updateCommits(graph);
-		t.updateBranches(graph);
-		t.updateTags(graph);
+		t.updateCommits(revisionGraph);
+		t.updateBranches(revisionGraph);
+		t.updateTags(revisionGraph);
 
 		// link commits to branches
 		for(Commit c : t.commits) {
@@ -54,18 +53,18 @@ public class StructuredTree {
 		return t;
 	}
 
-	private void updateBranches(String graph) {
+	private void updateBranches(String revisionGraph) {
 		//query all branches
+		
 		String queryBranches = RevisionManagement.prefixes + String.format(
 						"SELECT ?branch ?title ?commit%n"
 						+ "WHERE { GRAPH <%s> { %n"
 						+ "?branch a rmo:Branch;%n"
 						+ "rdfs:label ?title;%n"
-						+ "rmo:references ?rev.%n"
-						+ "?rev rmo:revisionOf <%s>.%n"
+						+ "rmo:references ?rev."
 						+ "?commit a rmo:Commit;%n"
 						+ "prov:generated ?rev.%n"
-						+ "} }", Config.revision_graph, graph);
+						+ "} }", revisionGraph);
 
 		ResultSet resultsBranches = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryBranches);
 
@@ -77,18 +76,17 @@ public class StructuredTree {
 		}
 	}
 
-	private void updateTags(String graph) {
+	private void updateTags(String revisionGraph) {
 		// query all tags
 		String queryBranches = RevisionManagement.prefixes + String.format(
 						"SELECT ?tag ?title ?commit%n"
 						+ "WHERE { GRAPH <%s> {%n"
 						+ "?tag a rmo:Tag;%n"
 						+ "rdfs:label ?title;%n"
-						+ "rmo:references ?rev.%n"
-						+ "?rev rmo:revisionOf <%s>.%n"
+						+ "rmo:references ?rev."
 						+ "?commit a rmo:Commit;%n"
 						+ "prov:generated ?rev.%n"
-						+ "} }", Config.revision_graph, graph);
+						+ "} }", revisionGraph);
 
 		ResultSet resultsTags = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryBranches);
 
@@ -115,7 +113,7 @@ public class StructuredTree {
 		return tags;
 	}
 
-	private void updateCommits(String graph) {
+	private void updateCommits(String revisionGraph) {
 		// query all commits
 		String queryCommits = RevisionManagement.prefixes + String.format(
 						"SELECT ?commit ?time ?prev ?next ?title ?authname ?branch%n"
@@ -127,13 +125,11 @@ public class StructuredTree {
 						+ "prov:atTime ?time;%n"
 						+ "prov:wasAssociatedWith ?author.%n"
 						+ "OPTIONAL { ?author rdfs:label ?authname. }%n"
-						+ "?reva rmo:revisionNumber ?prev;"
-						+ "rmo:revisionOf <%s>.%n"
+						+ "?reva rmo:revisionNumber ?prev.%n"
 						+ "?revb rmo:revisionNumber ?next."
-						+ "OPTIONAL { ?revb rmo:revisionOfBranch ?branch. }%n"
+						+ "OPTIONAL { ?revb rmo:belongsTo ?branch. }%n"
 						+ "} }",
-				Config.revision_graph,
-				graph);
+						revisionGraph);
 		
 		ResultSet resultsCommits = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryCommits);
 

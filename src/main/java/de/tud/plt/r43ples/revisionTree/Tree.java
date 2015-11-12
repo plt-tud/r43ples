@@ -8,7 +8,6 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
-import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
@@ -33,11 +32,11 @@ public class Tree {
 	 * Creates a tree with all revisions (with predecessors and successors and
 	 * references of tags and branches)
 	 * 
-	 * @param graphName
+	 * @param revisionGraph
 	 *            the graph name
 	 */
-	public Tree (final String graphName) {
-		logger.info("Start creation of revision tree of graph " + graphName + "!");
+	public Tree (final String revisionGraph) {
+		logger.debug("Start creation of revision tree of graph " + revisionGraph + "!");
 
 		// create query
 		String queryRevisions = RevisionManagement.prefixes + String.format(""
@@ -45,11 +44,10 @@ public class Tree {
 						+ "WHERE {"
 						+ "GRAPH <%s> {"
 						+ "	?uri a rmo:Revision;" 
-						+ "		rmo:revisionOf <%s>; "
 						+ "		rmo:revisionNumber ?revNumber."
 						+ "	OPTIONAL { ?branch rmo:references ?uri; rmo:fullGraph ?fullGraph.}" 
 						+ "} }",
-						Config.revision_graph, graphName);
+						revisionGraph);
 		ResultSet resultsCommits = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryRevisions);
 		while (resultsCommits.hasNext()) {
 			QuerySolution qsCommits = resultsCommits.next();
@@ -67,11 +65,10 @@ public class Tree {
 						+ "SELECT ?revNumber ?preRevNumber "  
 						+ "WHERE { GRAPH <%s> {"
 						+ " ?rev a rmo:Revision;" 
-						+ "	rmo:revisionOf <%s>; "
 						+ "	rmo:revisionNumber ?revNumber; " 
 						+ "	prov:wasDerivedFrom ?preRev. "
 						+ "?preRev rmo:revisionNumber ?preRevNumber. " 
-						+ " } }", Config.revision_graph, graphName);
+						+ " } }", revisionGraph);
 		ResultSet resultRevConnection = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryRevisionConnection);
 		while (resultRevConnection.hasNext()) {
 			QuerySolution qsCommits = resultRevConnection.next();

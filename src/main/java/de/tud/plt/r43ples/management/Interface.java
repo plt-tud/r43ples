@@ -1,21 +1,20 @@
 package de.tud.plt.r43ples.management;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.merging.MergeManagement;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.merging.MergeResult;
+import de.tud.plt.r43ples.merging.control.FastForwardControl;
+import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import de.tud.plt.r43ples.webservice.Endpoint;
 
 public class Interface {
 
@@ -28,14 +27,14 @@ public class Interface {
 	 * 
 	 * @param query R43ples query string
 	 * @param format serialisation format of the result 
-	 * @param join_option JOIN option
+	 * @param query_rewriting option if query rewriting should be enabled
 	 * @return string containing result of the query
 	 * @throws InternalErrorException
 	 */
-	public static String sparqlSelectConstructAsk(final String query, final String format, final boolean join_option)
+	public static String sparqlSelectConstructAsk(final String query, final String format, final boolean query_rewriting)
 			throws InternalErrorException {
 		String result;
-		if (join_option) {
+		if (query_rewriting) {
 			String query_rewritten = SparqlRewriter.rewriteQuery(query);
 			result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query_rewritten, format);
 		}
@@ -103,7 +102,7 @@ public class Interface {
 		final Pattern patternGraphWithRevision = Pattern.compile(
 				"GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
 				patternModifier);
-		logger.info("Update detected");
+		logger.debug("SPARQL Update detected");
 		
 		// write to add and delete sets
 		// (replace graph names in query)
@@ -117,7 +116,7 @@ public class Interface {
 			String action = m.group("action");															
 			
 			if (action.equalsIgnoreCase("WHERE")) {
-				// TODO: replace generateFullGraphOfRevision with SPARQL JOIN
+				// TODO: replace generateFullGraphOfRevision with query rewriting option
 				String tempGraphName = graphName + "-temp";
 				RevisionManagement.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
 				queryM = m.replaceFirst(String.format("WHERE { GRAPH <%s>", tempGraphName));
@@ -134,8 +133,8 @@ public class Interface {
 					newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName);
 					nextRevisionNumbers.put(graphName, newRevisionNumber);
 				}
-				String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
-				String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
+				String addSetGraphUri = graphName + "-addSet-" + newRevisionNumber;
+				String removeSetGraphUri = graphName + "-deleteSet-" + newRevisionNumber;
 				
 				String data = m.group("data");
 				if (data == null)
@@ -165,39 +164,18 @@ public class Interface {
 			// General variables
 			String newRevisionNumber = nextRevisionNumbers.get(graphName);
 			String referenceFullGraph = RevisionManagement.getReferenceGraph(graphName, revisionName);
-			String addSetGraphUri = graphName + "-delta-added-" + newRevisionNumber;
-			String removeSetGraphUri = graphName + "-delta-removed-" + newRevisionNumber;
+			String addSetGraphUri = graphName + "-addSet-" + newRevisionNumber;
+			String removeSetGraphUri = graphName + "-deleteSet-" + newRevisionNumber;
 
-			// remove doubled data
-			// (already existing triples in add set; not existing triples in
-			// delete set)
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
-							"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }", addSetGraphUri,
-							referenceFullGraph));
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
-					"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } MINUS { GRAPH <%s> { ?s ?p ?o. } } }",
-					removeSetGraphUri, removeSetGraphUri, referenceFullGraph));
-
-			// merge change sets into reference graph
-			// (copy add set to reference graph; remove delete set from reference graph)
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
-						"INSERT { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }",
-						referenceFullGraph,	addSetGraphUri));
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
-					"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }", 
-					referenceFullGraph,	removeSetGraphUri));
-
-			// add meta information to R43ples
-			ArrayList<String> usedRevisionNumber = new ArrayList<String>();
-			usedRevisionNumber.add(revisionName);
-			RevisionManagement.addMetaInformationForNewRevision(graphName, user, RevisionManagement.getDateString(), commitMessage, usedRevisionNumber,
-					newRevisionNumber, addSetGraphUri, removeSetGraphUri);
-			
+			RevisionManagement.addNewRevisionFromChangeSet(user, commitMessage, graphName, revisionName, newRevisionNumber,
+					referenceFullGraph, addSetGraphUri, removeSetGraphUri);
 			
 			queryM = m.replaceAll(String.format("GRAPH <%s> ", graphName));
 			m = patternGraphWithRevision.matcher(queryM);
 		}
 	}
+
+
 	
 	public static String sparqlCreateGraph(final String query) throws QueryErrorException {
 		final Pattern patternCreateGraph = Pattern.compile(
@@ -269,9 +247,51 @@ public class Interface {
 		}
 	}
 	
-	public static MergeResult sparqlMerge(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
+	
+	
+	/**
+	 * 
+	 * 
+	 * @return if fast-forward was successful
+	 * @throws InternalErrorException 
+	 */
+	public static boolean sparqlFastForwardMerge(final String sparqlQuery, final String user, final String commitMessage) throws InternalErrorException
+	{
+		final Pattern patternFastForwardQuery =  Pattern.compile(
+				"MERGE\\s*FF\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"",
+				patternModifier);
+		Matcher m = patternFastForwardQuery.matcher(sparqlQuery);
+		if (!m.find())
+			throw new InternalErrorException("Error in query: " + sparqlQuery);
+			
+		String graphName = m.group("graph");
+		String branchNameA = m.group("branchNameA").toLowerCase();
+		String branchNameB = m.group("branchNameB").toLowerCase();
+		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+		
+		if (!FastForwardControl.fastForwardCheck(revisionGraph, branchNameA, branchNameB)) {
+			return false;
+		}
+		String branchUriA = RevisionManagement.getBranchUri(revisionGraph, branchNameA);
+		String branchUriB = RevisionManagement.getBranchUri(revisionGraph, branchNameB);
+		
+		String fullGraphUriA = RevisionManagement.getFullGraphUri(revisionGraph, branchUriA);
+		String fullGraphUriB = RevisionManagement.getFullGraphUri(revisionGraph, branchUriB);
+
+		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
+		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
+		
+		StrategyManagement.moveBranchReference(revisionGraph, branchUriB, revisionUriB, revisionUriA);
+		// TODO: add reference commit with user and commit message
+		StrategyManagement.updateRevisionOfBranch(revisionGraph, graphName, branchUriB, revisionUriB, revisionUriA);	
+		StrategyManagement.fullGraphCopy(fullGraphUriA, fullGraphUriB);
+		return true;
+	}
+	
+	
+	public static MergeResult sparqlThreeWayMerge(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
 		final Pattern patternMergeQuery =  Pattern.compile(
-				"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
+				"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(SDD\\s*<(?<sdd>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
 				patternModifier);
 		Matcher m = patternMergeQuery.matcher(sparqlQuery);
 		
@@ -281,19 +301,18 @@ public class Interface {
 		String action = m.group("action");
 		String graphName = m.group("graph");
 		String sdd = m.group("sdd");
-		String sddURI = m.group("sddURI");
 		String branchNameA = m.group("branchNameA").toLowerCase();
 		String branchNameB = m.group("branchNameB").toLowerCase();
 		String with = m.group("with");
 		String triples = m.group("triples");
 		
-		String revisionUriA = RevisionManagement.getRevisionUri(graphName, branchNameA);
-		String revisionUriB = RevisionManagement.getRevisionUri(graphName, branchNameB);
+		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
+		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
 		
 		logger.debug("action: " + action);
 		logger.debug("graph: " + graphName);
 		logger.debug("sdd: " + sdd);
-		logger.debug("sddURI: " + sddURI);
 		logger.debug("branchNameA: " + branchNameA);
 		logger.debug("branchNameB: " + branchNameB);
 		logger.debug("with: " + with);
@@ -308,7 +327,7 @@ public class Interface {
 			
 		
 		// Check if A and B are different revisions
-		if (RevisionManagement.getRevisionNumber(graphName, branchNameA).equals(RevisionManagement.getRevisionNumber(graphName, branchNameB))) {
+		if (RevisionManagement.getRevisionNumber(revisionGraph, branchNameA).equals(RevisionManagement.getRevisionNumber(revisionGraph, branchNameB))) {
 			// Branches are equal - throw error
 			throw new InternalErrorException("Specified branches are equal: " + sparqlQuery);
 		}
@@ -320,33 +339,10 @@ public class Interface {
 
 		
 		// Differ between MERGE query with specified SDD and without SDD			
-		String usedSDDURI = null;
-		if (sdd != null) {
-			// Specified SDD
-			usedSDDURI = sddURI;
-		} else {
-			// Default SDD
-			// Query the referenced SDD
-			String querySDD = String.format(
-					  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
-					+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> %n"
-					+ "SELECT ?defaultSDD %n"
-					+ "WHERE { GRAPH <%s> {	%n"
-					+ "	<%s> a rmo:Graph ;%n"
-					+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
-					+ "} }", Config.revision_graph, graphName);
-			
-			ResultSet resultSetSDD = TripleStoreInterfaceSingleton.get().executeSelectQuery(querySDD);
-			if (resultSetSDD.hasNext()) {
-				QuerySolution qs = resultSetSDD.next();
-				usedSDDURI = qs.getResource("?defaultSDD").toString();
-			} else {
-				throw new InternalErrorException("Error in revision graph! Selected graph <" + graphName + "> has no default SDD referenced.");
-			}
-		}
+		String usedSDDURI = Endpoint.getSDD(graphName, sdd);
 
 		// Get the common revision with shortest path
-		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionUriA, revisionUriB);
+		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA, revisionUriB);
 		
 		// Create the revision progress for A and B
 		String graphNameA = graphName + "-RM-REVISION-PROGRESS-A";
@@ -356,26 +352,28 @@ public class Interface {
 		String uriA = "http://eatld.et.tu-dresden.de/branch-A";
 		String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 		
-		MergeManagement.createRevisionProgresses(MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriA), graphNameA, uriA, MergeManagement.getPathBetweenStartAndTargetRevision(commonRevision, revisionUriB), graphNameB, uriB);
+		MergeManagement.createRevisionProgresses(revisionGraph, graphName,
+				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, graphName, commonRevision, revisionUriA), graphNameA, uriA, 
+				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, graphName, commonRevision, revisionUriB), graphNameB, uriB);
 		
 		// Create difference model
 		MergeManagement.createDifferenceTripleModel(graphName,  graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI);
 		
 		// Differ between the different merge queries
 		if ((action != null) && (action.equalsIgnoreCase("AUTO")) && (with == null) && (triples == null)) {
-			logger.info("AUTO MERGE query detected");
+			logger.debug("AUTO MERGE query detected");
 			// Create the merged revision
 			mresult.newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.AUTO, "");
 		} else if ((action != null) && (action.equalsIgnoreCase("MANUAL")) && (with != null) && (triples != null)) {
-			logger.info("MANUAL MERGE query detected");
+			logger.debug("MANUAL MERGE query detected");
 			// Create the merged revision
 			mresult.newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.MANUAL, triples);
 		} else if ((action == null) && (with != null) && (triples != null)) {
-			logger.info("MERGE WITH query detected");
+			logger.debug("MERGE WITH query detected");
 			// Create the merged revision
 			mresult.newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.WITH, triples);
 		} else if ((action == null) && (with == null) && (triples == null)) {
-			logger.info("MERGE query detected");
+			logger.debug("MERGE query detected");
 			// Check if difference model contains conflicts
 			String queryASK = String.format(
 					  "ASK { %n"
@@ -400,6 +398,9 @@ public class Interface {
 		return mresult;
 		
 	}
+	
+	
+	
 
 
 }

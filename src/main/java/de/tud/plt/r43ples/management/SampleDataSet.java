@@ -71,13 +71,13 @@ public class SampleDataSet {
 		result.revisions.put("master-0", revisionNumber0);
 
 		String revisionNumber1 = RevisionManagement.createNewRevision(graph,
-				ResourceManagement.getContentFromResource("samples/test2-delta-added-1.nt"),
-				ResourceManagement.getContentFromResource("samples/test2-delta-removed-1.nt"), user,
+				ResourceManagement.getContentFromResource("samples/test2-addSet-1.nt"),
+				ResourceManagement.getContentFromResource("samples/test2-deleteSet-1.nt"), user,
 				"test commit message 1", revisionNumber0);
 		result.revisions.put("master-1", revisionNumber1);
 		String revisionNumber2 = RevisionManagement.createNewRevision(graph,
-				ResourceManagement.getContentFromResource("samples/test2-delta-added-2.nt"),
-				ResourceManagement.getContentFromResource("samples/test2-delta-removed-2.nt"), user,
+				ResourceManagement.getContentFromResource("samples/test2-addSet-2.nt"),
+				ResourceManagement.getContentFromResource("samples/test2-deleteSet-2.nt"), user,
 				"test commit message 2", revisionNumber1);
 		result.revisions.put("master-2", revisionNumber2);
 		return result;
@@ -225,7 +225,7 @@ public class SampleDataSet {
 	 * ---X----------+ (Master)
 	 * DEL: -        |
 	 *               |  ADD: H              ADD: I    ADD: J
-	 *               +-----X---------------------X---------X----- (Branch B2)  rebase unfreundlich by C
+	 *               +-----X---------------------X---------X----- (Branch B2)
 	 *                  DEL: C                DEL: -    DEL: -
 	 * 
 	 * 

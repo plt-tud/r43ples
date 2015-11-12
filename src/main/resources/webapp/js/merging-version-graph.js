@@ -58,11 +58,11 @@ var revTooltip = function (name, node) {
     var tooltip = "<h1>Revision " + node.revisionNumber + "</h1>" +
         "<table class='properties'>" +
         "<tr><td>Number:</td><td>" + node.revisionNumber + "</td><td></td></tr>" +
-        "<tr><td>Branch:</td><td>" + branches[node.revisionOfBranch].label + "</td><td><a href='" + node.revisionOfBranch + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+        "<tr><td>Branch:</td><td>" + branches[node.belongsTo].label + "</td><td><a href='" + node.belongsTo + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
         "<tr><td>Revised graph:</td><td>" + node.revisionOf + "</td><td><a href='" + node.revisionOf + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
         "<tr><td>URL:</td><td>" + name + "</td><td></td></tr>" +
-        "<tr><td>Add Set:</td><td>" + node.deltaAdded + "</td><td><a href='" + node.deltaAdded + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-        "<tr><td>Delete Set:</td><td>" + node.deltaRemoved + "</td><td><a href='" + node.deltaRemoved + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+        "<tr><td>Add Set:</td><td>" + node.addSet + "</td><td><a href='" + node.addSet + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+        "<tr><td>Delete Set:</td><td>" + node.deleteSet + "</td><td><a href='" + node.deleteSet + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
         "</table></p>";
        
     // Falls die Revision Version 0 ist, kann keine Information zum Commit angegeben werden
@@ -317,15 +317,15 @@ var drawGraph = function (_JSON, _showBranches, _showTags) {
                             revisions[key] = {};
                         }
                         // ID der entfernten Daten setzen
-                        revisions[key].deltaRemoved = value["http://eatld.et.tu-dresden.de/rmo#deltaRemoved"][0].value;
+                        revisions[key].deleteSet = value["http://eatld.et.tu-dresden.de/rmo#deleteSet"][0].value;
                         // ID der hinzugefügten Daten setzen
-                        revisions[key].deltaAdded = value["http://eatld.et.tu-dresden.de/rmo#deltaAdded"][0].value;
+                        revisions[key].addSet = value["http://eatld.et.tu-dresden.de/rmo#addSet"][0].value;
                         // Revisionsnummer setzen
                         revisions[key].revisionNumber = value["http://eatld.et.tu-dresden.de/rmo#revisionNumber"][0].value;
                         // ID der eigentlichen Daten setzen
                         revisions[key].revisionOf = value["http://eatld.et.tu-dresden.de/rmo#revisionOf"][0].value;
                         // ID des Branches setzen, zu dem die Revision gehört
-                        revisions[key].revisionOfBranch = value["http://eatld.et.tu-dresden.de/rmo#revisionOfBranch"][0].value;
+                        revisions[key].belongsTo = value["http://eatld.et.tu-dresden.de/rmo#belongsTo"][0].value;
                         break;
                     // Falls Branch
                     case "http://eatld.et.tu-dresden.de/rmo#Branch":
@@ -402,12 +402,12 @@ var drawGraph = function (_JSON, _showBranches, _showTags) {
             // Revisionen werden als Kreise dargestellt
             value.shape = "circle";
             // Falls die Revision am Kopf des Branches steht
-            if (branches[revisions[revision].revisionOfBranch].head == revision) {
+            if (branches[revisions[revision].belongsTo].head == revision) {
                 // Wird der Kreis komplett in der Branchfarbe gefüllt
-                value.style = "fill:" + branches[revisions[revision].revisionOfBranch].color + ";stroke:none;";
+                value.style = "fill:" + branches[revisions[revision].belongsTo].color + ";stroke:none;";
             } else {
                 // Sonst erhält er nur einen Rand in Branchfarbe
-                value.style = "stroke:" + branches[revisions[revision].revisionOfBranch].color + ";";
+                value.style = "stroke:" + branches[revisions[revision].belongsTo].color + ";";
             }
             // Knoten erzeugen
             g.setNode(revision, value);
@@ -421,10 +421,10 @@ var drawGraph = function (_JSON, _showBranches, _showTags) {
                 // Falls der Commit nur von einer Revision stammt
                 if (commits[commit].used.length == 1) {
                     // Wird als Farbe für die Kante die Revision genommen, die der Commit erzeugt hat
-                    color = branches[revisions[commits[commit].generated].revisionOfBranch].color;
+                    color = branches[revisions[commits[commit].generated].belongsTo].color;
                 } else {
                     // Ansonsten die Farbe der Ursprungsrevision
-                    color = branches[revisions[commits[commit].used[i]].revisionOfBranch].color;
+                    color = branches[revisions[commits[commit].used[i]].belongsTo].color;
                 }
                 // Kante von der Ursprungsrevision zur Revision, die der Commit erzeugt hat, erzeugen
                 g.setEdge(commits[commit].used[i], commits[commit].generated, {

@@ -1,47 +1,39 @@
 {{<super}}
 
 
-{{$title}}Merge View{{/title}}
+{{$title}}Merge Process{{/title}}
 
 {{$head_extra}}
-      <link rel="stylesheet" href="/static/css/process-graph.css">
+      <link rel="stylesheet" href="/static/css/r43ples.versiongraph.css">
+      <link rel="stylesheet" href="/static/css/tipsy.css">
       <link rel="stylesheet" href="/static/css/jsTreeStyle.css">            
       <link rel="stylesheet" href="/static/css/r43ples.merging.css">
-      
-      <style>
-        td:hover {
-            cursor: pointer;
-        }  
-
-        tr:hover {
-            background-color: #ccc;
-        }  
-
-        
-
-        #svg {
-          border:2px solid black; 
-          margin:1px; 
-          overflow:hidden;
-          
-        }
-      </style>
 {{/head_extra}}
 
 {{$script_extra}}
 <script src="/static/js/jstree.min.js"></script>
 <script src="/static/js/d3.min.js"></script>
 <script src="/static/js/dagre-d3.js"></script>
-<script src="/static/js/process-graph.js"></script>
+<script src="/static/js/jquery.tipsy.js"></script>
+<script src="/static/js/version-graph.js"></script>
 <script type="text/javascript">
-	//jsTree
-	// get checkbox and delete the file icon
+	// jsTree: get checkbox and delete the file icon
     $('#diffTree').jstree({ plugins : ["checkbox","sort","types","wholerow"], "core" : { "themes" : { "icons" : false } } });
 </script>
 <script type="text/javascript">
 	var tripleTableColor = "YellowGreen";
 	var individualTabelColor = "LemonChiffon"
 
+		function htmlEscape(str) {
+		if (str==null) return "";
+	    return String(str)
+	            .replace(/&/g, '&amp;')
+	            .replace(/"/g, '&quot;')
+	            .replace(/'/g, '&#39;')
+	            .replace(/</g, '&lt;')
+	            .replace(/>/g, '&gt;');
+	}
+	
 	function updateFilter() {
 		var checked = [];
         var properties;
@@ -57,17 +49,62 @@
              client: "{{clientName}}"
            },
            function(data, status){
-             $("#tripleView").empty();
-             $("#tripleView").prepend(data);
+             table = $("#tripleTable tbody");
+             
+             // regenerate triple list table
+             var row = new Array(), j = 0;
+             for (var key=0, size=data.length; key<size; key++){
+                 row[j++] = "<tr>" +
+                 			"	<td>"+htmlEscape(data[key]['subject'])+"</td>" +
+                 			"	<td>"+htmlEscape(data[key]['predicate'])+"</td>" +
+                 			"	<td>"+htmlEscape(data[key]['object'])+"</td>" +
+                 			"	<td class='state-"+data[key]['stateA']+"'>"+htmlEscape(data[key]['revisionA'])+"</td>" +
+                 			"	<td class='state-"+data[key]['stateB']+"'>"+htmlEscape(data[key]['revisionB'])+"</td>" +
+                 			"	<td class='conflict-"+data[key]['conflicting']+"'></td>" +
+                 			"	<td><input type='checkbox' name='options' value='"+htmlEscape(data[key]['revisionB'])+"'></td>" +
+                 			"	<td><button type='button' class='btn btn-default'>Confirm</button></td>" +
+                 			"</tr>";
+             }
+             table.html(row.join('')); 
              $("#tripleTable :button").each(function (){
                 if($(this).text() == "Approved") {
                    $(this).parent().prev().children().prop({"disabled":true});
-                   $(this).parent().parent().css('background',tripleTableColor);
+                   $(this).parent().parent().addClass("confirmed");
                 }else{
                    $(this).parent().prev().children().prop({"disabled":false});
-                   $(this).parent().parent().css('background','white');
+                   $(this).parent().parent().removeClass("confirmed");
                 }
              });
+         	// initApproveButtons
+   	      $("#tripleTable :button").click(function(){
+   	          var box = $(this).parent().prev().children();
+   	          var isChecked;
+   	          if(box.is(':checked')){
+   	            //triple added
+   	            isChecked = 1;
+   	          }else{
+   	            //triple deleted
+   	            isChecked = 0;
+   	          }
+
+   	          if(box.attr("disabled")){
+   	            box.prop({"disabled":false});
+   	            $(this).parent().parent().removeClass("confirmed");
+   	            $(this).text("Confirm");
+   	          }else{
+   	            box.prop({"disabled":true});
+   	            $(this).parent().parent().addClass("confirmed");
+   	            $(this).text("Approved");
+   	          }
+   	          $.post("api/approveProcess",
+   	              {
+   	                id: box.val(),
+   	                isChecked: isChecked,
+   	                graph: "{{graphName}}",
+   	                client: "{{clientName}}"
+   	              }
+   	          );
+   	        });
            }); 
 	}
 	
@@ -86,13 +123,14 @@
           }
 
           if($(this).attr("disabled")){
+        	  //FIXME: Why is is this commented out?
             // $(this).prop({"disabled":false});
             // $(this).parent().parent().css('background','white');
           }else{
             $(this).prop({"disabled":true});
-            $(this).parent().parent().css('background',tripleTableColor);
+            $(this).parent().parent().addClass("confirmed");
             $(this).parent().next().children().text("Approved");
-            $.post("approveProcess",
+            $.post("api/approveProcess",
               {
                 id: id,
                 isChecked: isChecked,
@@ -114,62 +152,9 @@
 	      
 	      
 	
-		// init Revision graph visualisation
-		var toogleBranches = $('#toogle-branches');
-	 	var toogleTags = $('#toogle-tags');
-		
-		drawGraph("mergingProcess?graph={{graphName}}&optradio=application/json", toogleBranches.prop("checked"), toogleTags.prop("checked"));
-		
-		// ChangeListener for tags
-		toogleTags.change(function () {
-		    $(this).prop('checked')?showTags():hideTags();
-		});
-		
-		// ChangeListener for branches
-		toogleBranches.change(function () {
-		    $(this).prop('checked')?showBranches():hideBranches();
-		});
-		
-		
-		
 
-	
-	
-	// initApproveButtons
-	      $("#tripleTable :button").click(function(){
-	          var box = $(this).parent().prev().children();
-	          var id = box.val();
-	          var isChecked;
-	          alert(box.is(':checked'));
-	          if(box.is(':checked')){
-	            //triple added
-	            isChecked = 1;
-	          }else{
-	            //triple deleted
-	            isChecked = 0;
-	          }
-
-	          if(box.attr("disabled")){
-	            box.prop({"disabled":false});
-	            $(this).parent().parent().css('background',tripleTableColor);
-	            $(this).text("Confirm");
-	          }else{
-	            box.prop({"disabled":true});
-	            $(this).parent().parent().css('background',tripleTableColor);
-	            $(this).text("Approved");
-	          }
-	          $.post("approveProcess",
-	              {
-	                id: id,
-	                isChecked: isChecked,
-	                graph: "{{graphName}}",
-	                client: "{{clientName}}"
-	              }
-	          );
-	        });
-	
-
-   
+		
+	 	drawGraph("#visualisation", "revisiongraph?graph={{graphName}}&format=application/json", false, false);
 
       updateFilter();
       
@@ -188,7 +173,6 @@
             graph: graphName, 
             options: options,
             client: clientName
-
         },
         function(data, status){
           if (confirm("Push process : " + status + "Show push result ?") == true) {
@@ -276,13 +260,6 @@
           });
         });
       });
-
-      // initial the size of svg
-      var svgInitial = $("#svg");
-      $("#svg").remove();
-      svgInitial.width("100%");
-      $("#visualisation").prepend(svgInitial);
-
 
       // filter table checked , filter TripleTable
       var property = $("#propertyBody").find("input");
@@ -389,16 +366,8 @@
               </div>
 
               <div id="right" class="col-lg-9">
-                <fieldset>
                   <legend>Revision graph</legend>
-                  <div id="visualisation" class="live map">
-                   <svg id="svg" width="100%" height="368" ><g/></svg>
-                  </div> 
-                  <div class="form col-sm-5">
-                    <input type="checkbox" id="toogle-tags" class="checkbox-inline"><label for="toogle-tags" class="checkbox-inline">Tags</label>
-                    <input type="checkbox" id="toogle-branches" class="checkbox-inline"><label for="toogle-branches" class="checkbox-inline">Branches</label>
-                  </div> 
-                </fieldset> 
+                  <div id="visualisation"></div> 
 
                 <div id="individualView"></div> 
                 <div id="highLevelView"></div>  

@@ -52,8 +52,8 @@ public class SparqlRewriter {
 	private static final String prov = "http://www.w3.org/ns/prov#";
 
 	private static final Node rmo_Revision = NodeFactory.createURI(rmo + "Revision");
-	private static final Node rmo_deltaRemoved = NodeFactory.createURI(rmo + "deltaRemoved");
-	private static final Node rmo_deltaAdded = NodeFactory.createURI(rmo + "deltaAdded");
+	private static final Node rmo_deleteSet = NodeFactory.createURI(rmo + "deleteSet");
+	private static final Node rmo_addSet = NodeFactory.createURI(rmo + "addSet");
 	private static final Node rmo_fullGraph = NodeFactory.createURI(rmo + "fullGraph");
 	private static final Node rmo_references = NodeFactory.createURI(rmo + "references");
 	private static final Node prov_wasDerivedFrom = NodeFactory.createURI(prov + "wasDerivedFrom");
@@ -86,7 +86,8 @@ public class SparqlRewriter {
 		if (RevisionManagement.isBranch(graphName, revisionNumber))
 			return false;
 		else {
-			Tree tree =  new Tree(graphName);
+			String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+			Tree tree =  new Tree(revisionGraph);
 			LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
 			logger.debug("Path to revision: " + list.toString());
 			last_revision = ExprUtils.nodeToExpr(NodeFactory.createURI(list.get(0).getRevisionUri()));
@@ -113,7 +114,8 @@ public class SparqlRewriter {
 			String graphName = m2.group("graph");
 			String referenceName = m2.group("revision").toLowerCase();
 			
-			String revisionNumber = RevisionManagement.getRevisionNumber(graphName, referenceName);
+			String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+			String revisionNumber = RevisionManagement.getRevisionNumber(revisionGraph, referenceName);
 			graphs.add(graphName);
 			revisions.add(revisionNumber);
 
@@ -219,7 +221,7 @@ public class SparqlRewriter {
 
 			Node g_delete_set_full_graph = Var.alloc("g_delete_set_full_graph_" + statement_i);
 			Node g_add_set = Var.alloc("g_add_set_" + statement_i);
-			Node g_revisiongraph = NodeFactory.createURI(Config.revision_graph);			
+			Node g_revisiongraph = NodeFactory.createURI(RevisionManagement.getRevisionGraph(graphName));			
 			
 			Var var_r_delete_set = Var.alloc("r_delete_set_" + statement_i);
 			Var var_r_add_set = Var.alloc("r_add_set_" + statement_i);
@@ -240,7 +242,7 @@ public class SparqlRewriter {
 
 			ElementGroup eg_delete_set = new ElementGroup();
 			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, RDF.type.asNode(), rmo_Revision));
-			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, rmo_deltaRemoved, g_delete_set_full_graph));
+			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, rmo_deleteSet, g_delete_set_full_graph));
 			eg_delete_set.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_delete_set),
 					expression_list_revision_path)));
 			eg_union.addElement(eg_delete_set);
@@ -252,7 +254,7 @@ public class SparqlRewriter {
 					var_r_add_set));
 			eg_revisiongraph2.addElement(ebp);
 			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, RDF.type.asNode(), rmo_Revision));
-			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, rmo_deltaAdded, g_add_set));
+			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, rmo_addSet, g_add_set));
 			eg_revisiongraph2.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_add_set),
 					expression_list_revision_path)));			
 		

@@ -7,8 +7,10 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
 
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
@@ -76,6 +78,18 @@ public class TestEndpoint extends JerseyTest {
 		assertXMLEqual(expected, result);
 	}
 	
+	@Test
+	public void testPOSTDirect() throws SAXException, IOException {
+		String query = String.format(""
+				+ "SELECT * FROM <%s> REVISION \"B2\" "
+				+ "WHERE { ?s ?p ?o. }"
+				+ "ORDER BY ?s ?p ?o", dsm.graphName);
+		Response response = target("sparql").request(format).post(Entity.entity(query, "application/sparql-query"));
+		String result = response.readEntity(String.class);
+		String expected = ResourceManagement.getContentFromResource("response-1.1-3.xml");
+		assertXMLEqual(expected, result);
+	}
+	
 	
 	@Test
 	public void testSelectSparqlUnion() throws SAXException, IOException {		
@@ -89,11 +103,11 @@ public class TestEndpoint extends JerseyTest {
 	
 	
 	@Test
-	public void testSelectSparqlJoinOption() throws SAXException, IOException{		
+	public void testSelectSparqlQueryRewritingOption() throws SAXException, IOException{		
 		String result = target("sparql").
 				queryParam("query", URLEncoder.encode(query_union_b1_b2, "UTF-8")).
 				queryParam("format", format).
-				queryParam("join_option", "true").
+				queryParam("query_rewriting", "true").
 				request().get(String.class);
 		String expected = ResourceManagement.getContentFromResource("response-b1-b2.xml");
 		assertXMLEqual(expected, result);
@@ -184,7 +198,7 @@ public class TestEndpoint extends JerseyTest {
 	@Test
 	public void testGetRevisionGraph(){
 		String result = target("revisiongraph").queryParam("format", "text/turtle").queryParam("graph", dsm.graphName).request().get(String.class);
-		Assert.assertThat(result, containsString("rmo:Revision"));
+		Assert.assertThat(result, containsString("Revision"));
 		result = target("revisiongraph").queryParam("format", "application/rdf+xml").queryParam("graph", dsm.graphName).request().get(String.class);
 		Assert.assertThat(result, containsString("http://eatld.et.tu-dresden.de/rmo#Revision"));
 		result = target("revisiongraph").queryParam("format", "batik").queryParam("graph", ds1.graphName).request().get(String.class);
@@ -209,11 +223,5 @@ public class TestEndpoint extends JerseyTest {
 		Assert.assertThat(result, containsString("SDD"));
 	}
 	
-	@Test
-	public void testGetRevisedGraphs() throws InternalErrorException{
-		String result = target("getRevisedGraphs").queryParam("format", "text/turtle").request().get(String.class);
-		Assert.assertThat(result, containsString(dsm.graphName));
-	}
-
 
 }
