@@ -161,12 +161,12 @@ public class HttpInterface extends TripleStoreInterface {
 
 	@Override
 	public boolean executeAskQuery(String askQueryString) {
-		InputStream result = executeQueryWithAuthorization(askQueryString, "text/boolean");
+		InputStream result = executeQueryWithAuthorization(askQueryString, "application/sparql-results+xml");
 		String answer;
 		try {
 			answer = IOUtils.toString(result);
 			result.close();
-			return answer.equals("true");
+			return answer.contains("<boolean>true</boolean>");
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;

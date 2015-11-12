@@ -198,7 +198,7 @@ public class TestEndpoint extends JerseyTest {
 	@Test
 	public void testGetRevisionGraph(){
 		String result = target("revisiongraph").queryParam("format", "text/turtle").queryParam("graph", dsm.graphName).request().get(String.class);
-		Assert.assertThat(result, containsString("rmo:Revision"));
+		Assert.assertThat(result, containsString("Revision"));
 		result = target("revisiongraph").queryParam("format", "application/rdf+xml").queryParam("graph", dsm.graphName).request().get(String.class);
 		Assert.assertThat(result, containsString("http://eatld.et.tu-dresden.de/rmo#Revision"));
 		result = target("revisiongraph").queryParam("format", "batik").queryParam("graph", ds1.graphName).request().get(String.class);
