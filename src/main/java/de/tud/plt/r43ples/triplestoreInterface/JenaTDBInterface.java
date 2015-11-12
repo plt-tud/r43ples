@@ -44,7 +44,7 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	public JenaTDBInterface(String databaseDirectory) {
 		
 		// if the directory does not exist, create it
-		Location location = new Location(databaseDirectory);
+		Location location = Location.create(databaseDirectory);
 		File theDir = new File(location.getDirectoryPath());
 		if (!theDir.exists()) {
 			logger.info("creating directory: " + theDir.toString());

@@ -10,6 +10,7 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFormatter;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.shared.NoWriterForLangException;
+import com.hp.hpl.jena.sparql.resultset.ResultsFormat;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.JenaModelManagement;
@@ -90,7 +91,7 @@ public abstract class TripleStoreInterface {
 		if (format.equals("application/sparql-results+xml") || format.equals("application/xml") || format.equals("text/xml"))
 			ResultSetFormatter.outputAsXML(baos, results);
 		else if (format.equals("text/turtle") )
-			ResultSetFormatter.outputAsRDF(baos, "Turtle", results);
+			ResultSetFormatter.output(baos, results, ResultsFormat.FMT_RDF_TTL);
 		else if (format.equals("application/json") )
 			ResultSetFormatter.outputAsJSON(baos, results);
 		else if (format.equals("text/plain") )
