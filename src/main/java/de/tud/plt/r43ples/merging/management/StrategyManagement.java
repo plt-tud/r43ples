@@ -1,7 +1,6 @@
 package de.tud.plt.r43ples.merging.management;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 import org.apache.log4j.Logger;
@@ -11,7 +10,6 @@ import com.hp.hpl.jena.query.ResultSet;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.merging.MergeManagement;
 import de.tud.plt.r43ples.merging.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
@@ -37,47 +35,8 @@ public class StrategyManagement {
 		return TripleStoreInterfaceSingleton.get().executeAskQuery(query);	
 	}
 	
-	
-	/**move the reference to the top of branch B
-	 * @param name of branch B
-	 * @param uri of branch B
-	 * @param uri of branch A
-	 *  */
-	public static void moveBranchReference(final String revisionGraph, String branchNameB, String revisionUriB, String revisionUriA){
-		// delete old reference
-		String query = RevisionManagement.prefixes + String.format("DELETE DATA { GRAPH <%s> { <%s> rmo:references <%s>. } };%n",
-				revisionGraph, branchNameB, revisionUriB);
-		// added new reference
-		query += String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:references <%s>. } } ;%n", revisionGraph,
-				branchNameB, revisionUriA);
-		
-		logger.info("move info" + query);
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
-				
-	}
-	
-	
-	/**update the named graph of branch
-	 * @param uri of branch B
-	 * @param uri of last revision of branch B
-	 * @param uri of last revision of branch A
-	 * */
-	public static void updatebelongsTo(final String revisionGraph, final String graphName, String branchUriB, String revisionUriB, String revisionUriA ){
-		LinkedList<String> revisionList =  MergeManagement.getPathBetweenStartAndTargetRevision(
-				revisionGraph, graphName, revisionUriB, revisionUriA);
-		
-		Iterator<String> riter = revisionList.iterator();
-		while(riter.hasNext()) {
-			String revision = riter.next();
 
-			String query = RevisionManagement.prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:belongsTo <%s>. } };%n",
-					revisionGraph, revision, branchUriB);
-			
-			logger.debug("revisionlist info" + revision);
-			logger.debug("updated info" + query);
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);			
-		}
-	}
+	
 	
 	/**
 	 * save old revision information of Graph
@@ -337,39 +296,7 @@ public class StrategyManagement {
 		
 		logger.info("No revision number could be found.");
 		return null;
-	}
-	
-	/**update the named graph of branch
-	 * @param uri of branch B
-	 * @param uri of last revision of branch B
-	 * @param uri of last revision of branch A
-	 * */
-	public static void updateRevisionOfBranch(String revisionGraph, String graphName, String branchUriB, String revisionUriB, String revisionUriA ){
-		LinkedList<String> revisionList =  MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, graphName, revisionUriB, revisionUriA);
-		
-		Iterator<String> riter = revisionList.iterator();
-		while(riter.hasNext()) {
-			String revision = riter.next();
-			String query = RevisionManagement.prefixes 
-					+ String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:revisionOfBranch <%s>. } };%n",
-					revisionGraph, revision, branchUriB);
-			
-			logger.debug("revisionlist info" + revision);
-			logger.debug("updated info" + query);
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);			
-		}
-	}
-	
-	/** copy fullgraph of branchA to fullgraph of branchB
-	 * @param uri of full graph A
-	 * @param uri of full graph B */
-	
-	public static void fullGraphCopy(String fullGraphUriA, String fullGraphUriB) {	
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(
-				"COPY GRAPH <" + fullGraphUriA + "> TO GRAPH <"
-						+ fullGraphUriB + ">");
-	}
-	
+	}	
 	
 }
 

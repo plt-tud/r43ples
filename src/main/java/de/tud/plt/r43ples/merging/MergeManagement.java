@@ -94,8 +94,7 @@ public class MergeManagement {
 	 * @return linked list with all revisions from start revision to target revision
 	 */
 	public static LinkedList<String> getPathBetweenStartAndTargetRevision(
-			final String revisionGraph, final String graphName,
-			final String startRevision, final String targetRevision) {
+			final String revisionGraph,	final String startRevision, final String targetRevision) {
 		
 		logger.info("Calculate the shortest path from revision <" + startRevision + "> to <" + targetRevision + "> .");
 		String query = String.format(

@@ -99,7 +99,6 @@ public class RebaseControl {
 		logger.info("patchGroup 1:" + patchGroup.getBasisRevisionNumber());
 		logger.info("patchGroup 2:" + patchGroup.getPatchMap().size());
 
-		
 		LinkedHashMap<String, Patch> patchMap = patchGroup.getPatchMap();
 		String basisRevisionNumber = patchGroup.getBasisRevisionNumber();
 				

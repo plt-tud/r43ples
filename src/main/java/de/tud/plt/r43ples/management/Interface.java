@@ -11,8 +11,6 @@ import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.merging.MergeManagement;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.merging.MergeResult;
-import de.tud.plt.r43ples.merging.control.FastForwardControl;
-import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
@@ -134,7 +132,7 @@ public class Interface {
 					nextRevisionNumbers.put(graphName, newRevisionNumber);
 				}
 				String addSetGraphUri = graphName + "-addSet-" + newRevisionNumber;
-				String removeSetGraphUri = graphName + "-deleteSet-" + newRevisionNumber;
+				String deleteSetGraphUri = graphName + "-deleteSet-" + newRevisionNumber;
 				
 				String data = m.group("data");
 				if (data == null)
@@ -142,7 +140,7 @@ public class Interface {
 				if (action.equalsIgnoreCase("INSERT")) {
 					queryM = m.replaceFirst(String.format("INSERT %s { GRAPH <%s>", data, addSetGraphUri));
 				} else if (action.equalsIgnoreCase("DELETE")) {
-					queryM = m.replaceFirst(String.format("INSERT %s { GRAPH <%s>", data, removeSetGraphUri));
+					queryM = m.replaceFirst(String.format("INSERT %s { GRAPH <%s>", data, deleteSetGraphUri));
 				}
 			}
 			m = patternUpdateRevision.matcher(queryM);
@@ -165,10 +163,10 @@ public class Interface {
 			String newRevisionNumber = nextRevisionNumbers.get(graphName);
 			String referenceFullGraph = RevisionManagement.getReferenceGraph(graphName, revisionName);
 			String addSetGraphUri = graphName + "-addSet-" + newRevisionNumber;
-			String removeSetGraphUri = graphName + "-deleteSet-" + newRevisionNumber;
+			String deleteSetGraphUri = graphName + "-deleteSet-" + newRevisionNumber;
 
 			RevisionManagement.addNewRevisionFromChangeSet(user, commitMessage, graphName, revisionName, newRevisionNumber,
-					referenceFullGraph, addSetGraphUri, removeSetGraphUri);
+					referenceFullGraph, addSetGraphUri, deleteSetGraphUri);
 			
 			
 			queryM = m.replaceAll(String.format("GRAPH <%s> ", graphName));
@@ -270,23 +268,7 @@ public class Interface {
 		String branchNameB = m.group("branchNameB").toLowerCase();
 		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
 		
-		if (!FastForwardControl.fastForwardCheck(revisionGraph, branchNameA, branchNameB)) {
-			return false;
-		}
-		String branchUriA = RevisionManagement.getBranchUri(revisionGraph, branchNameA);
-		String branchUriB = RevisionManagement.getBranchUri(revisionGraph, branchNameB);
-		
-		String fullGraphUriA = RevisionManagement.getFullGraphUri(revisionGraph, branchUriA);
-		String fullGraphUriB = RevisionManagement.getFullGraphUri(revisionGraph, branchUriB);
-
-		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
-		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
-		
-		StrategyManagement.moveBranchReference(revisionGraph, branchUriB, revisionUriB, revisionUriA);
-		// TODO: add reference commit with user and commit message
-		StrategyManagement.updateRevisionOfBranch(revisionGraph, graphName, branchUriB, revisionUriB, revisionUriA);	
-		StrategyManagement.fullGraphCopy(fullGraphUriA, fullGraphUriB);
-		return true;
+        return RevisionManagement.performFastForward(revisionGraph, branchNameA, branchNameB, user, RevisionManagement.getDateString(), commitMessage);
 	}
 	
 	
@@ -354,8 +336,8 @@ public class Interface {
 		String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 		
 		MergeManagement.createRevisionProgresses(revisionGraph, graphName,
-				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, graphName, commonRevision, revisionUriA), graphNameA, uriA, 
-				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, graphName, commonRevision, revisionUriB), graphNameB, uriB);
+				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriA), graphNameA, uriA, 
+				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriB), graphNameB, uriB);
 		
 		// Create difference model
 		MergeManagement.createDifferenceTripleModel(graphName,  graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI);

@@ -38,24 +38,7 @@ public class FastForwardControl {
 	public static boolean executeFastForward(String graphName, String branchNameA, String branchNameB) throws InternalErrorException
 	{
 		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-		if (!FastForwardControl.fastForwardCheck(revisionGraph, branchNameA, branchNameB)) {
-			return false;
-		}
-		
-		String branchUriA = RevisionManagement.getBranchUri(revisionGraph, branchNameA);
-		String branchUriB = RevisionManagement.getBranchUri(revisionGraph, branchNameB);
-		
-		String fullGraphUriA = RevisionManagement.getFullGraphUri(revisionGraph, branchUriA);
-		String fullGraphUriB = RevisionManagement.getFullGraphUri(revisionGraph, branchUriB);
-
-		
-		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
-		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
-		
-		StrategyManagement.moveBranchReference(revisionGraph, branchUriB, revisionUriB, revisionUriA);
-		StrategyManagement.updatebelongsTo(revisionGraph, graphName, branchUriB, revisionUriB, revisionUriA);	
-		StrategyManagement.fullGraphCopy(fullGraphUriA, fullGraphUriB);
-		return true;
+		return RevisionManagement.performFastForward(revisionGraph, branchNameA, branchNameB, "user", RevisionManagement.getDateString(), "Online merging ff");
 	}
 	
 }

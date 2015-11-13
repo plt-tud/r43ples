@@ -1182,7 +1182,7 @@ public class Endpoint {
 		 
 		// create the patch and patch group
 		LinkedList<String> revisionList = MergeManagement.getPathBetweenStartAndTargetRevision(
-				revisionGraph, graphName, commonRevision, revisionUriA);
+				revisionGraph, commonRevision, revisionUriA);
 		rebaseControl.createPatchGroupOfBranch(revisionGraph, revisionUriB, revisionList);
 		
 		
@@ -1216,8 +1216,8 @@ public class Endpoint {
 		String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 		
 		MergeManagement.createRevisionProgresses(revisionGraph, graphName,
-				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, graphName, commonRevision, revisionUriA), graphNameA, uriA, 
-				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, graphName, commonRevision, revisionUriB), graphNameB, uriB);
+				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriA), graphNameA, uriA, 
+				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriB), graphNameB, uriB);
 		
 		
 		// Create difference model
