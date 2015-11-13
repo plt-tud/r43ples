@@ -189,6 +189,15 @@
         rdfs:subClassOf prov:Activity .
   
 
+###  http://eatld.et.tu-dresden.de/rmo#CreateGraphCommit
+
+:CreateGraphCommit rdf:type owl:Class;
+        
+        rdfs:label "Grapherstellungscommit"@de ,
+                   "create graph commit"@en ;
+        
+        rdfs:subClassOf rmo:Commit .
+  
   
 ###  http://eatld.et.tu-dresden.de/rmo#RevisionCommit
 

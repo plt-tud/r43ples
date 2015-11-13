@@ -62,18 +62,20 @@ public class RevisionManagement {
 		}
 		
 		String queryAddRevisionGraph = String.format(prefixes
-				+ "INSERT DATA { GRAPH <%s> {"
-				+ "  <%s> a rmo:Graph;"
-				+ "    rmo:hasRevisionGraph <%s>;"
-				+ "    prov:wasAssociatedWith <%s>;"
-				+ "	   prov:generated \"%s\";"
+				+ "INSERT DATA { GRAPH <%1$s> {"
+				+ "  <%2$s> a rmo:Graph;"
+				+ "    rmo:hasRevisionGraph <%3$s>;"
 				+ "    sddo:hasDefaultSDD sdd:defaultSDD."
+				+ "  <%2$s-create-graph> a rmo:CreateGraphCommit;"
+				+ "    prov:wasAssociatedWith <%4$s>;"
+				+ "	   prov:atTime \"%5$s\";"
+				+ "    prov:generated <%2$s>."
 				+ "} }",
 				Config.revision_graph, graphName, revisiongraph, "user", getDateString());
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryAddRevisionGraph);
 		 		
 		 		
-		String revisionNumber = "0";
+		String revisionNumber = "1";
 		String revisionUri = graphName + "-revision-" + revisionNumber;
 
 		// Create new revision
@@ -81,8 +83,8 @@ public class RevisionManagement {
 				  "<%s> a rmo:Revision;"
 				+ "	rmo:revisionOf <%s>;"
 				+ "	rmo:revisionNumber \"%s\";"
-				+ "	rmo:belongsTo <%s>. "
-				,  revisionUri, graphName, revisionNumber, graphName + "-master");
+				+ "	rmo:belongsTo <%s>. ",
+				revisionUri, graphName, revisionNumber, graphName + "-master");
 		
 		// Add MASTER branch		
 		queryContent += String.format(
