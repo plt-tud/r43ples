@@ -30,7 +30,7 @@
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="47.0" width="132.552734375" x="-147.26953125" y="654.2689655172414"/>
-          <y:Fill color="#C0C0C0" transparent="false"/>
+          <y:Fill hasColor="false" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="31.9375" modelName="internal" modelPosition="c" textColor="#000000" visible="true" width="92.060546875" x="20.24609375" y="7.53125">rev:1
 (rmo:Revision)</y:NodeLabel>
@@ -42,7 +42,7 @@
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="47.0" width="132.552734375" x="164.5423355139369" y="654.2689655172414"/>
-          <y:Fill color="#C0C0C0" transparent="false"/>
+          <y:Fill hasColor="false" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="31.9375" modelName="internal" modelPosition="c" textColor="#000000" visible="true" width="92.060546875" x="20.24609375" y="7.53125">rev:2
 (rmo:Revision)</y:NodeLabel>
@@ -54,7 +54,7 @@
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="47.0" width="132.552734375" x="603.6332021048345" y="654.2689655172414"/>
-          <y:Fill color="#C0C0C0" transparent="false"/>
+          <y:Fill hasColor="false" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="31.9375" modelName="internal" modelPosition="c" textColor="#000000" visible="true" width="92.060546875" x="20.24609375" y="7.53125">rev:3
 (rmo:Revision)</y:NodeLabel>
@@ -66,7 +66,7 @@
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="47.0" width="132.552734375" x="225.5423355139369" y="840.5379310344829"/>
-          <y:Fill color="#C0C0C0" transparent="false"/>
+          <y:Fill hasColor="false" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="31.9375" modelName="internal" modelPosition="c" textColor="#000000" visible="true" width="92.072265625" x="20.240234375" y="7.53125">branch:master
 (rmo:Branch)</y:NodeLabel>
@@ -78,7 +78,7 @@
       <data key="d6">
         <y:ShapeNode>
           <y:Geometry height="47.0" width="132.552734375" x="368.6332021048345" y="524.0758620689658"/>
-          <y:Fill color="#C0C0C0" transparent="false"/>
+          <y:Fill hasColor="false" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="1.0"/>
           <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="31.9375" modelName="internal" modelPosition="c" textColor="#000000" visible="true" width="118.890625" x="6.8310546875" y="7.53125">branch:experiment
 (rmo:Branch)</y:NodeLabel>
