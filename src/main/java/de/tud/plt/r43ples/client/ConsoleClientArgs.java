@@ -4,6 +4,8 @@ package de.tud.plt.r43ples.client;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 
+import de.tud.plt.r43ples.management.RevisionManagement;
+
 public class ConsoleClientArgs {
   
   @Parameter(names = {"-g", "--graph"}, required=true, description = "uri of graph")
@@ -20,6 +22,9 @@ public class ConsoleClientArgs {
   
   @Parameter(names = {"-u", "--user"}, description = "user name")
   public String user = "console client";
+  
+  @Parameter(names = {"-t", "--timestamp"}, description = "time stamp (default: current time stamp)")
+  public String time_stamp = RevisionManagement.getDateString();
   
   @Parameter(names = {"-m", "--message"}, description = "commit message")
   public String message = "console client commit";

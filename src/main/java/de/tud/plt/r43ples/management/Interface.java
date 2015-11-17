@@ -168,7 +168,6 @@ public class Interface {
 			RevisionManagement.addNewRevisionFromChangeSet(user, commitMessage, graphName, revisionName, newRevisionNumber,
 					referenceFullGraph, addSetGraphUri, deleteSetGraphUri);
 			
-			
 			queryM = m.replaceAll(String.format("GRAPH <%s> ", graphName));
 			m = patternGraphWithRevision.matcher(queryM);
 		}
@@ -212,7 +211,7 @@ public class Interface {
 		while (m.find()) {
 			found = true;
 			String graphName = m.group("graph");
-			RevisionManagement.purgeGraph(graphName);
+			RevisionManagement.purgeRevisionInformation(graphName);
 		}
 		if (!found) {
 			throw new QueryErrorException("Query contain errors:\n" + query);
