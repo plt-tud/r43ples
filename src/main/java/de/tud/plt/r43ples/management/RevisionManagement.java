@@ -810,8 +810,9 @@ public class RevisionManagement {
 	 * @param graphName
 	 * @param revisionIdentifier
 	 * @return
+	 * @throws InternalErrorException 
 	 */
-	public static String getNextRevisionNumber(final String graphName) {
+	public static String getNextRevisionNumber(final String graphName) throws InternalErrorException {
 		// create UID and check whether the uid number already in named graph exist, if yes , than create it once again,
 		// if not , return this one
 		
@@ -826,7 +827,7 @@ public class RevisionManagement {
 					+ "WHERE { GRAPH <%s> {"
 					+ "	?rev a rmo:Revision; rmo:revisionNumber ?nr ."
 					+ " } "
-					+ "}ORDER BY DESC(xsd:int(?nr))", revisionGraph);
+					+ "}ORDER BY DESC(xsd:integer(?nr))", revisionGraph);
 		try {
 			ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 			QuerySolution qs = results.next();
@@ -836,8 +837,12 @@ public class RevisionManagement {
 			nextNumber = 0;
 		}
 		
+		int count = 0;
 		while (existRevisionNumber(""+nextNumber, revisionGraph)){
-			nextNumber++;		
+			nextNumber++;
+			count++;
+			if (count==100)
+				throw new InternalErrorException("No new revision number found");
 		}
 		
 		return ""+nextNumber;
@@ -852,10 +857,10 @@ public class RevisionManagement {
 		String queryASK = prefixes
 				+ String.format(""
 						+ "ASK {"
-						+ "	GRAPH <%s> { " 
-						+ " 	{ ?rev a rmo:Revision; rmo:revisionNumber \"%1$s\". }"
+						+ "	GRAPH <%1$s> { " 
+						+ " 	{ ?rev a rmo:Revision; rmo:revisionNumber \"%2$s\". }"
 						+ "		UNION "
-						+ "		{?rev a rmo:Revision. ?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%1$s\" .}"
+						+ "		{?rev a rmo:Revision. ?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%2$s\" .}"
 						+ "} } ",
 						revisionGraph, revisionNumber);
 		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
@@ -902,6 +907,7 @@ public class RevisionManagement {
 		
 		for (int i=0; i < lines.length; i++) {
 			insert.append(lines[i]);
+			insert.append("\n");
 			counter++;
 			if (counter == MAX_STATEMENTS-1) {
 				TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(template, graphName, insert));
@@ -1000,14 +1006,14 @@ public class RevisionManagement {
 	
 
 	/**
-	 * Deletes all information for a specific named graph including all full
+	 * Deletes all revision information for a specific named graph including all full
 	 * graphs and information in the R43ples system.
 	 * 
 	 * @param graph
 	 *            graph to be purged
 	 */
-	public static void purgeGraph(final String graphName) {
-		logger.info("Purge graph " + graphName + " and all related R43ples information.");
+	public static void purgeRevisionInformation(final String graphName) {
+		logger.info("Purge revision information of graph " + graphName);
 		// Drop all full graphs as well as add and delete sets which are related
 		// to specified graph
 		String revisionGraph = getRevisionGraph(graphName);

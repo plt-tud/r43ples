@@ -37,5 +37,6 @@ wget -r -np -nH -L -e robots=off http://live.dbpedia.org/changesets/2015/06/03/
 
 
 #extract everything
+bunzip2 -v dbpedia_3.9.owl.bz2
 gunzip -v dbpedia_2015_06_02.nt.gz
 gunzip -v changesets/2015/06/03/*/*.gz

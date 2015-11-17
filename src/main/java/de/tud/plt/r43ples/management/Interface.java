@@ -213,7 +213,7 @@ public class Interface {
 		while (m.find()) {
 			found = true;
 			String graphName = m.group("graph");
-			RevisionManagement.purgeGraph(graphName);
+			RevisionManagement.purgeRevisionInformation(graphName);
 		}
 		if (!found) {
 			throw new QueryErrorException("Query contain errors:\n" + query);

@@ -6,11 +6,16 @@
 
 
 GRAPH="http://dbpedia.org"
+CONFIG_STARDOG="../../../../r43ples.stardog.dbpedia.conf"
+
+CONFIG=$CONFIG_STARDOG
+
+JAR=../../../../target/r43ples-console-client-jar-with-dependencies.jar
 
 
 stardog-admin server start
 
-# create database and add compressed data
+# create database
 stardog-admin db create -n dbpedia -o "strict.parsing=false" -v 
 
 # add ontology data
@@ -22,16 +27,37 @@ stardog data add dbpedia -v --named-graph $GRAPH data/dbpedia_2015_06_02.nt
 
 
 
-CONFIG_STARDOG="../../../r43ples.stardog.dbpedia.conf"
-
-CONFIG=$CONFIG_STARDOG
-
-cd ../../
-JAR=../../../target/r43ples-console-client-jar-with-dependencies.jar
 
 
+
+set -x 
+set -e
 
 java -jar $JAR --config $CONFIG --new --graph $GRAPH
 
-java -jar $JAR --config $CONFIG -g $GRAPH -a $P/000277.added.nt -m 'benchmark commit'
-java -jar $JAR --config $CONFIG -g $GRAPH -a $P/000276.added.nt -m 'benchmark commit'
+for dir in data/changesets/*/*/*/*
+do
+    echo "Going into $dir"
+    i=1
+    f=`printf '%06i' $i`
+    f_add="$dir/$f.added.nt"
+    f_removed="$dir/$f.removed.nt"
+    f_reinserted="$dir/$f.reinserted.nt"
+    f_clear="$dir/$f.clear.nt"
+    until [ ! -f "$f_add" ]
+    do
+            echo " Performing changeset $f ..."
+            
+            cat $f_add $f_reinserted > $dir/tmp_add.nt
+            cat $f_removed $f_clear > $dir/tmp_del.nt
+            
+            java -jar $JAR --config $CONFIG -g $GRAPH -a $dir/tmp_add.nt -d $dir/tmp_del.nt -m "benchmark commit $i"
+            
+            i=$(( i+1 ))
+            f=`printf '%06i' $i`
+            f_add="$dir/$f.added.nt"
+            f_removed="$dir/$f.removed.nt"
+            f_reinserted="$dir/$f.reinserted.nt"
+            f_clear="$dir/$f.clear.nt"
+    done
+done 

@@ -24,7 +24,7 @@ public class SampleDataSet {
 		DataSetGenerationResult result = new DataSetGenerationResult();	
 		String graph = "http://test.com/r43ples-dataset-1";
 		result.graphName = graph;
-		RevisionManagement.purgeGraph(graph);
+		RevisionManagement.purgeRevisionInformation(graph);
 		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graph);
 		result.revisions.put("master-0", revisionNumber0);
 
@@ -66,7 +66,7 @@ public class SampleDataSet {
 		DataSetGenerationResult result = new DataSetGenerationResult();	
 		String graph = "http://test.com/r43ples-dataset-2";
 		result.graphName = graph;
-		RevisionManagement.purgeGraph(graph);
+		RevisionManagement.purgeRevisionInformation(graph);
 		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graph);
 		result.revisions.put("master-0", revisionNumber0);
 
@@ -109,7 +109,7 @@ public class SampleDataSet {
 		result.graphName = graphName;
 		
 		//delete the old graph
-		RevisionManagement.purgeGraph(graphName);
+		RevisionManagement.purgeRevisionInformation(graphName);
 		
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 		result.revisions.put("master-0", revision0);
@@ -182,7 +182,7 @@ public class SampleDataSet {
 	 */
 	public static String createSampleDataSetFastForward() throws InternalErrorException {
 		String graphName = "http://test.com/r43ples-dataset-fastforward";
-		RevisionManagement.purgeGraph(graphName);
+		RevisionManagement.purgeRevisionInformation(graphName);
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 		
 		// Initial commit
@@ -238,7 +238,7 @@ public class SampleDataSet {
 		String graphName = "http://test.com/r43ples-dataset-rebase";
 
 		//delete the old graph
-		RevisionManagement.purgeGraph(graphName);
+		RevisionManagement.purgeRevisionInformation(graphName);
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 
 		// Initial commit
@@ -306,7 +306,7 @@ public class SampleDataSet {
 		String graphName = "http://test.com/r43ples-dataset-force-rebase";
 
 		//delete the old graph
-		RevisionManagement.purgeGraph(graphName);
+		RevisionManagement.purgeRevisionInformation(graphName);
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 
 		// Initial commit
@@ -366,7 +366,7 @@ public class SampleDataSet {
 		String initialContent = ResourceManagement.getContentFromResource(initialContentFilePath);
 
 		//delete the old graph
-		RevisionManagement.purgeGraph(graphName);
+		RevisionManagement.purgeRevisionInformation(graphName);
 		
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 
@@ -434,7 +434,7 @@ public class SampleDataSet {
 		String graphName = "http://test.com/r43ples-dataset-renaming";
 
 		//delete the old graph
-		RevisionManagement.purgeGraph(graphName);
+		RevisionManagement.purgeRevisionInformation(graphName);
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 
 		// Initial commit
@@ -506,7 +506,7 @@ public class SampleDataSet {
 		String graphName = "http://test.com/r43ples-dataset-complex-structure";
 		
 		//delete the old graph
-		RevisionManagement.purgeGraph(graphName);
+		RevisionManagement.purgeRevisionInformation(graphName);
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 		
 		// Initial commit
