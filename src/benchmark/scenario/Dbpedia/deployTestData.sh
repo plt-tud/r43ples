@@ -6,10 +6,8 @@
 
 
 GRAPH="http://dbpedia.org"
-CONFIG_STARDOG="../../../../r43ples.stardog.dbpedia.conf"
-
+CONFIG_STARDOG="../../conf/r43ples.stardog.conf"
 CONFIG=$CONFIG_STARDOG
-
 JAR=../../../../target/r43ples-console-client-jar-with-dependencies.jar
 
 
@@ -29,10 +27,6 @@ stardog data add dbpedia -v --named-graph $GRAPH data/dbpedia_2015_06_02.nt
 
 
 
-
-set -x 
-set -e
-
 java -jar $JAR --config $CONFIG --new --graph $GRAPH
 
 for dir in data/changesets/*/*/*/*
@@ -43,21 +37,21 @@ do
     f_add="$dir/$f.added.nt"
     f_removed="$dir/$f.removed.nt"
     f_reinserted="$dir/$f.reinserted.nt"
-    f_clear="$dir/$f.clear.nt"
+    #f_clear="$dir/$f.clear.nt"
     until [ ! -f "$f_add" ]
     do
             echo " Performing changeset $f ..."
             
             cat $f_add $f_reinserted > $dir/tmp_add.nt
-            cat $f_removed $f_clear > $dir/tmp_del.nt
+            cat $f_removed > $dir/tmp_del.nt
             
-            java -jar $JAR --config $CONFIG -g $GRAPH -a $dir/tmp_add.nt -d $dir/tmp_del.nt -m "benchmark commit $i"
+            java -jar $JAR --config $CONFIG -g $GRAPH -a $dir/tmp_add.nt -d $dir/tmp_del.nt -m "benchmark commit $i in dir $dir"
             
             i=$(( i+1 ))
             f=`printf '%06i' $i`
             f_add="$dir/$f.added.nt"
             f_removed="$dir/$f.removed.nt"
             f_reinserted="$dir/$f.reinserted.nt"
-            f_clear="$dir/$f.clear.nt"
+            #f_clear="$dir/$f.clear.nt"
     done
 done 
