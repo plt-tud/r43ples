@@ -67,25 +67,22 @@ public class RevisionManagement {
 				+ "  <%2$s> a rmo:Graph;"
 				+ "    rmo:hasRevisionGraph <%3$s>;"
 				+ "    sddo:hasDefaultSDD sdd:defaultSDD."
-				+ "  <%2$s-create-graph> a rmo:CreateGraphCommit;"
-				+ "    prov:wasAssociatedWith <%4$s>;"
-				+ "	   prov:atTime \"%5$s\";"
-				+ "    prov:generated <%2$s>."
 				+ "} }",
-				Config.revision_graph, graphName, revisiongraph, "user", getDateString());
+				Config.revision_graph, graphName, revisiongraph);
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryAddRevisionGraph);
 		 		
 		 		
 		String revisionNumber = "1";
 		String revisionUri = graphName + "-revision-" + revisionNumber;
+		String commitUri = graphName + "-commit-" + revisionNumber;
+		String branchUri = graphName + "-master";
 
 		// Create new revision
 		String queryContent = String.format(
 				  "<%s> a rmo:Revision;"
-				+ "	rmo:revisionOf <%s>;"
 				+ "	rmo:revisionNumber \"%s\";"
 				+ "	rmo:belongsTo <%s>. ",
-				revisionUri, graphName, revisionNumber, graphName + "-master");
+				revisionUri, revisionNumber, branchUri);
 		
 		// Add MASTER branch		
 		queryContent += String.format(
@@ -93,8 +90,16 @@ public class RevisionManagement {
 				+ " rmo:fullGraph <%s>;"
 				+ "	rmo:references <%s>;"
 				+ "	rdfs:label \"master\".",
-				graphName + "-master", graphName, revisionUri);
+				branchUri, graphName, revisionUri);
 
+		queryContent += String.format(""
+				+ "<%s> a rmo:Commit; "
+				+ "	prov:wasAssociatedWith <%s> ;" 
+				+ "	prov:generated <%s>, <%s> ;" 
+				+ "	dc-terms:title \"initial commit\" ;" 
+				+ "	prov:atTime \"%s\" .%n",
+				commitUri,  "user", revisionUri, branchUri, getDateString());
+		
 		String queryRevision = prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisiongraph, queryContent);
 		
 		//TripleStoreInterfaceSingleton.get().executeCreateGraph(graph);
@@ -583,7 +588,7 @@ public class RevisionManagement {
 
 			// Create a new commit (activity)
 			String queryContent = String.format(""
-					+ "<%s> a %sCommit; "
+					+ "<%s> a %sCommit, rmo:Commit; "
 					+ "	prov:wasAssociatedWith <%s> ;" 
 					+ "	prov:generated <%s> ;" 
 					+ " prov:used <%s> ;"

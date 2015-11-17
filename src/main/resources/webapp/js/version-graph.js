@@ -89,7 +89,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
         // create nodes for every revision
         Object.keys(revisions).forEach(function (revision) {
             var value = revisions[revision];
-            value.label = trimRevisionNumber(revisions[revision].revisionNumber);
+            value.label = revisions[revision].revisionNumber;
             value.height = 25;
             value.shape = "circle";
             value.style = "stroke:" + branches[revisions[revision].belongsTo].color + ";";
@@ -151,14 +151,16 @@ function drawGraph(div_selector, _JSON, _showTags) {
             for (var i = 0; i < types.length; i++) {
                 switch (types[i].value) {
                     // Falls Commit
-                    case "http://eatld.et.tu-dresden.de/rmo#Commit":
+                    case "http://eatld.et.tu-dresden.de/rmo#RevisionCommit":
                         commits[key] = {};
                         commits[key].title = value["http://purl.org/dc/terms/title"][0].value;
                         commits[key].wasAssociatedWith = value["http://www.w3.org/ns/prov#wasAssociatedWith"][0].value;
                         commits[key].generated = value["http://www.w3.org/ns/prov#generated"][0].value;
                         commits[key].used = [];
-                        for (var k = 0; k < value["http://www.w3.org/ns/prov#used"].length; k++) {
-                            commits[key].used.push(value["http://www.w3.org/ns/prov#used"][k].value);
+                        if (value["http://www.w3.org/ns/prov#used"]){
+                            for (var k = 0; k < value["http://www.w3.org/ns/prov#used"].length; k++) {
+                                commits[key].used.push(value["http://www.w3.org/ns/prov#used"][k].value);
+                            }
                         }
                         commits[key].time = value["http://www.w3.org/ns/prov#atTime"][0].value;
                         if (revisions[commits[key].generated] == null) {
@@ -171,10 +173,13 @@ function drawGraph(div_selector, _JSON, _showTags) {
                         if (revisions[key] == null) {
                             revisions[key] = {};
                         }
-                        revisions[key].deleteSet = value["http://eatld.et.tu-dresden.de/rmo#deleteSet"][0].value;
-                        revisions[key].addSet = value["http://eatld.et.tu-dresden.de/rmo#addSet"][0].value;
+                        if (value["http://eatld.et.tu-dresden.de/rmo#deleteSet"]!=null){
+                        	revisions[key].deleteSet = value["http://eatld.et.tu-dresden.de/rmo#deleteSet"][0].value;
+                        }
+                        if (value["http://eatld.et.tu-dresden.de/rmo#addSet"]){
+                        	revisions[key].addSet = value["http://eatld.et.tu-dresden.de/rmo#addSet"][0].value;
+                        }
                         revisions[key].revisionNumber = value["http://eatld.et.tu-dresden.de/rmo#revisionNumber"][0].value;
-                        revisions[key].revisionOf = value["http://eatld.et.tu-dresden.de/rmo#revisionOf"][0].value;
                         revisions[key].belongsTo = value["http://eatld.et.tu-dresden.de/rmo#belongsTo"][0].value;
                         break;
                     // Falls Branch
@@ -242,7 +247,6 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	         "<table class='properties'>" +
 	         "<tr><td>Number:</td><td>" + node.revisionNumber + "</td><td></td></tr>" +
 	         "<tr><td>Branch:</td><td>" + branches[node.belongsTo].label + "</td><td><a href='" + node.belongsTo + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-	         "<tr><td>Revised graph:</td><td>" + node.revisionOf + "</td><td><a href='" + node.revisionOf + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
 	         "<tr><td>URL:</td><td>" + name + "</td><td></td></tr>" +
 	         "<tr><td>Add Set:</td><td>" + node.addSet + "</td><td><a href='" + node.addSet + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
 	         "<tr><td>Delete Set:</td><td>" + node.deleteSet + "</td><td><a href='" + node.deleteSet + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +

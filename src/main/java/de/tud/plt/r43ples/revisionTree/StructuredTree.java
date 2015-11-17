@@ -59,11 +59,11 @@ public class StructuredTree {
 		String queryBranches = RevisionManagement.prefixes + String.format(
 						"SELECT ?branch ?title ?commit%n"
 						+ "WHERE { GRAPH <%s> { %n"
-						+ "?branch a rmo:Branch;%n"
-						+ "rdfs:label ?title;%n"
-						+ "rmo:references ?rev."
-						+ "?commit a rmo:Commit;%n"
-						+ "prov:generated ?rev.%n"
+						+ "  ?branch a rmo:Branch;%n"
+						+ "     rdfs:label ?title;%n"
+						+ "     rmo:references ?rev."
+						+ "  ?commit a rmo:RevisionCommit;%n"
+						+ "     prov:generated ?rev.%n"
 						+ "} }", revisionGraph);
 
 		ResultSet resultsBranches = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryBranches);
@@ -84,7 +84,7 @@ public class StructuredTree {
 						+ "?tag a rmo:Tag;%n"
 						+ "rdfs:label ?title;%n"
 						+ "rmo:references ?rev."
-						+ "?commit a rmo:Commit;%n"
+						+ "?commit a rmo:TagCommit;%n"
 						+ "prov:generated ?rev.%n"
 						+ "} }", revisionGraph);
 
@@ -118,7 +118,7 @@ public class StructuredTree {
 		String queryCommits = RevisionManagement.prefixes + String.format(
 						"SELECT ?commit ?time ?prev ?next ?title ?authname ?branch%n"
 						+ "WHERE { GRAPH <%s> {%n"
-						+ "?commit a rmo:Commit;%n"
+						+ "?commit a rmo:RevisionCommit;%n"
 						+ "dc-terms:title ?title;%n"
 						+ "prov:used ?reva;%n"
 						+ "prov:generated ?revb;%n"
