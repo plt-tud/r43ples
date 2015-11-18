@@ -130,7 +130,7 @@ public class StructuredTree {
 						+ "?reva rmo:revisionNumber ?prev;"
 						+ "rmo:revisionOf <%s>.%n"
 						+ "?revb rmo:revisionNumber ?next."
-						+ "OPTIONAL { ?revb rmo:revisionOfBranch ?branch. }%n"
+						+ "OPTIONAL { ?revb rmo:belongsTo ?branch. }%n"
 						+ "} }",
 				Config.revision_graph,
 				graph);

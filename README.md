@@ -132,13 +132,13 @@ There are some additional keywords which can be used to control the revisions of
 		MERGE GRAPH <test> BRANCH "branch-1" INTO "branch-2"
 
 
-SPARQL Join option
-------------------
+Query Rewriting option
+----------------------
 There is a new option for R43ples which improves the performance. The necessary revision is not temporarily generated anymore.
 The SPARQL query is rewritten in such a way that the branch and the change sets are directly joined inside the query. This includes the order of the change sets.
 It is currently under development and further research.
 
-The option can be enabled by passing an additional parameter "join_option=true"
+The option can be enabled by passing an additional parameter "query_rewriting=true"
 
 It currently supports:
 
@@ -161,3 +161,17 @@ Following libraries are used in R43ples:
 * [jQuery](http://jquery.com/) as JavaScript framework
 * [Bootstrap](http://getbootstrap.com/) as HTML, CSS and JS framework
 * [Mustache](https://mustache.github.io/) as template engine
+
+
+
+Revision information
+--------------------
+All information about the revision history of all named graphs is stored in the named graph **http://eatld.et.tu-dresden.de/r43ples-revisions** (as long as not configured otherwise in the configuration file).
+
+Here, the Revision Management Ontology (RMO) is used to model revisions, branches and tags. Furthermore commits are stored which connect each revision, tag and branch with its prior revision. 
+
+
+HTTP Header information
+------------------------
+Each response header contains information about the revision information of the graphs specified in the requests. This information follows the RMO and is transferred as Turtle serialisation.
+ 

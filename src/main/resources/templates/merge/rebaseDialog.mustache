@@ -1,0 +1,24 @@
+{{<super}}
+
+
+{{$content}}
+	<h2>Rebase is unfriendly</h2>
+                  
+    <p>Rebase process stopped, because it is rebase unfriendly!</p>
+    <p>Please select: Force Rebase or Manually operation! </p>
+    <p>Force Rebase is dangerous and suggest manually operation!</p>
+
+	 <div class="row">
+	   <div class="col-sm-4">
+	    <a href="manualRebaseProcess?graph={{graphName}}&client={{clientName}}" type="submit" class="btn btn-primary btn-block">Manually Rebase</a>
+	   </div>
+	   <div class="col-sm-4">
+	     <a href="forceRebaseProcess?graph={{graphName}}&client={{clientName}}" type="button" class="btn btn-warning btn-block">Force Rebase</a>
+	   </div>
+	   <div class="col-sm-4">
+	     <a href="merging" type="button" class="btn btn-default btn-block">Go back</a>
+	   </div>
+	 </div>            
+{{/content}}
+
+{{/super}}

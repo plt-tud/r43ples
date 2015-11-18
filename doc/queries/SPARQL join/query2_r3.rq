@@ -15,7 +15,7 @@ WHERE{
         } UNION {
             VALUES ?r_delete_set {rev:5 rev:4 }
             ?r_delete_set  a  rmo:Revision ;
-                rmo:deltaRemoved  ?g_delete_set_full_graph .
+                rmo:deleteSet  ?g_delete_set_full_graph .
         }
     }
     
@@ -25,7 +25,7 @@ WHERE{
             VALUES ?r_add_set {rev:5 rev:4 }
             ?r_delete_set prov:wasDerivedFrom* ?r_add_set.
             ?r_add_set  a  rmo:Revision ;
-                  rmo:deltaAdded  ?g_add_set .
+                  rmo:addSet  ?g_add_set .
         }
     }
 }

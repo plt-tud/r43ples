@@ -1,0 +1,161 @@
+{{<super}}
+
+{{$title}}Merge Start{{/title}}
+
+{{$script_extra}}
+<script type="text/javascript">
+
+	function setLocalClient(){
+	  localStorage.clientName = document.getElementById("user").value;
+	}
+
+   
+    // update branches for each selected graph
+    $("#graph").change(function(){
+ 		$.get("api/getBranches", {graph : $(this).val() }, function(data,status){
+        	var listitems = '' ;
+        	$.each(data,function(key, value) {
+        		listitems += '<option>' + value + '</option>';
+        	});
+        	$("#Branch1").html(listitems);
+    		$("#Branch2").html(listitems);
+        });
+    });
+
+    
+    //js Stragegie->illustration with Graph
+    var strategyImage = {
+    		'Three-Way Merge': '/static/images/three-way-strategie.png',
+    		'Rebase': '/static/images/rebase-strategie.png',
+    		'Fast-Forward': '/static/images/fast-forward-strategie.png',
+    };    
+        
+    function showIllustration(num){
+     document.getElementById("illustration").innerHTML="<img src='" + strategyImage[num] +"' alt='"+num+"' style=\"width:100%\">";
+
+      // by fast forward hide the common,auto fieldset and sdd selector
+      if(num == "Fast-Forward"){
+        $('#methodField').hide();
+        $('#sddField').hide();
+      } else{
+        $('#methodField').show();
+        $('#sddField').show();
+      }
+    }; 
+    showIllustration("Three-Way Merge");
+
+        // branch onchange check : if reachable with fast forward
+        function checkFastForward (){
+          var graph = $('#graph').val();
+          var branch1 = $('#Branch1').val();
+          var branch2 = $('#Branch2').val();
+
+          $.get("api/fastForwardCheckProcess", 
+            {
+              graph : graph,
+              branch1 : branch1,
+              branch2 : branch2
+            },
+            function(data,status){
+              // get data and check
+              if(data == "false"){
+            	  $('#strategie option[value="Fast-Forward"]').attr('disabled', true);
+              }else{
+            	  $('#strategie option[value="Fast-Forward"]').attr('disabled', false);
+            	  $('#strategie').val("Fast-Forward");
+            	  showIllustration("Fast-Forward");
+              }
+            });
+        }
+</script>
+{{/script_extra}}
+
+{{$content}}
+<div class="container">
+			<div class="row" >
+				<div class="col-sm-7">
+                  <h3>Start Merging</h3>
+                    <form class="form-horizontal" action="mergingProcess" method="post" role="form">
+                      <div class="form-group" >
+                      	<label for="graph" class="col-sm-2 control-label">Graph</label>
+                        <div class="col-sm-10" >
+                          <select class="form-control" id="graph" name="graph">
+                             <option value="no">None</option>
+                             {{#graphList}}
+                             <option value="{{toString}}">{{toString}}</option>                        
+                             {{/graphList}}
+                          </select>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                      	<label for="Branch1" class="col-sm-2 control-label">Merge</label>
+                        <div class="col-sm-4">
+                          <select class="form-control" id="Branch1" name="Branch1" onchange="checkFastForward()">    
+                             <option value="no"></option>
+                          </select>          
+                        </div>
+                        <label for="Branch2" class="col-sm-2 control-label">Into</label>
+                        <div class="col-sm-4">
+                          <select class="form-control" id="Branch2" name="Branch2" onchange="checkFastForward()">
+                             <option value="no"></option>
+                          </select>          
+                        </div>
+                      </div>
+                      <div class="form-group" >
+                        <label for="strategie" class="col-sm-2 control-label">Strategy</label>
+                        <div class="col-sm-10" >
+                          <select class="form-control" id="strategie" name="strategie" onchange="showIllustration(this.value)">
+                             <option value="Three-Way Merge">Three-Way Merge</option>
+                             <option value="Rebase">Rebase</option>
+                             <option value="Fast-Forward">Fast-Forward</option>
+                          </select>
+                        </div>
+                      </div>                    
+                      <div id="methodField" class="form-group">
+                      	<label class="col-sm-2 control-label">Method</label>
+                              <label class="col-sm-5"><input type="radio" name="optradio" value="common" checked> Common</label>
+                              <label class="col-sm-5"><input type="radio" name="optradio" value="auto"> Auto</label>
+                      </div>
+                      <div id="sddField" class="form-group" >
+                          <label for="sdd" class="col-sm-2 control-label">SDD</label>
+                          <div class="col-sm-10">          
+                            <select class="form-control" id="sdd" name="sdd">
+                             <option value="http://eatld.et.tu-dresden.de/sdd#defaultSDD">sdd:defaultSDD</option>
+                            </select>
+                          </div>
+                      </div>
+                      <div class="form-group">
+                          <label for="user" class="col-sm-2 control-label">User</label>
+                          <div class="col-sm-10">
+                            <input class="form-control" type="text" placeholder="Committing User" id="user" name="user">
+                          </div>
+                       </div>    
+                      <div class="form-group">
+                           <label for="message" class="col-sm-2 control-label">Message</label>
+                           <div class="col-sm-10 ">
+                           	<textarea class="form-control" rows="6" placeholder="Commit Message" id="message" name="message"></textarea>
+                           </div>
+                      </div>
+                      <div class="form-group">
+                          <div class="col-sm-offset-2 col-sm-5">
+                            <button id="sub" type="submit" class="btn btn-primary btn-block" onclick="setLocalClient()">Submit</button>
+                          </div>
+                          <div class="col-sm-5">
+                            <button id="can" type="button" class="btn btn-default btn-block">Cancel</button>
+                          </div>
+                      </div>
+                    </form>
+
+			 </div>
+
+       <div class= "col-sm-5">
+            <h3>Strategy Illustration</h3>
+            <div id="illustration">
+            </div>
+          </div>
+		</div>
+   </div>
+{{/content}}
+
+
+{{/super}}

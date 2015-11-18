@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.DataSetGenerationResult;
 import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.management.SparqlRewriter;
@@ -20,12 +21,12 @@ import de.tud.plt.r43ples.management.SparqlRewriter;
  */
 public class TestSparqlRewriter {
 
-	private static String graph_test;
+	private static DataSetGenerationResult ds;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException{
 		Config.readConfig("r43ples.test.conf");
-		graph_test = SampleDataSet.createSampleDataset1();
+		ds = SampleDataSet.createSampleDataset1();
 	}
 	
 	
@@ -35,14 +36,17 @@ public class TestSparqlRewriter {
 	 */
 	@Test
 	public final void testRewriteQuery1() throws InternalErrorException {
-		String query = "PREFIX : <http://test.com/> "
+		String query = String.format("PREFIX : <http://test.com/> "
 				+ "SELECT DISTINCT ?s ?o "
 				+ "WHERE {"
-				+ "  GRAPH <" + graph_test + "> REVISION \"2\" {?s :knows ?o }"
-				+ "} ORDER BY ?s ?o";	
+				+ "  GRAPH <%s> REVISION \"%s\" {?s :knows ?o }"
+				+ "} ORDER BY ?s ?o",
+				ds.graphName, ds.revisions.get("master-2"));
 		
 		String result = SparqlRewriter.rewriteQuery(query);
-		String expected = ResourceManagement.getContentFromResource("rewritten-query1.rq");
+		String expected = String.format(
+				ResourceManagement.getContentFromResource("rewritten-query1.rq"),
+				ds.revisions.get("master-5"), ds.revisions.get("master-4"), ds.revisions.get("master-3"));
 		Assert.assertEquals(expected, result);
 	}
 	
@@ -52,18 +56,20 @@ public class TestSparqlRewriter {
 	 */
 	@Test
 	public final void testRewriteQuery2() throws InternalErrorException {
-		String query = "PREFIX : <http://test.com/> "
-
-		+ "SELECT DISTINCT ?p1 ?p2 "
-		+ "WHERE {"
-		+ "  GRAPH <" + graph_test + "> REVISION \"2\" {"
-		+ "	   ?p1 :knows ?p2."
-		+ "	   MINUS {?p1 :knows :Danny}"
-		+ "  }"
-		+ "} ORDER BY ?p1 ?p2";  
-		
+		String query = String.format("PREFIX : <http://test.com/> "
+				+ "SELECT DISTINCT ?p1 ?p2 "
+				+ "WHERE {"
+				+ "  GRAPH <%s> REVISION \"%s\" {"
+				+ "	   ?p1 :knows ?p2."
+				+ "	   MINUS {?p1 :knows :Danny}"
+				+ "  }"
+				+ "} ORDER BY ?p1 ?p2",
+				ds.graphName, ds.revisions.get("master-2"));  
+				
 		String result = SparqlRewriter.rewriteQuery(query);
-		String expected = ResourceManagement.getContentFromResource("rewritten-query2.rq");
+		String expected = String.format(
+				ResourceManagement.getContentFromResource("rewritten-query2.rq"),
+				ds.revisions.get("master-5"), ds.revisions.get("master-4"), ds.revisions.get("master-3"));
 		Assert.assertEquals(expected, result);
 	}
 

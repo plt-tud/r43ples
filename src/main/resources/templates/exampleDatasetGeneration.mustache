@@ -1,15 +1,19 @@
-{{<templates/super}}
+{{<super}}
+
+{{$title}}Example Dataset generated{{/title}}
 
 {{$content}}
- Following example data sets have been generating including a revision graph:
+<div class="row">
+	<p>Following example data sets have been generating including a revision graph:</p>
 
-<ul>
- 	{{#iterator}}
-	<li>{{toString}}</li>
-	{{/iterator}}
-</ul>
+	<ul>
+ 		{{#graphs}}
+		<li>{{toString}}</li>
+		{{/graphs}}
+	</ul>
 
-<a class="btn btn-default" href="sparql">Back to Endpoint</a>
+	<a class="btn btn-default" href="sparql">Back to Endpoint</a>
+</div>
 {{/content}}
 
-{{/templates/super}}
+{{/super}}

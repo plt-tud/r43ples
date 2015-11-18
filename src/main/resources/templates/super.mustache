@@ -1,61 +1,54 @@
-<html>
+<html  lang="en">
 <head>
-<title>{{$title}}R43ples - Revision Management for the Semantic Web{{/title}}</title>
-<meta name="author" content="Markus Graube">
-<meta name="description" content="R43ples web application">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="icon" type="image/png" href="/static/images/r43ples-r-logo.v04.png">    
+    <title>R43ples - {{$title}}Revision Management for the Semantic Web{{/title}}</title>
+    <meta name="author" content="Markus Graube">
+    <meta name="description" content="R43ples web application">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="/static/images/r43ples-logo-r.png">    
 
-<!-- Bootstrap core CSS -->
-<link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.3.2/css/bootstrap.min.css">
-<link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.3.2/css/bootstrap-theme.min.css">
-<link rel="stylesheet" href="/static/css/font-awesome.min.css">
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="/static/css/font-awesome.min.css">
 
-<!-- Custom styles for this template -->
-<link href="/static/css/r43ples.css" rel="stylesheet" />
+    <!-- Custom styles for this template -->
+    <link href="/static/css/r43ples.css" rel="stylesheet" />
 
-{{$head_extra}}{{/head_extra}}
+    {{$head_extra}}{{/head_extra}}
 </head>
 <body>
+    <nav class="navbar navbar-default navbar-static-top" role="navigation">
+            <div class="container">  
+                <div class="navbar-header">
+                    <a href="."><img class="pull-left" src="/static/images/r43ples-logo-r.png" alt="R43ples logo"><span class="navbar-brand">R43ples</span></a>
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="fa fa-bars fa-lg"></span>
+                    </button>  
+                </div>
+                <div id="navbar" class="collapse navbar-collapse">
+                    <ul class="nav navbar-nav navbar-left">
+                        <li {{#endpoint_active}}class="active"{{/endpoint_active}}><a href="sparql"><i class="fa fa-edit"></i> Endpoint</a></li>
+                        <li {{#debug_active}}class="active"{{/debug_active}}><a href="debug"><i class="fa fa-stethoscope"></i> Debug</a></li>
+                        <li {{#merging_active}}class="active"{{/merging_active}}><a href="merging"><i class="fa fa-magic"></i> Merging</a></li>
+                        <li class="divider"></li>
+                    </ul>
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="http://plt-tud.github.io/r43ples/"><i class="fa fa-globe"></i> Website</a></li>
+                        <li><a href="https://github.com/plt-tud/r43ples"><i class="fa fa-github"></i> GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+    </nav>
+    <div class="container">
+            {{$content}}Default content of the page{{/content}}
+    </div>
 
-<nav class="navbar navbar-default navbar-static-top" role="navigation">
-	<div class="container">  
-		<div class="navbar-header">
-			<a href="."><img class="pull-left" src="/static/images/r43ples-r-logo.v04.png" alt="R43ples logo"><span class="navbar-brand">R43ples</span></a>
-			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-				<span class="sr-only">Toggle navigation</span>
-				<span class="fa fa-bars fa-lg"></span>
-			</button>  
-		</div>
-		
-        <div id="navbar" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav navbar-left">
-            <li {{#endpoint_active}}class="active"{{/endpoint_active}}><a href="sparql"><i class="fa fa-edit"></i> Endpoint</a></li>
-            <li {{#debug_active}}class="active"{{/debug_active}}><a href="debug"><i class="fa fa-stethoscope"></i> Debug</a></li>
-            <li {{#merging_active}}class="active"{{/merging_active}}><a href="merging"><i class="fa fa-magic"></i> Merging</a></li>
-            <li class="divider"></li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="http://plt-tud.github.io/r43ples/"><i class="fa fa-globe"></i> Website</a></li>
-            <li><a href="https://github.com/plt-tud/r43ples"><i class="fa fa-github"></i> GitHub</a></li>
-          </ul>
-        </div><!--/.nav-collapse -->
-	</div>  
-
-</nav>
-
-<div class="container">
-	{{$content}}Default content of the page{{/content}}
-</div>
-
-<!--     Bootstrap core JavaScript -->
-<!--  At the end in order to load the page faster-->
-<script src="//cdn.jsdelivr.net/jquery/2.1.3/jquery.min.js"></script>
-<script src="//cdn.jsdelivr.net/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-{{$script_extra}}{{/script_extra}}
-
+    <!--     Bootstrap core JavaScript -->
+    <!--  At the end in order to load the page faster-->
+    <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    {{$script_extra}}{{/script_extra}}
 </body>
 </html>
-
-

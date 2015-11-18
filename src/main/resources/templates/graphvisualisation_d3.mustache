@@ -1,63 +1,35 @@
-{{<templates/super}}
+{{<super}}
+
+{{$title}}Revision Graph{{/title}}
 
 {{$head_extra}}
-    <!--CSS Dateien für den Version Graph, tipsy und Font Awesome für Symbole -->
-    <link rel="stylesheet" href="//cdn.jsdelivr.net/tipsy/1.0/stylesheets/tipsy.css">
-    <link rel="stylesheet" href="/static/css/version-graph.css">
+    <link rel="stylesheet" href="/static/css/r43ples.versiongraph.css">
+    <link rel="stylesheet" href="/static/css/tipsy.css">
 {{/head_extra}}
  
 {{$script_extra}}   
-    <!--Einbinden der externen Bibliotheken-->
-	<!--D3.js-->
-	<script src="//cdn.jsdelivr.net/d3js/3.5.5/d3.min.js"></script>
-	<!--dagre-d3-->
-	<script src="//cpettitt.github.io/project/dagre-d3/latest/dagre-d3.min.js"></script>
-	<!--tipsy-->
-	<script src="//cdn.jsdelivr.net/tipsy/1.0/javascripts/jquery.tipsy.js"></script>
-	<!--Version Graph-->
-	<script src="/static/js/version-graph.js"></script>
+<script src="/static/js/d3.min.js"></script>
+<script src="/static/js/dagre-d3.js"></script>
+<script src="/static/js/jquery.tipsy.js"></script>
+<script src="/static/js/version-graph.js"></script>
 
-	<script type="text/javascript">
-    // Verknüpfung der UI Elemente mit dem Version Graph über jQuery
+<script type="text/javascript">
     $(document).ready(function () {
-        // Elemente in Variablen Speichern
-        var toogleBranches = $('#toogle-branches');
-        var toogleTags = $('#toogle-tags');
-        //var dataSource = $('#datasource');
-        
-        // Graph mit der aktuellen Auswahl erstellen
-        drawGraph("revisiongraph?graph={{graphName}}&format=application/json",toogleBranches.prop("checked"),toogleTags.prop("checked"));
-        
-        // ChangeListener für die Tags
-        toogleTags.change(function () {
-            $(this).prop('checked')?showTags():hideTags();
-        });
-        
-        // ChangeListener für die Branches
-        toogleBranches.change(function () {
-            $(this).prop('checked')?showBranches():hideBranches();
-        });
+        drawGraph("#visualisation", "revisiongraph?graph={{graphName}}&format=application/json", false, false);
     });
 </script>
-
 {{/script_extra}}
     
 {{$content}}
-<h1>Revision Graph</h1>
-    <h2><samp>&lt;{{graphName}}&gt;</samp></h2>
-<!--SVG-Element für den Version Graph-->
-	<div id="visualisation">
-		<svg width="400" height="580" style="border:1px solid #000000; margin: 5px; overflow:hidden;"></svg>
-		<div class="form-inline">
-			<label for="toogle-tags" class="checkbox-inline">Tags</label><input type="checkbox" id="toogle-tags" class="checkbox-inline">
-			<label for="toogle-branches" class="checkbox-inline">Branches</label><input type="checkbox" id="toogle-branches" class="checkbox-inline">
-		</div>	
+<div class="row">
+	<div class= "col-sm-12">
+	<h1>Revision Graph</h1>
+	    <h2><samp>&lt;{{graphName}}&gt;</samp></h2>
+		<div id="visualisation"></div>
+		<br>
+		<a class="btn btn-default" href="sparql">Back to Endpoint</a>
 	</div>
-	<br/>
-	<a class="btn btn-default" href="sparql">Back to Endpoint</a>
+</div>
 {{/content}}
 
-
-
-
-{{/templates/super}}
+{{/super}}
