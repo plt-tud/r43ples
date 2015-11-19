@@ -837,11 +837,11 @@ public class RevisionManagement {
 		}
 	}
 
-	/**
+	/** Returns new unique revision number for specified graph
+	 * 
 	 * 
 	 * @param graphName
-	 * @param revisionIdentifier
-	 * @return
+	 * @return new revision number
 	 * @throws InternalErrorException 
 	 */
 	public static String getNextRevisionNumber(final String graphName) throws InternalErrorException {
