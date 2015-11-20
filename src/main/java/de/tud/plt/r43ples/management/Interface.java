@@ -1,6 +1,7 @@
 package de.tud.plt.r43ples.management;
 
-import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -88,88 +89,116 @@ public class Interface {
 	}
 	
 	
+	/** 
+	 * currently not thread-safe
+	 * @param query
+	 * @param user
+	 * @param commitMessage
+	 * @throws InternalErrorException
+	 */
 	public static void sparqlUpdate(final String query, final String user, final String commitMessage)
 			throws InternalErrorException {
 
 		final Pattern patternUpdateRevision = Pattern.compile(
-				"(?<action>INSERT|DELETE|WHERE)(?<data>\\s*DATA){0,1}\\s*\\{\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
+				"(?<action>INSERT|DELETE)(?<data>\\s*DATA){0,1}\\s*(?<parenthesis>\\{)",
 				patternModifier);
+		final Pattern patternWhere = Pattern.compile(
+				"WHERE\\s*(?<parenthesis>\\{)",
+				patternModifier);
+		
 		final Pattern patternEmptyGraphPattern = Pattern.compile(
 				"GRAPH\\s*<(?<graph>[^>]*)>\\s*\\{\\s*\\}",
 				patternModifier);
 		final Pattern patternGraphWithRevision = Pattern.compile(
-				"GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
+				"GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"\\s*(?<parenthesis>\\{)",
 				patternModifier);
+		
 		logger.debug("SPARQL Update detected");
 		
-		// write to add and delete sets
-		// (replace graph names in query)
-		String queryM = query;
-		HashMap<String, String> nextRevisionNumbers = new HashMap<String, String>();
-		Matcher m = patternUpdateRevision.matcher(queryM);
+		String queryRewritten = "";
 		
+		// I. Take over prefixes and other head stuff
+		Matcher m = patternUpdateRevision.matcher(query);
+		if (m.find()) {
+			queryRewritten = query.substring(0,m.start());
+			if (m.group("data") != null)
+				queryRewritten += "INSERT DATA {";
+			else
+				queryRewritten += "INSERT {";
+		}
+		else {
+			throw new InternalErrorException("No R43ples update query detected.");
+		}
+		
+		
+		// II. Rewrite INSERT and DELETE clauses (replace graph names in query with change set graph names)
+		List<RevisionDraft> revList = new LinkedList<RevisionDraft>();
+		m = patternUpdateRevision.matcher(query);
 		while (m.find()) {
-			String graphName = m.group("graph");
-			String revisionName = m.group("revision").toLowerCase(); 	// can contain revision numbers or reference names
-			String action = m.group("action");															
+			String action = m.group("action");
+			String updateClause = QueryParser.getStringEnclosedinBraces(query, m.end("parenthesis"));
 			
-			if (action.equalsIgnoreCase("WHERE")) {
-				// TODO: replace generateFullGraphOfRevision with query rewriting option
-				String tempGraphName = graphName + "-temp";
-				RevisionManagement.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
-				queryM = m.replaceFirst(String.format("WHERE { GRAPH <%s>", tempGraphName));
-			}
-			else {
+			Matcher m2a = patternGraphWithRevision.matcher(updateClause);
+			while (m2a.find()){
+				String graphName = m2a.group("graph");
+				String revisionName = m2a.group("revision").toLowerCase();
+				
 				if (!RevisionManagement.isBranch(graphName, revisionName)) {
 					throw new InternalErrorException("Revision is not referenced by a branch");
 				}
-				String newRevisionNumber;
-				if (nextRevisionNumbers.containsKey(graphName)) {
-					newRevisionNumber = nextRevisionNumbers.get(graphName);
+				RevisionDraft d = null;
+				for(RevisionDraft draft : revList){
+					if (draft.equals(graphName, revisionName))
+						d = draft;
 				}
-				else {
-					newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName);
-					nextRevisionNumbers.put(graphName, newRevisionNumber);
+				if (d==null){
+					d = new RevisionDraft(graphName, revisionName);
+					revList.add(d);
 				}
-				String addSetGraphUri = graphName + "-addSet-" + newRevisionNumber;
-				String deleteSetGraphUri = graphName + "-deleteSet-" + newRevisionNumber;
+				String graphClause = QueryParser.getStringEnclosedinBraces(updateClause, m2a.end("parenthesis"));
 				
-				String data = m.group("data");
-				if (data == null)
-					data = "";
 				if (action.equalsIgnoreCase("INSERT")) {
-					queryM = m.replaceFirst(String.format("INSERT %s { GRAPH <%s>", data, addSetGraphUri));
+					queryRewritten += String.format("GRAPH <%s> { %s }", d.addSetURI, graphClause );
 				} else if (action.equalsIgnoreCase("DELETE")) {
-					queryM = m.replaceFirst(String.format("INSERT %s { GRAPH <%s>", data, deleteSetGraphUri));
+					queryRewritten += String.format("GRAPH <%s> { %s }", d.deleteSetURI, graphClause );
 				}
 			}
-			m = patternUpdateRevision.matcher(queryM);
+		}
+		queryRewritten += "}";
+		
+		
+		// III. Rewrite where clause
+		Matcher m1 = patternWhere.matcher(query);
+		if (m1.find()) {
+			queryRewritten += "WHERE {";
+			String whereClause = QueryParser.getStringEnclosedinBraces(query, m1.end("parenthesis"));
+			
+			Matcher m1a = patternGraphWithRevision.matcher(whereClause);
+			while (m1a.find()){
+				String graphName = m1a.group("graph");
+				String revisionName = m1a.group("revision").toLowerCase();
+				// TODO: replace generateFullGraphOfRevision with query rewriting option
+				String tempGraphName = graphName + "-temp";
+				RevisionManagement.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
+				String GraphClause = QueryParser.getStringEnclosedinBraces(whereClause, m1a.end("parenthesis"));
+				queryRewritten += String.format("GRAPH <%s> { %s }", tempGraphName, GraphClause );
+			}
+			queryRewritten += "}";
 		}
 		
-		// Remove empty insert clauses which otherwise will lead to errors
-		m = patternEmptyGraphPattern.matcher(queryM);
-		queryM = m.replaceAll("");
+		logger.info("Rewritten query for update: " + queryRewritten);
+		
+		// (IIIa) Remove empty insert clauses which otherwise will lead to errors
+		m = patternEmptyGraphPattern.matcher(queryRewritten);
+		queryRewritten = m.replaceAll("");
 
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryM);
+		// IV. Execute rewritten query (updating changesets)
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryRewritten);
 
-		queryM = query;
-		m = patternGraphWithRevision.matcher(queryM);
-		while (m.find()) {
-			String graphName = m.group("graph");
-			String revisionName = m.group("revision").toLowerCase();	// can contain revision
-																		// numbers or reference
-																		// names
-			// General variables
-			String newRevisionNumber = nextRevisionNumbers.get(graphName);
-			String referenceFullGraph = RevisionManagement.getReferenceGraph(graphName, revisionName);
-			String addSetGraphUri = graphName + "-addSet-" + newRevisionNumber;
-			String deleteSetGraphUri = graphName + "-deleteSet-" + newRevisionNumber;
-
-			RevisionManagement.addNewRevisionFromChangeSet(user, commitMessage, graphName, revisionName, newRevisionNumber,
-					referenceFullGraph, addSetGraphUri, deleteSetGraphUri);
-			
-			queryM = m.replaceAll(String.format("GRAPH <%s> ", graphName));
-			m = patternGraphWithRevision.matcher(queryM);
+		// V. add changesets to full graph and add meta information in revision graphs
+		for (RevisionDraft d : revList) {
+			RevisionManagement.addNewRevisionFromChangeSet(user, commitMessage, d.graphName, d.revisionName, 
+					d.newRevisionNumber, d.referenceFullGraph, d.addSetURI, d.deleteSetURI);
 		}
 	}
 
