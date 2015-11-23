@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="238.46037"
+   height="78.056"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.5 r10040"
+   sodipodi:docname="r43ples-logo.v04.svg"
+   inkscape:export-filename="./r43ples-logo.v04.png"
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300"
+   style="enable-background:new">
+  <defs
+     id="defs4">
+    <marker
+       inkscape:stockid="Arrow1Mstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Mstart"
+       style="overflow:visible">
+      <path
+         id="path3918"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt"
+         transform="matrix(0.4,0,0,0.4,4,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <marker
+       inkscape:stockid="Arrow1Lstart"
+       orient="auto"
+       refY="0"
+       refX="0"
+       id="Arrow1Lstart"
+       style="overflow:visible">
+      <path
+         id="path3912"
+         d="M 0,0 5,-5 -12.5,0 5,5 0,0 z"
+         style="fill-rule:evenodd;stroke:#000000;stroke-width:1pt"
+         transform="matrix(0.8,0,0,0.8,10,0)"
+         inkscape:connector-curvature="0" />
+    </marker>
+    <linearGradient
+       id="linearGradient5435">
+      <stop
+         style="stop-color:#288135;stop-opacity:1;"
+         offset="0"
+         id="stop5437" />
+      <stop
+         style="stop-color:#288135;stop-opacity:0;"
+         offset="1"
+         id="stop5439" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5423">
+      <stop
+         style="stop-color:#880000;stop-opacity:1;"
+         offset="0"
+         id="stop5425" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop5427" />
+    </linearGradient>
+    <filter
+       id="filter4503"
+       inkscape:label="Filter1"
+       color-interpolation-filters="sRGB">
+      <feConvolveMatrix
+         order="3 3"
+         kernelMatrix="0 0 0 0 0 0 0 0 0"
+         id="feConvolveMatrix4505"
+         result="result1" />
+      <feBlend
+         blend="normal"
+         id="feBlend4507"
+         in2="result1"
+         mode="normal" />
+    </filter>
+    <filter
+       id="filter5071"
+       inkscape:label="Cubes"
+       inkscape:menu="Scatter"
+       inkscape:menu-tooltip="Scattered cubes; adjust the Morphology primitive to vary size"
+       color-interpolation-filters="sRGB"
+       width="1.2">
+      <feTurbulence
+         id="feTurbulence5073"
+         baseFrequency="0.33821138211382118"
+         numOctaves="5"
+         type="fractalNoise"
+         seed="576" />
+      <feColorMatrix
+         id="feColorMatrix5075"
+         values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 5.5 -3.5 "
+         result="result5" />
+      <feComposite
+         id="feComposite5077"
+         in2="result5"
+         operator="in"
+         in="SourceGraphic"
+         result="result6" />
+      <feMorphology
+         id="feMorphology5079"
+         result="result3"
+         radius="2.5"
+         operator="dilate"
+         in="result6" />
+      <feDisplacementMap
+         id="feDisplacementMap5081"
+         in2="result3"
+         result="result4"
+         scale="0"
+         yChannelSelector="A"
+         xChannelSelector="R"
+         in="result3" />
+      <feComposite
+         id="feComposite5083"
+         in2="result4"
+         operator="arithmetic"
+         result="result2"
+         k1="1"
+         k3="1"
+         k2="2.7755576e-17"
+         k4="0" />
+      <feBlend
+         id="feBlend5085"
+         in2="result2"
+         mode="darken"
+         in="result2" />
+      <feConvolveMatrix
+         id="feConvolveMatrix5087"
+         order="3 3"
+         kernelMatrix="2 0 0 0 1 0 0 0 -1 "
+         targetX="1"
+         targetY="1"
+         divisor="2"
+         edgeMode="duplicate" />
+    </filter>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5423"
+       id="linearGradient5429"
+       x1="329.52737"
+       y1="464.05783"
+       x2="328.4368"
+       y2="369.10349"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient5435"
+       id="linearGradient5441"
+       x1="322.4563"
+       y1="466.07812"
+       x2="324.39618"
+       y2="362.03241"
+       gradientUnits="userSpaceOnUse" />
+    <filter
+       inkscape:collect="always"
+       id="filter3827"
+       color-interpolation-filters="sRGB">
+      <feBlend
+         inkscape:collect="always"
+         mode="darken"
+         in2="BackgroundImage"
+         id="feBlend3829" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter4211"
+       color-interpolation-filters="sRGB">
+      <feBlend
+         inkscape:collect="always"
+         mode="multiply"
+         in2="BackgroundImage"
+         id="feBlend4213" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="3.959798"
+     inkscape:cx="95.522787"
+     inkscape:cy="40.181782"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer2"
+     showgrid="false"
+     inkscape:window-width="1856"
+     inkscape:window-height="1060"
+     inkscape:window-x="62"
+     inkscape:window-y="-3"
+     inkscape:window-maximized="1"
+     fit-margin-top="3"
+     fit-margin-left="3"
+     fit-margin-right="3"
+     fit-margin-bottom="3" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Original"
+     transform="translate(9.6,32.471895)"
+     style="opacity:0.46256684;display:inline;filter:url(#filter4211)">
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot2985-2"
+       style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:3.70000005;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:Garuda;-inkscape-font-specification:Garuda"
+       transform="translate(-159.5625,-332.3573)"
+       inkscape:export-filename="/home/mgraube/Desktop/r43ples-logo.png"
+       inkscape:export-xdpi="300"
+       inkscape:export-ydpi="300"><flowRegion
+         id="flowRegion2987-8"><rect
+           id="rect2989-7"
+           width="477.14285"
+           height="202.85715"
+           x="148.57143"
+           y="300.93362"
+           style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:3.70000005;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:Garuda;-inkscape-font-specification:Garuda" /></flowRegion><flowPara
+         id="flowPara2991-5"
+         style="font-size:72px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:3.70000005;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold"><flowSpan
+   style="letter-spacing:-2px;stroke-width:1;stroke-miterlimit:3.70000005;stroke-dasharray:none"
+   id="flowSpan3076">R</flowSpan><flowSpan
+   style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:-6px;writing-mode:lr-tb;text-anchor:start;fill:none;stroke:#000000;stroke-width:1;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:3.70000005;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold"
+   id="flowSpan3789-8">4</flowSpan><flowSpan
+   style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:-4px;writing-mode:lr-tb;text-anchor:start;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold;stroke-width:1;stroke-miterlimit:3.70000005;stroke-dasharray:none"
+   id="flowSpan3030">3</flowSpan>ples</flowPara></flowRoot>  </g>
+  <g
+     inkscape:label="Blöcke"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(244.8451,-153.75871)"
+     style="display:inline;filter:url(#filter3827)">
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot2985"
+       style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#000000;stroke-opacity:1;filter:url(#filter5071);font-family:Garuda;-inkscape-font-specification:Garuda"
+       transform="translate(-394.96965,-145.46196)"
+       inkscape:export-filename="/home/mgraube/Desktop/r43ples-logo.png"
+       inkscape:export-xdpi="600.10382"
+       inkscape:export-ydpi="600.10382"><flowRegion
+         id="flowRegion2987"><rect
+           id="rect2989"
+           width="477.14285"
+           height="202.85715"
+           x="148.57143"
+           y="300.93362"
+           style="font-size:128px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#000000;stroke-opacity:1;font-family:Garuda;-inkscape-font-specification:Garuda" /></flowRegion><flowPara
+         id="flowPara2991"
+         style="font-size:72px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;writing-mode:lr-tb;text-anchor:start;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold"><flowSpan
+           style="font-size:72px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:-2px;writing-mode:lr-tb;text-anchor:start;fill:#379546;fill-opacity:1;fill-rule:nonzero;stroke:none;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold"
+           id="flowSpan3789">R</flowSpan><flowSpan
+           style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#97be34;fill-opacity:1;fill-rule:nonzero;stroke:none;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold"
+           id="flowSpan2993"><flowSpan
+             style="font-size:56px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:-6px;writing-mode:lr-tb;text-anchor:start;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold"
+             id="flowSpan4205">4</flowSpan><flowSpan
+             style="letter-spacing:-4px"
+             id="flowSpan3084">3</flowSpan></flowSpan><flowSpan
+           style="font-size:72px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;text-align:start;line-height:125%;letter-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#379546;fill-opacity:1;stroke:none;font-family:Laksaman;-inkscape-font-specification:Laksaman Bold"
+           id="flowSpan3787">ples</flowSpan></flowPara></flowRoot>  </g>
+</svg>

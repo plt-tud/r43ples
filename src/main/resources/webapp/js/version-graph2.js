@@ -136,7 +136,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
         // bind zoom to SVG
         svg.call(zoom);
 
-		bindTipsyToRevisionNodes();
+        bindQTipToRevisionNodes();
 
         center();
         spinner.hide();
@@ -212,7 +212,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
         });
     }
     
-    var tipsy_options = {gravity: 'w', html: true, fade:true, trigger: 'focus', offset: 100};
+    var qtip_options = {gravity: 'w', html: true, fade:true, trigger: 'focus', offset: 100};
 
 	 // Center the graph
 	 var center = function () {
@@ -240,31 +240,24 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	
 	 // Funktion, die den Inhalt der Revisions-Tooltips erstellt
 	 var revTooltip = function (name, node) {
-	     var tooltip = "<h1>Revision " + node.revisionNumber + "</h1>" +
-	         "<table class='properties'>" +
-	         "<tr><td>Number:</td><td>" + node.revisionNumber + "</td><td></td></tr>" +
-	         "<tr><td>Branch:</td><td>" + branches[node.belongsTo].label + "</td><td><a href='" + node.belongsTo + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-	         "<tr><td>Revised graph:</td><td>" + node.revisionOf + "</td><td><a href='" + node.revisionOf + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-	         "<tr><td>URL:</td><td>" + name + "</td><td></td></tr>" +
-	         "<tr><td>Add Set:</td><td>" + node.addSet + "</td><td><a href='" + node.addSet + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-	         "<tr><td>Delete Set:</td><td>" + node.deleteSet + "</td><td><a href='" + node.deleteSet + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-	         "</table></p>";
-	        
+	     var tooltip = "<h1>Revision " + node.revisionNumber+"</h1>"+ 
+	         		   "<table class='properties'>";
 	     if (node.commit != null) { 
 		     var date = new Date(commits[node.commit].time);
-		     tooltip += "<h2>Commit</h2>" +
-		     "<table class='properties'>" +
-		     "<tr><td>Title:</td><td colspan='2'>" + commits[node.commit].title + "</td></tr>" +
-		     "<tr><td>Time:</td><td colspan='2'>" + dateString(date) + "</td></tr>" +
-		     "<tr><td>User:</td><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-		     "<tr><td>URL:</i></td><td colspan='2'>" + node.commit + "</td></tr>" + 
-		     "</table>";
+		     tooltip += "<tr><th>" + commits[node.commit].title+"</th><td>"+ dateString(date) + "</td><td></td></tr>" +  
+		     "<tr><th>User:</th><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+		     "<tr><th>URL:</th><td>" + node.commit + "</td><td></td></tr>";
 		 }
+	     tooltip+="<tr><th>Add Set:</th><td>" + node.addSet + "</td><td><a href='" + node.addSet + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+	         	  "<tr><th>Delete Set:</th><td>" + node.deleteSet + "</td><td><a href='" + node.deleteSet + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr></table>";
+	        
+	     
 	     return tooltip;
 	 };
-	
 
-	
+     
+	 
+		
 	 // Funktion, die die Tags als Knoten mit Kanten erstellt
 	 var createTags = function () {
 	     Object.keys(tags).forEach(function (referenceCommit) {
@@ -299,19 +292,24 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	     });
 	 };
 	
-    // bind tipsy to revision node
-    function bindTipsyToRevisionNodes(){
+    // bind qtip to revision node
+    function bindQTipToRevisionNodes(){
         inner.selectAll("g.node").filter(function (v) {
             return revisions[v] != null;
         })
             .attr("title", function (v) {
-                return revTooltip(v, g.node(v))
+            	return revTooltip(v, g.node(v))
             })
             .each(function() {
-                $(this).tipsy(tipsy_options);
+                $(this).qtip({
+                	show: 'click',
+                	hide: 'click'
+                })
             });
+        
      }
-            
+    
+                
 	
 	 // Funktion um Tags einzublenden
 	 var showTags = function () {
