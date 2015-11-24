@@ -100,17 +100,17 @@ public class Interface {
 			throws InternalErrorException {
 
 		final Pattern patternUpdateRevision = Pattern.compile(
-				"(?<action>INSERT|DELETE)(?<data>\\s*DATA){0,1}\\s*(?<parenthesis>\\{)",
+				"(?<action>INSERT|DELETE)(?<data>\\s*DATA){0,1}\\s*\\{",
 				patternModifier);
 		final Pattern patternWhere = Pattern.compile(
-				"WHERE\\s*(?<parenthesis>\\{)",
+				"WHERE\\s*\\{",
 				patternModifier);
 		
 		final Pattern patternEmptyGraphPattern = Pattern.compile(
 				"GRAPH\\s*<(?<graph>[^>]*)>\\s*\\{\\s*\\}",
 				patternModifier);
 		final Pattern patternGraphWithRevision = Pattern.compile(
-				"GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"\\s*(?<parenthesis>\\{)",
+				"GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"\\s*\\{",
 				patternModifier);
 		
 		logger.debug("SPARQL Update detected");
@@ -136,7 +136,7 @@ public class Interface {
 		m = patternUpdateRevision.matcher(query);
 		while (m.find()) {
 			String action = m.group("action");
-			String updateClause = QueryParser.getStringEnclosedinBraces(query, m.end("parenthesis"));
+			String updateClause = QueryParser.getStringEnclosedinBraces(query, m.end());
 			
 			Matcher m2a = patternGraphWithRevision.matcher(updateClause);
 			while (m2a.find()){
@@ -155,7 +155,7 @@ public class Interface {
 					d = new RevisionDraft(graphName, revisionName);
 					revList.add(d);
 				}
-				String graphClause = QueryParser.getStringEnclosedinBraces(updateClause, m2a.end("parenthesis"));
+				String graphClause = QueryParser.getStringEnclosedinBraces(updateClause, m2a.end());
 				
 				if (action.equalsIgnoreCase("INSERT")) {
 					queryRewritten += String.format("GRAPH <%s> { %s }", d.addSetURI, graphClause );
@@ -171,7 +171,7 @@ public class Interface {
 		Matcher m1 = patternWhere.matcher(query);
 		if (m1.find()) {
 			queryRewritten += "WHERE {";
-			String whereClause = QueryParser.getStringEnclosedinBraces(query, m1.end("parenthesis"));
+			String whereClause = QueryParser.getStringEnclosedinBraces(query, m1.end());
 			
 			Matcher m1a = patternGraphWithRevision.matcher(whereClause);
 			while (m1a.find()){
@@ -180,7 +180,7 @@ public class Interface {
 				// TODO: replace generateFullGraphOfRevision with query rewriting option
 				String tempGraphName = graphName + "-temp";
 				RevisionManagement.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
-				String GraphClause = QueryParser.getStringEnclosedinBraces(whereClause, m1a.end("parenthesis"));
+				String GraphClause = QueryParser.getStringEnclosedinBraces(whereClause, m1a.end());
 				queryRewritten += String.format("GRAPH <%s> { %s }", tempGraphName, GraphClause );
 			}
 			queryRewritten += "}";
