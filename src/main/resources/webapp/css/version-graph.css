@@ -1,0 +1,33 @@
+svg {
+    background-color: #FFF;
+    cursor: default;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+text {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+}
+
+.node circle {
+    stroke: #333;
+    fill: #fff;
+    stroke-width:2px;
+}
+
+.node rect {
+    fill: #fff;
+    height:10px;
+}
+
+.edgePath path {
+    stroke-width: 2px;
+}
+
+.node text {
+    pointer-events: none;
+}
+

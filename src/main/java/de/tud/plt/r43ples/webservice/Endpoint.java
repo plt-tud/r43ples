@@ -63,6 +63,7 @@ import de.tud.plt.r43ples.merging.model.structure.CommitModel;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.visualisation.VisualisationBatik;
 import de.tud.plt.r43ples.visualisation.VisualisationD3;
+import de.tud.plt.r43ples.visualisation.VisualisationG6;
 
 /**
  * Provides SPARQL endpoint via [host]:[port]/r43ples/.
@@ -194,6 +195,8 @@ public class Endpoint {
 			response.entity(VisualisationBatik.getHtmlOutput(graph));
 		} else if (format.equals("d3")) {
 			response.entity(VisualisationD3.getHtmlOutput(graph));
+		} else if (format.equals("g6")) {
+			response.entity(VisualisationG6.getHtmlOutput(graph));
 		}
 		else {
 			response.entity(RevisionManagement.getRevisionInformation(graph, format));
