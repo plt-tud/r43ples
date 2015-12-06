@@ -2,6 +2,14 @@
 
 # This scripts updates the javadoc and pushes all changes together 
 # with README.md to gh-pages in order to update th website
+# only executed if master branch changes
+
+if [ "$TRAVIS_BRANCH" != "master" ]; then 
+    echo "Not on master branch -> no update of gh-pages!"
+    exit 0;
+fi
+
+echo "Updating gh-pages"
 
 sudo apt-get install -qq graphviz
 mvn -q cobertura:cobertura coveralls:report site

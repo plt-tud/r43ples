@@ -1,0 +1,137 @@
+{{<super}}
+
+
+{{$title}}Report View{{/title}}
+
+
+{{$head_extra}}
+<link rel="stylesheet" href="/static/css/r43ples.merging.css">
+      <style>
+        td:hover {
+            cursor: pointer;
+        }  
+
+        tr:hover {
+            background-color: #ccc;
+        }  
+        
+        table {
+        	width:100%;
+        	table-layout:fixed;
+        	word-break: break-all;
+        	word-wrap: break-word;
+        }
+
+        #svg {
+          border:2px solid black; 
+          margin:1px; 
+          overflow:hidden;          
+        }
+      </style>
+{{/head_extra}}
+
+	
+{{$script_extra}}
+    <script type="text/javascript">
+	    $(document).ready(function () {
+	        //DataTable
+	        var table = $('#example').DataTable( {
+
+	        //"scrollY": "30.6em",	
+	        "scrollY": "17.6em",
+	        "paging": false,
+	        "ordering": false,
+        	"info": false
+	         } );
+
+	        $('a.toggle-vis').on( 'click', function (e) {
+	        e.preventDefault();
+	 
+	        // Get the column API object
+	        var column = table.column( $(this).attr('data-column') );
+	 
+	        // Toggle the visibility
+	        column.visible( ! column.visible() );
+	        } );
+
+	        // Disable function
+			jQuery.fn.extend({
+			    disable: function(state) {
+			        return this.each(function() {
+			            this.disabled = state;
+			        });
+			    }
+			});
+
+
+
+	        var conflict = $('#haveConflict').text();
+	        if(conflict == "1") {
+	        	alert("There are still conflicts! Please resolve them first in the other views!" + conflict);
+	        	$('#push').disable(true);
+	        } else {
+	        	alert("Everything is alright" + conflict);
+	        }
+
+	        var tripleTableColor = "YellowGreen";
+	        var tripleConflictColor = "Tomato";
+	        //when triple resolved, change the color
+	        $(".resolved").parent().css('background',tripleTableColor );
+	        $(".conflictColor").parent().css('background',tripleConflictColor);
+
+	    });
+	</script>
+{{/script_extra}}
+
+	
+{{$content}}
+	{{> templates/merge/superNavBreadcrumbs}}
+	
+    {{> templates/merge/mergeReport}}               
+	                   <div class="row">
+                   		<div class="col-sm-12">
+                        <table id="example" class="table">
+		                    <thead>
+		                        <tr>
+                                    <th style = "width:10%">Subject</th>
+                                    <th style = "width:10%">Predicate</th>
+                                    <th style = "width:10%">Object</th>
+                                    <th style = "width:18%">State B1</th>
+                                    <th style = "width:18%">State B2</th>
+                                    <th style = "width:9%">Conflicting</th>
+                                    <th style = "width:9%">Automatic Resolution State</th>
+                                   	<th style = "width:8%">Resolution State</th>
+                                    <th style = "width:8%">Approve</th>
+                                </tr>
+		                    </thead>
+		                    <tbody>
+		                    	{{#reportTableRowList}} 		         
+			                        <tr>
+	                                    <td style="width:10%">{{subject}} </td>
+	                                    <td style="width:10%">{{predicate}} </td>
+	                                    <td style="width:10%">{{object}} </td>              
+										<td style="width:18%" class="state-{{stateA}}"> {{revisionA}}</td>
+                           				<td style="width:18%" class="state-{{stateB}}"> {{revisionB}}</td>
+                           				<td style="width:9%; text-align: center;" class="{{#approved}}conflictColor{{/approved}} conflict-{{conflicting}}"></td>
+										<td style="width:9%;" class="state-{{#automaticResolutionState}}ADDED{{/automaticResolutionState}}{{^automaticResolutionState}}DELETED{{/automaticResolutionState}}"></td>
+										<td style="width:9%;" class="state-{{#resolutionState}}ADDED{{/resolutionState}}{{^resolutionState}}DELETED{{/resolutionState}}"></td>	
+										<td style="width:9%;" class="approved-{{#approved}}RESOLVED resolved{{/approved}}{{^approved}}NOTAPPROVED{{/approved}}"></td>
+	                              	</tr>
+	                            {{/reportTableRowList}}  	                        
+		                    </tbody>
+		                </table>
+		                </div>
+		                </div>
+
+		                <div class="row">
+			                <div style="display :none" id="haveConflict">{{report}}</div>
+	                      	<div class="col-sm-3 col-sm-offset-1">
+		                          <a href ="{{#isRebase}}rebase{{/isRebase}}PushProcess?graph={{graphName}}&client={{clientName}}"><button id="push" type="button" class="btn btn-block">Push</button></a>     	
+	                      	</div>
+	                      	<div class="col-sm-3 ">
+	                        	<a href ="javascript:history.go(-1)"><button id="back" type="button" class="btn btn-alarm btn-block">Back</button></a>
+	                      	</div>
+                      	</div>
+{{/content}}
+
+{{/super}}

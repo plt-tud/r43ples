@@ -1,0 +1,72 @@
+.revisionGraphVisualisation svg {
+	background-color: WhiteSmoke;
+	height: 468px;
+	border:1px solid #000000;
+	margin:1px;
+	overflow:hidden;
+    cursor: default;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+.revisionGraphVisualisation text {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+}
+
+.node circle {
+    stroke: #333;
+    fill: #fff;
+    stroke-width:2px;
+}
+
+.node rect {
+    fill: #fff;
+}
+
+.edgePath path {
+    stroke-width: 2px;
+}
+
+.node text {
+    pointer-events: none;
+}
+
+/* This styles the title of the tooltip */
+.tipsy h1, .tipsy h2 {
+    font-size: 1.6em;
+    font-weight: bold;
+}
+
+.tipsy h2 {
+    font-size: 1.4em;
+}
+
+/* This styles the body of the tooltip */
+.tipsy-inner {
+	max-width: 800px;
+}
+
+.tipsy .properties {
+    font-size: 1.3em;
+    color: white;
+
+}
+
+
+.tipsy .properties td {
+	padding-left: 5px;
+}
+
+.tipsy .properties td:first-child {
+    font-weight: bold;
+    white-space: nowrap;
+    padding-left: 0px;
+}
+
+.tipsy a, .tipsy a:hover, .tipsy a:active {
+    color: #60b1fc;
+    text-decoration: none;
+}

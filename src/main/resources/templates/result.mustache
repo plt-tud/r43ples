@@ -1,21 +1,28 @@
-{{<templates/super}}
+{{<super}}
+
+{{$title}}Result{{/title}}
    
 {{$content}}
 <div class="row">
-	<div id="main" class="col-md-12">
-		<div id="results">
-			<h2>Results</h2>
-			<pre>{{ result }}</pre>
-		</div>
-		
-		{{# query }}
-	  	<div id="query">
-	  		<h2>Query</h2>
-	  		<pre>{{ toString }}</pre> 
-			{{/query}}
-		</div>
-	</div>
+    <div id="results">
+        <h2>Results</h2>
+        <pre>{{ result }}</pre>
+    </div>
+
+    {{# query }}
+    <div id="query">
+        <h2>Query</h2>
+        <pre>{{ toString }}</pre> 
+    </div>
+    {{/query}}
+
+    {{# query_rewritten }}
+    <div id="query_rewritten">
+        <h2>Rewritten query executed on Triplestore</h2>
+        <pre>{{ toString }}</pre> 
+    </div>
+    {{/query_rewritten}}
 </div>
 {{/content}}
 
-{{/templates/super}}
+{{/super}}

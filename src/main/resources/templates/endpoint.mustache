@@ -1,4 +1,6 @@
-{{<templates/super}}
+{{<super}}
+
+{{$title}}Endpoint{{/title}}
    
 {{$script_extra}}
 <script type="text/javascript">
@@ -34,15 +36,15 @@
 					
 			<div class="col-xs-12">
 				<h2>Query Form</h2>
-				<form action="/r43ples/sparql" method="post" role="form" class="form-horizontal">
+				<form method="post" role="form" class="form-horizontal">
 					<div class="form-group">
 						<div class="col-xs-12">
-							<label for="query">Query Text</label><br />
+							<label class="control-label" for="query">Query Text</label><br />
 							<textarea name="query" class="form-control" id="query" rows="16" placeholder="Insert R43ples/SPARQL query text or copy it from examples"></textarea>
 						</div>
 					</div>
 					<div class="form-group">
-						<label for="format" class="col-sm-3">Results Format:</label>
+						<label for="format" class="col-sm-3 control-label">Result Format:</label>
 						<div class="col-sm-9">
 							<select	name="format" class="form-control" id="name">
 								<option value="text/html">HTML</option>
@@ -54,9 +56,9 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label for="join_option" class="col-sm-3" >JOIN Option:</label>
+						<label for="query_rewriting" class="col-sm-3 control-label" >JOIN Option:</label>
 						<div class="col-sm-9">
-							<input type="checkbox" name="join_option" value="on">
+							<input type="checkbox" name="query_rewriting" value="on">
 						</div>
 					</div>
 					<div class="form-group">
@@ -85,6 +87,9 @@
 										<option value="merging-classes">http://test.com/r43ples-dataset-merging-classes</option>
 										<option value="renaming">http://test.com/r43ples-dataset-renaming</option>
 										<option value="complex-structure">http://test.com/r43ples-dataset-complex-structure</option>
+										<option value="rebase">http://test.com/r43ples-dataset-rebase</option>
+										<option value="forcerebase">http://test.com/r43ples-dataset-force-rebase</option>
+										<option value="fastforward">http://test.com/r43ples-dataset-fastforward</option>
 									</select>
 								</div>
 								<div class="col-sm-4">
@@ -109,6 +114,7 @@
 										<option value="text/turtle">Turtle</option>
 										<option value="batik">Graphical 1</option>
 										<option value="d3">Graphical 2</option>
+										<option value="g6">Graphical 3</option>
 									</select>
 								</div>
 								<div class="col-sm-4">
@@ -158,8 +164,7 @@ WHERE {
 
 <div>
 			<h3>Select Query - Multiple Graphs</h3>
-			<pre>OPTION r43ples:SPARQL_JOIN
-# Find all triples that are both in revision 2 and in the master revision
+			<pre># Find all triples that are both in revision 2 and in the master revision
 SELECT ?s ?p ?o 
 WHERE {
   GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "master" { ?s ?p ?o. }
@@ -194,4 +199,4 @@ TAG GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "v0.3-alpha"
 </div>
 {{/content}}
 
-{{/templates/super}}
+{{/super}}

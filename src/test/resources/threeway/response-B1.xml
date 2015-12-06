@@ -1,0 +1,29 @@
+<sparql xmlns="http://www.w3.org/2005/sparql-results#">
+ <head>
+  <variable name="s"/>
+  <variable name="p"/>
+  <variable name="o"/>
+ </head>
+ <results>
+  <result>
+   <binding name="s"><uri>http://example.com/testS</uri></binding>
+   <binding name="p"><uri>http://example.com/testP</uri></binding>
+   <binding name="o"><literal>B</literal></binding>
+  </result>
+  <result>
+   <binding name="s"><uri>http://example.com/testS</uri></binding>
+   <binding name="p"><uri>http://example.com/testP</uri></binding>
+   <binding name="o"><literal>C</literal></binding>
+  </result>
+  <result>
+   <binding name="s"><uri>http://example.com/testS</uri></binding>
+   <binding name="p"><uri>http://example.com/testP</uri></binding>
+   <binding name="o"><literal>E</literal></binding>
+  </result>
+  <result>
+   <binding name="s"><uri>http://example.com/testS</uri></binding>
+   <binding name="p"><uri>http://example.com/testP</uri></binding>
+   <binding name="o"><literal>G</literal></binding>
+  </result>
+ </results>
+</sparql>

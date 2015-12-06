@@ -31,39 +31,3 @@ text {
     pointer-events: none;
 }
 
-/* This styles the title of the tooltip */
-.tipsy h1, .tipsy h2 {
-    font-size: 1.6em;
-    font-weight: bold;
-}
-
-.tipsy h2 {
-    font-size: 1.4em;
-}
-
-/* This styles the body of the tooltip */
-.tipsy-inner {
-	max-width: 800px;
-}
-
-.tipsy .properties {
-    font-size: 1.3em;
-    color: white;
-
-}
-
-
-.tipsy .properties td {
-	padding-left: 5px;
-}
-
-.tipsy .properties td:first-child {
-    font-weight: bold;
-    white-space: nowrap;
-    padding-left: 0px;
-}
-
-.tipsy a, .tipsy a:hover, .tipsy a:active {
-    color: #60b1fc;
-    text-decoration: none;
-}

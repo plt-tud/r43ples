@@ -1,0 +1,26 @@
+.state-ADDED:before {
+	content: url('/static/images/Added.svg');
+}
+.state-ORIGINAL:before {
+	content: url('/static/images/Original.svg');
+}
+.state-DELETED:before {
+	content: url('/static/images/Deleted.svg');
+}
+.state-NOTINCLUDED:before {
+	content: url('/static/images/NotIncluded.svg');
+}
+
+.conflict-0:before {
+	content: url('/static/images/Difference.png');
+}
+.conflict-1:before {
+	content: url('/static/images/Conflict.png');
+}
+
+.approved-RESOLVED:before {
+	content: url('/static/images/Resolved.png');
+}
+.approved-NOTAPPROVED:before {
+	content: url('/static/images/NotApproved.svg');
+}

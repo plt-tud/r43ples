@@ -1,0 +1,107 @@
+svg {
+    background-color: WhiteSmoke;
+    cursor: default;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.node ellipse,
+.node polygon {
+  stroke: #333;
+  fill: #fff;
+  stroke-width: 1.5px;
+}
+
+text {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 12px;
+}
+
+.node circle {
+    stroke: #333;
+    fill: #fff;
+    stroke-width:2px;
+}
+
+.node rect {
+    fill: #fff;
+    
+    stroke-width:2px;   
+}
+
+.edgePath path {
+    stroke-width: 2px;
+}
+
+.node text {
+    pointer-events: none;
+}
+
+.doubled {
+	stroke: red !important;	
+	stroke-width: 3.6px !important;	
+}
+
+.status-version {
+    height: 100%;
+    width: 15px;
+    display: block;
+    float: left;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    margin-right: 4px;
+    background-color: #7f7;
+    border-right: 2.5px #666 solid;
+    
+}
+
+.status-branch {
+    height: 100%;
+    width: 15px;
+    display: block;
+    float: left;
+    border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+    margin-right: 4px;
+    background-color: yellow;
+    border-right: 2.5px #666 solid;
+    
+}
+
+.version-node {
+    width: 196px;
+    border:2.5px #666 solid;
+    height:46px;
+   	border-top-left-radius: 5px;
+    border-bottom-left-radius: 5px;
+  }
+
+.node g span{
+    width: 96px;
+    height: 40px;
+    font-size:26px;
+    align:center;
+ } 
+  
+.name-label {
+    margin-top: 4px;
+}
+
+.edgeLabel text {
+    width: 50px;
+    fill: #fff;
+}
+
+.edgePath path {
+    stroke: #999;
+    stroke-width: 1.5px;
+    fill: #999;
+}
+
+.node text {
+    font-weight: 300;
+    font-size: 14px;
+}

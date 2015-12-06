@@ -1,4 +1,4 @@
-# SDD - Structural Difference Definition
+﻿# SDD - Structural Difference Definition
 
 @prefix sddo:	<http://eatld.et.tu-dresden.de/sddo#> .
 @prefix sdd:	<http://eatld.et.tu-dresden.de/sdd#> .
