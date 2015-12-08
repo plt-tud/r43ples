@@ -1,0 +1,15 @@
+% This file was created with JabRef 2.10.
+% Encoding: Cp1252
+
+
+@Article{Git2PROV,
+  Title                    = {Git2PROV: Exposing Version Control System Content as W3C PROV},
+  Author                   = {Tom De Nies and Sara Magliacane and Ruben Verborgh and Sam Coppens and Paul
+Groth and Erik Mannens and Rik Van de Walle},
+  Journal                  = {Poster and Demo Proceedings of the 12th International Semantic Web Conference},
+  Year                     = {2013},
+
+  Owner                    = {Dominik},
+  Timestamp                = {2015.11.04}
+}
+

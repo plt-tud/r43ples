@@ -1,0 +1,18 @@
+\contentsline {chapter}{\numberline {1}Motivation}{5}
+\contentsline {chapter}{\numberline {2}Stand der Technik}{7}
+\contentsline {section}{\numberline {2.1}Grundlegende Richtlinen}{7}
+\contentsline {section}{\numberline {2.2}Bisherige Visualisierungen}{7}
+\contentsline {section}{\numberline {2.3}Weitere Literatur}{8}
+\contentsline {subsection}{\numberline {2.3.1}Git2PROV}{8}
+\contentsline {subsection}{\numberline {2.3.2}GitHub Desktop}{9}
+\contentsline {chapter}{\numberline {3}Anforderungsdefinition}{11}
+\contentsline {section}{\numberline {3.1}Einleitung}{11}
+\contentsline {subsection}{\numberline {3.1.1}Zielsetzung}{11}
+\contentsline {subsection}{\numberline {3.1.2}Produktziele}{11}
+\contentsline {section}{\numberline {3.2}Allgemeine Beschreibung}{11}
+\contentsline {subsection}{\numberline {3.2.1}Produktumgebung}{11}
+\contentsline {subsection}{\numberline {3.2.2}Benutzereigenschaften}{11}
+\contentsline {subsection}{\numberline {3.2.3}Qualit\IeC {\"a}tsanforderung}{12}
+\contentsline {subsection}{\numberline {3.2.4}Produktfunktion}{12}
+\contentsline {subsection}{\numberline {3.2.5}Allgemeine Einschr\IeC {\"a}nkungen und Randbedingungen}{12}
+\contentsline {chapter}{\numberline {4}Gestaltungsentwurf und Implementierung}{13}
