@@ -8,6 +8,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -125,6 +126,9 @@ public class R43plesService {
 			BASE_URI = new URI("http", null, Config.service_host, Config.service_port, Config.service_path, null, null);
 			server = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, rc);			
 		}
+		
+		for (NetworkListener l : server.getListeners()) { l.getFileCache().setEnabled(false); }
+		logger.info("File cache disabled");
 		
 		server.getServerConfiguration().addHttpHandler(
 		        new CLStaticHttpHandler(R43plesService.class.getClassLoader(),"webapp/"), "/static/");

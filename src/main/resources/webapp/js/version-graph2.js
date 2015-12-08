@@ -1,130 +1,16 @@
-function d3_revGraph(
-div_selector) {
-        var commits = {};
-    var revisions = {};
-    var tags = {};
-    var branches = {};
-    var node=[], edge=[];
-    /*Initialization and configuration*/
-    var config = {
-        "opacity_normal": "1.0",
-        "opacity_highlight": "0.6",
-        "colorRange": ["red", "yellow", "green", "blue"],
-        "rotate": -55,
-        "title": "",
-        "title_class": "",
-        "ytitle": "",
-        "xtitle": "",
-        "unit": "",
-        "margin": { "top": 20, "right": 20, "bottom": 65, "left": 40}
-    }
-/*
-    var dConfig = "";
-    try {
-        dConfig = JSON.parse(pConfig);
-    } catch (e) {
-        dConfig = {};
-    }
+function addSpinner(element) {
+	SPINNER_WIDTH = SPINNER_HEIGHT = 60;
+	var spinner_html = jQuery.parseHTML(
+		"<div class='spinner' style='position: absolute; " +
+					"top:"  + (element.position().top  + (element.height()-SPINNER_HEIGHT)/2) + "px;" +
+					"left:" + (element.position().left + (element.width() -SPINNER_WIDTH )/2) + "px;'>" +
+			"<i class='fa fa-spinner fa-pulse fa-3x'></i>" +
+		"</div>");
+	element.after(spinner_html);
+	return element.next();
+}
 
-    for (var attrname in dConfig) {
-        config[attrname] = dConfig[attrname];
-    }
-
-    config.title = pTitle;
-    config.ytitle = pYTitle;
-    config.xtitle = pXTitle;*/
-    var colors = d3.scale.category10();
-   
-    var margin = config.margin,
-        width = getWidthwidth(),
-        height = $(div_selector).height() - margin.top - margin.bottom;
-
-    /*Define d3 axes and scales*/
-    var x = d3.scale.ordinal()
-        .rangeRoundPoints([0, width]);
-
-    var y = d3.scale.ordinal()
-        .rangeRoundPoints([height, 0]);
-
-    /*var xAxis = d3.svg.axis()
-        .scale(x)
-        .orient("bottom");
-
-    var yAxis = d3.svg.axis()
-        .scale(y)
-        .orient("left")
-        .tickFormat(function (v) {
-        return v + config.unit;
-    })
-        .ticks(Math.max(height / 50, 2)); //<-- dynamically adapt number of ticks to height
-    /*create svg-element*/
-    var contsvg = d3.select(div_selector).append("svg")
-        .attr("width", getSVGwidth())
-        .attr("height", getSVGheight())
-        .style("margin", "0px auto")
-        .style("display", "block");
-    var svg = contsvg.append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    /*append chart-title and x-axis-title*/
-   /* var title = contsvg.append("g");
-    title.append("text")
-        .attr("y", margin.top / 2)
-        .attr("x", getSVGwidth() / 2)
-        .attr("text-anchor", "middle")
-        .attr("class", config.title_class)
-        .text(config.title);
-    /* x- axis- title*/
-   /* title.append("text")
-        .attr("y", getSVGheight() - 15)
-        .attr("x", getSVGwidth() / 2)
-        .attr("dy", ".35em")
-        .style("text-anchor", "middle")
-        .text(config.xtitle);
-    /*create axes' elements*/
-  /*  svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis)
-        .selectAll("text")
-        .style("text-anchor", "end")
-        .attr("dx", "-.8em")
-        .attr("dy", ".15em")
-        .attr("transform", "rotate(" + config.rotate + ")");
-
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis)
-        .append("text")
-        .attr("transform", "translate(" + (10 - margin.left) + ", " + height / 2 + ")rotate(-90)")
-        .attr("dy", ".35em")
-        .style("text-anchor", "middle")
-        .text(config.ytitle);*/
-    //div-container for tooltips
-   /* d3.select("#d3_barcharttools_" + pRegionId).append("div")
-        .attr("class", "xstooltip")
-        .attr("id", "tooltip" + pRegionId);*/
-
-    var data = [];
-    var waitresize;
-
-    //getData(refreshData);
-refreshData(json_data);
-    /* FUNCTION DEFINITIONS
--------------------------------------------------------------------------
-*/
-    function getSVGheight() {
-        return height + margin.top + margin.bottom;
-    }
-
-    function getSVGwidth() {
-        return width + margin.left + margin.right;
-    }
-	
-	function getWidthwidth() {
-		return $(div_selector).width() * .96 - margin.left - margin.right;
-    }
-    // Trim revision number if too long for node
+// Trim revision number if too long for node
 function trimRevisionNumber(revisionNumber) {
 	if (revisionNumber.length > 5) {
 	    return revisionNumber.substr(0, 2) + ".." + revisionNumber.substr(revisionNumber.length - 2);
@@ -133,88 +19,84 @@ function trimRevisionNumber(revisionNumber) {
 	}
 }
 
-function sortByDate (a,b){
-    return a.date-b.date;
-}
-    function buildData(d3json) {
-        var j = 1;
-        $.each(d3json, function (key, value) {
-            var types = value["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"];
-            j++;
-            for (var i = 0; i < types.length; i++) {
-                switch (types[i].value) {
-                    // Falls Commit
-                    case "http://eatld.et.tu-dresden.de/rmo#Commit":
-                        commits[key] = {};
-                        commits[key].title = value["http://purl.org/dc/terms/title"][0].value;
-                        commits[key].wasAssociatedWith = value["http://www.w3.org/ns/prov#wasAssociatedWith"][0].value;
-                        commits[key].generated = value["http://www.w3.org/ns/prov#generated"][0].value;
-                        commits[key].used = [];
-                        for (var k = 0; k < value["http://www.w3.org/ns/prov#used"].length; k++) {
-                            commits[key].used.push(value["http://www.w3.org/ns/prov#used"][k].value);
-                        }
-                        commits[key].time = value["http://www.w3.org/ns/prov#atTime"][0].value;
-                        if (revisions[commits[key].generated] == null) {
-                            revisions[commits[key].generated] = {};
-                        }
-                        revisions[commits[key].generated].commit = key;
-                        break;
-                    // Falls Revision
-                    case "http://eatld.et.tu-dresden.de/rmo#Revision":
-                        if (revisions[key] == null) {
-                            revisions[key] = {};
-                        }
-                        revisions[key].deleteSet = (value["http://eatld.et.tu-dresden.de/rmo#deleteSet"])?value["http://eatld.et.tu-dresden.de/rmo#deleteSet"][0].value : null;
-                        revisions[key].addSet = (value["http://eatld.et.tu-dresden.de/rmo#addSet"])?value["http://eatld.et.tu-dresden.de/rmo#addSet"][0].value : null;
-                        revisions[key].revisionNumber = value["http://eatld.et.tu-dresden.de/rmo#revisionNumber"][0].value;
-                        revisions[key].revisionOf = value["http://eatld.et.tu-dresden.de/rmo#revisionOf"][0].value;
-                        revisions[key].belongsTo = value["http://eatld.et.tu-dresden.de/rmo#belongsTo"][0].value;
-                        break;
-                    // Falls Branch
-                    case "http://eatld.et.tu-dresden.de/rmo#Branch":
-                        if (branches[key] == null) {
-                            branches[key] = {};
-                        }
-                        branches[key].label = value["http://www.w3.org/2000/01/rdf-schema#label"][0].value;
-                        branches[key].fullGraph = value["http://eatld.et.tu-dresden.de/rmo#fullGraph"][0].value;
-                        branches[key].head = value["http://eatld.et.tu-dresden.de/rmo#references"][0].value;
-                        if (branches[key].color == null) {
-                            branches[key].color = d3.rgb(colors(j)).brighter().toString();
-                        }
-                        break;
-                    // Falls Tag
-                    case "http://eatld.et.tu-dresden.de/rmo#Tag":
-                        tags[key] = {};
-                        tags[key].label = value["http://www.w3.org/2000/01/rdf-schema#label"][0].value;
-                        tags[key].head = value["http://eatld.et.tu-dresden.de/rmo#references"][0].value;
-                        break;
-                    // Falls Master
-                    case "http://eatld.et.tu-dresden.de/rmo#Master":
-                        // Falls der Masterbranch noch nicht als Branch vorliegt, muss er initialisiert werden
-                        if (branches[key] == null) {
-                            branches[key] = {};
-                        }
-                        // Alle Masterbranches sollen immer die gleiche Farbe haben
-                        branches[key].color = "#5555ff";
-                        break;
-                }
-            }
 
+
+// Create a new directed graph
+/** Hauptfunktion, um kompletten Graphen zu erstellen.
+ *
+ *  _JSON: URL zu JSON-Daten oder Daten selbst
+
+ */
+function drawGraph(div_selector, _JSON, _showTags) {
+    // _showTags default is false
+    _showTags = _showTags || false;
+    
+    var g;		//d3 graph
+    var svg, inner;
+	var div_element = $(div_selector);
+    var colors = d3.scale.category10();
+    var commits = {};
+    var revisions = {};
+    var tags = {};
+    var branches = {};
+    var zoom;
+	var changeSets = {};
+    
+    
+	div_element.html(
+		"<div class='revisionGraphVisualisation'>" +
+		"	<svg><g/></svg>" +
+		"</div>" +
+		"<div class='checkbox'>" +
+        "	<label><input type='checkbox' class='toggle-tags'>Show Tags</label>" +
+	  	"</div>");
+
+	// ChangeListener for tags
+	div_element.find('.toggle-tags').change(function () {
+	    $(this).prop('checked')?showTags():hideTags();
+	});
+
+
+	
+	// http://stackoverflow.com/questions/16265123/resize-svg-when-window-is-resized-in-d3-js
+	function resizeSVG(){
+	    $('.revisionGraphVisualisation svg').each(function() {
+	    	$(this).width($(this).parent().width());
+	    });
+	}
+	$(window).resize( resizeSVG );	 
+	resizeSVG();
+
+	var svg_element = div_element.find('svg');
+	var spinner = addSpinner(svg_element);
+
+    // JSON-Daten mit jQuery laden und parsen
+    $.getJSON(_JSON, function (data, status) {
+        if (status != "success") {
+            alert("Error getting JSON Data: Status " + status);
+        }
+
+        // create  D3 graph
+        g = new dagreD3.graphlib.Graph();
+        g.setGraph({
+          rankdir: "LR",
         });
-        console.log("rev", revisions);
-        console.log("commits", commits);
-        console.log("branches", branches);
-        console.log("tags", tags);
-        
-         // create nodes for every revision
+
+
+        // light blue color for tags
+        colors(0);
+		
+		create_revision_model(data);
+		getChangeSets();
+
+        // create nodes for every revision
         Object.keys(revisions).forEach(function (revision) {
             var value = revisions[revision];
             value.label = trimRevisionNumber(revisions[revision].revisionNumber);
             value.height = 25;
             value.shape = "circle";
             value.style = "stroke:" + branches[revisions[revision].belongsTo].color + ";";
-            //g.setNode(revision, value);
-            node.push(value);
+            g.setNode(revision, value);
         });
 
         // create edge for every commit
@@ -229,137 +111,285 @@ function sortByDate (a,b){
                     // Ansonsten die Farbe der Ursprungsrevision
                     color = branches[revisions[commits[commit].used[i]].belongsTo].color;
                 }
-                /*g.setEdge(commits[commit].used[i], commits[commit].generated, {
+                g.setEdge(commits[commit].used[i], commits[commit].generated, {
                     style: "stroke:" + color + ";fill:none;",
                     arrowheadStyle: "fill:" + color + ";stroke:" + color + ";",
                     lineInterpolate: "basis"
-                });*/
-                var value =commits[commit];
-                value.color=color;
-                value.date= d3.time.format("%Y-%m-%dT%H:%M:%S").parse(commits[commit].time);
-                edge.push(value)
+                });
             }
         });
-        edge=edge.sort(sortByDate);
-        console.log(node, edge);
-    }
 
-    function Pageload(link) {
-        window.location = link;
-    }
-
-    function getData(f) {
-        /*apex.server.plugin(
-        pAjaxId, {}, {
-            success: f,
-            error: function (d) { /*NOTLÖSUNG: fehlende führende 0 bei Zahlenwerten führt im jQuery-JSONParser zu Fehlern*/
-                //console.log("fail");console.log(d);console.log(d.responseText); 
-          /*      var json = d.responseText.replace(/(\:\.|\:\,)/g, ":0.");
-                f($.parseJSON(json));
-            },
-            dataType: "json"
-        });*/
-        // JSON-Daten mit jQuery laden und parsen
-    $.getJSON(_JSON, function (data, status) {
-        if (status != "success") {
-            alert("Error getting JSON Data: Status " + status);
+        createBranches();
+        if (_showTags) {
+            createTags();
         }
-
-        f(data);
-    });
-    }
-
-    //wait some ms before reacting on the resize->decrease compute-weight
-    $(window).on("resize", function () {
-        clearTimeout(waitresize);
-        waitresize = setTimeout(function () {
-            wresize();
-        }, 100);
-    });
-
-    function wresize() {
-        /*height dependend from region-height -> hard coded in style
-	-> get new width
-	-> recompute all affected elements
-	*/
-        width = getWidthwidth();
-        x.rangeRoundPoints([0, width]);
-       /* yAxis.ticks(Math.max(height / 50, 2));
-
-        svg.select("g.x.axis").transition()
-            .call(xAxis)
-            .selectAll("text")
-            .style("text-anchor", "end")
-            .attr("dx", "-.8em")
-            .attr("dy", ".15em")
-            .attr("transform", "rotate(" + config.rotate + ")");
-
-        svg.selectAll("g.y.axis g.tick line").transition()
-            .attr("x2", width);
-        /*svg.select("g.y.axis")
-		.call(yAxis);*/
-
-        /*title.selectAll("text").transition()
-            .attr("x", getSVGwidth() / 2);*/
-
-        d3.select(div_selector + " svg")
-            .attr("width", getSVGwidth())
-            .attr("height", getSVGheight());
-
-        /*var node = svg.selectAll(".tool");
-        node.transition()
-            .attr("transform", function (d) {
-            return "translate(" + x(d.key) + ",0)";
-        })
-            .selectAll(".toolrect")
-            .attr("width", x.rangeBand())
-            .attr("y", function (d) {
-            return y(d.y1);
-        })
-            .attr("height", function (d) {
-            return y(d.y0) - y(d.y1);
-        });
-
-        node.selectAll("g rect").transition()
-        //.attr("y", function (d) {return y(d3.sum(d.states, function (d){return d.value;}));})
-        .attr("width", x.rangeBand())
-        //.attr("height",function (d){return y(0)-y(d3.sum(d.states, function (d){return d.value;})); })
-        ;*/
-
-    }
-
-    /*
--------------------------------------------------------------------------------------------------------
-*/
-    function refreshData(d3json) {
-        /*No data found - section*/
-        if (!d3json || d3json.length == 0) {
-            contsvg.append("text").attr("class", "NoData")
-                .attr("x", getSVGwidth() / 2)
-                .attr("y", getSVGheight() / 2)
-                .attr("dy", ".35em")
-                .attr("text-anchor", "middle")
-                .text("No Data");
-            return;
-        }
-        contsvg.select("text.NoData").remove();
-
-        buildData(d3json); //<-- get useable data-array out of json-object
+       
+    	svg = d3.select(div_selector + " svg");
+    	inner = svg.select("g");
+    	
+        // render graph and add to DOM
+        render = new dagreD3.render();
+        render(inner, g);
         
-
-        var edges = svg.selectAll(".edge")
-            .data(edge);
-			
-
-        /*INSERT-section ->visualize new label*/
-        var edgesEnter = egde.enter().append("g")
-            .attr("class", "edge")
-            .attr("transform", function (d) {
-            return "translate(" + x(d.date) + ",0)";
+        // enable zooming and panning of graph
+        zoom = d3.behavior.zoom().on("zoom", function () {
+        	inner.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
         });
+    	
+        // bind zoom to SVG
+        svg.call(zoom);
 
-    /*UPDATE-section ->update existing labels*/
-    /*DELETE-section -> remove no longer existing labels*/
+        bindQTipToRevisionNodes();
+
+        center();
+        spinner.hide();
+    });
+
+    function create_revision_model(data){
+        // counter for coloring
+        var j = 1;
+        $.each(data, function (key, value) {
+            var types = value["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"];
+            console.log('Typen: ',value["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"], 'key ', key, 'value ', value);
+            j++;
+            for (var i = 0; i < types.length; i++) {
+                switch (types[i].value) {
+             // Falls Commit
+                case "http://eatld.et.tu-dresden.de/rmo#RevisionCommit":
+                    commits[key] = {};
+                    commits[key].title = value["http://purl.org/dc/terms/title"][0].value;
+                    commits[key].wasAssociatedWith = value["http://www.w3.org/ns/prov#wasAssociatedWith"][0].value;
+                    commits[key].generated = value["http://www.w3.org/ns/prov#generated"][0].value;
+                    commits[key].used = [];
+                    if (value["http://www.w3.org/ns/prov#used"]){
+                        for (var k = 0; k < value["http://www.w3.org/ns/prov#used"].length; k++) {
+                            commits[key].used.push(value["http://www.w3.org/ns/prov#used"][k].value);
+                        }
+                    }
+                    commits[key].time = value["http://www.w3.org/ns/prov#atTime"][0].value;
+                    if (revisions[commits[key].generated] == null) {
+                        revisions[commits[key].generated] = {};
+                    }
+                    revisions[commits[key].generated].commit = key;
+                    break;
+                // Falls Revision
+                case "http://eatld.et.tu-dresden.de/rmo#Revision":
+                    if (revisions[key] == null) {
+                        revisions[key] = {};
+                    }
+                    if (value["http://eatld.et.tu-dresden.de/rmo#deleteSet"]!=null){
+                    	revisions[key].deleteSet = value["http://eatld.et.tu-dresden.de/rmo#deleteSet"][0].value;
+                    }
+                    if (value["http://eatld.et.tu-dresden.de/rmo#addSet"]){
+                    	revisions[key].addSet = value["http://eatld.et.tu-dresden.de/rmo#addSet"][0].value;
+                    }
+                    revisions[key].revisionNumber = value["http://eatld.et.tu-dresden.de/rmo#revisionNumber"][0].value;
+                    revisions[key].belongsTo = value["http://eatld.et.tu-dresden.de/rmo#belongsTo"][0].value;
+                    break;
+                // Falls Branch
+                case "http://eatld.et.tu-dresden.de/rmo#Branch":
+                    if (branches[key] == null) {
+                        branches[key] = {};
+                    }
+                    branches[key].label = value["http://www.w3.org/2000/01/rdf-schema#label"][0].value;
+                    branches[key].fullGraph = value["http://eatld.et.tu-dresden.de/rmo#fullGraph"][0].value;
+                    branches[key].head = value["http://eatld.et.tu-dresden.de/rmo#references"][0].value;
+                    if (branches[key].color == null) {
+                        branches[key].color = d3.rgb(colors(j)).brighter().toString();
+                    }
+                    break;
+                // Falls Tag
+                case "http://eatld.et.tu-dresden.de/rmo#Tag":
+                    tags[key] = {};
+                    tags[key].label = value["http://www.w3.org/2000/01/rdf-schema#label"][0].value;
+                    tags[key].head = value["http://eatld.et.tu-dresden.de/rmo#references"][0].value;
+                    break;
+                // Falls Master
+                case "http://eatld.et.tu-dresden.de/rmo#Master":
+                    // Falls der Masterbranch noch nicht als Branch vorliegt, muss er initialisiert werden
+                    if (branches[key] == null) {
+                        branches[key] = {};
+                    }
+                    // Alle Masterbranches sollen immer die gleiche Farbe haben
+                    branches[key].color = "#5555ff";
+                    break;
+                }
+            }
+
+        });
+    }
     
-}
-}
+    function getChangeSets() {
+    	Object.keys(revisions).forEach(function (revision) {
+    		var value = revisions[revision];
+    		changeSets[revision] = {};
+    		changeSets[revision].addSet = [];
+    		changeSets[revision].deleteSet = [];
+    		if (value.addSet!=null){
+        		var j = 0;
+        		$.ajax({
+        			type: "GET",
+        			url: "contentOfGraph?graph="+value.addSet+"&format=application/json",
+        			async: false,
+        			success: function(data) { 
+						$.each(data, function (subject, predicates) {
+							$.each(predicates, function (predicate, objects){
+								for (var i = 0; i < objects.length; i++) {
+					    			var object = objects[i].value;
+									changeSets[revision].addSet[j] = subject + " - " + predicate + " - " + objects[i].value;
+									console.log("added to revision " + revision + ": " + changeSets[revision].addSet[j]);
+									j ++;
+								}
+							})
+						})
+        			}
+	    		})
+    		}
+    		
+    		if (value.deleteSet!=null){
+        		var j = 0;
+        		$.ajax({
+        			type: "GET",
+        			url: "contentOfGraph?graph="+value.deleteSet+"&format=application/json",
+        			async: false,
+        			success: function(data) { 
+		    			$.each(data, function (subject, predicates) {
+		    				$.each(predicates, function (predicate, objects){
+		    					for (var i = 0; i < objects.length; i++) {
+					    			var object = objects[i].value;
+		    						changeSets[revision].deleteSet[j] = subject + " - " + predicate + " - " + objects[i].value;
+		    						console.log("deleted from revision " + revision + ": " + changeSets[revision].deleteSet[j]);
+		    						j ++;
+		    					}
+		    				})
+		    			})
+        			}
+	    		})
+    		}
+    	})
+    }
+    
+    var qtip_options = {gravity: 'w', html: true, fade:true, trigger: 'focus', offset: 100};
+
+	 // Center the graph
+	 var center = function () {
+	     // relationf of graph to svg size
+	     var widthscale = svg_element.width() / (g.graph().width + 50);
+	     var heightscale = svg_element.height() / (g.graph().height + 50);
+	     // use smaller scale for adaptation
+	     var scale = widthscale < heightscale ? widthscale : heightscale;
+	     // not more than twice the size
+	     scale = scale > 2 ? 2 : scale;
+	     zoom
+	         .translate([(svg_element.width() - g.graph().width * scale) / 2, (svg_element.height() - g.graph().height * scale) / 2])
+	         .scale(scale)
+	         .event(svg_element);
+	 };
+	
+	
+	 function padStr(i) {
+	     return (i < 10) ? "0" + i : "" + i;
+	 }
+	 
+	 function dateString(date) {
+	 	return padStr(date.getDate()) + "." + padStr((date.getMonth() + 1)) + "." + date.getFullYear() + " " + padStr(date.getHours()) + ":" + padStr(date.getMinutes()) + ":" + padStr(date.getSeconds());
+	 }
+	 
+	 
+	 
+	 // Funktion, die den Inhalt der Revisions-Tooltips erstellt
+	 var revTooltip = function (name, node) {
+	     var tooltip = "<h1>Revision " + node.revisionNumber+"</h1>"+ 
+	         		   "<table class='properties'>";
+	     if (node.commit != null) { 
+		     var date = new Date(commits[node.commit].time);
+		     tooltip += "<tr><th>" + commits[node.commit].title+"</th><td>"+ dateString(date) + "</td><td></td></tr>" +  
+		     "<tr><th>User:</th><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+		     "<tr><th>URL:</th><td>" + node.commit + "</td><td></td></tr>";
+		 }
+	     for (var i = 0; i < changeSets[name].addSet.length; i++) {
+	    	 tooltip+="<tr><th>Added:</th><td>" + String(changeSets[name].addSet[i]) + "</td></tr>";
+	     }
+	     for (var i = 0; i < changeSets[name].deleteSet.length; i++) {
+	    	 tooltip+="<tr><th>Deleted:</th><td>" +  changeSets[name].deleteSet[i] + "</td></tr></table>";
+	     }
+	     if (changeSets[name].deleteSet.length=0) tooltip+="</table>";
+	     
+	     return tooltip;
+	 };
+
+     
+	 
+		
+	 // Funktion, die die Tags als Knoten mit Kanten erstellt
+	 var createTags = function () {
+	     Object.keys(tags).forEach(function (referenceCommit) {
+	         var value = tags[referenceCommit];
+	         value.label = tags[referenceCommit].label;
+	         value.height = 5;
+	         value.style = "stroke:#60b1fc;";
+	         value.labelStyle = "font-size:9px;";
+	         g.setNode(referenceCommit, value);
+             g.setEdge(tags[referenceCommit].head, referenceCommit, {
+                 style: "stroke:#60b1fc;fill:none;stroke-dasharray: 5, 5;",
+                 arrowhead: "undirected",
+                 weight: 2,
+             });
+	     });
+	 };
+	
+	 // Funktion, die die Branches als Knoten mit Kanten erstellt
+	 var createBranches = function () {
+	     Object.keys(branches).forEach(function (branch) {
+	         var value = branches[branch];
+	         value.label = branches[branch].label;
+	         value.height = 5;
+	         value.style = "fill:" + branches[branch].color + ";stroke:#fff;";
+	         value.labelStyle = "font-size:9px;";
+	         g.setNode(branch, value);
+	         g.setEdge(branches[branch].head, branch, {
+	             style: "stroke:" + branches[branch].color + ";fill:none;",
+	             arrowhead: "undirected",
+	             lineInterpolate: "basis"
+	         });
+	     });
+	 };
+	
+    // bind qtip to revision node
+    function bindQTipToRevisionNodes(){
+        inner.selectAll("g.node").filter(function (v) {
+            return revisions[v] != null;
+        })
+            .attr("title", function (v) {
+            	return revTooltip(v, g.node(v))
+            })
+            .each(function() {
+                $(this).qtip({
+                	show: 'click',
+                	hide: 'click'
+                })
+            });
+        
+     }
+    
+                
+	
+	 // Funktion um Tags einzublenden
+	 var showTags = function () {
+	     createTags();
+	     render(inner, g);
+	 };
+	
+	 // Funktion um Tags auszublenden
+	 var hideTags = function () {
+	     // remove tag nodes from d3
+		 inner.selectAll("g.node").filter(function (v) {
+	         return tags[v] != null;
+	     })
+	         .each(function (v) {
+	             g.removeNode(v);
+	         });
+	     render(inner, g);
+	 };    
+    
+};
