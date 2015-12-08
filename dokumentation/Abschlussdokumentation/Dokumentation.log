@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (MiKTeX 2.9) (preloaded format=pdflatex 2015.10.5)  1 DEC 2015 13:10
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (MiKTeX 2.9) (preloaded format=pdflatex 2015.10.5)  1 DEC 2015 14:04
 entering extended mode
 **C:/Users/Dominik/Documents/Mensch-Maschine-Systemtechnik/Dokumentation.tex
 (C:/Users/Dominik/Documents/Mensch-Maschine-Systemtechnik/Dokumentation.tex
@@ -68,14 +68,6 @@ Package: fontenc 2005/09/27 v1.99g Standard LaTeX package
 File: t1enc.def 2005/09/27 v1.99g Standard LaTeX file
 LaTeX Font Info:    Redeclaring font encoding T1 on input line 48.
 ))
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\color.sty"
-Package: color 2014/10/28 v1.1a Standard LaTeX Color (DPC)
-
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\00miktex\color.cfg"
-File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
-)
-Package color Info: Driver file: pdftex.def on input line 142.
-)
 LaTeX Font Info:    Try loading font information for T1+aun on input line 48.
 LaTeX Font Info:    No file T1aun.fd. on input line 48.
 
@@ -112,11 +104,6 @@ LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
 (Font)                  OT1/cmr/bx/it --> T1/aun/l/sl on input line 145.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
 (Font)                  T1/aun/l/sl --> T1/aun/l/sl on input line 146.
-Package color Info: Redefining color white on input line 232.
-Package color Info: Redefining color black on input line 233.
-Package color Info: Redefining color blue on input line 235.
-Package color Info: Redefining color green on input line 240.
-Package color Info: Redefining color cyan on input line 246.
 \logo@Tab@Width=\skip43
 \logo@Tab@Extra@Space=\skip44
 \@@professurComma=\box26
@@ -373,6 +360,10 @@ Package: paralist 2013/06/09 v2.4 Extended list environments
 \plparsep=\skip49
 \pl@lab=\toks17
 )
+
+LaTeX Warning: Unused global option(s):
+    [nocolor].
+
 (Dokumentation.aux)
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 10.
 LaTeX Font Info:    ... okay on input line 10.
@@ -404,7 +395,6 @@ LaTeX Font Info:    ... okay on input line 10.
 
 bibgerm.sty: (n)german.sty 2.5b detected
 
-\GPT@outputbox=\box28
 LaTeX Font Info:    Try loading font information for T1+din on input line 18.
 LaTeX Font Info:    No file T1din.fd. on input line 18.
 
@@ -424,13 +414,8 @@ File: TU_Logo_SW.pdf Graphic file (type pdf)
 Package pdftex.def Info: TU_Logo_SW.pdf used on input line 18.
 (pdftex.def)             Requested size: 162.1807pt x 47.51472pt.
 
-Underfull \hbox (badness 10000) has occurred while \output is active
-[][]
- []
-
-
-Overfull \hbox (85.35828pt too wide) has occurred while \output is active
-[]| [] []
+Overfull \hbox (28.45274pt too wide) has occurred while \output is active
+[] []
  []
 
 [1{C:/Users/Dominik/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}
@@ -526,7 +511,7 @@ m-men von $\T1/cmtt/m/n/10 https : / / assets-[]cdn .$
 
 Overfull \hbox (0.46559pt too wide) in paragraph at lines 5--5
  $\T1/cmtt/m/n/10 github . com / images / modules / home / desktop-[]mac . png 
-? v = 1$\T1/aun/l/sc/10 , ab-ge-ru-fen am 24.11.2015 [][]  
+? v = 1$\T1/aun/l/sc/10 , ab-ge-ru-fen am 24.11.2015 []  
  []
 
 )
@@ -537,13 +522,13 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 2460 strings out of 493673
- 30931 string characters out of 3141524
- 92387 words of memory out of 3000000
- 5772 multiletter control sequences out of 15000+200000
+ 2336 strings out of 493673
+ 29000 string characters out of 3141524
+ 87744 words of memory out of 3000000
+ 5653 multiletter control sequences out of 15000+200000
  13441 words of font info for 31 fonts, out of 3000000 for 9000
  1025 hyphenation exceptions out of 8191
- 34i,17n,23p,1134b,464s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 34i,16n,23p,1134b,430s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/enc/dvips/cm-super/cm-supe
 r-t1.enc}<C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy
 10.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super
@@ -556,7 +541,7 @@ TeX/2.9/fonts/type1/public/cm-super/sfrm1200.pfb><C:/Users/Dominik/AppData/Roam
 ing/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm1440.pfb><C:/Users/Dominik/AppDa
 ta/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm2488.pfb><C:/Users/Domini
 k/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sftt1000.pfb>
-Output written on Dokumentation.pdf (17 pages, 766446 bytes).
+Output written on Dokumentation.pdf (17 pages, 765230 bytes).
 PDF statistics:
  109 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
