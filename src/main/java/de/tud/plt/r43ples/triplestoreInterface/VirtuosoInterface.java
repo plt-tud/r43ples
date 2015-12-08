@@ -17,6 +17,15 @@ import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 
+/**
+ * Interface for accessing Virtuoso over a JDBC bridge
+ * 
+ * Currently not working since all results are empty
+ * 
+ * 
+ * @author Markus Graube
+ *
+ */
 public class VirtuosoInterface extends TripleStoreInterface {
 	
 	/** The logger. **/

@@ -49,14 +49,16 @@ public class ConsoleClient {
 		logger.info("add set file: " + args_client.add_set);
 		logger.info("delete set file: " +  args_client.delete_set);
 		logger.info("user: " +  args_client.user);
+		logger.info("timestamp: " + args_client.time_stamp);
 		logger.info("commit message: " +  args_client.message);
 		logger.info("branch: " +  args_client.branch);
+		
 		
 		Config.readConfig(args_client.r43ples.config);
 		
 		
 		if (args_client.create) {
-			RevisionManagement.purgeGraph(args_client.graph);
+			RevisionManagement.purgeRevisionInformation(args_client.graph);
 			TripleStoreInterfaceSingleton.get().executeCreateGraph(args_client.graph);
 			RevisionManagement.putGraphUnderVersionControl(args_client.graph);
 			logger.info("Graph created: "+ args_client.graph);

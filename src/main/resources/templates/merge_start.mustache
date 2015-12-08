@@ -25,9 +25,9 @@
     
     //js Stragegie->illustration with Graph
     var strategyImage = {
-    		'Three-Way Merge': '/static/images/three-way-strategie.png',
-    		'Rebase': '/static/images/rebase-strategie.png',
-    		'Fast-Forward': '/static/images/fast-forward-strategie.png',
+    		'Three-Way Merge': '/static/images/three-way-strategy.png',
+    		'Rebase': '/static/images/rebase-strategy.png',
+    		'Fast-Forward': '/static/images/fast-forward-strategy.png',
     };    
         
     function showIllustration(num){
@@ -59,10 +59,10 @@
             function(data,status){
               // get data and check
               if(data == "false"){
-            	  $('#strategie option[value="Fast-Forward"]').attr('disabled', true);
+            	  $('#strategy ption[value="Fast-Forward"]').attr('disabled', true);
               }else{
-            	  $('#strategie option[value="Fast-Forward"]').attr('disabled', false);
-            	  $('#strategie').val("Fast-Forward");
+            	  $('#strategy option[value="Fast-Forward"]').attr('disabled', false);
+            	  $('#strategy').val("Fast-Forward");
             	  showIllustration("Fast-Forward");
               }
             });
@@ -88,23 +88,23 @@
                         </div>
                       </div>
                       <div class="form-group">
-                      	<label for="Branch1" class="col-sm-2 control-label">Merge</label>
+                      	<label for="branch1" class="col-sm-2 control-label">Merge</label>
                         <div class="col-sm-4">
-                          <select class="form-control" id="Branch1" name="Branch1" onchange="checkFastForward()">    
+                          <select class="form-control" id="branch1" name="branch1" onchange="checkFastForward()">    
                              <option value="no"></option>
                           </select>          
                         </div>
-                        <label for="Branch2" class="col-sm-2 control-label">Into</label>
+                        <label for="branch2" class="col-sm-2 control-label">Into</label>
                         <div class="col-sm-4">
-                          <select class="form-control" id="Branch2" name="Branch2" onchange="checkFastForward()">
+                          <select class="form-control" id="branch2" name="branch2" onchange="checkFastForward()">
                              <option value="no"></option>
                           </select>          
                         </div>
                       </div>
                       <div class="form-group" >
-                        <label for="strategie" class="col-sm-2 control-label">Strategy</label>
+                        <label for="strategy" class="col-sm-2 control-label">Strategy</label>
                         <div class="col-sm-10" >
-                          <select class="form-control" id="strategie" name="strategie" onchange="showIllustration(this.value)">
+                          <select class="form-control" id="strategy" name="strategy" onchange="showIllustration(this.value)">
                              <option value="Three-Way Merge">Three-Way Merge</option>
                              <option value="Rebase">Rebase</option>
                              <option value="Fast-Forward">Fast-Forward</option>
@@ -113,8 +113,8 @@
                       </div>                    
                       <div id="methodField" class="form-group">
                       	<label class="col-sm-2 control-label">Method</label>
-                              <label class="col-sm-5"><input type="radio" name="optradio" value="common" checked> Common</label>
-                              <label class="col-sm-5"><input type="radio" name="optradio" value="auto"> Auto</label>
+                              <label class="col-sm-5"><input type="radio" name="method" value="common" checked> Common</label>
+                              <label class="col-sm-5"><input type="radio" name="method" value="auto"> Auto</label>
                       </div>
                       <div id="sddField" class="form-group" >
                           <label for="sdd" class="col-sm-2 control-label">SDD</label>

@@ -66,13 +66,14 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void test_reference_uri() throws InternalErrorException {
-		String res = RevisionManagement.getBranchUri(ds.graphName, "master");
+		String revisionGraph = RevisionManagement.getRevisionGraph(ds.graphName);
+		String res = RevisionManagement.getBranchUri(revisionGraph, "master");
 		Assert.assertEquals(ds.graphName+"-master", res);
 	}
 	
 	@Test
 	public void test_revision_uri() throws InternalErrorException {
-		String uri = RevisionManagement.getRevisionUri(ds.graphName, ds.revisions.get("master-4"));
+		String uri = RevisionManagement.getRevisionUri(RevisionManagement.getRevisionGraph(ds.graphName), ds.revisions.get("master-4"));
 		Assert.assertEquals(ds.graphName+"-revision-"+ds.revisions.get("master-4"), uri);
 	}
 	
@@ -213,22 +214,24 @@ public class TestRevisionManagment {
 	public void testBranching() throws InternalErrorException {
 		RevisionManagement.createBranch(ds.graphName, ds.revisions.get("master-2"), "testBranch", "test_user", "branching as junit test");
 
+		String revisionGraph = RevisionManagement.getRevisionGraph(ds.graphName);
+		
 		String rev = RevisionManagement.createNewRevision(ds.graphName, "<a> <b> <c>", "", "test_user", "test_commitMessage", "testBranch");
-		String revNumber = RevisionManagement.getRevisionNumber(ds.graphName, "testBranch");
+		String revNumber = RevisionManagement.getRevisionNumber(revisionGraph, "testBranch");
 		Assert.assertEquals(rev, revNumber);
 		
 		String rev2 = RevisionManagement.createNewRevision(ds.graphName, "<a> <b> <d>", "", "test_user", "test_commitMessage", "testBranch");
-		String revNumber2 = RevisionManagement.getRevisionNumber(ds.graphName, "testBranch");
+		String revNumber2 = RevisionManagement.getRevisionNumber(revisionGraph, "testBranch");
 		Assert.assertEquals(rev2, revNumber2);
 		
 		RevisionManagement.createBranch(ds.graphName, rev2, "testBranch2", "test_user", "branching as junit test");
 		String rev3 = RevisionManagement.createNewRevision(ds.graphName, "<a> <b> <e>", "", "test_user", "test_commitMessage", "testBranch2");
-		String revNumber3 = RevisionManagement.getRevisionNumber(ds.graphName, "testBranch2");
+		String revNumber3 = RevisionManagement.getRevisionNumber(revisionGraph, "testBranch2");
 		Assert.assertEquals(rev3, revNumber3);
 		
 		RevisionManagement.createBranch(ds.graphName, rev2, "testBranch2a", "test_user", "branching as junit test");
 		String rev4 = RevisionManagement.createNewRevision(ds.graphName, "<a> <b> <f>", "", "test_user", "test_commitMessage", "testBranch2a");
-		String revNumber4 = RevisionManagement.getRevisionNumber(ds.graphName, "testBranch2a");
+		String revNumber4 = RevisionManagement.getRevisionNumber(revisionGraph, "testBranch2a");
 		Assert.assertEquals(rev4, revNumber4);
 	}
 	

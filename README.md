@@ -55,7 +55,7 @@ Configuration
 -------------
 There is a configuration file named *resources/r43ples.conf*. The most important ones are the following:
 
-* *triplestore.type* - type of attached triplestore (can be tdb, virtuoso, http or http_virtuoso)
+* *triplestore.type* - type of attached triplestore (can be tdb, virtuoso [not working right now], http)
 * *triplestore.uri* - URI or path under which R43ples can access the attached triplestore
 * *triplestore.user* - user of attached triplestore if necessary
 * *triplestore.password* - password of attached triplestore if necessary

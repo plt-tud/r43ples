@@ -122,14 +122,13 @@ public class ProcessManagement {
 	 * 
 	 * @param differenceModelToRead the difference model to read
 	 * @param differenceModel the difference model where the result should be stored
-	 * @param format rdf serialisation of differenceModelToRead
 	 */
-	public static void readDifferenceModel(String differenceModelToRead, DifferenceModel differenceModel, String format) {
+	public static void readDifferenceModel(String differenceModelToRead, DifferenceModel differenceModel) {
 		logger.info("Start reading difference model.");
 		differenceModel.clear();
 		
 		logger.info("differenceModelToRead: "+ differenceModelToRead);
-		Model model = JenaModelManagement.readStringToJenaModel(differenceModelToRead, format);
+		Model model = JenaModelManagement.readStringToJenaModel(differenceModelToRead, "TURTLE");
 		
 		// Query all difference groups
 		String queryDifferenceGroups = prefixes + String.format(
@@ -433,16 +432,16 @@ public class ProcessManagement {
 		
     	// Query all individuals (DISTINCT because there can be multiple individual definitions)
 		String query = prefixes + String.format(
-				  "SELECT DISTINCT ?individualUri %n"
-				+ "FROM <%s> REVISION \"%s\" %n"
-				+ "WHERE { %n"
-				+ "	?individualUri a ?class . %n"
-				+ "} %n"
+				  "SELECT DISTINCT ?individualUri "
+				+ "WHERE { "
+				+ " GRAPH <%s> REVISION \"%s\" {"
+				+ "	?individualUri a ?class . "
+				+ "} }"
 				+ "ORDER BY ?individualUri", graphName, revisionName);
 		logger.debug(query);
 		
 		
-		String result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query, "text/xml");
+		String result = Interface.sparqlSelectConstructAsk(query, "text/xml", true);
 		logger.debug(result);
 		
 		// Iterate over all individuals
@@ -1047,7 +1046,7 @@ public class ProcessManagement {
 		
 		//here difference with mergingClient
 		
-		String result = Interface.sparqlSelectConstructAsk(query, "text/xml", true);
+		String result = Interface.sparqlSelectConstructAsk(query, "text/xml", false);
 		
 		logger.debug(result);
 		

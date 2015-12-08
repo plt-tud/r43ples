@@ -95,6 +95,38 @@ public class TestUpdate {
 		String query_restructure = String.format(""
 				+ "USER \"shensel\" %n"
 				+ "MESSAGE \"restructure commit to B2.\" %n"
+				+ "DELETE { GRAPH <%1$s> REVISION \"B2\" {"
+				+ " <http://example.com/testS> <http://example.com/testP> ?o."
+				+ "} } %n"
+				+ "INSERT { GRAPH <%1$s> REVISION \"B2\" {"
+				+ " <http://example.com/newTestS> <http://example.com/newTestP> ?o."
+				+ "} } %n"
+				+ "WHERE { GRAPH <%1$s> REVISION \"B2\" {"
+				+ "	<http://example.com/testS> <http://example.com/testP> ?o"
+				+ "} }", 
+				dsm.graphName);
+		logger.debug("Execute query: \n" + query_restructure);
+		result = ep.sparql(format, query_restructure).toString();
+		
+		result = ep.sparql(format, query).getEntity().toString();
+		logger.debug("Result: "+result);
+        expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2-restructured.xml");
+        assertXMLEqual(expected, result);
+	}
+	
+	@Test
+	public void testRestructuringAlternative() throws SAXException, IOException, InternalErrorException {
+		String query = "SELECT ?s ?p ?o FROM <"+dsm.graphName+"> REVISION \"B2\"\n"
+        		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
+		String result = ep.sparql(format, query).getEntity().toString();
+        String expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2.xml");
+        assertXMLEqual(expected, result);
+        
+		// restructure commit to B2
+		logger.debug("Restructure commit to B2");
+		String query_restructure = String.format(""
+				+ "USER \"shensel\" %n"
+				+ "MESSAGE \"restructure commit to B2.\" %n"
 				+ "INSERT { GRAPH <%1$s> REVISION \"B2\" {"
 				+ " <http://example.com/newTestS> <http://example.com/newTestP> ?o."
 				+ "} } %n"
