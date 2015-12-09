@@ -2,9 +2,10 @@
 \contentsline {chapter}{\numberline {2}Stand der Technik}{7}
 \contentsline {section}{\numberline {2.1}Grundlegende Richtlinen}{7}
 \contentsline {section}{\numberline {2.2}Bisherige Visualisierungen}{7}
-\contentsline {section}{\numberline {2.3}Weitere Literatur}{8}
+\contentsline {section}{\numberline {2.3}Weitere Beispiele}{8}
 \contentsline {subsection}{\numberline {2.3.1}Git2PROV}{8}
 \contentsline {subsection}{\numberline {2.3.2}GitHub Desktop}{9}
+\contentsline {subsection}{\numberline {2.3.3}Tortoise Git}{9}
 \contentsline {chapter}{\numberline {3}Anforderungsdefinition}{11}
 \contentsline {section}{\numberline {3.1}Einleitung}{11}
 \contentsline {subsection}{\numberline {3.1.1}Zielsetzung}{11}
