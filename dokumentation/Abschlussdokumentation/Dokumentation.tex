@@ -27,7 +27,7 @@ Insbesondere für das Semantic Web mangelt es derzeit noch an einem solchen Syst
 In der vorliegenden Arbeit soll die vorhandene Visualisierung erweitert werden, um die Changesets, der einzelnen Revisionen sichtbar zu machen. Dabei werden zunächst bestehende Konventionen und Ästhetikkriterien für Graphen untersucht und die bisherigen Arbeiten an R43ples, sowie andere Konzepte für Versionsverwaltungssystemen für das Semantic Web bzw. Linked Data im Allgemeinen analysiert werden, um auf dieser Basis anschließend eine eigene Visualisierung zu entwerfen und zu implementieren. Diese soll sich, um eine unkomplizierte Integration zu gewährleisten, direkt in die HTML-Oberfläche des bestehenden Gesamtsystems einfügen.
 
 \chapter{Stand der Technik}
-In \cite{Graube} wurde das Versionsverwaltungssystem \textit{R43ples} etabliert und, wie bereits erwähnt, mittels gerichteter Graphen visualisiert. Die Visualisierung wurde bereits in \cite{Gruppe2.3,Gruppe2.1} weiterentwickelt, diese Entwicklung soll in der vorliegenden Arbeit fortgesetzt werden. Da die Visualisierung weiterhin mittels gerichteter Graphen erfolgen soll, werden zunächst grundlegende Richtlinien und Ästhtetikkriterien zur Darstellung gerichteter Graphen diskutiert. Anschließend werden die vorhandenen Arbeiten an \textit{R43ples} sowie weitere Darstellungen von Versionsverwaltungssystemen aus der Literatur analysiert.
+In \cite{Graube} wurde das Versionsverwaltungssystem \textit{R43ples} etabliert und, wie bereits erwähnt, mittels gerichteter Graphen visualisiert. Die Visualisierung wurde bereits in \cite{Gruppe2.3,Gruppe2.1} weiterentwickelt, diese Entwicklung soll in der vorliegenden Arbeit fortgesetzt werden. Da die Visualisierung weiterhin mittels gerichteter Graphen erfolgen soll, werden zunächst grundlegende Richtlinien und Ästhtetikkriterien zur Darstellung gerichteter Graphen diskutiert. Anschließend werden die vorhandenen Arbeiten an \textit{R43ples} sowie weitere Darstellungen von Versionsverwaltungssystemen aus der Literatur und dem Internet analysiert.
 
 \section{Grundlegende Richtlinen}
 \label{sec:Richtlinien}
@@ -49,7 +49,7 @@ Die zweite Visualisierung in \cite{Gruppe2.3} stellt den Graphen mehr an die Sei
 
 Beide Visualisierungen sind in Abbildung \ref{fig:Vorarbeiten} zu sehen.
 
-\section{Weitere Literatur}
+\section{Weitere Beispiele}
 \label{sec:WeitereLiteratur}
 \subsection{Git2PROV}
 \label{sec:Git2PROV}
@@ -65,11 +65,23 @@ In \cite{Git2PROV} wird mit W3C PROV ein neuer Standard eingeführt, um Versions
 \subsection{GitHub Desktop}
 GitHub stellt ein Desktop Tool zur Verfügung, in dem ebenfalls der Verlauf der verschiedenen Branches eines Projektes zu sehen ist, dargestellt in Abbildung \ref{fig:GitHubDesktop}. Hier werden für den markierten Commit relativ umfangreiche Informationen angezeigt, es ist genau ersichtlich, was sich im Vergleich zur vorherigen Version geändert hat, außerdem sind die Kommentare der einzelnen Commits samt Benutzerbild des Autors zu sehen. Es wird zwischen Commits und Merges unterschieden und der Zeitverlauf ist durch unterschiedliche Abstände ersichtlich, außerdem wird unter dem Kommentar angezeigt, wie viel Zeit seitdem vergangen ist. Es werden allerdings nur die Commits des markierten Branches angezeigt und dort auch nur die aktuellsten. Dies erhöht die Übersichtlichkeit, insbesondere bei umfangreichen Projekten, die Suche nach einzlnen Commits gestaltet sich aber aufwendiger, auch weil die Knoten keine Beschriftung haben, wodurch eine direkte Zuordnung nicht möglich ist, die Revisionsnummer taucht gar nicht auf.
 
-\begin{figure}[htbp] 
+\begin{figure}[htb] 
   \centering
      \includegraphics[width=\textwidth]{GitHubDesktop.png}
   \caption[Darstellung eines Graphen mit GitHub Dekstop, entnommen von \GitHubDesktop, abgerufen am 24.11.2015]{Darstellung eines Graphen mit GitHub Desktop}
   \label{fig:GitHubDesktop}
+\end{figure}
+
+\subsection{Tortoise Git}
+Eine weitere Möglichkeit, Git zu nutzen, bietet die freie grafische Benutzeroberfläche Tortoise Git, dargestellt in Abbildung \ref{fig:TortoiseGit}. Dargestellt wird hier ein kleiner, von unten nach oben aufgebauter Graph, eine grafische Darstellung, ob Dateien gelöscht, hinzugefügt oder geändert wurden, die Commit Nachricht, der Autor und das Datum. Durch Klicken auf den jeweiligen Commit können genauere Infos abgerufen werden, z.B. welche Dateien genau geändert/hinzugefügt/gelöscht wurden, außerdem wird die Commit Nachricht komplett angezeigt, falls sie vorher aus Platzgründen nur zum Teil dargestellt werden konnte.
+
+Hier zeigt sich bereits ein Nachteil dieser Art der Darstellung. Lange Commit Nachrichten können nicht dargestellt werden, aus denen ersten Worten, die gezeigt werden können, ist nicht zwingend der Kontext ersichtlich. Zudem ist der Platz für den Graphen relativ gering, sodass große, weit verzweigte Graphen nicht übersichtlich dargestellt werden können.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=\textwidth]{TortoiseGit.png}
+	\caption{Darstellung eines Graphen mit Tortoise Git}
+	\label{fig:TortoiseGit}
 \end{figure}
 
 \chapter{Anforderungsdefinition}
@@ -100,17 +112,18 @@ Anders als die in Abschnitt \ref{sec:Git2PROV} beschriebene Visualisierung, die 
 \subsection{Produktfunktion}
 \begin{enumerate}[F1]
 \item Übersichtlichkeit und Lesbarkeit der Graphen durch Einhalten der Richtlinien und Kriterien aus Abschnitt \ref{sec:Richtlinien}, sowie durch Beschränken auf die entscheidenden Informationen
-\item Automatische Anordnung der Revisionen nach Zeitpunkt des Commits und der Verbindungen
-\item Hervorheben des Master Branches, kennzeichnen der Branches mit Namen und Gruppierung durch einheitliche Farbgebung
-\item Direkt dargestellt werden soll zudem die Revisionsnummer
-\item Hinzufügen weiterer Informationen wie Changeset oder Kommentar durch Mouseover bzw. Klicken
-\item Darstellung der zusätzlichen Informationen am unteren Bildschirmrand
-\item Hinzufügen einer Zeitleiste am oberen Bildschirmrand
+	\item Automatische Anordnung der Revisionen nach Zeitpunkt des Commits und der Verbindungen
+	\item Hervorheben des Master Branches, kennzeichnen der Branches mit Namen und Gruppierung durch einheitliche Farbgebung
+	\item Direkt dargestellt werden soll zudem die Revisionsnummer
+	\item Hinzufügen weiterer Informationen wie Changeset oder Kommentar durch Mouseover bzw. Klicken
+	\item Darstellung der zusätzlichen Informationen am unteren Bildschirmrand
+	\item Hinzufügen einer Zeitleiste am oberen Bildschirmrand
 \end{enumerate}
 
 \subsection{Allgemeine Einschränkungen und Randbedingungen}
-
-
+\begin{enumerate}[R1]
+	\item Das Produkt muss kompatibel mit aktuellen, verbreiteten Browsern (Firefox, Chrome) sein
+\end{enumerate}
 
 \chapter{Gestaltungsentwurf und Implementierung}
 Ideen:
