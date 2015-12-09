@@ -46,16 +46,19 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	div_element.html(
 		"<div class='revisionGraphVisualisation'>" +
 		"	<svg><g/></svg>" +
-		"</div>" +
+		"</div>"+
 		"<div class='checkbox'>" +
         "	<label><input type='checkbox' class='toggle-tags'>Show Tags</label>" +
-	  	"</div>");
+	  	"</div>"+
+		"<div class='details' style='border:1px solid;'>" +
+			"<div id='header'><content/></div>" +
+			"<div id='changesets' style='height:150px;overflow:auto;border:1px solid;'><content/></div>" +
+		"</div>");
 
 	// ChangeListener for tags
 	div_element.find('.toggle-tags').change(function () {
 	    $(this).prop('checked')?showTags():hideTags();
 	});
-
 
 	
 	// http://stackoverflow.com/questions/16265123/resize-svg-when-window-is-resized-in-d3-js
@@ -138,7 +141,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
     	
         // bind zoom to SVG
         svg.call(zoom);
-
+        
         bindQTipToRevisionNodes();
 
         center();
@@ -299,27 +302,48 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	 
 	 // Funktion, die den Inhalt der Revisions-Tooltips erstellt
 	 var revTooltip = function (name, node) {
-	     var tooltip = "<h1>Revision " + node.revisionNumber+"</h1>"+ 
-	         		   "<table class='properties'>";
+	     var tooltip = "<h1>Revision " + node.revisionNumber+"</h1>"
 	     if (node.commit != null) { 
 		     var date = new Date(commits[node.commit].time);
-		     tooltip += "<tr><th>" + commits[node.commit].title+"</th><td>"+ dateString(date) + "</td><td></td></tr>" +  
-		     "<tr><th>User:</th><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-		     "<tr><th>URL:</th><td>" + node.commit + "</td><td></td></tr>";
+		     tooltip += "<table class='properties'>"+
+		    	"<tr><th>" + commits[node.commit].title + "</th><td>" + dateString(date) + "</td><td></td></tr>" + 
+		    	"<table class='properties' cellpadding='10' cellspacing='10'>"+
+		    	"<tr><th>User:</th><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+		    	"<tr><th>URL:</th><td>" + node.commit + "</td><td></td></tr>";
 		 }
-	     for (var i = 0; i < changeSets[name].addSet.length; i++) {
-	    	 tooltip+="<tr><th>Added:</th><td>" + String(changeSets[name].addSet[i]) + "</td></tr>";
-	     }
-	     for (var i = 0; i < changeSets[name].deleteSet.length; i++) {
-	    	 tooltip+="<tr><th>Deleted:</th><td>" +  changeSets[name].deleteSet[i] + "</td></tr></table>";
-	     }
-	     if (changeSets[name].deleteSet.length=0) tooltip+="</table>";
+	     tooltip+="</table>";
 	     
 	     return tooltip;
 	 };
 
-     
-	 
+	// Funktion, die den Inhalt der Changeset-Anzeige im Detailfeld erstellt
+	 var displayChangeset = function (name, node) {
+	     var changesetText = "<h2>Changeset </h2>"+
+	     	"<table class='properties'>";
+	     for (var i = 0; i < changeSets[name].addSet.length; i++) {
+	    	 changesetText+="<tr><th>Added:</th><td>" + String(changeSets[name].addSet[i]) + "</td></tr>";
+	     }
+	     for (var i = 0; i < changeSets[name].deleteSet.length; i++) {
+	    	 changesetText+="<tr><th>Deleted:</th><td>" +  changeSets[name].deleteSet[i] + "</td></tr></table>";
+	     }
+	     if (changeSets[name].deleteSet.length=0) tooltip+="</table>";
+	     
+	     return changesetText;
+	 };
+	// Funktion, die den Inhalt der Info-Anzeige im Detailfeld erstellt
+	 var displayHeader = function (name, node) {
+	     var headerText = "<h1>Revision " + node.revisionNumber+"</h1>"+
+	     	"<table class='properties'>";
+	     if (node.commit != null) { 
+		     var date = new Date(commits[node.commit].time);
+		     headerText += "<tr><th>Comment:   </th><td>"+ commits[node.commit].title + "</td><td></td></tr>" +  
+		     "<tr><th>Committime:</th><td>"+ dateString(date) + "</td><td></td></tr>" +  
+		     "<tr><th>User:</th><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+		     "<tr><th>URL:</th><td>" + node.commit + "</td><td></td></tr></table>";
+		 }
+	     
+	     return headerText;
+	 };
 		
 	 // Funktion, die die Tags als Knoten mit Kanten erstellt
 	 var createTags = function () {
@@ -355,25 +379,36 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	     });
 	 };
 	
-    // bind qtip to revision node
+    // bind qtip and detailtext to revision node
     function bindQTipToRevisionNodes(){
         inner.selectAll("g.node").filter(function (v) {
             return revisions[v] != null;
         })
-            .attr("title", function (v) {
-            	return revTooltip(v, g.node(v))
-            })
-            .each(function() {
-                $(this).qtip({
-                	show: 'click',
-                	hide: 'click'
-                })
-            });
-        
+        .attr("title", function (v) {
+        	return revTooltip(v, g.node(v))
+        })
+        .attr("header", function (v) {
+        	return displayHeader(v, g.node(v))
+        })
+        .attr("change", function (v) {
+        	return displayChangeset(v, g.node(v))
+        })
+        .each(function (v) {
+        	console.log(g.node(v));
+        	var n = g.node;
+        	console.log(this);
+        	$(this).on("click", function () {
+            	console.log("clicked");
+            	$("#header").html( $(this).attr("header") );
+            	$("#changesets").html( $(this).attr("change") );
+        	})
+        	$(this).qtip({
+        		show: 'mouseover',
+        		hide: 'mouseout'
+        	})
+        });
      }
-    
-                
-	
+
 	 // Funktion um Tags einzublenden
 	 var showTags = function () {
 	     createTags();
