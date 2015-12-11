@@ -44,16 +44,19 @@ function drawGraph(div_selector, _JSON, _showTags) {
     
     
 	div_element.html(
-		"<div class='revisionGraphVisualisation'>" +
-		"	<svg><g/></svg>" +
-		"</div>"+
-		"<div class='checkbox'>" +
-        "	<label><input type='checkbox' class='toggle-tags'>Show Tags</label>" +
-	  	"</div>"+
-		"<div class='details' style='border:1px solid;'>" +
-			"<div id='header'><content/></div>" +
-			"<div id='changesets' style='height:150px;overflow:auto;border:1px solid;'><content/></div>" +
-		"</div>");
+			"<div class='revisionGraphVisualisation'>" +
+			"	<svg><g/></svg>" +
+			"</div>"+
+			"<div class='checkbox'>" +
+	        "	<label><input type='checkbox' class='toggle-tags'>Show Tags</label>" +
+		  	"</div>"+
+		  	"<div class='row'>"+
+		    "<div class='col-md-12' id='header'><h2>Revision</h2></div>"+
+			"</div>"+
+			"<div class='row'>"+
+		    "<div class='col-md-12''><h2>Changeset </h2></div>"+
+		    "<div class='col-md-12' id='changesets' style='max-height:200px;overflow:auto;'></div>"+
+			"</div>");
 
 	// ChangeListener for tags
 	div_element.find('.toggle-tags').change(function () {
@@ -239,7 +242,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 							$.each(predicates, function (predicate, objects){
 								for (var i = 0; i < objects.length; i++) {
 					    			var object = objects[i].value;
-									changeSets[revision].addSet[j] = subject + " - " + predicate + " - " + objects[i].value;
+									changeSets[revision].addSet[j] = subject + " - " + predicate + " - " + objects[i].value + "<br>";
 									console.log("added to revision " + revision + ": " + changeSets[revision].addSet[j]);
 									j ++;
 								}
@@ -260,7 +263,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 		    				$.each(predicates, function (predicate, objects){
 		    					for (var i = 0; i < objects.length; i++) {
 					    			var object = objects[i].value;
-		    						changeSets[revision].deleteSet[j] = subject + " - " + predicate + " - " + objects[i].value;
+		    						changeSets[revision].deleteSet[j] = subject + " - " + predicate + " - " + objects[i].value + "<br>";
 		    						console.log("deleted from revision " + revision + ": " + changeSets[revision].deleteSet[j]);
 		    						j ++;
 		    					}
@@ -305,11 +308,11 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	     var tooltip = "<h1>Revision " + node.revisionNumber+"</h1>"
 	     if (node.commit != null) { 
 		     var date = new Date(commits[node.commit].time);
-		     tooltip += "<table class='properties'>"+
-		    	"<tr><th>" + commits[node.commit].title + "</th><td>" + dateString(date) + "</td><td></td></tr>" + 
-		    	"<table class='properties' cellpadding='10' cellspacing='10'>"+
-		    	"<tr><th>User:</th><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-		    	"<tr><th>URL:</th><td>" + node.commit + "</td><td></td></tr>";
+		     tooltip += "<table class='properties' style='width:100%'>"+
+		    	"<tr><th style='padding-right:5px;'>" + commits[node.commit].title + "</th><td align='right' style='vertical-align:top;'>" + dateString(date) + "</td></tr>" + 
+		    	"<table class='properties'>"+
+		    	"<tr><th style='padding-right:5px;'>User:</th><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+		    	"<tr><th style='padding-right:5px;'>URL:</th><td>" + node.commit + "</td><td></td></tr>";
 		 }
 	     tooltip+="</table>";
 	     
@@ -318,27 +321,26 @@ function drawGraph(div_selector, _JSON, _showTags) {
 
 	// Funktion, die den Inhalt der Changeset-Anzeige im Detailfeld erstellt
 	 var displayChangeset = function (name, node) {
-	     var changesetText = "<h2>Changeset </h2>"+
+	     var changesetText = //"<h2>Changeset </h2>"+
 	     	"<table class='properties'>";
 	     for (var i = 0; i < changeSets[name].addSet.length; i++) {
-	    	 changesetText+="<tr><th>Added:</th><td>" + String(changeSets[name].addSet[i]) + "</td></tr>";
+	    	 changesetText+="<tr><th style='vertical-align:top;color:#176511;'>+</th><td style='padding-left:5px;padding-bottom:5px;color:#176511;'>" + changeSets[name].addSet[i] + "</td></tr>";
 	     }
 	     for (var i = 0; i < changeSets[name].deleteSet.length; i++) {
-	    	 changesetText+="<tr><th>Deleted:</th><td>" +  changeSets[name].deleteSet[i] + "</td></tr></table>";
+	    	 changesetText+="<tr><th style='vertical-align:top;color:#811109;'>-</th><td style='padding-left:5px;padding-bottom:5px;color:#811109;'>" +  changeSets[name].deleteSet[i] + "</td></tr>";
 	     }
-	     if (changeSets[name].deleteSet.length=0) tooltip+="</table>";
+	     changesetText+="</table>";
 	     
 	     return changesetText;
 	 };
 	// Funktion, die den Inhalt der Info-Anzeige im Detailfeld erstellt
 	 var displayHeader = function (name, node) {
 	     var headerText = "<h1>Revision " + node.revisionNumber+"</h1>"+
-	     	"<table class='properties'>";
+	     	"<table class='properties' style='width:100%'>";
 	     if (node.commit != null) { 
 		     var date = new Date(commits[node.commit].time);
-		     headerText += "<tr><th>Comment:   </th><td>"+ commits[node.commit].title + "</td><td></td></tr>" +  
-		     "<tr><th>Committime:</th><td>"+ dateString(date) + "</td><td></td></tr>" +  
-		     "<tr><th>User:</th><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+		     headerText += "<tr><th>"+ commits[node.commit].title + "</th><td align='right' style='vertical-align:top;'>"+ dateString(date) + "</td></tr></table>" +  
+		     "<table class='properties' style='width:100%'><tr><th>User:</th><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
 		     "<tr><th>URL:</th><td>" + node.commit + "</td><td></td></tr></table>";
 		 }
 	     
@@ -401,6 +403,9 @@ function drawGraph(div_selector, _JSON, _showTags) {
             	console.log("clicked");
             	$("#header").html( $(this).attr("header") );
             	$("#changesets").html( $(this).attr("change") );
+            	$("#changesets").animate({
+                    scrollTop: 0
+                }, 0);
         	})
         	$(this).qtip({
         		show: 'mouseover',

@@ -10,6 +10,15 @@
  * Plugins: tips viewport imagemap svg modal ie6
  * Styles: core basic css3
  */
+ 
+ 
+
+td, th {
+    padding-left: 10px;
+    padding-bottom: 5px;
+}
+ 
+ 
 .qtip{
 	position: absolute;
 	left: -28000px;
