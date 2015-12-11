@@ -8,12 +8,11 @@
 \contentsline {subsection}{\numberline {2.3.3}Tortoise Git}{9}
 \contentsline {chapter}{\numberline {3}Anforderungsdefinition}{11}
 \contentsline {section}{\numberline {3.1}Einleitung}{11}
-\contentsline {subsection}{\numberline {3.1.1}Zielsetzung}{11}
-\contentsline {subsection}{\numberline {3.1.2}Produktziele}{11}
 \contentsline {section}{\numberline {3.2}Allgemeine Beschreibung}{11}
 \contentsline {subsection}{\numberline {3.2.1}Produktumgebung}{11}
 \contentsline {subsection}{\numberline {3.2.2}Benutzereigenschaften}{11}
-\contentsline {subsection}{\numberline {3.2.3}Qualit\IeC {\"a}tsanforderung}{12}
-\contentsline {subsection}{\numberline {3.2.4}Produktfunktion}{12}
-\contentsline {subsection}{\numberline {3.2.5}Allgemeine Einschr\IeC {\"a}nkungen und Randbedingungen}{12}
+\contentsline {section}{\numberline {3.3}Spezifische Anforderungen}{11}
+\contentsline {subsection}{\numberline {3.3.1}Funktionale Anforderungen}{11}
+\contentsline {subsection}{\numberline {3.3.2}Qualit\IeC {\"a}tsanforderung}{12}
+\contentsline {subsection}{\numberline {3.3.3}Einschr\IeC {\"a}nkungen und Randbedingungen}{12}
 \contentsline {chapter}{\numberline {4}Gestaltungsentwurf und Implementierung}{13}

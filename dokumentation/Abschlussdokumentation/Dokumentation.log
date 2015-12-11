@@ -1,17 +1,26 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (MiKTeX 2.9) (preloaded format=pdflatex 2015.10.5)  8 DEC 2015 12:56
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (MiKTeX 2.9) (preloaded format=pdflatex 2015.2.12)  11 DEC 2015 11:58
 entering extended mode
-**C:/Users/Dominik/Documents/Mensch-Maschine-Systemtechnik/Dokumentation.tex
-(C:/Users/Dominik/Documents/Mensch-Maschine-Systemtechnik/Dokumentation.tex
-LaTeX2e <2015/01/01> patch level 2
-Babel <3.9m> and hyphenation patterns for 69 languages loaded.
-(tudbook.cls
+**Dokumentation.tex
+(E:\UNI\MMST\r43ples\dokumentation\Abschlussdokumentation\Dokumentation.tex
+LaTeX2e <2011/06/27>
+Babel <v3.8m> and hyphenation patterns for english, afrikaans, ancientgreek, ar
+abic, armenian, assamese, basque, bengali, bokmal, bulgarian, catalan, coptic, 
+croatian, czech, danish, dutch, esperanto, estonian, farsi, finnish, french, ga
+lician, german, german-x-2013-05-26, greek, gujarati, hindi, hungarian, iceland
+ic, indonesian, interlingua, irish, italian, kannada, kurmanji, latin, latvian,
+ lithuanian, malayalam, marathi, mongolian, mongolianlmc, monogreek, ngerman, n
+german-x-2013-05-26, nynorsk, oriya, panjabi, pinyin, polish, portuguese, roman
+ian, russian, sanskrit, serbian, slovak, slovenian, spanish, swedish, swissgerm
+an, tamil, telugu, turkish, turkmen, ukenglish, ukrainian, uppersorbian, usengl
+ishmax, welsh, loaded.
+(E:\UNI\MMST\r43ples\dokumentation\Abschlussdokumentation\tudbook.cls
 Document Class: tudbook 2012/08/04 Buch-Klasse fuer die TU Dresden, (c) by Klau
 s Bergmann
 Class: 'tudbook' Version 1.6, Buchvorlage der Technischen Universitaet Dresden
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\book.cls"
-Document Class: book 2014/09/29 v1.4h Standard LaTeX document class
+Document Class: book 2007/10/19 v1.4h Standard LaTeX document class
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\bk10.clo"
-File: bk10.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+File: bk10.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
 \c@chapter=\count80
@@ -27,14 +36,14 @@ File: bk10.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 \bibindent=\dimen102
 )
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\graphicx.sty"
-Package: graphicx 2014/10/28 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\keyval.sty"
-Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
 \KV@toks@=\toks14
 )
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\graphics.sty"
-Package: graphics 2014/10/28 v1.0p Standard LaTeX Graphics (DPC,SPQR)
+Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\trig.sty"
 Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
@@ -42,7 +51,7 @@ Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\00miktex\graphics.cfg"
 File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
 )
-Package graphics Info: Driver file: pdftex.def on input line 94.
+Package graphics Info: Driver file: pdftex.def on input line 91.
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\pdftex-def\pdftex.def"
 File: pdftex.def 2011/05/27 v0.06d Graphics/color for pdfTeX
@@ -59,14 +68,14 @@ Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 \Gin@req@width=\dimen104
 )
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\ifthen.sty"
-Package: ifthen 2014/09/29 v1.1c Standard LaTeX ifthen package (DPC)
+Package: ifthen 2001/05/26 v1.1c Standard LaTeX ifthen package (DPC)
 )
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\fontenc.sty"
 Package: fontenc 2005/09/27 v1.99g Standard LaTeX package
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\t1enc.def"
 File: t1enc.def 2005/09/27 v1.99g Standard LaTeX file
-LaTeX Font Info:    Redeclaring font encoding T1 on input line 48.
+LaTeX Font Info:    Redeclaring font encoding T1 on input line 43.
 ))
 LaTeX Font Info:    Try loading font information for T1+aun on input line 48.
 LaTeX Font Info:    No file T1aun.fd. on input line 48.
@@ -114,30 +123,30 @@ File: TU_Logo_SW.pdf Graphic file (type pdf)
 Package pdftex.def Info: TU_Logo_SW.pdf used on input line 280.
 (pdftex.def)             Requested size: 162.1807pt x 47.51472pt.
 )
-(tudthesis.sty
+(E:\UNI\MMST\r43ples\dokumentation\Abschlussdokumentation\tudthesis.sty
 Package: tudthesis 2011/05/02 Thesis-Package fuer die TU Dresden, (c) by Klaus 
 Bergmann
 )
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\german\german.sty
+("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\german\german.sty"
 v2.5e 1998-07-08
 Package: german 1998/07/08 v2.5e Support for writing german texts (br)
 \grmnU@D=\dimen105
-german -- \language number for Austrian undefined, default 23 used.
+german -- \language number for Austrian undefined, default 22 used.
 )
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\inputenc.sty"
-Package: inputenc 2015/03/17 v1.2c Input encoding file
+Package: inputenc 2008/03/30 v1.1d Input encoding file
 \inpenc@prehook=\toks15
 \inpenc@posthook=\toks16
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\utf8.def"
-File: utf8.def 2015/06/27 v1.1n UTF-8 support for inputenc
+File: utf8.def 2008/04/05 v1.1m UTF-8 support for inputenc
 Now handling font encoding OML ...
 ... no UTF-8 mapping file for font encoding OML
 Now handling font encoding T1 ...
 ... processing UTF-8 mapping file for font encoding T1
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\t1enc.dfu"
-File: t1enc.dfu 2015/06/27 v1.1n UTF-8 support for inputenc
+File: t1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A1 (decimal 161)
    defining Unicode char U+00A3 (decimal 163)
    defining Unicode char U+00AB (decimal 171)
@@ -287,7 +296,7 @@ Now handling font encoding OT1 ...
 ... processing UTF-8 mapping file for font encoding OT1
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\ot1enc.dfu"
-File: ot1enc.dfu 2015/06/27 v1.1n UTF-8 support for inputenc
+File: ot1enc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A1 (decimal 161)
    defining Unicode char U+00A3 (decimal 163)
    defining Unicode char U+00B8 (decimal 184)
@@ -318,7 +327,7 @@ Now handling font encoding OMS ...
 ... processing UTF-8 mapping file for font encoding OMS
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\omsenc.dfu"
-File: omsenc.dfu 2015/06/27 v1.1n UTF-8 support for inputenc
+File: omsenc.dfu 2008/04/05 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A7 (decimal 167)
    defining Unicode char U+00B6 (decimal 182)
    defining Unicode char U+00B7 (decimal 183)
@@ -341,18 +350,18 @@ Now handling font encoding U ...
    defining Unicode char U+2122 (decimal 8482)
    defining Unicode char U+2423 (decimal 9251)
 ))
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\germbib\bibgerm.sty
+("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\germbib\bibgerm.sty"
 Package: bibgerm 2000/08/18 v0.1 Support for mixed language bibliographies
 
 ** Macros for german `BibTeX'ing added to Style Option `german' 20 Apr 1993 **
 ** idea and languages `german' and `USenglish' implemented by M. Wallmeier **
 ** Modified for LaTeX 2e and german.sty 2.5b by A. Scherer 1 Nov 1995 **
 ** Modified for ngerman.sty and babel.sty by H. Harders 21 August 2000 **)
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\url\url.sty
+("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\url\url.sty"
 \Urlmuskip=\muskip10
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\paralist\paralist.sty
+("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\paralist\paralist.sty"
 Package: paralist 2013/06/09 v2.4 Extended list environments
 \pltopsep=\skip46
 \plpartopsep=\skip47
@@ -364,7 +373,7 @@ Package: paralist 2013/06/09 v2.4 Extended list environments
 LaTeX Warning: Unused global option(s):
     [nocolor].
 
-(Dokumentation.aux)
+(E:\UNI\MMST\r43ples\dokumentation\Abschlussdokumentation\Dokumentation.aux)
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 10.
 LaTeX Font Info:    ... okay on input line 10.
 LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 10.
@@ -378,7 +387,7 @@ LaTeX Font Info:    ... okay on input line 10.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 10.
 LaTeX Font Info:    ... okay on input line 10.
 
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\context\base\supp-pdf.mkii
+("C:\Program Files (x86)\MiKTeX 2.9\tex\context\base\supp-pdf.mkii"
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count89
 \scratchdimen=\dimen106
@@ -418,12 +427,13 @@ Overfull \hbox (28.45274pt too wide) has occurred while \output is active
 [] []
  []
 
-[1{C:/Users/Dominik/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}
+[1{C:/ProgramData/MiKTeX/2.9/pdftex/config/pdftex.map}
 
 
- <./TU_Logo_SW.pdf>] [2
+ <E:/UNI/MMST/r43ples/dokumentation/Abschlussdokumentation/TU_Logo_SW.pdf>] [2
 
-] (Dokumentation.toc
+]
+(E:\UNI\MMST\r43ples\dokumentation\Abschlussdokumentation\Dokumentation.toc
 
 LaTeX Font Warning: Font shape `T1/aun/bx/n' undefined
 (Font)              using `T1/cmr/m/n' instead on input line 1.
@@ -456,43 +466,52 @@ Overfull \hbox (85.35696pt too wide) in paragraph at lines 43--44
  [][] 
  []
 
-[8 <./Vorarbeiten.png>] <Git2PROV.png, id=41, 758.835pt x 379.4175pt>
+[8 <E:/UNI/MMST/r43ples/dokumentation/Abschlussdokumentation/Vorarbeiten.png>]
+<Git2PROV.png, id=41, 758.835pt x 379.4175pt>
 File: Git2PROV.png Graphic file (type png)
-
-<use Git2PROV.png>
+ <use Git2PROV.png>
 Package pdftex.def Info: Git2PROV.png used on input line 60.
 (pdftex.def)             Requested size: 426.79134pt x 213.39865pt.
- <GitHubDesktop.png, id=43, 2015.53pt x 1210.5225pt>
-File: GitHubDesktop.png Graphic file (type png)
 
-<use GitHubDesktop.png>
+<GitHubDesktop.png, id=43, 2015.53pt x 1210.5225pt>
+File: GitHubDesktop.png Graphic file (type png)
+ <use GitHubDesktop.png>
 Package pdftex.def Info: GitHubDesktop.png used on input line 70.
 (pdftex.def)             Requested size: 426.79134pt x 256.32292pt.
- <TortoiseGit.png, id=44, 1027.58907pt x 526.21594pt>
-File: TortoiseGit.png Graphic file (type png)
 
-<use TortoiseGit.png>
+<TortoiseGit.png, id=44, 1027.58907pt x 526.21594pt>
+File: TortoiseGit.png Graphic file (type png)
+ <use TortoiseGit.png>
 Package pdftex.def Info: TortoiseGit.png used on input line 82.
 (pdftex.def)             Requested size: 426.79134pt x 218.55219pt.
- [9 <./Git2PROV.png>] [10 <./GitHubDesktop.png> <./TortoiseGit.png>]
+
+[9 <E:/UNI/MMST/r43ples/dokumentation/Abschlussdokumentation/Git2PROV.png>]
+[10 <E:/UNI/MMST/r43ples/dokumentation/Abschlussdokumentation/GitHubDesktop.png
+> <E:/UNI/MMST/r43ples/dokumentation/Abschlussdokumentation/TortoiseGit.png>]
 Kapitel 3.
 
 Package paralist Warning: Incorrect label; no or multiple counters.
-(paralist)                The label is: Q1.1 on input line 105.
+(paralist)                The label is: F1.1 on input line 102.
 
 [11
 
-] [12]
-Kapitel 4.
-LaTeX Font Info:    Try loading font information for OMS+aun on input line 131.
+]
 
-LaTeX Font Info:    No file OMSaun.fd. on input line 131.
+Package paralist Warning: Incorrect label; no or multiple counters.
+(paralist)                The label is: Q1.1 on input line 125.
+
+[12]
+Kapitel 4.
+LaTeX Font Info:    Try loading font information for OMS+aun on input line 143.
+
+LaTeX Font Info:    No file OMSaun.fd. on input line 143.
 
 LaTeX Font Warning: Font shape `OMS/aun/l/n' undefined
 (Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbullet' on input line 131.
+(Font)              for symbol `textbullet' on input line 143.
 
-(Dokumentation.bbl [13
+(E:\UNI\MMST\r43ples\dokumentation\Abschlussdokumentation\Dokumentation.bbl
+[13
 
 ] [14
 
@@ -503,11 +522,12 @@ LaTeX Font Warning: Font shape `T1/aun/l/sc' undefined
 
 ) [15] [16
 
-] (Dokumentation.lof
+]
+(E:\UNI\MMST\r43ples\dokumentation\Abschlussdokumentation\Dokumentation.lof
 LaTeX Font Info:    Try loading font information for T1+cmtt on input line 5.
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\t1cmtt.fd"
-File: t1cmtt.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+File: t1cmtt.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 Overfull \hbox (17.2115pt too wide) in paragraph at lines 5--5
  [][] []\T1/aun/l/sc/10 Darstellung ei-nes Gra-phen mit GitHub Dek-stop, ent-no
@@ -522,34 +542,35 @@ Overfull \hbox (0.46559pt too wide) in paragraph at lines 5--5
 
 )
 \tf@lof=\write4
- [17] (Dokumentation.aux)
+ [17]
+(E:\UNI\MMST\r43ples\dokumentation\Abschlussdokumentation\Dokumentation.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 2342 strings out of 493673
- 29111 string characters out of 3141524
- 87755 words of memory out of 3000000
- 5658 multiletter control sequences out of 15000+200000
+ 2341 strings out of 493921
+ 29720 string characters out of 3144873
+ 83423 words of memory out of 3000000
+ 5603 multiletter control sequences out of 15000+200000
  13441 words of font info for 31 fonts, out of 3000000 for 9000
- 1025 hyphenation exceptions out of 8191
- 34i,16n,23p,1134b,430s stack positions out of 5000i,500n,10000p,200000b,50000s
-{C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/enc/dvips/cm-super/cm-supe
-r-t1.enc}<C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy
-10.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super
-/sfrm0600.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/c
-m-super/sfrm0700.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/p
-ublic/cm-super/sfrm0800.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/
-type1/public/cm-super/sfrm0900.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9
-/fonts/type1/public/cm-super/sfrm1000.pfb><C:/Users/Dominik/AppData/Roaming/MiK
-TeX/2.9/fonts/type1/public/cm-super/sfrm1200.pfb><C:/Users/Dominik/AppData/Roam
-ing/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm1440.pfb><C:/Users/Dominik/AppDa
-ta/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm2488.pfb><C:/Users/Domini
-k/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sftt1000.pfb>
-Output written on Dokumentation.pdf (17 pages, 797313 bytes).
+ 841 hyphenation exceptions out of 8191
+ 34i,16n,23p,1077b,430s stack positions out of 5000i,500n,10000p,200000b,50000s
+ <C:\Users\Katrin\AppData\Local\MiKTeX\2.9\fonts\pk\ljfour\jknappen\ec\dpi600
+\ectt1000.pk> <C:\Users\Katrin\AppData\Local\MiKTeX\2.9\fonts\pk\ljfour\jknappe
+n\ec\dpi600\ecrm1200.pk> <C:\Users\Katrin\AppData\Local\MiKTeX\2.9\fonts\pk\ljf
+our\jknappen\ec\dpi600\ecrm0800.pk> <C:\Users\Katrin\AppData\Local\MiKTeX\2.9\f
+onts\pk\ljfour\jknappen\ec\dpi600\ecrm0600.pk> <C:\Users\Katrin\AppData\Local\M
+iKTeX\2.9\fonts\pk\ljfour\jknappen\ec\dpi600\ecrm0700.pk> <C:\Users\Katrin\AppD
+ata\Local\MiKTeX\2.9\fonts\pk\ljfour\jknappen\ec\dpi600\ecrm1000.pk> <C:\Users\
+Katrin\AppData\Local\MiKTeX\2.9\fonts\pk\ljfour\jknappen\ec\dpi600\ecrm2488.pk>
+ <C:\Users\Katrin\AppData\Local\MiKTeX\2.9\fonts\pk\ljfour\jknappen\ec\dpi600\e
+crm1440.pk> <C:\Users\Katrin\AppData\Local\MiKTeX\2.9\fonts\pk\ljfour\jknappen\
+ec\dpi600\ecrm0900.pk><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/ams
+fonts/cm/cmsy10.pfb>
+Output written on Dokumentation.pdf (17 pages, 713055 bytes).
 PDF statistics:
- 110 PDF objects out of 1000 (max. 8388607)
+ 436 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  26 words of extra memory for PDF output out of 10000 (max. 10000000)
 
