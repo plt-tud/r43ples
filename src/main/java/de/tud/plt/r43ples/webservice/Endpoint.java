@@ -366,7 +366,7 @@ public class Endpoint {
 		
 	    StringWriter sw = new StringWriter();
 	    MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/merge_start.mustache");
+	    Mustache mustache = mf.compile("templates/merge_start_wip.mustache");
 	    mustache.execute(sw, scope);		
 	    response.entity(sw.toString()).type(MediaType.TEXT_HTML);
 		return response.build();
