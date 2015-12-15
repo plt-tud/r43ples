@@ -54,8 +54,10 @@ function drawGraph(div_selector, _JSON, _showTags) {
 		    "<div class='col-md-12' id='header'><h2>Revision</h2></div>"+
 			"</div>"+
 			"<div class='row'>"+
-		    "<div class='col-md-12''><h2>Changeset </h2></div>"+
-		    "<div class='col-md-12' id='changesets' style='max-height:200px;overflow:auto;'></div>"+
+		    "<div class='col-md-12'><h2>Changeset </h2></div>"+
+		    "<div class='col-md-12' id='changesets'"
+		    	//+"style='max-height:200px;overflow:auto;'"
+		    	+"></div>"+
 			"</div>");
 
 	// ChangeListener for tags
@@ -146,7 +148,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
         svg.call(zoom);
         
         bindQTipToRevisionNodes();
-
+        
         center();
         spinner.hide();
     });
@@ -156,7 +158,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
         var j = 1;
         $.each(data, function (key, value) {
             var types = value["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"];
-            console.log('Typen: ',value["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"], 'key ', key, 'value ', value);
+            //console.log('Typen: ',value["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"], 'key ', key, 'value ', value);
             j++;
             for (var i = 0; i < types.length; i++) {
                 switch (types[i].value) {
@@ -243,7 +245,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 								for (var i = 0; i < objects.length; i++) {
 					    			var object = objects[i].value;
 									changeSets[revision].addSet[j] = subject + " - " + predicate + " - " + objects[i].value + "<br>";
-									console.log("added to revision " + revision + ": " + changeSets[revision].addSet[j]);
+									//console.log("added to revision " + revision + ": " + changeSets[revision].addSet[j]);
 									j ++;
 								}
 							})
@@ -264,7 +266,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 		    					for (var i = 0; i < objects.length; i++) {
 					    			var object = objects[i].value;
 		    						changeSets[revision].deleteSet[j] = subject + " - " + predicate + " - " + objects[i].value + "<br>";
-		    						console.log("deleted from revision " + revision + ": " + changeSets[revision].deleteSet[j]);
+		    						//console.log("deleted from revision " + revision + ": " + changeSets[revision].deleteSet[j]);
 		    						j ++;
 		    					}
 		    				})
@@ -322,14 +324,15 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	// Funktion, die den Inhalt der Changeset-Anzeige im Detailfeld erstellt
 	 var displayChangeset = function (name, node) {
 	     var changesetText = //"<h2>Changeset </h2>"+
-	     	"<table class='properties'>";
+	     	"<h3>Add Set</h3><div><ul class='addSet'>";
 	     for (var i = 0; i < changeSets[name].addSet.length; i++) {
-	    	 changesetText+="<tr><th style='vertical-align:top;color:#176511;'>+</th><td style='padding-left:5px;padding-bottom:5px;color:#176511;'>" + changeSets[name].addSet[i] + "</td></tr>";
+	    	 changesetText+="<li class='addSet'>"+ changeSets[name].addSet[i] + "</li>";
 	     }
+	     changesetText += '</ul></div><h3>Delete Set</h3><div><ul class="deleteSet">';
 	     for (var i = 0; i < changeSets[name].deleteSet.length; i++) {
-	    	 changesetText+="<tr><th style='vertical-align:top;color:#811109;'>-</th><td style='padding-left:5px;padding-bottom:5px;color:#811109;'>" +  changeSets[name].deleteSet[i] + "</td></tr>";
+	    	 changesetText+="<li class='deleteSet'>"+  changeSets[name].deleteSet[i] + "</li>";
 	     }
-	     changesetText+="</table>";
+	     changesetText += '</ul></div>';
 	     
 	     return changesetText;
 	 };
@@ -396,22 +399,32 @@ function drawGraph(div_selector, _JSON, _showTags) {
         	return displayChangeset(v, g.node(v))
         })
         .each(function (v) {
-        	console.log(g.node(v));
+        	//console.log(g.node(v));
         	var n = g.node;
-        	console.log(this);
+        	//console.log(this);
         	$(this).on("click", function () {
-            	console.log("clicked");
+            	//console.log("clicked");
             	$("#header").html( $(this).attr("header") );
             	$("#changesets").html( $(this).attr("change") );
+            	$( "#changesets" ).accordion( "refresh" );
             	$("#changesets").animate({
                     scrollTop: 0
                 }, 0);
         	})
         	$(this).qtip({
-        		show: 'mouseover',
-        		hide: 'mouseout'
+        		//show: 'mouseover',
+        		//hide: 'mouseout',
+        		position: {
+                    target: 'mouse', // Track the mouse as the positioning target
+                    adjust: { x: 5, y: 5 } // Offset it slightly from under the mouse
+                }
         	})
         });
+        $( "#changesets" ).accordion({
+  		  collapsible: true,
+  		heightStyle: "content"
+  	});
+
      }
 
 	 // Funktion um Tags einzublenden
