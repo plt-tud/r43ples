@@ -412,12 +412,17 @@ function drawGraph(div_selector, _JSON, _showTags) {
                 }, 0);
         	})
         	$(this).qtip({
-        		show: 'mouseover',
-        		hide: 'mouseout'
+        		//show: 'mouseover',
+        		//hide: 'mouseout',
+        		position: {
+                    target: 'mouse', // Track the mouse as the positioning target
+                    adjust: { x: 5, y: 5 } // Offset it slightly from under the mouse
+                }
         	})
         });
         $( "#changesets" ).accordion({
-  		  collapsible: true
+  		  collapsible: true,
+  		heightStyle: "content"
   	});
 
      }
