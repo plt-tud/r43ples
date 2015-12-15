@@ -99,7 +99,7 @@ Anders als die in Abschnitt \ref{sec:Git2PROV} beschriebene Visualisierung, die 
 \subsection{Funktionale Anforderungen}
 \begin{enumerate}[F1]
 \item Der Graph soll durch geeignete Darstellung eine schnelle Auffindbarkeit der gesuchten Revision gewährleisten.
-	\begin{enumerate}[F1.1]
+	\begin{enumerate}[{F1}.1]
 	\item Die Revisionen sollen nach dem Zeitpunkt des Commits automatisch von links nach rechts angeordnet werden, da ein Bildschirm im Querformat so mehr Platz für den Graphen bietet, ohne dass der Benutzer scrollen muss.
 	\item Die Revisionen sind den einzelnen Branches durch einheitliche Farbgebung aller Revisionen eines Branches und lineare Anordnung eines Branches zuordenbar zu machen.
 	\item Die Branches sind entsprechend ihrer Benennung zu beschriften.
@@ -108,12 +108,12 @@ Anders als die in Abschnitt \ref{sec:Git2PROV} beschriebene Visualisierung, die 
 	\item Am oberen Bildschirmrand ist eine Zeitleiste für die Commit-Zeitpunkte hinzuzufügen.
 	\end{enumerate}
 \item Durch zusätzliche Darstellung von Tooltips beim Mouseover sollen dem Benutzer die wichtigsten Information schnell zugänglich gemacht werden
-	\begin{enumerate}[F2.1]	
+	\begin{enumerate}[{F2}.1]	
 	\item Beim Mouseover über eine Revision soll ein Tooltip-Fenster rechts unten neben dem Knoten geöffnet werden, das sich automatisch wieder schließt, sobald der Benutzer den Mauszeiger vom Knoten wegbewegt.
 	\item Im Tooltip-Fenster sollen der Name des Autors, der Kommentar, sowie Datum und Uhrzeit angezeigt werden.
 	\end{enumerate}
 \item Beim Klick auf eine Revision sollen Detailinformation in einem Fenster unterhalb des Graphen dargestellt werden.
-	\begin{enumerate}[F3.1]	
+	\begin{enumerate}[{F3}.1]	
 	\item Die Detailinformationen sollen nochmals die Informationen aus dem Tooltip-Fenster enthalten, sowie zusätzlich die Changesets detailliert auflisten.
 	\item Die Detailansicht einer Revision bleibt solange erhalten, bis auf eine andere Revision geklickt wird und somit deren Detailansicht geöffnet wird.
 	\end{enumerate}
@@ -122,7 +122,7 @@ Anders als die in Abschnitt \ref{sec:Git2PROV} beschriebene Visualisierung, die 
 \subsection{Qualitätsanforderung}
 \begin{enumerate}[Q1]
 	\item Die in Abschnitt \ref{sec:Richtlinien} erläuterten Konventionen sollen eingehalten werden.
-	\begin{enumerate}[Q1.1]
+	\begin{enumerate}[{Q1}.1]
 		\item Alle Kanten sollen gerade Linien sein.
 		\item Kreuzungen von Graphen sollen nur an Knoten auftreten.
 		\item Die Fläche und Gesamtkantenlänge soll minimiert werden.
