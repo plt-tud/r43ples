@@ -4,6 +4,7 @@
 \usepackage{bibgerm}
 \usepackage{url}
 \usepackage{paralist}
+\usepackage{subfigure}
 
 \urldef{\GitHubDesktop}\url{https://assets-cdn.github.com/images/modules/home/desktop-mac.png?v=1}
 
@@ -90,7 +91,7 @@ Die im vorangegangenen Abschnitt analysierte, vorhandene Visualisierung für das
 
 \section{Allgemeine Beschreibung}
 \subsection{Produktumgebung}
-Da Revisionsverwaltungssysteme im Allgemeinen vorwiegend auf Desktop-PCs oder Laptops, evtl. auch auf Tablets, verwendet werden, soll das Produkt für eine Nutzung an einem Bildschirm im Querformat optimiert werden.
+Da Revisionsverwaltungssysteme im Allgemeinen vorwiegend auf Desktop-PCs oder Laptops, evtl. auch auf Tablets, verwendet werden, soll das Produkt für eine Nutzung an einem Bildschirm im Querformat optimiert werden. Das System muss sich in die bereits existierende Weboberfläche einfügen.
 
 \subsection{Benutzereigenschaften}
 Anders als die in Abschnitt \ref{sec:Git2PROV} beschriebene Visualisierung, die eher für Entwickler gedacht ist, ist R43ples für Anwender gedacht, die keine ausführliche Darstellung des semantischen Netzes, sondern eine übersichtliche Visualisierung der wichtigsten Informationen benötigen. 
@@ -98,23 +99,25 @@ Anders als die in Abschnitt \ref{sec:Git2PROV} beschriebene Visualisierung, die 
 \section{Spezifische Anforderungen}
 \subsection{Funktionale Anforderungen}
 \begin{enumerate}[F1]
-\item Der Graph soll durch geeignete Darstellung eine schnelle Auffindbarkeit der gesuchten Revision gewährleisten.
-	\begin{enumerate}[F1.1]
-	\item Die Revisionen sollen nach dem Zeitpunkt des Commits automatisch von links nach rechts angeordnet werden, da ein Bildschirm im Querformat so mehr Platz für den Graphen bietet, ohne dass der Benutzer scrollen muss.
+\item Der Graph muss durch geeignete Darstellung eine schnelle Auffindbarkeit der gesuchten Revision gewährleisten.
+	\begin{enumerate}[{F1}.1]
+	\item Die Revisionen werden automatisch nach dem Zeitpunkt des Commits von links nach rechts angeordnet, da ein Bildschirm im Querformat so mehr Platz für den Graphen bietet, ohne dass der Benutzer scrollen muss.
 	\item Die Revisionen sind den einzelnen Branches durch einheitliche Farbgebung aller Revisionen eines Branches und lineare Anordnung eines Branches zuordenbar zu machen.
 	\item Die Branches sind entsprechend ihrer Benennung zu beschriften.
-	\item Der Master-Branch soll durch eine immer gleiche Farbgebung und dessen zentrale Position besonders leicht erkennbar sein.
-	\item Direkt auf den Knoten der Revisionen soll die Revisionsnummer dargestellt werden.
-	\item Am oberen Bildschirmrand ist eine Zeitleiste für die Commit-Zeitpunkte hinzuzufügen.
+	\item Der Master-Branch muss durch eine immer gleiche Farbgebung und dessen zentrale Position besonders leicht erkennbar sein.
+	\item Direkt auf den Knoten der Revisionen wird die Revisionsnummer dargestellt.
+	\item Am oberen Bildschirmrand soll eine Zeitleiste für die Commit-Zeitpunkte hinzugefügt werden.
 	\end{enumerate}
 \item Durch zusätzliche Darstellung von Tooltips beim Mouseover sollen dem Benutzer die wichtigsten Information schnell zugänglich gemacht werden
-	\begin{enumerate}[F2.1]	
+	\begin{enumerate}[{F2}.1]	
 	\item Beim Mouseover über eine Revision soll ein Tooltip-Fenster rechts unten neben dem Knoten geöffnet werden, das sich automatisch wieder schließt, sobald der Benutzer den Mauszeiger vom Knoten wegbewegt.
 	\item Im Tooltip-Fenster sollen der Name des Autors, der Kommentar, sowie Datum und Uhrzeit angezeigt werden.
 	\end{enumerate}
-\item Beim Klick auf eine Revision sollen Detailinformation in einem Fenster unterhalb des Graphen dargestellt werden.
-	\begin{enumerate}[F3.1]	
-	\item Die Detailinformationen sollen nochmals die Informationen aus dem Tooltip-Fenster enthalten, sowie zusätzlich die Changesets detailliert auflisten.
+\item Beim Klick auf eine Revision werden Detailinformation in einem Fenster unterhalb des Graphen dargestellt.
+	\begin{enumerate}[{F3}.1]	
+	\item Die Detailinformationen enthalten nochmals die Informationen aus dem Tooltip-Fenster, sowie zusätzlich die Changesets detailliert auflisten.
+	\item Wenn mehr als eine maximale Anzahl an Adds/Deletes auftritt, wird das Fenster scrollbar.
+	\item Die Adds und Deletes sollen jeweils per Klick ein- und ausgeblendet werden können.
 	\item Die Detailansicht einer Revision bleibt solange erhalten, bis auf eine andere Revision geklickt wird und somit deren Detailansicht geöffnet wird.
 	\end{enumerate}
 \end{enumerate}
@@ -122,7 +125,7 @@ Anders als die in Abschnitt \ref{sec:Git2PROV} beschriebene Visualisierung, die 
 \subsection{Qualitätsanforderung}
 \begin{enumerate}[Q1]
 	\item Die in Abschnitt \ref{sec:Richtlinien} erläuterten Konventionen sollen eingehalten werden.
-	\begin{enumerate}[Q1.1]
+	\begin{enumerate}[{Q1}.1]
 		\item Alle Kanten sollen gerade Linien sein.
 		\item Kreuzungen von Graphen sollen nur an Knoten auftreten.
 		\item Die Fläche und Gesamtkantenlänge soll minimiert werden.
@@ -132,32 +135,25 @@ Anders als die in Abschnitt \ref{sec:Git2PROV} beschriebene Visualisierung, die 
 \subsection{Einschränkungen und Randbedingungen}
 \begin{enumerate}[R1]
 	\item Das Produkt muss kompatibel mit aktuellen, verbreiteten Browsern (Firefox, Chrome) sein.
-	\item Die Entwicklung soll als Fork auf GitHub durchgeführt werden.
-	\item Als Implementierungssprache ist Javascript vorgesehen.
+	\item Die Entwicklung muss als Fork auf GitHub durchgeführt werden.
+	\item Die Implementierungssprache ist Javascript.
 	\item Das Produkt ist in die bestehende Anwendung zu integrieren.
 \end{enumerate}
 
 \chapter{Gestaltungsentwurf und Implementierung}
-Ideen:
-\begin{itemize}
-\item Mouseover für mehr Informationen
-\item Evtl. durch Klick dauerhaftes Hinzufügen der Informationen
-\item Show und Hide Haken
-\item evtl Änderung der Form auf Rechteck, um mehr Platz für zusätzliche Informationen zu erhalten
-\item Commits und Tags sollen weiterhin klar unterscheidbar sein, evtl. durch Farbe
-\item Vermeiden von Kreuzungen
-\item Ausgleich zwischen Information und Übersichtlichkeit finden
-\item Neuestes nach oben
-\item Evtl. Master in der Mitte, alles andere drum herum anordnen
-\item Evtl. Einfügen einer Suche
-\item Entscheidendes Ziel der zusätzlichen Informationen: Schnelles Finden der Version, die wiederhergestellt werden soll
-\item add und remove durch Symbol darstellen
-\item Mit Klick/Mouseover Informationen, was geaddet bzw. removed wurde
-\item Sortierung nach Datum? Evtl. auch grobe Zeiteinteilung
-\item Bei Klick werden Add und Delete Sets mit angezeigt (was wurde hinzugefügt, was wurde gelöscht)
-\item Anzeige in Fenster am unteren Bildschirmrand
-\item Zeitleiste
-\end{itemize}
+Für den Gestaltungsentwurf wurden zunächst Mockups entworfen und auf Realisierbarkeit geprüft, anschließend wurde das Konzept umgesetzt und implementiert.
+\section{Mockups}
+\begin{figure}
+    \subfigure[Darstellung des Graphen und des gesamten Changesets bei Klick]{\includegraphics[width=0.49\textwidth]{Mockup_Changeset.png}}
+    \subfigure[Anzeige spezifischer Informationen bei Mouseover]{\includegraphics[width=0.49\textwidth]{Mockup_Mouseover.png}}
+\caption{Mockups}
+\label{fig:mockup1}
+\end{figure}
+
+Ein erster Mockup ist in Abbildung \ref{fig:mockup1} zu sehen. Hier ist bereits eine Zeitleiste dargestellt, die einzelnen Branches sind in der gleichen Farbe gezeichnet und mit Namen beschriftet. Der Master Branch verläuft geradlinig, nebenläufige Branches sind rechts davon angeordnet. Wird auf einen Knoten geklickt, werden wie links gezeigt, zusätzlich der Name des Autors, der Kommentar sowie die Adds und Deletes angezeigt. Wird die Maus lediglich auf den Knoten gefahren, ohne zu Klicken, sieht man lediglich den Autorennamen und den Kommentar. 
+
+Dieser Entwurf ist bereits übersichtlich, der zeitliche Verlauf kann nachvollzogen werden und es sind alle wichtigen Informationen einfach abrufbar, lediglich die Revisionsnummer fehlt hier noch, die im späteren Entwurf in jedem Knoten angezeigt wird. Weitere Änderungen betreffen die Anordnung, die, wie in den Anforderungsdefinitionen festgelegt von links nach rechts sein soll, außerdem sollten die nebenläufigen Branches zu beiden Seiten des Masters aufgeführt werden.
+
 
 \bibliography{MMST}
 \bibliographystyle{gerabbrv}
