@@ -6,3 +6,6 @@
 \contentsline {figure}{\numberline {2.4}{\ignorespaces Darstellung eines Graphen mit Tortoise Git}}{10}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Mockups}}{13}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Darstellung des Graphen und des gesamten Changesets bei Klick}}}{13}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Anzeige spezifischer Informationen bei Mouseover}}}{13}

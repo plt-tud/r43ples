@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (MiKTeX 2.9) (preloaded format=pdflatex 2015.10.5)  15 DEC 2015 11:21
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (MiKTeX 2.9) (preloaded format=pdflatex 2015.10.5)  15 DEC 2015 13:27
 entering extended mode
 **C:/Users/Dominik/Desktop/studium/Wahlmodule/Mensch-Maschine-Systemtechnik/Pro
 jekt/Quelltext/r43ples/dokumentation/Abschlussdokumentation/Dokumentation.tex
@@ -363,58 +363,78 @@ Package: paralist 2013/06/09 v2.4 Extended list environments
 \plparsep=\skip49
 \pl@lab=\toks17
 )
+(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\subfigure\subfigure.sty
+Package: subfigure 2002/07/30 v2.1.4 subfigure package
+\subfigtopskip=\skip50
+\subfigcapskip=\skip51
+\subfigcaptopadj=\dimen106
+\subfigbottomskip=\skip52
+\subfigcapmargin=\dimen107
+\subfiglabelskip=\skip53
+\c@subfigure=\count89
+\c@lofdepth=\count90
+\c@subtable=\count91
+\c@lotdepth=\count92
+
+****************************************
+* Local config file subfigure.cfg used *
+****************************************
+(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\subfigure\subfigure.cfg)
+\subfig@top=\skip54
+\subfig@bottom=\skip55
+)
 
 LaTeX Warning: Unused global option(s):
     [nocolor].
 
 (Dokumentation.aux)
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 10.
-LaTeX Font Info:    ... okay on input line 10.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 10.
-LaTeX Font Info:    ... okay on input line 10.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 10.
-LaTeX Font Info:    ... okay on input line 10.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 10.
-LaTeX Font Info:    ... okay on input line 10.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 10.
-LaTeX Font Info:    ... okay on input line 10.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 10.
-LaTeX Font Info:    ... okay on input line 10.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 11.
+LaTeX Font Info:    ... okay on input line 11.
 
 (C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\context\base\supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count89
-\scratchdimen=\dimen106
+\scratchcounter=\count93
+\scratchdimen=\dimen108
 \scratchbox=\box27
-\nofMPsegments=\count90
-\nofMParguments=\count91
+\nofMPsegments=\count94
+\nofMParguments=\count95
 \everyMPshowfont=\toks18
-\MPscratchCnt=\count92
-\MPscratchDim=\dimen107
-\MPnumerator=\count93
-\makeMPintoPDFobject=\count94
+\MPscratchCnt=\count96
+\MPscratchDim=\dimen109
+\MPnumerator=\count97
+\makeMPintoPDFobject=\count98
 \everyMPtoPDFconversion=\toks19
 )
 
 bibgerm.sty: (n)german.sty 2.5b detected
 
-LaTeX Font Info:    Try loading font information for T1+din on input line 18.
-LaTeX Font Info:    No file T1din.fd. on input line 18.
+LaTeX Font Info:    Try loading font information for T1+din on input line 19.
+LaTeX Font Info:    No file T1din.fd. on input line 19.
 
 LaTeX Font Warning: Font shape `T1/din/b/n' undefined
-(Font)              using `T1/cmr/m/n' instead on input line 18.
+(Font)              using `T1/cmr/m/n' instead on input line 19.
 
 
 LaTeX Font Warning: Font shape `T1/din/bx/n' undefined
-(Font)              using `T1/cmr/m/n' instead on input line 18.
+(Font)              using `T1/cmr/m/n' instead on input line 19.
 
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 18.
+(Font)              <7> on input line 19.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <5> on input line 18.
+(Font)              <5> on input line 19.
 File: TU_Logo_SW.pdf Graphic file (type pdf)
 <use TU_Logo_SW.pdf>
-Package pdftex.def Info: TU_Logo_SW.pdf used on input line 18.
+Package pdftex.def Info: TU_Logo_SW.pdf used on input line 19.
 (pdftex.def)             Requested size: 162.1807pt x 47.51472pt.
 
 Overfull \hbox (28.45274pt too wide) has occurred while \output is active
@@ -439,23 +459,23 @@ LaTeX Font Warning: Font shape `T1/aun/bx/n' undefined
 Kapitel 1.
 
 LaTeX Font Warning: Font shape `T1/aun/l/it' undefined
-(Font)              using `T1/aun/l/n' instead on input line 23.
+(Font)              using `T1/aun/l/n' instead on input line 24.
 
 [5] [6
 
 ]
 Kapitel 2.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 39.
+(Font)              <8> on input line 40.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 39.
+(Font)              <6> on input line 40.
 [7] <Vorarbeiten.png, id=36, 975.645pt x 728.7225pt>
 File: Vorarbeiten.png Graphic file (type png)
  <use Vorarbeiten.png>
-Package pdftex.def Info: Vorarbeiten.png used on input line 43.
+Package pdftex.def Info: Vorarbeiten.png used on input line 44.
 (pdftex.def)             Requested size: 512.1483pt x 382.52945pt.
 
-Overfull \hbox (85.35696pt too wide) in paragraph at lines 43--44
+Overfull \hbox (85.35696pt too wide) in paragraph at lines 44--45
  [][] 
  []
 
@@ -463,19 +483,19 @@ Overfull \hbox (85.35696pt too wide) in paragraph at lines 43--44
 File: Git2PROV.png Graphic file (type png)
 
 <use Git2PROV.png>
-Package pdftex.def Info: Git2PROV.png used on input line 60.
+Package pdftex.def Info: Git2PROV.png used on input line 61.
 (pdftex.def)             Requested size: 426.79134pt x 213.39865pt.
  <GitHubDesktop.png, id=43, 2015.53pt x 1210.5225pt>
 File: GitHubDesktop.png Graphic file (type png)
 
 <use GitHubDesktop.png>
-Package pdftex.def Info: GitHubDesktop.png used on input line 70.
+Package pdftex.def Info: GitHubDesktop.png used on input line 71.
 (pdftex.def)             Requested size: 426.79134pt x 256.32292pt.
  <TortoiseGit.png, id=44, 1027.58907pt x 526.21594pt>
 File: TortoiseGit.png Graphic file (type png)
 
 <use TortoiseGit.png>
-Package pdftex.def Info: TortoiseGit.png used on input line 82.
+Package pdftex.def Info: TortoiseGit.png used on input line 83.
 (pdftex.def)             Requested size: 426.79134pt x 218.55219pt.
  [9 <./Git2PROV.png>] [10 <./GitHubDesktop.png> <./TortoiseGit.png>]
 Kapitel 3.
@@ -483,17 +503,22 @@ Kapitel 3.
 
 ] [12]
 Kapitel 4.
-LaTeX Font Info:    Try loading font information for OMS+aun on input line 143.
+<Mockup_Changeset.png, id=59, 894.34125pt x 570.13pt>
+File: Mockup_Changeset.png Graphic file (type png)
 
-LaTeX Font Info:    No file OMSaun.fd. on input line 143.
+<use Mockup_Changeset.png>
+Package pdftex.def Info: Mockup_Changeset.png used on input line 147.
+(pdftex.def)             Requested size: 209.1301pt x 133.3107pt.
 
-LaTeX Font Warning: Font shape `OMS/aun/l/n' undefined
-(Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbullet' on input line 143.
+<Mockup_Mouseover.png, id=60, 878.28125pt x 554.07pt>
+File: Mockup_Mouseover.png Graphic file (type png)
 
-(Dokumentation.bbl [13
+<use Mockup_Mouseover.png>
+Package pdftex.def Info: Mockup_Mouseover.png used on input line 148.
+(pdftex.def)             Requested size: 209.1301pt x 131.93117pt.
+ (Dokumentation.bbl [13
 
-] [14
+ <./Mockup_Changeset.png> <./Mockup_Mouseover.png>] [14
 
 ]
 
@@ -527,28 +552,27 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 2342 strings out of 493673
- 29351 string characters out of 3141524
- 87755 words of memory out of 3000000
- 5658 multiletter control sequences out of 15000+200000
+ 2505 strings out of 493673
+ 31824 string characters out of 3141524
+ 90469 words of memory out of 3000000
+ 5815 multiletter control sequences out of 15000+200000
  13441 words of font info for 31 fonts, out of 3000000 for 9000
  1025 hyphenation exceptions out of 8191
- 34i,16n,23p,1214b,430s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 34i,16n,24p,1214b,430s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/enc/dvips/cm-super/cm-supe
-r-t1.enc}<C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy
-10.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super
-/sfrm0600.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/c
-m-super/sfrm0700.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/p
-ublic/cm-super/sfrm0800.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/
-type1/public/cm-super/sfrm0900.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9
-/fonts/type1/public/cm-super/sfrm1000.pfb><C:/Users/Dominik/AppData/Roaming/MiK
-TeX/2.9/fonts/type1/public/cm-super/sfrm1200.pfb><C:/Users/Dominik/AppData/Roam
-ing/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm1440.pfb><C:/Users/Dominik/AppDa
-ta/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm2488.pfb><C:/Users/Domini
-k/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sftt1000.pfb>
-Output written on Dokumentation.pdf (17 pages, 798213 bytes).
+r-t1.enc}<C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-sup
+er/sfrm0600.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public
+/cm-super/sfrm0700.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1
+/public/cm-super/sfrm0800.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/font
+s/type1/public/cm-super/sfrm0900.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2
+.9/fonts/type1/public/cm-super/sfrm1000.pfb><C:/Users/Dominik/AppData/Roaming/M
+iKTeX/2.9/fonts/type1/public/cm-super/sfrm1200.pfb><C:/Users/Dominik/AppData/Ro
+aming/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm1440.pfb><C:/Users/Dominik/App
+Data/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm2488.pfb><C:/Users/Domi
+nik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sftt1000.pfb>
+Output written on Dokumentation.pdf (17 pages, 840372 bytes).
 PDF statistics:
  110 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 26 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 36 words of extra memory for PDF output out of 10000 (max. 10000000)
 
