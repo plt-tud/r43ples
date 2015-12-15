@@ -98,7 +98,7 @@ public class RevisionManagement {
 				+ "	prov:generated <%s>, <%s> ;" 
 				+ "	dc-terms:title \"initial commit\" ;" 
 				+ "	prov:atTime \"%s\" .%n",
-				commitUri,  "user", revisionUri, branchUri, getDateString());
+				commitUri,  "http://eatld.et.tu-dresden.de/user/r43ples", revisionUri, branchUri, getDateString());
 		
 		String queryRevision = prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisiongraph, queryContent);
 		

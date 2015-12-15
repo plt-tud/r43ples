@@ -81,7 +81,7 @@ public class HttpInterface extends TripleStoreInterface {
 	 */
 	private InputStream executeQueryWithAuthorization(String query, String format) {
 		HttpResponse response = executeQueryWithAuthorizationResponse(query, format);
-		logger.debug("Statuscode: " + response.getStatusLine().getStatusCode());
+		logger.info("Statuscode: " + response.getStatusLine().getStatusCode());
 		try{
 			InputStream in = response.getEntity().getContent();
 			if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {
@@ -105,7 +105,7 @@ public class HttpInterface extends TripleStoreInterface {
 	 * @return the result of the query in the specified format
 	 */
 	private HttpResponse executeQueryWithAuthorizationResponse(String query, String format) {
-		logger.debug("Execute query on SPARQL endpoint:\n"+ query);
+		logger.info("Execute query on SPARQL endpoint:\n"+ query);
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
 			
@@ -118,7 +118,7 @@ public class HttpInterface extends TripleStoreInterface {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-    	request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+    	//request.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
     	request.setHeader("Accept", format);
     	
 		//Execute Query
