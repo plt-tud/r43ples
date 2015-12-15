@@ -34,8 +34,6 @@ public class SampleDataSet {
 				"test commit message 1", revisionNumber0);
 		result.revisions.put("master-1", revisionNumber1);
 		
-		RevisionManagement.createTag(graph, revisionNumber1 , "v0.1", "test_user", "Version v0.1 published");
-		
 		String revisionNumber2 = RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-2.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset1/removed-2.nt"), user,
