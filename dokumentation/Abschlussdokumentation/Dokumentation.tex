@@ -94,7 +94,7 @@ Die im vorangegangenen Abschnitt analysierte, vorhandene Visualisierung für das
 Da Revisionsverwaltungssysteme im Allgemeinen vorwiegend auf Desktop-PCs oder Laptops, evtl. auch auf Tablets, verwendet werden, soll das Produkt für eine Nutzung an einem Bildschirm im Querformat optimiert werden. Das System muss sich in die bereits existierende Weboberfläche einfügen.
 
 \subsection{Benutzereigenschaften}
-Anders als die in Abschnitt \ref{sec:Git2PROV} beschriebene Visualisierung, die eher für Entwickler gedacht ist, ist R43ples für Anwender gedacht, die keine ausführliche Darstellung des semantischen Netzes, sondern eine übersichtliche Visualisierung der wichtigsten Informationen benötigen. 
+Anders als die in Abschnitt \ref{sec:Git2PROV} beschriebene Visualisierung, die eher für Entwickler gedacht ist, ist R43ples für Normalanwender gedacht, die keine ausführliche Darstellung des semantischen Netzes, sondern eine übersichtliche Visualisierung der wichtigsten Informationen benötigen. 
 
 \section{Spezifische Anforderungen}
 \subsection{Funktionale Anforderungen}
@@ -104,21 +104,22 @@ Anders als die in Abschnitt \ref{sec:Git2PROV} beschriebene Visualisierung, die 
 	\item Die Revisionen werden automatisch nach dem Zeitpunkt des Commits von links nach rechts angeordnet, da ein Bildschirm im Querformat so mehr Platz für den Graphen bietet, ohne dass der Benutzer scrollen muss.
 	\item Die Revisionen sind den einzelnen Branches durch einheitliche Farbgebung aller Revisionen eines Branches und lineare Anordnung eines Branches zuordenbar zu machen.
 	\item Die Branches sind entsprechend ihrer Benennung zu beschriften.
-	\item Der Master-Branch muss durch eine immer gleiche Farbgebung und dessen zentrale Position besonders leicht erkennbar sein.
+	\item Der Master-Branch muss durch eine immer gleiche Farbgebung und seine Position besonders leicht erkennbar sein.
 	\item Direkt auf den Knoten der Revisionen wird die Revisionsnummer dargestellt.
 	\item Am oberen Bildschirmrand soll eine Zeitleiste für die Commit-Zeitpunkte hinzugefügt werden.
 	\end{enumerate}
-\item Durch zusätzliche Darstellung von Tooltips beim Mouseover sollen dem Benutzer die wichtigsten Information schnell zugänglich gemacht werden
+\item Durch zusätzliche Darstellung von Tooltips beim Mouseover sollen dem Benutzer die wichtigsten Information schnell zugänglich gemacht werden.
 	\begin{enumerate}[{F2}.1]	
-	\item Beim Mouseover über eine Revision soll ein Tooltip-Fenster rechts unten neben dem Knoten geöffnet werden, das sich automatisch wieder schließt, sobald der Benutzer den Mauszeiger vom Knoten wegbewegt.
+	\item Beim Mouseover über eine Revision soll ein Tooltip-Fenster geöffnet werden, das sich automatisch wieder schließt, sobald der Benutzer den Mauszeiger vom Knoten wegbewegt.
 	\item Im Tooltip-Fenster sollen der Name des Autors, der Kommentar, sowie Datum und Uhrzeit angezeigt werden.
 	\end{enumerate}
 \item Beim Klick auf eine Revision werden Detailinformation in einem Fenster unterhalb des Graphen dargestellt.
 	\begin{enumerate}[{F3}.1]	
-	\item Die Detailinformationen enthalten nochmals die Informationen aus dem Tooltip-Fenster, sowie zusätzlich die Changesets detailliert auflisten.
+	\item Die Detailinformationen enthalten nochmals die Informationen aus dem Tooltip-Fenster, sowie zusätzlich eine Auflistung der Changesets.
 	\item Wenn mehr als eine maximale Anzahl an Adds/Deletes auftritt, wird das Fenster scrollbar.
 	\item Die Adds und Deletes sollen jeweils per Klick ein- und ausgeblendet werden können.
 	\item Die Detailansicht einer Revision bleibt solange erhalten, bis auf eine andere Revision geklickt wird und somit deren Detailansicht geöffnet wird.
+	\item Die aktuell angeklickte Revision soll hervorgehoben werden.
 	\end{enumerate}
 \end{enumerate}
 
@@ -160,7 +161,7 @@ Dieser Entwurf ist bereits übersichtlich, der zeitliche Verlauf kann nachvollzo
 	\label{fig:mockup2}
 \end{figure}
 
-In Abbildung \ref{fig:mockup2} ist eine verbesserte Variante zu sehen. Der Graph wird jetzt von links nach rechts angezeigt, der Master Branch ist in der Mitte, die nebenläufigen Branches werden darunter angezeigt. Aus Gründern der Übersichtlichkeit und Darstellbarkeit wird das Datum nur noch aufgeführt, wenn sich der Tag geändert hat, außerdem stehen innerhalb der Knoten die Revisionsnummern. Bei Klicken werden am unteren Bildschirmrand die Add und Delete Sets aufgeführt, außerdem der Name des Autors und der Kommentar, sowie Datum und Uhrzeit des Commits.
+In Abbildung \ref{fig:mockup2} ist eine verbesserte Variante zu sehen. Der Graph wird jetzt von links nach rechts angezeigt, der Master Branch ist in der Mitte, die nebenläufigen Branches werden darunter angezeigt. Aus Gründern der Übersichtlichkeit und Darstellbarkeit wird das Datum nur noch aufgeführt, wenn sich der Tag geändert hat, außerdem stehen innerhalb der Knoten die Revisionsnummern. Bei Klicken werden am unteren Bildschirmrand die Add und Delete Sets aufgeführt, außerdem der Name des Autors und der Kommentar, sowie Datum und Uhrzeit des Commits. Da es in diesem Beispiel viele Deletes gibt wurde außerdem ein Scrollbalken hinzugefügt, um die Übersichtlichkeit zu erhalten.
 
 
 \bibliography{MMST}

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (MiKTeX 2.9) (preloaded format=pdflatex 2015.10.5)  15 DEC 2015 14:13
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (MiKTeX 2.9) (preloaded format=pdflatex 2015.10.5)  18 DEC 2015 18:38
 entering extended mode
 **C:/Users/Dominik/Desktop/studium/Wahlmodule/Mensch-Maschine-Systemtechnik/Pro
 jekt/Quelltext/r43ples/dokumentation/Abschlussdokumentation/Dokumentation.tex
@@ -507,21 +507,21 @@ Kapitel 4.
 File: Mockup_Changeset.png Graphic file (type png)
 
 <use Mockup_Changeset.png>
-Package pdftex.def Info: Mockup_Changeset.png used on input line 147.
+Package pdftex.def Info: Mockup_Changeset.png used on input line 148.
 (pdftex.def)             Requested size: 209.1301pt x 133.3107pt.
 
 <Mockup_Mouseover.png, id=60, 878.28125pt x 554.07pt>
 File: Mockup_Mouseover.png Graphic file (type png)
 
 <use Mockup_Mouseover.png>
-Package pdftex.def Info: Mockup_Mouseover.png used on input line 148.
+Package pdftex.def Info: Mockup_Mouseover.png used on input line 149.
 (pdftex.def)             Requested size: 209.1301pt x 131.93117pt.
 
 <Mockup_Querformat.png, id=61, 894.34125pt x 570.13pt>
 File: Mockup_Querformat.png Graphic file (type png)
 
 <use Mockup_Querformat.png>
-Package pdftex.def Info: Mockup_Querformat.png used on input line 158.
+Package pdftex.def Info: Mockup_Querformat.png used on input line 159.
 (pdftex.def)             Requested size: 426.79134pt x 272.07599pt.
  [13
 
@@ -578,7 +578,7 @@ iKTeX/2.9/fonts/type1/public/cm-super/sfrm1200.pfb><C:/Users/Dominik/AppData/Ro
 aming/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm1440.pfb><C:/Users/Dominik/App
 Data/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm2488.pfb><C:/Users/Domi
 nik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sftt1000.pfb>
-Output written on Dokumentation.pdf (17 pages, 872713 bytes).
+Output written on Dokumentation.pdf (17 pages, 872800 bytes).
 PDF statistics:
  112 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
