@@ -105,7 +105,7 @@ public class HttpInterface extends TripleStoreInterface {
 	 * @return the result of the query in the specified format
 	 */
 	private HttpResponse executeQueryWithAuthorizationResponse(String query, String format) {
-		logger.info("Execute query on SPARQL endpoint:\n"+ query);
+		logger.debug("Execute query on SPARQL endpoint:\n"+ query);
 		DefaultHttpClient httpClient = new DefaultHttpClient();
 	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);
 			
