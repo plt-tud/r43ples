@@ -29,7 +29,8 @@ stardog data add dbpedia -v --named-graph $GRAPH data/dbpedia_2015_06_02.nt
 
 java -jar $JAR --config $CONFIG --new --graph $GRAPH
 
-for dir in data/changesets/*/*/*/*
+# for dir in data/changesets/*/*/*/*
+for dir in data/changesets/2015/06/03/*
 do
     echo "Going into $dir"
     i=1
