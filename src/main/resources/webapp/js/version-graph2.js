@@ -42,23 +42,24 @@ function drawGraph(div_selector, _JSON, _showTags) {
     var zoom;
 	var changeSets = {};
     
+    d3.select(div_selector).append('div')
+    .attr('class','revisionGraphVisualisation')
+    .append('svg').append('g');
     
-	div_element.html(
-			"<div class='revisionGraphVisualisation'>" +
-			"	<svg><g/></svg>" +
-			"</div>"+
-			"<div class='checkbox'>" +
-	        "	<label><input type='checkbox' class='toggle-tags'>Show Tags</label>" +
-		  	"</div>"+
-		  	"<div class='row'>"+
-		    "<div class='col-md-12' id='header'><h2>Revision</h2></div>"+
-			"</div>"+
-			"<div class='row'>"+
-		    "<div class='col-md-12'><h2>Changeset </h2></div>"+
-		    "<div class='col-md-12' id='changesets'"
-		    	//+"style='max-height:200px;overflow:auto;'"
-		    	+"></div>"+
-			"</div>");
+    d3.select(div_selector).append('div')
+    .attr('class','checkbox')
+    .html("<label><input type='checkbox' class='toggle-tags'>Show Tags</label>");
+    
+    d3.select(div_selector).append('div')
+    .attr('id','infos')
+    .style('display','none');
+    d3.select('#infos').append('div')
+    .attr('id','header')
+    .html('<h2>Revision</h2>');
+    d3.select('#infos').append('div')
+    .html('<h2>Changeset </h2>')
+    .append('div').attr('id', 'changesets');
+
 
 	// ChangeListener for tags
 	div_element.find('.toggle-tags').change(function () {
@@ -392,21 +393,18 @@ function drawGraph(div_selector, _JSON, _showTags) {
         .attr("title", function (v) {
         	return revTooltip(v, g.node(v))
         })
-        .attr("header", function (v) {
-        	return displayHeader(v, g.node(v))
-        })
-        .attr("change", function (v) {
-        	return displayChangeset(v, g.node(v))
-        })
         .each(function (v) {
         	//console.log(g.node(v));
         	var n = g.node;
+        	//console.log(v);
         	//console.log(this);
         	$(this).on("click", function () {
             	//console.log("clicked");
-            	$("#header").html( $(this).attr("header") );
-            	$("#changesets").html( $(this).attr("change") );
+        		$("#infos").css('display', '');
+            	$("#header").html( displayHeader(v, g.node(v)) );
+            	$("#changesets").html( displayChangeset(v, g.node(v)) );
             	$( "#changesets" ).accordion( "refresh" );
+            	$( "#changesets" ).accordion( "option", "active", false );
             	$("#changesets").animate({
                     scrollTop: 0
                 }, 0);
