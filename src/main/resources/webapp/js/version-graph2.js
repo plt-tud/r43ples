@@ -35,12 +35,15 @@ function drawGraph(div_selector, _JSON, _showTags) {
     var svg, inner;
 	var div_element = $(div_selector);
     var colors = d3.scale.category10();
+    var format = d3.time.format("%Y-%m-%dT%H:%M:%S");
     var commits = {};
     var revisions = {};
     var tags = {};
     var branches = {};
     var zoom;
 	var changeSets = {};
+	var rev_ar=[];
+	var branch_ar=[];
     
     d3.select(div_selector).append('div')
     .attr('class','revisionGraphVisualisation')
@@ -97,6 +100,9 @@ function drawGraph(div_selector, _JSON, _showTags) {
 		
 		create_revision_model(data);
 		getChangeSets();
+		console.log('revisions', revisions);
+		console.log('commits', commits);
+		create_revision_array();
 
         // create nodes for every revision
         Object.keys(revisions).forEach(function (revision) {
@@ -203,6 +209,8 @@ function drawGraph(div_selector, _JSON, _showTags) {
                     branches[key].label = value["http://www.w3.org/2000/01/rdf-schema#label"][0].value;
                     branches[key].fullGraph = value["http://eatld.et.tu-dresden.de/rmo#fullGraph"][0].value;
                     branches[key].head = value["http://eatld.et.tu-dresden.de/rmo#references"][0].value;
+                    branches[key].derivedFrom = value["http://www.w3.org/ns/prov#wasDerivedFrom"]?value["http://www.w3.org/ns/prov#wasDerivedFrom"][0].value:null;
+                    
                     if (branches[key].color == null) {
                         branches[key].color = d3.rgb(colors(j)).brighter().toString();
                     }
@@ -276,6 +284,46 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	    		})
     		}
     	})
+    }
+    
+    function create_revision_array(){
+    	Object.keys(revisions).forEach(function (i) {
+    		rev_ar.push({
+    			id: i, 
+    			deleteSet: revisions[i].deleteSet,
+    			addSet: revisions[i].addSet,
+    			revNo: revisions[i].revisionNumber,
+    			belongsTo: revisions[i].belongsTo
+    			});
+    	});
+    	console.log('array', rev_ar);
+    	
+    	Object.keys(commits).forEach(function (i) {
+    		var elementPos = rev_ar.map(function(x) {return x.id; }).indexOf(commits[i].generated);
+    		rev_ar[elementPos].time=commits[i].time;
+    		rev_ar[elementPos].d3time=format.parse(commits[i].time);	
+    		rev_ar[elementPos].title=commits[i].title;
+    		rev_ar[elementPos].used=commits[i].used;
+    	});
+    	console.log('with time', rev_ar);
+    	
+    	rev_ar.sort(function(a, b) { return b.d3time - a.d3time; });
+    	console.log('sort?', rev_ar);
+    	
+    	console.log(branches);
+    	Object.keys(branches).forEach(function (i) {
+    		var elementPos = rev_ar.map(function(x) {return x.id; }).indexOf(branches[i].head);
+    		var elementPos2 = rev_ar.map(function(x) {return x.id; }).indexOf(branches[i].derivedFrom);
+    		var end_time = branches[i].derivedFrom? rev_ar[elementPos2].d3time: new Date()
+    		branch_ar.push({
+    			id: i,
+    			starttime: rev_ar[elementPos].d3time,
+    			endtime: end_time,
+    			color: branches[i].color,
+    			label:branches[i].label
+    		});
+    	});
+    	console.log('brancharr', branch_ar);
     }
     
     var qtip_options = {gravity: 'w', html: true, fade:true, trigger: 'focus', offset: 100};
