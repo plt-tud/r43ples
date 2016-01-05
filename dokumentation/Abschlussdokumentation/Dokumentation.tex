@@ -5,6 +5,7 @@
 \usepackage{url}
 \usepackage{paralist}
 \usepackage{subfigure}
+\usepackage{german}
 
 \urldef{\GitHubDesktop}\url{https://assets-cdn.github.com/images/modules/home/desktop-mac.png?v=1}
 
@@ -49,6 +50,8 @@ In \cite{Gruppe2.1} ist eine Möglichkeit zur Visualisierung bereits dargestellt
 Die zweite Visualisierung in \cite{Gruppe2.3} stellt den Graphen mehr an die Seite und stellt mit dem Kommentar zu jedem Commit sowie dem Autor zusätzliche Informationen dar. Die zeitliche Abfolge ist hier ersichtlich, zudem ist eine Einteilung in Monate gegeben. Der Graph wird durch diese Darstellung allerdings relativ klein und der Text dominiert die Visualisierung. Im dargestellten Beispiel sind die Kommentare immer sehr kurz gehalten, dies muss aber nicht zwangsläufig so sein muss, sodass es in dieser Art der Darstellung bei längeren Kommentaren zu Zeilenumbrüchen kommt, was den Graph in die Länge zieht.  
 
 Beide Visualisierungen sind in Abbildung \ref{fig:Vorarbeiten} zu sehen.
+
+In der zum Beginn dieser Arbeit im Git Repository vorhandenen Version war der Graph zoombar. Befand sich der Mauszeiger im Feld des Graphen und es wurde gescroolt, wurde an den Graphen heran- bzw. davon weg gezoomt. Diese Funktionalität bietet nur einen geringen Vorteil, der Graph wird immer in einer gut lesbaren Größe dargestellt und im Zweifel mit einem Scrollbalken versehen, die Zoomfunktion bietet hier also keinen entscheidenden Vorteil. Allerdings muss zum Teil gescrollt werden, um alle Informationen zu erkennen. Dabei musste immer darauf geachtet werden, dass sich der Mauszeiger nicht im Feld des Graphen befand, um nicht aus Versehen zu zoomen anstatt zu scrollen. Deshalb wurde entschieden, auf diese Funktion ganz zu verzichten oder sie erst zu aktivieren, wenn zusätzlich zum Scrollen gleichzeitig beispielsweise die \glqq Strg\grqq{} Taste gedrückt wird.
 
 \section{Weitere Beispiele}
 \label{sec:WeitereLiteratur}
@@ -106,7 +109,9 @@ Anders als die in Abschnitt \ref{sec:Git2PROV} beschriebene Visualisierung, die 
 	\item Die Branches sind entsprechend ihrer Benennung zu beschriften.
 	\item Der Master-Branch muss durch eine immer gleiche Farbgebung und seine Position besonders leicht erkennbar sein.
 	\item Direkt auf den Knoten der Revisionen wird die Revisionsnummer dargestellt.
+	\item Die Knoten müssen immer die gleiche Größe haben, um sie gut erkennen zu können. Ist der Graph zu groß, um in einem Fenster dargestellt zu werden, wird ein Scrollbalken hinzugefügt. Dabei wird immer auf die aktuellste Version fokussiert.
 	\item Am oberen Bildschirmrand soll eine Zeitleiste für die Commit-Zeitpunkte hinzugefügt werden.
+	\item Revisionen mit Tags sollen gesondert markiert werden.
 	\end{enumerate}
 \item Durch zusätzliche Darstellung von Tooltips beim Mouseover sollen dem Benutzer die wichtigsten Information schnell zugänglich gemacht werden.
 	\begin{enumerate}[{F2}.1]	
@@ -120,6 +125,8 @@ Anders als die in Abschnitt \ref{sec:Git2PROV} beschriebene Visualisierung, die 
 	\item Die Adds und Deletes sollen jeweils per Klick ein- und ausgeblendet werden können.
 	\item Die Detailansicht einer Revision bleibt solange erhalten, bis auf eine andere Revision geklickt wird und somit deren Detailansicht geöffnet wird.
 	\item Die aktuell angeklickte Revision soll hervorgehoben werden.
+	\item Damit die Detailinformationen sicher erreicht werden können, muss die Zoomfunktion entweder ausgeschaltet oder mit einer zusätzlichen Bedingung, zum Beispiel das Drücken der \glqq Strg\grqq{} Taste, versehen werden. 
+	\item URLs müssen in spitzen Klammern, Literale in Hochkommata dargestellt werden.
 	\end{enumerate}
 \end{enumerate}
 
@@ -163,6 +170,13 @@ Dieser Entwurf ist bereits übersichtlich, der zeitliche Verlauf kann nachvollzo
 
 In Abbildung \ref{fig:mockup2} ist eine verbesserte Variante zu sehen. Der Graph wird jetzt von links nach rechts angezeigt, der Master Branch ist in der Mitte, die nebenläufigen Branches werden darunter angezeigt. Aus Gründern der Übersichtlichkeit und Darstellbarkeit wird das Datum nur noch aufgeführt, wenn sich der Tag geändert hat, außerdem stehen innerhalb der Knoten die Revisionsnummern. Bei Klicken werden am unteren Bildschirmrand die Add und Delete Sets aufgeführt, außerdem der Name des Autors und der Kommentar, sowie Datum und Uhrzeit des Commits. Da es in diesem Beispiel viele Deletes gibt wurde außerdem ein Scrollbalken hinzugefügt, um die Übersichtlichkeit zu erhalten.
 
+\begin{figure}
+   \includegraphics[width=\textwidth]{Tooltip.png}
+\caption{Add und Delete Sets nebeneinander, erweitertes Mouseover Feld, Markierung der geklickten Revision sowie gesonderte Markierung von Revisionen mit Tags}
+\label{fig:mockup3}
+\end{figure}
+
+Für eine weiter verbesserte Übersichtlichkeit wurde entschieden, die Add und Delete Sets nebeneinander anzuzeigen, jeweils versehen mit Scrollbalken. Die URLs sollten in spitzen Klammern angezeigt werden, Literale in Hochkommata. Im Mouseover Feld wurde zudem eine Anzeige hinzugefügt, wie viele Adds und Deletes es in dieser Revision gab. Gesonderte Markierungen wurden zum einen für die derzeit angeklickte Revision des Graphen, durch Fettschrift der Zahl und fettere Umrandung des Knotens, sowie für alle Revisionen mit Tags, indem diese Knoten ausgemalt wurden, eingeführt. Diese Erweiterungen sind in Abbildung \ref{fig:mockup3} zu sehen.
 
 \bibliography{MMST}
 \bibliographystyle{gerabbrv}

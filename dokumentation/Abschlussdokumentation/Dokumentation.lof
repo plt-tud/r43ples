@@ -3,10 +3,11 @@
 \contentsline {figure}{\numberline {2.1}{\ignorespaces Visualisierungen der vorherigen Gruppen, links Gruppe 2.1 (aus \cite {Gruppe2.1}), rechts Gruppe 2.3 (aus \cite {Gruppe2.3})}}{8}
 \contentsline {figure}{\numberline {2.2}{\ignorespaces Darstellung eines Graphen mit Git2PROV, entnommen aus \cite {Git2PROV}}}{9}
 \contentsline {figure}{\numberline {2.3}{\ignorespaces Darstellung eines Graphen mit GitHub Dekstop, entnommen von \GitHubDesktop , abgerufen am 24.11.2015}}{10}
-\contentsline {figure}{\numberline {2.4}{\ignorespaces Darstellung eines Graphen mit Tortoise Git}}{10}
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Darstellung eines Graphen mit Tortoise Git}}{11}
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces Mockups}}{13}
-\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Darstellung des Graphen und des gesamten Changesets bei Klick}}}{13}
-\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Anzeige spezifischer Informationen bei Mouseover}}}{13}
-\contentsline {figure}{\numberline {4.2}{\ignorespaces Mockup im Querformat mit Anzeige der Add und Delete Sets}}{14}
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Mockups}}{15}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Darstellung des Graphen und des gesamten Changesets bei Klick}}}{15}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Anzeige spezifischer Informationen bei Mouseover}}}{15}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Mockup im Querformat mit Anzeige der Add und Delete Sets}}{16}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Add und Delete Sets nebeneinander, erweitertes Mouseover Feld, Markierung der geklickten Revision sowie gesonderte Markierung von Revisionen mit Tags}}{17}
