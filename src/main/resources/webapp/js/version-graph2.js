@@ -44,6 +44,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	var changeSets = {};
 	var rev_ar=[];
 	var branch_ar=[];
+	var branchPositions = {};
     
     d3.select(div_selector).append('div')
     .attr('class','revisionGraphVisualisation')
@@ -103,6 +104,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 		console.log('revisions', revisions);
 		console.log('commits', commits);
 		create_revision_array();
+    	sortBranches();
 
         // create nodes for every revision
         Object.keys(revisions).forEach(function (revision) {
@@ -324,6 +326,31 @@ function drawGraph(div_selector, _JSON, _showTags) {
     		});
     	});
     	console.log('brancharr', branch_ar);
+    }
+    
+    /** erzeugt das Objekt branchPositions von dem die Position eines Branches über dessen ID
+     * abgefragt werden kann mittels: branchPositions[branchID].pos
+     * Positionen sind Integer von 0 - x, der Master-Branch hat immer Position 0 **/
+    function sortBranches(){
+    	var positions = [];
+    	branch_ar.sort(function(a, b) { return b.endtime - a.endtime; });
+    	for  (var i = 0; i < branch_ar.length; i++){
+    		if (branch_ar[i].label != "master"){
+    			for (var j = 0; j <= positions.length; j++){
+    				if (branch_ar[i].starttime < positions[j] || positions[j] == null){
+    					positions[j] = branch_ar[i].starttime;
+    					branchPositions[branch_ar[i].id] = {};
+    					branchPositions[branch_ar[i].id].pos = j + 1;
+    					break;
+    				}    			
+    			}
+    		}
+    		else {
+				branchPositions[branch_ar[i].id] = {};
+				branchPositions[branch_ar[i].id].pos = 0;
+    		}
+    	}
+    	console.log('branch positions', branchPositions);
     }
     
     var qtip_options = {gravity: 'w', html: true, fade:true, trigger: 'focus', offset: 100};
