@@ -31,8 +31,9 @@ function drawGraph(div_selector, _JSON, _showTags) {
     // _showTags default is false
     _showTags = _showTags || false;
     
-    var g;		//d3 graph
-    var svg, inner;
+   /* var g;		//d3 graph
+    var svg;
+    var inner;*/
 	var div_element = $(div_selector);
     var colors = d3.scale.category10();
     var format = d3.time.format("%Y-%m-%dT%H:%M:%S");
@@ -45,24 +46,26 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	var rev_ar=[];
 	var branch_ar=[];
 	var branchPositions = {};
+    var r = 20;
+    var padd= 80;
+    
+    var svg = d3.select(div_selector).append('div')
+        .attr('class','revisionGraphVisualisation')
+        .append('svg');//.append('g');
     
     d3.select(div_selector).append('div')
-    .attr('class','revisionGraphVisualisation')
-    .append('svg').append('g');
+        .attr('class','checkbox')
+        .html("<label><input type='checkbox' class='toggle-tags'>Show Tags</label>");
     
     d3.select(div_selector).append('div')
-    .attr('class','checkbox')
-    .html("<label><input type='checkbox' class='toggle-tags'>Show Tags</label>");
-    
-    d3.select(div_selector).append('div')
-    .attr('id','infos')
-    .style('display','none');
+        .attr('id','infos')
+        .style('display','none');
     d3.select('#infos').append('div')
-    .attr('id','header')
-    .html('<h2>Revision</h2>');
+        .attr('id','header')
+        .html('<h2>Revision</h2>');
     d3.select('#infos').append('div')
-    .html('<h2>Changeset </h2>')
-    .append('div').attr('id', 'changesets');
+        .html('<h2>Changeset </h2>')
+        .append('div').attr('id', 'changesets');
 
 
 	// ChangeListener for tags
@@ -82,13 +85,32 @@ function drawGraph(div_selector, _JSON, _showTags) {
 
 	var svg_element = div_element.find('svg');
 	var spinner = addSpinner(svg_element);
+    
+    var x = d3.scale.ordinal().rangeRoundPoints([2*r, $('.revisionGraphVisualisation svg').width()-2*r]);
+    
+    $( "#changesets" ).accordion({
+  		  collapsible: true,
+  		heightStyle: "content"
+  	});
+    
+    function getPath(d){
+        var x1,x2,y1,y2;
+        x1 = x(d.origin.d3time)-r;
+        x2 = x(revisions[d.used].d3time)+r;
+        y1 = branchPositions[d.origin.belongsTo].pos*padd+40;
+        y2 = branchPositions[revisions[d.used].belongsTo].pos*padd+40;
+        var pathd = 'M'+ x1 + ' ' +y1;
+            pathd += 'h'+(x2-x1);
+            pathd += 'v' + (y2-y1);
+        return pathd;
+    }
 
     // JSON-Daten mit jQuery laden und parsen
     $.getJSON(_JSON, function (data, status) {
         if (status != "success") {
             alert("Error getting JSON Data: Status " + status);
         }
-
+/*
         // create  D3 graph
         g = new dagreD3.graphlib.Graph();
         g.setGraph({
@@ -97,15 +119,69 @@ function drawGraph(div_selector, _JSON, _showTags) {
 
 
         // light blue color for tags
-        colors(0);
+        colors(0);*/
 		
 		create_revision_model(data);
 		getChangeSets();
-		console.log('revisions', revisions);
-		console.log('commits', commits);
+		//console.log('revisions', revisions);
+		//console.log('commits', commits);
 		create_revision_array();
     	sortBranches();
-
+        
+        x.domain(rev_ar.map(function(d) { return d.d3time; }));
+        
+        var branchG = svg.selectAll('g')
+            .data(branch_ar)
+            .enter()
+            .append('g')
+            .attr('class','branch')
+            .style('stroke', function(d){return d.color})
+            .style('stroke-width', 3);
+            
+        var revG = branchG.selectAll('g')
+            .data(function(d){return d.revs;})
+            .enter()
+            .append('g')
+            .attr('class', 'revision');
+            
+        revG.append('g').attr('class', 'lines').style('fill',"none").selectAll('.lines')
+            .data(function(d){return d.used?d.used:[];})
+            .enter()
+            .append('path')
+            .attr('d', function(d){return getPath(d);});
+            /*revGenter.append('line')
+            .attr('x1', function(d){return x(revisions[d.used].d3time);})
+            .attr('y1', function(d){return branchPositions[revisions[d.used].belongsTo].pos*padd+40;})
+            .attr('x2', function(d){return x(d.origin.d3time);})
+            .attr('y2', function(d){return branchPositions[d.origin.belongsTo].pos*padd+40;});*/
+            
+        revG.append('circle')
+            .attr('cx', function(d){return x(d.d3time);})
+            .attr('cy', function(d){return branchPositions[d.belongsTo].pos*padd+40;})
+            .attr('r', r)
+            .style('fill', 'white')
+            .on("click", function (d) {
+            	//console.log("clicked");
+        		$("#infos").css('display', '');
+            	$("#header").html( displayHeader2(d) );
+            	$("#changesets").html( displayChangeset2(d) );
+            	$( "#changesets" ).accordion( "refresh" );
+            	$( "#changesets" ).accordion( "option", "active", false );
+            	$("#changesets").animate({
+                    scrollTop: 0
+                }, 0);
+        	});
+        revG.append('text')
+            .attr('x', function(d){return x(d.d3time);})
+            .attr('y', function(d){return branchPositions[d.belongsTo].pos*padd+40;})
+            .text(function(d){return trimRevisionNumber(d.revNo);})
+            .attr('text-anchor','middle')
+            .attr('dy', '.5em')
+            .attr('font-size', '1em')
+            .attr('stroke-width',1)
+            .style('pointer-events', 'none');
+            
+/*
         // create nodes for every revision
         Object.keys(revisions).forEach(function (revision) {
             var value = revisions[revision];
@@ -158,7 +234,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
         
         bindQTipToRevisionNodes();
         
-        center();
+        center();*/
         spinner.hide();
     });
 
@@ -212,7 +288,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
                     branches[key].fullGraph = value["http://eatld.et.tu-dresden.de/rmo#fullGraph"][0].value;
                     branches[key].head = value["http://eatld.et.tu-dresden.de/rmo#references"][0].value;
                     branches[key].derivedFrom = value["http://www.w3.org/ns/prov#wasDerivedFrom"]?value["http://www.w3.org/ns/prov#wasDerivedFrom"][0].value:null;
-                    
+                    branches[key].revs=[];
                     if (branches[key].color == null) {
                         branches[key].color = d3.rgb(colors(j)).brighter().toString();
                     }
@@ -289,27 +365,43 @@ function drawGraph(div_selector, _JSON, _showTags) {
     }
     
     function create_revision_array(){
-    	Object.keys(revisions).forEach(function (i) {
-    		rev_ar.push({
+    	
+    	Object.keys(commits).forEach(function (i) {
+    		var d= revisions[commits[i].generated];
+    		d.time=commits[i].time;
+    		d.d3time=format.parse(commits[i].time);	
+    		d.title=commits[i].title;
+    		d.used=commits[i].used;
+            d.wasAssociatedWith= commits[i].wasAssociatedWith;
+            d.commit = i;
+    	});
+        Object.keys(revisions).forEach(function (i) {
+            var userev = revisions[i].used?revisions[i].used.map(function() {return{used: revisions[i].used, origin: {
+                            belongsTo: revisions[i].belongsTo,
+                            d3time:  revisions[i].d3time
+            } }}): [];
+            var revobj = {
     			id: i, 
     			deleteSet: revisions[i].deleteSet,
     			addSet: revisions[i].addSet,
     			revNo: revisions[i].revisionNumber,
-    			belongsTo: revisions[i].belongsTo
-    			});
-    	});
-    	console.log('array', rev_ar);
-    	
-    	Object.keys(commits).forEach(function (i) {
-    		var elementPos = rev_ar.map(function(x) {return x.id; }).indexOf(commits[i].generated);
-    		rev_ar[elementPos].time=commits[i].time;
-    		rev_ar[elementPos].d3time=format.parse(commits[i].time);	
-    		rev_ar[elementPos].title=commits[i].title;
-    		rev_ar[elementPos].used=commits[i].used;
+    			belongsTo: revisions[i].belongsTo,
+                time:  revisions[i].time,
+                d3time:  revisions[i].d3time,
+                title:  revisions[i].title,
+                used:  userev,
+                commit:  revisions[i].commit,
+                wasAssociatedWith:  revisions[i].wasAssociatedWith
+                
+    			};
+    		rev_ar.push(revobj);
+            branches[revisions[i].belongsTo].revs.push(revobj);
     	});
     	console.log('with time', rev_ar);
     	
-    	rev_ar.sort(function(a, b) { return b.d3time - a.d3time; });
+    	rev_ar.sort(function(a, b) { 
+        if(a.d3time == b.d3time&&a.belongsTo==b.belongsTo){a.d3time+=1;}; 
+        return a.d3time - b.d3time; });
     	console.log('sort?', rev_ar);
     	
     	console.log(branches);
@@ -322,7 +414,8 @@ function drawGraph(div_selector, _JSON, _showTags) {
     			starttime: rev_ar[elementPos].d3time,
     			endtime: end_time,
     			color: branches[i].color,
-    			label:branches[i].label
+    			label:branches[i].label,
+                revs: branches[i].revs
     		});
     	});
     	console.log('brancharr', branch_ar);
@@ -412,6 +505,20 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	     
 	     return changesetText;
 	 };
+     var displayChangeset2 = function (d) {
+	     var changesetText = //"<h2>Changeset </h2>"+
+	     	"<h3>Add Set</h3><div><ul class='addSet'>";
+	     for (var i = 0; i < changeSets[d.id].addSet.length; i++) {
+	    	 changesetText+="<li class='addSet'>"+ changeSets[d.id].addSet[i] + "</li>";
+	     }
+	     changesetText += '</ul></div><h3>Delete Set</h3><div><ul class="deleteSet">';
+	     for (var i = 0; i < changeSets[d.id].deleteSet.length; i++) {
+	    	 changesetText+="<li class='deleteSet'>"+  changeSets[d.id].deleteSet[i] + "</li>";
+	     }
+	     changesetText += '</ul></div>';
+	     
+	     return changesetText;
+	 };
 	// Funktion, die den Inhalt der Info-Anzeige im Detailfeld erstellt
 	 var displayHeader = function (name, node) {
 	     var headerText = "<h1>Revision " + node.revisionNumber+"</h1>"+
@@ -422,6 +529,16 @@ function drawGraph(div_selector, _JSON, _showTags) {
 		     "<table class='properties' style='width:100%'><tr><th>User:</th><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
 		     "<tr><th>URL:</th><td>" + node.commit + "</td><td></td></tr></table>";
 		 }
+	     
+	     return headerText;
+	 };
+     var displayHeader2 = function (d) {
+	     var headerText = "<h1>Revision " + d.revNo+"</h1>"+
+	     	"<table class='properties' style='width:100%'>";
+		     var date = new Date(d.time);
+		     headerText += "<tr><th>"+ d.title + "</th><td align='right' style='vertical-align:top;'>"+ dateString(date) + "</td></tr></table>" +  
+		     "<table class='properties' style='width:100%'><tr><th>User:</th><td>" + d.wasAssociatedWith + "</td><td><a href='" + d.wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+		     "<tr><th>URL:</th><td>" + d.commit + "</td><td></td></tr></table>";
 	     
 	     return headerText;
 	 };
