@@ -331,7 +331,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 							$.each(predicates, function (predicate, objects){
 								for (var i = 0; i < objects.length; i++) {
 					    			var object = objects[i].value;
-									changeSets[revision].addSet[j] = subject + " - " + predicate + " - " + objects[i].value + "<br>";
+									changeSets[revision].addSet[j] = "<tr><td>"+subject+"</td><td>"+predicate+"</td><td>"+objects[i].value+"</td></tr>";
 									//console.log("added to revision " + revision + ": " + changeSets[revision].addSet[j]);
 									j ++;
 								}
@@ -352,7 +352,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 		    				$.each(predicates, function (predicate, objects){
 		    					for (var i = 0; i < objects.length; i++) {
 					    			var object = objects[i].value;
-		    						changeSets[revision].deleteSet[j] = subject + " - " + predicate + " - " + objects[i].value + "<br>";
+		    						changeSets[revision].deleteSet[j] = "<tr><td>"+subject+"</td><td>"+predicate+"</td><td>"+objects[i].value+"</td></tr>";
 		    						//console.log("deleted from revision " + revision + ": " + changeSets[revision].deleteSet[j]);
 		    						j ++;
 		    					}
@@ -507,15 +507,15 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	 };
      var displayChangeset2 = function (d) {
 	     var changesetText = //"<h2>Changeset </h2>"+
-	     	"<h3>Add Set</h3><div><ul class='addSet'>";
+	     	"<h3>Add Set</h3><div><table class='addSet' style='width:100%'>";
 	     for (var i = 0; i < changeSets[d.id].addSet.length; i++) {
-	    	 changesetText+="<li class='addSet'>"+ changeSets[d.id].addSet[i] + "</li>";
+	    	 changesetText+=changeSets[d.id].addSet[i];
 	     }
-	     changesetText += '</ul></div><h3>Delete Set</h3><div><ul class="deleteSet">';
+	     changesetText += "</table></div><h3>Delete Set</h3><div><table class='deleteSet' style='width:100%'>";
 	     for (var i = 0; i < changeSets[d.id].deleteSet.length; i++) {
-	    	 changesetText+="<li class='deleteSet'>"+  changeSets[d.id].deleteSet[i] + "</li>";
+	    	 changesetText+=changeSets[d.id].deleteSet[i];
 	     }
-	     changesetText += '</ul></div>';
+	     changesetText += "</table></div>";
 	     
 	     return changesetText;
 	 };
