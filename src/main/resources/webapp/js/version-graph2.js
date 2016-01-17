@@ -66,6 +66,10 @@ function drawGraph(div_selector, _JSON, _showTags) {
     d3.select('#infos').append('div')
         .html('<h2>Changeset </h2>')
         .append('div').attr('id', 'changesets');
+    d3.select('#changesets').append('div')
+    	.attr('id','addsets')
+    d3.select('#changesets').append('div')
+    	.attr('id','deletesets')
 
 
 	// ChangeListener for tags
@@ -88,10 +92,10 @@ function drawGraph(div_selector, _JSON, _showTags) {
     
     var x = d3.scale.ordinal().rangeRoundPoints([2*r, $('.revisionGraphVisualisation svg').width()-2*r]);
     
-    $( "#changesets" ).accordion({
+    /*$( "#changesets" ).accordion({
   		  collapsible: true,
   		heightStyle: "content"
-  	});
+  	});*/
     
     function getPath(d){
         var x1,x2,y1,y2;
@@ -163,14 +167,29 @@ function drawGraph(div_selector, _JSON, _showTags) {
             .on("click", function (d) {
             	//console.log("clicked");
         		$("#infos").css('display', '');
-            	$("#header").html( displayHeader2(d) );
-            	$("#changesets").html( displayChangeset2(d) );
-            	$( "#changesets" ).accordion( "refresh" );
-            	$( "#changesets" ).accordion( "option", "active", false );
-            	$("#changesets").animate({
-                    scrollTop: 0
-                }, 0);
-        	});
+            	$("#header").html( displayHeader(d) );
+            	//$("#changesets").html( displayChangeset(d) );
+            	$("#addsets").html( displayAddset(d) );
+            	$("#deletesets").html( displayDeleteset(d) );
+        		$("#addsets").animate({ scrollTop: 0 }, 0);
+        		$("#deletesets").animate({ scrollTop: 0 }, 0);
+            	/*$( "#changesets" ).accordion( "refresh" );
+            	$( "#changesets" ).accordion( "option", "active", false );*/
+        	})
+        	.attr('title', function(d){
+        		return revTooltip(d);
+        	})
+			.each(function() {
+	        	$(this).qtip({
+	        		show: 'mouseover',
+	        		hide: 'mouseout',
+	        		position: {
+	                    target: 'mouse', // Track the mouse as the positioning target
+	                    adjust: { x: 10, y: 10 } // Offset it slightly from under the mouse
+	                }
+	        	})
+	        });
+        
         revG.append('text')
             .attr('x', function(d){return x(d.d3time);})
             .attr('y', function(d){return branchPositions[d.belongsTo].pos*padd+40;})
@@ -320,23 +339,35 @@ function drawGraph(div_selector, _JSON, _showTags) {
     		changeSets[revision] = {};
     		changeSets[revision].addSet = [];
     		changeSets[revision].deleteSet = [];
+    		var turtle = new ParseTurtle;
     		if (value.addSet!=null){
         		var j = 0;
         		$.ajax({
         			type: "GET",
-        			url: "contentOfGraph?graph="+value.addSet+"&format=application/json",
+        			url: "contentOfGraph?graph="+value.addSet+"&format=application/turtle",
         			async: false,
         			success: function(data) { 
-						$.each(data, function (subject, predicates) {
-							$.each(predicates, function (predicate, objects){
-								for (var i = 0; i < objects.length; i++) {
-					    			var object = objects[i].value;
-									changeSets[revision].addSet[j] = "<tr><td>"+subject+"</td><td>"+predicate+"</td><td>"+objects[i].value+"</td></tr>";
-									//console.log("added to revision " + revision + ": " + changeSets[revision].addSet[j]);
-									j ++;
-								}
-							})
-						})
+        				var rdf = turtle.parse(data);
+        	    		console.log(rdf);
+        	    		var sets;
+        	    		var subject=predicate=object=lang=datatype=" ";
+        	    		for(sets in rdf){
+        	    			subject="&lt;"+rdf[sets].subject+"&gt;";
+        	    			predicate="&lt;"+rdf[sets].predicate+"&gt;";
+        	    			if(rdf[sets].type == "literal"){
+            	    			object="&quot;"+rdf[sets].object+"&quot;";
+        	    			}
+        	    			if(rdf[sets].type == "resource"){
+            	    			object="&lt;"+rdf[sets].object+"&gt;";
+        	    			}
+        	    			if(rdf[sets].lang){
+        	    				lang="@"+rdf[sets].lang;
+        	    			}if(rdf[sets].datatype){
+        	    				datatype="^^"+rdf[sets].datatype;
+        	    			}
+        	    			var s = "<tr><td>"+subject+"</td><td>"+predicate+"</td><td>"+object+" "+lang+" "+datatype+"</td></tr>";
+            	    		changeSets[revision].addSet.push(s);
+        	    		}
         			}
 	    		})
     		}
@@ -345,21 +376,33 @@ function drawGraph(div_selector, _JSON, _showTags) {
         		var j = 0;
         		$.ajax({
         			type: "GET",
-        			url: "contentOfGraph?graph="+value.deleteSet+"&format=application/json",
+        			url: "contentOfGraph?graph="+value.deleteSet+"&format=application/turtle",
         			async: false,
         			success: function(data) { 
-		    			$.each(data, function (subject, predicates) {
-		    				$.each(predicates, function (predicate, objects){
-		    					for (var i = 0; i < objects.length; i++) {
-					    			var object = objects[i].value;
-		    						changeSets[revision].deleteSet[j] = "<tr><td>"+subject+"</td><td>"+predicate+"</td><td>"+objects[i].value+"</td></tr>";
-		    						//console.log("deleted from revision " + revision + ": " + changeSets[revision].deleteSet[j]);
-		    						j ++;
-		    					}
-		    				})
-		    			})
+        				// get RDF triples as a javascript array
+        	    		var rdf = turtle.parse(data);
+        	    		console.log(rdf);
+        	    		var sets;
+        	    		var subject=predicate=object=lang=datatype=" ";
+        	    		for(sets in rdf){
+        	    			subject="&lt;"+rdf[sets].subject+"&gt;";
+        	    			predicate="&lt;"+rdf[sets].predicate+"&gt;";
+        	    			if(rdf[sets].type == "literal"){
+            	    			object="&quot;"+rdf[sets].object+"&quot;";
+        	    			}
+        	    			if(rdf[sets].type == "resource"){
+            	    			object="&lt;"+rdf[sets].object+"&gt;";
+        	    			}
+        	    			if(rdf[sets].lang){
+        	    				lang="@"+rdf[sets].lang;
+        	    			}if(rdf[sets].datatype){
+        	    				datatype="^^"+rdf[sets].datatype;
+        	    			}
+            	    		var s = "<tr><td>"+subject+"</td><td>"+predicate+"</td><td>"+object+" "+lang+" "+datatype+"</td></tr>";
+            	    		changeSets[revision].deleteSet.push(s);
+        	    		}
         			}
-	    		})
+    			})
     		}
     	})
     }
@@ -400,7 +443,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
     	console.log('with time', rev_ar);
     	
     	rev_ar.sort(function(a, b) { 
-        if(a.d3time == b.d3time&&a.belongsTo==b.belongsTo){a.d3time+=1;}; 
+        if(a.d3time == b.d3time && a.belongsTo == b.belongsTo){ a.d3time += 1; }; 
         return a.d3time - b.d3time; });
     	console.log('sort?', rev_ar);
     	
@@ -474,44 +517,72 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	 
 	 
 	 
-	 // Funktion, die den Inhalt der Revisions-Tooltips erstellt
-	 var revTooltip = function (name, node) {
-	     var tooltip = "<h1>Revision " + node.revisionNumber+"</h1>"
-	     if (node.commit != null) { 
-		     var date = new Date(commits[node.commit].time);
+	// Funktion, die den Inhalt der Revisions-Tooltips erstellt
+	 var revTooltip = function (d) {
+	     var tooltip = "<h3>Revision " + d.revNo+"</h3>"
+	     if (d.commit != null) { 
+		     var date = new Date(d.time);
 		     tooltip += "<table class='properties' style='width:100%'>"+
-		    	"<tr><th style='padding-right:5px;'>" + commits[node.commit].title + "</th><td align='right' style='vertical-align:top;'>" + dateString(date) + "</td></tr>" + 
-		    	"<table class='properties'>"+
-		    	"<tr><th style='padding-right:5px;'>User:</th><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-		    	"<tr><th style='padding-right:5px;'>URL:</th><td>" + node.commit + "</td><td></td></tr>";
+		    	"<tr><th style='padding-right:5px;'>" + d.title + "</th><td align='right' style='vertical-align:top;'>" + dateString(date) + "</td></tr>";
+		     if(changeSets[d.id] != null){
+			    	tooltip +=	"<tr><th>" + changeSets[d.id].addSet.length + " added, " + changeSets[d.id].deleteSet.length + " deleted" + "</th></tr>";
+			    }
+		     tooltip +=	"<table class='properties'>"+
+		    	"<tr><th style='padding-right:5px;'>User:</th><td>" + d.wasAssociatedWith + "</td></tr>" +
+		    	"<tr><th style='padding-right:5px;'>URL:</th><td>" + d.commit + "</td><td></td></tr>";
 		 }
 	     tooltip+="</table>";
 	     
 	     return tooltip;
 	 };
 
+	 /*löschen
 	// Funktion, die den Inhalt der Changeset-Anzeige im Detailfeld erstellt
-	 var displayChangeset = function (name, node) {
+     var displayChangeset = function (d) {
+    	 added = deleted = "";
+    	 if(changeSets[d.id] != null){
+	    	 added = changeSets[d.id].addSet.length;
+	    	 deleted = changeSets[d.id].deleteSet.length;
+		    }
 	     var changesetText = //"<h2>Changeset </h2>"+
-	     	"<h3>Add Set</h3><div><ul class='addSet'>";
-	     for (var i = 0; i < changeSets[name].addSet.length; i++) {
-	    	 changesetText+="<li class='addSet'>"+ changeSets[name].addSet[i] + "</li>";
-	     }
-	     changesetText += '</ul></div><h3>Delete Set</h3><div><ul class="deleteSet">';
-	     for (var i = 0; i < changeSets[name].deleteSet.length; i++) {
-	    	 changesetText+="<li class='deleteSet'>"+  changeSets[name].deleteSet[i] + "</li>";
-	     }
-	     changesetText += '</ul></div>';
-	     
-	     return changesetText;
-	 };
-     var displayChangeset2 = function (d) {
-	     var changesetText = //"<h2>Changeset </h2>"+
-	     	"<h3>Add Set</h3><div><table class='addSet' style='width:100%'>";
+	     	"<h3>Add Set (" + added + ")</h3><div><table class='addSet' style='width:100%'>";
 	     for (var i = 0; i < changeSets[d.id].addSet.length; i++) {
 	    	 changesetText+=changeSets[d.id].addSet[i];
 	     }
-	     changesetText += "</table></div><h3>Delete Set</h3><div><table class='deleteSet' style='width:100%'>";
+	     changesetText += "</table></div><h3>Delete Set (" + deleted + ")</h3><div><table class='deleteSet' style='width:100%'>";
+	     for (var i = 0; i < changeSets[d.id].deleteSet.length; i++) {
+	    	 changesetText+=changeSets[d.id].deleteSet[i];
+	     }
+	     changesetText += "</table></div>";
+	     
+	     return changesetText;
+	 };*/
+
+
+	 // Funktion, die den Inhalt der Changeset-Anzeige im Detailfeld erstellt
+	 var displayAddset = function (d) {
+    	 added = deleted = "";
+    	 if(changeSets[d.id] != null){
+	    	 added = changeSets[d.id].addSet.length;
+	    	 deleted = changeSets[d.id].deleteSet.length;
+		    }
+	     var changesetText = "<h3>Add Set (" + added + ")</h3><div><table class='addSet' style='width:100%'>";
+	     for (var i = 0; i < changeSets[d.id].addSet.length; i++) {
+	    	 changesetText+=changeSets[d.id].addSet[i];
+	     }
+	     changesetText += "</table></div>";
+	     
+	     return changesetText;
+	 };
+	 
+	 // Funktion, die den Inhalt der Changeset-Anzeige im Detailfeld erstellt
+     var displayDeleteset = function (d) {
+    	 added = deleted = "";
+    	 if(changeSets[d.id] != null){
+	    	 added = changeSets[d.id].addSet.length;
+	    	 deleted = changeSets[d.id].deleteSet.length;
+		    }
+	     var changesetText = "<h3>Delete Set (" + deleted + ")</h3><div><table class='deleteSet' style='width:100%'>";
 	     for (var i = 0; i < changeSets[d.id].deleteSet.length; i++) {
 	    	 changesetText+=changeSets[d.id].deleteSet[i];
 	     }
@@ -519,26 +590,19 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	     
 	     return changesetText;
 	 };
+	 
 	// Funktion, die den Inhalt der Info-Anzeige im Detailfeld erstellt
-	 var displayHeader = function (name, node) {
-	     var headerText = "<h1>Revision " + node.revisionNumber+"</h1>"+
-	     	"<table class='properties' style='width:100%'>";
-	     if (node.commit != null) { 
-		     var date = new Date(commits[node.commit].time);
-		     headerText += "<tr><th>"+ commits[node.commit].title + "</th><td align='right' style='vertical-align:top;'>"+ dateString(date) + "</td></tr></table>" +  
-		     "<table class='properties' style='width:100%'><tr><th>User:</th><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-		     "<tr><th>URL:</th><td>" + node.commit + "</td><td></td></tr></table>";
-		 }
-	     
-	     return headerText;
-	 };
-     var displayHeader2 = function (d) {
-	     var headerText = "<h1>Revision " + d.revNo+"</h1>"+
-	     	"<table class='properties' style='width:100%'>";
+     var displayHeader = function (d) {
+    	 var headerText = "<h1>Revision " + d.revNo+"</h1>"
+	     if (d.commit != null) { 
 		     var date = new Date(d.time);
-		     headerText += "<tr><th>"+ d.title + "</th><td align='right' style='vertical-align:top;'>"+ dateString(date) + "</td></tr></table>" +  
-		     "<table class='properties' style='width:100%'><tr><th>User:</th><td>" + d.wasAssociatedWith + "</td><td><a href='" + d.wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-		     "<tr><th>URL:</th><td>" + d.commit + "</td><td></td></tr></table>";
+		     headerText += "<table class='properties' style='width:100%'>"+
+		    	"<tr><th style='padding-right:5px;'>" + d.title + "</th><td align='right' style='vertical-align:top;'>" + dateString(date) + "</td></tr>" +
+		     	"<table class='properties'>"+
+		    	"<tr><th style='padding-right:5px;'>User:</th><td>" + d.wasAssociatedWith + "</td></tr>" +
+		    	"<tr><th style='padding-right:5px;'>URL:</th><td>" + d.commit + "</td><td></td></tr>";
+		 }
+    	 headerText+="</table>";
 	     
 	     return headerText;
 	 };
@@ -576,46 +640,6 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	         });
 	     });
 	 };
-	
-    // bind qtip and detailtext to revision node
-    function bindQTipToRevisionNodes(){
-        inner.selectAll("g.node").filter(function (v) {
-            return revisions[v] != null;
-        })
-        .attr("title", function (v) {
-        	return revTooltip(v, g.node(v))
-        })
-        .each(function (v) {
-        	//console.log(g.node(v));
-        	var n = g.node;
-        	//console.log(v);
-        	//console.log(this);
-        	$(this).on("click", function () {
-            	//console.log("clicked");
-        		$("#infos").css('display', '');
-            	$("#header").html( displayHeader(v, g.node(v)) );
-            	$("#changesets").html( displayChangeset(v, g.node(v)) );
-            	$( "#changesets" ).accordion( "refresh" );
-            	$( "#changesets" ).accordion( "option", "active", false );
-            	$("#changesets").animate({
-                    scrollTop: 0
-                }, 0);
-        	})
-        	$(this).qtip({
-        		//show: 'mouseover',
-        		//hide: 'mouseout',
-        		position: {
-                    target: 'mouse', // Track the mouse as the positioning target
-                    adjust: { x: 5, y: 5 } // Offset it slightly from under the mouse
-                }
-        	})
-        });
-        $( "#changesets" ).accordion({
-  		  collapsible: true,
-  		heightStyle: "content"
-  	});
-
-     }
 
 	 // Funktion um Tags einzublenden
 	 var showTags = function () {
