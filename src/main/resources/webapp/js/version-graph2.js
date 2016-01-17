@@ -170,7 +170,21 @@ function drawGraph(div_selector, _JSON, _showTags) {
             	$("#changesets").animate({
                     scrollTop: 0
                 }, 0);
-        	});
+        	})
+        	.attr('title', function(d){
+        		return revTooltip(d);
+        	})
+			.each(function() {
+	        	$(this).qtip({
+	        		show: 'mouseover',
+	        		hide: 'unfocus',
+	        		position: {
+	                    target: 'mouse', // Track the mouse as the positioning target
+	                    adjust: { x: 5, y: 5 } // Offset it slightly from under the mouse
+	                }
+	        	})
+	        });
+        
         revG.append('text')
             .attr('x', function(d){return x(d.d3time);})
             .attr('y', function(d){return branchPositions[d.belongsTo].pos*padd+40;})
@@ -320,23 +334,35 @@ function drawGraph(div_selector, _JSON, _showTags) {
     		changeSets[revision] = {};
     		changeSets[revision].addSet = [];
     		changeSets[revision].deleteSet = [];
+    		var turtle = new ParseTurtle;
     		if (value.addSet!=null){
         		var j = 0;
         		$.ajax({
         			type: "GET",
-        			url: "contentOfGraph?graph="+value.addSet+"&format=application/json",
+        			url: "contentOfGraph?graph="+value.addSet+"&format=application/turtle",
         			async: false,
         			success: function(data) { 
-						$.each(data, function (subject, predicates) {
-							$.each(predicates, function (predicate, objects){
-								for (var i = 0; i < objects.length; i++) {
-					    			var object = objects[i].value;
-									changeSets[revision].addSet[j] = "<tr><td>"+subject+"</td><td>"+predicate+"</td><td>"+objects[i].value+"</td></tr>";
-									//console.log("added to revision " + revision + ": " + changeSets[revision].addSet[j]);
-									j ++;
-								}
-							})
-						})
+        				var rdf = turtle.parse(data);
+        	    		console.log(rdf);
+        	    		var sets;
+        	    		var subject=predicate=object=lang=datatype=" ";
+        	    		for(sets in rdf){
+        	    			subject="&lt;"+rdf[sets].subject+"&gt;";
+        	    			predicate="&lt;"+rdf[sets].predicate+"&gt;";
+        	    			if(rdf[sets].type == "literal"){
+            	    			object="&quot;"+rdf[sets].object+"&quot;";
+        	    			}
+        	    			if(rdf[sets].type == "resource"){
+            	    			object="&lt;"+rdf[sets].object+"&gt;";
+        	    			}
+        	    			if(rdf[sets].lang){
+        	    				lang="@"+rdf[sets].lang;
+        	    			}if(rdf[sets].datatype){
+        	    				datatype="^^"+rdf[sets].datatype;
+        	    			}
+            	    		var s=subject+" "+predicate+" "+object+" "+lang+" "+datatype;
+            	    		changeSets[revision].addSet.push(s);
+        	    		}
         			}
 	    		})
     		}
@@ -345,21 +371,33 @@ function drawGraph(div_selector, _JSON, _showTags) {
         		var j = 0;
         		$.ajax({
         			type: "GET",
-        			url: "contentOfGraph?graph="+value.deleteSet+"&format=application/json",
+        			url: "contentOfGraph?graph="+value.deleteSet+"&format=application/turtle",
         			async: false,
         			success: function(data) { 
-		    			$.each(data, function (subject, predicates) {
-		    				$.each(predicates, function (predicate, objects){
-		    					for (var i = 0; i < objects.length; i++) {
-					    			var object = objects[i].value;
-		    						changeSets[revision].deleteSet[j] = "<tr><td>"+subject+"</td><td>"+predicate+"</td><td>"+objects[i].value+"</td></tr>";
-		    						//console.log("deleted from revision " + revision + ": " + changeSets[revision].deleteSet[j]);
-		    						j ++;
-		    					}
-		    				})
-		    			})
+        				// get RDF triples as a javascript array
+        	    		var rdf = turtle.parse(data);
+        	    		console.log(rdf);
+        	    		var sets;
+        	    		var subject=predicate=object=lang=datatype=" ";
+        	    		for(sets in rdf){
+        	    			subject="&lt;"+rdf[sets].subject+"&gt;";
+        	    			predicate="&lt;"+rdf[sets].predicate+"&gt;";
+        	    			if(rdf[sets].type == "literal"){
+            	    			object="&quot;"+rdf[sets].object+"&quot;";
+        	    			}
+        	    			if(rdf[sets].type == "resource"){
+            	    			object="&lt;"+rdf[sets].object+"&gt;";
+        	    			}
+        	    			if(rdf[sets].lang){
+        	    				lang="@"+rdf[sets].lang;
+        	    			}if(rdf[sets].datatype){
+        	    				datatype="^^"+rdf[sets].datatype;
+        	    			}
+            	    		var s=subject+" "+predicate+" "+object+" "+lang+" "+datatype;
+            	    		changeSets[revision].deleteSet.push(s);
+        	    		}
         			}
-	    		})
+    			})
     		}
     	})
     }
@@ -474,16 +512,20 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	 
 	 
 	 
-	 // Funktion, die den Inhalt der Revisions-Tooltips erstellt
-	 var revTooltip = function (name, node) {
-	     var tooltip = "<h1>Revision " + node.revisionNumber+"</h1>"
-	     if (node.commit != null) { 
-		     var date = new Date(commits[node.commit].time);
+	// Funktion, die den Inhalt der Revisions-Tooltips erstellt
+	 var revTooltip = function (d) {
+	     var tooltip = "<h1>Revision " + d.revNo+"</h1>"
+	     if (d.commit != null) { 
+		     var date = new Date(d.time);
 		     tooltip += "<table class='properties' style='width:100%'>"+
-		    	"<tr><th style='padding-right:5px;'>" + commits[node.commit].title + "</th><td align='right' style='vertical-align:top;'>" + dateString(date) + "</td></tr>" + 
+		    	"<tr><th style='padding-right:5px;'>" + d.title + "</th><td align='right' style='vertical-align:top;'>" + dateString(date) + "</td></tr>" + 
 		    	"<table class='properties'>"+
-		    	"<tr><th style='padding-right:5px;'>User:</th><td>" + commits[node.commit].wasAssociatedWith + "</td><td><a href='" + commits[node.commit].wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-		    	"<tr><th style='padding-right:5px;'>URL:</th><td>" + node.commit + "</td><td></td></tr>";
+		    	"<tr><th style='padding-right:5px;'>User:</th><td>" + d.wasAssociatedWith + "</td><td><a href='" + d.wasAssociatedWith + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
+		    	"<tr><th style='padding-right:5px;'>URL:</th><td>" + d.commit + "</td><td></td></tr>";
+		    if(changeSets[d] != null){
+		    	tooltip +=	"<tr><th>AddSet: +</th><td>"+changeSets[d].addSet.length+"</td><th>DeleteSet: -</th><td>"+changeSets[d].deleteSet.length+"</td></tr>";
+		    }
+		    // console.log(""+changeSets[name].addSet.length);
 		 }
 	     tooltip+="</table>";
 	     
@@ -576,46 +618,6 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	         });
 	     });
 	 };
-	
-    // bind qtip and detailtext to revision node
-    function bindQTipToRevisionNodes(){
-        inner.selectAll("g.node").filter(function (v) {
-            return revisions[v] != null;
-        })
-        .attr("title", function (v) {
-        	return revTooltip(v, g.node(v))
-        })
-        .each(function (v) {
-        	//console.log(g.node(v));
-        	var n = g.node;
-        	//console.log(v);
-        	//console.log(this);
-        	$(this).on("click", function () {
-            	//console.log("clicked");
-        		$("#infos").css('display', '');
-            	$("#header").html( displayHeader(v, g.node(v)) );
-            	$("#changesets").html( displayChangeset(v, g.node(v)) );
-            	$( "#changesets" ).accordion( "refresh" );
-            	$( "#changesets" ).accordion( "option", "active", false );
-            	$("#changesets").animate({
-                    scrollTop: 0
-                }, 0);
-        	})
-        	$(this).qtip({
-        		//show: 'mouseover',
-        		//hide: 'mouseout',
-        		position: {
-                    target: 'mouse', // Track the mouse as the positioning target
-                    adjust: { x: 5, y: 5 } // Offset it slightly from under the mouse
-                }
-        	})
-        });
-        $( "#changesets" ).accordion({
-  		  collapsible: true,
-  		heightStyle: "content"
-  	});
-
-     }
 
 	 // Funktion um Tags einzublenden
 	 var showTags = function () {
