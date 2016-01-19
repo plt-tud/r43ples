@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (MiKTeX 2.9) (preloaded format=pdflatex 2015.10.5)  5 JAN 2016 13:18
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (MiKTeX 2.9) (preloaded format=pdflatex 2015.10.5)  19 JAN 2016 13:35
 entering extended mode
 **C:/Users/Dominik/Desktop/studium/Wahlmodule/Mensch-Maschine-Systemtechnik/Pro
 jekt/Quelltext/r43ples/dokumentation/Abschlussdokumentation/Dokumentation.tex
@@ -483,19 +483,19 @@ Overfull \hbox (85.35696pt too wide) in paragraph at lines 45--46
 File: Git2PROV.png Graphic file (type png)
 
 <use Git2PROV.png>
-Package pdftex.def Info: Git2PROV.png used on input line 64.
+Package pdftex.def Info: Git2PROV.png used on input line 62.
 (pdftex.def)             Requested size: 426.79134pt x 213.39865pt.
  <GitHubDesktop.png, id=42, 2015.53pt x 1210.5225pt>
 File: GitHubDesktop.png Graphic file (type png)
 
 <use GitHubDesktop.png>
-Package pdftex.def Info: GitHubDesktop.png used on input line 74.
+Package pdftex.def Info: GitHubDesktop.png used on input line 72.
 (pdftex.def)             Requested size: 426.79134pt x 256.32292pt.
  [9 <./Git2PROV.png>]
 <TortoiseGit.png, id=48, 1027.58907pt x 526.21594pt>
 File: TortoiseGit.png Graphic file (type png)
  <use TortoiseGit.png>
-Package pdftex.def Info: TortoiseGit.png used on input line 86.
+Package pdftex.def Info: TortoiseGit.png used on input line 84.
 (pdftex.def)             Requested size: 426.79134pt x 218.55219pt.
 
 [10 <./GitHubDesktop.png>] [11 <./TortoiseGit.png>] [12
@@ -508,21 +508,21 @@ Kapitel 4.
 File: Mockup_Changeset.png Graphic file (type png)
 
 <use Mockup_Changeset.png>
-Package pdftex.def Info: Mockup_Changeset.png used on input line 155.
+Package pdftex.def Info: Mockup_Changeset.png used on input line 154.
 (pdftex.def)             Requested size: 209.1301pt x 133.3107pt.
 
 <Mockup_Mouseover.png, id=67, 878.28125pt x 554.07pt>
 File: Mockup_Mouseover.png Graphic file (type png)
 
 <use Mockup_Mouseover.png>
-Package pdftex.def Info: Mockup_Mouseover.png used on input line 156.
+Package pdftex.def Info: Mockup_Mouseover.png used on input line 155.
 (pdftex.def)             Requested size: 209.1301pt x 131.93117pt.
 
 <Mockup_Querformat.png, id=68, 894.34125pt x 570.13pt>
 File: Mockup_Querformat.png Graphic file (type png)
 
 <use Mockup_Querformat.png>
-Package pdftex.def Info: Mockup_Querformat.png used on input line 166.
+Package pdftex.def Info: Mockup_Querformat.png used on input line 165.
 (pdftex.def)             Requested size: 426.79134pt x 272.07599pt.
  [15
 
@@ -530,24 +530,31 @@ Package pdftex.def Info: Mockup_Querformat.png used on input line 166.
 375pt x 712.6625pt>
 File: Tooltip.png Graphic file (type png)
  <use Tooltip.png>
-Package pdftex.def Info: Tooltip.png used on input line 174.
+Package pdftex.def Info: Tooltip.png used on input line 173.
 (pdftex.def)             Requested size: 426.79134pt x 329.01404pt.
+LaTeX Font Info:    Try loading font information for OMS+aun on input line 183.
 
-(Dokumentation.bbl [16 <./Mockup_Querformat.png>] [17 <./Tooltip.png>] [18
+LaTeX Font Info:    No file OMSaun.fd. on input line 183.
 
-]
+
+LaTeX Font Warning: Font shape `OMS/aun/l/n' undefined
+(Font)              using `OMS/cmsy/m/n' instead
+(Font)              for symbol `textbullet' on input line 183.
+
+LaTeX Font Info:    Try loading font information for T1+cmtt on input line 183.
+
+("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\t1cmtt.fd"
+File: t1cmtt.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+) [16 <./Mockup_Querformat.png>] [17 <./Tooltip.png>] (Dokumentation.bbl [18]
 
 LaTeX Font Warning: Font shape `T1/aun/l/sc' undefined
 (Font)              using `T1/aun/l/n' instead on input line 4.
 
-) [19] [20
+) [19
+
+] [20
 
 ] (Dokumentation.lof
-LaTeX Font Info:    Try loading font information for T1+cmtt on input line 5.
-
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\t1cmtt.fd"
-File: t1cmtt.fd 2014/09/29 v2.5h Standard LaTeX font definitions
-)
 Overfull \hbox (17.2115pt too wide) in paragraph at lines 5--5
  [][] []\T1/aun/l/sc/10 Darstellung ei-nes Gra-phen mit GitHub Dek-stop, ent-no
 m-men von $\T1/cmtt/m/n/10 https : / / assets-[]cdn .$ 
@@ -567,27 +574,29 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 2517 strings out of 493673
- 32048 string characters out of 3141524
+ 2526 strings out of 493673
+ 32137 string characters out of 3141524
  91231 words of memory out of 3000000
- 5825 multiletter control sequences out of 15000+200000
- 13441 words of font info for 31 fonts, out of 3000000 for 9000
+ 5831 multiletter control sequences out of 15000+200000
+ 13754 words of font info for 32 fonts, out of 3000000 for 9000
  1025 hyphenation exceptions out of 8191
  34i,16n,24p,1214b,430s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/enc/dvips/cm-super/cm-supe
-r-t1.enc}<C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-sup
-er/sfrm0600.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public
-/cm-super/sfrm0700.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1
-/public/cm-super/sfrm0800.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/font
-s/type1/public/cm-super/sfrm0900.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2
-.9/fonts/type1/public/cm-super/sfrm1000.pfb><C:/Users/Dominik/AppData/Roaming/M
-iKTeX/2.9/fonts/type1/public/cm-super/sfrm1200.pfb><C:/Users/Dominik/AppData/Ro
-aming/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm1440.pfb><C:/Users/Dominik/App
-Data/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm2488.pfb><C:/Users/Domi
-nik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sftt1000.pfb>
-Output written on Dokumentation.pdf (21 pages, 919834 bytes).
+r-t1.enc}<C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy
+10.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super
+/sfrm0600.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/c
+m-super/sfrm0700.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/p
+ublic/cm-super/sfrm0800.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/
+type1/public/cm-super/sfrm0900.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9
+/fonts/type1/public/cm-super/sfrm1000.pfb><C:/Users/Dominik/AppData/Roaming/MiK
+TeX/2.9/fonts/type1/public/cm-super/sfrm1200.pfb><C:/Users/Dominik/AppData/Roam
+ing/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm1440.pfb><C:/Users/Dominik/AppDa
+ta/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm2488.pfb><C:/Users/Domini
+k/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sftt0800.pfb><C:/Users
+/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sftt1000.pfb>
+Output written on Dokumentation.pdf (21 pages, 954424 bytes).
 PDF statistics:
- 127 PDF objects out of 1000 (max. 8388607)
+ 135 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
  46 words of extra memory for PDF output out of 10000 (max. 10000000)
 
