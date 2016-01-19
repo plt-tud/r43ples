@@ -26,15 +26,35 @@ li {
 }
 #addsets, #deletesets {
     width: 49.5%;
-    height:200px;
     float:left;
-    overflow-y: scroll;
-	border:1px solid #000000;
-	background-color: WhiteSmoke; 
 }
 #addsets{
 	margin-right: 1%; 
 } 
+.changeSetH{
+	width: 100%;
+    float:left;
+}
+.changeSetDiv{
+	width: 100%;
+    height:200px;
+    overflow-y: scroll;
+	border:1px solid #000000;
+}
+.changeSetTable{
+	width: 100%;
+	height: 100%;
+	table-layout: fixed;
+}
+.changeSetTable td{
+	width: 33%;
+	word-wrap: break-word;
+	padding: 5px;
+}
+.changeSetTable tr:nth-child(odd) {
+	background-color: #f2f2f2
+} 
+
 .node circle {
     stroke: #333;
     fill: #fff;

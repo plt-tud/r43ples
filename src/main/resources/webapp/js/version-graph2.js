@@ -350,7 +350,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
         				var rdf = turtle.parse(data);
         	    		console.log(rdf);
         	    		var sets;
-        	    		var subject=predicate=object=lang=datatype=" ";
+        	    		var subject=predicate=object=lang=datatype="";
         	    		for(sets in rdf){
         	    			subject="&lt;"+rdf[sets].subject+"&gt;";
         	    			predicate="&lt;"+rdf[sets].predicate+"&gt;";
@@ -362,9 +362,10 @@ function drawGraph(div_selector, _JSON, _showTags) {
         	    			}
         	    			if(rdf[sets].lang){
         	    				lang="@"+rdf[sets].lang;
-        	    			}if(rdf[sets].datatype){
+        	    			}else lang = "";
+        	    			if(rdf[sets].datatype){
         	    				datatype="^^"+rdf[sets].datatype;
-        	    			}
+        	    			}else datatype = "";
         	    			var s = "<tr><td>"+subject+"</td><td>"+predicate+"</td><td>"+object+" "+lang+" "+datatype+"</td></tr>";
             	    		changeSets[revision].addSet.push(s);
         	    		}
@@ -566,7 +567,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	    	 added = changeSets[d.id].addSet.length;
 	    	 deleted = changeSets[d.id].deleteSet.length;
 		    }
-	     var changesetText = "<h3>Add Set (" + added + ")</h3><div><table class='addSet' style='width:100%'>";
+	     var changesetText = "<div class='changeSetH'><h3>Add Set (" + added + ")</h3></div><div class='changeSetDiv'><table class='changeSetTable'>";
 	     for (var i = 0; i < changeSets[d.id].addSet.length; i++) {
 	    	 changesetText+=changeSets[d.id].addSet[i];
 	     }
@@ -582,7 +583,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	    	 added = changeSets[d.id].addSet.length;
 	    	 deleted = changeSets[d.id].deleteSet.length;
 		    }
-	     var changesetText = "<h3>Delete Set (" + deleted + ")</h3><div><table class='deleteSet' style='width:100%'>";
+	     var changesetText = "<div class='changeSetH'><h3>Delete Set (" + deleted + ")</h3></div><div class='changeSetDiv'><table class='changeSetTable'>";
 	     for (var i = 0; i < changeSets[d.id].deleteSet.length; i++) {
 	    	 changesetText+=changeSets[d.id].deleteSet[i];
 	     }
