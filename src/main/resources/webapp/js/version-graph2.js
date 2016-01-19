@@ -91,12 +91,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	var spinner = addSpinner(svg_element);
     
     var x = d3.scale.ordinal().rangeRoundPoints([2*r, $('.revisionGraphVisualisation svg').width()-2*r]);
-    
-    /*$( "#changesets" ).accordion({
-  		  collapsible: true,
-  		heightStyle: "content"
-  	});*/
-    
+        
     function getPath(d){
         var x1,x2,y1,y2;
         x1 = x(d.origin.d3time)-r;
@@ -445,8 +440,29 @@ function drawGraph(div_selector, _JSON, _showTags) {
     	console.log('with time', rev_ar);
     	
     	rev_ar.sort(function(a, b) { 
-        if(a.d3time == b.d3time && a.belongsTo == b.belongsTo){ a.d3time += 1; }; 
-        return a.d3time - b.d3time; });
+    		//sorts commits without time to the beginning
+    		if(!isFinite(a.d3time-b.d3time)) 
+    		      return !isFinite(a.d3time) ? -1 : 1;
+    		else{
+    			if((a.d3time - b.d3time)==0 && a.belongsTo == b.belongsTo){
+    				//besser: sollte nicht revNo abfragen sondern a.used == b oder so ähnlich
+    				if (a.revNo < b.revNo) b.d3time.setSeconds(b.d3time.getSeconds()+1);
+    				if (a.revNo > b.revNo) a.d3time.setSeconds(a.d3time.getSeconds()+1);
+    				
+    				/*if ((a.d3time.getMilliseconds() - b.d3time.getMilliseconds())==0){
+	    				console.log('same time', a.d3time);
+	    				console.log('same time', a.d3time.getMilliseconds() + " " + b.d3time.getMilliseconds());
+	    				a.d3time.setMilliseconds(a.d3time.getMilliseconds()+1);
+	    				console.log('same time', a.d3time);
+	    				console.log('same time', a.d3time.getMilliseconds() + " " + b.d3time.getMilliseconds());
+    				}
+    				console.log('return', a.d3time.getMilliseconds() - b.d3time.getMilliseconds());
+    				return a.d3time.getMilliseconds() - b.d3time.getMilliseconds();*/
+    			};
+    			//console.log("sort", "revNo " + a.revNo +"time " + a.time +" " + Date.parse(a.time).toString() + " - " + "revNo " + b.revNo +"time " + b.time +" " +  Date.parse(b.time).toString() + " = " + (Date.parse(a.time) - Date.parse(b.time)).toString());
+    			return a.d3time - b.d3time;
+    		}
+        });
     	console.log('sort?', rev_ar);
     	
     	console.log(branches);
@@ -491,8 +507,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
     	console.log('branch positions', branchPositions);
     }
     
-    var qtip_options = {gravity: 'w', html: true, fade:true, trigger: 'focus', offset: 100};
-
+    
 	 // Center the graph
 	 var center = function () {
 	     // relationf of graph to svg size
@@ -517,52 +532,25 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	 	return padStr(date.getDate()) + "." + padStr((date.getMonth() + 1)) + "." + date.getFullYear() + " " + padStr(date.getHours()) + ":" + padStr(date.getMinutes()) + ":" + padStr(date.getSeconds());
 	 }
 	 
-	 
-	 
 	// Funktion, die den Inhalt der Revisions-Tooltips erstellt
-	 var revTooltip = function (d) {
-	     var tooltip = "<h3>Revision " + d.revNo+"</h3>"
-	     if (d.commit != null) { 
-		     var date = new Date(d.time);
-		     if(changeSets[d.id] != null){
-			    	tooltip +=	"<table class='properties' style='width:100%'><tr><th style='padding-right:5px;'>" + changeSets[d.id].addSet.length + " added, " +
-			    	changeSets[d.id].deleteSet.length + " deleted" + "</th><td align='right' style='vertical-align:top;'>" + dateString(date) + "</td></tr></table>";
-			 }
-		     tooltip += "<table class='properties'>"+
-		    	"<tr><th valign='top' style='padding-right:5px;'>Comment:</th><td>" + d.title + "</td></table>";
-		     tooltip +=	"<table class='properties'>"+
-		    	"<tr><th valign='top' style='padding-right:5px;'>User:</th><td>" + d.wasAssociatedWith + "</td></tr>" +
-		    	"<tr><th valign='top' style='padding-right:5px;'>URL:</th><td>" + d.commit + "</td><td></td></tr>";
-		 }
-	     tooltip+="</table>";
-	     
-	     return tooltip;
-	 };
+	var revTooltip = function (d) {
+		var tooltip = "<h3>Revision " + d.revNo+"</h3>"
+		if (d.commit != null) { 
+			var date = new Date(d.time);
+			if(changeSets[d.id] != null){
+				tooltip +=	"<table class='properties'><tr><th>" + changeSets[d.id].addSet.length + " added, " +
+				changeSets[d.id].deleteSet.length + " deleted" + "</th></tr></table>";
+			}
+			tooltip += "<table class='properties'>"+
+				"<tr><th>Date:</th><td>" + dateString(date) + "</td></tr>"+
+		    	"<tr><th>Comment:</th><td>" + d.title + "</td></tr>" +
+		     	"<tr><th>User:</th><td>" + d.wasAssociatedWith + "</td></tr>" +
+		    	"<tr><th>URI:</th><td>" + d.commit + "</td></tr></table>";
+		}
+		return tooltip;
+	};
 
-	 /*löschen
-	// Funktion, die den Inhalt der Changeset-Anzeige im Detailfeld erstellt
-     var displayChangeset = function (d) {
-    	 added = deleted = "";
-    	 if(changeSets[d.id] != null){
-	    	 added = changeSets[d.id].addSet.length;
-	    	 deleted = changeSets[d.id].deleteSet.length;
-		    }
-	     var changesetText = //"<h2>Changeset </h2>"+
-	     	"<h3>Add Set (" + added + ")</h3><div><table class='addSet' style='width:100%'>";
-	     for (var i = 0; i < changeSets[d.id].addSet.length; i++) {
-	    	 changesetText+=changeSets[d.id].addSet[i];
-	     }
-	     changesetText += "</table></div><h3>Delete Set (" + deleted + ")</h3><div><table class='deleteSet' style='width:100%'>";
-	     for (var i = 0; i < changeSets[d.id].deleteSet.length; i++) {
-	    	 changesetText+=changeSets[d.id].deleteSet[i];
-	     }
-	     changesetText += "</table></div>";
-	     
-	     return changesetText;
-	 };*/
-
-
-	 // Funktion, die den Inhalt der Changeset-Anzeige im Detailfeld erstellt
+	 // Funktion, die den Inhalt der Addset-Anzeige im Detailfeld erstellt
 	 var displayAddset = function (d) {
     	 added = deleted = "";
     	 if(changeSets[d.id] != null){
@@ -578,7 +566,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	     return changesetText;
 	 };
 	 
-	 // Funktion, die den Inhalt der Changeset-Anzeige im Detailfeld erstellt
+	 // Funktion, die den Inhalt der Deleteset-Anzeige im Detailfeld erstellt
      var displayDeleteset = function (d) {
     	 added = deleted = "";
     	 if(changeSets[d.id] != null){
@@ -599,14 +587,12 @@ function drawGraph(div_selector, _JSON, _showTags) {
     	 var headerText = "<h1>Revision " + d.revNo+"</h1>"
 	     if (d.commit != null) { 
 		     var date = new Date(d.time);
-		     headerText += "<table class='properties' style='width:100%'>"+
-		    	"<tr><th style='padding-right:5px;'>" + d.title + "</th><td align='right' style='vertical-align:top;'>" + dateString(date) + "</td></tr>" +
-		     	"<table class='properties'>"+
-		    	"<tr><th style='padding-right:5px;'>User:</th><td>" + d.wasAssociatedWith + "</td></tr>" +
-		    	"<tr><th style='padding-right:5px;'>URL:</th><td>" + d.commit + "</td><td></td></tr>";
+		     headerText += "<table class='properties'>"+
+		     	"<tr><th>Date:</th><td>" + dateString(date) + "</td></tr>"+
+		    	"<tr><th>Comment:</th><td>" + d.title + "</td></tr>" +
+		     	"<tr><th>User:</th><td>" + d.wasAssociatedWith + "</td></tr>" +
+		    	"<tr><th>URI:</th><td>" + d.commit + "</td></tr></table>";
 		 }
-    	 headerText+="</table>";
-	     
 	     return headerText;
 	 };
 		
