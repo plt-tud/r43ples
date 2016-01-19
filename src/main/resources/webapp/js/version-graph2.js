@@ -185,7 +185,8 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	        		hide: 'mouseout',
 	        		position: {
 	                    target: 'mouse', // Track the mouse as the positioning target
-	                    adjust: { x: 10, y: 10 } // Offset it slightly from under the mouse
+	                    adjust: { x: 10, y: 10}, // Offset it slightly from under the mouse
+	        			viewport: div_element
 	                }
 	        	})
 	        });
@@ -523,14 +524,15 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	     var tooltip = "<h3>Revision " + d.revNo+"</h3>"
 	     if (d.commit != null) { 
 		     var date = new Date(d.time);
-		     tooltip += "<table class='properties' style='width:100%'>"+
-		    	"<tr><th style='padding-right:5px;'>" + d.title + "</th><td align='right' style='vertical-align:top;'>" + dateString(date) + "</td></tr>";
 		     if(changeSets[d.id] != null){
-			    	tooltip +=	"<tr><th>" + changeSets[d.id].addSet.length + " added, " + changeSets[d.id].deleteSet.length + " deleted" + "</th></tr>";
-			    }
+			    	tooltip +=	"<table class='properties' style='width:100%'><tr><th style='padding-right:5px;'>" + changeSets[d.id].addSet.length + " added, " +
+			    	changeSets[d.id].deleteSet.length + " deleted" + "</th><td align='right' style='vertical-align:top;'>" + dateString(date) + "</td></tr></table>";
+			 }
+		     tooltip += "<table class='properties'>"+
+		    	"<tr><th valign='top' style='padding-right:5px;'>Comment:</th><td>" + d.title + "</td></table>";
 		     tooltip +=	"<table class='properties'>"+
-		    	"<tr><th style='padding-right:5px;'>User:</th><td>" + d.wasAssociatedWith + "</td></tr>" +
-		    	"<tr><th style='padding-right:5px;'>URL:</th><td>" + d.commit + "</td><td></td></tr>";
+		    	"<tr><th valign='top' style='padding-right:5px;'>User:</th><td>" + d.wasAssociatedWith + "</td></tr>" +
+		    	"<tr><th valign='top' style='padding-right:5px;'>URL:</th><td>" + d.commit + "</td><td></td></tr>";
 		 }
 	     tooltip+="</table>";
 	     
