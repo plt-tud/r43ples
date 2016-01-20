@@ -1,0 +1,5 @@
+@prefix : <http://test.com/> .
+
+:Adam :knows :Bob.
+:Adam :knows :Emma.
+:Carlos :knows :Freddy.
