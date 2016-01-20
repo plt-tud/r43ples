@@ -102,7 +102,7 @@ public class RevisionManagement {
 				branchUri, graphName, revisionUri);
 
 		queryContent += String.format(""
-				+ "<%s> a rmo:Commit; "
+				+ "<%s> a rmo:RevisionCommit; "
 				+ "	prov:wasAssociatedWith <%s> ;" 
 				+ "	prov:generated <%s>, <%s> ;" 
 				+ "	dc-terms:title \"initial commit\" ;" 

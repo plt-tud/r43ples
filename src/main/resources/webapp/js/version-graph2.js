@@ -53,9 +53,9 @@ function drawGraph(div_selector, _JSON, _showTags) {
         .attr('class','revisionGraphVisualisation')
         .append('svg');//.append('g');
     
-    d3.select(div_selector).append('div')
+    /*d3.select(div_selector).append('div')
         .attr('class','checkbox')
-        .html("<label><input type='checkbox' class='toggle-tags'>Show Tags</label>");
+        .html("<label><input type='checkbox' class='toggle-tags'>Show Tags</label>");*/
     
     d3.select(div_selector).append('div')
         .attr('id','infos')
@@ -73,9 +73,9 @@ function drawGraph(div_selector, _JSON, _showTags) {
 
 
 	// ChangeListener for tags
-	div_element.find('.toggle-tags').change(function () {
+	/*div_element.find('.toggle-tags').change(function () {
 	    $(this).prop('checked')?showTags():hideTags();
-	});
+	});*/
 
 	
 	// http://stackoverflow.com/questions/16265123/resize-svg-when-window-is-resized-in-d3-js
@@ -159,17 +159,17 @@ function drawGraph(div_selector, _JSON, _showTags) {
             .attr('cy', function(d){return branchPositions[d.belongsTo].pos*padd+40;})
             .attr('r', r)
             .style('fill', 'white')
+            .style('stroke-width', function(d){
+            	if (d.label != null)  return '5px';
+            })
             .on("click", function (d) {
             	//console.log("clicked");
         		$("#infos").css('display', '');
             	$("#header").html( displayHeader(d) );
-            	//$("#changesets").html( displayChangeset(d) );
             	$("#addsets").html( displayAddset(d) );
             	$("#deletesets").html( displayDeleteset(d) );
         		$("#addsets").animate({ scrollTop: 0 }, 0);
         		$("#deletesets").animate({ scrollTop: 0 }, 0);
-            	/*$( "#changesets" ).accordion( "refresh" );
-            	$( "#changesets" ).accordion( "option", "active", false );*/
         	})
         	.attr('title', function(d){
         		return revTooltip(d);
@@ -194,7 +194,10 @@ function drawGraph(div_selector, _JSON, _showTags) {
             .attr('dy', '.5em')
             .attr('font-size', '1em')
             .attr('stroke-width',1)
-            .style('pointer-events', 'none');
+            .style('pointer-events', 'none')
+            .style('font-weight', function(d){
+            	if (d.label != null)  return 'bold';
+            });
             
 /*
         // create nodes for every revision
@@ -405,7 +408,10 @@ function drawGraph(div_selector, _JSON, _showTags) {
     }
     
     function create_revision_array(){
-    	
+    	Object.keys(tags).forEach(function (i){
+    		var rev = revisions[tags[i].head];
+    		rev.label = tags[i].label;
+    	});
     	Object.keys(commits).forEach(function (i) {
     		var d= revisions[commits[i].generated];
     		d.time=commits[i].time;
@@ -416,6 +422,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
             d.commit = i;
     	});
         Object.keys(revisions).forEach(function (i) {
+        	if(revisions[i].d3time==null) {revisions[i].d3time = format.parse("1970-01-01T00:00:01")};
             var userev = revisions[i].used?revisions[i].used.map(function() {return{used: revisions[i].used, origin: {
                             belongsTo: revisions[i].belongsTo,
                             d3time:  revisions[i].d3time
@@ -431,8 +438,8 @@ function drawGraph(div_selector, _JSON, _showTags) {
                 title:  revisions[i].title,
                 used:  userev,
                 commit:  revisions[i].commit,
-                wasAssociatedWith:  revisions[i].wasAssociatedWith
-                
+                wasAssociatedWith:  revisions[i].wasAssociatedWith,
+                label: revisions[i].label
     			};
     		rev_ar.push(revobj);
             branches[revisions[i].belongsTo].revs.push(revobj);
@@ -530,8 +537,9 @@ function drawGraph(div_selector, _JSON, _showTags) {
 				changeSets[d.id].deleteSet.length + " deleted" + "</th></tr></table>";
 			}
 			tooltip += "<table class='properties'>"+
-				"<tr><th>Date:</th><td>" + dateString(date) + "</td></tr>"+
-		    	"<tr><th>Comment:</th><td>" + d.title + "</td></tr>" +
+				"<tr><th>Date:</th><td>" + dateString(date) + "</td></tr>";
+			if (d.label != null) tooltip += "<tr><th>Tag:</th><td>" + d.label + "</td></tr>";
+			tooltip += "<tr><th>Comment:</th><td>" + d.title + "</td></tr>" +
 		     	"<tr><th>User:</th><td>" + d.wasAssociatedWith + "</td></tr>" +
 		    	"<tr><th>URI:</th><td>" + d.commit + "</td></tr></table>";
 		}
@@ -576,8 +584,9 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	     if (d.commit != null) { 
 		     var date = new Date(d.time);
 		     headerText += "<table class='properties'>"+
-		     	"<tr><th>Date:</th><td>" + dateString(date) + "</td></tr>"+
-		    	"<tr><th>Comment:</th><td>" + d.title + "</td></tr>" +
+		     	"<tr><th>Date:</th><td>" + dateString(date) + "</td></tr>";
+			if (d.label != null) headerText += "<tr><th>Tag:</th><td>" + d.label + "</td></tr>";
+			headerText += "<tr><th>Comment:</th><td>" + d.title + "</td></tr>" +
 		     	"<tr><th>User:</th><td>" + d.wasAssociatedWith + "</td></tr>" +
 		    	"<tr><th>URI:</th><td>" + d.commit + "</td></tr></table>";
 		 }
@@ -585,7 +594,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	 };
 		
 	 // Funktion, die die Tags als Knoten mit Kanten erstellt
-	 var createTags = function () {
+	 /*var createTags = function () {
 	     Object.keys(tags).forEach(function (referenceCommit) {
 	         var value = tags[referenceCommit];
 	         value.label = tags[referenceCommit].label;
@@ -599,7 +608,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
                  weight: 2,
              });
 	     });
-	 };
+	 };*/
 	
 	 // Funktion, die die Branches als Knoten mit Kanten erstellt
 	 var createBranches = function () {
@@ -618,7 +627,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	     });
 	 };
 
-	 // Funktion um Tags einzublenden
+	 /*// Funktion um Tags einzublenden
 	 var showTags = function () {
 	     createTags();
 	     render(inner, g);
@@ -634,6 +643,6 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	             g.removeNode(v);
 	         });
 	     render(inner, g);
-	 };    
+	 };    */
     
 };
