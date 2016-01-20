@@ -36,15 +36,21 @@ public class RevisionManagement {
 
 	/** The logger. **/
 	private static Logger logger = Logger.getLogger(RevisionManagement.class);
-	/** The SPARQL prefixes. **/
+	/** The SPARQL prefixes. 
+	 * TODO: Add possibility to insert user defined prefixes
+	 * **/
 	public static final String prefixes = 
-			  "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> \n"
+			  "PREFIX rmo:	<http://eatld.et.tu-dresden.de/rmo#> \n"
 			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
-			+ "PREFIX dc-terms: <http://purl.org/dc/terms/> \n" 
-			+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
+			+ "PREFIX dc-terms:	<http://purl.org/dc/terms/> \n" 
+			+ "PREFIX xsd:	<http://www.w3.org/2001/XMLSchema#> \n"
 			+ "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
-			+ "PREFIX sdd: <http://eatld.et.tu-dresden.de/sdd#> \n"
-			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n";
+			+ "PREFIX sdd:	<http://eatld.et.tu-dresden.de/sdd#> \n"
+			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
+			+ "PREFIX rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n"
+			+ "PREFIX owl:	<http://www.w3.org/2002/07/owl#> \n"
+			+ "PREFIX test: <http://test.com/> \n"
+			+ "PREFIX mso: <http://eatld.et.tu-dresden.de/mso/> \n";
 
 
 	/**
@@ -1244,7 +1250,7 @@ public class RevisionManagement {
 	 * @return the constructed graph content as specified RDF serialisation format
 	 */
 	public static String getContentOfGraphByConstruct(String graphName, String format) {
-		String query = String.format(
+		String query = RevisionManagement.prefixes + String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
 				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
 		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		
