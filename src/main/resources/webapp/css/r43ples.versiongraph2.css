@@ -13,7 +13,7 @@
 }
 .revisionGraphVisualisation text {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 12px;
+    font-size: 14px;
 }
  ul {
   list-style: none;
@@ -23,7 +23,7 @@
 li {
   padding-left: 1em;
   text-indent: -1em;
-}}
+}
 .properties th{
 	vertical-align: top;
 	padding-right: 10px;
