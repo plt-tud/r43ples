@@ -103,8 +103,8 @@ public class RevisionManagement {
 				+ "	prov:wasAssociatedWith <%s> ;" 
 				+ "	prov:generated <%s>, <%s> ;" 
 				+ "	dc-terms:title \"initial commit\" ;" 
-				+ "	prov:atTime \"%s\" .%n",
-				commitUri,  "http://eatld.et.tu-dresden.de/user/r43ples", revisionUri, branchUri, getDateString());
+				+ "	prov:atTime \"%s\"^^xsd:dateTime .%n",
+				commitUri,  "http://eatld.et.tu-dresden.de/user/r43ples", revisionUri, branchUri, datetime);
 		
 		String queryRevision = prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisiongraph, queryContent);
 		
@@ -381,7 +381,7 @@ public class RevisionManagement {
 				+ "	prov:wasAssociatedWith <%s>;"
 				+ "	prov:generated <%s>;" 
 				+ "	dc-terms:title \"%s\";" 
-				+ "	prov:atTime \"%s\". %n", commitUri,
+				+ "	prov:atTime \"%s\"^^xsd:dateTime. %n", commitUri,
 				personUri, revisionUri, commitMessage, timeStamp));
 
 		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
@@ -1125,7 +1125,7 @@ public class RevisionManagement {
 	public static String getDateString() {
 		// Create current time stamp
 		Date date = new Date();
-		DateFormat df = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH:mm:ss");
+		DateFormat df = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH:mm:ss.SSS");
 		String dateString = df.format(date);
 		logger.debug("Time stamp created: " + dateString);
 		return dateString;
