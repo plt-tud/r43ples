@@ -407,7 +407,6 @@ function drawGraph(div_selector, _JSON, _showTags) {
     function create_revision_array(){
     	
     	Object.keys(commits).forEach(function (i) {
-    		if(commits[i].time==null) {commits[i].time = "1970-01-01T00:00:01"};
     		var d= revisions[commits[i].generated];
     		d.time=commits[i].time;
     		d.d3time=format.parse(commits[i].time);	
@@ -417,7 +416,6 @@ function drawGraph(div_selector, _JSON, _showTags) {
             d.commit = i;
     	});
         Object.keys(revisions).forEach(function (i) {
-    		if(revisions[i].d3time==null) {revisions[i].d3time = format.parse("1970-01-01T00:00:01")};
             var userev = revisions[i].used?revisions[i].used.map(function() {return{used: revisions[i].used, origin: {
                             belongsTo: revisions[i].belongsTo,
                             d3time:  revisions[i].d3time
@@ -442,7 +440,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
     	console.log('with time', rev_ar);
     	
     	rev_ar.sort(function(a, b) { 
-			if ((a.d3time.getTime() - b.d3time.getTime())==0 && a.belongsTo == b.belongsTo){
+			/*if ((a.d3time.getTime() - b.d3time.getTime())==0 && a.belongsTo == b.belongsTo){
 				//console.log('same time', a.d3time + " " + b.d3time);
 				//console.log('same time', a.d3time.getMilliseconds() + " " + b.d3time.getMilliseconds());
 				if (a.revNo < b.revNo) {b.d3time.setMilliseconds(b.d3time.getMilliseconds()+1)}
@@ -450,7 +448,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 				//console.log('same time', a.d3time + " " + b.d3time);
 				//console.log('same time', a.d3time.getMilliseconds() + " " + b.d3time.getMilliseconds());
 			}
-			console.log("sort", "revNo " + a.revNo +"time " + a.d3time +" " + a.d3time.getTime() + " - " + "revNo " + b.revNo +"time " + b.d3time +" " +  b.d3time.getTime() + " = " + (a.d3time.getTime() - b.d3time.getTime()).toString() );
+			console.log("sort", "revNo " + a.revNo +"time " + a.d3time +" " + a.d3time.getTime() + " - " + "revNo " + b.revNo +"time " + b.d3time +" " +  b.d3time.getTime() + " = " + (a.d3time.getTime() - b.d3time.getTime()).toString() );*/
 			return a.d3time.getTime() - b.d3time.getTime();
         });
     	console.log('sort?', rev_ar);
