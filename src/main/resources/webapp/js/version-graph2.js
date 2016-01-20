@@ -94,8 +94,8 @@ function drawGraph(div_selector, _JSON, _showTags) {
         
     function getPath(d){
         var x1,x2,y1,y2;
-        x1 = x(d.origin.d3time)-r;
-        x2 = x(revisions[d.used].d3time)+r;
+        x1 = x(d.origin.d3time.getTime())-r;
+        x2 = x(revisions[d.used].d3time.getTime())+r;
         y1 = branchPositions[d.origin.belongsTo].pos*padd+40;
         y2 = branchPositions[revisions[d.used].belongsTo].pos*padd+40;
         var pathd = 'M'+ x1 + ' ' +y1;
@@ -127,7 +127,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 		create_revision_array();
     	sortBranches();
         
-        x.domain(rev_ar.map(function(d) { return d.d3time; }));
+        x.domain(rev_ar.map(function(d) { return d.d3time.getTime(); }));
         
         var branchG = svg.selectAll('g')
             .data(branch_ar)
@@ -155,7 +155,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
             .attr('y2', function(d){return branchPositions[d.origin.belongsTo].pos*padd+40;});*/
             
         revG.append('circle')
-            .attr('cx', function(d){return x(d.d3time);})
+            .attr('cx', function(d){return x(d.d3time.getTime());})
             .attr('cy', function(d){return branchPositions[d.belongsTo].pos*padd+40;})
             .attr('r', r)
             .style('fill', 'white')
@@ -187,7 +187,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	        });
         
         revG.append('text')
-            .attr('x', function(d){return x(d.d3time);})
+            .attr('x', function(d){return x(d.d3time.getTime());})
             .attr('y', function(d){return branchPositions[d.belongsTo].pos*padd+40;})
             .text(function(d){return trimRevisionNumber(d.revNo);})
             .attr('text-anchor','middle')
@@ -407,6 +407,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
     function create_revision_array(){
     	
     	Object.keys(commits).forEach(function (i) {
+    		if(commits[i].time==null) {commits[i].time = "1970-01-01T00:00:01"};
     		var d= revisions[commits[i].generated];
     		d.time=commits[i].time;
     		d.d3time=format.parse(commits[i].time);	
@@ -416,6 +417,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
             d.commit = i;
     	});
         Object.keys(revisions).forEach(function (i) {
+    		if(revisions[i].d3time==null) {revisions[i].d3time = format.parse("1970-01-01T00:00:01")};
             var userev = revisions[i].used?revisions[i].used.map(function() {return{used: revisions[i].used, origin: {
                             belongsTo: revisions[i].belongsTo,
                             d3time:  revisions[i].d3time
@@ -440,28 +442,16 @@ function drawGraph(div_selector, _JSON, _showTags) {
     	console.log('with time', rev_ar);
     	
     	rev_ar.sort(function(a, b) { 
-    		//sorts commits without time to the beginning
-    		if(!isFinite(a.d3time-b.d3time)) 
-    		      return !isFinite(a.d3time) ? -1 : 1;
-    		else{
-    			if((a.d3time - b.d3time)==0 && a.belongsTo == b.belongsTo){
-    				//besser: sollte nicht revNo abfragen sondern a.used == b oder so ähnlich
-    				if (a.revNo < b.revNo) b.d3time.setSeconds(b.d3time.getSeconds()+1);
-    				if (a.revNo > b.revNo) a.d3time.setSeconds(a.d3time.getSeconds()+1);
-    				
-    				/*if ((a.d3time.getMilliseconds() - b.d3time.getMilliseconds())==0){
-	    				console.log('same time', a.d3time);
-	    				console.log('same time', a.d3time.getMilliseconds() + " " + b.d3time.getMilliseconds());
-	    				a.d3time.setMilliseconds(a.d3time.getMilliseconds()+1);
-	    				console.log('same time', a.d3time);
-	    				console.log('same time', a.d3time.getMilliseconds() + " " + b.d3time.getMilliseconds());
-    				}
-    				console.log('return', a.d3time.getMilliseconds() - b.d3time.getMilliseconds());
-    				return a.d3time.getMilliseconds() - b.d3time.getMilliseconds();*/
-    			};
-    			//console.log("sort", "revNo " + a.revNo +"time " + a.time +" " + Date.parse(a.time).toString() + " - " + "revNo " + b.revNo +"time " + b.time +" " +  Date.parse(b.time).toString() + " = " + (Date.parse(a.time) - Date.parse(b.time)).toString());
-    			return a.d3time - b.d3time;
-    		}
+			if ((a.d3time.getTime() - b.d3time.getTime())==0 && a.belongsTo == b.belongsTo){
+				//console.log('same time', a.d3time + " " + b.d3time);
+				//console.log('same time', a.d3time.getMilliseconds() + " " + b.d3time.getMilliseconds());
+				if (a.revNo < b.revNo) {b.d3time.setMilliseconds(b.d3time.getMilliseconds()+1)}
+				if (a.revNo > b.revNo) {a.d3time.setMilliseconds(a.d3time.getMilliseconds()+1)}
+				//console.log('same time', a.d3time + " " + b.d3time);
+				//console.log('same time', a.d3time.getMilliseconds() + " " + b.d3time.getMilliseconds());
+			}
+			console.log("sort", "revNo " + a.revNo +"time " + a.d3time +" " + a.d3time.getTime() + " - " + "revNo " + b.revNo +"time " + b.d3time +" " +  b.d3time.getTime() + " = " + (a.d3time.getTime() - b.d3time.getTime()).toString() );
+			return a.d3time.getTime() - b.d3time.getTime();
         });
     	console.log('sort?', rev_ar);
     	
@@ -487,12 +477,12 @@ function drawGraph(div_selector, _JSON, _showTags) {
      * Positionen sind Integer von 0 - x, der Master-Branch hat immer Position 0 **/
     function sortBranches(){
     	var positions = [];
-    	branch_ar.sort(function(a, b) { return b.endtime - a.endtime; });
+    	branch_ar.sort(function(a, b) { return b.starttime - a.starttime; });
     	for  (var i = 0; i < branch_ar.length; i++){
     		if (branch_ar[i].label != "master"){
     			for (var j = 0; j <= positions.length; j++){
     				if (branch_ar[i].starttime < positions[j] || positions[j] == null){
-    					positions[j] = branch_ar[i].starttime;
+    					positions[j] = branch_ar[i].endtime;
     					branchPositions[branch_ar[i].id] = {};
     					branchPositions[branch_ar[i].id].pos = j + 1;
     					break;
