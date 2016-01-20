@@ -54,12 +54,15 @@ public class RevisionManagement {
 
 
 	/**
-	 * Put existing graph under version control. Existence of graph is not checked.
+	 * Put existing graph under version control. Existence of graph is not checked. Current date is used for commit timstamp
 	 * 
 	 * @param graphName
 	 *            the graph name of the existing graph
+	 * @param datetime
+	 * 			time stamp to be inserted in commit
 	 */
-	public static String putGraphUnderVersionControl(final String graphName) {
+	protected static String putGraphUnderVersionControl(final String graphName, final String datetime) {
+
 		logger.info("Put existing graph under version control with the name " + graphName);
 
 		String revisiongraph = graphName + "-revisiongraph";
@@ -112,6 +115,16 @@ public class RevisionManagement {
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryRevision);
 		
 		return revisionNumber;
+	}
+	
+	/**
+	 * Put existing graph under version control. Existence of graph is not checked. Current date is used for commit timstamp
+	 * 
+	 * @param graphName
+	 *            the graph name of the existing graph
+	 */
+	public static String putGraphUnderVersionControl(final String graphName) {
+		return putGraphUnderVersionControl(graphName, getDateString());
 	}
 	
 	

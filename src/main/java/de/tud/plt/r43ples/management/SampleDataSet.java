@@ -25,36 +25,41 @@ public class SampleDataSet {
 		String graph = "http://test.com/r43ples-dataset-1";
 		result.graphName = graph;
 		RevisionManagement.purgeRevisionInformation(graph);
-		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graph);
+		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graph, "2016-01-01T14:51:37");
 		result.revisions.put("master-0", revisionNumber0);
 
 		String revisionNumber1 = RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-1.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset1/removed-1.nt"), user,
+				"2016-01-01T21:32:52",
 				"test commit message 1", revisionNumber0);
 		result.revisions.put("master-1", revisionNumber1);
 		
 		String revisionNumber2 = RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-2.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset1/removed-2.nt"), user,
+				"2016-01-02T09:06:52",
 				"test commit message 2", revisionNumber1);
 		result.revisions.put("master-2", revisionNumber2);
 		
 		String revisionNumber3 = RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-3.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset1/removed-3.nt"), user,
+				"2016-01-08T14:07:59",
 				"test commit message 3", revisionNumber2);
 		result.revisions.put("master-3", revisionNumber3);
 		
 		String revisionNumber4 = RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-4.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset1/removed-4.nt"), user,
+				"2016-01-10T08:12:23",
 				"test commit message 4", revisionNumber3);
 		result.revisions.put("master-4", revisionNumber4);
 		
 		String revisionNumber5 = RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-5.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset1/removed-5.nt"), user,
+				"2016-01-21T23:07:52",
 				"test commit message 5", revisionNumber4);
 		result.revisions.put("master-5", revisionNumber5);
 		return result;
