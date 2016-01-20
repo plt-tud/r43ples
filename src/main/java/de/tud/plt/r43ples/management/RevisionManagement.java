@@ -36,24 +36,33 @@ public class RevisionManagement {
 
 	/** The logger. **/
 	private static Logger logger = Logger.getLogger(RevisionManagement.class);
-	/** The SPARQL prefixes. **/
+	/** The SPARQL prefixes. 
+	 * TODO: Add possibility to insert user defined prefixes
+	 * **/
 	public static final String prefixes = 
-			  "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> \n"
+			  "PREFIX rmo:	<http://eatld.et.tu-dresden.de/rmo#> \n"
 			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
-			+ "PREFIX dc-terms: <http://purl.org/dc/terms/> \n" 
-			+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
+			+ "PREFIX dc-terms:	<http://purl.org/dc/terms/> \n" 
+			+ "PREFIX xsd:	<http://www.w3.org/2001/XMLSchema#> \n"
 			+ "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
-			+ "PREFIX sdd: <http://eatld.et.tu-dresden.de/sdd#> \n"
-			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n";
+			+ "PREFIX sdd:	<http://eatld.et.tu-dresden.de/sdd#> \n"
+			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
+			+ "PREFIX rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n"
+			+ "PREFIX owl:	<http://www.w3.org/2002/07/owl#> \n"
+			+ "PREFIX test: <http://test.com/> \n"
+			+ "PREFIX mso: <http://eatld.et.tu-dresden.de/mso/> \n";
 
 
 	/**
-	 * Put existing graph under version control. Existence of graph is not checked.
+	 * Put existing graph under version control. Existence of graph is not checked. Current date is used for commit timstamp
 	 * 
 	 * @param graphName
 	 *            the graph name of the existing graph
+	 * @param datetime
+	 * 			time stamp to be inserted in commit
 	 */
-	public static String putGraphUnderVersionControl(final String graphName) {
+	protected static String putGraphUnderVersionControl(final String graphName, final String datetime) {
+
 		logger.info("Put existing graph under version control with the name " + graphName);
 
 		String revisiongraph = graphName + "-revisiongraph";
@@ -97,8 +106,8 @@ public class RevisionManagement {
 				+ "	prov:wasAssociatedWith <%s> ;" 
 				+ "	prov:generated <%s>, <%s> ;" 
 				+ "	dc-terms:title \"initial commit\" ;" 
-				+ "	prov:atTime \"%s\" .%n",
-				commitUri,  "user", revisionUri, branchUri, getDateString());
+				+ "	prov:atTime \"%s\"^^xsd:dateTime .%n",
+				commitUri,  "http://eatld.et.tu-dresden.de/user/r43ples", revisionUri, branchUri, datetime);
 		
 		String queryRevision = prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisiongraph, queryContent);
 		
@@ -106,6 +115,16 @@ public class RevisionManagement {
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryRevision);
 		
 		return revisionNumber;
+	}
+	
+	/**
+	 * Put existing graph under version control. Existence of graph is not checked. Current date is used for commit timstamp
+	 * 
+	 * @param graphName
+	 *            the graph name of the existing graph
+	 */
+	public static String putGraphUnderVersionControl(final String graphName) {
+		return putGraphUnderVersionControl(graphName, getDateString());
 	}
 	
 	
@@ -375,7 +394,7 @@ public class RevisionManagement {
 				+ "	prov:wasAssociatedWith <%s>;"
 				+ "	prov:generated <%s>;" 
 				+ "	dc-terms:title \"%s\";" 
-				+ "	prov:atTime \"%s\". %n", commitUri,
+				+ "	prov:atTime \"%s\"^^xsd:dateTime. %n", commitUri,
 				personUri, revisionUri, commitMessage, timeStamp));
 
 		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
@@ -1119,7 +1138,7 @@ public class RevisionManagement {
 	public static String getDateString() {
 		// Create current time stamp
 		Date date = new Date();
-		DateFormat df = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH:mm:ss");
+		DateFormat df = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH:mm:ss.SSS");
 		String dateString = df.format(date);
 		logger.debug("Time stamp created: " + dateString);
 		return dateString;
@@ -1244,7 +1263,7 @@ public class RevisionManagement {
 	 * @return the constructed graph content as specified RDF serialisation format
 	 */
 	public static String getContentOfGraphByConstruct(String graphName, String format) {
-		String query = String.format(
+		String query = RevisionManagement.prefixes + String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
 				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
 		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		

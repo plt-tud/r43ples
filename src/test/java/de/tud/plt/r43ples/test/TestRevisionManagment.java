@@ -210,6 +210,26 @@ public class TestRevisionManagment {
 	}
 	
 	
+	
+	
+	@Test
+	public void testTagging() throws InternalErrorException, SAXException, IOException {
+		String expected, result;
+		RevisionManagement.createTag(ds.graphName, ds.revisions.get("master-3") , "v0.1", "test_user", "Version v0.1 published");
+		
+		result = ep.sparql(format, String.format(query_template, ds.revisions.get("master-1"))).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev1.xml");
+        assertXMLEqual(expected, result);
+        
+		result = ep.sparql(format, String.format(query_template, ds.revisions.get("master-2"))).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev2.xml");
+        assertXMLEqual(expected, result);
+		
+        result = ep.sparql(format, String.format(query_template, ds.revisions.get("master-3"))).getEntity().toString();
+        expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev3.xml");
+        assertXMLEqual(expected, result);
+	}
+	
 	@Test
 	public void testBranching() throws InternalErrorException {
 		RevisionManagement.createBranch(ds.graphName, ds.revisions.get("master-2"), "testBranch", "test_user", "branching as junit test");
