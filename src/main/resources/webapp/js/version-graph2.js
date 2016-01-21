@@ -177,6 +177,8 @@ function drawGraph(div_selector, _JSON, _showTags) {
             })
             .on("click", function (d) {
             	//console.log("clicked");
+            	$('circle').css('fill', 'white');
+            	$(this).css('fill', d3.rgb(branches[d.belongsTo].color).brighter().brighter().toString());
         		$("#infos").css('display', '');
             	$("#header").html( displayHeader(d) );
             	$("#addsets").html( displayAddset(d) );
