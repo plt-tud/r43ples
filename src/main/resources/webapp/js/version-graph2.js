@@ -89,8 +89,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 
 	var svg_element = div_element.find('svg');
 	var spinner = addSpinner(svg_element);
-    
-    var x = d3.scale.ordinal().rangeRoundPoints([2*r, $('.revisionGraphVisualisation svg').width()-2*r]);
+    var x;
         
     function getPath(d){
         var x1,x2,y1,y2;
@@ -98,6 +97,18 @@ function drawGraph(div_selector, _JSON, _showTags) {
         x2 = x(revisions[d.used].d3time.getTime())+r;
         y1 = branchPositions[d.origin.belongsTo].pos*padd+40;
         y2 = branchPositions[revisions[d.used].belongsTo].pos*padd+40;
+        var pathd = 'M'+ x1 + ' ' +y1;
+            pathd += 'h'+(x2-x1);
+            pathd += 'v' + (y2-y1);
+        return pathd;
+    }
+    
+    function getPathLabel(d){
+        var x1,x2,y1,y2;
+        x1 = x(d.head.d3time.getTime())+r*0.707;
+        x2 = x(d.head.d3time.getTime())+r*0.707+10;
+        y1 = branchPositions[d.head.belongsTo].pos*padd+40-r*0.707;
+        y2 = branchPositions[d.head.belongsTo].pos*padd+40-r*0.707-10;
         var pathd = 'M'+ x1 + ' ' +y1;
             pathd += 'h'+(x2-x1);
             pathd += 'v' + (y2-y1);
@@ -126,7 +137,9 @@ function drawGraph(div_selector, _JSON, _showTags) {
 		//console.log('commits', commits);
 		create_revision_array();
     	sortBranches();
-        
+
+        //x = d3.scale.ordinal().rangeRoundPoints([2*r, rev_ar.length*80]);
+        x = d3.scale.ordinal().rangeRoundPoints([2*r, $('.revisionGraphVisualisation svg').width()-2*r-50]);
         x.domain(rev_ar.map(function(d) { return d.d3time.getTime(); }));
         
         var branchG = svg.selectAll('g')
@@ -136,7 +149,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
             .attr('class','branch')
             .style('stroke', function(d){return d.color})
             .style('stroke-width', 3);
-            
+        
         var revG = branchG.selectAll('g')
             .data(function(d){return d.revs;})
             .enter()
@@ -199,6 +212,34 @@ function drawGraph(div_selector, _JSON, _showTags) {
             	if (d.label != null)  return 'bold';
             });
             
+        svg.selectAll('.branch')
+		    .append('g')
+		    .attr('class', 'label')
+		    .each(function(d){
+		    	d3.select(this).append('text')
+		        .attr('x', function(d){return x(d.head.d3time.getTime())+r*0.707+10;})
+		        .attr('y', function(d){return branchPositions[d.head.belongsTo].pos*padd+40-r*0.707-10;})
+		        .text(d.label)
+		        .attr('text-anchor','start')
+		        .attr('dy', '-.1em')
+		        .attr('dx', '-.5em')
+		        .attr('font-size', '1em')
+		        .attr('stroke-width',1);
+		    })
+	        .append('g').attr('class', 'lines').style('fill',"none")
+            .append('path')
+            .attr('d', function(d){return getPathLabel(d);});
+        /*svg.selectAll('.branch')
+        	.append('text')
+	        .attr('x', function(d){return x(d.head.d3time.getTime())+r*0.707+10;})
+	        .attr('y', function(d){return branchPositions[d.head.belongsTo].pos*padd+40-r*0.707-10;})
+	        .text(d.label)
+	        .attr('text-anchor','middle')
+	        .attr('dy', '.5em')
+	        .attr('font-size', '1em')
+	        .attr('stroke-width',1);*/
+
+        
 /*
         // create nodes for every revision
         Object.keys(revisions).forEach(function (revision) {
@@ -467,6 +508,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
     		var end_time = branches[i].derivedFrom? rev_ar[elementPos2].d3time: new Date()
     		branch_ar.push({
     			id: i,
+    			head: rev_ar[elementPos],
     			starttime: rev_ar[elementPos].d3time,
     			endtime: end_time,
     			color: branches[i].color,
