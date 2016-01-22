@@ -110,8 +110,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
         y1 = branchPositions[d.head.belongsTo].pos*padd+40-r*0.707;
         y2 = branchPositions[d.head.belongsTo].pos*padd+40-r*0.707-10;
         var pathd = 'M'+ x1 + ' ' +y1;
-            pathd += 'h'+(x2-x1);
-            pathd += 'v' + (y2-y1);
+            pathd += 'L'+ x2 + ' ' +y2;
         return pathd;
     }
 
@@ -178,7 +177,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
             .on("click", function (d) {
             	//console.log("clicked");
             	$('circle').css('fill', 'white');
-            	$(this).css('fill', d3.rgb(branches[d.belongsTo].color).brighter().brighter().toString());
+            	$(this).css('fill', d3.rgb(branches[d.belongsTo].color).brighter(1.5).toString());
         		$("#infos").css('display', '');
             	$("#header").html( displayHeader(d) );
             	$("#addsets").html( displayAddset(d) );
@@ -208,7 +207,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
             .attr('text-anchor','middle')
             .attr('dy', '.5em')
             .attr('font-size', '1em')
-            .attr('stroke-width',1)
+            .attr('stroke-width',0.5)
             .style('pointer-events', 'none')
             .style('font-weight', function(d){
             	if (d.label != null)  return 'bold';
