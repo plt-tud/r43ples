@@ -93,13 +93,23 @@ function drawGraph(div_selector, _JSON, _showTags) {
         
     function getPath(d){
         var x1,x2,y1,y2;
+        var rad = 5;
         x1 = x(d.origin.d3time.getTime())-r;
         x2 = x(revisions[d.used].d3time.getTime())+r;
         y1 = branchPositions[d.origin.belongsTo].pos*padd+40;
         y2 = branchPositions[revisions[d.used].belongsTo].pos*padd+40;
         var pathd = 'M'+ x1 + ' ' +y1;
-            pathd += 'h'+(x2-x1);
-            pathd += 'v' + (y2-y1);
+        if (y1 != y2){
+            pathd += 'h'+(x2-x1+2*rad);
+            //arc
+            pathd += 'a '+rad+' '+rad+' 0 0,1 -'+rad+',-'+rad  ;//rad, 90
+            
+            pathd += 'v' + (y2-y1+2*rad);
+            //arc
+            pathd += 'a'+rad+' '+rad+' 0 0,0 -'+rad+',-'+rad ;//rad, 90
+        }
+        else{ pathd += 'h'+(x2-x1);}
+            
         return pathd;
     }
     
@@ -129,7 +139,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 
         // light blue color for tags
         colors(0);*/
-		
+		console.log(data)
 		create_revision_model(data);
 		getChangeSets();
 		//console.log('revisions', revisions);
@@ -147,6 +157,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
             .append('g')
             .attr('class','branch')
             .style('stroke', function(d){return d.color})
+            .style('fill', function(d){return d.color})
             .style('stroke-width', 3);
         
         var revG = branchG.selectAll('g')
@@ -176,9 +187,14 @@ function drawGraph(div_selector, _JSON, _showTags) {
             })
             .on("click", function (d) {
             	//console.log("clicked");
-            	$('circle').css('fill', 'white');
-            	$(this).css('fill', d3.rgb(branches[d.belongsTo].color).brighter(1.5).toString());
-        		$("#infos").css('display', '');
+            	//$('circle').css('fill', 'white');
+            	//$(this).css('fill', d3.rgb(branches[d.belongsTo].color).brighter(1.5).toString());
+            	revG.selectAll('circle')
+            		.style({"opacity": 1, "fill": "white"});
+            	d3.select(this)
+        			.style({"opacity": .5, "fill": branches[d.belongsTo].color});
+            	
+            	$("#infos").css('display', '');
             	$("#header").html( displayHeader(d) );
             	$("#addsets").html( displayAddset(d) );
             	$("#deletesets").html( displayDeleteset(d) );
@@ -215,7 +231,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
             
         svg.selectAll('.branch')
 		    .append('g')
-		    .attr('class', 'label')
+		    .attr('class', 'tag')
 		    .each(function(d){
 		    	d3.select(this).append('text')
 		        .attr('x', function(d){return x(d.head.d3time.getTime())+r*0.707+10;})
@@ -225,7 +241,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 		        .attr('dy', '-.1em')
 		        .attr('dx', '-.5em')
 		        .attr('font-size', '1em')
-		        .attr('stroke-width',1);
+		        .attr('stroke-width',0);
 		    })
 	        .append('g').attr('class', 'lines').style('fill',"none")
             .append('path')
