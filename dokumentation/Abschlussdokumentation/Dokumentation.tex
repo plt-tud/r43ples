@@ -180,9 +180,11 @@ Für eine weiter verbesserte Übersichtlichkeit wurde entschieden, die Add und D
 \section{Umsetzung}
 Für die Umsetzung sollen zunächst die verwendeten Bibliotheken vorgestellt und anschließend die endgültigen Ergebnisse präsentiert werden:
 \begin{itemize}
-\item Das Kürzel D3 steht für \textit{Data-Driven Documents} und ist eine Bibliothek, mit der Daten aus Dokumenten grafisch 				dargestellt werden können. Sie ist veröffentlicht unter der BSD Lizenz und erlaubt damit eine freie Verwendung. In den 				verfügbaren Beispielen \footnote{Abrufbar unter \url{http://d3js.org/}, Stand 19.01.2016} sind verschiedenste Arten von 			Diagrammen und Graphen vorhanden, unter anderem auch Baumstrukturen. Diese lassen sich gut auf die gestellte Aufgabe 			übertragen und erlaube so eine Visualisierung der Daten des Versionsverwaltungssystems.
+\item Bibliothek D3: Das Kürzel D3 steht für \textit{Data-Driven Documents} und ist eine Bibliothek, mit der Daten aus Dokumenten grafisch dargestellt werden können. Sie ist veröffentlicht unter der BSD Lizenz und erlaubt damit eine freie Verwendung. In den 	verfügbaren Beispielen \footnote{Abrufbar unter \url{http://d3js.org/}, Stand 19.01.2016} sind verschiedenste Arten von 			Diagrammen und Graphen vorhanden, unter anderem auch Baumstrukturen. Diese lassen sich gut auf die gestellte Aufgabe 			übertragen und erlaube so eine Visualisierung der Daten des Versionsverwaltungssystems.
 
 \item Mit der Bibliothek qTip2 wurde die Darstellung der Tooltips bei Mouseover automatisch realisiert. Die Bibliothek ist unter der 			public Domain veröffentlicht\footnote{Die Bibliothek ist abrufbar unter \url{http://qtip2.com/}, Stand 19.01.2016} und damit 			ebenfalls für die freie Verwendung zugänglich. Auch hier sind verschiedene Demos verfügbar.
+
+\item Die Daten des Netzwerks wurden über eine Turtle Abfrage abgerufen und anschließend mittels eines Turtle Parsers\footnote{Verwendet wurde der Turtle Parser von Kanzaki, abrufbar unter \url{http://www.kanzaki.com/works/2006/misc/0308turtle.html} (Stand 26.01.2016). Er steht unter der LGPL Lizenz, wodurch eine freie Verwendung gestattet ist.} in Triple geparst.
 \end{itemize}
 
 \bibliography{MMST}
