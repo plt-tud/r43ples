@@ -367,6 +367,8 @@ function drawGraph(div_selector, _JSON, _showTags) {
         
         center();*/
         spinner.hide();
+
+		$(".revisionGraphVisualisation").animate({ scrollLeft: $(".revisionGraphVisualisation").width() }, 0);
     });
 
     function create_revision_model(data){
