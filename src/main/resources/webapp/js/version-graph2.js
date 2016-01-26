@@ -6,8 +6,8 @@ function addSpinner(element) {
 					"left:" + (element.position().left + (element.width() -SPINNER_WIDTH )/2) + "px;'>" +
 			"<i class='fa fa-spinner fa-pulse fa-3x'></i>" +
 		"</div>");
-	element.after(spinner_html);
-	return element.next();
+	$('.revisionGraphVisualisation').append(spinner_html);
+	return $('.spinner');
 }
 
 // Trim revision number if too long for node
@@ -93,7 +93,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	resizeSVG();
 
 	var svg_element = div_element.find('svg');
-	var spinner = addSpinner(svg_element);
+	var spinner = addSpinner(div_element);
 	
 	var xpadd = r;
 
@@ -577,11 +577,11 @@ function drawGraph(div_selector, _JSON, _showTags) {
     	Object.keys(branches).forEach(function (i) {
     		var elementPos = rev_ar.map(function(x) {return x.id; }).indexOf(branches[i].head);
     		var elementPos2 = rev_ar.map(function(x) {return x.id; }).indexOf(branches[i].derivedFrom);
-    		var end_time = branches[i].derivedFrom? rev_ar[elementPos2].d3time: new Date()
+    		var end_time = branches[i].derivedFrom? rev_ar[elementPos2].d3time.getTime(): new Date()
     		branch_ar.push({
     			id: i,
     			head: rev_ar[elementPos],
-    			starttime: rev_ar[elementPos].d3time,
+    			starttime: rev_ar[elementPos].d3time.getTime(),
     			endtime: end_time,
     			color: branches[i].color,
     			label:branches[i].label,
