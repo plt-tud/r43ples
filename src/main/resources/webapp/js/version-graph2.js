@@ -51,6 +51,8 @@ function drawGraph(div_selector, _JSON, _showTags) {
     
     var svg = d3.select(div_selector).append('div')
         .attr('class','revisionGraphVisualisation')
+        .style('overflow', 'scroll')
+        .style('direction','rtl')
         .append('svg');//.append('g');
     
     /*d3.select(div_selector).append('div')
@@ -80,24 +82,39 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	
 	// http://stackoverflow.com/questions/16265123/resize-svg-when-window-is-resized-in-d3-js
 	function resizeSVG(){
-	    $('.revisionGraphVisualisation svg').each(function() {
-	    	$(this).width($(this).parent().width());
-	    });
+    	var jsvg = $('.revisionGraphVisualisation svg');
+    	jsvg.width(jsvg.parent().width()*.97);
+    	if(x){
+    		getMinWidth();
+    		updateXscale();
+    	}
 	}
 	$(window).resize( resizeSVG );	 
 	resizeSVG();
 
 	var svg_element = div_element.find('svg');
 	var spinner = addSpinner(svg_element);
-    var x;
+	
+	var xpadd = r;
+
+    var x = d3.scale.ordinal().rangeRoundPoints([2*r, $('.revisionGraphVisualisation svg').width()-2*r-50]);
+    //var x;
+    
+    function getMinWidth(){
+        var minwidth = $('.revisionGraphVisualisation svg').width();
+        minwidth = Math.max(x.domain().length*(2*r+xpadd),minwidth);    
+        $('.revisionGraphVisualisation svg').width(minwidth);
+        x.rangeRoundPoints([2*r, minwidth-2*r]);
+        return minwidth;
+    }
         
     function getPath(d){
         var x1,x2,y1,y2;
         var rad = 5;
         x1 = x(d.origin.d3time.getTime())-r;
         x2 = x(revisions[d.used].d3time.getTime())+r;
-        y1 = branchPositions[d.origin.belongsTo].pos*padd+40;
-        y2 = branchPositions[revisions[d.used].belongsTo].pos*padd+40;
+        y1 = branchPositions[d.origin.belongsTo].pos*padd+2*r;
+        y2 = branchPositions[revisions[d.used].belongsTo].pos*padd+2*r;
         var pathd = 'M'+ x1 + ' ' +y1;
         if (y1 != y2){
             pathd += 'h'+(x2-x1+2*rad);
@@ -117,11 +134,37 @@ function drawGraph(div_selector, _JSON, _showTags) {
         var x1,x2,y1,y2;
         x1 = x(d.head.d3time.getTime())+r*0.707;
         x2 = x(d.head.d3time.getTime())+r*0.707+10;
-        y1 = branchPositions[d.head.belongsTo].pos*padd+40-r*0.707;
-        y2 = branchPositions[d.head.belongsTo].pos*padd+40-r*0.707-10;
+        y1 = branchPositions[d.head.belongsTo].pos*padd+2*r-r*0.707;
+        y2 = branchPositions[d.head.belongsTo].pos*padd+2*r-r*0.707-10;
         var pathd = 'M'+ x1 + ' ' +y1;
             pathd += 'L'+ x2 + ' ' +y2;
         return pathd;
+    }
+    
+    function updateXscale(){
+    	var branchG = svg.selectAll('.branch')
+        .data(branch_ar);
+    	
+    	branchG.selectAll('.tag text')
+        .attr('x', function(d){return x(d.head.d3time.getTime())+1.5*r;})//+r*0.707+10;})
+		.attr('y', function(d){return branchPositions[d.head.belongsTo].pos*padd+.5*r;})//-r*0.707-10;})
+    	branchG.selectAll('.tag path')
+        .attr('d', function(d){return getPathLabel(d);});
+    	
+    	
+    	var revG = branchG.selectAll('.revision')
+        .data(function(d){return d.revs;});
+    	
+    	revG.selectAll('path')
+    	.data(function(d){return d.used?d.used:[];})
+    	.attr('d', function(d){return getPath(d);});
+    	
+    	revG.selectAll('circle')
+        .attr('cx', function(d){return x(d.d3time.getTime());})
+        .attr('cy', function(d){return branchPositions[d.belongsTo].pos*padd+2*r;});
+    	revG.selectAll('text')
+        .attr('x', function(d){return x(d.d3time.getTime());})
+        .attr('y', function(d){return branchPositions[d.belongsTo].pos*padd+2*r;});
     }
 
     // JSON-Daten mit jQuery laden und parsen
@@ -148,10 +191,21 @@ function drawGraph(div_selector, _JSON, _showTags) {
     	sortBranches();
 
         //x = d3.scale.ordinal().rangeRoundPoints([2*r, rev_ar.length*80]);
-        x = d3.scale.ordinal().rangeRoundPoints([2*r, $('.revisionGraphVisualisation svg').width()-2*r-50]);
+        //x = d3.scale.ordinal().rangeRoundPoints([2*r, $('.revisionGraphVisualisation svg').width()-2*r-50]);
         x.domain(rev_ar.map(function(d) { return d.d3time.getTime(); }));
+
+        //min x: 4 r +xpadd (zeitgleiche commits)
+        //bestimme mind. benötigte Weite
+        //-->todo fkt für resize!!
+        var minwidth = getMinWidth();
         
-        var branchG = svg.selectAll('g')
+        svg.on("click", function (d) {
+        	revG.selectAll('circle')
+        		.style({"opacity": 1, "fill": "white"});
+        	$("#infos").css('display', 'none');
+    	})
+        
+        var branchG = svg.selectAll('.branch')
             .data(branch_ar)
             .enter()
             .append('g')
@@ -160,16 +214,19 @@ function drawGraph(div_selector, _JSON, _showTags) {
             .style('fill', function(d){return d.color})
             .style('stroke-width', 3);
         
-        var revG = branchG.selectAll('g')
+        var revG = branchG.selectAll('.revision')
             .data(function(d){return d.revs;})
             .enter()
             .append('g')
             .attr('class', 'revision');
             
-        revG.append('g').attr('class', 'lines').style('fill',"none").selectAll('.lines')
+        revG.selectAll('.lines')
             .data(function(d){return d.used?d.used:[];})
             .enter()
             .append('path')
+            .attr('class', 'lines')
+        	.style('fill',"none")
+        	.style('opacity',.65)
             .attr('d', function(d){return getPath(d);});
             /*revGenter.append('line')
             .attr('x1', function(d){return x(revisions[d.used].d3time);})
@@ -179,7 +236,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
             
         revG.append('circle')
             .attr('cx', function(d){return x(d.d3time.getTime());})
-            .attr('cy', function(d){return branchPositions[d.belongsTo].pos*padd+40;})
+            .attr('cy', function(d){return branchPositions[d.belongsTo].pos*padd+2*r;})
             .attr('r', r)
             .style('fill', 'white')
             .style('stroke-width', function(d){
@@ -189,6 +246,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
             	//console.log("clicked");
             	//$('circle').css('fill', 'white');
             	//$(this).css('fill', d3.rgb(branches[d.belongsTo].color).brighter(1.5).toString());
+            	 d3.event.stopPropagation();
             	revG.selectAll('circle')
             		.style({"opacity": 1, "fill": "white"});
             	d3.select(this)
@@ -218,7 +276,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
         
         revG.append('text')
             .attr('x', function(d){return x(d.d3time.getTime());})
-            .attr('y', function(d){return branchPositions[d.belongsTo].pos*padd+40;})
+            .attr('y', function(d){return branchPositions[d.belongsTo].pos*padd+2*r;})
             .text(function(d){return trimRevisionNumber(d.revNo);})
             .attr('text-anchor','middle')
             .attr('dy', '.5em')
@@ -228,24 +286,21 @@ function drawGraph(div_selector, _JSON, _showTags) {
             .style('font-weight', function(d){
             	if (d.label != null)  return 'bold';
             });
-            
-        svg.selectAll('.branch')
-		    .append('g')
-		    .attr('class', 'tag')
-		    .each(function(d){
-		    	d3.select(this).append('text')
-		        .attr('x', function(d){return x(d.head.d3time.getTime())+r*0.707+10;})
-		        .attr('y', function(d){return branchPositions[d.head.belongsTo].pos*padd+40-r*0.707-10;})
-		        .text(d.label)
+        
+        var tags = branchG.append('g')
+		    .attr('class', 'tag');
+        tags.append('text')
+        		.attr('x', function(d){return x(d.head.d3time.getTime())+1.5*r;})//+r*0.707+10;})
+		        .attr('y', function(d){return branchPositions[d.head.belongsTo].pos*padd+.5*r;})//-r*0.707-10;})
+		        .text(function(d){return d.label})
 		        .attr('text-anchor','start')
-		        .attr('dy', '-.1em')
-		        .attr('dx', '-.5em')
+		        //.attr('dy', '-.1em')
+		        .attr('dy', '.3em')
 		        .attr('font-size', '1em')
 		        .attr('stroke-width',0);
-		    })
-	        .append('g').attr('class', 'lines').style('fill',"none")
-            .append('path')
-            .attr('d', function(d){return getPathLabel(d);});
+        tags.append('path')
+        .style('fill',"none")
+        .attr('d', function(d){return getPathLabel(d);});
         /*svg.selectAll('.branch')
         	.append('text')
 	        .attr('x', function(d){return x(d.head.d3time.getTime())+r*0.707+10;})
