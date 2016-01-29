@@ -25,13 +25,13 @@ public class SampleDataSet {
 		String graph = "http://test.com/r43ples-dataset-1";
 		result.graphName = graph;
 		RevisionManagement.purgeRevisionInformation(graph);
-		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graph, "2016-01-01T14:51:37.000");
+		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graph, "2016-01-01T14:51:37.011");
 		result.revisions.put("master-0", revisionNumber0);
 
 		String revisionNumber1 = RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-1.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset1/removed-1.nt"), user,
-				"2016-01-01T21:32:52.000",
+				"2016-01-01T14:51:37.012",
 				"test commit message 1", revisionNumber0);
 		result.revisions.put("master-1", revisionNumber1);
 		

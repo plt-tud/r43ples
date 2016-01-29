@@ -36,7 +36,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
     var inner;*/
 	var div_element = $(div_selector);
     var colors = d3.scale.category10();
-    var format = d3.time.format("%Y-%m-%dT%H:%M:%S");
+    var format = d3.time.format("%Y-%m-%dT%H:%M:%S.%L");
     var commits = {};
     var revisions = {};
     var tags = {};
@@ -383,9 +383,18 @@ function drawGraph(div_selector, _JSON, _showTags) {
              // Falls Commit
                 case "http://eatld.et.tu-dresden.de/rmo#RevisionCommit":
                     commits[key] = {};
+                    commits[key].generated = [];
                     commits[key].title = value["http://purl.org/dc/terms/title"][0].value;
                     commits[key].wasAssociatedWith = value["http://www.w3.org/ns/prov#wasAssociatedWith"][0].value;
-                    commits[key].generated = value["http://www.w3.org/ns/prov#generated"][0].value;
+                    //for first commit there can be to values of generated (revision 1 and branch master)
+                    for (var i= 0; i<value["http://www.w3.org/ns/prov#generated"].length; i++){
+                    	commits[key].generated[i] = value["http://www.w3.org/ns/prov#generated"][i].value;
+                    	if (revisions[commits[key].generated[i]] == null) {
+                        	revisions[commits[key].generated[i]] = {};
+                    	}
+                    	//save as revision, later (in function create_revision_array() ) sorted out if it is a branch not a revision
+                        revisions[commits[key].generated[i]].commit = key;
+                    }
                     commits[key].used = [];
                     if (value["http://www.w3.org/ns/prov#used"]){
                         for (var k = 0; k < value["http://www.w3.org/ns/prov#used"].length; k++) {
@@ -393,10 +402,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
                         }
                     }
                     commits[key].time = value["http://www.w3.org/ns/prov#atTime"][0].value;
-                    if (revisions[commits[key].generated] == null) {
-                        revisions[commits[key].generated] = {};
-                    }
-                    revisions[commits[key].generated].commit = key;
+                    
                     break;
                 // Falls Revision
                 case "http://eatld.et.tu-dresden.de/rmo#Revision":
@@ -528,16 +534,26 @@ function drawGraph(div_selector, _JSON, _showTags) {
     		rev.label = tags[i].label;
     	});
     	Object.keys(commits).forEach(function (i) {
-    		var d= revisions[commits[i].generated];
-    		d.time=commits[i].time;
-    		d.d3time=format.parse(commits[i].time);	
-    		d.title=commits[i].title;
-    		d.used=commits[i].used;
-            d.wasAssociatedWith= commits[i].wasAssociatedWith;
-            d.commit = i;
+    		if (commits[i].time.length == 19) commits[i].time += ".000";
+    		if (commits[i].time.length == 21) commits[i].time += "00";
+    		if (commits[i].time.length == 22) commits[i].time += "0";
+    		for (var j=0; j<commits[i].generated.length; j++){
+				if (revisions[commits[i].generated[j]].revisionNumber != null && revisions[commits[i].generated[j]].belongsTo != null){
+					var d= revisions[commits[i].generated[j]];
+					d.time=commits[i].time;
+					d.d3time=format.parse(commits[i].time);	
+					d.title=commits[i].title;
+					d.used=commits[i].used;
+			        d.wasAssociatedWith= commits[i].wasAssociatedWith;
+			        d.commit = i;
+				}else{
+					delete revisions[commits[i].generated[j]];
+					//revisions.splice(commits[i].generated[j],1);
+				}
+    		}
     	});
         Object.keys(revisions).forEach(function (i) {
-        	if(revisions[i].d3time==null) {revisions[i].d3time = format.parse("1970-01-01T00:00:01")};
+        	//if(revisions[i].d3time==null) {revisions[i].d3time = format.parse("1970-01-01T00:00:01.000")};
             var userev = revisions[i].used?revisions[i].used.map(function() {return{used: revisions[i].used, origin: {
                             belongsTo: revisions[i].belongsTo,
                             d3time:  revisions[i].d3time
@@ -562,7 +578,8 @@ function drawGraph(div_selector, _JSON, _showTags) {
     	console.log('with time', rev_ar);
     	
     	rev_ar.sort(function(a, b) { 
-			/*if ((a.d3time.getTime() - b.d3time.getTime())==0 && a.belongsTo == b.belongsTo){
+			/*sorting for two revisions with same time and same branch, sorted according to revision numbers 
+			 * if ((a.d3time.getTime() - b.d3time.getTime())==0 && a.belongsTo == b.belongsTo){
 				//console.log('same time', a.d3time + " " + b.d3time);
 				//console.log('same time', a.d3time.getMilliseconds() + " " + b.d3time.getMilliseconds());
 				if (a.revNo < b.revNo) {b.d3time.setMilliseconds(b.d3time.getMilliseconds()+1)}
