@@ -23,8 +23,12 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.webservice.API;
+import de.tud.plt.r43ples.webservice.Configuration;
+import de.tud.plt.r43ples.webservice.Debug;
 import de.tud.plt.r43ples.webservice.Endpoint;
 import de.tud.plt.r43ples.webservice.ExceptionMapper;
+import de.tud.plt.r43ples.webservice.Merging;
+import de.tud.plt.r43ples.webservice.Misc;
 
 
 /**
@@ -100,7 +104,12 @@ public class R43plesService {
 		URI BASE_URI;
 		
 		ResourceConfig rc = new ResourceConfig()
-			.registerClasses(Endpoint.class, API.class)
+			.registerClasses(Endpoint.class, 
+					Misc.class,
+					API.class, 
+					Configuration.class, 
+					Debug.class, 
+					Merging.class)
 			.property(MustacheMvcFeature.TEMPLATE_BASE_PATH, "templates")
 			.register(MustacheMvcFeature.class)
 			.register(ExceptionMapper.class)

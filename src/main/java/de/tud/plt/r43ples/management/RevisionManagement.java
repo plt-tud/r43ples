@@ -1,3 +1,4 @@
+
 package de.tud.plt.r43ples.management;
 
 import java.io.UnsupportedEncodingException;
@@ -1335,7 +1336,42 @@ public class RevisionManagement {
 			return null;
 		}
 	}
+	
+	/**
+	 * @param graphName
+	 * @param sdd
+	 * @param sddURI
+	 * @return
+	 * @throws InternalErrorException
+	 */
+	public static String getSDD(String graphName, String sdd)
+			throws InternalErrorException {
+		if (sdd != null && sdd != "") {
+			// Specified SDD
+			return sdd;
+		} else {
+			// Default SDD
+			// Query the referenced SDD
+			String querySDD = String.format(
+					  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
+					+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> %n"
+					+ "SELECT ?defaultSDD %n"
+					+ "WHERE { GRAPH <%s> {	%n"
+					+ "	<%s> a rmo:Graph ;%n"
+					+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
+					+ "} }", Config.revision_graph, graphName);
+			
+			ResultSet resultSetSDD = TripleStoreInterfaceSingleton.get().executeSelectQuery(querySDD);
+			if (resultSetSDD.hasNext()) {
+				QuerySolution qs = resultSetSDD.next();
+				return qs.getResource("?defaultSDD").toString();
+			} else {
+				throw new InternalErrorException("Error in revision graph! Selected graph <" + graphName + "> has no default SDD referenced.");
+			}
+		}
+	}
 
 
 	
 }
+

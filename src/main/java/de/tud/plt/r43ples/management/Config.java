@@ -1,5 +1,9 @@
 package de.tud.plt.r43ples.management;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.log4j.Logger;
@@ -46,6 +50,10 @@ public class Config {
 	/** The path to the SDD graph default content. **/
 	public static String sdd_graph_defaultContent;
 	
+	
+	public static HashMap<String, String> user_defined_prefixes = new HashMap<String, String>();
+	
+	
 	/** The logger. **/
 	private static Logger logger = Logger.getLogger(Config.class);	
 	
@@ -77,11 +85,31 @@ public class Config {
 			
 			sdd_graph = config.getString("sdd.graph");
 			sdd_graph_defaultContent = config.getString("sdd.graph.defaultContent");
+			
+			Iterator<String> it = config.getKeys("prefix");
+			while ( it.hasNext()) {
+				String prefix = it.next();
+				String namespace = config.getString(prefix);
+				prefix = prefix.replace("prefix.", "");
+				user_defined_prefixes.put(prefix, namespace);
+			}
 
 		} catch (ConfigurationException e) {
 			logger.warn("Could not read configuration file '" + configFilePath + "'. Switch to 'r43ples.dist.conf'.");
 			readConfig("r43ples.dist.conf");
 		}
+	}
+	
+	public static String getPrefixes(){
+		StringBuilder sb = new StringBuilder();
+		Set<String> set = user_defined_prefixes.keySet();
+		Iterator<String> it = set.iterator();
+		while (it.hasNext()){
+			String prefix = it.next();
+			String namespace = user_defined_prefixes.get(prefix);
+			sb.append("PREFIX "+prefix+": <"+namespace+"> \n");
+		}
+		return sb.toString();
 	}
 
 }

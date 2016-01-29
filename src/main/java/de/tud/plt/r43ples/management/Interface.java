@@ -13,7 +13,6 @@ import de.tud.plt.r43ples.merging.MergeManagement;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import de.tud.plt.r43ples.webservice.Endpoint;
 
 public class Interface {
 
@@ -350,7 +349,7 @@ public class Interface {
 
 		
 		// Differ between MERGE query with specified SDD and without SDD			
-		String usedSDDURI = Endpoint.getSDD(graphName, sdd);
+		String usedSDDURI = RevisionManagement.getSDD(graphName, sdd);
 
 		// Get the common revision with shortest path
 		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA, revisionUriB);

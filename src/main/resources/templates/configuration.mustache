@@ -1,0 +1,68 @@
+{{<super}}
+
+{{$title}}Configuration{{/title}}
+   
+{{$content}}
+<div class="row">
+	<div id="main" class="col-sm-12">
+		<h2>Configuration</h2>
+		<h3>Triplestore</h3>
+		<form method="post" role="form" class="form-horizontal">
+			<div class="form-group">
+				<label for="triplestore-type" class="col-sm-3 control-label">Type</label>
+				<div class="col-sm-9">
+					<select	name="format" class="form-control" id="triplestore-type" value="{{triplestore_type}}" readonly>
+						<option>TDB</option>
+						<option>Virtuoso</option>
+						<option>HTTP</option>
+					</select>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="triplestore-url" class="col-sm-3 control-label" >URL</label>
+				<div class="col-sm-9">
+					<input type="text" class="form-control" name="triplestore-url" value="{{triplestore_url}}" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="revision-graph" class="col-sm-3 control-label" >Revision Graph</label>
+				<div class="col-sm-9">
+					<input type="text" class="form-control" name="revision-graph" value="{{revisionGraph}}" readonly>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="sdd-graph" class="col-sm-3 control-label" >SDD Graph</label>
+				<div class="col-sm-9">
+					<input type="text" class="form-control" name="sdd-graph" value="{{sdd_graph}}" readonly>
+				</div>
+			</div>
+			<!--<div class="form-group">
+				<div class="col-xs-offset-3 col-xs-9 btn-group">
+					<input type="submit" class="col-xs-8 btn btn-primary" value="Save" />
+					<input type="reset"	class="col-xs-4 btn btn-default" value="Reset" />
+				</div>
+			</div>-->
+		</form>
+		<h3>Namespaces</h3>
+		<table class="table table-hover table-strip">
+			<thead>
+				<tr><th>Prefix</th><th>Namespace</th><th>Action</th></tr>
+			</thead> 
+			<tbody>
+				{{#namespaces}}
+				<tr> <td>{{key}}</td><td>{{value}}</td><td><a class="btn btn-danger btn-xs" href="configuration/deletePrefix?prefix={{key}}">Delete</button></td></tr>
+				{{/namespaces}}
+				<tr>
+				    <form class="form-group" method="post">
+					<td><input type="text" placeholder="prefix" id="prefix" name="prefix" class="form-control"/></td>
+					<td><input type="text" placeholder="URI" id="uri" name="namespace" class="form-control"/></td>
+					<td><input type="submit" value="Add" class="btn btn-success"/></td>
+					</form>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+{{/content}}
+
+{{/super}}
