@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.test;
+package de.tud.plt.r43ples.test.webservice;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.hamcrest.core.StringContains.containsString;
@@ -29,6 +29,8 @@ import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.webservice.Endpoint;
+import de.tud.plt.r43ples.webservice.Merging;
+import de.tud.plt.r43ples.webservice.Misc;
 
 
 public class TestEndpoint extends JerseyTest {
@@ -42,7 +44,7 @@ public class TestEndpoint extends JerseyTest {
 	
     @Override
     protected Application configure() {
-        return new ResourceConfig(Endpoint.class);
+        return new ResourceConfig(Endpoint.class, Misc.class, Merging.class);
     }
     
 	@BeforeClass
@@ -118,19 +120,6 @@ public class TestEndpoint extends JerseyTest {
 	public void testHtmlQueryForm() throws IOException{
 		String result = target("sparql").queryParam("query", "").queryParam("format", MediaType.TEXT_HTML).request().get(String.class);
 		Assert.assertThat(result, containsString("<form"));
-	}
-	
-	@Test
-	public void testHtmlDebugQueryForm() throws IOException{
-		String result = target("debug").queryParam("query", "").queryParam("format", MediaType.TEXT_HTML).request().get(String.class);
-		Assert.assertThat(result, containsString("<form"));
-	}
-	
-	@Test
-	public void testDebug() throws IOException{
-		String query = "SELECT * WHERE { GRAPH ?g { ?s ?p ?o. } }";
-		String result = target("debug").queryParam("query", URLEncoder.encode(query, "UTF-8")).request().get(String.class);
-		Assert.assertThat(result, containsString("http://eatld.et.tu-dresden.de/r43ples-revisions"));
 	}
 	
 	
