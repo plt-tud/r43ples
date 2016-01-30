@@ -4,4 +4,7 @@
 :Adam :knows :Freddy.
 :Carlos :knows :Freddy.
 :Freddy :knows :Emma.
+:Stefan :knows :Paul.
+:Franz :knows :Paul.
+:Carlos :knows :Paul.
 

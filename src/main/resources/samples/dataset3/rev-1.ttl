@@ -2,3 +2,6 @@
 
 :Adam :knows :Bob.
 :Carlos :knows :Danny.
+:Stefan :knows :Paul.
+:Franz :knows :Silvia.
+:Gertrude :knows :Waldtraut.

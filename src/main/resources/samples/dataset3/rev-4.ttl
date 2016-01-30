@@ -4,3 +4,8 @@
 :Adam :knows :Freddy.
 :Carlos :knows :Danny.
 :Freddy :knows :Emma.
+:Stefan :knows :Paul.
+:Franz :knows :Paul.
+:Harry :knows :Waldtraut.
+:Heinrich :knows :Silvia.
+:Carlos :knows :Paul.

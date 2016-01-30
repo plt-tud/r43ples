@@ -3,3 +3,8 @@
 :Adam :knows :Bob.
 :Adam :knows :Emma.
 :Carlos :knows :Freddy.
+:Stefan :knows :Paul.
+:Gertrude :knows :Waldtraut.
+:Stefan :knows :Heinrich.
+:Franz :knows :Harry.
+:Gertrude :knows :Kevin.
