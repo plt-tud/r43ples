@@ -145,6 +145,9 @@ public class Endpoint {
 		if (graph.equals("2") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataset2().graphName);
 		}
+		if (graph.equals("3") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataset3().graphName);
+		}
 		if (graph.equals("merging") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetMerging().graphName);
 		}
