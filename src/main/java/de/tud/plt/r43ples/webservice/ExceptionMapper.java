@@ -27,14 +27,14 @@ public class ExceptionMapper implements
 	@Override
 	public Response toResponse(Throwable e) {
 		logger.error(e.getMessage(), e);
-		
 		MustacheFactory mf = new DefaultMustacheFactory();
 	    Mustache mustache = mf.compile("templates/error.mustache");
 	    StringWriter sw = new StringWriter();
 	    
 	    Map<String, Object> htmlMap = new HashMap<String, Object>();
 		htmlMap.put("error", e);
-		htmlMap.put("request", request.getMethod() );
+		if (request!=null)
+			htmlMap.put("request", request.getMethod() );
 		
 		mustache.execute(sw, htmlMap);
 		String content = sw.toString();
