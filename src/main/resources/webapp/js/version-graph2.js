@@ -48,6 +48,22 @@ function drawGraph(div_selector, _JSON, _showTags) {
 	var branchPositions = {};
     var r = 20;
     var padd= 80;
+    var xAxis, maxYpos;
+    
+    var germanFormat= d3.locale({
+    	  "decimal": ",",
+    	  "thousands": ".",
+    	  "grouping": [3],
+    	  "currency": ["", "€"],
+    	  "dateTime": "%c",
+    	  "date": "%m/%d/%Y",
+    	  "time": "%H:%M:%S",
+    	  "periods": ["AM", "PM"],
+    	  "days": ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"],
+    	  "shortDays": ["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"],
+    	  "months": ["Januar", "Februar", "März", "April", "Mai", "Juni", "Juli", "August", "September", "Oktober", "November", "Dezember"],
+    	  "shortMonths": ["Jan", "Feb", "Mrz", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"]
+    	});
     
     var svg = d3.select(div_selector).append('div')
         .attr('class','revisionGraphVisualisation')
@@ -142,6 +158,9 @@ function drawGraph(div_selector, _JSON, _showTags) {
     }
     
     function updateXscale(){
+    	svg.select("g.x.axis")
+        .call(xAxis);
+    	
     	var branchG = svg.selectAll('.branch')
         .data(branch_ar);
     	
@@ -182,7 +201,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 
         // light blue color for tags
         colors(0);*/
-		console.log(data)
+		//console.log(data)
 		create_revision_model(data);
 		getChangeSets();
 		//console.log('revisions', revisions);
@@ -204,6 +223,42 @@ function drawGraph(div_selector, _JSON, _showTags) {
         		.style({"opacity": 1, "fill": "white"});
         	$("#infos").css('display', 'none');
     	})
+    	 	
+    	xAxis = d3.svg.axis()
+        .scale(x)
+        .orient("bottom")
+        .tickSize(2)
+        .tickFormat(function(d){var dd = new Date(d); return dd.toLocaleDateString()+' '+dd.toLocaleTimeString();});
+        
+        /*xAxis.tickFormat(germanFormat.timeFormat.multi([
+                          	[":%S", function(d) {var dd = new Date(d); return dd.getSeconds(); }],
+                            ["%H:%M", function(d) {var dd = new Date(d); return dd.getMinutes(); }],
+                            ["%H:%M", function(d) {var dd = new Date(d); return dd.getHours(); }],
+                          ["%d.%b", function(d) {var dd = new Date(d); return dd.getDate() != 1; }],
+                               ["%B", function(d) {var dd = new Date(d); return dd.getMonth(); }],
+                               ["%Y", function() { return true; }]]));*/
+    
+        svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + (maxYpos+padd) + ")")
+        .call(xAxis)
+        .selectAll("text")
+        .style("text-anchor", "start")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-90)");
+        
+        svg.selectAll("g.x g.tick")
+        .append("line")
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", 0)
+        .attr("y2", -(maxYpos+padd))
+        .style("stroke-dasharray","10,10")
+        .style("stroke", "#cbcbcb");
+       // console.log($('g.x.axis').outerHeight());
+       // $(window).load(console.log($('g.x.axis')[0].getBoundingClientRect().height));
+        svg.style('height',(5+$('g.x.axis')[0].getBoundingClientRect().height));   
         
         var branchG = svg.selectAll('.branch')
             .data(branch_ar)
@@ -301,71 +356,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
         tags.append('path')
         .style('fill',"none")
         .attr('d', function(d){return getPathLabel(d);});
-        /*svg.selectAll('.branch')
-        	.append('text')
-	        .attr('x', function(d){return x(d.head.d3time.getTime())+r*0.707+10;})
-	        .attr('y', function(d){return branchPositions[d.head.belongsTo].pos*padd+40-r*0.707-10;})
-	        .text(d.label)
-	        .attr('text-anchor','middle')
-	        .attr('dy', '.5em')
-	        .attr('font-size', '1em')
-	        .attr('stroke-width',1);*/
 
-        
-/*
-        // create nodes for every revision
-        Object.keys(revisions).forEach(function (revision) {
-            var value = revisions[revision];
-            value.label = trimRevisionNumber(revisions[revision].revisionNumber);
-            value.height = 25;
-            value.shape = "circle";
-            value.style = "stroke:" + branches[revisions[revision].belongsTo].color + ";";
-            g.setNode(revision, value);
-        });
-
-        // create edge for every commit
-        Object.keys(commits).forEach(function (commit) {
-            for (var i = 0; i < commits[commit].used.length; i++) {
-                var color;
-                // Falls der Commit nur von einer Revision stammt
-                if (commits[commit].used.length == 1) {
-                    // Wird als Farbe fÃ¼r die Kante die Revision genommen, die der Commit erzeugt hat
-                    color = branches[revisions[commits[commit].generated].belongsTo].color;
-                } else {
-                    // Ansonsten die Farbe der Ursprungsrevision
-                    color = branches[revisions[commits[commit].used[i]].belongsTo].color;
-                }
-                g.setEdge(commits[commit].used[i], commits[commit].generated, {
-                    style: "stroke:" + color + ";fill:none;",
-                    arrowheadStyle: "fill:" + color + ";stroke:" + color + ";",
-                    lineInterpolate: "basis"
-                });
-            }
-        });
-
-        createBranches();
-        if (_showTags) {
-            createTags();
-        }
-       
-    	svg = d3.select(div_selector + " svg");
-    	inner = svg.select("g");
-    	
-        // render graph and add to DOM
-        render = new dagreD3.render();
-        render(inner, g);
-        
-        // enable zooming and panning of graph
-        zoom = d3.behavior.zoom().on("zoom", function () {
-        	inner.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-        });
-    	
-        // bind zoom to SVG
-        svg.call(zoom);
-        
-        bindQTipToRevisionNodes();
-        
-        center();*/
         spinner.hide();
 
 		$(".revisionGraphVisualisation").animate({ scrollLeft: $(".revisionGraphVisualisation").width() }, 0);
@@ -468,7 +459,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
         			async: false,
         			success: function(data) { 
         				var rdf = turtle.parse(data);
-        	    		console.log(rdf);
+        	    		//console.log(rdf);
         	    		var sets;
         	    		var subject=predicate=object=lang=datatype="";
         	    		for(sets in rdf){
@@ -502,7 +493,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
         			success: function(data) { 
         				// get RDF triples as a javascript array
         	    		var rdf = turtle.parse(data);
-        	    		console.log(rdf);
+        	    		//console.log(rdf);
         	    		var sets;
         	    		var subject=predicate=object=lang=datatype=" ";
         	    		for(sets in rdf){
@@ -575,7 +566,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
     		rev_ar.push(revobj);
             branches[revisions[i].belongsTo].revs.push(revobj);
     	});
-    	console.log('with time', rev_ar);
+    	//console.log('with time', rev_ar);
     	
     	rev_ar.sort(function(a, b) { 
 			/*sorting for two revisions with same time and same branch, sorted according to revision numbers 
@@ -590,9 +581,9 @@ function drawGraph(div_selector, _JSON, _showTags) {
 			console.log("sort", "revNo " + a.revNo +"time " + a.d3time +" " + a.d3time.getTime() + " - " + "revNo " + b.revNo +"time " + b.d3time +" " +  b.d3time.getTime() + " = " + (a.d3time.getTime() - b.d3time.getTime()).toString() );*/
 			return a.d3time.getTime() - b.d3time.getTime();
         });
-    	console.log('sort?', rev_ar);
+    	//console.log('sort?', rev_ar);
     	
-    	console.log(branches);
+    	//console.log(branches);
     	Object.keys(branches).forEach(function (i) {
     		var elementPos = rev_ar.map(function(x) {return x.id; }).indexOf(branches[i].head);
     		var elementPos2 = rev_ar.map(function(x) {return x.id; }).indexOf(branches[i].derivedFrom);
@@ -607,7 +598,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
                 revs: branches[i].revs
     		});
     	});
-    	console.log('brancharr', branch_ar);
+    	//console.log('brancharr', branch_ar);
     }
     
     /** erzeugt das Objekt branchPositions von dem die Position eines Branches über dessen ID
@@ -632,7 +623,8 @@ function drawGraph(div_selector, _JSON, _showTags) {
 				branchPositions[branch_ar[i].id].pos = 0;
     		}
     	}
-    	console.log('branch positions', branchPositions);
+    	maxYpos = positions.length*padd + 2*r;
+    	//console.log('branch positions', branchPositions);
     }
     
     
