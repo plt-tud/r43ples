@@ -1,6 +1,7 @@
 package de.tud.plt.r43ples.management;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
@@ -93,26 +94,29 @@ public class SampleDataSet {
 		RevisionManagement.purgeRevisionInformation(graph);
 		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graph, "2015-01-01T14:51:37");
 		result.revisions.put("master-0", revisionNumber0);
-
+		
+		
 		String revisionNumber1 = RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-1.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-1.nt"), user,
 				"2015-02-01T21:32:52",
 				"test commit message 1", revisionNumber0);
 		result.revisions.put("master-1", revisionNumber1);
-		
-		String revisionNumber2 = RevisionManagement.createNewRevision(graph,
+		// Create a new branch B1
+				DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graph, revisionNumber1, "B1");
+
+		String revisionB1_0 = RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-2.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-2.nt"), user,
 				"2015-03-02T09:06:52",
-				"test commit message 2", revisionNumber1);
-		result.revisions.put("master-2", revisionNumber2);
+				"test commit message 2", "B1".toLowerCase());
+		result.revisions.put("b1-0", revisionB1_0);
 		
 		String revisionNumber3 = RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-3.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-3.nt"), user,
 				"2015-04-08T14:07:59",
-				"test commit message 3", revisionNumber2);
+				"test commit message 3", revisionNumber1);
 		result.revisions.put("master-3", revisionNumber3);
 		
 		String revisionNumber4 = RevisionManagement.createNewRevision(graph,
@@ -121,12 +125,14 @@ public class SampleDataSet {
 				"2015-05-10T08:12:23",
 				"test commit message 4", revisionNumber3);
 		result.revisions.put("master-4", revisionNumber4);
-		
+		ArrayList<String> usedRevisions5 = new ArrayList<>();
+		usedRevisions5.add(revisionNumber4);
+		usedRevisions5.add(revisionB1_0);
 		String revisionNumber5 = RevisionManagement.createNewRevision(graph,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-5.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-5.nt"), user,
 				"2015-06-21T23:07:52",
-				"test commit message 5", revisionNumber4);
+				"test commit message 5", usedRevisions5);
 		result.revisions.put("master-5", revisionNumber5);
 		return result;
 	}
