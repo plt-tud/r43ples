@@ -236,6 +236,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
 
         // light blue color for tags
         colors(0);*/
+        colors(0);
 		//console.log(data)
 		create_revision_model(data);
 		getChangeSets();
@@ -272,7 +273,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
                           ["%d.%b", function(d) {var dd = new Date(d); return dd.getDate() != 1; }],
                                ["%B", function(d) {var dd = new Date(d); return dd.getMonth(); }],
                                ["%Y", function() { return true; }]]));*/
-    
+
         svg.append("g")
         .attr("class", "x axis")
         .attr("transform", "translate(0," + (maxYpos+padd) + ")")
@@ -455,7 +456,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
                     branches[key].derivedFrom = value["http://www.w3.org/ns/prov#wasDerivedFrom"]?value["http://www.w3.org/ns/prov#wasDerivedFrom"][0].value:null;
                     branches[key].revs=[];
                     if (branches[key].color == null) {
-                        branches[key].color = d3.rgb(colors(j)).brighter().toString();
+                        branches[key].color = colors(key);//d3.rgb(colors(j)).brighter().toString();
                     }
                     break;
                 // Falls Tag
@@ -471,7 +472,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
                         branches[key] = {};
                     }
                     // Alle Masterbranches sollen immer die gleiche Farbe haben
-                    branches[key].color = "#5555ff";
+                    branches[key].color = colors(0);//"#5555ff";
                     break;
                 }
             }
