@@ -141,13 +141,13 @@ function drawGraph(div_selector, _JSON, _showTags) {
         return minwidth;
     }
         
-    function getPath(d){
+    function getPath(d, i){
         var x1,x2,y1,y2;
         var rad = 5;
         x1 = x(d.origin.d3time.getTime())-r;
-        x2 = x(revisions[d.used].d3time.getTime())+r;
+        x2 = x(revisions[d.used[i]].d3time.getTime())+r;
         y1 = branchPositions[d.origin.belongsTo].pos*padd+2*r;
-        y2 = branchPositions[revisions[d.used].belongsTo].pos*padd+2*r;
+        y2 = branchPositions[revisions[d.used[i]].belongsTo].pos*padd+2*r;
         var pathd = 'M'+ x1 + ' ' +y1;
         if (y1 != y2){
             pathd += 'h'+(x2-x1+2*rad);
@@ -198,7 +198,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
     	
     	revG.selectAll('path')
     	.data(function(d){return d.used?d.used:[];})
-    	.attr('d', function(d){return getPath(d);});
+    	.attr('d', function(d, i){return getPath(d, i);});
     	
     	revG.selectAll('circle')
         .attr('cx', function(d){return x(d.d3time.getTime());})
@@ -304,7 +304,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
             .attr('class', 'lines')
         	.style('fill',"none")
         	.style('opacity',.65)
-            .attr('d', function(d){return getPath(d);});
+            .attr('d', function(d, i){return getPath(d, i);});
             /*revGenter.append('line')
             .attr('x1', function(d){return x(revisions[d.used].d3time);})
             .attr('y1', function(d){return branchPositions[revisions[d.used].belongsTo].pos*padd+40;})
