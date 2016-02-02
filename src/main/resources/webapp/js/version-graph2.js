@@ -87,7 +87,24 @@ function drawGraph(div_selector, _JSON, _showTags) {
     d3.select('#changesets').append('div')
     	.attr('id','addsets')
     d3.select('#changesets').append('div')
-    	.attr('id','deletesets')
+    	.attr('id','deletesets');
+    d3.select(div_selector)
+    .append('label')
+    .text('Show Axis ')
+    .append('input')
+    .attr('type','checkbox')
+    .attr('checked', true)
+    .on('change', function(){
+    	if(this.checked){
+    		svg.select('g.x.axis').style('display','');
+    		svg.style('height',(5+$('g.x.axis')[0].getBoundingClientRect().height));    		
+    	}
+    	else{
+    		svg.select('g.x.axis').style('display','none');
+    		svg.style('height',(maxYpos+padd));
+    	}});
+    	//console.log(this, this.checked);});
+    //.html("<input type='checkbox' class='toggle-tags'>Show Axis");
 
 
 	// ChangeListener for tags
