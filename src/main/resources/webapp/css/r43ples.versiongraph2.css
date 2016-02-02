@@ -1,7 +1,7 @@
 .revisionGraphVisualisation svg {
-	background-color: WhiteSmoke;
+	/*background-color: WhiteSmoke;*/
 	height: 368px;
-	border:1px solid #000000;
+	border:1px solid #CBCBCB;
 	margin:1px;
 	overflow:hidden;
     cursor: default;
@@ -77,4 +77,17 @@ li {
 
 .node text {
     pointer-events: none;
+}
+
+.axis {
+  font: 10px sans-serif;
+}
+
+.x.axis  path, .x.axis line {
+  stroke: #000;
+}
+.axis path,
+.axis line {
+  fill: none;
+  shape-rendering: crispEdges;
 }
