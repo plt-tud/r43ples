@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (MiKTeX 2.9) (preloaded format=pdflatex 2015.10.5)  26 JAN 2016 10:59
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (MiKTeX 2.9) (preloaded format=pdflatex 2015.10.5)  2 FEB 2016 21:38
 entering extended mode
 **C:/Users/Dominik/Desktop/studium/Wahlmodule/Mensch-Maschine-Systemtechnik/Pro
 jekt/Quelltext/r43ples/dokumentation/Abschlussdokumentation/Dokumentation.tex
@@ -363,25 +363,38 @@ Package: paralist 2013/06/09 v2.4 Extended list environments
 \plparsep=\skip49
 \pl@lab=\toks17
 )
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\subfigure\subfigure.sty
-Package: subfigure 2002/07/30 v2.1.4 subfigure package
-\subfigtopskip=\skip50
-\subfigcapskip=\skip51
-\subfigcaptopadj=\dimen106
-\subfigbottomskip=\skip52
-\subfigcapmargin=\dimen107
-\subfiglabelskip=\skip53
-\c@subfigure=\count89
-\c@lofdepth=\count90
-\c@subtable=\count91
-\c@lotdepth=\count92
+(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\subfig\subfig.sty
+Package: subfig 2005/06/28 ver: 1.3 subfig package
 
-****************************************
-* Local config file subfigure.cfg used *
-****************************************
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\subfigure\subfigure.cfg)
-\subfig@top=\skip54
-\subfig@bottom=\skip55
+(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\caption\caption.sty
+Package: caption 2015/09/17 v3.3-111 Customizing captions (AR)
+
+(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\caption\caption3.sty
+Package: caption3 2015/09/20 v1.7-115 caption3 kernel (AR)
+Package caption3 Info: TeX engine: e-TeX on input line 57.
+\captionmargin=\dimen106
+\captionmargin@=\dimen107
+\captionwidth=\dimen108
+\caption@tempdima=\dimen109
+\caption@indent=\dimen110
+\caption@parindent=\dimen111
+\caption@hangindent=\dimen112
+)
+\c@ContinuedFloat=\count89
+)
+\c@KVtest=\count90
+\sf@farskip=\skip50
+\sf@captopadj=\dimen113
+\sf@capskip=\skip51
+\sf@nearskip=\skip52
+\c@subfigure=\count91
+\c@subfigure@save=\count92
+\c@lofdepth=\count93
+\c@subtable=\count94
+\c@subtable@save=\count95
+\c@lotdepth=\count96
+\sf@top=\skip53
+\sf@bottom=\skip54
 )
 
 LaTeX Warning: Unused global option(s):
@@ -403,21 +416,24 @@ LaTeX Font Info:    ... okay on input line 12.
 
 (C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\context\base\supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
-\scratchcounter=\count93
-\scratchdimen=\dimen108
+\scratchcounter=\count97
+\scratchdimen=\dimen114
 \scratchbox=\box27
-\nofMPsegments=\count94
-\nofMParguments=\count95
+\nofMPsegments=\count98
+\nofMParguments=\count99
 \everyMPshowfont=\toks18
-\MPscratchCnt=\count96
-\MPscratchDim=\dimen109
-\MPnumerator=\count97
-\makeMPintoPDFobject=\count98
+\MPscratchCnt=\count100
+\MPscratchDim=\dimen115
+\MPnumerator=\count101
+\makeMPintoPDFobject=\count102
 \everyMPtoPDFconversion=\toks19
 )
 
 bibgerm.sty: (n)german.sty 2.5b detected
 
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: subfig package v1.3 is loaded.
+Package caption Info: End \AtBeginDocument code.
 LaTeX Font Info:    Try loading font information for T1+din on input line 20.
 LaTeX Font Info:    No file T1din.fd. on input line 20.
 
@@ -466,39 +482,37 @@ LaTeX Font Warning: Font shape `T1/aun/l/it' undefined
 ]
 Kapitel 2.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 41.
+(Font)              <8> on input line 42.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 41.
+(Font)              <6> on input line 42.
 [7] <Vorarbeiten.png, id=36, 975.645pt x 728.7225pt>
 File: Vorarbeiten.png Graphic file (type png)
  <use Vorarbeiten.png>
-Package pdftex.def Info: Vorarbeiten.png used on input line 45.
+Package pdftex.def Info: Vorarbeiten.png used on input line 46.
 (pdftex.def)             Requested size: 512.1483pt x 382.52945pt.
 
-Overfull \hbox (85.35696pt too wide) in paragraph at lines 45--46
+Overfull \hbox (85.35696pt too wide) in paragraph at lines 46--47
  [][] 
  []
 
-[8 <./Vorarbeiten.png>] <Git2PROV.png, id=40, 758.835pt x 379.4175pt>
+<Git2PROV.png, id=37, 758.835pt x 379.4175pt>
 File: Git2PROV.png Graphic file (type png)
-
-<use Git2PROV.png>
-Package pdftex.def Info: Git2PROV.png used on input line 62.
+ <use Git2PROV.png>
+Package pdftex.def Info: Git2PROV.png used on input line 61.
 (pdftex.def)             Requested size: 426.79134pt x 213.39865pt.
- <GitHubDesktop.png, id=42, 2015.53pt x 1210.5225pt>
+ [8 <./Vorarbeiten.png>] <GitHubDesktop.png, id=42, 2015.53pt x 1210.5225pt>
 File: GitHubDesktop.png Graphic file (type png)
 
 <use GitHubDesktop.png>
-Package pdftex.def Info: GitHubDesktop.png used on input line 72.
+Package pdftex.def Info: GitHubDesktop.png used on input line 70.
 (pdftex.def)             Requested size: 426.79134pt x 256.32292pt.
- [9 <./Git2PROV.png>]
-<TortoiseGit.png, id=48, 1027.58907pt x 526.21594pt>
+ <TortoiseGit.png, id=43, 1027.58907pt x 526.21594pt>
 File: TortoiseGit.png Graphic file (type png)
- <use TortoiseGit.png>
-Package pdftex.def Info: TortoiseGit.png used on input line 84.
-(pdftex.def)             Requested size: 426.79134pt x 218.55219pt.
 
-[10 <./GitHubDesktop.png>] [11 <./TortoiseGit.png>] [12
+<use TortoiseGit.png>
+Package pdftex.def Info: TortoiseGit.png used on input line 79.
+(pdftex.def)             Requested size: 426.79134pt x 218.55219pt.
+ [9 <./Git2PROV.png>] [10 <./GitHubDesktop.png>] [11 <./TortoiseGit.png>] [12
 
 ]
 Kapitel 3.
@@ -508,51 +522,76 @@ Kapitel 4.
 File: Mockup_Changeset.png Graphic file (type png)
 
 <use Mockup_Changeset.png>
-Package pdftex.def Info: Mockup_Changeset.png used on input line 154.
+Package pdftex.def Info: Mockup_Changeset.png used on input line 152.
 (pdftex.def)             Requested size: 209.1301pt x 133.3107pt.
 
 <Mockup_Mouseover.png, id=67, 878.28125pt x 554.07pt>
 File: Mockup_Mouseover.png Graphic file (type png)
 
 <use Mockup_Mouseover.png>
-Package pdftex.def Info: Mockup_Mouseover.png used on input line 155.
+Package pdftex.def Info: Mockup_Mouseover.png used on input line 153.
 (pdftex.def)             Requested size: 209.1301pt x 131.93117pt.
 
 <Mockup_Querformat.png, id=68, 894.34125pt x 570.13pt>
 File: Mockup_Querformat.png Graphic file (type png)
 
 <use Mockup_Querformat.png>
-Package pdftex.def Info: Mockup_Querformat.png used on input line 165.
+Package pdftex.def Info: Mockup_Querformat.png used on input line 162.
 (pdftex.def)             Requested size: 426.79134pt x 272.07599pt.
  [15
 
- <./Mockup_Changeset.png> <./Mockup_Mouseover.png>] <Tooltip.png, id=74, 924.45
-375pt x 712.6625pt>
-File: Tooltip.png Graphic file (type png)
- <use Tooltip.png>
-Package pdftex.def Info: Tooltip.png used on input line 173.
-(pdftex.def)             Requested size: 426.79134pt x 329.01404pt.
-LaTeX Font Info:    Try loading font information for OMS+aun on input line 183.
+ <./Mockup_Changeset.png> <./Mockup_Mouseover.png>]
+LaTeX Font Info:    Try loading font information for OMS+aun on input line 172.
 
-LaTeX Font Info:    No file OMSaun.fd. on input line 183.
+LaTeX Font Info:    No file OMSaun.fd. on input line 172.
 
 
 LaTeX Font Warning: Font shape `OMS/aun/l/n' undefined
 (Font)              using `OMS/cmsy/m/n' instead
-(Font)              for symbol `textbullet' on input line 183.
+(Font)              for symbol `textbullet' on input line 172.
 
-LaTeX Font Info:    Try loading font information for T1+cmtt on input line 183.
+LaTeX Font Info:    Try loading font information for T1+cmtt on input line 172.
 
 ("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\t1cmtt.fd"
 File: t1cmtt.fd 2014/09/29 v2.5h Standard LaTeX font definitions
-) [16 <./Mockup_Querformat.png>] [17 <./Tooltip.png>] (Dokumentation.bbl [18]
+)
+<detail_graph.jpg, id=74, 902.6222pt x 478.03593pt>
+File: detail_graph.jpg Graphic file (type jpg)
+ <use detail_graph.jpg>
+Package pdftex.def Info: detail_graph.jpg used on input line 182.
+(pdftex.def)             Requested size: 209.1301pt x 110.7556pt.
+
+<graph_ohne_achse.jpg, id=75, 892.08281pt x 277.78781pt>
+File: graph_ohne_achse.jpg Graphic file (type jpg)
+
+<use graph_ohne_achse.jpg>
+Package pdftex.def Info: graph_ohne_achse.jpg used on input line 183.
+(pdftex.def)             Requested size: 209.1301pt x 65.11906pt.
+ <detail.jpg, id=76, 871.00406pt x 345.54094pt>
+File: detail.jpg Graphic file (type jpg)
+
+<use detail.jpg>
+Package pdftex.def Info: detail.jpg used on input line 184.
+(pdftex.def)             Requested size: 209.1301pt x 82.96315pt.
+ <tooltip_click.jpg, id=77, 914.66719pt x 511.15968pt>
+File: tooltip_click.jpg Graphic file (type jpg)
+
+<use tooltip_click.jpg>
+Package pdftex.def Info: tooltip_click.jpg used on input line 185.
+(pdftex.def)             Requested size: 209.1301pt x 116.87007pt.
+ [16 <./Mockup_Querformat.png>] [17 <./detail_graph.jpg> <./graph_ohne_achse.jp
+g> <./detail.jpg> <./tooltip_click.jpg>] [18
+
+]
+Kapitel 5.
+(Dokumentation.bbl [19] [20
+
+]
 
 LaTeX Font Warning: Font shape `T1/aun/l/sc' undefined
 (Font)              using `T1/aun/l/n' instead on input line 4.
 
-) [19
-
-] [20
+) [21] [22
 
 ] (Dokumentation.lof
 Overfull \hbox (17.2115pt too wide) in paragraph at lines 5--5
@@ -568,19 +607,19 @@ Overfull \hbox (0.46559pt too wide) in paragraph at lines 5--5
 
 )
 \tf@lof=\write4
- [21] (Dokumentation.aux)
+ [23] (Dokumentation.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 2526 strings out of 493673
- 32137 string characters out of 3141524
- 91231 words of memory out of 3000000
- 5831 multiletter control sequences out of 15000+200000
+ 3597 strings out of 493673
+ 52038 string characters out of 3141524
+ 118751 words of memory out of 3000000
+ 6894 multiletter control sequences out of 15000+200000
  13754 words of font info for 32 fonts, out of 3000000 for 9000
  1025 hyphenation exceptions out of 8191
- 34i,16n,24p,1214b,430s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 44i,16n,47p,2301b,433s stack positions out of 5000i,500n,10000p,200000b,50000s
 {C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/enc/dvips/cm-super/cm-supe
 r-t1.enc}<C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy
 10.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super
@@ -594,9 +633,9 @@ ing/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm1440.pfb><C:/Users/Dominik/AppDa
 ta/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm2488.pfb><C:/Users/Domini
 k/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sftt0800.pfb><C:/Users
 /Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sftt1000.pfb>
-Output written on Dokumentation.pdf (21 pages, 964952 bytes).
+Output written on Dokumentation.pdf (23 pages, 1344448 bytes).
 PDF statistics:
- 135 PDF objects out of 1000 (max. 8388607)
+ 143 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 46 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 61 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -33,7 +33,7 @@
 }
 
 @Book{SemanticWeb,
-  Title                    = {Semantic Web zur Unterstützung von Wissensgemeinschaften},
+  Title                    = {Semantic Web zur Unterst"utzung von Wissensgemeinschaften},
   Author                   = {Rolf Gr"utter},
   Publisher                = {Oldenbourg Verlag M"unchen},
   Year                     = {2008},
@@ -79,7 +79,8 @@
 
   Author                   = {Heike J"anicke},
   HowPublished             = {Vorlesungsunterlagen Visualisierung I},
-  Note                     = {Uni Heidelberg},
+  Note                     = {Universit"at Heidelberg},
+  Year                     = {2012},
 
   Owner                    = {Dominik},
   Timestamp                = {2015.11.06}

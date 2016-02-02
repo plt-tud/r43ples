@@ -18,3 +18,5 @@
 \contentsline {chapter}{\numberline {4}Gestaltungsentwurf und Implementierung}{15}
 \contentsline {section}{\numberline {4.1}Mockups}{15}
 \contentsline {section}{\numberline {4.2}Umsetzung}{16}
+\contentsline {subsection}{\numberline {4.2.1}Darstellung der L\IeC {\"o}sung}{17}
+\contentsline {chapter}{\numberline {5}Fazit und Ausblick}{19}

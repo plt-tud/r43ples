@@ -17,8 +17,9 @@
 \newblock De Gruyter, 2013.
 
 \bibitem{CAE}
-{\sc Graube, M.}: {\em Vorlesungsunterlagen CAE - Revisisonsverwaltung: R43ples
-  als RCS f"ur Linked Data\/}, 2015.
+{\sc Graube, M.}: {\em Revisisonsverwaltung: R43ples als RCS f"ur Linked
+  Data\/}.
+\newblock Vorlesungsunterlagen CAE, TU Dresden, 2015.
 
 \bibitem{Graube}
 {\sc Graube, M.}, {\sc S.~Hensel} \btxandshort{.}\ {\sc L.~Urbas}: {\em
@@ -40,8 +41,7 @@
 
 \bibitem{Aesthetik}
 {\sc J"anicke, H.}: {\em Darstellung von Graphen\/}.
-\newblock Vorlesungsunterlagen Visualisierung I.
-\newblock Uni Heidelberg.
+\newblock Vorlesungsunterlagen Visualisierung I, Universit"at Heidelberg, 2012.
 
 \bibitem{Git2PROV}
 {\sc Nies, T.~D.}, {\sc S.~Magliacane}, {\sc R.~Verborgh}, {\sc S.~Coppens},
