@@ -149,7 +149,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
         y1 = branchPositions[d.origin.belongsTo].pos*padd+2*r;
         y2 = branchPositions[revisions[d.used[i]].belongsTo].pos*padd+2*r;
         var pathd = 'M'+ x1 + ' ' +y1;
-        if (y1 != y2){
+        if (y1 > y2){
             pathd += 'h'+(x2-x1+2*rad);
             //arc
             pathd += 'a '+rad+' '+rad+' 0 0,1 -'+rad+',-'+rad  ;//rad, 90
@@ -158,7 +158,20 @@ function drawGraph(div_selector, _JSON, _showTags) {
             //arc
             pathd += 'a'+rad+' '+rad+' 0 0,0 -'+rad+',-'+rad ;//rad, 90
         }
-        else{ pathd += 'h'+(x2-x1);}
+        else{
+        	if (y1 < y2){
+                //arc
+                pathd += 'a '+rad+' '+rad+' 0 0,0 -'+rad+','+rad  ;//rad, 90
+                
+                pathd += 'v' + (y2-y1-2*rad);
+                //arc
+                pathd += 'a'+rad+' '+rad+' 0 0,1 -'+rad+','+rad ;//rad, 90
+                
+                pathd += 'h'+(x2-x1+2*rad);
+            }
+        	else{pathd += 'h'+(x2-x1);}
+        	
+        	}
             
         return pathd;
     }
