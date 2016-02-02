@@ -176,7 +176,12 @@ function drawGraph(div_selector, _JSON, _showTags) {
     
     function updateXscale(){
     	svg.select("g.x.axis")
-        .call(xAxis);
+        .call(xAxis)
+        .selectAll("text")
+        .style("text-anchor", "start")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-90)");
     	
     	var branchG = svg.selectAll('.branch')
         .data(branch_ar);
