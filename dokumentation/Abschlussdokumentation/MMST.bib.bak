@@ -1,0 +1,98 @@
+% This file was created with JabRef 2.10.
+% Encoding: Cp1252
+
+
+@Book{Graphenoptimierung,
+  Title                    = {Graphen- und Netzwerkoptimierung},
+  Author                   = {Christina B"using},
+  Publisher                = {Spektrum Akademischer Verlag},
+  Year                     = {2010},
+
+  Owner                    = {Dominik},
+  Timestamp                = {2015.11.06}
+}
+
+@Article{Gruppe2.3,
+  Title                    = {Konzeption und Gestaltung einer Revisionsdarstellung f"ur das semantische Revisionsverwaltungssystem R43ples},
+  Author                   = {Lukas Buntkiel and Alexander Lehmann and Miao Zhang and Sven Sch"onfeld and Falk-Jonatan Straube},
+  Journal                  = {Dokumentation zum Projekt Mensch-Maschine-Systemtechnik},
+  Year                     = {2015},
+
+  Owner                    = {Dominik},
+  Timestamp                = {2015.11.06}
+}
+
+@Book{diskreteMathematik,
+  Title                    = {Elemente der diskreten Mathematik},
+  Author                   = {Volker Diekert and Manfred Kufleitner and Gerhard Rosenberger},
+  Publisher                = {De Gruyter},
+  Year                     = {2013},
+
+  Owner                    = {Dominik},
+  Timestamp                = {2015.11.06}
+}
+
+@Book{SemanticWeb,
+  Title                    = {Semantic Web zur Unterst"utzung von Wissensgemeinschaften},
+  Author                   = {Rolf Gr"utter},
+  Publisher                = {Oldenbourg Verlag M"unchen},
+  Year                     = {2008},
+
+  Owner                    = {Dominik},
+  Timestamp                = {2015.11.19}
+}
+
+@Misc{CAE,
+  Title                    = {Vorlesungsunterlagen CAE - Revisisonsverwaltung: R43ples als RCS f"ur Linked Data},
+
+  Author                   = {Markus Graube},
+  Year                     = {2015},
+
+  Owner                    = {Dominik},
+  Timestamp                = {2015.11.19}
+}
+
+@Article{Graube,
+  Title                    = {R43ples: Revisions for Triples - An Approach for Version Control in the Semantic Web},
+  Author                   = {Markus Graube and Sebastian Hensel and Leon Urbas},
+  Journal                  = {Proceedings of the 1st Workshop on Linked Data Quality (LDQ)},
+  Year                     = {2014},
+  Volume                   = {1215},
+
+  Owner                    = {Dominik},
+  Timestamp                = {2015.11.07}
+}
+
+@Article{Gruppe2.1,
+  Title                    = {Konzeption und Gestaltung einer Revisionsdarstellung f"ur das semantische Revisionsverwaltungssystem R43ples},
+  Author                   = {Florian Hoffmann and Marius M"uller and Woldemar Nebyliza and Jannes Riffert},
+  Journal                  = {Dokumentation zum Projekt Mensch-Maschine-Systemtechnik},
+  Year                     = {2015},
+
+  HowPublished             = {Dokumentation},
+  Owner                    = {Dominik},
+  Timestamp                = {2015.11.06}
+}
+
+@Misc{Aesthetik,
+  Title                    = {Darstellung von Graphen},
+
+  Author                   = {Heike J"anicke},
+  HowPublished             = {Vorlesungsunterlagen Visualisierung I},
+  Note                     = {Universit"at Heidelberg},
+  Year                     = {2012},
+
+  Owner                    = {Dominik},
+  Timestamp                = {2015.11.06}
+}
+
+@Article{Git2PROV,
+  Title                    = {Git2PROV: Exposing Version Control System Content as W3C PROV},
+  Author                   = {Nies, Tom De and Magliacane, Sara and Verborgh, Ruben and Coppens, Sam and Groth, Paul and Mannens, Erik and Rik Van de Walle},
+  Journal                  = {Poster and Demo Proceedings of the 12th International Semantic Web Conference},
+  Year                     = {2013},
+
+  Owner                    = {Dominik},
+  Timestamp                = {2015.11.04}
+}
+

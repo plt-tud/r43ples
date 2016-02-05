@@ -1,0 +1,39 @@
+{{<super}}
+
+{{$title}}Revision Graph{{/title}}
+
+{{$head_extra}}
+    <link rel="stylesheet" href="/static/css/r43ples.versiongraph2.css">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="/static/css/jquery.qtip.css">
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+{{/head_extra}}
+ 
+{{$script_extra}}   
+<script src="/static/js/d3.min.js"></script>
+<script src="/static/js/dagre-d3.js"></script>
+<script src="/static/js/jquery.qtip.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script src="/static/js/version-graph2.js"></script>
+<script src="/static/js/TurtleParser.js"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        drawGraph("#visualisation", "revisiongraph?graph={{graphName}}&format=application/json", false, false);
+    });
+</script>
+{{/script_extra}}
+    
+{{$content}}
+<div class="row">
+	<div class= "col-sm-12">
+	<h1>Revision Graph</h1>
+	    <h2><samp>&lt;{{graphName}}&gt;</samp></h2>
+		<div id="visualisation"></div>
+		<br>
+		<a class="btn btn-default" href="sparql">Back to Endpoint</a>
+	</div>
+</div>
+{{/content}}
+
+{{/super}}

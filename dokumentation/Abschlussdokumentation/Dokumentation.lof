@@ -1,0 +1,18 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {2.1}{\ignorespaces Visualisierungen der vorherigen Gruppen, links Gruppe 2.1 (aus \cite {Gruppe2.1}), rechts Gruppe 2.3 (aus \cite {Gruppe2.3})}}{8}
+\contentsline {figure}{\numberline {2.2}{\ignorespaces Darstellung eines Graphen mit Git2PROV, entnommen aus \cite {Git2PROV}}}{9}
+\contentsline {figure}{\numberline {2.3}{\ignorespaces Darstellung eines Graphen mit GitHub Dekstop, entnommen von \GitHubDesktop , abgerufen am 24.11.2015}}{10}
+\contentsline {figure}{\numberline {2.4}{\ignorespaces Darstellung eines Graphen mit Tortoise Git\relax }}{11}
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Erster Mockup\relax }}{15}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Darstellung des Graphen und des gesamten Changesets bei Klick}}}{15}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Anzeige spezifischer Informationen bei Mouseover}}}{15}
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Mockup im Querformat mit Anzeige der Add und Delete Sets\relax }}{16}
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Darstellung der L\IeC {\"o}sung\relax }}{17}
+\contentsline {subfigure}{\numberline {(a)}{\ignorespaces {Graph mit Zeitachse und Revision 4 angeklickt }}}{17}
+\contentsline {subfigure}{\numberline {(b)}{\ignorespaces {Graph ohne Zeitachse, keine Version angeklickt }}}{17}
+\contentsline {subfigure}{\numberline {(c)}{\ignorespaces {Add und Delete Sets zu Revision 4 }}}{17}
+\contentsline {subfigure}{\numberline {(d)}{\ignorespaces {Darstellung eines komplizierteren Graphen mit angelickter Revision 9 und Mouseover Feld von Revision 7 }}}{17}
+\addvspace {10\p@ }

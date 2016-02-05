@@ -63,7 +63,7 @@ var revTooltip = function (name, node) {
         "<tr><td>URL:</td><td>" + name + "</td><td></td></tr>" +
         "<tr><td>Add Set:</td><td>" + node.addSet + "</td><td><a href='" + node.addSet + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
         "<tr><td>Delete Set:</td><td>" + node.deleteSet + "</td><td><a href='" + node.deleteSet + "' target='_blank'><i class='fa fa-external-link'></i></a></td></tr>" +
-        "</table></p>";
+        "</table>";
        
     // Falls die Revision Version 0 ist, kann keine Information zum Commit angegeben werden
     if (node.commit == null) {

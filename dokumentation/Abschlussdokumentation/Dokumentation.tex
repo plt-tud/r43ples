@@ -1,0 +1,204 @@
+\documentclass[nocolor]{tudbook}
+\usepackage{tudthesis, german}
+\usepackage[utf8]{inputenc}
+\usepackage{bibgerm}
+\usepackage{url}
+\usepackage{paralist}
+\usepackage{subfig}
+\usepackage{german}
+
+\urldef{\GitHubDesktop}\url{https://assets-cdn.github.com/images/modules/home/desktop-mac.png?v=1}
+
+\begin{document}
+\einrichtung{Fakult"at Elektrotechnik und Informationstechnik,}
+\institut{Institut f"ur Automatisierungstechnik}
+\thesis{Dokumentation zum Projekt Mensch-Maschine-Systemtechnik}
+\author{Gruppe 6: Dominik Baumann, Johannes Börnicke, Katrin Messbauer, Angela Wobar}
+\title{Weiterentwicklung einer Revisionsdarstellung für das Revisionsverwaltungssystem R43ples}
+\supervisor{Dipl.-Ing. M. Graube}
+\submitdate{05. Februar 2016}
+\maketitle
+
+\tableofcontents
+
+\chapter{Motivation}
+Um mit mehreren Personen koordiniert an großen Softwareprojekten arbeiten zu können, ist ein Versionsverwaltungssystem unerlässlich. Das Ziel dieser Systeme ist eine inkrementelle Entwicklung des Projektes, bei der die Historie jederzeit verfügbar ist. Dies bietet den Vorteil, dass die Änderungsgeschichte nachvollziehbar bleibt und jederzeit auf alte Versionen zurückgegriffen werden kann. Außerdem kann parallel auf verschiedenen Branches (Zweigen) entwickelt werden, so können also mehrere Personen gleichzeitig am gleichen Projekt arbeiten und das Versionsverwaltungssystem sollte dann auch eine Möglichkeit bieten, diese verschiedenen Versionen nachher in eine zu integrieren (auch: \textit{mergen}). Der Begriff \textit{Revision} bezeichnet dabei einen eindeutigen Versionsstand des Projektes (auch: \textit{Repository}), der durch eine Revisionsnummer eindeutig bestimmt ist \cite{CAE}. Um eine gute Nutzbarkeit des Systems zu gewährleisten, sind zudem eine ansprechende Visualisierung sowie die Bedienbarkeit essentiell.
+
+Insbesondere für das Semantic Web mangelt es derzeit noch an einem solchen System, weshalb es in der Industrie noch nicht akzeptiert ist. Das Semantic Web stellt eine Erweiterung des Webs dar, mit der Informationen einfacher austausch- und verwertbar werden sollen, indem zu Begriffen zusätzliche semantische Informationen hinzugefügt werden \cite{SemanticWeb}. In \cite{Graube} wird mit \textit{R43ples} ein Konzept für ein solches Versionsverwaltungssystem vorgestellt. Zur Visualisierung werden hier gerichtete Graphen verwendet. Es existieren eine komplette semantische Beschreibung und Mergingmöglichkeiten. Zur Datenabfrage gibt es zudem ein SPARQL Interface. 
+
+In der vorliegenden Arbeit soll die vorhandene Visualisierung erweitert werden, um die Changesets der einzelnen Revisionen sichtbar zu machen. Dabei werden zunächst bestehende Konventionen und Ästhetikkriterien für Graphen untersucht und die bisherigen Arbeiten an R43ples, sowie andere Konzepte für Versionsverwaltungssystemen für das Semantic Web bzw. Linked Data im Allgemeinen analysiert, um auf dieser Basis anschließend eine eigene Visualisierung zu entwerfen und zu implementieren. Diese soll sich, um eine unkomplizierte Integration zu gewährleisten, direkt in die HTML-Oberfläche des bestehenden Gesamtsystems einfügen.
+
+\chapter{Stand der Technik}
+In \cite{Graube} wurde das Versionsverwaltungssystem \textit{R43ples} etabliert und mittels gerichteter Graphen visualisiert. Die Visualisierung wurde bereits in \cite{Gruppe2.3,Gruppe2.1} weiterentwickelt. Diese Entwicklung soll in der vorliegenden Arbeit fortgesetzt werden. Da die Visualisierung mittels gerichteter Graphen erfolgen soll, werden zunächst grundlegende Richtlinien und Ästhtetikkriterien zur Darstellung gerichteter Graphen diskutiert. Anschließend werden die vorhandenen Arbeiten an \textit{R43ples} sowie weitere Darstellungen von Versionsverwaltungssystemen aus der Literatur und dem Internet analysiert.
+
+\section{Grundlegende Richtlinen}
+\label{sec:Richtlinien}
+Ein Graph ist definiert als eine Menge an Knoten und Kanten, wobei jede Kante zwei Knoten aus dieser Menge verbindet \cite[Seite 2]{Graphenoptimierung}. Sie dienen zur Veranschaulichung von Relationen zwischen Objekten, so können also sehr kompakt Informationen und Beziehungen zwischen den Informationen dargestellt werden. Graphen können dabei u.a. in gerichtete und ungerichtete Graphen unterteilt werden. Bei ungerichteten Graphen wird nicht zwischen Start- und Zielknoten unterschieden, bei gerichteten Graphen ist eine solche Unterscheidung vorhanden \cite{diskreteMathematik}. Für die Aufgabenstellung liegt also ein gerichteter Graph vor, da jeder Knoten einen Vorgänger und einen Nachfolger hat und diese klar unterscheidbar sind.
+
+Für das Zeichnen von Graphen existieren einige Konventionen, die die Lesbarkeit erhöhen sollen und z.B. in \cite{Aesthetik} aufgeführt sind. Zu diesen Konventionen zählt, dass alle Kanten als gerade Linie gezeichnet werden sollten. Besondere Übersichtlichkeit wird erzielt, wenn der Graph kreuzungsfrei gezeichnet werden kann, sich die gezeichneten Linien also nicht schneiden. Diese Vorgabe kann in einem Versionsverwaltungssystem nicht immer eingehalten werden, allerdings kann hier der Begriff des planaren Graphens eingeführt werden. Ein Graph ist planar, wenn er durch Punkte und Linien der Zeichenebene dargestellt werden kann und sich die Linien höchstens an den Knoten schneiden. Diese Konvention soll bestmöglich umgesetzt werden. Neben den Konventionen gibt es einige Ästhetikkriterien, auf die ebenfalls geachtet werden soll. Dazu zählt die Minimierung der Schnittpunkte von Kanten, der Fläche und der Gesamtkantenlänge.
+
+\section{Bisherige Visualisierungen}
+\label{sec:alt}
+In \cite{Gruppe2.1} ist eine Möglichkeit zur Visualisierung bereits dargestellt. In diesem Entwurf steht der Graph im Mittelpunkt. Die einzelnen Knoten sind mit der Revisionsnummer beschriftet und durch die Pfeile ist ersichtlich, wie der Verlauf der Branches ist. Gleiche Branches sind zudem durch gleiche Farben gekennzeichnet. Durch einen Haken können zusätzlich die Tags\footnote{Unter einem Tag versteht man eine Art Etikett, der zu einem Commit hinzugefügt wird, um zum Beispiel den Stand des Projektes zu diesem Zeitpunkt festzuhalten.} angezeigt werden. In einem mouseover Feld werden bei Bedarf weitere Informationen angezeigt. Die Commits sind von oben nach unten angeordnet. Hierbei ist zwar ersichtlich, welche Commits innerhalb eines Branches nacheinander kamen, für zwei Commits aus unterschiedlichen Branches ist aber nicht erkenntlich, welcher zeitlich früher stattfand. Ein Beispielgraph ist in Abbildung \ref{fig:Vorarbeiten} links zu sehen.
+
+\begin{figure}[htbp] 
+  \centering
+     \includegraphics[width=1.2\textwidth]{Vorarbeiten.png}
+  \caption[Visualisierungen der vorherigen Gruppen, links Gruppe 2.1 (aus \cite{Gruppe2.1}), rechts Gruppe 2.3 (aus \cite{Gruppe2.3})]{Visualisierungen der vorherigen Gruppen, links Gruppe 2.1, rechts Gruppe 2.3}
+  \label{fig:Vorarbeiten}
+\end{figure}
+
+Die zweite Visualisierung in \cite{Gruppe2.3} stellt den Graphen mehr an die Seite und stellt mit dem Kommentar zu jedem Commit sowie dem Autor zusätzliche Informationen dar. Die zeitliche Abfolge ist hier ersichtlich, zudem ist eine Einteilung in Monate gegeben. Der Graph wird durch diese Darstellung allerdings relativ klein und der Text dominiert die Visualisierung. Im in Abbildung~\ref{fig:Vorarbeiten} rechts dargestellten Beispiel sind die Kommentare immer sehr kurz gehalten, dies muss aber nicht zwangsläufig so sein muss, sodass es in dieser Art der Darstellung bei längeren Kommentaren zu Zeilenumbrüchen kommt, was den Graph in die Länge zieht.  
+
+In der zum Beginn dieser Arbeit im Git Repository vorhandenen Version war der Graph zoombar. Befand sich der Mauszeiger im Feld des Graphen und es wurde gescroolt, wurde an den Graphen heran- bzw. davon weg gezoomt. Diese Funktionalität bietet nur einen geringen Vorteil, der Graph wird immer in einer gut lesbaren Größe dargestellt und im Zweifel mit einem Scrollbalken versehen, die Zoomfunktion bietet hier also keinen entscheidenden Vorteil. Allerdings muss zum Teil gescrollt werden, um alle Informationen zu erkennen. Dabei musste immer darauf geachtet werden, dass sich der Mauszeiger nicht im Feld des Graphen befand, um nicht aus Versehen zu zoomen anstatt zu scrollen. Deshalb wurde entschieden, auf diese Funktion ganz zu verzichten oder sie erst zu aktivieren, wenn zusätzlich zum Scrollen gleichzeitig beispielsweise die \glqq Strg\grqq{} Taste gedrückt wird.
+
+\section{Weitere Beispiele}
+\label{sec:WeitereLiteratur}
+\subsection{Git2PROV}
+\label{sec:Git2PROV}
+\begin{figure}[htbp] 
+  \centering
+     \includegraphics[width=\textwidth]{Git2PROV.png}
+  \caption[Darstellung eines Graphen mit Git2PROV, entnommen aus \cite{Git2PROV}]{Darstellung eines Graphen mit Git2PROV}
+  \label{fig:Git2PROV}
+\end{figure}
+In \cite{Git2PROV} wird mit W3C PROV ein neuer Standard eingeführt, um Versionskontrollsysteme wie Git einfacher benutzen und veröffentlichen zu können, zu sehen in Abbildung \ref{fig:Git2PROV}. Dort sind viele Informationen des semantischen Netzes dargestellt, die verschiedenen Arten von Informationen sind durch unterschiedliche Formen dargestellt. So sind die Commits in Rechtecken aufgeführt, die Namen der Autoren in Trapezen, außerdem sind die Kanten mit Spezifizierungen der Beziehungen, in der die Knoten stehen, versehen. Damit bietet dieses Format sehr viele Informationen, ist dabei aber weniger intuitiv und es braucht eine gewisse Einarbeitungszeit, bis damit umgegangen werden kann. Dieses Modell ist eher als Werkzeug für Entwickler gedacht und damit als Vorlage für R43ples nicht geeignet, da hier mehr auf den Anwender eingegangen werden soll, der die wesentlichen Informationen dargestellt haben möchte anstatt einer ausführlichen Beschreibung des semantischen Netzes.
+
+\subsection{GitHub Desktop}
+\begin{figure}[htb] 
+  \centering
+     \includegraphics[width=\textwidth]{GitHubDesktop.png}
+  \caption[Darstellung eines Graphen mit GitHub Dekstop, entnommen von \GitHubDesktop, abgerufen am 24.11.2015]{Darstellung eines Graphen mit GitHub Desktop}
+  \label{fig:GitHubDesktop}
+\end{figure}
+GitHub stellt ein Desktop Tool zur Verfügung, in dem ebenfalls der Verlauf der verschiedenen Branches eines Projektes zu sehen ist, dargestellt in Abbildung \ref{fig:GitHubDesktop}. Hier werden für den markierten Commit relativ umfangreiche Informationen angezeigt, es ist genau ersichtlich, was sich im Vergleich zur vorherigen Version geändert hat, außerdem sind die Kommentare der einzelnen Commits samt Benutzerbild des Autors zu sehen. Es wird zwischen Commits und Merges unterschieden und der Zeitverlauf ist durch unterschiedliche Abstände ersichtlich, außerdem wird unter dem Kommentar angezeigt, wie viel Zeit seitdem vergangen ist. Es werden allerdings nur die Commits des markierten Branches angezeigt und dort auch nur die aktuellsten. Dies erhöht die Übersichtlichkeit, insbesondere bei umfangreichen Projekten, die Suche nach einzlnen Commits gestaltet sich aber aufwendiger, auch weil die Knoten keine Beschriftung haben, wodurch eine direkte Zuordnung nicht möglich ist, die Revisionsnummer taucht gar nicht auf.
+
+\subsection{Tortoise Git}
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=\textwidth]{TortoiseGit.png}
+	\caption{Darstellung eines Graphen mit Tortoise Git}
+	\label{fig:TortoiseGit}
+\end{figure}
+Eine weitere Möglichkeit, Git zu nutzen, bietet die freie grafische Benutzeroberfläche Tortoise Git, zu sehen in Abbildung \ref{fig:TortoiseGit}. Dargestellt wird hier ein kleiner, von unten nach oben aufgebauter Graph, eine grafische Darstellung, ob Dateien gelöscht, hinzugefügt oder geändert wurden, die Commit Nachricht, der Autor und das Datum. Durch Klicken auf den jeweiligen Commit können genauere Infos abgerufen werden, z.B. welche Dateien genau geändert/hinzugefügt/gelöscht wurden, außerdem wird die Commit Nachricht komplett angezeigt, falls sie vorher aus Platzgründen nur zum Teil dargestellt werden konnte.
+
+Hier zeigt sich bereits ein Nachteil dieser Art der Darstellung. Lange Commit Nachrichten können nicht dargestellt werden, aus denen ersten Worten, die gezeigt werden können, ist nicht zwingend der Kontext ersichtlich. Zudem ist der Platz für den Graphen relativ gering, sodass große, weit verzweigte Graphen nicht übersichtlich dargestellt werden können.
+
+\chapter{Anforderungsdefinition}
+\section{Einleitung}
+Die im vorangegangenen Abschnitt analysierte, vorhandene Visualisierung für das semantische Revisionsverwaltungssystem R43ples soll erweitert werden, sodass die Inhalte der Changesets der Revisionen sichtbar werden. Der neue Entwurf soll sich dabei gut in die bisherige HTML-Oberfläche integrieren und gut skalieren in Bezug auf die Größe der Changesets.
+
+\section{Allgemeine Beschreibung}
+\subsection{Produktumgebung}
+Da Revisionsverwaltungssysteme im Allgemeinen vorwiegend auf Desktop-PCs oder Laptops, evtl. auch auf Tablets, verwendet werden, soll das Produkt für eine Nutzung an einem Bildschirm im Querformat optimiert werden. Das System muss sich in die bereits existierende Weboberfläche einfügen.
+
+\subsection{Benutzereigenschaften}
+Anders als die in Abschnitt \ref{sec:Git2PROV} beschriebene Visualisierung, die eher für Entwickler gedacht ist, ist R43ples für Normalanwender gedacht, die keine ausführliche Darstellung des semantischen Netzes, sondern eine übersichtliche Visualisierung der wichtigsten Informationen benötigen. 
+
+\section{Spezifische Anforderungen}
+\label{sec:Anforderungen}
+\subsection{Funktionale Anforderungen}
+\begin{enumerate}[F1]
+\item Der Graph muss durch geeignete Darstellung eine schnelle Auffindbarkeit der gesuchten Revision gewährleisten.
+	\begin{enumerate}[{F1}.1]
+	\item Die Revisionen werden automatisch nach dem Zeitpunkt des Commits von links nach rechts angeordnet, da ein Bildschirm im Querformat so mehr Platz für den Graphen bietet, ohne dass der Benutzer scrollen muss.
+	\item Die Revisionen sind den einzelnen Branches durch einheitliche Farbgebung aller Revisionen eines Branches und lineare Anordnung eines Branches zuordenbar zu machen.
+	\item Die Branches sind entsprechend ihrer Benennung zu beschriften.
+	\item Der Master-Branch muss durch eine immer gleiche Farbgebung und seine Position besonders leicht erkennbar sein.
+	\item Direkt auf den Knoten der Revisionen wird die Revisionsnummer dargestellt.
+	\item Die Knoten müssen immer die gleiche Größe haben, um sie gut erkennen zu können. Ist der Graph zu groß, um in einem Fenster dargestellt zu werden, wird ein Scrollbalken hinzugefügt. Beim Laden der Seite wird immer auf die aktuellste Version fokussiert.
+	\item Am oberen oder unteren Bildschirmrand soll eine Zeitleiste für die Commit-Zeitpunkte hinzugefügt werden.
+	\item Revisionen mit Tags sollen gesondert markiert werden.
+	\end{enumerate}
+\item Durch zusätzliche Darstellung von Tooltips beim Mouseover sollen dem Benutzer die wichtigsten Information schnell zugänglich gemacht werden.
+	\begin{enumerate}[{F2}.1]	
+	\item Beim Mouseover über eine Revision soll ein Tooltip-Fenster geöffnet werden, das sich automatisch wieder schließt, sobald der Benutzer den Mauszeiger vom Knoten wegbewegt.
+	\item Im Tooltip-Fenster sollen der Name des Autors, der Kommentar, die Anzahl der Adds und Deletes sowie Datum und Uhrzeit und, falls vorhanden, der Tag der Revision angezeigt werden.
+	\end{enumerate}
+\item Beim Klick auf eine Revision werden Detailinformation in einem Fenster unterhalb des Graphen dargestellt.
+	\begin{enumerate}[{F3}.1]	
+	\item Die Detailinformationen enthalten nochmals die Informationen aus dem Tooltip-Fenster, sowie zusätzlich eine Auflistung der Changesets.
+	\item Wenn mehr als eine maximale Anzahl an Adds/Deletes auftritt, wird das Fenster scrollbar.
+	\item Die Adds und Deletes sollen nebeneinander aufgeführt werden.
+	\item Die Detailansicht einer Revision bleibt solange erhalten, bis auf eine andere Revision geklickt wird und somit deren Detailansicht geöffnet wird.
+	\item Die aktuell angeklickte Revision soll hervorgehoben werden.
+	\item Damit die Detailinformationen sicher erreicht werden können, muss die Zoomfunktion entweder ausgeschaltet oder mit einer zusätzlichen Bedingung, zum Beispiel das Drücken der \glqq Strg\grqq{} Taste, versehen werden. 
+	\item URLs müssen in spitzen Klammern, Literale in Hochkommata dargestellt werden.
+	\end{enumerate}
+\end{enumerate}
+
+\subsection{Qualitätsanforderung}
+\begin{enumerate}[Q1]
+	\item Die in Abschnitt \ref{sec:Richtlinien} erläuterten Konventionen sollen eingehalten werden.
+	\begin{enumerate}[{Q1}.1]
+		\item Alle Kanten sollen gerade Linien sein.
+		\item Kreuzungen von Graphen sollen nur an Knoten auftreten.
+		\item Die Fläche und Gesamtkantenlänge soll minimiert werden.
+	\end{enumerate}
+\end{enumerate}
+
+\subsection{Einschränkungen und Randbedingungen}
+\begin{enumerate}[R1]
+	\item Das Produkt muss kompatibel mit aktuellen, verbreiteten Browsern (Firefox, Chrome) sein.
+	\item Die Entwicklung muss als Fork auf GitHub durchgeführt werden.
+	\item Die Implementierungssprache ist Javascript.
+	\item Das Produkt ist in die bestehende Anwendung zu integrieren.
+\end{enumerate}
+
+\chapter{Gestaltungsentwurf und Implementierung}
+Für den Gestaltungsentwurf wurden zunächst Mockups entworfen und auf Realisierbarkeit geprüft, anschließend wurde das Konzept umgesetzt und implementiert.
+\section{Mockups}
+\begin{figure}
+    \subfloat[Darstellung des Graphen und des gesamten Changesets bei Klick]{\includegraphics[width=0.49\textwidth]{Mockup_Changeset.png}}
+    \subfloat[Anzeige spezifischer Informationen bei Mouseover]{\includegraphics[width=0.49\textwidth]{Mockup_Mouseover.png}}
+\caption{Erster Mockup}
+\label{fig:mockup1}
+\end{figure}
+
+Ein erster Mockup ist in Abbildung \ref{fig:mockup1} zu sehen. Hier ist bereits eine Zeitleiste dargestellt, die einzelnen Branches sind in der gleichen Farbe gezeichnet und mit Namen beschriftet. Der Master Branch verläuft geradlinig, nebenläufige Branches sind rechts davon angeordnet. Wird auf einen Knoten geklickt, werden wie links gezeigt, zusätzlich der Name des Autors, der Kommentar sowie die Adds und Deletes angezeigt. Wird die Maus auf den Knoten gefahren, ohne zu Klicken, sieht man lediglich den Autorennamen und den Kommentar. 
+
+Dieser Entwurf ist bereits übersichtlich, der zeitliche Verlauf kann nachvollzogen werden und es sind alle wichtigen Informationen einfach abrufbar, lediglich die Revisionsnummer fehlt hier noch, die im späteren Entwurf in jedem Knoten angezeigt wird. Weitere Änderungen betreffen die Anordnung, die, wie in den Anforderungsdefinitionen festgelegt von links nach rechts sein soll.
+\begin{figure}
+	\includegraphics[width=\textwidth]{Mockup_Querformat.png}
+	\caption{Mockup im Querformat mit Anzeige der Add und Delete Sets}
+	\label{fig:mockup2}
+\end{figure}
+
+In Abbildung \ref{fig:mockup2} ist eine verbesserte Variante zu sehen. Der Graph wird jetzt von links nach rechts angezeigt, der Master Branch ist in der Mitte, die nebenläufigen Branches werden darunter angezeigt. Aus Gründern der Übersichtlichkeit und Darstellbarkeit wird das Datum nur noch aufgeführt, wenn sich der Tag geändert hat, außerdem stehen innerhalb der Knoten die Revisionsnummern. Bei Klicken werden am unteren Bildschirmrand die Add und Delete Sets aufgeführt, außerdem der Name des Autors und der Kommentar, sowie Datum und Uhrzeit des Commits. Da es in diesem Beispiel viele Deletes gibt wurde außerdem ein Scrollbalken hinzugefügt, um die Übersichtlichkeit zu erhalten.
+
+\section{Umsetzung}
+Für die Umsetzung sollen zunächst die verwendeten Bibliotheken vorgestellt und anschließend die endgültigen Ergebnisse präsentiert werden:
+\begin{itemize}
+\item Bibliothek D3: Das Kürzel D3 steht für \textit{Data-Driven Documents} und ist eine Bibliothek, mit der Daten aus Dokumenten grafisch dargestellt werden können. Sie ist veröffentlicht unter der BSD Lizenz und erlaubt damit eine freie Verwendung. In den 	verfügbaren Beispielen \footnote{Abrufbar unter \url{http://d3js.org/}, Stand 19.01.2016} sind verschiedenste Arten von 			Diagrammen und Graphen vorhanden, unter anderem auch Baumstrukturen. Diese lassen sich gut auf die gestellte Aufgabe 			übertragen und erlaube so eine Visualisierung der Daten des Versionsverwaltungssystems.
+
+\item Mit der Bibliothek qTip2 wurde die Darstellung der Tooltips bei Mouseover automatisch realisiert. Die Bibliothek ist unter der 			public Domain veröffentlicht\footnote{Die Bibliothek ist abrufbar unter \url{http://qtip2.com/}, Stand 19.01.2016} und damit 			ebenfalls für die freie Verwendung zugänglich. Auch hier sind verschiedene Demos verfügbar.
+
+\item Die Daten des Netzwerks wurden über eine Turtle Abfrage abgerufen und anschließend mittels eines Turtle Parsers\footnote{Verwendet wurde der Turtle Parser von Kanzaki, abrufbar unter \url{http://www.kanzaki.com/works/2006/misc/0308turtle.html} (Stand 26.01.2016). Er steht unter der LGPL Lizenz, wodurch eine freie Verwendung gestattet ist.} in Triple geparst.
+\end{itemize}
+
+\subsection{Darstellung der Lösung}
+\label{sec:Loesung}
+\begin{figure}   
+    \subfloat[Graph mit Zeitachse und Revision 4 angeklickt  \label{fig:graph_detail}]{\includegraphics[width=0.49\textwidth]{detail_graph.jpg}}   
+    \subfloat[Graph ohne Zeitachse, keine Version angeklickt  \label{fig:graph_einfach}]{\includegraphics[width=0.49\textwidth]{graph_ohne_achse.jpg}}\\   
+    \subfloat[Add und Delete Sets zu Revision 4  \label{fig:graph_changeset}]{\includegraphics[width=0.49\textwidth]{detail.jpg}}
+    \subfloat[Darstellung eines komplizierteren Graphen mit angelickter Revision 9 und Mouseover Feld von Revision 7 \label{fig:graph_mouseover}]{\includegraphics[width=0.49\textwidth]{tooltip_click.jpg}}
+\caption{Darstellung der Lösung}
+\label{fig:Loesung}
+\end{figure}
+In der endgültigen Version wurde im Sinne einer weiter verbesserten Übersichtlichkeit entschieden, die Add und Delete Sets nebeneinander anzuzeigen, jeweils versehen mit Scrollbalken. Die URLs sollten in spitzen Klammern angezeigt werden, Literale in Hochkommata. Im Mouseover Feld wurde zudem eine Anzeige hinzugefügt, wie viele Adds und Deletes es in dieser Revision gab. Gesonderte Markierungen wurden zum einen für die derzeit angeklickte Revision des Graphen, indem dieser Knoten ausgemalt wurde, sowie für alle Revisionen mit Tags, indem diese Knoten mit dickerer Umrandung und die Zahlen in Fettschrift dargestellt wurden, eingeführt. Zu sehen ist die endgültige Lösung in Abbildung~\ref{fig:Loesung}. In~\ref{fig:graph_detail} wird ein eigens zur Überprüfung der Implementierung erstelltes Changeset genutzt, bei dem auch ein Merge vorkommt. Für jeden Commit ist der zugehörige Zeitstempel erkenntlich, wobei die Zeitleiste über den Haken bei \textit{Show Axis} jederzeit ein- und ausgeblendet werden kann. Die angeklickte Revision (hier: Revision 4) ist markiert. Der gleiche Graph mit ausgeblendeter Zeitachse ist in Abbildung~\ref{fig:graph_einfach} zu sehen. Die nebeneinander dargestellten Add und Delete Sets können Abbildung~\ref{fig:graph_changeset} entnommen werden, die Scrollbalken sind ebenfalls zu sehen. In Abbildung~\ref{fig:graph_mouseover} ist die Visualisierung eines komplexeren Graphens zu sehen, sowie zusätzlich das Mouseover Feld. Der Masterbranch ist dabei durch seine Anordnung ganz oben stets direkt zu erkennen. Auch die Zugehörigkeit der Revisionen zu ihren Branches ist durch gleiche Farbgebung und gerade Anordnung der Kanten direkt ersichtlich, an der letzten Revision jedes Branches wird zusätzlich der Name angezeigt. Beim Laden der Seite wird bei längeren Graphen auf die aktuellste Revision fokussiert. Die Zoomfunktion wurde entfernt, da, wie bereits in Abschnitt~\ref{sec:alt} diskutiert, sie das Scrollen zu den Add und Delete Sets erschwert und aufgrund der immer gleichen, gut erkennbaren Größe der Knoten des Graphen keinen nennenswerten Vorteil bietet.
+
+\chapter{Fazit und Ausblick}
+Mit der gezeigten Lösung konnten die in Abschnitt~\ref{sec:Anforderungen} definierten Anforderungen erfüllt werden. Aus den Datensätzen wird ein von links nach rechts angeordneter Graph erstellt, in dem die Revisionen ihren Branches durch einheitliche Farbgebung und lineare Anordnung der Revisionen innerhalb eines Branches klar zuzuordnen sind. Der Master-Branch ist dabei immer ganz oben angeordnet. Die Branches sind beschriftet, in den Knoten ist zudem die jeweilige Revisionsnummer zu sehen. Die Knoten haben immer die gleiche Größe, das Fenster wird, falls der Graph zu groß wird, scrollbar. Aufgrund dieser Funktionalität wurde auf die Zoomfunktion verzichtet. Am unteren Bildschirmrand ist eine Zeitleiste angebracht, die bei Bedarf durch Abwahl der entsprechenden Checkbox auch ausgeblendet werden kann. Zusätzliche Informationen werden angezeigt, wenn sich der Mauszeiger über einer Revision befindet. Diese Informationen sind: der Name des Autors, der Kommentar, die Anzahl der Adds und Deletes, Datum und Uhrzeit und, falls vorhanden, der Tag der Revision. Für eine Auflistung der Adds und Deletes einer Revision muss auf den Knoten geklickt werden, diese werden in einem Fenster unterhalb des Graphen dargestellt. Dort sind auch nochmals die Informationen aus dem Mouseover-Fenster zu sehen. Die Adds und Deletes sind nebeneinander angebracht, die Fenster werden ab einer bestimmten Größe scrollbar. Die aktuell angeklickte Revision wird durch Ausfüllen des Knotens hervorgehoben. Revisionen mit Tags werden durch dickere Umrandung und Fettschrift der Revisionsnummer markiert. URLs werden in spitzen Klammern, Literale in Hochkommata aufgeführt. Zum Testen der Darstellung von Merges wurde zudem ein neuer Datensatz erstellt.
+
+Auch die Qualitätsanforderungen konnten erfüllt werden. Wie in Abbildung~\ref{fig:Loesung} zu sehen sind alle Kanten gerade Linien, Kreuzungen treten nur an Knoten auf und die Fläche und Gesamtkantenlänge sind soweit optimiert, dass eine gute Übersichtlichkeit bei möglichst allen Bildschirmgrößen gegeben ist. Das Produkt ist auf aktuellen Browsern lauffähig und in die bestehende Anwendung integriert.
+
+Zur weiteren Verbesserung könnten die Nutzeranforderungen anhand statistischer Erhebungen genauer überprüft und die Darstellung dementsprechend angepasst werden.
+
+
+
+\bibliography{MMST}
+\bibliographystyle{gerabbrv}
+\listoffigures
+
+\end{document}
