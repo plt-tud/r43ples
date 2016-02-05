@@ -18,12 +18,13 @@ import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.Resource;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.JenaModelManagement;
-import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
+import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.ResolutionStateEnum;
 import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
 import de.tud.plt.r43ples.merging.TripleObjectTypeEnum;
@@ -49,103 +50,31 @@ import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 public class ProcessManagement {
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(ProcessManagement.class);
-	/** The SPARQL prefixes. **/
-	private static final String prefixes = 
-			  "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
-			+ "PREFIX dc-terms: <http://purl.org/dc/terms/> \n"
-			+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> \n"
-			+ "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#> \n"
-			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
-			+ "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
-			+ "PREFIX sdd: <http://eatld.et.tu-dresden.de/sdd#> \n"
-			+ "PREFIX rpo: <http://eatld.et.tu-dresden.de/rpo#> \n"
-			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
-			+ "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n";
-
-	
-	/**create the merge query
-	 * @param graphName name of graph
-	 * @param sdd the sdd model name 
-	 * @param user client name 
-	 * @param commitMessage messsage of client
-	 * @param type type of merging
-	 * @param branchNameA name of branch 1
-	 * @param branchNameB name of branch 2
-	 * @param type of merging
-	 * @param triples triple set*/
-	
-	public static String createMergeQuery(String graphName, String sdd, String user, String commitMessage, MergeQueryTypeEnum type, String branchNameA, String branchNameB, String triples) {
-		logger.info("Execute merge query of type " + type.toString());
-		String query = "";
-		
-		String queryTemplateCommon = 
-				  "USER \"%s\" %n"
-				+ "MESSAGE \"%s\" %n"
-				+ "MERGE GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\"";
-		
-		String queryTemplateWith = 
-				  "USER \"%s\" %n"
-				+ "MESSAGE \"%s\" %n"
-				+ "MERGE GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\" WITH { %n"
-				+ "	%s"
-				+ "}";
-		
-		String queryTemplateAuto = 
-				  "USER \"%s\" %n"
-				+ "MESSAGE \"%s\" %n"
-				+ "MERGE AUTO GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\"";
-		
-		String queryTemplateManual = 
-				  "USER \"%s\" %n"
-				+ "MESSAGE \"%s\" %n"
-				+ "MERGE MANUAL GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\" WITH { %n"
-				+ "	%s"
-				+ "}";
-		if (type.equals(MergeQueryTypeEnum.COMMON)) {
-			query = String.format(queryTemplateCommon, user, commitMessage, graphName, sdd, branchNameA, branchNameB);
-		} else if (type.equals(MergeQueryTypeEnum.WITH)) {
-			query = String.format(queryTemplateWith, user, commitMessage, graphName, sdd, branchNameA, branchNameB, triples);
-		} else if (type.equals(MergeQueryTypeEnum.AUTO)) {
-			query = String.format(queryTemplateAuto, user, commitMessage, graphName, sdd, branchNameA, branchNameB);
-		} else if (type.equals(MergeQueryTypeEnum.MANUAL)) {
-			query = String.format(queryTemplateManual, user, commitMessage, graphName, sdd, branchNameA, branchNameB, triples);
-		}
-		
-		return query;
-	}
-	
-	
 	
 	
 	/**
 	 * Read difference model to java representation.
 	 * 
-	 * @param differenceModelToRead the difference model to read
+	 * @param differenceModelToRead the difference model to read in turtle serialisation
 	 * @param differenceModel the difference model where the result should be stored
+	 * @return 
 	 */
-	public static void readDifferenceModel(String differenceModelToRead, DifferenceModel differenceModel) {
-		logger.info("Start reading difference model.");
-		differenceModel.clear();
+	public static DifferenceModel readDifferenceModel(Model model) {
+		DifferenceModel differenceModel =  new DifferenceModel();
 		
-		logger.info("differenceModelToRead: "+ differenceModelToRead);
-		Model model = JenaModelManagement.readStringToJenaModel(differenceModelToRead, "TURTLE");
 		
 		// Query all difference groups
-		String queryDifferenceGroups = prefixes + String.format(
-				  "SELECT ?uri ?tripleStateA ?tripleStateB ?automaticResolutionState ?conflicting %n"
-				+ "WHERE { %n"
-				+ "	?uri a rpo:DifferenceGroup ; %n"
-				+ "		sddo:hasTripleStateA ?tripleStateA ; %n"
-				+ "		sddo:hasTripleStateB ?tripleStateB ; %n"
-				+ "		sddo:automaticResolutionState ?automaticResolutionState ; %n"
-				+ "		sddo:isConflicting ?conflicting . %n"
-				+ "}");
-		logger.debug(queryDifferenceGroups);
-		
-		// query execution
+		String queryDifferenceGroups = RevisionManagement.prefixes + 
+				  "SELECT ?uri ?tripleStateA ?tripleStateB ?automaticResolutionState ?conflicting "
+				+ "WHERE { "
+				+ "	?uri a rpo:DifferenceGroup ; "
+				+ "		sddo:hasTripleStateA ?tripleStateA ; "
+				+ "		sddo:hasTripleStateB ?tripleStateB ; "
+				+ "		sddo:automaticResolutionState ?automaticResolutionState ; "
+				+ "		sddo:isConflicting ?conflicting . "
+				+ "}";
 		QueryExecution qeDifferenceGroups = QueryExecutionFactory.create(queryDifferenceGroups, model);
 		ResultSet resultSetDifferenceGroups = qeDifferenceGroups.execSelect();
-		// Iterate over all difference groups
 	    while(resultSetDifferenceGroups.hasNext()) {
 	    	QuerySolution qsDifferenceGroups = resultSetDifferenceGroups.next();
 	    	String uri = qsDifferenceGroups.getResource("?uri").toString();
@@ -153,8 +82,6 @@ public class ProcessManagement {
 	    	SDDTripleStateEnum tripleStateB = convertSDDStringToSDDTripleState(qsDifferenceGroups.getResource("?tripleStateB").toString());
 	    	SDDTripleStateEnum automaticResolutionState = convertSDDStringToSDDTripleState(qsDifferenceGroups.getResource("?automaticResolutionState").toString());
 	    	boolean conflicting = qsDifferenceGroups.getLiteral("?conflicting").toString().equals("true^^http://www.w3.org/2001/XMLSchema#boolean");   
-	    	logger.debug("Original value of conflict: "+ qsDifferenceGroups.getLiteral("?conflicting").toString());
-
 	    	ResolutionStateEnum resolutionState = ResolutionStateEnum.DIFFERENCE;
 	    	if (conflicting) {
 	    		resolutionState = ResolutionStateEnum.CONFLICT;
@@ -163,7 +90,7 @@ public class ProcessManagement {
 	    	DifferenceGroup differenceGroup = new DifferenceGroup(tripleStateA, tripleStateB, automaticResolutionState, conflicting);
 	    	
 	    	// Query all differences
-			String queryDifferences = prefixes + String.format(
+			String queryDifferences = RevisionManagement.prefixes + String.format(
 					  "SELECT ?subject ?predicate ?object ?referencedRevisionA ?referencedRevisionB %n"
 					+ "WHERE { %n"
 					+ "	<%s> a rpo:DifferenceGroup ; %n"
@@ -176,16 +103,12 @@ public class ProcessManagement {
 					+ "		rdf:predicate ?predicate ; %n"
 					+ "		rdf:object ?object . %n"
 					+ "}", uri);
-			logger.debug(queryDifferences);
-			
-			// query execution
 			QueryExecution qeDifferences = QueryExecutionFactory.create(queryDifferences, model);
 			ResultSet resultSetDifferences = qeDifferences.execSelect();
-			// Iterate over all differences
 		    while(resultSetDifferences.hasNext()) {
 		    	QuerySolution qsDifferences = resultSetDifferences.next();
 		    	
-		    	String subject = qsDifferences.getResource("?subject").toString();
+		    	String subject = model.qnameFor(qsDifferences.getResource("?subject").toString());
 		    	String predicate = qsDifferences.getResource("?predicate").toString();
 	    	
 		    	// Differ between literal and resource
@@ -216,7 +139,7 @@ public class ProcessManagement {
 		    	String referencedRevisionLabelB = null;
 		    	
 				if ((referencedRevisionA != null) && (referencedRevisionB == null)) {
-					String query = prefixes + String.format(
+					String query = RevisionManagement.prefixes + String.format(
 							  "SELECT ?rev %n"
 							+ "FROM <%s> %n"
 							+ "WHERE { %n"
@@ -231,7 +154,7 @@ public class ProcessManagement {
 						referencedRevisionLabelA = qs.getLiteral("?rev").toString();
 					}
 				} else if ((referencedRevisionA == null) && (referencedRevisionB != null)) {
-					String query = prefixes + String.format(
+					String query = RevisionManagement.prefixes + String.format(
 							  "SELECT ?rev %n"
 							+ "FROM <%s> %n"
 							+ "WHERE { %n"
@@ -247,7 +170,7 @@ public class ProcessManagement {
 						referencedRevisionLabelB = qs.getLiteral("?rev").toString();
 					}
 				} else if ((referencedRevisionA != null) && (referencedRevisionB != null)) {
-					String query = prefixes + String.format(
+					String query = RevisionManagement.prefixes + String.format(
 							  "SELECT ?revA ?revB %n"
 							+ "FROM <%s> %n"
 							+ "WHERE { %n"
@@ -275,7 +198,7 @@ public class ProcessManagement {
 	    }
 	    
 	    logger.info("Difference model successfully read.");	
-		logger.info("DT"+differenceModel.getDifferenceGroups().toString());
+		return differenceModel;
 	}
 	
 	
@@ -288,7 +211,7 @@ public class ProcessManagement {
 	 * @return the SDD triple state
 	 */
 	
-	public static SDDTripleStateEnum convertSDDStringToSDDTripleState(String state) {
+	private static SDDTripleStateEnum convertSDDStringToSDDTripleState(String state) {
 		if (state.equals(SDDTripleStateEnum.ADDED.getSddRepresentation())) {
 			return SDDTripleStateEnum.ADDED;
 		} else if (state.equals(SDDTripleStateEnum.DELETED.getSddRepresentation())) {
@@ -313,10 +236,8 @@ public class ProcessManagement {
 	
 	public static String tripleToString(Triple triple) {
 		if (triple.getObjectType().equals(TripleObjectTypeEnum.LITERAL)) {
-			logger.debug(String.format("<%s> %s \"%s\" .", triple.getSubject(), getPredicate(triple), triple.getObject()));
 			return String.format("<%s> %s \"%s\" .", triple.getSubject(), getPredicate(triple), triple.getObject());
 		} else {
-			logger.debug(String.format("<%s> %s <%s> .", triple.getSubject(), getPredicate(triple), triple.getObject()));
 			return String.format("<%s> %s <%s> .", triple.getSubject(), getPredicate(triple), triple.getObject());
 		}
 	}
@@ -431,7 +352,7 @@ public class ProcessManagement {
 		ArrayList<String> list = new ArrayList<String>();
 		
     	// Query all individuals (DISTINCT because there can be multiple individual definitions)
-		String query = prefixes + String.format(
+		String query = RevisionManagement.prefixes + String.format(
 				  "SELECT DISTINCT ?individualUri "
 				+ "WHERE { "
 				+ " GRAPH <%s> REVISION \"%s\" {"
@@ -472,7 +393,7 @@ public class ProcessManagement {
 		HashMap<String, TripleIndividualStructure> list = new HashMap<String, TripleIndividualStructure>();
 		
     	// Query all individuals
-		String query = prefixes + String.format(
+		String query = RevisionManagement.prefixes + String.format(
 				  "SELECT ?predicate ?object %n"
 				+ "FROM <%s> REVISION \"%s\" %n"
 				+ "WHERE { %n"
@@ -598,9 +519,9 @@ public class ProcessManagement {
 				//get triple
 				Triple triple = indEnt.getValue().getTriple();			
 				
-				String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(triple));
-				String predicate = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(triple));
-				String object = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(triple));
+				String subject = ProcessManagement.getSubject(triple);
+				String predicate = ProcessManagement.getPredicate(triple);
+				String object = ProcessManagement.getObject(triple);
 				
 				Iterator<TableRow> itr = TripleRowList.iterator();
 				boolean status = true;
@@ -613,7 +534,7 @@ public class ProcessManagement {
 				}
 				if(status == true){
 					updatedTripleRowList.add(new TableRow(triple, subject, predicate, object, "--", 
-	                        "--", "--", "--", "--", "--","--"));
+	                        "--", "--", "--", false, "--","--"));
 				}
 			}
 			return updatedTripleRowList;
@@ -628,9 +549,9 @@ public class ProcessManagement {
 				//get triple
 				Triple triple = indEnt.getValue().getTriple();			
 				
-				String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(triple));
-				String predicate = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(triple));
-				String object = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(triple));
+				String subject = ProcessManagement.getSubject(triple);
+				String predicate = ProcessManagement.getPredicate(triple);
+				String object = ProcessManagement.getObject(triple);
 				
 				Iterator<TableRow> itr = TripleRowList.iterator();
 				boolean status = true;
@@ -645,7 +566,7 @@ public class ProcessManagement {
 				
 				if(status == true){
 					updatedTripleRowList.add(new TableRow(triple, subject, predicate, object, "--", 
-	                        "--", "--", "--", "--", "--","--"));
+	                        "--", "--", "--", false, "--","--"));
 				}
 				
 			}
@@ -676,9 +597,8 @@ public class ProcessManagement {
 	 * @param highLevelChangeModel the high level change model
 	 * @param differenceModel the difference model
 	 */
-	public static void createHighLevelChangeRenamingModel(HighLevelChangeModel highLevelChangeModel, DifferenceModel differenceModel) {
-		// Clear high level change model
-		highLevelChangeModel.clear();
+	public static HighLevelChangeModel createHighLevelChangeRenamingModel(DifferenceModel differenceModel) {
+		HighLevelChangeModel highLevelChangeModel = new HighLevelChangeModel();
 		
 		// Get all differences of state combination DELETED-ORIGINAL
 		DifferenceGroup delOrig = differenceModel.getDifferenceGroups().get(SDDTripleStateEnum.DELETED + "-" + SDDTripleStateEnum.ORIGINAL);
@@ -721,16 +641,8 @@ public class ProcessManagement {
 					highLevelChangeModel.addHighLevelChangeRenaming(tripleToString(highLevelChangeRenaming.getAdditionDifference().getTriple()), highLevelChangeRenaming);
 				}		
 			}
-			
-			Iterator<Entry<String, HighLevelChangeRenaming>> test = highLevelChangeModel.getHighLevelChangesRenaming().entrySet().iterator();
-			while(test.hasNext()){
-				Entry<String, HighLevelChangeRenaming> ent = test.next();
-				
-				logger.info("High Level Change Model Test: " + ent.getKey().toString());
-				logger.info("High Level Additon Value : "+ ent.getValue().getAdditionDifference().getTriple().getObject().toString());
-				logger.info("High Level Deletion Value : "+ ent.getValue().getDeletionDifference().getTriple().getObject().toString());
-			}		
 		}
+		return highLevelChangeModel;
 	}
 	
 	
@@ -801,10 +713,10 @@ public class ProcessManagement {
 	
 	/**create High level change Table Model from high level change Model
 	 * @param highLevelChangeModel the model to be read 
-	 * @param hightLevelChangeTableModel the Model to be created 
+	 * @return hightLevelChangeTableModel the Model to be created 
 	 *  */
-	public static void createHighLevelChangeTableModel (HighLevelChangeModel highLevelChangeModel, HighLevelChangeTableModel highLevelChangeTableModel) {
-		highLevelChangeTableModel.clear();
+	public static HighLevelChangeTableModel createHighLevelChangeTableModel (HighLevelChangeModel highLevelChangeModel) {
+		HighLevelChangeTableModel highLevelChangeTableModel = new HighLevelChangeTableModel();
 		Iterator<Entry<String, HighLevelChangeRenaming>> iterHL = highLevelChangeModel.getHighLevelChangesRenaming().entrySet().iterator();
 		while(iterHL.hasNext()){
 			HighLevelChangeRenaming hlcr = iterHL.next().getValue();
@@ -814,10 +726,10 @@ public class ProcessManagement {
 			Triple additionTriple = additionDifference.getTriple();
 			Triple deletionTriple = deletionDifference.getTriple();
 					
-			String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(additionTriple));
-			String predicate = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(additionTriple));
-			String altObject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(deletionTriple));
-			String newObject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(additionTriple));
+			String subject = ProcessManagement.getSubject(additionTriple);
+			String predicate = ProcessManagement.getPredicate(additionTriple);
+			String altObject = ProcessManagement.getObject(deletionTriple);
+			String newObject = ProcessManagement.getObject(additionTriple);
 			
 			//get checkBox state
 			//get approved button state
@@ -841,12 +753,7 @@ public class ProcessManagement {
 			
 			highLevelChangeTableModel.readTableRow(new HighLevelChangeTableRow(hlcr, subject, predicate, altObject, newObject, isResolved, isRenaming));
 		}
-		
-		Iterator<HighLevelChangeTableRow> iter = highLevelChangeTableModel.getTripleRowList().iterator();
-		while(iter.hasNext()){
-			HighLevelChangeTableRow row = iter.next();
-			logger.info("HighLevelTable test: " + row.getSubject() +  row.getPredicate()+ row.getObjectAlt() + row.getObjectNew() + "--" + row.getTripleId());
-		}
+		return highLevelChangeTableModel;
 	}
 	
 	/**
@@ -869,16 +776,14 @@ public class ProcessManagement {
 	
 	/** read difference model and create treelist*/
 	
-	public static void createDifferenceTree(DifferenceModel differenceModel, List<TreeNode> treeList) {
-//		List<TreeNode> treeList = new ArrayList<TreeNode>();
-		treeList.clear();	
+	public static List<TreeNode> createDifferenceTree(DifferenceModel differenceModel) {
+		List<TreeNode> treeList = new ArrayList<TreeNode>();
 		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
 		while(iterDM.hasNext()){
 			//get Triple List von jede DifferenceGroup
 			List<String> tripleList = new ArrayList<String>();
 			Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterDM.next();
 			
-			//get Name von differenceGroup
 			String groupName = (String) entryDG.getKey();
 			
 			logger.info("Tree test groupName: "+ groupName);
@@ -894,21 +799,18 @@ public class ProcessManagement {
 			Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
 			while(iterDIF.hasNext()){
 				Entry<String, Difference> entryDF = iterDIF.next();
-				// get jede tripleName
 				String tripleName = entryDF.getKey();
 				logger.info("Tree test TripleName: "+ tripleName);
 				
 				Triple triple = entryDF.getValue().getTriple();
 				
-				String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(triple));
-				String predicate = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(triple));
-				String object = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(triple));
+				String subject = ProcessManagement.getSubject(triple);
+				String predicate = ProcessManagement.getPredicate(triple);
+				String object = ProcessManagement.getObject(triple);
 				
 				StringBuilder TripleBuilder = new StringBuilder();
 				String prefixTriple = TripleBuilder.append(subject).append(" ").append(predicate).append(" ").append(object).toString();
 				
-				logger.info("Tree test PrefixTriple: "+ prefixTriple);
-
 				//get alle tripleNames in der DifferenceGroup
 				tripleList.add(prefixTriple);
 			}
@@ -916,13 +818,12 @@ public class ProcessManagement {
 			TreeNode treeNode = new TreeNode(groupName, tripleList, status);
 			treeList.add(treeNode);
 		}
-		
-		logger.info("Difference Tree successful created.");
+		return treeList;
 	}
 	/**read difference model and create table model
 	 * */
-	public static void createTableModel(DifferenceModel differenceModel, TableModel tableModel) {
-		tableModel.clear();
+	public static TableModel createTableModel(DifferenceModel differenceModel) {
+		TableModel tableModel = new TableModel();
 		
 		//get difference group
 		Iterator<Entry<String, DifferenceGroup>> iterDM = differenceModel.getDifferenceGroups().entrySet().iterator();
@@ -932,8 +833,7 @@ public class ProcessManagement {
 			boolean isconflicting = differ.isConflicting();
 			SDDTripleStateEnum stateA = differ.getTripleStateA();
 			SDDTripleStateEnum stateB = differ.getTripleStateB();
-	//		SDDTripleStateEnum resolutionState = differ.getAutomaticResolutionState();
-			String conflicting = (isconflicting ) ? "1" : "0";
+			
 			//get difference 
 			Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
 			while(iterDIF.hasNext()){
@@ -946,68 +846,23 @@ public class ProcessManagement {
 				
 				SDDTripleStateEnum autoResolutionState = entryDF.getValue().getTripleResolutionState();
 				
-				String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(triple));
-				String predicate = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(triple));
-				String object = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(triple));
+				String subject = ProcessManagement.getSubject(triple);
+				String predicate = ProcessManagement.getPredicate(triple);
+				String object = ProcessManagement.getObject(triple);
 				//get revision number
 				String revisionA = entryDF.getValue().getReferencedRevisionLabelA();
 				String revisionB = entryDF.getValue().getReferencedRevisionLabelB();
 				
 				//read each TableRow
 				tableModel.readTableRow(new TableRow(triple, subject, predicate, object, stateA.toString(), 
-			                            stateB.toString(), revisionA, revisionB, conflicting, autoResolutionState.toString(),resolutionState.toString()));
-				logger.info("State Test"+ autoResolutionState.toString());
-													
+			                            stateB.toString(), revisionA, revisionB, isconflicting, autoResolutionState.toString(),resolutionState.toString()));						
 			}			
 			
 		}
-		Iterator<TableRow> idt = tableModel.getTripleRowList().iterator();
-		while(idt.hasNext()){
-			TableRow tr = idt.next();
-			logger.info("TableModel ID Test:" + tr.getRevisionA() + tr.getResolutionState() + tr.getTripleId() );
-		}
-		
-		
-		logger.info("TableModel successful created.");
-		
+		return tableModel;		
 	}
 	
-	
-	/**
-	 * Converts a triple string to a string in which URIs are replaced by prefixes which were specified in the configuration.
-	 * If no prefix was found or if input string is a literal the input string will be returned.
-	 * 
-	 * @param tripleString the triple string (subject or predicate or object) to convert
-	 * @return the converted triple string or input string
-	 * @throws ConfigurationException 
-	 */
-	public static String convertTripleStringToPrefixTripleString(String tripleString) {		
-		if (tripleString.contains("<") && tripleString.contains(">")) {
-			String tripleStringConverted = tripleString.trim().replaceAll("<", "").replaceAll(">", "");
-			int lastIndexSlash = tripleStringConverted.lastIndexOf("/");
-			int lastIndexHash = tripleStringConverted.lastIndexOf("#");
-			if ((lastIndexSlash == -1) && (lastIndexHash == -1)) {
-				return tripleString;
-			} else {
-				int index = 0;
-				if (lastIndexSlash > lastIndexHash) {
-					// Slash separator found
-					index = lastIndexSlash + 1;
-				} else {
-					// Hash separator found
-					index = lastIndexHash + 1;
-				}
-				String subString = tripleStringConverted.substring(0, index);
-				
-				logger.info("get substring: "+subString);
-			}
-		}
-		return tripleString;
-	}
-
-	
-
-	
+		
 	/**
 	 * ##########################################################################################################################################################################
 	 * ##########################################################################################################################################################################
@@ -1027,76 +882,30 @@ public class ProcessManagement {
 	 * @return the array list of property URIs
 	 * @throws InternalErrorException 
 	 */
-	public static ArrayList<String> getPropertiesOfRevision(String graphName, String branchNameA, String branchNameB) throws InternalErrorException {
-		logger.info("Get all properties of branches.");
-		
+	public static ArrayList<String> getPropertiesOfDifferenceModel(Model model) throws InternalErrorException {
 		// Result array list
 		ArrayList<String> list = new ArrayList<String>();
 
-    	// Query all properties (DISTINCT because there can be multiple property occurrences)
-		String query = String.format(
-				"SELECT DISTINCT ?propertyUri %n"
-				+ "FROM <%s> REVISION \"%s\" %n"
-				+ "FROM <%s> REVISION \"%s\" %n"
-				+ "WHERE { %n"
-				+ "	?subject ?propertyUri ?object . %n"
-				+ "} %n"
-				+ "ORDER BY ?propertyUri", graphName, branchNameA, graphName, branchNameB);
-		logger.debug(query);
+    	// Query all properties
+		String query = Config.getPrefixes() + RevisionManagement.prefixes +
+				"SELECT DISTINCT ?propertyUri "
+				+ "WHERE { "
+				+ "	[] rdf:predicate ?propertyUri."
+				+ "} "
+				+ "ORDER BY ?propertyUri";
 		
-		//here difference with mergingClient
-		
-		String result = Interface.sparqlSelectConstructAsk(query, "text/xml", false);
-		
-		logger.debug(result);
+		QueryExecution qeProperties = QueryExecutionFactory.create(query, model);
+		ResultSet resultSetProperties = qeProperties.execSelect();
 		
 		// Iterate over all properties
-		ResultSet resultSet = ResultSetFactory.fromXML(result);
-		while (resultSet.hasNext()) {
-			QuerySolution qs = resultSet.next();
-			//get kurz property
-//			ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(triple));
-			String kqs = ProcessManagement.convertTripleStringToPrefixTripleString("<"+qs.getResource("?propertyUri").toString()+">");
-			
-			//list.add(qs.getResource("?propertyUri").toString());
+		while (resultSetProperties.hasNext()) {
+			QuerySolution qs = resultSetProperties.next();
+			String kqs = model.qnameFor(qs.getResource("?propertyUri").getURI());
 			list.add(kqs);
-
 		}
 		return list;
 	}
 	
-	
-	/**
-	 * ##########################################################################################################################################################################
-	 * ##########################################################################################################################################################################
-	 * ##                                                                                                                                                                      ##
-	 * ## create push ergebnis and create merging query                                                                                                                                                     ##
-	 * ##                                                                                                                                                                      ##
-	 * ##########################################################################################################################################################################
-	 * ##########################################################################################################################################################################
-	 */	
-	
-	
-	/**
-	 * Get the whole content of a revision as jena model.
-	 * 
-	 * @param graphName the graph name
-	 * @param revision the revision
-	 * @return the whole content of the revision of the graph as jena model
-	 * @throws InternalErrorException 
-	 */
-	public static Model getWholeContentOfRevision(String graphName, String revision) throws InternalErrorException {
-		String query = String.format(
-				  "CONSTRUCT {?s ?p ?o} %n"
-				+ "FROM <%s> REVISION \"%s\" %n"
-				+ "WHERE { %n"
-				+ "	?s ?p ?o %n"
-				+ "}", graphName, revision);
-		String result = Interface.sparqlSelectConstructAsk(query, "text/turtle", false);
-		
-		logger.debug("WholeContent Result: "+result);		
-		return JenaModelManagement.readStringToJenaModel(result,"text/html");
-	}
 	
 	
 	/**

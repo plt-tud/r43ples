@@ -18,12 +18,12 @@ public class TableRow {
 	String stateB;
 	String revisionA;
 	String revisionB;
-	String conflicting;
+	boolean conflicting;
 	String resolutionState;
 	String state;
 	
 	public TableRow(Triple triple, String subject, String predicate, String object, String stateA, 
-			String stateB, String revisionA, String revisionB, String conflicting, String resolutionState,String state){
+			String stateB, String revisionA, String revisionB, boolean conflicting, String resolutionState,String state){
 		this.triple = triple;
 		this.subject = subject;
 		this.object = object;
@@ -109,11 +109,11 @@ public class TableRow {
 		this.revisionB = revisionB;
 	}
 
-	public String getConflicting() {
+	public boolean getConflicting() {
 		return conflicting;
 	}
 
-	public void setConflicting(String conflicting) {
+	public void setConflicting(boolean conflicting) {
 		this.conflicting = conflicting;
 	}	
 	

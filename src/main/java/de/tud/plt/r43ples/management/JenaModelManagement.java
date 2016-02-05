@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
@@ -48,6 +50,11 @@ public class JenaModelManagement {
 			is.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+		Iterator<Entry<String, String>> it = Config.user_defined_prefixes.entrySet().iterator();
+		while (it.hasNext()) {
+			Entry<String, String> ns = it.next();
+			model.setNsPrefix(ns.getKey(), ns.getValue());
 		}
 		
 		return model;

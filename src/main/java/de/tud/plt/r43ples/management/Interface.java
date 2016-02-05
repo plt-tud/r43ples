@@ -34,7 +34,7 @@ public class Interface {
 		String result;
 		if (query_rewriting) {
 			String query_rewritten = SparqlRewriter.rewriteQuery(query);
-			result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query_rewritten, format);
+			result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(Config.getPrefixes() + query_rewritten, format);
 		}
 		else {
 			result = getSelectConstructAskResponseClassic(query, format);
@@ -83,7 +83,7 @@ public class Interface {
 			m = patternSelectFromPart.matcher(queryM);
 			
 		}
-		String response = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(queryM, format);
+		String response = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(Config.getPrefixes() + queryM, format);
 		return response;
 	}
 	
@@ -295,9 +295,11 @@ public class Interface {
 		String branchNameB = m.group("branchNameB").toLowerCase();
 		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
 		
-        return RevisionManagement.performFastForward(revisionGraph, branchNameA, branchNameB, user, RevisionManagement.getDateString(), commitMessage);
+        return FastForwardControl.performFastForward(revisionGraph, branchNameA, branchNameB, user, RevisionManagement.getDateString(), commitMessage);
 	}
 	
+	
+
 	
 	public static MergeResult sparqlThreeWayMerge(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
 		final Pattern patternMergeQuery =  Pattern.compile(
@@ -316,6 +318,15 @@ public class Interface {
 		String with = m.group("with");
 		String triples = m.group("triples");
 		
+		return sparqlThreeWayMerge(graphName, branchNameA, branchNameB, with, triples, action, sdd, user, commitMessage, format);
+	}
+	
+	
+	public static MergeResult sparqlThreeWayMerge(
+			final String graphName, final String branchNameA, final String branchNameB,
+			final String with, final String triples, final String action, final String sdd,
+			final String user, final String commitMessage, final String format) throws InternalErrorException {
+					
 		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
 		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
 		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
@@ -339,12 +350,12 @@ public class Interface {
 		// Check if A and B are different revisions
 		if (RevisionManagement.getRevisionNumber(revisionGraph, branchNameA).equals(RevisionManagement.getRevisionNumber(revisionGraph, branchNameB))) {
 			// Branches are equal - throw error
-			throw new InternalErrorException("Specified branches are equal: " + sparqlQuery);
+			throw new InternalErrorException("Specified branches are equal");
 		}
 		
 		// Check if both are terminal nodes
 		if (!(RevisionManagement.isBranch(graphName, branchNameA) && RevisionManagement.isBranch(graphName, branchNameB))) {
-			throw new InternalErrorException("Non terminal nodes were used: " + sparqlQuery);
+			throw new InternalErrorException("Non terminal nodes were used");
 		}
 
 		
@@ -403,7 +414,7 @@ public class Interface {
 				mresult.newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, MergeQueryTypeEnum.COMMON, "");
 			}
 		} else {
-			throw new InternalErrorException("This is not a valid MERGE query: " + sparqlQuery);
+			throw new InternalErrorException("This is not a valid MERGE query");
 		}
 		return mresult;
 		

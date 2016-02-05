@@ -1,101 +1,26 @@
-	    <script type="text/javascript">
-          var graphName = "{{graphName}}";
-          var clientName = "{{clientName}}";
-          var tripleTableColor = "YellowGreen";
-          var individualTabelColor = "LemonChiffon"
-          $("#highLevelTable :button").click(function(){
-              var box = $(this).parent().prev().children();
-              var id = box.val();
-              var isChecked;
-              alert(box.is(':checked'));
-              if(box.is(':checked')){
-                //triple added
-                isChecked = 1;
-              }else{
-                //triple deleted
-                isChecked = 0;
-              }
-
-              if(box.attr("disabled")){
-                box.prop({"disabled":false});
-                $(this).parent().parent().css('background','white');
-                $(this).text("Confirm");
-              }else{
-                box.prop({"disabled":true});
-                $(this).parent().parent().css('background',tripleTableColor);
-                $(this).text("Approved");
-              }
-              
-              $.post("approveHighLevelProcess",
-                  {
-                    id: id,
-                    isChecked: isChecked,
-                    graph: graphName,
-                    client: clientName
-                  }
-              );
-
-          });
-
-          $("#allSelectHighLevel").click(function(){
-            $("#highLevelTable input[name='options']").each(function(){
-              var id = $(this).val();
-
-              var isChecked;
-
-              if($(this).is(':checked')){
-                //triple added
-                isChecked = 1;
-              }else{
-                //triple deleted
-                isChecked = 0;
-              }
-
-              if($(this).attr("disabled")){
-                // $(this).prop({"disabled":false});
-                // $(this).parent().parent().css('background','white');
-              }else{
-                $(this).prop({"disabled":true});
-                $(this).parent().parent().css('background',tripleTableColor);
-                $(this).parent().next().children().text("Approved");
-                $.post("approveHighLevelProcess",
-                  {
-                    id: id,
-                    isChecked: isChecked,
-                    graph: graphName,
-                    client: clientName
-                  }
-                );
-              }
-
-            });
-
-          });
-	    </script>
-        
-        <fieldset>
-            <legend>Resolution</legend>
-              <div id="allSelectHighLevel" class="col-lg-2 col-lg-offset-10"><button type="button" class="btn btn-sm" onclick="">Approve All</button></div>
-              <hr style="margin:8px;"/>
-              <div class = "parentTbl">
-                <table id = "highLevelTable" class="table" style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">
-                            <th style = "width:18%">Subject</th>
-                            <th style = "width:18%">Predicate</th>
-                            <th style = "width:18%">Object</th>
-                            <th style = "width:18%">Object will be renamed to</th>
-                            <th style = "width:18%">Rename yes or no</th>
-                            <th style = "width:10%">Approve</th>
-                          </tr>
-                          {{#highLevelRowList}}
-                            <tr>
-                              <td style = "width:18%">{{subject}}</td>
-                              <td style = "width:18%">{{predicate}}</td>
-                              <td style = "width:18%">{{objectAlt}}</td>
-                              <td style = "width:18%">{{objectNew}}</td>
-                              <td style = "width:18% ;text-align: center;"><input type="checkbox" id ="opt" name="options" {{#isRenaming}}checked{{/isRenaming}} value={{tripleId}}></td>
-                              <td><button type="button" class="btn">{{#isResolved}}Approved{{/isResolved}}{{^isResolved}}Confirm{{/isResolved}}</button></td>
-                            </tr>
-                          {{/highLevelRowList}}   
-                </table>
-              </div>                     
-     	  </fieldset>
+ <fieldset>
+    <legend>Resolution - High-Level View</legend>
+      <div id="allSelectHighLevel" class="col-lg-2 col-lg-offset-10"><button type="button" class="btn btn-sm" onclick="">Approve All</button></div>
+      <hr style="margin:8px;"/>
+      <div class = "parentTbl">
+        <table id = "highLevelTable" class="table" style="width:100%; table-layout:fixed; word-break: break-all; word-wrap: break-word;">
+                    <th style = "width:18%">Subject</th>
+                    <th style = "width:18%">Predicate</th>
+                    <th style = "width:18%">Object</th>
+                    <th style = "width:18%">Object will be renamed to</th>
+                    <th style = "width:18%">Rename yes or no</th>
+                    <th style = "width:10%">Approve</th>
+                  </tr>
+                  {{#highLevelRowList}}
+                    <tr>
+                      <td style = "width:18%">{{subject}}</td>
+                      <td style = "width:18%">{{predicate}}</td>
+                      <td style = "width:18%">{{objectAlt}}</td>
+                      <td style = "width:18%">{{objectNew}}</td>
+                      <td style = "width:18% ;text-align: center;"><input type="checkbox" id ="opt" name="options" {{#isRenaming}}checked{{/isRenaming}} value={{tripleId}}></td>
+                      <td><button type="button" class="btn">{{#isResolved}}Approved{{/isResolved}}{{^isResolved}}Confirm{{/isResolved}}</button></td>
+                    </tr>
+                  {{/highLevelRowList}}   
+        </table>
+      </div>                     
+  </fieldset>

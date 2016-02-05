@@ -90,9 +90,9 @@ public class ReportManagement {
 				
 				SDDTripleStateEnum tripleResolutionState = difference.getTripleResolutionState();
 				
-				String subject = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getSubject(triple));
-				String predicate = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getPredicate(triple));
-				String object = ProcessManagement.convertTripleStringToPrefixTripleString(ProcessManagement.getObject(triple));
+				String subject = ProcessManagement.getSubject(triple);
+				String predicate = ProcessManagement.getPredicate(triple);
+				String object = ProcessManagement.getObject(triple);
 				//get revision number
 				String revisionA = difference.getReferencedRevisionLabelA();
 				String revisionB = difference.getReferencedRevisionLabelB();
@@ -100,21 +100,9 @@ public class ReportManagement {
 				//read each reportTableRowList
 				
 				reportTableRowList.add(new ReportTableRow(subject, predicate, object, stateA.toString(), stateB.toString(), revisionA, revisionB, 
-						conflicting, automaticResolutionState.toString(), tripleResolutionState.toString(), approvedState.toString()));
-																	
-			}			
-			
+						conflicting, automaticResolutionState.toString(), tripleResolutionState.toString(), approvedState.toString()));											
+			}				
 		}
-		// test report table row list
-		Iterator<ReportTableRow> idt = reportTableRowList.iterator();
-		while(idt.hasNext()){
-			ReportTableRow tr = idt.next();
-			logger.debug("TableModel ID Test:" + tr.getRevisionA() + tr.getResolutionState() + tr.getApproved());
-		}
-		
-		
-		logger.info("TableModel successful created.");
-		
 		return reportTableRowList;
 	}
 }

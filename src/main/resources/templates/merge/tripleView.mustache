@@ -1,35 +1,52 @@
+ <div class="col-lg-3">
+    <fieldset>
+      <legend>Filter</legend> 
+            <table id="propertyBody" class="table">
+            	<tr>
+                   <th>Property</th>
+                 </tr>
+                 {{#propertyList}}
+                    <tr>
+                        <td><input type="checkbox" name="pFilter" checked id="{{toString}}"> {{toString}}</td>
+                    </tr>
+                  {{/propertyList}}     
+            </table>
+  	</fieldset>
+ </div>
+              
+  <div class="col-lg-9">
  <fieldset>
 	<legend>Resolution</legend>
-	<div id="allSelect" class="col-lg-2 col-lg-offset-10">
-	  	<button type="button" class="btn btn-default">Approve All</button>
-	</div>
-	<table id="tripleTable" class="table" style="width:100%;table-layout:fixed;word-break: break-all; word-wrap: break-word;">
+	<table id="tripleTable" class="table table-striped table-hover">
 		<thead>
 			<tr>
-	        	<th style="width:18%">Subject</th>
-				<th style="width:18%">Predicate</th>
-				<th style="width:18%">Object</th>
-				<th style="width:9%">State B1</th>
-				<th style="width:9%">State B2</th>
-				<th style="width:9%">Conflict</th>
-				<th style="width:9%">Resolution State</th>
-				<th style="width:10%">Approve</th>
+	        	<th data-placeholder="Try B*{space}" class="filter-select filer-exact">Subject</th>
+				<th data-placeholder="Try B*{space}" class="filter-match">Predicate</th>
+				<th data-placeholder="e.g. object" class="filter-match">Object</th>
+				<th class="filter-select">State B1</th>
+				<th class="filter-select filter-exact">State B2</th>
+				<th >Conflict</th>
+				<th >Resolution State</th>
+				<th >Approve</th>
 			</tr>
 		</thead>
 		<tbody>
-			{{#tableRowList}}               
+			{{#tableModel.getTripleRowList}}               
 		  	<tr>
-			    <td style="width:12%">{{subject}} </td>
-				<td style="width:12%">{{predicate}}</td>
-				<td style="width:12%">{{object}}</td>
-				<td style="width:18%" class="state-{{stateA}}"> {{revisionA}}</td>
-				<td style="width:18%" class="state-{{stateB}}"> {{revisionB}}</td>
-				<td style="width:9%; text-align: center;" class="conflict-{{conflicting}}"></td>
-				<td style="width:9%; text-align: center;"><input type="checkbox" id="opt" name="options" value={{tripleId}}></td>
+			    <td>{{subject}} </td>
+				<td>{{predicate}}</td>
+				<td>{{object}}</td>
+				<td class="state-{{stateA}}"> {{stateA}}</td>
+				<td class="state-{{stateB}}"> {{stateB}}</td>
+				<td class="conflict-{{conflicting}}">{{conflicting}}</td>
+				<td><input type="checkbox" id="opt" name="options" value={{tripleId}}></td>
 		        <td><button type="button" class="btn btn-default">Confirm</button></td>
 	        </tr>
-        {{/tableRowList}}
+        {{/tableModel.getTripleRowList}}
         </tbody>   
     </table>
+    <div id="allSelect" class="col-lg-2 col-lg-offset-10">
+	  	<button type="button" class="btn btn-default">Approve All</button>
+	</div>
 </fieldset>
-                     
+</div>                     

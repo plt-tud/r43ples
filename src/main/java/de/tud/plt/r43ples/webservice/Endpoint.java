@@ -40,13 +40,14 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.JenaModelManagement;
+import de.tud.plt.r43ples.management.RebaseControl;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.merging.MergeManagement;
 import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.RebaseQueryTypeEnum;
-import de.tud.plt.r43ples.merging.control.MergingControl;
-import de.tud.plt.r43ples.merging.control.RebaseControl;
+import de.tud.plt.r43ples.merging.model.structure.PatchGroup;
+import de.tud.plt.r43ples.merging.ui.MergingControl;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 /**
@@ -526,26 +527,12 @@ public class Endpoint {
 			throw new InternalErrorException("Error in SPARQL Merge Anfrage , type is not right.");
 		}
 		
-		MergingControl mergingControl;
-		RebaseControl rebaseControl;
 		
-		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-	
-		if(clientMap.containsKey(user) && (clientMap.get(user).containsKey(graphName))) {
-			mergingControl = clientMap.get(user).get(graphName);
-			rebaseControl = mergingControl.getRebaseControl();
-		}else{
-			mergingControl = new MergingControl();
-			mergingControl.setRebaseControl();
-			rebaseControl = mergingControl.getRebaseControl();
-			rebaseControl.createCommitModel(graphName, sdd, user, commitMessage, branchNameA, branchNameB, "Rebase", type);
-		}
-					
-		// get the last revision of each branch
+		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);					
 		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
 		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
 			
-		checkIfRebaseIsPossible(graphName, branchNameA, branchNameB);
+		RebaseControl.checkIfRebaseIsPossible(graphName, branchNameA, branchNameB);
 
 		// Differ between MERGE query with specified SDD and without SDD			
 		String usedSDDURI = RevisionManagement.getSDD(graphName, sdd);
@@ -557,10 +544,10 @@ public class Endpoint {
 		// create the patch and patch group
 		LinkedList<String> revisionList = MergeManagement.getPathBetweenStartAndTargetRevision(
 				revisionGraph, commonRevision, revisionUriA);
-		rebaseControl.createPatchGroupOfBranch(revisionGraph, revisionUriB, revisionList);
+        
+		PatchGroup patchGroup = RebaseControl.createPatchGroupOfBranch(revisionGraph, revisionUriB, revisionList);
 		
 		
-		// transform the response to the rebase freundlich check process
 		String graphNameHeader;
 		try {
 			graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
@@ -577,7 +564,7 @@ public class Endpoint {
 		String graphStrategy = "merging-strategy-information";
 		
 		if((action!= null) && (action.equalsIgnoreCase("FORCE"))) {
-			rebaseControl.forceRebaseProcess(graphName);	
+//			rebaseControl.forceRebaseProcess(graphName);	
 			responseBuilder.header(graphStrategy, "force-rebase");
 			return responseBuilder.build();	
 		}
@@ -603,9 +590,9 @@ public class Endpoint {
 			String addedAsNTriples = addedAndRemovedTriples.get(0);
 			String removedAsNTriples = addedAndRemovedTriples.get(1);
 			
-			String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
-			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
-					user, commitMessage, basisRevisionNumber);
+//			String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
+//			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
+//					user, commitMessage, basisRevisionNumber);
 			
 			responseBuilder.header(graphStrategy, "auto-rebase");
 								
@@ -616,10 +603,10 @@ public class Endpoint {
 			String addedAsNTriples = addedAndRemovedTriples.get(0);
 			String removedAsNTriples = addedAndRemovedTriples.get(1);
 			
-			String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
-			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
-					user, commitMessage, basisRevisionNumber);
-			
+//			String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
+//			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
+//					user, commitMessage, basisRevisionNumber);
+//			
 			responseBuilder.header(graphStrategy, "manual-rebase");
 			
 		} else if ((action == null) && (with != null) && (triples != null)) {
@@ -629,10 +616,10 @@ public class Endpoint {
 			String addedAsNTriples = addedAndRemovedTriples.get(0);
 			String removedAsNTriples = addedAndRemovedTriples.get(1);
 			
-			String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
-			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
-					user, commitMessage, basisRevisionNumber);
-			
+//			String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
+//			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
+//					user, commitMessage, basisRevisionNumber);
+//			
 			responseBuilder.header(graphStrategy, "with-rebase");
 						
 		} else if ((action == null) && (with == null) && (triples == null)) {
@@ -652,7 +639,7 @@ public class Endpoint {
 				// write the difference model in the response builder
 				responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
 			} else{
-				rebaseControl.forceRebaseProcess(graphName);	
+//				rebaseControl.forceRebaseProcess(graphName);	
 				responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));				
 			}
 					
@@ -665,31 +652,6 @@ public class Endpoint {
 		return responseBuilder.build();			
 	}
 
-	/** simple checks if rebase could be possible for these two branches of a graph
-	 * @param graphName
-	 * @param branchNameA
-	 * @param branchNameB
-	 * @throws InternalErrorException throws an error if it is not possible
-	 */
-	private void checkIfRebaseIsPossible(String graphName, String branchNameA,
-			String branchNameB) throws InternalErrorException {
-		// Check if graph already exists
-		if (!RevisionManagement.checkGraphExistence(graphName)){
-			logger.error("Graph <"+graphName+"> does not exist.");
-			throw new InternalErrorException("Graph <"+graphName+"> does not exist.");
-		}
-	
-		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-		// Check if A and B are different revisions
-		if (RevisionManagement.getRevisionNumber(revisionGraph, branchNameA).equals(RevisionManagement.getRevisionNumber(revisionGraph, branchNameB))) {
-			// Branches are equal - throw error
-			throw new InternalErrorException("Specified branches are equal");
-		}
-		
-		// Check if both are terminal nodes
-		if (!(RevisionManagement.isBranch(graphName, branchNameA) && RevisionManagement.isBranch(graphName, branchNameB))) {
-			throw new InternalErrorException("Non terminal nodes were used ");
-		}
-	}
+
 	
 }

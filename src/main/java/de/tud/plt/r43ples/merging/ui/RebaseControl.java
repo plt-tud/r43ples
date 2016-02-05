@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.merging.control;
+package de.tud.plt.r43ples.merging.ui;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -26,68 +25,30 @@ import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.ResolutionStateEnum;
 import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
-import de.tud.plt.r43ples.merging.management.StrategyManagement;
-import de.tud.plt.r43ples.merging.model.structure.CommitModel;
 import de.tud.plt.r43ples.merging.model.structure.Difference;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
+import de.tud.plt.r43ples.merging.model.structure.MergeCommitModel;
 import de.tud.plt.r43ples.merging.model.structure.Patch;
 import de.tud.plt.r43ples.merging.model.structure.PatchGroup;
 
 public class RebaseControl {
 	private static Logger logger = Logger.getLogger(RebaseControl.class);
-	private CommitModel commitModel;
+	private MergeCommitModel commitModel;
 	private PatchGroup patchGroup = new PatchGroup(null, null);
 	private DifferenceModel differenceModel = new DifferenceModel();
 	
 	private String differenceGraphModel = null;
 	
-
-	private MergingControl mergingControl = null;
-	
-	
-	/**create the RebaseControl*/
-	public RebaseControl(MergingControl mergingControl){
-		this.mergingControl = mergingControl;
-	}
 	
 	/**save the commit information and later output it */
 	public void createCommitModel(String graphName, String sddName, String user, String message, String branch1, String branch2, String strategy, String type){
-		commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2, strategy, type);
+		commitModel = new MergeCommitModel(graphName, sddName, user, message, branch1, branch2, strategy, type);
 	}
 	
 	/**save the commit information and later output it */
-	public CommitModel getCommitModel(){
+	public MergeCommitModel getCommitModel(){
 		return commitModel;
-	}
-	
-	/**for each revision in branchA , create a patch */
-	public void createPatchGroupOfBranch(String revisionGraph, String basisRevisionUri, LinkedList<String> revisionList) {
-		
-		LinkedHashMap<String, Patch> patchMap = new LinkedHashMap<String, Patch>();
-		
-		Iterator<String> rIter  = revisionList.iterator();
-		
-		while(rIter.hasNext()) {
-			String revisionUri = rIter.next();
-			String commitUri = StrategyManagement.getCommitUri(revisionGraph, revisionUri);
-			
-			String addSet = StrategyManagement.getaddSetUri(revisionGraph, revisionUri);
-			String deleteSet = StrategyManagement.getdeleteSetUri(revisionGraph, revisionUri);
-			
-			String patchNumber = StrategyManagement.getRevisionNumber(revisionGraph, revisionUri);
-			String patchUser = StrategyManagement.getPatchUserUri(revisionGraph, commitUri);
-			String patchMessage = StrategyManagement.getPatchMessage(revisionGraph, commitUri);
-			
-			patchMap.put(patchNumber, new Patch(patchNumber, patchUser, patchMessage, addSet, deleteSet));			
-		}
-		
-		String basisRevisionNumber = StrategyManagement.getRevisionNumber(revisionGraph, basisRevisionUri);
-		
-		patchGroup.setBasisRevisionNumber(basisRevisionNumber);
-		patchGroup.setPatchMap(patchMap);
-		
-		logger.info("patchGroup initial successful!" + patchGroup.getPatchMap().size());
 	}
 	
 	/**
@@ -117,7 +78,7 @@ public class RebaseControl {
 		return basisRevisionNumber;	
 	}
 	
-	/**manual rebase beginn , for each patch in patch graup will a new revision created 
+	/**manual rebase begin, for each patch in patch group will a new revision created 
 	 * @throws InternalErrorException 
 	 * */
 	public void manualRebaseProcess() throws InternalErrorException {
@@ -127,15 +88,9 @@ public class RebaseControl {
 		logger.info("difference Graph Model by manualRebase: "+ differenceGraphModel);
 		responseBuilder.entity(this.differenceGraphModel);
 		
-		Response response = responseBuilder.build();	
-		
-		
-		mergingControl.openRebaseModel();
-		logger.info("open rebase model: "+ mergingControl.getClass().toString());
-		
-		logger.info("is Rebase: "+ mergingControl.getIsRebase());
-		
-		mergingControl.getMergeProcess(response, commitModel.getGraphName(), commitModel.getBranch1(), commitModel.getBranch2());
+		//Response response = responseBuilder.build();	
+				
+		//mergingControl.getMergeProcess(response, commitModel.getGraphName(), commitModel.getBranch1(), commitModel.getBranch2());
 	}
 	
 	/**read the difference model and set the automatic resolution state for the triple and create */
