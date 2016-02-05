@@ -48,9 +48,7 @@ import de.tud.plt.r43ples.merging.RebaseQueryTypeEnum;
 import de.tud.plt.r43ples.merging.control.MergingControl;
 import de.tud.plt.r43ples.merging.control.RebaseControl;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import de.tud.plt.r43ples.visualisation.VisualisationBatik;
-import de.tud.plt.r43ples.visualisation.VisualisationD3;
-import de.tud.plt.r43ples.visualisation.VisualisationG6;
+
 
 /**
  * Provides SPARQL endpoint via [host]:[port]/r43ples/.
