@@ -24,6 +24,7 @@ import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.visualisation.VisualisationBatik;
 import de.tud.plt.r43ples.visualisation.VisualisationD3;
+import de.tud.plt.r43ples.visualisation.VisualisationG6;
 
 @Path("/")
 public class Misc {
@@ -62,6 +63,9 @@ public class Misc {
 		if (graph.equals("2") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataset2().graphName);
 		}
+		if (graph.equals("3") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataset3().graphName);
+		}
 		if (graph.equals("merging") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetMerging().graphName);
 		}
@@ -90,7 +94,6 @@ public class Misc {
 	}
 	
 	
-
 	/**
 	 * Provide revision information about R43ples system.
 	 * 
@@ -113,6 +116,8 @@ public class Misc {
 			response.entity(VisualisationBatik.getHtmlOutput(graph));
 		} else if (format.equals("d3")) {
 			response.entity(VisualisationD3.getHtmlOutput(graph));
+		} else if (format.equals("g6")) {
+			response.entity(VisualisationG6.getHtmlOutput(graph));
 		}
 		else {
 			response.entity(RevisionManagement.getRevisionInformation(graph, format));
@@ -142,8 +147,6 @@ public class Misc {
 		return response.entity(result).type(format).build();
 	}
 	
-	
-
 	
 
 }

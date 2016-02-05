@@ -1,0 +1,39 @@
+!SESSION 2015-11-04 18:22:12.996 -----------------------------------------------
+eclipse.buildId=4.3.2.M20140221-1700
+java.version=1.8.0_60
+java.vendor=Oracle Corporation
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=de_DE
+Framework arguments:  -product org.eclipse.epp.package.standard.product
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -product org.eclipse.epp.package.standard.product
+
+!ENTRY org.eclipse.egit.ui 2 0 2015-11-04 18:23:38.889
+!MESSAGE Warning: EGit couldn't detect the installation path "gitPrefix" of native Git. Hence EGit can't respect system level
+Git settings which might be configured in ${gitPrefix}/etc/gitconfig under the native Git installation directory.
+The most important of these settings is core.autocrlf. Git for Windows by default sets this parameter to true in
+this system level configuration. The Git installation location can be configured on the
+Team > Git > Configuration preference page's 'System Settings' tab.
+This warning can be switched off on the Team > Git > Confirmations and Warnings preference page.
+
+!ENTRY org.eclipse.egit.ui 2 0 2015-11-04 18:23:38.892
+!MESSAGE Warning: The environment variable HOME is not set. The following directory will be used to store the Git
+user global configuration and to define the default location to store repositories: 'C:\Users\McJoey'. If this is
+not correct please set the HOME environment variable and restart Eclipse. Otherwise Git for Windows and
+EGit might behave differently since they see different configuration options.
+This warning can be switched off on the Team > Git > Confirmations and Warnings preference page.
+
+!ENTRY org.eclipse.egit.ui 4 0 2015-11-04 18:26:36.460
+!MESSAGE file:///C:\Users\McJoey\Documents\GitHub: not found.
+!STACK 0
+org.eclipse.jgit.api.errors.TransportException: file:///C:\Users\McJoey\Documents\GitHub: not found.
+	at org.eclipse.jgit.api.LsRemoteCommand.call(LsRemoteCommand.java:196)
+	at org.eclipse.egit.core.op.ListRemoteOperation.run(ListRemoteOperation.java:99)
+	at org.eclipse.egit.ui.internal.clone.SourceBranchPage$8.run(SourceBranchPage.java:324)
+	at org.eclipse.jface.operation.ModalContext$ModalContextThread.run(ModalContext.java:121)
+Caused by: org.eclipse.jgit.errors.NoRemoteRepositoryException: file:///C:\Users\McJoey\Documents\GitHub: not found.
+	at org.eclipse.jgit.transport.TransportLocal$1.open(TransportLocal.java:131)
+	at org.eclipse.jgit.transport.TransportBundleFile$1.open(TransportBundleFile.java:106)
+	at org.eclipse.jgit.transport.Transport.open(Transport.java:556)
+	at org.eclipse.jgit.transport.Transport.open(Transport.java:316)
+	at org.eclipse.jgit.transport.Transport.open(Transport.java:287)
+	at org.eclipse.jgit.api.LsRemoteCommand.call(LsRemoteCommand.java:162)
+	... 3 more

@@ -1,0 +1,12 @@
+@prefix : <http://test.com/> .
+
+:Adam :knows :Emma.
+:Adam :knows :Freddy.
+:Carlos :knows :Danny.
+:Carlos :knows :Freddy.
+:Gertrude :knows :Waldtraut.
+:Stefan :knows :Heinrich.
+:Stefan :knows :Paul.
+:Franz :knows :Paul.
+:Gertrude :knows :Freddy.
+

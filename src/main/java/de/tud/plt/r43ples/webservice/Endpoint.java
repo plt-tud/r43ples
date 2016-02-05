@@ -49,6 +49,7 @@ import de.tud.plt.r43ples.merging.control.MergingControl;
 import de.tud.plt.r43ples.merging.control.RebaseControl;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
+
 /**
  * Provides SPARQL endpoint via [host]:[port]/r43ples/.
  * Supplies version information, service description as well as SPARQL queries.
@@ -112,6 +113,7 @@ public class Endpoint {
 	protected static HashMap<String, HashMap<String, MergingControl>> clientMap = new HashMap<String, HashMap<String, MergingControl>>();
 	
 	
+
 
 	/**
 	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).
