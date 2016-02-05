@@ -1,19 +1,16 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (MiKTeX 2.9) (preloaded format=pdflatex 2015.10.5)  2 FEB 2016 21:38
+This is pdfTeX, Version 3.14159265-2.6-1.40.15 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2015.5.20)  5 FEB 2016 15:44
 entering extended mode
-**C:/Users/Dominik/Desktop/studium/Wahlmodule/Mensch-Maschine-Systemtechnik/Pro
-jekt/Quelltext/r43ples/dokumentation/Abschlussdokumentation/Dokumentation.tex
-
-(C:/Users/Dominik/Desktop/studium/Wahlmodule/Mensch-Maschine-Systemtechnik/Proj
-ekt/Quelltext/r43ples/dokumentation/Abschlussdokumentation/Dokumentation.tex
-LaTeX2e <2015/01/01> patch level 2
-Babel <3.9m> and hyphenation patterns for 69 languages loaded.
+**Dokumentation.tex
+(Dokumentation.tex
+LaTeX2e <2015/01/01>
+Babel <3.9l> and hyphenation patterns for 69 languages loaded.
 (tudbook.cls
 Document Class: tudbook 2012/08/04 Buch-Klasse fuer die TU Dresden, (c) by Klau
 s Bergmann
 Class: 'tudbook' Version 1.6, Buchvorlage der Technischen Universitaet Dresden
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\book.cls"
+("C:\Program Files\MiKTeX 2.9\tex\latex\base\book.cls"
 Document Class: book 2014/09/29 v1.4h Standard LaTeX document class
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\bk10.clo"
+("C:\Program Files\MiKTeX 2.9\tex\latex\base\bk10.clo"
 File: bk10.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
@@ -29,31 +26,31 @@ File: bk10.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\graphicx.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\graphicx.sty"
 Package: graphicx 2014/10/28 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\keyval.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\keyval.sty"
 Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
 \KV@toks@=\toks14
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\graphics.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\graphics.sty"
 Package: graphics 2014/10/28 v1.0p Standard LaTeX Graphics (DPC,SPQR)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\trig.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\trig.sty"
 Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\00miktex\graphics.cfg"
+("C:\Program Files\MiKTeX 2.9\tex\latex\00miktex\graphics.cfg"
 File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
 )
 Package graphics Info: Driver file: pdftex.def on input line 94.
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\pdftex-def\pdftex.def"
+("C:\Program Files\MiKTeX 2.9\tex\latex\pdftex-def\pdftex.def"
 File: pdftex.def 2011/05/27 v0.06d Graphics/color for pdfTeX
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\infwarerr.sty"
+("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\infwarerr.sty"
 Package: infwarerr 2010/04/08 v1.3 Providing info/warning/error messages (HO)
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\ltxcmds.sty"
+("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\ltxcmds.sty"
 Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 )
 \Gread@gobject=\count88
@@ -61,19 +58,21 @@ Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 \Gin@req@height=\dimen103
 \Gin@req@width=\dimen104
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\ifthen.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\base\ifthen.sty"
 Package: ifthen 2014/09/29 v1.1c Standard LaTeX ifthen package (DPC)
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\fontenc.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\base\fontenc.sty"
 Package: fontenc 2005/09/27 v1.99g Standard LaTeX package
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\t1enc.def"
+("C:\Program Files\MiKTeX 2.9\tex\latex\base\t1enc.def"
 File: t1enc.def 2005/09/27 v1.99g Standard LaTeX file
 LaTeX Font Info:    Redeclaring font encoding T1 on input line 48.
 ))
 LaTeX Font Info:    Try loading font information for T1+aun on input line 48.
-LaTeX Font Info:    No file T1aun.fd. on input line 48.
 
+(C:\LocalTexFiles\tex\latex\converted\t1aun.fd
+File: t1aun.fd 2014/06/05 Fontinst v1.933 font definitions for T1/aun.
+)
 
 LaTeX Font Warning: Font shape `T1/aun/l/n' undefined
 (Font)              using `T1/cmr/m/n' instead on input line 48.
@@ -120,27 +119,25 @@ Package pdftex.def Info: TU_Logo_SW.pdf used on input line 280.
 (tudthesis.sty
 Package: tudthesis 2011/05/02 Thesis-Package fuer die TU Dresden, (c) by Klaus 
 Bergmann
-)
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\german\german.sty
+) ("C:\Program Files\MiKTeX 2.9\tex\latex\german\german.sty"
 v2.5e 1998-07-08
 Package: german 1998/07/08 v2.5e Support for writing german texts (br)
 \grmnU@D=\dimen105
 german -- \language number for Austrian undefined, default 23 used.
-)
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\inputenc.sty"
+) ("C:\Program Files\MiKTeX 2.9\tex\latex\base\inputenc.sty"
 Package: inputenc 2015/03/17 v1.2c Input encoding file
 \inpenc@prehook=\toks15
 \inpenc@posthook=\toks16
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\utf8.def"
-File: utf8.def 2015/06/27 v1.1n UTF-8 support for inputenc
+("C:\Program Files\MiKTeX 2.9\tex\latex\base\utf8.def"
+File: utf8.def 2014/09/29 v1.1m UTF-8 support for inputenc
 Now handling font encoding OML ...
 ... no UTF-8 mapping file for font encoding OML
 Now handling font encoding T1 ...
 ... processing UTF-8 mapping file for font encoding T1
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\t1enc.dfu"
-File: t1enc.dfu 2015/06/27 v1.1n UTF-8 support for inputenc
+("C:\Program Files\MiKTeX 2.9\tex\latex\base\t1enc.dfu"
+File: t1enc.dfu 2014/09/29 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A1 (decimal 161)
    defining Unicode char U+00A3 (decimal 163)
    defining Unicode char U+00AB (decimal 171)
@@ -289,8 +286,8 @@ File: t1enc.dfu 2015/06/27 v1.1n UTF-8 support for inputenc
 Now handling font encoding OT1 ...
 ... processing UTF-8 mapping file for font encoding OT1
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\ot1enc.dfu"
-File: ot1enc.dfu 2015/06/27 v1.1n UTF-8 support for inputenc
+("C:\Program Files\MiKTeX 2.9\tex\latex\base\ot1enc.dfu"
+File: ot1enc.dfu 2014/09/29 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A1 (decimal 161)
    defining Unicode char U+00A3 (decimal 163)
    defining Unicode char U+00B8 (decimal 184)
@@ -320,8 +317,8 @@ File: ot1enc.dfu 2015/06/27 v1.1n UTF-8 support for inputenc
 Now handling font encoding OMS ...
 ... processing UTF-8 mapping file for font encoding OMS
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\omsenc.dfu"
-File: omsenc.dfu 2015/06/27 v1.1n UTF-8 support for inputenc
+("C:\Program Files\MiKTeX 2.9\tex\latex\base\omsenc.dfu"
+File: omsenc.dfu 2014/09/29 v1.1m UTF-8 support for inputenc
    defining Unicode char U+00A7 (decimal 167)
    defining Unicode char U+00B6 (decimal 182)
    defining Unicode char U+00B7 (decimal 183)
@@ -344,18 +341,18 @@ Now handling font encoding U ...
    defining Unicode char U+2122 (decimal 8482)
    defining Unicode char U+2423 (decimal 9251)
 ))
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\germbib\bibgerm.sty
+("C:\Program Files\MiKTeX 2.9\tex\latex\germbib\bibgerm.sty"
 Package: bibgerm 2000/08/18 v0.1 Support for mixed language bibliographies
 
 ** Macros for german `BibTeX'ing added to Style Option `german' 20 Apr 1993 **
 ** idea and languages `german' and `USenglish' implemented by M. Wallmeier **
 ** Modified for LaTeX 2e and german.sty 2.5b by A. Scherer 1 Nov 1995 **
 ** Modified for ngerman.sty and babel.sty by H. Harders 21 August 2000 **)
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\url\url.sty
+("C:\Program Files\MiKTeX 2.9\tex\latex\url\url.sty"
 \Urlmuskip=\muskip10
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\paralist\paralist.sty
+("C:\Program Files\MiKTeX 2.9\tex\latex\paralist\paralist.sty"
 Package: paralist 2013/06/09 v2.4 Extended list environments
 \pltopsep=\skip46
 \plpartopsep=\skip47
@@ -363,14 +360,14 @@ Package: paralist 2013/06/09 v2.4 Extended list environments
 \plparsep=\skip49
 \pl@lab=\toks17
 )
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\subfig\subfig.sty
+("C:\Program Files\MiKTeX 2.9\tex\latex\subfig\subfig.sty"
 Package: subfig 2005/06/28 ver: 1.3 subfig package
 
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\caption\caption.sty
-Package: caption 2015/09/17 v3.3-111 Customizing captions (AR)
+("C:\Program Files\MiKTeX 2.9\tex\latex\caption\caption.sty"
+Package: caption 2013/05/02 v3.3-89 Customizing captions (AR)
 
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\latex\caption\caption3.sty
-Package: caption3 2015/09/20 v1.7-115 caption3 kernel (AR)
+("C:\Program Files\MiKTeX 2.9\tex\latex\caption\caption3.sty"
+Package: caption3 2013/05/02 v1.6-88 caption3 kernel (AR)
 Package caption3 Info: TeX engine: e-TeX on input line 57.
 \captionmargin=\dimen106
 \captionmargin@=\dimen107
@@ -413,8 +410,7 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 12.
 LaTeX Font Info:    ... okay on input line 12.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 12.
 LaTeX Font Info:    ... okay on input line 12.
-
-(C:\Users\Dominik\AppData\Roaming\MiKTeX\2.9\tex\context\base\supp-pdf.mkii
+ ("C:\Program Files\MiKTeX 2.9\tex\context\base\supp-pdf.mkii"
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count97
 \scratchdimen=\dimen114
@@ -435,7 +431,9 @@ Package caption Info: Begin \AtBeginDocument code.
 Package caption Info: subfig package v1.3 is loaded.
 Package caption Info: End \AtBeginDocument code.
 LaTeX Font Info:    Try loading font information for T1+din on input line 20.
-LaTeX Font Info:    No file T1din.fd. on input line 20.
+(C:\LocalTexFiles\tex\latex\converted\t1din.fd
+File: t1din.fd 2014/06/17 Fontinst v1.933 font definitions for T1/din.
+)
 
 LaTeX Font Warning: Font shape `T1/din/b/n' undefined
 (Font)              using `T1/cmr/m/n' instead on input line 20.
@@ -457,7 +455,7 @@ Overfull \hbox (28.45274pt too wide) has occurred while \output is active
 [] []
  []
 
-[1{C:/Users/Dominik/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}
+[1{C:/Users/Angela/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}
 
 
  <./TU_Logo_SW.pdf>] [2
@@ -552,7 +550,7 @@ LaTeX Font Warning: Font shape `OMS/aun/l/n' undefined
 
 LaTeX Font Info:    Try loading font information for T1+cmtt on input line 172.
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\t1cmtt.fd"
+("C:\Program Files\MiKTeX 2.9\tex\latex\base\t1cmtt.fd"
 File: t1cmtt.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 <detail_graph.jpg, id=74, 902.6222pt x 478.03593pt>
@@ -596,13 +594,13 @@ LaTeX Font Warning: Font shape `T1/aun/l/sc' undefined
 ] (Dokumentation.lof
 Overfull \hbox (17.2115pt too wide) in paragraph at lines 5--5
  [][] []\T1/aun/l/sc/10 Darstellung ei-nes Gra-phen mit GitHub Dek-stop, ent-no
-m-men von $\T1/cmtt/m/n/10 https : / / assets-[]cdn .$ 
+m-men von $\T1/cmtt/m/n/10 https : / / assets-[]cdn . 
  []
 
 
 Overfull \hbox (0.46559pt too wide) in paragraph at lines 5--5
- $\T1/cmtt/m/n/10 github . com / images / modules / home / desktop-[]mac . png 
-? v = 1$\T1/aun/l/sc/10 , ab-ge-ru-fen am 24.11.2015 []  
+ \T1/cmtt/m/n/10 github . com / images / modules / home / desktop-[]mac . png ?
+ v = 1$\T1/aun/l/sc/10 , ab-ge-ru-fen am 24.11.2015 []  
  []
 
 )
@@ -611,29 +609,30 @@ Overfull \hbox (0.46559pt too wide) in paragraph at lines 5--5
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
  ) 
 Here is how much of TeX's memory you used:
- 3597 strings out of 493673
- 52038 string characters out of 3141524
- 118751 words of memory out of 3000000
- 6894 multiletter control sequences out of 15000+200000
+ 3589 strings out of 493671
+ 51044 string characters out of 3143859
+ 118539 words of memory out of 3000000
+ 6883 multiletter control sequences out of 15000+200000
  13754 words of font info for 32 fonts, out of 3000000 for 9000
  1025 hyphenation exceptions out of 8191
- 44i,16n,47p,2301b,433s stack positions out of 5000i,500n,10000p,200000b,50000s
-{C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/enc/dvips/cm-super/cm-supe
-r-t1.enc}<C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy
-10.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super
-/sfrm0600.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/c
-m-super/sfrm0700.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/p
-ublic/cm-super/sfrm0800.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/
-type1/public/cm-super/sfrm0900.pfb><C:/Users/Dominik/AppData/Roaming/MiKTeX/2.9
-/fonts/type1/public/cm-super/sfrm1000.pfb><C:/Users/Dominik/AppData/Roaming/MiK
-TeX/2.9/fonts/type1/public/cm-super/sfrm1200.pfb><C:/Users/Dominik/AppData/Roam
-ing/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm1440.pfb><C:/Users/Dominik/AppDa
-ta/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sfrm2488.pfb><C:/Users/Domini
-k/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sftt0800.pfb><C:/Users
-/Dominik/AppData/Roaming/MiKTeX/2.9/fonts/type1/public/cm-super/sftt1000.pfb>
-Output written on Dokumentation.pdf (23 pages, 1344448 bytes).
+ 44i,16n,47p,2164b,433s stack positions out of 5000i,500n,10000p,200000b,50000s
+{C:/Program Files/MiKTeX 2.9/fonts/enc/dvips/cm-super/cm-super-t1.enc}<C:/Pro
+gram Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Fil
+es/MiKTeX 2.9/fonts/type1/public/cm-super/sfrm0600.pfb><C:/Program Files/MiKTeX
+ 2.9/fonts/type1/public/cm-super/sfrm0700.pfb><C:/Program Files/MiKTeX 2.9/font
+s/type1/public/cm-super/sfrm0800.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/p
+ublic/cm-super/sfrm0900.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/cm-
+super/sfrm1000.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/cm-super/sfr
+m1200.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/cm-super/sfrm1440.pfb
+><C:/Program Files/MiKTeX 2.9/fonts/type1/public/cm-super/sfrm2488.pfb><C:/Prog
+ram Files/MiKTeX 2.9/fonts/type1/public/cm-super/sftt0800.pfb><C:/Program Files
+/MiKTeX 2.9/fonts/type1/public/cm-super/sftt1000.pfb>
+Output written on Dokumentation.pdf (23 pages, 1344661 bytes).
 PDF statistics:
  143 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
