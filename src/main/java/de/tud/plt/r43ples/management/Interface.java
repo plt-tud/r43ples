@@ -363,7 +363,7 @@ public class Interface {
 		String usedSDDURI = RevisionManagement.getSDD(graphName, sdd);
 
 		// Get the common revision with shortest path
-		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA, revisionUriB);
+		mresult.commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA, revisionUriB);
 		
 		// Create the revision progress for A and B
 		String graphNameA = graphName + "-RM-REVISION-PROGRESS-A";
@@ -374,8 +374,8 @@ public class Interface {
 		String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 		
 		MergeManagement.createRevisionProgresses(revisionGraph, graphName,
-				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriA), graphNameA, uriA, 
-				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriB), graphNameB, uriB);
+				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, mresult.commonRevision, revisionUriA), graphNameA, uriA, 
+				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, mresult.commonRevision, revisionUriB), graphNameB, uriB);
 		
 		// Create difference model
 		MergeManagement.createDifferenceTripleModel(graphName,  graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI);

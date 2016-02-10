@@ -1,5 +1,6 @@
 package de.tud.plt.r43ples.merging.model.structure;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -11,35 +12,9 @@ import java.util.HashMap;
 public class DifferenceModel {
 
 	/** The hash map which contains all difference groups. **/
-	private HashMap<String, DifferenceGroup> differenceGroups;
+	private HashMap<String, DifferenceGroup> differenceGroups = new HashMap<String, DifferenceGroup>();
 	
-	
-	/**
-	 * The constructor.
-	 */
-	public DifferenceModel() {
-		setDifferenceGroups(new HashMap<String, DifferenceGroup>());
-	}
-
-
-	/**
-	 * Get the difference groups.
-	 * 
-	 * @return the hash map with all difference groups
-	 */
-	public HashMap<String, DifferenceGroup> getDifferenceGroups() {
-		return differenceGroups;
-	}
-
-
-	/**
-	 * Set the difference groups.
-	 * 
-	 * @param differenceGroups the difference groups to set
-	 */
-	public void setDifferenceGroups(HashMap<String, DifferenceGroup> differenceGroups) {
-		this.differenceGroups = differenceGroups;
-	}
+	public ArrayList<Difference> allDifferences = new ArrayList<Difference>(); 
 	
 	
 	/**
@@ -54,6 +29,17 @@ public class DifferenceModel {
 	
 	
 	/**
+	 * Add a difference group. If the difference group identifier already exists the old difference group will be overwritten.
+	 * 
+	 * @param identifier the identifier
+	 * @param differenceGroup the difference group
+	 */
+	public void addDifference(Difference difference) {
+		this.allDifferences.add(difference);
+	}
+	
+	
+	/**
 	 * Remove entry from difference groups.
 	 * 
 	 * @param identifier the identifier of the difference group to remove
@@ -61,13 +47,11 @@ public class DifferenceModel {
 	public void removeDifferenceGroup(String identifier) {
 		this.differenceGroups.remove(identifier);
 	}
-	
-	
-	/**
-	 * Clear the difference model.
-	 */
-	public void clear() {
-		differenceGroups.clear();
-	}
 
+
+	public HashMap<String, DifferenceGroup> getDifferenceGroups() {
+		return differenceGroups;
+	}
+	
+	
 }

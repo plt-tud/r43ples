@@ -310,6 +310,7 @@ public class Endpoint {
 		Mustache mustache = mf.compile("templates/result.mustache");
 		StringWriter sw = new StringWriter();
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
+		htmlMap.put("endpoint_active", true);
 		htmlMap.put("result", result);
 		htmlMap.put("query", query);
 		htmlMap.put("query_rewritten", query_rewritten);
@@ -485,7 +486,7 @@ public class Endpoint {
 	/** 
 	 * Creates response query and get Response of it.
 	 * 
-	 * Using command: RESBASE (AUTO|FORCE|MANUAL) GRAPH <graphURI> BRANCH "branchNameA" INTO "branchNameB"
+	 * Using command: REBASE (AUTO|FORCE|MANUAL) GRAPH <graphURI> BRANCH "branchNameA" INTO "branchNameB"
 	 * 
 	 * @param sparqlQuery the SPARQL query
 	 * @throws InternalErrorException 

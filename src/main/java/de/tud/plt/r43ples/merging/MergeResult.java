@@ -11,6 +11,7 @@ public class MergeResult {
 	public String newRevisionNumber;
 	public String conflictModel;
 	public String graphDiff;
+	public String commonRevision;
 	
 	
 	public MergeResult(String graph, String branchA, String branchB) {

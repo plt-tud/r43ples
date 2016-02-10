@@ -11,10 +11,10 @@
 	content: url('/static/images/NotIncluded.svg');
 }
 
-.conflict-0:before {
+.conflict-false:before {
 	content: url('/static/images/Difference.png');
 }
-.conflict-1:before {
+.conflict-true:before {
 	content: url('/static/images/Conflict.png');
 }
 

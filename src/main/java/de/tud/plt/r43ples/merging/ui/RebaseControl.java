@@ -24,13 +24,13 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.ResolutionStateEnum;
 import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
-import de.tud.plt.r43ples.merging.management.ProcessManagement;
 import de.tud.plt.r43ples.merging.model.structure.Difference;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
 import de.tud.plt.r43ples.merging.model.structure.MergeCommitModel;
 import de.tud.plt.r43ples.merging.model.structure.Patch;
 import de.tud.plt.r43ples.merging.model.structure.PatchGroup;
+import de.tud.plt.r43ples.merging.model.structure.Triple;
 
 public class RebaseControl {
 	private static Logger logger = Logger.getLogger(RebaseControl.class);
@@ -113,13 +113,13 @@ public class RebaseControl {
 			tripleState = differenceGroup.getAutomaticResolutionState();
 		
 			
-			Iterator<String> iteDifferences = differenceGroup.getDifferences().keySet().iterator();
+			Iterator<Triple> iteDifferences = differenceGroup.getDifferences().keySet().iterator();
 			while (iteDifferences.hasNext()) {
-				String differenceKey = iteDifferences.next();
+				Triple differenceKey = iteDifferences.next();
 				Difference difference = differenceGroup.getDifferences().get(differenceKey);
 								
 				// Get the triple
-				String triple = ProcessManagement.tripleToString( difference.getTriple());					
+				Triple triple = difference.getTriple();					
 				
 				// Add the triple to the corresponding string
 				if (tripleState.equals(SDDTripleStateEnum.ADDED) || tripleState.equals(SDDTripleStateEnum.ORIGINAL)) {
@@ -159,9 +159,9 @@ public class RebaseControl {
 			String differenceGroupKey = iteDifferenceGroups.next();
 			DifferenceGroup differenceGroup = differenceModel.getDifferenceGroups().get(differenceGroupKey);
 			
-			Iterator<String> iteDifferences = differenceGroup.getDifferences().keySet().iterator();
+			Iterator<Triple> iteDifferences = differenceGroup.getDifferences().keySet().iterator();
 			while (iteDifferences.hasNext()) {
-				String differenceKey = iteDifferences.next();
+				Triple differenceKey = iteDifferences.next();
 				Difference difference = differenceGroup.getDifferences().get(differenceKey);
 				
 				// Get the triple state to use
@@ -175,7 +175,7 @@ public class RebaseControl {
 				}
 				
 				// Get the triple
-				String triple = ProcessManagement.tripleToString( difference.getTriple());					
+				Triple triple = difference.getTriple();					
 				
 				// Add the triple to the corresponding string
 				if (tripleState.equals(SDDTripleStateEnum.ADDED) || tripleState.equals(SDDTripleStateEnum.ORIGINAL)) {
@@ -275,7 +275,6 @@ public class RebaseControl {
 	
 	/**update difference model*/
 	public void updateRebaseDifferenceModel(DifferenceModel updatedDifferenceModel){		
-		differenceModel.clear();
 		differenceModel = updatedDifferenceModel;
 	}
 

@@ -1,52 +1,38 @@
- <div class="col-lg-3">
-    <fieldset>
-      <legend>Filter</legend> 
-            <table id="propertyBody" class="table">
-            	<tr>
-                   <th>Property</th>
-                 </tr>
-                 {{#propertyList}}
-                    <tr>
-                        <td><input type="checkbox" name="pFilter" checked id="{{toString}}"> {{toString}}</td>
-                    </tr>
-                  {{/propertyList}}     
-            </table>
-  	</fieldset>
- </div>
-              
-  <div class="col-lg-9">
- <fieldset>
-	<legend>Resolution</legend>
-	<table id="tripleTable" class="table table-striped table-hover">
-		<thead>
+  <div>
+  <fieldset>
+	<table id="tripleTable" class="table tablesorter-bootstrap">
+		<thead> 
 			<tr>
-	        	<th data-placeholder="Try B*{space}" class="filter-select filer-exact">Subject</th>
-				<th data-placeholder="Try B*{space}" class="filter-match">Predicate</th>
-				<th data-placeholder="e.g. object" class="filter-match">Object</th>
+	        	<th class="filter-match filer-exact">Subject</th>
+				<th class="filter-match">Predicate</th>
+				<th class="filter-match">Object</th>
 				<th class="filter-select">State B1</th>
-				<th class="filter-select filter-exact">State B2</th>
-				<th >Conflict</th>
+				<th class="filter-select">State B2</th>
+				<th class="filter-select">Conflict</th>
 				<th >Resolution State</th>
 				<th >Approve</th>
 			</tr>
 		</thead>
 		<tbody>
-			{{#tableModel.getTripleRowList}}               
+			{{#tripleDifferenceModel.allDifferences}}               
 		  	<tr>
-			    <td>{{subject}} </td>
-				<td>{{predicate}}</td>
-				<td>{{object}}</td>
-				<td class="state-{{stateA}}"> {{stateA}}</td>
-				<td class="state-{{stateB}}"> {{stateB}}</td>
+		  	    {{#getTriple}}
+			    <td>{{getSubject}} </td>
+				<td>{{getPredicate}}</td>
+				<td>{{getObject}}</td>
+				{{/getTriple}}
+				<td class="state-{{tripleStateA}}"> {{tripleStateA}}</td>
+				<td class="state-{{tripleStateB}}"> {{tripleStateB}}</td>
 				<td class="conflict-{{conflicting}}">{{conflicting}}</td>
 				<td><input type="checkbox" id="opt" name="options" value={{tripleId}}></td>
 		        <td><button type="button" class="btn btn-default">Confirm</button></td>
 	        </tr>
-        {{/tableModel.getTripleRowList}}
+        {{/tripleDifferenceModel.allDifferences}}
         </tbody>   
     </table>
     <div id="allSelect" class="col-lg-2 col-lg-offset-10">
 	  	<button type="button" class="btn btn-default">Approve All</button>
 	</div>
 </fieldset>
-</div>                     
+</div>          
+           

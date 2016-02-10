@@ -36,9 +36,9 @@ public class ReportManagement {
 			Entry<String, DifferenceGroup> entryDG = (Entry<String, DifferenceGroup>) iterDM.next();
 			DifferenceGroup differ = (DifferenceGroup) entryDG.getValue();
 			
-			Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
+			Iterator<Entry<Triple, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
 			while(iterDIF.hasNext()){
-				Entry<String, Difference> entryDF = iterDIF.next();
+				Entry<Triple, Difference> entryDF = iterDIF.next();
 								
 				Difference difference = entryDF.getValue();
 				
@@ -77,10 +77,10 @@ public class ReportManagement {
 			
 			String conflicting = (isconflicting ) ? "1" : "0";
 			//get difference 
-			Iterator<Entry<String, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
+			Iterator<Entry<Triple, Difference>> iterDIF = differ.getDifferences().entrySet().iterator();
 			while(iterDIF.hasNext()){
 				
-				Entry<String, Difference> entryDF = iterDIF.next();
+				Entry<Triple, Difference> entryDF = iterDIF.next();
 				
 				Difference difference = entryDF.getValue();
 				//get triple
@@ -90,9 +90,9 @@ public class ReportManagement {
 				
 				SDDTripleStateEnum tripleResolutionState = difference.getTripleResolutionState();
 				
-				String subject = ProcessManagement.getSubject(triple);
-				String predicate = ProcessManagement.getPredicate(triple);
-				String object = ProcessManagement.getObject(triple);
+				String subject = triple.getSubject();
+				String predicate = triple.getPredicate();
+				String object = triple.getObject();
 				//get revision number
 				String revisionA = difference.getReferencedRevisionLabelA();
 				String revisionB = difference.getReferencedRevisionLabelB();

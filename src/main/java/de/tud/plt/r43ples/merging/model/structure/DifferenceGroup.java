@@ -22,7 +22,7 @@ public class DifferenceGroup {
 	/** The conflicting property. Specifies if this difference is a conflict or not. **/
 	private boolean conflicting;
 	/** The array list which contains all differences. **/
-	private HashMap<String, Difference> differences;
+	private HashMap<Triple, Difference> differences;
 	
 	
 	/**
@@ -38,7 +38,7 @@ public class DifferenceGroup {
 		this.tripleStateB = tripleStateB;
 		this.automaticResolutionState = automaticResolutionState;
 		this.conflicting = conflicting;
-		setDifferences(new HashMap<String, Difference>());
+		setDifferences(new HashMap<Triple, Difference>());
 	}
 
 	
@@ -127,7 +127,7 @@ public class DifferenceGroup {
 	 * 
 	 * @return the hash map with all differences
 	 */
-	public HashMap<String, Difference> getDifferences() {
+	public HashMap<Triple, Difference> getDifferences() {
 		return differences;
 	}
 
@@ -137,7 +137,7 @@ public class DifferenceGroup {
 	 * 
 	 * @param differences the differences to set
 	 */
-	public void setDifferences(HashMap<String, Difference> differences) {
+	public void setDifferences(HashMap<Triple, Difference> differences) {
 		this.differences = differences;
 	}
 	
@@ -148,7 +148,7 @@ public class DifferenceGroup {
 	 * @param identifier the identifier
 	 * @param difference the difference
 	 */
-	public void addDifference(String identifier, Difference difference) {
+	public void addDifference(Triple identifier, Difference difference) {
 		this.differences.put(identifier, difference);
 	}
 	

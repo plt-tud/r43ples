@@ -73,15 +73,15 @@ public class JenaModelManagement {
 	
 	
 	/**
-	 * Converts a jena model to N-Triple serialization. 
+	 * Converts a jena model to the specified serialization. 
 	 * 
 	 * @param model the jena model
 	 * @return the string which contains the N-Triples
 	 */
-	public static String convertJenaModelToNTriple(Model model) {
+	public static String convertJenaModelToString(Model model, String format) {
 			
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		model.write(os, "N-TRIPLES");
+		model.write(os, format);
 		
 		try {
 			return new String(os.toByteArray(), "UTF-8");
@@ -89,6 +89,16 @@ public class JenaModelManagement {
 			e.printStackTrace();
 			return "";
 		}
+	}
+	
+	/**
+	 * Converts a jena model to N-Triple serialization. 
+	 * 
+	 * @param model the jena model
+	 * @return the string which contains the N-Triples
+	 */
+	public static String convertJenaModelToNTriple(Model model) {
+		return convertJenaModelToString(model, "N-TRIPLES");
 	}
 
 }

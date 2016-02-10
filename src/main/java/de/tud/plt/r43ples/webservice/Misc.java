@@ -45,6 +45,19 @@ public class Misc {
 		return htmlMap;
 	}
 	
+	@GET
+	@Path("help")
+	@Template(name = "/help.mustache")
+	@Produces(MediaType.TEXT_HTML)
+	public final Map<String, Object> getHelpPage() {
+		logger.info("Get Landing page");
+		Map<String, Object> htmlMap = new HashMap<String, Object>();
+		htmlMap.put("help_active", true);
+		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());	
+		return htmlMap;
+	}
+	
 	/**
 	 * Creates sample datasets
 	 * @return information provided as HTML response

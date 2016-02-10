@@ -139,7 +139,7 @@ public class Merging {
 			} else {
 				MergingControl mergingControl = new MergingControl();
 				// show page for resolving conflicts
-				mergingControl.getMergeProcess(commitModel, mresult.conflictModel);
+				mergingControl.getMergeProcess(commitModel, mresult);
 				response.entity(mergingControl.getViewHtmlOutput());
 				return response.build();
 			}
