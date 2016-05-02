@@ -1,5 +1,6 @@
 package de.tud.plt.r43ples.webservice;
 
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.log4j.Logger;
-import org.glassfish.jersey.server.mvc.Template;
+
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.GitRepositoryState;
@@ -36,14 +40,19 @@ public class Misc {
 	 *
 	 */
 	@GET
-	@Template(name = "/home.mustache")
 	@Produces(MediaType.TEXT_HTML)
-	public final Map<String, Object> getLandingPage() {
+	public final Response getLandingPage() {
 		logger.info("Get Landing page");
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
 		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
 		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());	
-		return htmlMap;
+		
+		StringWriter sw = new StringWriter();
+	    MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/home.mustache");
+	    mustache.execute(sw, htmlMap);		
+	    ResponseBuilder response = Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML);
+		return response.build();
 	}
 	
 	/**
@@ -53,8 +62,7 @@ public class Misc {
 	 */
 	@Path("createSampleDataset")
 	@GET
-	@Template(name = "/exampleDatasetGeneration.mustache")
-	public final Map<String, Object> createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws InternalErrorException {
+	public final Response createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws InternalErrorException {
 		List<String> graphs = new ArrayList<>();
 		
 		if (graph.equals("1") || graph.equals("all")){
@@ -90,7 +98,12 @@ public class Misc {
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
 	    htmlMap.put("graphs", graphs);
 	    
-		return htmlMap;			
+	    StringWriter sw = new StringWriter();
+	    MustacheFactory mf = new DefaultMustacheFactory();
+	    Mustache mustache = mf.compile("templates/exampleDatasetGeneration.mustache");
+	    mustache.execute(sw, htmlMap);		
+	    ResponseBuilder response = Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML);
+		return response.build();			
 	}
 	
 	
@@ -106,7 +119,8 @@ public class Misc {
 	@Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
 			MediaType.APPLICATION_SVG_XML, "application/ld+json" })
 	public final Response getRevisionGraph(@HeaderParam("Accept") final String format_header,
-			@QueryParam("format") final String format_query, @QueryParam("graph") @DefaultValue("") final String graph) {
+			@QueryParam("format") final String format_query,
+			@QueryParam("graph") @DefaultValue("") final String graph) {
 		String format = (format_query != null) ? format_query : format_header;
 		logger.info("Get Revision Graph: " + graph + " (format: " + format+")");
 		
@@ -129,12 +143,11 @@ public class Misc {
 	/**
 	 * Provides content of graph in the attached triple store
 	 * 
-	 * @return list of graphs which are under revision control
+	 * @return content of specified graph in specified serialisation
 	 */
 	@Path("contentOfGraph")
 	@GET
-	@Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
-		MediaType.APPLICATION_SVG_XML, "application/ld+json" })
+	@Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, "application/ld+json" })
 	public final Response getContentOfGraph(
 			@HeaderParam("Accept") final String format_header,
 			@QueryParam("format") @DefaultValue("application/json") final String format_query,
