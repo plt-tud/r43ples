@@ -156,6 +156,7 @@ public class HttpInterface extends TripleStoreInterface {
 		InputStream result = executeQueryWithAuthorization(describeQueryString);
 		Model model = ModelFactory.createDefaultModel();
 		RDFDataMgr.read(model, result, Lang.RDFXML);
+		
 		return model;
 	}
 
@@ -168,7 +169,7 @@ public class HttpInterface extends TripleStoreInterface {
 			result.close();
 			return answer.contains("<boolean>true</boolean>");
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e);
 			return false;
 		}
 	}
@@ -182,7 +183,6 @@ public class HttpInterface extends TripleStoreInterface {
 	@Override
 	public void executeCreateGraph(String graph) {
 		executeQueryWithAuthorization("CREATE GRAPH <"+graph+">");
-
 	}
 
 	@Override

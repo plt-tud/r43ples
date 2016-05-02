@@ -49,22 +49,27 @@ public class VirtuosoInterface extends TripleStoreInterface {
 	public ResultSet executeSelectQuery(String selectQueryString) {
 		Query query =  QueryFactory.create(selectQueryString);
 		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(query, set);
-		return vqe.execSelect();
-		
+		ResultSet result = vqe.execSelect();
+		vqe.close();
+		return result;
 	}
 
 	@Override
 	public Model executeConstructQuery(String constructQueryString) {
 		Query query =  QueryFactory.create(constructQueryString);
 		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(query,  set);
-		return vqe.execConstruct();
+		Model result = vqe.execConstruct();
+		vqe.close();
+		return result;
 	}
 
 
 	@Override
 	public boolean executeAskQuery(String askQueryString) {
 		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(askQueryString, set);
-		return vqe.execAsk();
+		boolean result = vqe.execAsk();
+		vqe.close();
+		return result;
 	}
 
 	@Override
