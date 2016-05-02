@@ -55,7 +55,7 @@ public class RevisionManagement {
 
 
 	/**
-	 * Put existing graph under version control. Existence of graph is not checked. Current date is used for commit timstamp
+	 * Put existing graph under version control. Existence of graph is not checked. Current date is used for commit timestamp
 	 * 
 	 * @param graphName
 	 *            the graph name of the existing graph
