@@ -605,9 +605,8 @@ public class MergeManagement {
 			}
 		
 			// Concatenated SPARQL query
-			String query = String.format(
-					prefixes
-					+ "%s"
+			String query = prefixes + String.format(
+					"%s"
 					+ "WHERE { %n"
 					+ "%s"
 					+ "%s"
