@@ -6,7 +6,6 @@ R43ples (Revision for triples) is an open source Revision Management Tool for th
 It provides different revisions of named graphs via a SPARQL interface. All information about revisions, changes, commits, branches and tags are stored in additional named graphs beside the original graph in an attached external triple store.
 
 [![Build Status](https://travis-ci.org/plt-tud/r43ples.png?branch=master)](https://travis-ci.org/plt-tud/r43ples)
-[![Coverage Status](https://coveralls.io/repos/plt-tud/r43ples/badge.svg)](https://coveralls.io/r/plt-tud/r43ples)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/2125/badge.svg)](https://scan.coverity.com/projects/2125)
 [![Ohloh Project Status](https://www.ohloh.net/p/r43ples/widgets/project_thin_badge.gif)](https://www.ohloh.net/p/r43ples)
 
