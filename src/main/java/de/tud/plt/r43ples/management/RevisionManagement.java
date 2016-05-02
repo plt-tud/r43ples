@@ -1337,17 +1337,17 @@ public class RevisionManagement {
 		}
 	}
 	
-	/**
+	/** Get SDD for graphName
+	 * 
 	 * @param graphName
 	 * @param sdd
 	 * @param sddURI
-	 * @return
+	 * @return specified SDD if not null otherwise the default SDD for the specified graph
 	 * @throws InternalErrorException
 	 */
 	public static String getSDD(String graphName, String sdd)
 			throws InternalErrorException {
-		if (sdd != null && sdd != "") {
-			// Specified SDD
+		if (sdd != null && !sdd.equals("")) {
 			return sdd;
 		} else {
 			// Default SDD
