@@ -72,8 +72,8 @@ public class RevisionManagement {
 			revisiongraph += "x";
 		}
 		
-		String queryAddRevisionGraph = String.format(prefixes
-				+ "INSERT DATA { GRAPH <%1$s> {"
+		String queryAddRevisionGraph = prefixes + String.format(
+				"INSERT DATA { GRAPH <%1$s> {"
 				+ "  <%2$s> a rmo:Graph;"
 				+ "    rmo:hasRevisionGraph <%3$s>;"
 				+ "    sddo:hasDefaultSDD sdd:defaultSDD."
