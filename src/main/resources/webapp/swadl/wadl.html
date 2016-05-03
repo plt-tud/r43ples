@@ -1,0 +1,164 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link href="screen.css" media="screen" rel="stylesheet" type="text/css"></link>
+    <title>R43ples API documentation</title>
+    <script>
+
+      /** POINT TO YOUR WADL **/
+
+      var xmlDoc = "/r43ples/application.wadl";
+
+      /** END CHANGES **/
+
+      var xslDoc = "wadl.xsl?"+Math.random();
+      var grammarDefs = {};
+      function goToWadl(){
+        var win = window.open(xmlDoc,'_blank');
+        win.focus();
+      }
+      function loadWadl(){
+        xmlDoc = document.getElementById('input_baseUrl').value;
+        document.getElementById('example').innerHTML = '';
+        document.getElementById('grammars').innerHTML = '';
+        document.getElementById('message').innerHTML = '';
+        try{
+          displayResult();
+        }
+        catch (e){
+          console.log(e);
+          document.getElementById('message').innerHTML = "Unable to load wadl. Check cross-domain compatibility.";
+        }
+      }
+      function loadXMLDoc(filename)
+      {
+        if (window.ActiveXObject)
+        {
+          xhttp = new ActiveXObject("Msxml2.XMLHTTP");
+        }
+        else 
+        {
+          xhttp = new XMLHttpRequest();
+        }
+        if (xhttp.overrideMimeType){
+          xhttp.overrideMimeType('text/xml');
+        }
+        xhttp.open("GET", filename, false);
+        try {xhttp.responseType = "msxml-document"} catch(err) {} // Helping IE11
+        xhttp.send("");
+        return xhttp.responseXML;
+      }
+
+      function foreach(list,callback){
+        for (var i=0; i<list.length; i++){
+          callback(list[i]);
+        }
+      }
+
+      function slide(el){
+        if (el.style.height == 'auto') el.style.height = el.scrollHeight+'px';
+        var height = el.opened ? el.scrollHeight+'px' : '0px';
+        if (el.style.height == height){
+          endTransition(el);
+        }
+        else{
+          setTimeout(function(){el.style.setProperty("transition","1s");setTimeout(function(){el.style.height=height;},10);},10);
+        }
+      }
+
+      function slideToggle(el,className,force,callback){
+        while (el && (!el.getAttribute('class') || (el.getAttribute('class') && !el.getAttribute('class').match('slideContainer')))){
+          el = el.parentNode;
+        }
+        foreach(el.getElementsByClassName(className),function(el){el.callback = callback; el.opened = (typeof force!='undefined' ? force : !el.opened); slide(el);});
+      }
+
+      function endTransition(el){
+        el.style.removeProperty("transition");
+        if (el.opened){
+          setTimeout(function(){el.style.height = "auto";},0);
+        }
+        if (el.callback){ 
+          el.callback();
+          el.callback = null;
+        }
+      }
+
+      function displayResult()
+      {
+        document.getElementById('input_baseUrl').setAttribute('value',xmlDoc);
+        xml = loadXMLDoc(xmlDoc);
+        xsl = loadXMLDoc(xslDoc);
+        // code for IE
+        if (window.ActiveXObject || xhttp.responseType == "msxml-document")
+        {
+          ex = xml.transformNode(xsl);
+          document.getElementById("example").innerHTML = ex;
+        }
+        // code for Chrome, Firefox, Opera, etc.
+        else if (document.implementation && document.implementation.createDocument)
+        {
+          xsltProcessor = new XSLTProcessor();
+          xsltProcessor.importStylesheet(xsl);
+          resultDocument = xsltProcessor.transformToFragment(xml, document);
+          document.getElementById("example").appendChild(resultDocument);
+          foreach(document.getElementsByClassName('grammar'),function(el){addGrammar(el.getAttribute('href'),'xsd.xsl');});
+          foreach(document.getElementsByClassName('schema_def'),function(el){
+            var target = el.getAttribute('target');
+            var content = el.innerHTML;
+            foreach(document.getElementsByClassName(target),function(el){
+              el.innerHTML += content;
+              foreach(el.getElementsByClassName('schema_link'),function(el){el.className+=" active_schema_link";});
+            });
+          });
+          foreach(document.getElementsByClassName('active_schema_link'),function(el){el.onclick=function(){slideToggle(this,'model-signature');}});
+          foreach(document.getElementsByClassName('slider'),function(el){
+            el.addEventListener('webkitTransitionEnd',function(){endTransition(el);});
+            el.addEventListener('transitionend',function(){endTransition(el);});
+          });
+        }
+      }
+
+      function addGrammar(xmlGrammarDoc, xslGrammarDoc)
+      {
+        var xmlGrammar = loadXMLDoc(xmlGrammarDoc);
+        var xslGrammar = loadXMLDoc(xslGrammarDoc);
+        // code for IE
+        if (window.ActiveXObject || xhttp.responseType == "msxml-document")
+        {
+          ex = xmlGrammar.transformNode(xslGrammar);
+        }
+        // code for Chrome, Firefox, Opera, etc.
+        else if (document.implementation && document.implementation.createDocument)
+        {
+          xsltProcessor = new XSLTProcessor();
+          xsltProcessor.importStylesheet(xslGrammar);
+          resultDocument = xsltProcessor.transformToFragment(xmlGrammar, document);
+        }
+        document.getElementById('grammars').appendChild(resultDocument);
+      }
+    </script>
+  </head>
+  <body onload="displayResult()">
+    <div id="header">
+      <div class="swadl-ui-wrap">
+        <a id="logo">R43ples API Documentation</a>
+        <form id="api_selector">
+          <div class="input">
+            <input id="input_baseUrl" name="baseUrl" type="text">
+            </input>
+          </div>
+          <div class="input">
+            <a id="explore" onclick="loadWadl()">Swadl it!</a>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div id="message" class="error"></div>
+    <div id="example">
+    </div>
+    <div id="grammars">
+    </div>
+	<hr> produced by SWADL
+  </body>
+</html>
