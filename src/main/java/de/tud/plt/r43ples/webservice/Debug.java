@@ -31,6 +31,13 @@ public class Debug {
 		return "WIP";
 	}
 	
+	/**
+	 * Performs Debug query 
+	 * 
+	 * @param sparqlQuery SPARQL query which should be executed. If omitted, a HTML site will be displayed in order to enter a query
+	 * @return	SPARQL result
+	 * @throws InternalErrorException
+	 */
 	@GET
 	public final String getDebugQuery(@QueryParam("query") final String sparqlQuery) throws InternalErrorException {
 		if (sparqlQuery == null) {
