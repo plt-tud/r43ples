@@ -4,6 +4,7 @@ bin/
 target/
 database/
 
+*~
 .settings
 .externalToolBuilders/
 
