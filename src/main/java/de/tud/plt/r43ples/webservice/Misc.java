@@ -55,6 +55,13 @@ public class Misc {
 		return response.build();
 	}
 	
+	@Path("index")
+	@GET
+	@Produces(MediaType.TEXT_HTML)
+	public final Response getIndex(){
+		return getLandingPage();
+	}
+	
 	/**
 	 * Creates sample datasets
 	 * @return information provided as HTML response

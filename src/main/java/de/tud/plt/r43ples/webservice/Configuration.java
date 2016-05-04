@@ -20,6 +20,11 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.GitRepositoryState;
 
+/**
+ * REST services for managing the configuration on R43ples
+ * @author mgraube
+ *
+ */
 @Path("configuration")
 public class Configuration {
 	
@@ -27,6 +32,11 @@ public class Configuration {
 	
 	private final static Logger logger = Logger.getLogger(Configuration.class);
 	
+	/**
+	 * Get all configuration variables of R43ples and the user defined namespaces
+	 * @return map with all configuration variables
+	 * @throws InternalErrorException
+	 */
 	@GET
 	@Template(name = "/configuration.mustache")
 	public final Map<String, Object> getConfiguration() throws InternalErrorException {
@@ -43,6 +53,14 @@ public class Configuration {
 		return htmlMap;
 	}
 	
+	/**
+	 * Add user defined prefix to R43ples configuration
+	 * 
+	 * @param prefix	prefix to be added
+	 * @param namespace	namespaces used for specified prefix
+	 * @return	updated configuration
+	 * @throws InternalErrorException
+	 */
 	@POST
 	@Template(name = "/configuration.mustache")
 	public final Map<String, Object> addPrefix(
@@ -54,6 +72,12 @@ public class Configuration {
 		return getConfiguration();
 	}
 	
+	/**
+	 * Delete specified prefix from R43ples configuration
+	 * @param prefix	prefix which specified the namespace to be deleted
+	 * @return redirect to configuration site
+	 * @throws InternalErrorException
+	 */
 	@GET
 	@Path("deletePrefix")
 	public final Response deletePrefix(
