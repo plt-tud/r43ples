@@ -13,3 +13,6 @@ r43ples.log*
 
 /Todo.md
 /dataset.ttl
+/src/benchmark/scenario/Dbpedia/.deployTestData.sh.kate-swp
+/.Rhistory
+*.log
