@@ -1,0 +1,143 @@
+R43ples: Supported SPARQL Queries
+=================================
+
+General
+-------
+
+* Prefixes are supported
+* No limitations in WHERE clause
+    * Filtering should work
+    * UNION
+* Limit, Offset and Ordering supported
+
+
+
+
+
+
+SELECT Queries
+--------------
+
+SELECT *
+FROM <graph>
+WHERE {}
+
+SELECT *
+FROM <graph> REVISION "2"
+WHERE {}
+
+SELECT *
+FROM <graph> REVISION "develop"
+WHERE {}
+
+
+
+SELECT *
+FROM <graph> REVISION "tag-v0.5"
+WHERE {}
+
+
+## Was bedeuted NAMED eigentlich genau?
+SELECT *
+FROM NAMED <graph> REVISION "2"
+WHERE {}
+
+
+SELECT *
+FROM NAMED <graph>
+WHERE {}
+
+
+
+
+SELECT *
+WHERE {
+    GRAPH <graph> {}
+}
+
+SELECT *
+WHERE {
+    GRAPH <graph> REVISION "2" {}
+}
+
+
+SELECT *
+WHERE {
+    GRAPH <graph> REVISION "develop" {}
+}
+
+
+
+
+UPDATE Queries
+---------------
+INSERT DATA { GRAPH <graph> REVISION "master" { <a> <b> <c>} }
+INSERT DATA { GRAPH <graph> REVISION "4" { <a> <b> <c>} }
+
+
+INSERT { GRAPH <graph> REVISION "master" { ?s ?p "new"} }
+WHERE { GRAPH <graph> REVISION "1" {?s ?p "old" }}
+
+
+
+DELETE { GRAPH <graph> REVISION "master" { ?s ?p "new"} }
+WHERE { GRAPH <graph> REVISION "1" {?s ?p "old" }}
+
+
+
+INSERT { GRAPH <graph> REVISION "master" { ?s ?p "new"} }
+DELETE { GRAPH <graph> REVISION "master" { ?s ?p "old"} }
+WHERE  { GRAPH <graph> REVISION "1" {?s ?p "old" }}
+
+WITH
+
+USING
+
+
+
+
+
+
+Reference Queries
+-----------------
+BRANCH GRAPH <graph> REVISION "master" TO "experiment"
+BRANCH GRAPH <graph> REVISION "3" TO "experiment"
+
+TAG GRAPH <graph> REVISION "master" TO "v0.2"
+TAG GRAPH <graph> REVISION "4" TO "v0.2"
+
+MERGE GRAPH <graph> REVISION "experiment" INTO "master"
+MERGE GRAPH <graph> REVISION "4" INTO "2"
+MERGE GRAPH <graph> REVISION "4" INTO "2" WITH {}                   (for conflict resolution)
+MERGE AUTO GRAPH <graph> REVISION "4" INTO "2"
+MERGE MANUAL GRAPH <graph> REVISION "4" INTO "2" WITH {}
+
+
+MERGE FF GRAPH <graph> REVISION "experiment" INTO "master"
+MERGE FF GRAPH <graph> REVISION "4" INTO "2"
+
+
+REBASE GRAPH <graph> REVISION "experiment" INTO "master"
+REBASE GRAPH <graph> REVISION "4" INTO "2"
+REBASE GRAPH <graph> REVISION "4" INTO "2" WITH {}   (for conflict resolution)
+REBASE AUTO GRAPH <graph> REVISION "experiment" INTO "master"
+
+
+
+# needs further discussion
+PICK <graph> REVISION "4" INTO "master"
+PICK <graph> REVISION ("2", "5") INTO "master"
+REBASE GRAPH <graph> REVISION "experiment" INTO "master" USING ("3",4,5")
+REBASE GRAPH <graph> REVISION "4" INTO "2"
+REBASE GRAPH <graph> REVISION "4" INTO "2" WITH {}   (for conflict resolution)
+REBASE AUTO GRAPH <graph> REVISION "experiment" INTO "master"
+
+
+
+Other queries
+-------------
+# ASK, CONSTRUCT? -> should work
+
+
+
+CREATE Graph
