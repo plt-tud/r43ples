@@ -59,6 +59,8 @@ public class TestMisc extends JerseyTest {
 	public final void testGetLandingPage() {
 		String result = target().request(MediaType.TEXT_HTML).get(String.class);
 		Assert.assertThat(result, containsString("html"));
+		result = target("index").request(MediaType.TEXT_HTML).get(String.class);
+		Assert.assertThat(result, containsString("html"));
 	}
 
 	/**
@@ -66,7 +68,17 @@ public class TestMisc extends JerseyTest {
 	 */
 	@Test
 	public final void testCreateSampleDataset() {
-		String result = target("createSampleDataset").request().get(String.class);
+		String result = target("createSampleDataset").queryParam("dataset", "1").request().get(String.class);
+		result = target("createSampleDataset").queryParam("dataset", "2").request().get(String.class);
+		result = target("createSampleDataset").queryParam("dataset", "3").request().get(String.class);
+		result = target("createSampleDataset").queryParam("dataset", "merging").request().get(String.class);
+		result = target("createSampleDataset").queryParam("dataset", "merging-classes").request().get(String.class);
+		result = target("createSampleDataset").queryParam("dataset", "renaming").request().get(String.class);
+		result = target("createSampleDataset").queryParam("dataset", "complex-structure").request().get(String.class);
+		result = target("createSampleDataset").queryParam("dataset", "rebase").request().get(String.class);
+		result = target("createSampleDataset").queryParam("dataset", "forcerebase").request().get(String.class);
+		result = target("createSampleDataset").queryParam("dataset", "fastforward").request().get(String.class);		
+		result = target("createSampleDataset").request().get(String.class);
 		Assert.assertThat(result, containsString(dataset.graphName));
 	}
 
