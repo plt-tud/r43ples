@@ -1,7 +1,7 @@
 package de.tud.plt.r43ples.merging.model.structure;
 
 import de.tud.plt.r43ples.merging.ResolutionStateEnum;
-import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
+import de.tud.plt.r43ples.merge.SDDTripleStateEnum;
 
 
 /**

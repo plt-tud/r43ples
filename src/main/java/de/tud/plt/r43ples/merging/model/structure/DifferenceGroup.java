@@ -2,7 +2,7 @@ package de.tud.plt.r43ples.merging.model.structure;
 
 import java.util.HashMap;
 
-import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
+import de.tud.plt.r43ples.merge.SDDTripleStateEnum;
 
 
 /**

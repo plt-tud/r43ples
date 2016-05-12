@@ -20,7 +20,7 @@ import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.merging.ResolutionStateEnum;
-import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
+import de.tud.plt.r43ples.merge.SDDTripleStateEnum;
 import de.tud.plt.r43ples.merging.model.structure.Difference;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;

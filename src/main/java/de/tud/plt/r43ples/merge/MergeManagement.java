@@ -567,38 +567,38 @@ public class MergeManagement {
 			String sparqlQueryRevisionB = null;			
 			
 			// A
-			if (currentTripleStateA.equals(SDDTripleState.ADDED.getSddRepresentation())) {
+			if (currentTripleStateA.equals(SDDTripleStateEnum.ADDED.getSddRepresentation())) {
 				// In revision A the triple was added
 				querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
-				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.ADDED.getRpoRepresentation());
-			} else if (currentTripleStateA.equals(SDDTripleState.DELETED.getSddRepresentation())) {
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleStateEnum.ADDED.getRpoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleStateEnum.DELETED.getSddRepresentation())) {
 				// In revision A the triple was deleted
 				querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
-				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.DELETED.getRpoRepresentation());
-			} else if (currentTripleStateA.equals(SDDTripleState.ORIGINAL.getSddRepresentation())) {
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleStateEnum.DELETED.getRpoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleStateEnum.ORIGINAL.getSddRepresentation())) {
 				// In revision A the triple is original
 				querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
-				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleState.ORIGINAL.getRpoRepresentation());
-			} else if (currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+				sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleStateEnum.ORIGINAL.getRpoRepresentation());
+			} else if (currentTripleStateA.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
 				// In revision A the triple is not included
 				querySelectPart = String.format(querySelectPart, "", "%s");
 				sparqlQueryRevisionA = sparqlTemplateNotExistsRevisionA;
 			}
 			
 			// B
-			if (currentTripleStateB.equals(SDDTripleState.ADDED.getSddRepresentation())) {
+			if (currentTripleStateB.equals(SDDTripleStateEnum.ADDED.getSddRepresentation())) {
 				// In revision B the triple was added
 				querySelectPart = String.format(querySelectPart, "?revisionB");
-				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.ADDED.getRpoRepresentation());
-			} else if (currentTripleStateB.equals(SDDTripleState.DELETED.getSddRepresentation())) {
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleStateEnum.ADDED.getRpoRepresentation());
+			} else if (currentTripleStateB.equals(SDDTripleStateEnum.DELETED.getSddRepresentation())) {
 				// In revision B the triple was deleted
 				querySelectPart = String.format(querySelectPart, "?revisionB");
-				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.DELETED.getRpoRepresentation());
-			} else if (currentTripleStateB.equals(SDDTripleState.ORIGINAL.getSddRepresentation())) {
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleStateEnum.DELETED.getRpoRepresentation());
+			} else if (currentTripleStateB.equals(SDDTripleStateEnum.ORIGINAL.getSddRepresentation())) {
 				// In revision B the triple is original
 				querySelectPart = String.format(querySelectPart, "?revisionB");
-				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleState.ORIGINAL.getRpoRepresentation());
-			} else if (currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+				sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleStateEnum.ORIGINAL.getRpoRepresentation());
+			} else if (currentTripleStateB.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
 				// In revision B the triple is not included
 				querySelectPart = String.format(querySelectPart, "");
 				sparqlQueryRevisionB = sparqlTemplateNotExistsRevisionB;
@@ -630,15 +630,15 @@ public class MergeManagement {
 				
 				// Create the references A and B part of the query
 				String referencesAB = ". %n";
-				if (!currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation()) && !currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+				if (!currentTripleStateA.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation()) && !currentTripleStateB.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
 					referencesAB = String.format(
 							  "			rpo:referencesA <%s> ; %n"
 							+ "			rpo:referencesB <%s> %n", qsQuery.getResource("?revisionA").toString(), 
 																qsQuery.getResource("?revisionB").toString());
-				} else if (currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation()) && !currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+				} else if (currentTripleStateA.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation()) && !currentTripleStateB.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
 					referencesAB = String.format(
 							  "			rpo:referencesB <%s> %n", qsQuery.getResource("?revisionB").toString());
-				} else if (!currentTripleStateA.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation()) && currentTripleStateB.equals(SDDTripleState.NOTINCLUDED.getSddRepresentation())) {
+				} else if (!currentTripleStateA.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation()) && currentTripleStateB.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
 					referencesAB = String.format(
 							  "			rpo:referencesA <%s> %n", qsQuery.getResource("?revisionA").toString());
 				}
@@ -774,7 +774,7 @@ public class MergeManagement {
 							type.equals(MergeQueryTypeEnum.COMMON) || 
 							(type.equals(MergeQueryTypeEnum.WITH) && !currentDifferencGroupConflict) ) {
 						// MERGE AUTO or common MERGE query
-						if (currentDifferencGroupAutomaticResolutionState.equals(SDDTripleState.ADDED.getSddRepresentation())) {
+						if (currentDifferencGroupAutomaticResolutionState.equals(SDDTripleStateEnum.ADDED.getSddRepresentation())) {
 							// Triple should be added
 							triplesToAdd += subject + " " + predicate + " " + object + " . \n";
 						} else {
