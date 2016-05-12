@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.management;
+package de.tud.plt.r43ples.merge;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.merging.model.structure.Patch;
 import de.tud.plt.r43ples.merging.model.structure.PatchGroup;
