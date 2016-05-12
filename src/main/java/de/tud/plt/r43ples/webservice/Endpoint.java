@@ -73,21 +73,15 @@ public class Endpoint {
 			"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"\\s*TO\\s*\"(?<name>[^\"]*)\"",
 			patternModifier);
 	
-	final static Pattern patternUser = Pattern.compile(
+	private final static Pattern patternUser = Pattern.compile(
 			"USER\\s*\"(?<user>[^\"]*)\"",
 			patternModifier);
-	final static Pattern patternCommitMessage = Pattern.compile(
+	private final static Pattern patternCommitMessage = Pattern.compile(
 			"MESSAGE\\s*\"(?<message>[^\"]*)\"", 
 			patternModifier);
 
-	final static Pattern patternMergeQuery =  Pattern.compile(
-			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(SDD\\s*<(?<sdd>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
-			patternModifier);
-	private final static Pattern patternFastForwardQuery =  Pattern.compile(
-			"MERGE\\s*FF\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"",
-			patternModifier);
-	final static Pattern patternRebaseQuery =  Pattern.compile(
-			"REBASE\\s*(?<action>AUTO|MANUAL|FORCE)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(SDD\\s*<(?<sdd>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
+	private final static Pattern patternMergeQuery =  Pattern.compile(
+			"(MERGE|MERGE FF|REBASE)\\s*(AUTO|MANUAL)?\\s*GRAPH\\s*<([^>]*?)>\\s*(SDD\\s*<([^>]*?)>)?\\s*BRANCH\\s*\"([^\"]*?)\"\\s*INTO\\s*\"([^\"]*?)\"",
 			patternModifier);
 
 	
@@ -349,9 +343,6 @@ public class Endpoint {
 			String graphName = Interface.sparqlCreateGraph(sparqlQuery);
 			result = "Graph <"+graphName+"> successfully created";
 		}
-		else if (patternMergeQuery.matcher(sparqlQuery).find()) {
-			return getThreeWayMergeResponse(sparqlQuery, user, message, format);
-		}
 		else if (patternDropGraph.matcher(sparqlQuery).find()) {
 			Interface.sparqlDropGraph(sparqlQuery);
 			result = "Graph successfully dropped";
@@ -360,14 +351,8 @@ public class Endpoint {
 			Interface.sparqlTagOrBranch(sparqlQuery, user, message);
 			result = "Tagging or branching successful";
 		}
-		else if (patternFastForwardQuery.matcher(sparqlQuery).find()) {					
-			if (!Interface.sparqlMerge(sparqlQuery, user, message, format).hasConflict)
-				result = "Fast Forward Merge successful";
-			else
-				result = "Error in Fast Forward Merge";
-		}
-		else if (patternRebaseQuery.matcher(sparqlQuery).find()) {
-			return getRebaseResponse(sparqlQuery, user, message, format);
+		else if (patternMergeQuery.matcher(sparqlQuery).find()) {
+			return getMergeResponse(sparqlQuery, user, message, format);
 		}
 		else
 			throw new QueryErrorException("No R43ples query detected");
@@ -446,9 +431,9 @@ public class Endpoint {
 	 * @param format the result format
 	 * @throws InternalErrorException 
 	 */
-	private Response getThreeWayMergeResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
+	private Response getMergeResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
-		logger.info("Three-Way-Merge query detected");
+		logger.info("Merge query detected");
 		
 		MergeResult mresult = Interface.sparqlMerge(sparqlQuery, user, commitMessage, format);
 		
@@ -473,46 +458,5 @@ public class Endpoint {
 		
 		return responseBuilder.build();	
 	}
-	
-	
-	
-	/** 
-	 * Creates response query and get Response of it.
-	 * 
-	 * Using command: REBASE (AUTO|FORCE|MANUAL) GRAPH <graphURI> BRANCH "branchNameA" INTO "branchNameB"
-	 * 
-	 * @param sparqlQuery the SPARQL query
-	 * @throws InternalErrorException 
-	 */
-	
-	private Response getRebaseResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
-		
-		ResponseBuilder responseBuilder = Response.created(URI.create(""));
-		logger.info("Rebase query detected");
-		
-		MergeResult mresult = Interface.sparqlMerge(sparqlQuery, user, commitMessage, format);		
-		
-		if (mresult.hasConflict) {
-			responseBuilder = Response.status(Response.Status.CONFLICT);
-			responseBuilder.entity(mresult.conflictModel);
-		}
-		
-		String graphNameHeader;
-		try {
-			graphNameHeader = URLEncoder.encode(mresult.graph, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			graphNameHeader = mresult.graph;
-		}
-		String revisionGraph = RevisionManagement.getRevisionGraph(mresult.graph);
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(revisionGraph, mresult.branchA));
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(revisionGraph, mresult.branchB));	
-		responseBuilder.header("merging-strategy-information", mresult.graphStrategy);
-		
-		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(sparqlQuery));	
-				
-		return responseBuilder.build();			
-	}
-
 
 }

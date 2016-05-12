@@ -698,6 +698,7 @@ public class MergeManagement {
 		 
 		// Create an empty temporary graph which will contain the merged full content
 		String graphNameOfMerged = graphName + "-RM-MERGED-TEMP";
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameOfMerged));
 		TripleStoreInterfaceSingleton.get().executeCreateGraph(graphNameOfMerged);
 		
 		// Get the full graph name of branch A
@@ -818,7 +819,7 @@ public class MergeManagement {
 				  "CONSTRUCT {?s ?p ?o} %n"
 				+ "WHERE { %n"
 				+ "	GRAPH <%s> { ?s ?p ?o } %n"
-				+ "	FILTER NOT EXISTS { %n"
+				+ "	FILTER NOT EXISTS { "
 				+ "		GRAPH <%s> { ?s ?p ?o } %n"
 				+ "	} %n"
 				+ "}", graphNameOfMerged, graphNameOfBranchA);
@@ -885,7 +886,7 @@ public class MergeManagement {
 	 * @return new revision number
 	 * @throws InternalErrorException 
 	 */
-	public static ArrayList<String> createRebaseMergedTripleList(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, RebaseQueryTypeEnum type, String triples) throws InternalErrorException {
+	public static ArrayList<String> createRebaseMergedTripleList(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type, String triples) throws InternalErrorException {
 		//set the triple list
 		ArrayList<String> list = new ArrayList<String>();
 		
@@ -899,7 +900,7 @@ public class MergeManagement {
 		String graphNameOfBranchB = RevisionManagement.getReferenceGraph(graphName, branchNameB);
 		
 		logger.info("the triples: "+ triples);
-		if (type.equals(RebaseQueryTypeEnum.MANUAL)) {
+		if (type.equals(MergeQueryTypeEnum.MANUAL)) {
 			// Manual merge query
 			RevisionManagement.executeINSERT(graphNameOfMerged, triples);
 		} else {	
@@ -963,9 +964,9 @@ public class MergeManagement {
 						object = "<" + qsCurrentDifference.getResource("?o").toString() + ">";
 					}
 					
-					if (	type.equals(RebaseQueryTypeEnum.AUTO) || 
-							type.equals(RebaseQueryTypeEnum.COMMON) || 
-							(type.equals(RebaseQueryTypeEnum.WITH) && !currentDifferencGroupConflict) ) {
+					if (	type.equals(MergeQueryTypeEnum.AUTO) || 
+							type.equals(MergeQueryTypeEnum.COMMON) || 
+							(type.equals(MergeQueryTypeEnum.WITH) && !currentDifferencGroupConflict) ) {
 						
 						// MERGE AUTO or common MERGE query
 						if (currentDifferencGroupAutomaticResolutionState.equals(SDDTripleStateEnum.ADDED.getSddRepresentation())) {

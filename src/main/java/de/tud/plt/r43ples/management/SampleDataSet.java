@@ -211,9 +211,7 @@ public class SampleDataSet {
 		RevisionManagement.createNewRevision(graphName, triplesInsert, triplesDelete, user, "Second commit to B1", revisionB1_0);
 		
 		logger.info("Example graph <" + graphName +"> created.");
-		return graphName;
-		
-		
+		return graphName;	
 	}
 	
 		

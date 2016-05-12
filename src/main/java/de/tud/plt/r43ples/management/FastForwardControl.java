@@ -8,7 +8,7 @@ public class FastForwardControl {
 	/**
 	 * Fast forwards branch A to branch B
 	 * 
-	 * Note: branch B remains the same, only branch a is updated
+	 * Note: branch B remains the same, only branch A is updated
 	 * 
 	 * @param revisionGraph URI of revision graph where fast forward should take place
 	 * @param branchNameA name of branch A which should be forwarded
@@ -72,7 +72,7 @@ public class FastForwardControl {
 		
 			String query = RevisionManagement.prefixes
 				+ String.format("ASK { GRAPH <%s> { "
-						+ "<%s> prov:wasDerivedFrom+ <%s> ."
+						+ "<%s> prov:wasDerivedFrom* <%s> ."
 						+ " }} ",
 						revisionGraph, revisionUriB, revisionUriA);
 			

@@ -3,6 +3,7 @@ package de.tud.plt.r43ples.management;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
 
@@ -15,15 +16,27 @@ public class RebaseControl {
 	
 	/** The logger. **/
 	private static Logger logger = Logger.getLogger(RebaseControl.class);
+	private String graphName;
+	private String branchNameB;
+	private String branchNameA;
+	private PatchGroup patchGroup;
 	
+	
+	
+	
+	
+	
+	public RebaseControl(String graphName, String branchNameA, String branchNameB) {
+		this.graphName = graphName;
+		this.branchNameA = branchNameA;
+		this.branchNameB = branchNameB;
+	}
+
 	/** simple checks if rebase could be possible for these two branches of a graph
-	 * @param graphName
-	 * @param branchNameA
-	 * @param branchNameB
+	 * 
 	 * @throws InternalErrorException throws an error if it is not possible
 	 */
-	public static void checkIfRebaseIsPossible(String graphName, String branchNameA,
-			String branchNameB) throws InternalErrorException {
+	public void checkIfRebaseIsPossible() throws InternalErrorException {
 		// Check if graph already exists
 		if (!RevisionManagement.checkGraphExistence(graphName)){
 			logger.error("Graph <"+graphName+"> does not exist.");
@@ -43,8 +56,9 @@ public class RebaseControl {
 		}
 	}
 	
+	
 	/**for each revision in branchA , create a patch */
-	public static PatchGroup createPatchGroupOfBranch(String revisionGraph, String basisRevisionUri, LinkedList<String> revisionList) {
+	public PatchGroup createPatchGroupOfBranch(String revisionGraph, String basisRevisionUri, LinkedList<String> revisionList) {
 		
 		LinkedHashMap<String, Patch> patchMap = new LinkedHashMap<String, Patch>();
 		
@@ -66,10 +80,37 @@ public class RebaseControl {
 		
 		String basisRevisionNumber = StrategyManagement.getRevisionNumber(revisionGraph, basisRevisionUri);
 		
-		PatchGroup patchGroup = new PatchGroup(basisRevisionNumber, patchMap);
+		patchGroup = new PatchGroup(basisRevisionNumber, patchMap);
 		
-		logger.info("patchGroup initial successful!" + patchGroup.getPatchMap().size());
+		logger.debug("patchGroup initial successful!" + patchGroup.getPatchMap().size());
 		return patchGroup;
 	}
 	
+	
+	/**
+	 * force rebase begin, for each patch in patch group will a new revision created 
+	 * @throws InternalErrorException 
+	 * */
+	public String forceRebaseProcess() throws InternalErrorException{
+		
+		logger.debug("patchGroup 1:" + patchGroup.getBasisRevisionNumber());
+		logger.debug("patchGroup 2:" + patchGroup.getPatchMap().size());
+
+		LinkedHashMap<String, Patch> patchMap = patchGroup.getPatchMap();
+		String basisRevisionNumber = patchGroup.getBasisRevisionNumber();
+				
+		Iterator<Entry<String, Patch>> pIter = patchMap.entrySet().iterator();
+		
+		while(pIter.hasNext()) {
+			Entry<String, Patch> pEntry = pIter.next();
+			Patch patch = pEntry.getValue();
+		
+			String newRevisionNumber = RevisionManagement.createNewRevisionWithPatch(
+					graphName, patch.getAddedSetUri(), patch.getRemovedSetUri(),
+					patch.getPatchUser(), patch.getPatchMessage(), basisRevisionNumber);
+			
+			basisRevisionNumber = newRevisionNumber;
+		}
+		return basisRevisionNumber;	
+	}
 }

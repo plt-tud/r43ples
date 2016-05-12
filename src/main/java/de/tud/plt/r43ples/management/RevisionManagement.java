@@ -62,7 +62,7 @@ public class RevisionManagement {
 	 */
 	protected static String putGraphUnderVersionControl(final String graphName, final String datetime) {
 
-		logger.info("Put existing graph under version control with the name " + graphName);
+		logger.debug("Put existing graph under version control with the name " + graphName);
 
 		String revisiongraph = graphName + "-revisiongraph";
 		

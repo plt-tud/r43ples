@@ -15,7 +15,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.log4j.Logger;
-import org.glassfish.jersey.server.mvc.Template;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -38,10 +37,9 @@ public class Merging {
 	 * get merging HTML start page and input merging information
 	 * */
 	@GET
-    @Produces(MediaType.TEXT_HTML)
 	public final Response getMerging() {
 		logger.info("Merging - Start page");		
-		ResponseBuilder response = Response.ok();
+		
 		List<String> graphList = RevisionManagement.getRevisedGraphsList();	
 		Map<String, Object> scope = new HashMap<String, Object>();
 	    scope.put("merging_active", true);
@@ -49,10 +47,9 @@ public class Merging {
 		
 		StringWriter sw = new StringWriter();
 		MustacheFactory mf = new DefaultMustacheFactory();
-		Mustache mustache = mf.compile("merge_start.mustache");		
+		Mustache mustache = mf.compile("templates/merge_start.mustache");		
 		mustache.execute(sw, scope);		
-		response.entity(sw.toString()).type(MediaType.TEXT_HTML);
-		return response.build();
+		return Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML).build();
 	}
 	
 	
@@ -140,7 +137,7 @@ public class Merging {
 		// Three Way Merge
 		else {			
 			MergeCommitModel commitModel = new MergeCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way", null);
-			MergeResult mresult = Interface.mergeThreeWay(graphName, branch1, branch2, null, null, null, null, user, message, "text/turtle");
+			MergeResult mresult = Interface.mergeThreeWay(graphName, branch1, branch2, false, null, null, null, user, message, "text/turtle");
 							
 			if(!mresult.hasConflict){
 				response.entity(commitModel.getReportView());				

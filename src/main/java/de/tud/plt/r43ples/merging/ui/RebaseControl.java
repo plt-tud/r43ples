@@ -6,9 +6,7 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
@@ -21,21 +19,17 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.ResolutionStateEnum;
 import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
 import de.tud.plt.r43ples.merging.model.structure.Difference;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
 import de.tud.plt.r43ples.merging.model.structure.MergeCommitModel;
-import de.tud.plt.r43ples.merging.model.structure.Patch;
-import de.tud.plt.r43ples.merging.model.structure.PatchGroup;
 import de.tud.plt.r43ples.merging.model.structure.Triple;
 
 public class RebaseControl {
 	private static Logger logger = Logger.getLogger(RebaseControl.class);
 	private MergeCommitModel commitModel;
-	private PatchGroup patchGroup = new PatchGroup(null, null);
 	private DifferenceModel differenceModel = new DifferenceModel();
 	
 	private String differenceGraphModel = null;
@@ -51,32 +45,7 @@ public class RebaseControl {
 		return commitModel;
 	}
 	
-	/**
-	 * force rebase begin, for each patch in patch group will a new revision created 
-	 * @throws InternalErrorException 
-	 * */
-	public String forceRebaseProcess( String graphName ) throws InternalErrorException{
-		
-		logger.info("patchGroup 1:" + patchGroup.getBasisRevisionNumber());
-		logger.info("patchGroup 2:" + patchGroup.getPatchMap().size());
-
-		LinkedHashMap<String, Patch> patchMap = patchGroup.getPatchMap();
-		String basisRevisionNumber = patchGroup.getBasisRevisionNumber();
-				
-		Iterator<Entry<String, Patch>> pIter = patchMap.entrySet().iterator();
-		
-		while(pIter.hasNext()) {
-			Entry<String, Patch> pEntry = pIter.next();
-			Patch patch = pEntry.getValue();
-		
-			String newRevisionNumber = RevisionManagement.createNewRevisionWithPatch(
-					graphName, patch.getAddedSetUri(), patch.getRemovedSetUri(),
-					patch.getPatchUser(), patch.getPatchMessage(), basisRevisionNumber);
-			
-			basisRevisionNumber = newRevisionNumber;
-		}
-		return basisRevisionNumber;	
-	}
+	
 	
 	/**manual rebase begin, for each patch in patch group will a new revision created 
 	 * @throws InternalErrorException 
@@ -195,34 +164,6 @@ public class RebaseControl {
 		
 		return list;
 	}
-	
-	
-	
-	
-	
-	
-	
-	/**common manual rebase end , get the updated difference model and check the create new Revision
-	 * @throws InternalErrorException 
-	 * 
-	 * */
-	public void createCommonManualRebaseProcess() throws InternalErrorException {
-		//check action command , auto or common
-		
-		ArrayList<String> addedAndRemovedTriples = getManualAddedTriplesAndRemovedTriples();
-		String addedAsNTriples = addedAndRemovedTriples.get(0);
-		String removedAsNTriples = addedAndRemovedTriples.get(1);
-		
-		String basisRevisionNumber = forceRebaseProcess(commitModel.getGraphName());
-		RevisionManagement.createNewRevision(commitModel.getGraphName(), addedAsNTriples, removedAsNTriples,
-				commitModel.getUser(), commitModel.getMessage(), basisRevisionNumber);
-		
- 			
-	}
-	
-
-
-	
 	
 	
 	
