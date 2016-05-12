@@ -1,0 +1,39 @@
+ <script type="text/javascript">
+	// jsTree: get checkbox and delete the file icon
+    $('#diffTree').jstree({ plugins : ["checkbox","sort","types","wholerow"], "core" : { "themes" : { "icons" : false } } });
+</script>
+ 
+ <fieldset>
+                  <legend>Differences</legend>
+                  <div id="diffTree">
+                      <ul>
+                          <li data-jstree='{"opened" : true}'><a class="jstree-clicked"><img src="/static/images/Conflict.png"/> Conflict</a>
+                            <ul>
+                              {{#conList}}
+                                <li><a><img src="/static/images/Conflict.png"/>{{differenceGroup}}</a>
+                                  <ul>
+                                      {{#tripleList}}
+                                          <li><a><img src="/static/images/Conflict.png"/>{{toString}}</a></li>              
+                                      {{/tripleList}}
+                                  </ul>
+                                </li>          
+                              {{/conList}}
+                            </ul>
+                           </li>
+                           
+                           <li data-jstree='{"opened" : true}'><a class="jstree-clicked"><img src="/static/images/Difference.png"/> Difference</a>
+                            <ul>
+                            {{#diffList}}
+                                <li ><a><img src="/static/images/Difference.png"/>{{differenceGroup}}</a>
+                                  <ul>
+                                      {{#tripleList}}
+                                          <li ><a ><img src="/static/images/Difference.png"/>{{toString}}</a></li>              
+                                      {{/tripleList}}
+                                  </ul>
+                                </li>          
+                              {{/diffList}}
+                            </ul>
+                           </li>       
+                       </ul>                 
+                  </div>   
+                </fieldset>

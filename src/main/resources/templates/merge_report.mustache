@@ -16,8 +16,11 @@
     <script type="text/javascript">
 	    $(document).ready(function () {
 	     // Graph mit der aktuellen Auswahl erstellen
-        	drawGraph("#leftContainer .visualisation", "getOldRevisiongraph?graph={{commit.graphName}}", false, true);
-          	drawGraph("#rightContainer .visualisation", "revisiongraph?graph={{commit.graphName}}&format=application/json",true, false);
+        	drawGraph("#leftContainer .visualisation", '{{commit.oldRevisionGraph}}', true);
+        	
+        	
+        	
+          	drawGraph("#rightContainer .visualisation", "revisiongraph?graph={{commit.graphName}}&format=application/json", true);
 	    });
     </script>
 {{/script_extra}}
@@ -47,7 +50,8 @@
       <div class="col-sm-10 col-sm-offset-1">
            <a href="merging" ><button style="width:95%; margin-left:16px" type="button" class="btn btn-default">New Merge</button></a>
           </div>
-      </div>           
+      </div>   
+       {{commit.oldRevisionGraph}}        
 {{/content}}
 
 {{/super}}     

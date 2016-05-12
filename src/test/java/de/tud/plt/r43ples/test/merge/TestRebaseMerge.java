@@ -11,7 +11,6 @@ import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -21,7 +20,7 @@ import de.tud.plt.r43ples.management.ResourceManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
-@Ignore
+
 public class TestRebaseMerge {
 
 	/** The graph name. **/
@@ -125,28 +124,7 @@ public class TestRebaseMerge {
 		assertXMLEqual(expected2, result2);
 		
 	}
-	
-	/**
-	 * Test FORCE-REBASE-MERGE.
-	 * 
-	 * @throws IOException 
-	 * @throws SAXException 
-	 * @throws InternalErrorException 
-	 */
-	@Test
-	public void testForceRebaseMerge() throws SAXException, IOException, InternalErrorException {
-		// The SDD to use
-		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
-		// Merge B1 into B2
-		ep.sparql(createForceRebaseMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
-		// Test branch B1
-		String result1 = ep.sparql(createSelectQuery(graphName, "B2")).getEntity().toString();
-		String expected1 = ResourceManagement.getContentFromResource("rebase/force/response-B1-into-B2.xml");
-		assertXMLEqual(expected1, result1);
-		
-	}
-	
 
 	/**
 	 * Test AUTO-REBASE-MERGE.
@@ -198,37 +176,7 @@ public class TestRebaseMerge {
 		assertXMLEqual(expected1, result1);
 
 	}
-	
-	
-	/**
-	 * Test Rebase MANUAL-MERGE.
-	 * 
-	 * @throws IOException 
-	 * @throws SAXException 
-	 * @throws InternalErrorException 
-	 */
-	@Test
-	public void testManualRebaseMerge() throws IOException, SAXException, InternalErrorException {
-		// The SDD to use
-		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";		
-		
-		// Merge B1 into B2
-		String triples = "<http://example.com/testS> <http://example.com/testP> \"A\". \n"
-				+ "<http://example.com/testS> <http://example.com/testP> \"B\". \n"
-				+ "<http://example.com/testS> <http://example.com/testP> \"D\". \n"
-				+ "<http://example.com/testS> <http://example.com/testP> \"C\". \n"
-				+ "<http://example.com/testS> <http://example.com/testP> \"G\". \n"
-				+ "<http://example.com/testS> <http://example.com/testP> \"E\". \n" ;
-		
-		ep.sparql(createManualRebaseMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
-		
-		// Test branch B2
-		String result1 = ep.sparql(createSelectQuery(graphName, "B2")).getEntity().toString();
-		String expected1 = ResourceManagement.getContentFromResource("rebase/manual/response-B1-into-B2.xml");
-		assertXMLEqual(expected1, result1);
-		
-	}
-	
+
 	
 	/**
 	 * Create the SELECT query.
@@ -263,23 +211,6 @@ public class TestRebaseMerge {
 				+ "REBASE GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\"", user, commitMessage, graphName, sdd, branchNameA, branchNameB);
 	}
 
-	
-	/**
-	 * Create FORCE-REBASE-MERGE query.
-	 * 
-	 * @param graphName the graph name
-	 * @param sdd the SDD
-	 * @param user the user
-	 * @param commitMessage the commit message
-	 * @param branchNameA the branch name A
-	 * @param branchNameB the branch name B
-	 * @return the query
-	 */
-	private String createForceRebaseMergeQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB) {
-		return String.format( "USER \"%s\" %n"
-							+ "MESSAGE \"%s\" %n"
-							+ "REBASE FORCE GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\"", user, commitMessage, graphName, sdd, branchNameA, branchNameB);
-	}
 
 	/**
 	 * Create AUTO-REBASE-MERGE query.
@@ -320,25 +251,5 @@ public class TestRebaseMerge {
 							+ "}", user, commitMessage, graphName, sdd, branchNameA, branchNameB, triples);
 	}
 	
-	
-	/**
-	 * Create REBASE-MANUAL-MERGE query.
-	 * 
-	 * @param graphName the graph name
-	 * @param sdd the SDD
-	 * @param user the user
-	 * @param commitMessage the commit message
-	 * @param branchNameA the branch name A
-	 * @param branchNameB the branch name B
-	 * @param triples the triples which should be in the WITH part as N-Triples
-	 * @return the query
-	 */
-	private String createManualRebaseMergeQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB, String triples) {
-		return String.format( "USER \"%s\" %n"
-							+ "MESSAGE \"%s\" %n"
-							+ "REBASE MANUAL GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\" WITH { %n"
-							+ "	%s %n"
-							+ "}", user, commitMessage, graphName, sdd, branchNameA, branchNameB, triples);
-	}
 
 }

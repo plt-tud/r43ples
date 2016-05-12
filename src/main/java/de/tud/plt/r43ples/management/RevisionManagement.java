@@ -21,7 +21,6 @@ import com.hp.hpl.jena.util.FileUtils;
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.merging.MergeManagement;
-import de.tud.plt.r43ples.merging.control.FastForwardControl;
 import de.tud.plt.r43ples.revisionTree.Revision;
 import de.tud.plt.r43ples.revisionTree.Tree;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
@@ -37,8 +36,8 @@ public class RevisionManagement {
 
 	/** The logger. **/
 	private static Logger logger = Logger.getLogger(RevisionManagement.class);
-	/** The SPARQL prefixes. 
-	 * TODO: Add possibility to insert user defined prefixes
+	
+	/** The SPARQL prefixes
 	 * **/
 	public static final String prefixes = 
 			  "PREFIX rmo:	<http://eatld.et.tu-dresden.de/rmo#> \n"
@@ -47,11 +46,10 @@ public class RevisionManagement {
 			+ "PREFIX xsd:	<http://www.w3.org/2001/XMLSchema#> \n"
 			+ "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
 			+ "PREFIX sdd:	<http://eatld.et.tu-dresden.de/sdd#> \n"
+			+ "PREFIX rpo: <http://eatld.et.tu-dresden.de/rpo#> \n"
 			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
 			+ "PREFIX rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n"
-			+ "PREFIX owl:	<http://www.w3.org/2002/07/owl#> \n"
-			+ "PREFIX test: <http://test.com/> \n"
-			+ "PREFIX mso: <http://eatld.et.tu-dresden.de/mso/> \n";
+			+ "PREFIX owl:	<http://www.w3.org/2002/07/owl#> \n";
 
 
 	/**
@@ -64,7 +62,7 @@ public class RevisionManagement {
 	 */
 	protected static String putGraphUnderVersionControl(final String graphName, final String datetime) {
 
-		logger.info("Put existing graph under version control with the name " + graphName);
+		logger.debug("Put existing graph under version control with the name " + graphName);
 
 		String revisiongraph = graphName + "-revisiongraph";
 		
@@ -457,41 +455,6 @@ public class RevisionManagement {
 	
 	
 	/**
-	 * @throws InternalErrorException 
-	 * 
-	 */
-	public static boolean performFastForward(final String revisionGraph, final String branchNameA, final String branchNameB, final String user, final String dateTime, final String message) throws InternalErrorException{
-		if (!FastForwardControl.fastForwardCheck(revisionGraph, branchNameA, branchNameB)) {
-			return false;
-		}
-		String branchUriA = getBranchUri(revisionGraph, branchNameA);
-		String branchUriB = getBranchUri(revisionGraph, branchNameB);
-		
-		String fullGraphUriA = getFullGraphUri(revisionGraph, branchUriA);
-		String fullGraphUriB = getFullGraphUri(revisionGraph, branchUriB);
-	
-		String revisionUriA = getRevisionUri(revisionGraph, branchNameA);
-		String revisionUriB = getRevisionUri(revisionGraph, branchNameB);
-		
-		moveBranchReference(revisionGraph, branchUriB, revisionUriB, revisionUriA);
-		
-		String commitUri = revisionGraph+"-ff-commit-"+branchNameA+"-"+branchNameB;
-		String query = RevisionManagement.prefixes + String.format(""
-				+ "INSERT DATA { GRAPH <%s> { "
-				+ "  <%s> a rmo:FastForwardCommit;"
-				+ "     prov:used <%s>, <%s>, <%s>;"
-				+ "     prov:wasAssociatedWith <%s>;"
-				+ "     prov:atTime <%s>;"
-				+ "     dc-terms:title \"%s\". "
-				+ "} }",
-				revisionGraph, commitUri, branchUriA, revisionUriA, revisionUriB, user, dateTime, message);
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
-		updateBelongsTo(revisionGraph, branchUriB, revisionUriB, revisionUriA);	
-		fullGraphCopy(fullGraphUriA, fullGraphUriB);
-		return true;
-	}
-	
-	/**
 	 * updates all revisions between A and B and let them belong to the specified branch
 	 * 
 	 * @param revisionGraph 
@@ -802,7 +765,7 @@ public class RevisionManagement {
 	 * Get the revision number of a given reference name.
 	 * 
 	 * @param revisionGraph
-	 *            the graph name
+	 *            the revision graph where information about the history of the graph is stored
 	 * @param referenceName
 	 *            the reference name
 	 * @return the revision number of given reference name
@@ -1132,6 +1095,37 @@ public class RevisionManagement {
 			return personUri;
 		}
 	}
+	
+	/**
+	 * get the names of all branches of a named graph
+	 * @param graphName name of graph
+	 * @return list of the name of branch
+	 * */
+	public static ArrayList<String> getAllBranchNamesOfGraph(String graphName) {
+		logger.info("Get all branch names of graph "+ graphName);
+		ArrayList<String> list = new ArrayList<String>();	
+		if (graphName != null) {
+			String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+			String sparqlQuery = RevisionManagement.prefixes
+					+ String.format(
+					  "SELECT DISTINCT ?label %n"
+					+ "FROM <%s> %n"
+					+ "WHERE { %n"
+					+ "	?branch a rmo:Branch ;"
+					+ "		rdfs:label ?label . "
+					+ "} %n"
+					+ "ORDER BY ?label", revisionGraph);
+			
+			ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(sparqlQuery);
+			while (results.hasNext()) {
+				QuerySolution qs = results.next();
+				list.add(qs.getLiteral("label").toString());
+			}		
+		}
+		logger.debug("All branches: " +list);
+		return list;
+	}
+
 
 	/**
 	 * @return current date formatted as xsd:DateTime
@@ -1264,7 +1258,7 @@ public class RevisionManagement {
 	 * @return the constructed graph content as specified RDF serialisation format
 	 */
 	public static String getContentOfGraphByConstruct(String graphName, String format) {
-		String query = RevisionManagement.prefixes + String.format(
+		String query = RevisionManagement.prefixes + Config.getPrefixes() + String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
 				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
 		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		

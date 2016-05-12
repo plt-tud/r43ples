@@ -2,202 +2,107 @@
 
 {{$title}}Endpoint{{/title}}
    
-{{$script_extra}}
-<script type="text/javascript">
-  $(function() {
-	 $i=1;
-	$(".accordion > div").addClass("panel panel-default");
-	$(".accordion > div").html(function() {
- 		  var text =	"<div class='panel-heading btn btn-block' data-toggle='collapse' data-parent='.accordion' href='#collapse"+$i+"'>"+
-		  					"<h3 class='panel-title'>" + $(this).children("h3").text() + "</h3>" +
-	  					"</div>" +
-  						"<div id='collapse"+$i+"' class='panel-collapse collapse'>"+
-  							"<div class='panel-body'>" +
-  								"<button class='copy btn btn-default btn-block'><span class='fa fa-reply'</span> copy to form</button>" +
-  								"<pre>" + $(this).children("pre").html() + "</pre>" +
-  								"</div>" +		
-  							"</div>" +
-	  					"</div>";
-		  $i++;
-		  return text;
-	});
-	$(".accordion .panel-collapse").first().addClass("in");
-  	$(".copy").click(function() {
-		$("#query").val($(this).next().text());
-  	}); 
-  });
-</script>
-{{/script_extra}}
 
 {{$content}}
 <div class="row">
 	<div id="main" class="col-lg-6">
-		<div class="row">
-					
-			<div class="col-xs-12">
-				<h2>Query Form</h2>
-				<form method="post" role="form" class="form-horizontal">
-					<div class="form-group">
-						<div class="col-xs-12">
-							<label class="control-label" for="query">Query Text</label><br />
-							<textarea name="query" class="form-control" id="query" rows="16" placeholder="Insert R43ples/SPARQL query text or copy it from examples"></textarea>
-						</div>
+		<h2>Query Form</h2>
+		<form method="post" role="form" class="form-horizontal">
+			
+				<div class="form-group">				
+					<label class="col-sm-3 control-label" for="query">Query Text</label>
+					<div class="col-sm-9"><textarea name="query" class="form-control" id="query" rows="16" placeholder="Insert R43ples/SPARQL query text or copy it from examples"></textarea></div>
+				</div>
+				<div class="form-group">
+					<label for="format" class="col-sm-3 control-label">Result Format:</label>
+					<div class="col-sm-9">
+						<select	name="format" class="form-control" id="name">
+							<option value="text/html">HTML</option>
+							<option value="text/plain">Text</option>
+							<option value="application/sparql-results+xml">RDF/XML</option>
+							<option value="text/turtle">Turtle</option>
+							<option value="application/json">JSON</option>
+						</select>
 					</div>
+				</div>
+				<div class="form-group">
+					<label for="query_rewriting" class="col-sm-3 control-label" >JOIN Option:</label>
+					<div class="col-sm-9">
+						<input type="checkbox" name="query_rewriting" value="on">
+					</div>
+				</div>
+				<div class="form-group">
+					<div class="col-xs-offset-3 col-xs-9 btn-group">
+						<input type="submit" class="col-xs-8 btn btn-primary" value="Run Query" />
+						<input type="reset"	class="col-xs-4 btn btn-default" value="Reset" />
+					</div>
+				</div>
+		</form>
+	</div>
+					
+	<div id="revision-information" class="col-lg-6">
+			<h2>Revision Information</h2>
+			<form action="createSampleDataset" method="get" class="form-horizontal">
 					<div class="form-group">
-						<label for="format" class="col-sm-3 control-label">Result Format:</label>
-						<div class="col-sm-9">
-							<select	name="format" class="form-control" id="name">
-								<option value="text/html">HTML</option>
-								<option value="text/plain">Text</option>
-								<option value="application/sparql-results+xml">RDF/XML</option>
-								<option value="text/turtle">Turtle</option>
-								<option value="application/json">JSON</option>
+						<div class="col-sm-8">
+							<select id="exampleGraph" class="form-control" name="dataset">
+								<option value="all">All</option>
+								<option value="1">http://test.com/r43ples-dataset-1</option>
+								<option value="2">http://test.com/r43ples-dataset-2</option>
+								<option value="merging">http://test.com/r43ples-dataset-merging</option>
+								<option value="merging-classes">http://test.com/r43ples-dataset-merging-classes</option>
+								<option value="renaming">http://test.com/r43ples-dataset-renaming</option>
+								<option value="complex-structure">http://test.com/r43ples-dataset-complex-structure</option>
+								<option value="rebase">http://test.com/r43ples-dataset-rebase</option>
+								<option value="forcerebase">http://test.com/r43ples-dataset-force-rebase</option>
+								<option value="fastforward">http://test.com/r43ples-dataset-fastforward</option>
 							</select>
 						</div>
-					</div>
-					<div class="form-group">
-						<label for="query_rewriting" class="col-sm-3 control-label" >JOIN Option:</label>
-						<div class="col-sm-9">
-							<input type="checkbox" name="query_rewriting" value="on">
-						</div>
-					</div>
-					<div class="form-group">
-						<div class="col-xs-offset-3 col-xs-9 btn-group">
-							<input type="submit" class="col-xs-8 btn btn-primary" value="Run Query" />
-							<input type="reset"	class="col-xs-4 btn btn-default" value="Reset" />
+						<div class="col-sm-4">
+							<input type="submit" class="btn btn-default form-control" value="Create Samples" />
 						</div>
 					</div>
 				</form>
-			</div>
-		</div>
-		<div class="row">
-					
-		<div class="col-xs-12">
-				<h2>Revision Information</h2>			
-				<ul class="list-group">
-					<li class="list-group-item">
-						<form action="createSampleDataset" method="get" class="form-horizontal">
-							<div class="form-group">
-								<div class="col-sm-8">
-									<select id="exampleGraph" class="form-control" name="dataset">
-										<option value="all">All</option>
-										<option value="1">http://test.com/r43ples-dataset-1</option>
-										<option value="2">http://test.com/r43ples-dataset-2</option>
-										<option value="3">http://test.com/r43ples-dataset-3</option>
-										<option value="merging">http://test.com/r43ples-dataset-merging</option>
-										<option value="merging-classes">http://test.com/r43ples-dataset-merging-classes</option>
-										<option value="renaming">http://test.com/r43ples-dataset-renaming</option>
-										<option value="complex-structure">http://test.com/r43ples-dataset-complex-structure</option>
-										<option value="rebase">http://test.com/r43ples-dataset-rebase</option>
-										<option value="forcerebase">http://test.com/r43ples-dataset-force-rebase</option>
-										<option value="fastforward">http://test.com/r43ples-dataset-fastforward</option>
-									</select>
-								</div>
-								<div class="col-sm-4">
-        							<input type="submit" class="btn btn-default form-control" value="Create Samples" />
-        						</div>
-							</div>
-						</form>
-					</li>
-					<li class="list-group-item">
-						<form action="revisiongraph" method="get" class="form-horizontal">
-							<div class="form-group">
-								<div class="col-sm-4">
-									<select id="selectRevisedGraph" class="form-control" name="graph">
-										<option value="">(All)</option>
-										{{#graphList}}
-										<option value="{{toString}}">{{toString}}</option>
-										{{/graphList}}	
-									</select>
-								</div>
-								<div class="col-sm-4">
-									<select class="form-control" name="format">
-										<option value="text/turtle">Turtle</option>
-										<option value="batik">Graphical 1</option>
-										<option value="d3">Graphical 2</option>
-										<option value="g6">Graphical 3</option>
-									</select>
-								</div>
-								<div class="col-sm-4">
-									<input type="submit" class="btn btn-default form-control" value="Get Revision Graph" />
-								</div>
-							</div>
-						</form>
-					</li>
-					<li class="list-group-item">
-						<form action="sparql" method="get" class="form-horizontal">
-							<div class="form-group">
-								<div class="col-sm-8">
-									<select id="dropRevisedGraph" class="form-control" name="query">
-										<option value="">(None)</option>
-										{{#graphList}}
-										<option value="DROP GRAPH &lt;{{toString}}&gt;">{{toString}}</option>
-										{{/graphList}}	
-									</select>
-								</div>
-								<div class="col-sm-4">
-									<input type="submit" class="btn btn-default form-control" value="Drop Graph" />
-								</div>
-							</div>
-						</form>
-					</li>
-				</ul>
-				</div>
-				</div>
+				<form action="revisiongraph" method="get" class="form-horizontal">
+					<div class="form-group">
+						<div class="col-sm-4">
+							<select id="selectRevisedGraph" class="form-control" name="graph">
+								<option value="">(All)</option>
+								{{#graphList}}
+								<option value="{{toString}}">{{toString}}</option>
+								{{/graphList}}	
+							</select>
+						</div>
+						<div class="col-sm-4">
+							<select class="form-control" name="format">
+								<option value="text/turtle">Turtle</option>
+								<option value="batik">Graphical 1</option>
+								<option value="d3">Graphical 2</option>
+							</select>
+						</div>
+						<div class="col-sm-4">
+							<input type="submit" class="btn btn-default form-control" value="Get Revision Graph" />
+						</div>
+					</div>
+				</form>
+				<form action="sparql" method="get" class="form-horizontal">
+					<div class="form-group">
+						<div class="col-sm-8">
+							<select id="dropRevisedGraph" class="form-control" name="query">
+								<option value="">(None)</option>
+								{{#graphList}}
+								<option value="DROP GRAPH &lt;{{toString}}&gt;">{{toString}}</option>
+								{{/graphList}}	
+							</select>
+						</div>
+						<div class="col-sm-4">
+							<input type="submit" class="btn btn-default form-control" value="Drop Graph" />
+						</div>
+					</div>
+				</form>
 	</div>
+</div>
 	
-	<div id="examples" class="col-lg-6 panel-group accordion">
-		<h2>Example Queries</h2>
-	    <div>
-			<h3>Create Graph under Version Control</h3>
-			<pre>CREATE SILENT GRAPH &lt;http://test.com/r43ples-dataset-new&gt;</pre>
-</div>
-
-<div>
-			<h3>Select Query</h3>
-			<pre>SELECT * 
-WHERE {
-  GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "3" {
-	?s ?p ?o. 
-  }
-}</pre>
-</div>
-
-<div>
-			<h3>Select Query - Multiple Graphs</h3>
-			<pre># Find all triples that are both in revision 2 and in the master revision
-SELECT ?s ?p ?o 
-WHERE {
-  GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "master" { ?s ?p ?o. }
-  GRAPH &lt;http://test.com/r43ples-dataset-2&gt; REVISION "2" { ?s ?p ?o. } 
-}</pre>
-</div>
-
-<div>
-			<h3>Update Query</h3>
-			<pre>USER "mgraube"
-MESSAGE "test commit"
-INSERT DATA {
-  GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "4" {
-    &lt;a&gt; &lt;b&gt; &lt;c&gt; .
-  }
-}</pre>
-</div>
-
-<div>
-			<h3>Branching</h3>
-			<pre>USER "mgraube"
-MESSAGE "test branch commit"
-BRANCH GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "unstable"</pre>
-</div>
-<div>
-			<h3>Tagging</h3>
-			<pre>USER "mgraube"
-MESSAGE "test tag commit"
-TAG GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "v0.3-alpha"</pre>
-		</div>
-	</div>
-</div>
 {{/content}}
 
 {{/super}}

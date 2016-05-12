@@ -85,14 +85,13 @@ public class TestFastForwardMerge {
 	@Test
 	public void testFastForwardMerge() throws InternalErrorException, SAXException, IOException {
 		String result1 = ep.sparql(createSelectQuery(graphName, "B1")).getEntity().toString();		
-		String expected1 = ResourceManagement.getContentFromResource("fastforward/response-B1-into-Master-Master.xml");
-		assertXMLEqual(expected1, result1);
+		String expected = ResourceManagement.getContentFromResource("fastforward/response-B1-into-Master-Master.xml");
+		assertXMLEqual(expected, result1);
 		
 		ep.sparql(createFastForwardMergeQuery(graphName, user, "Merge B1 into Master", "B1", "master"));
 		
 		String result2 = ep.sparql(createSelectQuery(graphName, "master")).getEntity().toString();		
-		String expected2 = ResourceManagement.getContentFromResource("fastforward/response-B1-into-Master-Master.xml");
-		assertXMLEqual(expected2, result2);	
+		assertXMLEqual(expected, result2);	
 	}
 	
 	

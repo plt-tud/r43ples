@@ -1,0 +1,100 @@
+{{<super}}
+
+{{$script_extra}}
+<script type="text/javascript">
+  $(function() {
+	 $i=1;
+	$(".accordion > div").addClass("panel panel-default");
+	$(".accordion > div").html(function() {
+ 		  var text =	"<div class='panel-heading btn btn-block' data-toggle='collapse' data-parent='.accordion' href='#collapse"+$i+"'>"+
+		  					"<h3 class='panel-title'>" + $(this).children("h3").text() + "</h3>" +
+	  					"</div>" +
+  						"<div id='collapse"+$i+"' class='panel-collapse collapse'>"+
+  							"<div class='panel-body'>" +
+  								"<pre>" + $(this).children("pre").html() + "</pre>" +
+  								"</div>" +		
+  							"</div>" +
+	  					"</div>";
+		  $i++;
+		  return text;
+	});
+	$(".accordion .panel-collapse").first().addClass("in"); 
+  });
+</script>
+{{/script_extra}}
+
+
+{{$content}}
+<div class="row">
+	<div class="col-xs-12">
+	    <h2>Information</h2>
+	    <p>{{#version}}Version: {{toString}}{{/version}}{{^version}}Git: {{git.commitIdAbbrev}} - {{git.branch}}{{/version}}</p>
+	     
+	    <p><a href="http://plt-tud.github.io/r43ples/">More information on the website</a></p>
+	    <p><a href="https://github.com/plt-tud/r43ples">Development on GitHub</a></p>
+	    
+		<h2>Documentation</h2>
+		R43ples (Revision for triples) is an open source Revision Management Tool for the Semantic Web.
+
+It provides different revisions of named graphs via a SPARQL interface. All information about revisions, changes, commits, branches and tags are stored in additional named graphs beside the original graph in an attached external triple store.
+
+
+<div id="examples" class="panel-group accordion">
+<h2>Example Queries</h2>
+	    <div>
+			<h3>Create Graph under Version Control</h3>
+			<pre>CREATE SILENT GRAPH &lt;http://test.com/r43ples-dataset-new&gt;</pre>
+</div>
+
+<div>
+			<h3>Select Query</h3>
+			<pre>SELECT * 
+WHERE {
+  GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "3" {
+	?s ?p ?o. 
+  }
+}</pre>
+</div>
+
+<div>
+			<h3>Select Query - Multiple Graphs</h3>
+			<pre># Find all triples that are both in revision 2 and in the master revision
+SELECT ?s ?p ?o 
+WHERE {
+  GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "master" { ?s ?p ?o. }
+  GRAPH &lt;http://test.com/r43ples-dataset-2&gt; REVISION "2" { ?s ?p ?o. } 
+}</pre>
+</div>
+
+<div>
+			<h3>Update Query</h3>
+			<pre>USER "mgraube"
+MESSAGE "test commit"
+INSERT DATA {
+  GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "4" {
+    &lt;a&gt; &lt;b&gt; &lt;c&gt; .
+  }
+}</pre>
+</div>
+
+<div>
+			<h3>Branching</h3>
+			<pre>USER "mgraube"
+MESSAGE "test branch commit"
+BRANCH GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "unstable"</pre>
+</div>
+<div>
+			<h3>Tagging</h3>
+			<pre>USER "mgraube"
+MESSAGE "test tag commit"
+TAG GRAPH &lt;http://test.com/r43ples-dataset-1&gt; REVISION "2" TO "v0.3-alpha"</pre>
+		</div>
+	</div>
+</div>
+		
+	
+	</div>
+</div>
+{{/content}}
+
+{{/super}}

@@ -26,6 +26,9 @@ public class Difference {
 	private SDDTripleStateEnum tripleResolutionState;
 	/** The resolution state of this difference. **/
 	private ResolutionStateEnum resolutionState;
+	public SDDTripleStateEnum tripleStateA;
+	public SDDTripleStateEnum tripleStateB;
+	public boolean conflicting;
 	
 	
 	/**
@@ -39,12 +42,18 @@ public class Difference {
 	 * @param tripleResolutionState the triple resolution state
 	 * @param resolutionState the resolution state
 	 */
-	public Difference(Triple triple, String referencedRevisionA, String referencedRevisionLabelA, String referencedRevisionB, String referencedRevisionLabelB, SDDTripleStateEnum tripleResolutionState, ResolutionStateEnum resolutionState) {
+	public Difference(Triple triple, 
+			String referencedRevisionA, String referencedRevisionLabelA, SDDTripleStateEnum tripleStateA, 
+			String referencedRevisionB, String referencedRevisionLabelB, SDDTripleStateEnum tripleStateB,
+			boolean conflicting, SDDTripleStateEnum tripleResolutionState, ResolutionStateEnum resolutionState) {
 		this.triple = triple;
 		this.referencedRevisionA = referencedRevisionA;
 		this.referencedRevisionLabelA = referencedRevisionLabelA;
+		this.tripleStateA = tripleStateA;
 		this.referencedRevisionB = referencedRevisionB;
 		this.referencedRevisionLabelB = referencedRevisionLabelB;
+		this.tripleStateB = tripleStateB;
+		this.conflicting = conflicting;
 		this.tripleResolutionState = tripleResolutionState;
 		this.resolutionState = resolutionState;
 	}

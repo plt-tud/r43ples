@@ -1,86 +1,87 @@
 {{<super}}
 
-{{$title}}Merge Start{{/title}}
+{{$title}}Start Merge{{/title}}
+
+{{$head_extra}}
+    <link rel="stylesheet" href="/static/css/r43ples.versiongraph.css">
+    <link rel="stylesheet" href="/static/css/tipsy.css">
+{{/head_extra}}
 
 {{$script_extra}}
+<script src="/static/js/d3.min.js"></script>
+<script src="/static/js/dagre-d3.js"></script>
+<script src="/static/js/jquery.tipsy.js"></script>
+<script src="/static/js/version-graph.js"></script>
+
+
 <script type="text/javascript">
+    $( document ).ready(function() {
+    	updateBranchSelectOptions();
+    	 drawGraph("#visualisation", "revisiongraph?graph={{graphName}}&format=application/json", false, false);
+    });
 
-	function setLocalClient(){
-	  localStorage.clientName = document.getElementById("user").value;
-	}
-
-   
-    // update branches for each selected graph
     $("#graph").change(function(){
- 		$.get("api/getBranches", {graph : $(this).val() }, function(data,status){
+ 		updateBranchSelectOptions();
+ 		 drawGraph("#visualisation", "revisiongraph?graph={{graphName}}&format=application/json", false, false);
+    });
+   
+    // update branches when selecting another graph 
+    function updateBranchSelectOptions() {
+        $graph = $("#graph").val();
+    	$.get("api/getBranches", {graph : $graph }, function(data,status){
         	var listitems = '' ;
         	$.each(data,function(key, value) {
         		listitems += '<option>' + value + '</option>';
         	});
-        	$("#Branch1").html(listitems);
-    		$("#Branch2").html(listitems);
+        	$("#branch1").html(listitems);
+    		$("#branch2").html(listitems);
         });
-    });
-
+    };
     
-    //js Stragegie->illustration with Graph
-    var strategyImage = {
-    		'Three-Way Merge': '/static/images/three-way-strategy.png',
-    		'Rebase': '/static/images/rebase-strategy.png',
-    		'Fast-Forward': '/static/images/fast-forward-strategy.png',
-    };    
-        
-    function showIllustration(num){
-     document.getElementById("illustration").innerHTML="<img src='" + strategyImage[num] +"' alt='"+num+"' style=\"width:100%\">";
+    
+    function setLocalClient(){
+	  localStorage.clientName = document.getElementById("user").value;
+	}
 
-      // by fast forward hide the common,auto fieldset and sdd selector
-      if(num == "Fast-Forward"){
-        $('#methodField').hide();
-        $('#sddField').hide();
-      } else{
-        $('#methodField').show();
-        $('#sddField').show();
-      }
-    }; 
-    showIllustration("Three-Way Merge");
 
-        // branch onchange check : if reachable with fast forward
-        function checkFastForward (){
-          var graph = $('#graph').val();
-          var branch1 = $('#Branch1').val();
-          var branch2 = $('#Branch2').val();
+    // branch onchange check : if reachable with fast forward
+    function checkFastForward (){
+      var graph = $('#graph').val();
+      var branch1 = $('#branch1').val();
+      var branch2 = $('#branch2').val();
 
-          $.get("api/fastForwardCheckProcess", 
-            {
-              graph : graph,
-              branch1 : branch1,
-              branch2 : branch2
-            },
-            function(data,status){
-              // get data and check
-              if(data == "false"){
-            	  $('#strategy ption[value="Fast-Forward"]').attr('disabled', true);
-              }else{
-            	  $('#strategy option[value="Fast-Forward"]').attr('disabled', false);
-            	  $('#strategy').val("Fast-Forward");
-            	  showIllustration("Fast-Forward");
-              }
-            });
-        }
+      $.get("api/fastForwardCheckProcess", 
+        {
+          graph : graph,
+          branch1 : branch1,
+          branch2 : branch2
+        },
+        function(data,status){
+          // get data and check
+          if(data == "false"){
+        	  $('#strategy option[value="Fast-Forward"]').attr('disabled', true);
+          }else{
+        	  $('#strategy option[value="Fast-Forward"]').attr('disabled', false);
+        	  $('#strategy').val("Fast-Forward");
+        	  showIllustration("Fast-Forward");
+          }
+        });
+    }
 </script>
 {{/script_extra}}
 
 {{$content}}
 <div class="container">
 			<div class="row" >
+				<h2>Start Merging <span class="label label-warning"> Development in Progress</span></h2>
+			</div>
+			<div class="row">
 				<div class="col-sm-7">
-                  <h3>Start Merging</h3>
-                    <form class="form-horizontal" action="mergingProcess" method="post" role="form">
+                    <form class="form-horizontal" method="post" role="form">
                       <div class="form-group" >
                       	<label for="graph" class="col-sm-2 control-label">Graph</label>
                         <div class="col-sm-10" >
                           <select class="form-control" id="graph" name="graph">
-                             <option value="no">None</option>
                              {{#graphList}}
                              <option value="{{toString}}">{{toString}}</option>                        
                              {{/graphList}}
@@ -111,11 +112,6 @@
                           </select>
                         </div>
                       </div>                    
-                      <div id="methodField" class="form-group">
-                      	<label class="col-sm-2 control-label">Method</label>
-                              <label class="col-sm-5"><input type="radio" name="method" value="common" checked> Common</label>
-                              <label class="col-sm-5"><input type="radio" name="method" value="auto"> Auto</label>
-                      </div>
                       <div id="sddField" class="form-group" >
                           <label for="sdd" class="col-sm-2 control-label">SDD</label>
                           <div class="col-sm-10">          
@@ -138,10 +134,10 @@
                       </div>
                       <div class="form-group">
                           <div class="col-sm-offset-2 col-sm-5">
-                            <button id="sub" type="submit" class="btn btn-primary btn-block" onclick="setLocalClient()">Submit</button>
+                            <button id="submit" type="submit" class="btn btn-primary btn-block">Submit</button>
                           </div>
                           <div class="col-sm-5">
-                            <button id="can" type="button" class="btn btn-default btn-block">Cancel</button>
+                            <button id="cancel" type="button" class="btn btn-default btn-block">Cancel</button>
                           </div>
                       </div>
                     </form>
@@ -149,9 +145,7 @@
 			 </div>
 
        <div class= "col-sm-5">
-            <h3>Strategy Illustration</h3>
-            <div id="illustration">
-            </div>
+            <div id="visualisation"></div>
           </div>
 		</div>
    </div>

@@ -17,6 +17,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.log4j.Logger;
+import org.glassfish.jersey.server.mvc.Template;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -60,6 +61,19 @@ public class Misc {
 	@Produces(MediaType.TEXT_HTML)
 	public final Response getIndex(){
 		return getLandingPage();
+	}
+	
+	@GET
+	@Path("help")
+	@Template(name = "/help.mustache")
+	@Produces(MediaType.TEXT_HTML)
+	public final Map<String, Object> getHelpPage() {
+		logger.info("Get Landing page");
+		Map<String, Object> htmlMap = new HashMap<String, Object>();
+		htmlMap.put("help_active", true);
+		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
+		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());	
+		return htmlMap;
 	}
 	
 	/**
