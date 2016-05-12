@@ -765,7 +765,7 @@ public class RevisionManagement {
 	 * Get the revision number of a given reference name.
 	 * 
 	 * @param revisionGraph
-	 *            the graph name
+	 *            the revision graph where information about the history of the graph is stored
 	 * @param referenceName
 	 *            the reference name
 	 * @return the revision number of given reference name

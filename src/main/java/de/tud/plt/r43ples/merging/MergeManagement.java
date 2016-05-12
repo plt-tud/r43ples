@@ -698,7 +698,7 @@ public class MergeManagement {
 		 
 		// Create an empty temporary graph which will contain the merged full content
 		String graphNameOfMerged = graphName + "-RM-MERGED-TEMP";
-		createNewGraph(graphNameOfMerged);
+		TripleStoreInterfaceSingleton.get().executeCreateGraph(graphNameOfMerged);
 		
 		// Get the full graph name of branch A
 		String graphNameOfBranchA = RevisionManagement.getReferenceGraph(graphName, branchNameA);
@@ -891,7 +891,7 @@ public class MergeManagement {
 		
 		// Create an empty temporary graph which will contain the merged full content
 		String graphNameOfMerged = graphName + "-RM-MERGED-TEMP";
-		createNewGraph(graphNameOfMerged);
+		TripleStoreInterfaceSingleton.get().executeCreateGraph(graphNameOfMerged);
 		
 		// Get the full graph name of branch A
 		String graphNameOfBranchA = RevisionManagement.getReferenceGraph(graphName, branchNameA);
@@ -1061,22 +1061,5 @@ public class MergeManagement {
 				
 		return list;
 	}
-
-	
-	
-	/**
-	 * Create a new graph. When graph already exists it will be dropped.
-	 * 
-	 * @param graphname the graph name
-	 */
-	private static void createNewGraph(String graphName) {
-		logger.info("Create new graph with the name: " + graphName + ".");
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphName));
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphName));
-	}
-	
-	
-	// TODO upload on initialization RMO and SDDO so the client has the possibility to use the ontology data
-	// TODO Add SPIN file to graph and also reference in RMO
 	
 }

@@ -1,5 +1,6 @@
 package de.tud.plt.r43ples.webservice;
 
+import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,10 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Template;
+
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.FastForwardControl;
@@ -34,16 +39,20 @@ public class Merging {
 	 * */
 	@GET
     @Produces(MediaType.TEXT_HTML)
-	@Template(name = "/merge_start.mustache")
-	public final Map<String, Object> getMerging() {
+	public final Response getMerging() {
 		logger.info("Merging - Start page");		
-		
+		ResponseBuilder response = Response.ok();
 		List<String> graphList = RevisionManagement.getRevisedGraphsList();	
-	    Map<String, Object> scope = new HashMap<String, Object>();
+		Map<String, Object> scope = new HashMap<String, Object>();
 	    scope.put("merging_active", true);
 		scope.put("graphList", graphList);
 		
-		return scope;
+		StringWriter sw = new StringWriter();
+		MustacheFactory mf = new DefaultMustacheFactory();
+		Mustache mustache = mf.compile("merge_start.mustache");		
+		mustache.execute(sw, scope);		
+		response.entity(sw.toString()).type(MediaType.TEXT_HTML);
+		return response.build();
 	}
 	
 	
@@ -131,7 +140,7 @@ public class Merging {
 		// Three Way Merge
 		else {			
 			MergeCommitModel commitModel = new MergeCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way", null);
-			MergeResult mresult = Interface.sparqlThreeWayMerge(graphName, branch1, branch2, null, null, null, null, user, message, "text/turtle");
+			MergeResult mresult = Interface.mergeThreeWay(graphName, branch1, branch2, null, null, null, null, user, message, "text/turtle");
 							
 			if(!mresult.hasConflict){
 				response.entity(commitModel.getReportView());				
