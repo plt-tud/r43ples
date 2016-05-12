@@ -68,8 +68,8 @@ public class RebaseControl {
 			String revisionUri = rIter.next();
 			String commitUri = StrategyManagement.getCommitUri(revisionGraph, revisionUri);
 			
-			String addSet = StrategyManagement.getAddSetUri(revisionGraph, revisionUri);
-			String deleteSet = StrategyManagement.getDeleteSetUri(revisionGraph, revisionUri);
+			String addSet = RevisionManagement.getAddSetURI(revisionUri, revisionGraph);
+			String deleteSet = RevisionManagement.getDeleteSetURI(revisionUri, revisionGraph);;
 			
 			String patchNumber = StrategyManagement.getRevisionNumber(revisionGraph, revisionUri);
 			String patchUser = StrategyManagement.getCommitUserUri(revisionGraph, commitUri);
