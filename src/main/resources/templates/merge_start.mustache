@@ -13,17 +13,17 @@
 <script src="/static/js/jquery.tipsy.js"></script>
 <script src="/static/js/version-graph.js"></script>
 
-
 <script type="text/javascript">
-    $( document ).ready(function() {
-    	updateBranchSelectOptions();
-    	 drawGraph("#visualisation", "revisiongraph?graph={{graphName}}&format=application/json", false, false);
-    });
-
-    $("#graph").change(function(){
+    function updateVisualisation(){
+ 		console.log("update visualisation");
+ 		$graph = $("#graph").val();
  		updateBranchSelectOptions();
- 		 drawGraph("#visualisation", "revisiongraph?graph={{graphName}}&format=application/json", false, false);
-    });
+ 		drawGraph("#visualisation", "revisiongraph?graph="+$graph+"&format=application/json", false, false);
+    };
+    
+    $(document).ready(updateVisualisation);
+
+    $("#graph").change(updateVisualisation);
    
     // update branches when selecting another graph 
     function updateBranchSelectOptions() {
@@ -73,7 +73,7 @@
 {{$content}}
 <div class="container">
 			<div class="row" >
-				<h2>Start Merging <span class="label label-warning"> Development in Progress</span></h2>
+				<h2>Start Merging <small>Development in Progress</small></h2>
 			</div>
 			<div class="row">
 				<div class="col-sm-7">
