@@ -49,29 +49,7 @@ public class TestFastForwardMerge {
 	@Before
 	public void setUp() throws InternalErrorException {
 		// Create the initial data set
-		graphName = SampleDataSet.createSampleDataSetFastForward();
-	}
-	
-	
-	
-	/**
-	 * Test the created graph.
-	 * 
-	 * @throws IOException 
-	 * @throws SAXException 
-	 * @throws InternalErrorException 
-	 */
-	@Test
-	public void testCreatedGraph() throws IOException, SAXException, InternalErrorException {
-		// Test branch B1
-		String result1 = ep.sparql(createSelectQuery(graphName, "B1")).getEntity().toString();
-		String expected1 = ResourceManagement.getContentFromResource("fastforward/response-B1.xml");
-		assertXMLEqual(expected1, result1);	
-		
-		// Test branch MASTER
-		String result2 = ep.sparql(createSelectQuery(graphName, "master")).getEntity().toString();
-		String expected2 = ResourceManagement.getContentFromResource("fastforward/response-MASTER.xml");
-		assertXMLEqual(expected2, result2);
+		graphName = SampleDataSet.createSampleDataSetMerging().graphName;
 	}
 	
 	
@@ -84,14 +62,20 @@ public class TestFastForwardMerge {
 	 */
 	@Test
 	public void testFastForwardMerge() throws InternalErrorException, SAXException, IOException {
-		String result1 = ep.sparql(createSelectQuery(graphName, "B1")).getEntity().toString();		
-		String expected = ResourceManagement.getContentFromResource("fastforward/response-B1-into-Master-Master.xml");
-		assertXMLEqual(expected, result1);
+		// Test branch B1
+		String result_b1 = ep.sparql(createSelectQuery(graphName, "B1")).getEntity().toString();
+		String expected_b1 = ResourceManagement.getContentFromResource("threeway/response-B1.xml");
+		assertXMLEqual(expected_b1, result_b1);	
 		
+		// Test branch MASTER
+		String result_master = ep.sparql(createSelectQuery(graphName, "master")).getEntity().toString();
+		String expected_master = ResourceManagement.getContentFromResource("threeway/response-MASTER.xml");
+		assertXMLEqual(expected_master, result_master);
+
+		// Test fast forward
 		ep.sparql(createFastForwardMergeQuery(graphName, user, "Merge B1 into Master", "B1", "master"));
-		
-		String result2 = ep.sparql(createSelectQuery(graphName, "master")).getEntity().toString();		
-		assertXMLEqual(expected, result2);	
+		result_master = ep.sparql(createSelectQuery(graphName, "master")).getEntity().toString();		
+		assertXMLEqual(expected_b1, result_master);	
 	}
 	
 	

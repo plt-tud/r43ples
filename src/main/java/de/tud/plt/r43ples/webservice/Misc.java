@@ -110,12 +110,6 @@ public class Misc {
 		if (graph.equals("rebase") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetRebase());
 		}
-		if (graph.equals("forcerebase") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataSetForceRebase());
-		}
-		if (graph.equals("fastforward") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataSetFastForward());
-		}
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
 	    htmlMap.put("graphs", graphs);
 	    
