@@ -22,7 +22,6 @@ import org.junit.Test;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.DataSetGenerationResult;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.webservice.Misc;
@@ -33,7 +32,7 @@ import de.tud.plt.r43ples.webservice.Misc;
  */
 public class TestMisc extends JerseyTest {
 	
-	private static DataSetGenerationResult dataset;
+	private static String dataset;
 
 	@Override
     protected Application configure() {
@@ -44,7 +43,7 @@ public class TestMisc extends JerseyTest {
 	public static void setUpBeforeClass() throws ConfigurationException, URISyntaxException, IOException, InternalErrorException {
 		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.test.conf");
-		dataset = SampleDataSet.createSampleDataset1();
+		dataset = SampleDataSet.createSampleDataSetComplexStructure();
 	}
 	
 	@AfterClass
@@ -79,7 +78,7 @@ public class TestMisc extends JerseyTest {
 		result = target("createSampleDataset").queryParam("dataset", "forcerebase").request().get(String.class);
 		result = target("createSampleDataset").queryParam("dataset", "fastforward").request().get(String.class);		
 		result = target("createSampleDataset").request().get(String.class);
-		Assert.assertThat(result, containsString(dataset.graphName));
+		Assert.assertThat(result, containsString(dataset));
 	}
 
 	/**
@@ -87,14 +86,17 @@ public class TestMisc extends JerseyTest {
 	 */
 	@Test
 	public final void testGetRevisionGraph() {
-		String result = target("revisiongraph").queryParam("graph", dataset.graphName).queryParam("format", "text/turtle").request().get(String.class);
+		String result = target("revisiongraph").queryParam("graph", dataset).queryParam("format", "text/turtle").request().get(String.class);
 		Assert.assertThat(result, containsString("@prefix"));
 		
-		result = target("revisiongraph").queryParam("graph", dataset.graphName).queryParam("format", "d3").request().get(String.class);
+		result = target("revisiongraph").queryParam("graph", dataset).queryParam("format", "d3").request().get(String.class);
+		Assert.assertThat(result, containsString("<div id=\"visualisation\""));
 		
-		result = target("revisiongraph").queryParam("graph", dataset.graphName).queryParam("format", "batik").request().get(String.class);
+		result = target("revisiongraph").queryParam("graph", dataset).queryParam("format", "batik").request().get(String.class);
+		Assert.assertThat(result, containsString("<svg"));
 		
-		result = target("revisiongraph").queryParam("graph", dataset.graphName).queryParam("format", "g6").request().get(String.class);
+		result = target("revisiongraph").queryParam("graph", dataset).queryParam("format", "g6").request().get(String.class);
+		Assert.assertThat(result, containsString("<div id=\"visualisation\""));
 	}
 
 	
@@ -103,10 +105,10 @@ public class TestMisc extends JerseyTest {
 	 */
 	@Test
 	public final void testGetContentOfGraph() {
-		String result = target("contentOfGraph").queryParam("graph", dataset.graphName).request().get(String.class);
+		String result = target("contentOfGraph").queryParam("graph", dataset).request().get(String.class);
 		Assert.assertThat(result, containsString("type"));
 		
-		result = target("contentOfGraph").queryParam("graph", dataset.graphName).queryParam("format", "text/turtle").request().get(String.class);
+		result = target("contentOfGraph").queryParam("graph", dataset).queryParam("format", "text/turtle").request().get(String.class);
 		Assert.assertThat(result, containsString("<http://"));
 	}
 	
