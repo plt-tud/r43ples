@@ -146,28 +146,9 @@ function drawGraph(div_selector, _JSON, _showTags) {
         // counter for coloring
         var j = 1;
         $.each(data, function (key, value) {
-            var types = value["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"];
             j++;
-            for (var i = 0; i < types.length; i++) {
-                switch (types[i].value) {
-                    // Falls Commit
-                    case "http://eatld.et.tu-dresden.de/rmo#RevisionCommit":
-                        commits[key] = {};
-                        commits[key].title = value["http://purl.org/dc/terms/title"][0].value;
-                        commits[key].wasAssociatedWith = value["http://www.w3.org/ns/prov#wasAssociatedWith"][0].value;
-                        commits[key].generated = value["http://www.w3.org/ns/prov#generated"][0].value;
-                        commits[key].used = [];
-                        if (value["http://www.w3.org/ns/prov#used"]){
-                            for (var k = 0; k < value["http://www.w3.org/ns/prov#used"].length; k++) {
-                                commits[key].used.push(value["http://www.w3.org/ns/prov#used"][k].value);
-                            }
-                        }
-                        commits[key].time = value["http://www.w3.org/ns/prov#atTime"][0].value;
-                        if (revisions[commits[key].generated] == null) {
-                            revisions[commits[key].generated] = {};
-                        }
-                        revisions[commits[key].generated].commit = key;
-                        break;
+            $.each(value["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"], function(k, type) {
+                switch (type.value) {
                     // Falls Revision
                     case "http://eatld.et.tu-dresden.de/rmo#Revision":
                         if (revisions[key] == null) {
@@ -211,8 +192,32 @@ function drawGraph(div_selector, _JSON, _showTags) {
                         break;
                 }
             }
+            )
 
         });
+        
+        // Adding Commits
+        $.each(data, function (key, value) {
+            $.each(value["http://www.w3.org/1999/02/22-rdf-syntax-ns#type"], function(k, type) {
+               if (type.value== "http://eatld.et.tu-dresden.de/rmo#RevisionCommit"){
+                        commits[key] = {};
+                        commits[key].title = value["http://purl.org/dc/terms/title"][0].value;
+                        commits[key].wasAssociatedWith = value["http://www.w3.org/ns/prov#wasAssociatedWith"][0].value;
+                        commits[key].generated = value["http://www.w3.org/ns/prov#generated"][0].value;
+                        commits[key].used = [];
+                        if (value["http://www.w3.org/ns/prov#used"]){
+                            for (var k = 0; k < value["http://www.w3.org/ns/prov#used"].length; k++) {
+                                commits[key].used.push(value["http://www.w3.org/ns/prov#used"][k].value);
+                            }
+                        }
+                        commits[key].time = value["http://www.w3.org/ns/prov#atTime"][0].value;
+                        if (revisions[commits[key].generated]){
+                        	revisions[commits[key].generated].commit = key;
+                        	}
+                       }
+                        });
+                        });
+                        
     }
     
     var tipsy_options = {gravity: 'w', html: true, fade:true, trigger: 'focus', offset: 100};
