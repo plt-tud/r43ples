@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,16 +16,17 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Variant;
 
 import org.apache.log4j.Logger;
 
@@ -42,6 +44,8 @@ import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.ui.MergingControl;
+
+
 
 /**
  * Provides SPARQL endpoint via [host]:[port]/r43ples/.
@@ -87,12 +91,19 @@ public class Endpoint {
 	
 	@Context
 	private UriInfo uriInfo;
+	@Context
+	private Request request;
 	
 	
 
 	
 	/** default logger for this class */
 	private final static Logger logger = Logger.getLogger(Endpoint.class);
+
+
+	private static final MediaType TEXT_TURTLE_TYPE = new MediaType("text", "turtle");
+	private static final MediaType APPLICATION_RDF_XML_TYPE = new MediaType("application", "rdf+xml");
+	private static final MediaType APPLICATION_SPARQL_RESULTS_XML_TYPE = new MediaType("application", "sparql-results+xml");
 	
 	
 	/**map for client and mergingControlMap
@@ -117,14 +128,24 @@ public class Endpoint {
 	 * @throws InternalErrorException 
 	 */
 	@POST
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml"})
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
+	public final Response sparqlPOST(
 			@FormParam("format") final String formatQuery, 
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
 			@FormParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
-		String format = (formatQuery != null) ? formatQuery : formatHeader;
-		logger.debug("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
+		String format = formatQuery;
+		if (formatQuery == null){
+			List<Variant> reqVariants = Variant.mediaTypes(MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_HTML_TYPE, 
+					MediaType.APPLICATION_JSON_TYPE, TEXT_TURTLE_TYPE, APPLICATION_RDF_XML_TYPE, APPLICATION_SPARQL_RESULTS_XML_TYPE).build();
+			Variant bestVariant = request.selectVariant(reqVariants);
+	        if (bestVariant == null) {
+	            return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
+	        }
+        	MediaType reqMediaType = bestVariant.getMediaType();
+        	format = reqMediaType.toString();
+		}
+		logger.info("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
 		return sparql(format, sparqlQuery, query_rewriting);
 	}
 	
@@ -142,12 +163,19 @@ public class Endpoint {
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	@Consumes("application/sparql-query")
-	public final Response sparqlPOSTdirectly(@HeaderParam("Accept") final String formatHeader,
+	public final Response sparqlPOSTdirectly(
 			final String sparqlQuery) throws InternalErrorException {
-		logger.debug("SPARQL POST query directly (format: "+formatHeader+", query: "+sparqlQuery +")");
-		return sparql(formatHeader, sparqlQuery);
+		List<Variant> reqVariants = Variant.mediaTypes(MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_HTML_TYPE, 
+				MediaType.APPLICATION_JSON_TYPE, TEXT_TURTLE_TYPE, APPLICATION_RDF_XML_TYPE, APPLICATION_SPARQL_RESULTS_XML_TYPE).build();
+		Variant bestVariant = request.selectVariant(reqVariants);
+        if (bestVariant == null) {
+            return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
+        }
+    	MediaType reqMediaType = bestVariant.getMediaType();
+    	String format = reqMediaType.toString();
+		logger.info("SPARQL POST query directly (format: "+format+", query: "+sparqlQuery +")");
+		return sparql(reqMediaType.toString(), sparqlQuery);
 	}
-		
 	
 	/**
 	 * HTTP GET interface for query and update (e.g. SELECT, INSERT, DELETE).
@@ -168,11 +196,21 @@ public class Endpoint {
 	 */
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
+	public final Response sparqlGET(
 			@QueryParam("format") final String formatQuery, 
 			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
 			@QueryParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
-		String format = (formatQuery != null) ? formatQuery : formatHeader;
+		String format = formatQuery;
+		if (formatQuery == null){
+			List<Variant> reqVariants = Variant.mediaTypes(MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_HTML_TYPE, 
+					MediaType.APPLICATION_JSON_TYPE, TEXT_TURTLE_TYPE, APPLICATION_RDF_XML_TYPE, APPLICATION_SPARQL_RESULTS_XML_TYPE).build();
+			Variant bestVariant = request.selectVariant(reqVariants);
+	        if (bestVariant == null) {
+	            return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
+	        }
+        	MediaType reqMediaType = bestVariant.getMediaType();
+        	format = reqMediaType.toString();
+		}		
 		
 		String sparqlQueryDecoded;
 		try {
@@ -181,6 +219,7 @@ public class Endpoint {
 			e.printStackTrace();
 			sparqlQueryDecoded = sparqlQuery;
 		}
+		logger.info("SPARQL GET query (format: "+format+", query: "+sparqlQueryDecoded +")");
 		return sparql(format, sparqlQueryDecoded, query_rewriting);
 	}
 	
@@ -317,8 +356,11 @@ public class Endpoint {
 	 * @return HTTP response of evaluating the sparql query 
 	 * @throws InternalErrorException
 	 */
-	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
+	private Response getSparqlResponse(String format, String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
 		logger.debug(String.format("SPARQL request (format=%s, query_rewriting=%s) -> %n %s", format, query_rewriting, sparqlQuery));
+		
+        
+		
 		String user = null;
 		Matcher userMatcher = patternUser.matcher(sparqlQuery);
 		if (userMatcher.find()) {
