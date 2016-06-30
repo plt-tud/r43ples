@@ -148,7 +148,12 @@ public class R43plesService {
 		
 		String version = R43plesService.class.getPackage().getImplementationVersion();
 		if (version==null){
-			version = "Commit: " +GitRepositoryState.getGitRepositoryState().commitIdAbbrev;
+			try{
+				version = "Commit: " +GitRepositoryState.getGitRepositoryState().commitIdAbbrev;
+			}
+			catch(Exception e){
+                version="No version information available";
+            }
 		}
 		logger.info("Version: "+ version);
 	}
