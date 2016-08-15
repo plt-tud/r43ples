@@ -140,9 +140,7 @@ public class SparqlRewriter {
 
 	
 	/**
-	 * @param expression_list_revision_path
-	 * @param branch
-	 * @param eg_orginal
+	 * @param el_orginal
 	 * @return rewritten element group
 	 */
 	private Element getRewrittenElement(final Element el_orginal) {
@@ -206,8 +204,6 @@ public class SparqlRewriter {
 	}
 
 	/**
-	 * @param expression_list_revision_path
-	 * @param branch
 	 * @param triplePath
 	 * @return rewritten triple path element
 	 */
