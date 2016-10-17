@@ -6,6 +6,7 @@ import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -39,7 +40,9 @@ public class Debug {
 	 * @throws InternalErrorException
 	 */
 	@GET
-	public final String getDebugQuery(@QueryParam("query") final String sparqlQuery) throws InternalErrorException {
+	public final String getDebugQuery(
+			@QueryParam("query") final String sparqlQuery,
+			@QueryParam("format")  @DefaultValue("text/html") final String format) throws InternalErrorException {
 		if (sparqlQuery == null) {
 			logger.info("Get Debug page");
 			return getHTMLDebugResponse();
@@ -57,8 +60,13 @@ public class Debug {
 				return "Query executed";
 			}
 			else {
-				String result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query, "text/html");
-				return getHTMLResult( result, sparqlQuery);
+				String result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query, format);
+				if (format.equals("text/html")){
+					return getHTMLResult( result, sparqlQuery);
+				}
+				else {
+					return result;
+				}
 			}
 		}
 	}
