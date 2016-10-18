@@ -11,6 +11,8 @@ import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.log4j.Logger;
 
@@ -19,6 +21,7 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 @Path("debug")
@@ -40,13 +43,15 @@ public class Debug {
 	 * @throws InternalErrorException
 	 */
 	@GET
-	public final String getDebugQuery(
+	public final Response getDebugQuery(
 			@QueryParam("query") final String sparqlQuery,
 			@QueryParam("format")  @DefaultValue("text/html") final String format) throws InternalErrorException {
+		ResponseBuilder responseBuilder = Response.ok();
 		if (sparqlQuery == null) {
 			logger.info("Get Debug page");
-			return getHTMLDebugResponse();
+			responseBuilder.entity(getHTMLDebugResponse());
 		} else {
+			
 			String query;
 			try {
 				query = URLDecoder.decode(sparqlQuery, "UTF-8");
@@ -57,18 +62,19 @@ public class Debug {
 			logger.info("Debug query was requested. Query: " + query);
 			if (sparqlQuery.contains("INSERT")) {
 				TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
-				return "Query executed";
+				responseBuilder.entity("Query executed");
 			}
 			else {
 				String result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query, format);
 				if (format.equals("text/html")){
-					return getHTMLResult( result, sparqlQuery);
-				}
-				else {
-					return result;
-				}
+					responseBuilder.entity(getHTMLResult(result, sparqlQuery));
+				} else {
+					responseBuilder.entity(result);
+				}	
 			}
 		}
+		responseBuilder.type(format);
+		return responseBuilder.build();
 	}
 	
 	/**
@@ -83,6 +89,7 @@ public class Debug {
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
 		htmlMap.put("graphs", TripleStoreInterfaceSingleton.get().getGraphs());
 	    htmlMap.put("debug_active", true);
+	    htmlMap.put("revisionGraph", Config.revision_graph);
 	    StringWriter sw = new StringWriter();	    
 		MustacheFactory mf = new DefaultMustacheFactory();
 	    Mustache mustache = mf.compile("templates/debug.mustache");
