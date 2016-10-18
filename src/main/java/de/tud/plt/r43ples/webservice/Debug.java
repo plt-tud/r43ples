@@ -4,14 +4,18 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Variant;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.log4j.Logger;
@@ -26,6 +30,9 @@ import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 @Path("debug")
 public class Debug {
+	
+	@Context
+	private Request request;
 	
 	private final static Logger logger = Logger.getLogger(Debug.class);
 	
@@ -45,8 +52,20 @@ public class Debug {
 	@GET
 	public final Response getDebugQuery(
 			@QueryParam("query") final String sparqlQuery,
-			@QueryParam("format")  @DefaultValue("text/html") final String format) throws InternalErrorException {
+			@QueryParam("format") final String formatQuery) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.ok();
+		String format = formatQuery;
+		if (formatQuery == null){
+			List<Variant> reqVariants = Variant.mediaTypes(MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_HTML_TYPE, 
+					MediaType.APPLICATION_JSON_TYPE, Endpoint.TEXT_TURTLE_TYPE, Endpoint.APPLICATION_RDF_XML_TYPE, Endpoint.APPLICATION_SPARQL_RESULTS_XML_TYPE).build();
+			Variant bestVariant = request.selectVariant(reqVariants);
+	        if (bestVariant == null) {
+	            return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
+	        }
+        	MediaType reqMediaType = bestVariant.getMediaType();
+        	format = reqMediaType.toString();
+		}
+		logger.warn(format);
 		if (sparqlQuery == null) {
 			logger.info("Get Debug page");
 			responseBuilder.entity(getHTMLDebugResponse());

@@ -101,9 +101,9 @@ public class Endpoint {
 	private final static Logger logger = Logger.getLogger(Endpoint.class);
 
 
-	private static final MediaType TEXT_TURTLE_TYPE = new MediaType("text", "turtle");
-	private static final MediaType APPLICATION_RDF_XML_TYPE = new MediaType("application", "rdf+xml");
-	private static final MediaType APPLICATION_SPARQL_RESULTS_XML_TYPE = new MediaType("application", "sparql-results+xml");
+	static final MediaType TEXT_TURTLE_TYPE = new MediaType("text", "turtle");
+	static final MediaType APPLICATION_RDF_XML_TYPE = new MediaType("application", "rdf+xml");
+	static final MediaType APPLICATION_SPARQL_RESULTS_XML_TYPE = new MediaType("application", "sparql-results+xml");
 	
 	
 	/**map for client and mergingControlMap
