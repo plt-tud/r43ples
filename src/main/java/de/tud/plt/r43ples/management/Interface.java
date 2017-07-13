@@ -81,8 +81,8 @@ public class Interface {
 					newGraphName = RevisionManagement.getReferenceGraph(graphName, revisionNumber);
 				} else {
 					// Respond with specified revision, therefore the revision
-					// must be generated - saved in graph <RM-TEMP-graphName>
-					newGraphName = graphName + "-temp";
+					// must be generated - saved in graph <graphName-revisionNumber>
+					newGraphName = graphName + "-" + revisionNumber;
 					RevisionManagement.generateFullGraphOfRevision(graphName, revisionNumber, newGraphName);
 				}
 			}
