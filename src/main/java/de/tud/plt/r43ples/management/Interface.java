@@ -200,9 +200,8 @@ public class Interface {
 
 		// V. add changesets to full graph and add meta information in revision
 		// graphs
-		for (RevisionDraft d : revList) {
-			RevisionManagement.addNewRevisionFromChangeSet(user, commitMessage, d.graphName, d.revisionName,
-					d.newRevisionNumber, d.referenceFullGraph, d.addSetURI, d.deleteSetURI);
+		for (RevisionDraft draft : revList) {
+			RevisionManagement.addNewRevisionFromChangeSet(user, commitMessage, draft);
 		}
 	}
 
