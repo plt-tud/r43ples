@@ -5,7 +5,7 @@
 # of the day to the coverity scan service
 #
 
-COMMITS=`git log --since=today.midnight --oneline | wc -l`
+COMMITS=$(git log --since=today.midnight --oneline | wc -l)
 
 if [ "$TRAVIS_BRANCH" != "develop" ]; then 
     echo "Not on develop branch -> no update of coverity_scan!"
