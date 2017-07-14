@@ -241,7 +241,7 @@ public class Endpoint {
 	 * @throws InternalErrorException 
 	 */
 	public final Response sparql(final String format, final String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
-		if (sparqlQuery.equals("")) {
+		if ("".equals(sparqlQuery)) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
 			} else {
