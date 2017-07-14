@@ -40,7 +40,7 @@ public class Interface {
 		if (query_rewriting) {
 			String query_rewritten = SparqlRewriter.rewriteQuery(query);
 			result = TripleStoreInterfaceSingleton.get()
-					.executeSelectConstructAskQuery(Config.getPrefixes() + query_rewritten, format);
+					.executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + query_rewritten, format);
 		} else {
 			result = getSelectConstructAskResponseClassic(query, format);
 		}
@@ -94,7 +94,7 @@ public class Interface {
 
 		}
 		String response = TripleStoreInterfaceSingleton.get()
-				.executeSelectConstructAskQuery(Config.getPrefixes() + queryM, format);
+				.executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + queryM, format);
 		return response;
 	}
 

@@ -19,9 +19,9 @@ import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.JenaModelManagement;
-import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.TripleObjectTypeEnum;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
@@ -121,7 +121,7 @@ public class MergingControl {
 
 		
 		// Get all subjects from difference model
-		String querySubject = RevisionManagement.prefixes +
+		String querySubject = Config.prefixes +
 				  "SELECT DISTINCT ?subject "
 				+ "WHERE { "
 				+ " ?triple rdf:subject ?subject."
@@ -142,7 +142,7 @@ public class MergingControl {
 	
 	private HashMap<Triple, Boolean> addTriplesOfIndividual(String individualUri, String branchName) throws InternalErrorException{
 		HashMap<Triple, Boolean> triples = new HashMap<Triple, Boolean>();
-		String query = RevisionManagement.prefixes + String.format(
+		String query = Config.prefixes + String.format(
 				  "SELECT ?predicate ?object %n"
 				+ "FROM <%s> REVISION \"%s\" %n"
 				+ "WHERE { %n"

@@ -37,21 +37,6 @@ public class RevisionManagement {
 	/** The logger. **/
 	private static Logger logger = Logger.getLogger(RevisionManagement.class);
 	
-	/** The SPARQL prefixes
-	 * **/
-	public static final String prefixes = 
-			  "PREFIX rmo:	<http://eatld.et.tu-dresden.de/rmo#> \n"
-			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
-			+ "PREFIX dc-terms:	<http://purl.org/dc/terms/> \n" 
-			+ "PREFIX xsd:	<http://www.w3.org/2001/XMLSchema#> \n"
-			+ "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
-			+ "PREFIX sdd:	<http://eatld.et.tu-dresden.de/sdd#> \n"
-			+ "PREFIX rpo: <http://eatld.et.tu-dresden.de/rpo#> \n"
-			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
-			+ "PREFIX rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n"
-			+ "PREFIX owl:	<http://www.w3.org/2002/07/owl#> \n";
-
-
 	/**
 	 * Put existing graph under version control. Existence of graph is not checked. Current date is used for commit timestamp
 	 * 
@@ -70,7 +55,7 @@ public class RevisionManagement {
 			revisiongraph += "x";
 		}
 		
-		String queryAddRevisionGraph = prefixes + String.format(
+		String queryAddRevisionGraph = Config.prefixes + String.format(
 				"INSERT DATA { GRAPH <%1$s> {"
 				+ "  <%2$s> a rmo:Graph;"
 				+ "    rmo:hasRevisionGraph <%3$s>;"
@@ -108,7 +93,7 @@ public class RevisionManagement {
 				+ "	prov:atTime \"%s\"^^xsd:dateTime .%n",
 				commitUri,  "http://eatld.et.tu-dresden.de/user/r43ples", revisionUri, branchUri, datetime);
 		
-		String queryRevision = prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisiongraph, queryContent);
+		String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisiongraph, queryContent);
 		
 		//TripleStoreInterfaceSingleton.get().executeCreateGraph(graph);
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryRevision);
@@ -407,7 +392,7 @@ public class RevisionManagement {
 					+ "<%s> prov:wasDerivedFrom <%s> .", commitUri, revUri2, revisionUri, revUri2));
 		}
 		
-		String query = prefixes
+		String query = Config.prefixes
 				+ String.format("INSERT DATA { GRAPH <%s> { %s } }", draft.revisionGraph,
 						queryContent.toString());
 		
@@ -417,7 +402,7 @@ public class RevisionManagement {
 		String branchIdentifier = draft.revisionName; //or revisionNumber //TODO
 		String oldRevisionUri = graph.getRevisionUri(branchIdentifier);
 
-		String queryBranch = prefixes + String.format("" 
+		String queryBranch = Config.prefixes + String.format("" 
 					+ "SELECT ?branch " 
 					+ "WHERE { GRAPH <%s> {" 
 					+ "	?branch a rmo:Branch; "
@@ -440,7 +425,7 @@ public class RevisionManagement {
 	 *  */
 	public static void moveBranchReference(final String revisionGraph, final String branchName, final String revisionOld, final String revisionNew){
 		// delete old reference
-		String query = prefixes	+ String.format(""
+		String query = Config.prefixes	+ String.format(""
 				+ "DELETE DATA { GRAPH <%1$s> { <%2$s> rmo:references <%3$s>. } };" 
 				+ "INSERT DATA { GRAPH <%1$s> { <%2$s> rmo:references <%4$s>. } }",
 				revisionGraph, branchName, revisionOld, revisionNew);
@@ -463,7 +448,7 @@ public class RevisionManagement {
 		while(riter.hasNext()) {
 			String revision = riter.next();
 
-			String query = RevisionManagement.prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:belongsTo <%s>. } };%n",
+			String query = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:belongsTo <%s>. } };%n",
 					revisionGraph, revision, branch);
 			
 			logger.debug("revisionlist info" + revision);
@@ -587,7 +572,7 @@ public class RevisionManagement {
 			generateFullGraphOfRevision(graphName, revisionNumber, referenceUri);
 
 			// Execute queries
-			String query = prefixes
+			String query = Config.prefixes
 					+ String.format("INSERT DATA { GRAPH <%s> { %s } } ;", revisionGraph, queryContent);
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
 		}
@@ -731,7 +716,7 @@ public class RevisionManagement {
 		String sparqlQuery;
 		
 		if (graphName.equals("")) {
-			sparqlQuery = prefixes + String.format(""
+			sparqlQuery = Config.prefixes + String.format(""
 					+ "CONSTRUCT { ?s ?p ?o. }"
 					+ "WHERE { "
 					+ "	GRAPH <%s> { ?graph a rmo:Graph; rmo:hasRevisionGraph ?revisiongraph.}"
@@ -753,7 +738,7 @@ public class RevisionManagement {
 	 * @return the constructed graph content as specified RDF serialization format
 	 */
 	public static String getContentOfGraph(final String graphName, final String format) {
-		String query = prefixes + String.format(
+		String query = Config.prefixes + String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
 				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
 		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		
@@ -768,7 +753,7 @@ public class RevisionManagement {
 	 * @return String containing the SPARQL response in specified format
 	 */
 	public static String getRevisedGraphsSparql(final String format) {
-		String sparqlQuery = prefixes
+		String sparqlQuery = Config.prefixes
 				+ String.format("" 
 						+ "SELECT DISTINCT ?graph " 
 						+ "WHERE {"
@@ -784,7 +769,7 @@ public class RevisionManagement {
 	 * @return result set
 	 */
 	public static ResultSet getRevisedGraphs() {
-		String sparqlQuery = prefixes
+		String sparqlQuery = Config.prefixes
 				+ String.format("" 
 						+ "SELECT DISTINCT ?graph " 
 						+ "WHERE {"
@@ -819,7 +804,7 @@ public class RevisionManagement {
 	public static String getUserName(final String user) {
 		// When user does not already exists - create new
 
-		String query = prefixes
+		String query = Config.prefixes
 				+ String.format("SELECT ?personUri { GRAPH <%s>  { " + "?personUri a prov:Person;"
 						+ "  rdfs:label \"%s\"." + "} }", Config.revision_graph, user);
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
@@ -835,7 +820,7 @@ public class RevisionManagement {
 				e.printStackTrace();
 			}
 			logger.debug("User does not exists. Create user " + personUri + ".");
-			query = prefixes
+			query = Config.prefixes
 					+ String.format("INSERT DATA { GRAPH <%s> { <%s> a prov:Person; rdfs:label \"%s\". } }",
 							Config.revision_graph, personUri, user);
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
@@ -935,7 +920,7 @@ public class RevisionManagement {
 	}
 	
 	public static String getResponseHeader(String graphList) {
-		String queryConstruct = RevisionManagement.prefixes + String.format(
+		String queryConstruct = Config.prefixes + String.format(
 				  "CONSTRUCT {"
 				+ " ?ref a ?type;"
 				+ "		rdfs:label ?label;"

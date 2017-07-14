@@ -39,7 +39,7 @@ public class FastForwardControl {
 		RevisionManagement.moveBranchReference(revisionGraph, branchUriA, revisionUriA, revisionUriB);
 		
 		String commitUri = revisionGraph+"-ff-commit-"+branchNameA+"-"+branchNameB;
-		String query = RevisionManagement.prefixes + String.format(""
+		String query = Config.prefixes + String.format(""
 				+ "INSERT DATA { GRAPH <%s> { "
 				+ "  <%s> a rmo:FastForwardCommit;"
 				+ "     prov:used <%s>, <%s>, <%s>;"
@@ -71,7 +71,7 @@ public class FastForwardControl {
 			String revisionUriA = revisionGraph.getRevisionUri(branch1);
 			String revisionUriB = revisionGraph.getRevisionUri(branch2);
 		
-			String query = RevisionManagement.prefixes
+			String query = Config.prefixes
 				+ String.format("ASK { GRAPH <%s> { "
 						+ "<%s> prov:wasDerivedFrom+ <%s> ."
 						+ " }} ",

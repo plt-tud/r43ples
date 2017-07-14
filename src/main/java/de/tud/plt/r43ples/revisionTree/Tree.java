@@ -8,7 +8,7 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
-import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 /**
@@ -39,7 +39,7 @@ public class Tree {
 		logger.debug("Start creation of revision tree of graph " + revisionGraph + "!");
 
 		// create query
-		String queryRevisions = RevisionManagement.prefixes + String.format(""
+		String queryRevisions = Config.prefixes + String.format(""
 						+ "SELECT ?uri ?revNumber ?fullGraph " 
 						+ "WHERE {"
 						+ "GRAPH <%s> {"
@@ -61,7 +61,7 @@ public class Tree {
 			this.addNode(revisionNumber, revision, fullGraph);
 		}
 
-		String queryRevisionConnection = RevisionManagement.prefixes + String.format(""
+		String queryRevisionConnection = Config.prefixes + String.format(""
 						+ "SELECT ?revNumber ?preRevNumber "  
 						+ "WHERE { GRAPH <%s> {"
 						+ " ?rev a rmo:Revision;" 
