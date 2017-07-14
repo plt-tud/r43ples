@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 # Add dpbedia data to Stardog
 # Take care to go to data directory beforehand
@@ -34,7 +34,7 @@ for dir in data/changesets/2015/06/03/*
 do
     echo "Going into $dir"
     i=1
-    f=`printf '%06i' $i`
+    f=$(printf '%06i' $i)
     f_add="$dir/$f.added.nt"
     f_removed="$dir/$f.removed.nt"
     f_reinserted="$dir/$f.reinserted.nt"
