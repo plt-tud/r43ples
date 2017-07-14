@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.R43plesMergeCommit;
 import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.management.StrategyManagement;
@@ -26,10 +27,16 @@ public class RebaseControl {
 	
 	
 	
-	public RebaseControl(String graphName, String branchNameA, String branchNameB) {
+	public RebaseControl(final String graphName, final String branchNameA, final String branchNameB) {
 		this.graphName = graphName;
 		this.branchNameA = branchNameA;
 		this.branchNameB = branchNameB;
+	}
+	
+	public RebaseControl(final R43plesMergeCommit commit) {
+		this.graphName = commit.graphName;
+		this.branchNameA = commit.branchNameA;
+		this.branchNameB = commit.branchNameB;
 	}
 
 	/** simple checks if rebase could be possible for these two branches of a graph

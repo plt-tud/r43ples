@@ -28,21 +28,21 @@ public class Interface {
 	 * @param query
 	 *            R43ples query string
 	 * @param format
-	 *            serialisation format of the result
+	 *            serialization format of the result
 	 * @param query_rewriting
 	 *            option if query rewriting should be enabled
 	 * @return string containing result of the query
 	 * @throws InternalErrorException
 	 */
-	public static String sparqlSelectConstructAsk(final String query, final String format,
+	public static String sparqlSelectConstructAsk(final R43plesRequest request,
 			final boolean query_rewriting) throws InternalErrorException {
 		String result;
 		if (query_rewriting) {
-			String query_rewritten = SparqlRewriter.rewriteQuery(query);
+			String query_rewritten = SparqlRewriter.rewriteQuery(request.query_sparql);
 			result = TripleStoreInterfaceSingleton.get()
-					.executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + query_rewritten, format);
+					.executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + query_rewritten, request.format);
 		} else {
-			result = getSelectConstructAskResponseClassic(query, format);
+			result = getSelectConstructAskResponseClassic(request.query_sparql, request.format);
 		}
 		return result;
 	}
@@ -103,10 +103,10 @@ public class Interface {
 	 * 
 	 * @param query
 	 * @param user
-	 * @param commitMessage
+	 * @param message
 	 * @throws InternalErrorException
 	 */
-	public static void sparqlUpdate(final String query, final String user, final String commitMessage)
+	public static void sparqlUpdate(R43plesCommit commit)
 			throws InternalErrorException {
 
 		final Pattern patternUpdateRevision = Pattern.compile("(?<action>INSERT|DELETE)(?<data>\\s*DATA){0,1}\\s*\\{",
@@ -120,12 +120,12 @@ public class Interface {
 
 		logger.debug("SPARQL Update detected");
 
-		String queryRewritten = "";
 
 		// I. Take over prefixes and other head stuff
-		Matcher m = patternUpdateRevision.matcher(query);
+		String queryRewritten;
+		Matcher m = patternUpdateRevision.matcher(commit.query_sparql);
 		if (m.find()) {
-			queryRewritten = query.substring(0, m.start());
+			queryRewritten = commit.query_sparql.substring(0, m.start());
 			if (m.group("data") != null)
 				queryRewritten += "INSERT DATA {";
 			else
@@ -137,10 +137,10 @@ public class Interface {
 		// II. Rewrite INSERT and DELETE clauses (replace graph names in query
 		// with change set graph names)
 		List<RevisionDraft> revList = new LinkedList<RevisionDraft>();
-		m = patternUpdateRevision.matcher(query);
+		m = patternUpdateRevision.matcher(commit.query_sparql);
 		while (m.find()) {
 			String action = m.group("action");
-			String updateClause = QueryParser.getStringEnclosedinBraces(query, m.end());
+			String updateClause = QueryParser.getStringEnclosedinBraces(commit.query_sparql, m.end());
 
 			Matcher m2a = patternGraphWithRevision.matcher(updateClause);
 			while (m2a.find()) {
@@ -172,10 +172,10 @@ public class Interface {
 		queryRewritten += "}";
 
 		// III. Rewrite where clause
-		Matcher m1 = patternWhere.matcher(query);
+		Matcher m1 = patternWhere.matcher(commit.query_sparql);
 		if (m1.find()) {
 			queryRewritten += "WHERE {";
-			String whereClause = QueryParser.getStringEnclosedinBraces(query, m1.end());
+			String whereClause = QueryParser.getStringEnclosedinBraces(commit.query_sparql, m1.end());
 
 			Matcher m1a = patternGraphWithRevision.matcher(whereClause);
 			while (m1a.find()) {
@@ -204,7 +204,7 @@ public class Interface {
 		// V. add changesets to full graph and add meta information in revision
 		// graphs
 		for (RevisionDraft draft : revList) {
-			RevisionManagement.addNewRevisionFromChangeSet(user, commitMessage, draft);
+			RevisionManagement.addNewRevisionFromChangeSet(commit.user, commit.message, draft);
 		}
 	}
 
@@ -250,12 +250,12 @@ public class Interface {
 		}
 	}
 
-	public static void sparqlTagOrBranch(final String sparqlQuery, final String user, final String commitMessage)
+	public static void sparqlTagOrBranch(final R43plesCommit commit)
 			throws InternalErrorException, QueryErrorException {
 		final Pattern patternBranchOrTagQuery = Pattern.compile(
 				"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"\\s*TO\\s*\"(?<name>[^\"]*)\"",
 				patternModifier);
-		Matcher m = patternBranchOrTagQuery.matcher(sparqlQuery);
+		Matcher m = patternBranchOrTagQuery.matcher(commit.query_sparql);
 
 		boolean foundEntry = false;
 		while (m.find()) {
@@ -265,45 +265,25 @@ public class Interface {
 			String revisionNumber = m.group("revision").toLowerCase();
 			String referenceName = m.group("name").toLowerCase();
 			if (action.equals("TAG")) {
-				RevisionManagement.createTag(graphName, revisionNumber, referenceName, user, commitMessage);
+				RevisionManagement.createTag(graphName, revisionNumber, referenceName, commit.user, commit.message);
 			} else if (action.equals("BRANCH")) {
-				RevisionManagement.createBranch(graphName, revisionNumber, referenceName, user, commitMessage);
+				RevisionManagement.createBranch(graphName, revisionNumber, referenceName, commit.user, commit.message);
 			} else {
-				throw new QueryErrorException("Error in query: " + sparqlQuery);
+				throw new QueryErrorException("Error in query: " + commit.query_sparql);
 			}
 		}
 		if (!foundEntry) {
-			throw new QueryErrorException("Error in query: " + sparqlQuery);
+			throw new QueryErrorException("Error in query: " + commit.query_sparql);
 		}
 	}
 
-	public static MergeResult sparqlMerge(final String sparqlQuery, final String user, final String commitMessage,
-			final String format) throws InternalErrorException {
-		final Pattern patternMergeQuery = Pattern.compile(
-				"(?<action>MERGE|REBASE|MERGE FF)\\s*(?<type>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(SDD\\s*<(?<sdd>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(?<with>\\s*WITH\\s*\\{(?<triples>.*)\\})?",
-				patternModifier);
-		Matcher m = patternMergeQuery.matcher(sparqlQuery);
-
-		if (!m.find())
-			throw new InternalErrorException("Error in query: " + sparqlQuery);
-
-		final String action = m.group("action");
-		final String type = m.group("type");
-		final String graphName = m.group("graph");
-		final String sdd = m.group("sdd");
-		final String branchNameA = m.group("branchNameA").toLowerCase();
-		final String branchNameB = m.group("branchNameB").toLowerCase();
-		final boolean with = m.group("with")!=null;
-		final String triples = m.group("triples");
-
-		if (action.equals("MERGE"))
-			return mergeThreeWay(graphName, branchNameA, branchNameB, with, triples, type, sdd, user, commitMessage,
-					format);
-		else if (action.equals("REBASE"))
-			return mergeRebase(graphName, branchNameA, branchNameB, with, triples, type, sdd, user, commitMessage,
-					format);
-		else if (action.equals("MERGE FF"))
-			return mergeFastForward(graphName, branchNameB, branchNameA, user, commitMessage);
+	public static MergeResult sparqlMerge(final R43plesMergeCommit commit) throws InternalErrorException {
+		if (commit.action.equals("MERGE"))
+			return mergeThreeWay(commit);
+		else if (commit.action.equals("REBASE"))
+			return mergeRebase(commit);
+		else if (commit.action.equals("MERGE FF"))
+			return mergeFastForward(commit);
 		else
 			throw new InternalErrorException("Merge Query has errors");
 	}
@@ -314,12 +294,11 @@ public class Interface {
 	 * @return if fast-forward was successful
 	 * @throws InternalErrorException
 	 */
-	public static MergeResult mergeFastForward(final String graphName, final String branchNameA,
-			final String branchNameB, final String user, final String commitMessage) throws InternalErrorException {
-		RevisionGraph graph = new RevisionGraph(graphName);
-		MergeResult result = new MergeResult(graphName, branchNameA, branchNameB);
-		result.hasConflict = !FastForwardControl.performFastForward(graph, branchNameA, branchNameB, user,
-				RevisionManagement.getDateString(), commitMessage);
+	public static MergeResult mergeFastForward(final R43plesMergeCommit commit) throws InternalErrorException {
+		RevisionGraph graph = new RevisionGraph(commit.graphName);
+		MergeResult result = new MergeResult(commit);
+		result.hasConflict = !FastForwardControl.performFastForward(graph, commit.branchNameB, commit.branchNameA, commit.user,
+				RevisionManagement.getDateString(), commit.message);
 
 		return result;
 	}
@@ -339,88 +318,75 @@ public class Interface {
 	 * @return
 	 * @throws InternalErrorException
 	 */
-	public static MergeResult mergeThreeWay(final String graphName, final String branchNameA, final String branchNameB,
-			final boolean with, final String triples, final String type, final String sdd, final String user,
-			final String commitMessage, final String format) throws InternalErrorException {
+	public static MergeResult mergeThreeWay(final R43plesMergeCommit commit) throws InternalErrorException {
 
-		RevisionGraph graph = new RevisionGraph(graphName);
+		RevisionGraph graph = new RevisionGraph(commit.graphName);
 		String revisionGraph = graph.getRevisionGraphUri();
-		String revisionUriA = graph.getRevisionUri(branchNameA);
-		String revisionUriB = graph.getRevisionUri(branchNameB);
+		String revisionUriA = graph.getRevisionUri(commit.branchNameA);
+		String revisionUriB = graph.getRevisionUri(commit.branchNameB);
 
-		logger.debug("type: " + type);
-		logger.debug("graph: " + graphName);
-		logger.debug("sdd: " + sdd);
-		logger.debug("branchNameA: " + branchNameA);
-		logger.debug("branchNameB: " + branchNameB);
-		logger.debug("with: " + with);
-		logger.debug("triples: " + triples);
+		MergeResult mresult = new MergeResult(commit);
 
-		MergeResult mresult = new MergeResult(graphName, branchNameA, branchNameB);
-
-		if (!RevisionManagement.checkGraphExistence(graphName)) {
-			logger.warn("Graph <" + graphName + "> does not exist.");
-			throw new InternalErrorException("Graph <" + graphName + "> does not exist.");
+		if (!RevisionManagement.checkGraphExistence(commit.graphName)) {
+			logger.warn("Graph <" + commit.graphName + "> does not exist.");
+			throw new InternalErrorException("Graph <" + commit.graphName + "> does not exist.");
 		}
 
 		// Check if A and B are different revisions
-		if (graph.getRevisionNumber(branchNameA)
-				.equals(graph.getRevisionNumber(branchNameB))) {
+		if (graph.getRevisionNumber(commit.branchNameA)
+				.equals(graph.getRevisionNumber(commit.branchNameB))) {
 			// Branches are equal - throw error
 			throw new InternalErrorException("Specified branches are equal");
 		}
 
 		// Check if both are terminal nodes
-		if (!(graph.hasBranch(branchNameA)
-				&& graph.hasBranch(branchNameB))) {
+		if (!(graph.hasBranch(commit.branchNameA)
+				&& graph.hasBranch(commit.branchNameB))) {
 			throw new InternalErrorException("No terminal nodes were used");
 		}
 
 		// Differ between MERGE query with specified SDD and without SDD
-		String usedSDDURI = graph.getSDD(sdd);
+		String usedSDDURI = graph.getSDD(commit.sdd);
 
 		// Get the common revision with shortest path
 		mresult.commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA,
 				revisionUriB);
 
 		// Create the revision progress for A and B
-		String graphNameA = graphName + "-RM-REVISION-PROGRESS-A";
-		String graphNameB = graphName + "-RM-REVISION-PROGRESS-B";
-		String graphNameDiff = graphName + "-RM-DIFFERENCE-MODEL";
+		String graphNameA = commit.graphName + "-RM-REVISION-PROGRESS-A";
+		String graphNameB = commit.graphName + "-RM-REVISION-PROGRESS-B";
+		String graphNameDiff = commit.graphName + "-RM-DIFFERENCE-MODEL";
 		mresult.graphDiff = graphNameDiff;
 		String uriA = "http://eatld.et.tu-dresden.de/branch-A";
 		String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 
-		MergeManagement.createRevisionProgresses(revisionGraph, graphName,
+		MergeManagement.createRevisionProgresses(revisionGraph, commit.graphName,
 				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, mresult.commonRevision,revisionUriA),
 				graphNameA, uriA, 
 				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph,	mresult.commonRevision, revisionUriB),
 				graphNameB, uriB);
 
 		// Create difference model
-		MergeManagement.createDifferenceTripleModel(graphName, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
+		MergeManagement.createDifferenceTripleModel(commit.graphName, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
 				usedSDDURI);
 
 		// Differ between the different merge queries
-		if ((type != null) && (type.equalsIgnoreCase("AUTO")) && !with) {
+		if ((commit.type != null) && (commit.type.equalsIgnoreCase("AUTO")) && !commit.with) {
 			logger.debug("AUTO MERGE query detected");
 			// Create the merged revision
-			mresult.newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user,
-					commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI,
-					MergeQueryTypeEnum.AUTO, "");
-		} else if ((type != null) && (type.equalsIgnoreCase("MANUAL")) && with) {
+			mresult.newRevisionNumber = MergeManagement.createMergedRevision(commit, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI,
+					MergeQueryTypeEnum.AUTO);
+		} else if ((commit.type != null) && (commit.type.equalsIgnoreCase("MANUAL")) && commit.with) {
 			logger.debug("MANUAL MERGE query detected");
 			// Create the merged revision
-			mresult.newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user,
-					commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI,
-					MergeQueryTypeEnum.MANUAL, triples);
-		} else if ((type == null) && with) {
+			mresult.newRevisionNumber = MergeManagement.createMergedRevision(commit, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI,
+					MergeQueryTypeEnum.MANUAL);
+		} else if ((commit.type == null) && commit.with) {
 			logger.debug("MERGE WITH query detected");
 			// Create the merged revision
-			mresult.newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB, user,
-					commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI,
-					MergeQueryTypeEnum.WITH, triples);
-		} else if ((type == null) && !with) {
+			mresult.newRevisionNumber = MergeManagement.createMergedRevision(commit, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI,
+					MergeQueryTypeEnum.WITH);
+		} else if ((commit.type == null) && !commit.with) {
 			logger.debug("MERGE query detected");
 			// Check if difference model contains conflicts
 			String queryASK = String.format("ASK { %n" + "	GRAPH <%s> { %n"
@@ -430,14 +396,13 @@ public class Interface {
 				// Difference model contains conflicts
 				// Return the conflict model to the client
 				mresult.hasConflict = true;
-				mresult.conflictModel = RevisionManagement.getContentOfGraph(graphNameDiff, format);
+				mresult.conflictModel = RevisionManagement.getContentOfGraph(graphNameDiff, commit.format);
 
 			} else {
 				// Difference model contains no conflicts
 				// Create the merged revision
-				mresult.newRevisionNumber = MergeManagement.createMergedRevision(graphName, branchNameA, branchNameB,
-						user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI,
-						MergeQueryTypeEnum.COMMON, "");
+				mresult.newRevisionNumber = MergeManagement.createMergedRevision(commit, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI,
+						MergeQueryTypeEnum.COMMON);
 			}
 		} else {
 			throw new InternalErrorException("This is not a valid MERGE query");
@@ -460,30 +425,20 @@ public class Interface {
 	 * @return
 	 * @throws InternalErrorException
 	 */
-	public static MergeResult mergeRebase(final String graphName, final String branchNameA, final String branchNameB,
-			final boolean with, final String triples, final String type, final String sdd, final String user,
-			final String commitMessage, final String format) throws InternalErrorException {
+	public static MergeResult mergeRebase(final R43plesMergeCommit commit) throws InternalErrorException {
 
-		RevisionGraph graph = new RevisionGraph(graphName);
+		RevisionGraph graph = new RevisionGraph(commit.graphName);
 		String revisionGraph = graph.getRevisionGraphUri();
-		String revisionUriA = graph.getRevisionUri(branchNameA);
-		String revisionUriB = graph.getRevisionUri(branchNameB);
+		String revisionUriA = graph.getRevisionUri(commit.branchNameA);
+		String revisionUriB = graph.getRevisionUri(commit.branchNameB);
 
-		logger.debug("type: " + type);
-		logger.debug("graph: " + graphName);
-		logger.debug("sdd: " + sdd);
-		logger.debug("branchNameA: " + branchNameA);
-		logger.debug("branchNameB: " + branchNameB);
-		logger.debug("with: " + with);
-		logger.debug("triples: " + triples);
+		MergeResult mresult = new MergeResult(commit);
 
-		MergeResult mresult = new MergeResult(graphName, branchNameA, branchNameB);
-
-		RebaseControl rebaseControl =  new RebaseControl(graphName, branchNameA, branchNameB);
+		RebaseControl rebaseControl =  new RebaseControl(commit);
 		rebaseControl.checkIfRebaseIsPossible();
 
 		// Differ between MERGE query with specified SDD and without SDD
-		String usedSDDURI = graph.getSDD(sdd);
+		String usedSDDURI = graph.getSDD(commit.sdd);
 
 		// Get the common revision with shortest path
 		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA,
@@ -496,63 +451,60 @@ public class Interface {
 		rebaseControl.createPatchGroupOfBranch(revisionGraph, revisionUriB, revisionList);
 
 		// Create the revision progress for A and B
-		String graphNameA = graphName + "-RM-REVISION-PROGRESS-A";
-		String graphNameB = graphName + "-RM-REVISION-PROGRESS-B";
-		String graphNameDiff = graphName + "-RM-DIFFERENCE-MODEL";
+		String graphNameA = commit.graphName + "-RM-REVISION-PROGRESS-A";
+		String graphNameB = commit.graphName + "-RM-REVISION-PROGRESS-B";
+		String graphNameDiff = commit.graphName + "-RM-DIFFERENCE-MODEL";
 		String uriA = "http://eatld.et.tu-dresden.de/branch-A";
 		String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 
-		MergeManagement.createRevisionProgresses(revisionGraph, graphName,
+		MergeManagement.createRevisionProgresses(revisionGraph, commit.graphName,
 				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriA),
 				graphNameA, uriA,
 				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriB),
 				graphNameB, uriB);
 
 		// Create difference model
-		MergeManagement.createDifferenceTripleModel(graphName, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
+		MergeManagement.createDifferenceTripleModel(commit.graphName, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
 				usedSDDURI);
 		
-		if ((type != null) && (type.equalsIgnoreCase("AUTO")) && !with) {
+		if ((commit.type != null) && (commit.type.equalsIgnoreCase("AUTO")) && !commit.with) {
 			logger.info("AUTO REBASE query detected");
 			// Create the merged revision
-			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName,
-					branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
-					usedSDDURI, MergeQueryTypeEnum.AUTO, "");
+			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(commit, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
+					usedSDDURI, MergeQueryTypeEnum.AUTO);
 			String addedAsNTriples = addedAndRemovedTriples.get(0);
 			String removedAsNTriples = addedAndRemovedTriples.get(1);
 
 			String basisRevisionNumber = rebaseControl.forceRebaseProcess();
-			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples, user, commitMessage,
+			RevisionManagement.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,
 					basisRevisionNumber);
 			mresult.graphStrategy = "auto-rebase";
-		} else if ((type != null) && (type.equalsIgnoreCase("MANUAL")) && !with) {
+		} else if ((commit.type != null) && (commit.type.equalsIgnoreCase("MANUAL")) && !commit.with) {
 			logger.info("MANUAL REBASE query detected");
 			// Create the merged revision
-			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName,
-					branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
-					usedSDDURI, MergeQueryTypeEnum.MANUAL, triples);
+			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(commit, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
+					usedSDDURI, MergeQueryTypeEnum.MANUAL);
 			String addedAsNTriples = addedAndRemovedTriples.get(0);
 			String removedAsNTriples = addedAndRemovedTriples.get(1);
 
 			String basisRevisionNumber = rebaseControl.forceRebaseProcess();
-			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples, user, commitMessage,
+			RevisionManagement.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,
 					basisRevisionNumber);
 			mresult.graphStrategy = "manual-rebase";
-		} else if ((type == null) && with) {
+		} else if ((commit.type == null) && commit.with) {
 			logger.info("REBASE WITH query detected");
 			// Create the merged revision -- newTriples
-			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName,
-					branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
-					usedSDDURI, MergeQueryTypeEnum.WITH, triples);
+			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(commit, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
+					usedSDDURI, MergeQueryTypeEnum.WITH);
 			String addedAsNTriples = addedAndRemovedTriples.get(0);
 			String removedAsNTriples = addedAndRemovedTriples.get(1);
 
 			String basisRevisionNumber = rebaseControl.forceRebaseProcess();
-			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples, user, commitMessage,
+			RevisionManagement.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,
 					basisRevisionNumber);
 
 			mresult.graphStrategy = "with-rebase";
-		} else if ((type == null) && !with) {
+		} else if ((commit.type == null) && !commit.with) {
 			logger.info("COMMON REBASE query detected");
 			// Check if difference model contains conflicts
 			String queryASK = String.format("ASK { %n" + "	GRAPH <%s> { %n"
@@ -563,14 +515,13 @@ public class Interface {
 			} else {
 				rebaseControl.forceRebaseProcess();
 			}
-			mresult.conflictModel = RevisionManagement.getContentOfGraph(graphNameDiff, format);
+			mresult.conflictModel = RevisionManagement.getContentOfGraph(graphNameDiff, commit.format);
 
 		} else {
 			throw new InternalErrorException("This is not a valid MERGE query");
 		}
 
 		return mresult;
-
 	}
 
 }

@@ -1,5 +1,7 @@
 package de.tud.plt.r43ples.merging;
 
+import de.tud.plt.r43ples.management.R43plesMergeCommit;
+
 public class MergeResult {
 	
 	public String graph;
@@ -15,10 +17,10 @@ public class MergeResult {
 	public String graphStrategy;  // for rebase only TODO: create subclass RebaseResult
 	
 	
-	public MergeResult(String graph, String branchA, String branchB) {
-		this.graph = graph;
-		this.branchA = branchA;
-		this.branchB = branchB;
+	public MergeResult(R43plesMergeCommit commit) {
+		this.graph = commit.graphName;
+		this.branchA = commit.branchNameA;
+		this.branchB = commit.branchNameB;
 	}
 
 }

@@ -23,6 +23,7 @@ import com.github.mustachejava.MustacheFactory;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.FastForwardControl;
 import de.tud.plt.r43ples.management.Interface;
+import de.tud.plt.r43ples.management.R43plesMergeCommit;
 import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.MergeResult;
@@ -138,7 +139,8 @@ public class Merging {
 		// Three Way Merge
 		else {			
 			MergeCommitModel commitModel = new MergeCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way", null);
-			MergeResult mresult = Interface.mergeThreeWay(graphName, branch1, branch2, false, null, null, null, user, message, "text/turtle");
+			R43plesMergeCommit commit = new R43plesMergeCommit(graphName, branch1, branch2, user, message, "text/turtle");
+			MergeResult mresult = Interface.mergeThreeWay(commit);
 							
 			if(!mresult.hasConflict){
 				response.entity(commitModel.getReportView());				
