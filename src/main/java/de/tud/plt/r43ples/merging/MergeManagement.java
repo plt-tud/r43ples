@@ -19,9 +19,9 @@ import com.hp.hpl.jena.util.FileUtils;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.JenaModelManagement;
+import de.tud.plt.r43ples.management.R43plesMergeCommit;
 import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.merge.SDDTripleStateEnum;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 /**
@@ -698,23 +698,23 @@ public class MergeManagement {
 	 * @return new revision number
 	 * @throws InternalErrorException 
 	 */
-	public static String createMergedRevision(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type, String triples) throws InternalErrorException {
+	public static String createMergedRevision(final R43plesMergeCommit commit, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type) throws InternalErrorException {
 		 
-		RevisionGraph graph = new RevisionGraph(graphName);
+		RevisionGraph graph = new RevisionGraph(commit.graphName);
 				
 		// Create an empty temporary graph which will contain the merged full content
-		String graphNameOfMerged = graphName + "-RM-MERGED-TEMP";
+		String graphNameOfMerged = commit.graphName + "-RM-MERGED-TEMP";
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameOfMerged));
 		TripleStoreInterfaceSingleton.get().executeCreateGraph(graphNameOfMerged);
 		
 		// Get the full graph name of branch A
-		String graphNameOfBranchA = graph.getReferenceGraph(branchNameA);
+		String graphNameOfBranchA = graph.getReferenceGraph(commit.branchNameA);
 		// Get the full graph name of branch B
-		String graphNameOfBranchB = graph.getReferenceGraph(branchNameB);
+		String graphNameOfBranchB = graph.getReferenceGraph(commit.branchNameB);
 		
 		if (type.equals(MergeQueryTypeEnum.MANUAL)) {
 			// Manual merge query
-			RevisionManagement.executeINSERT(graphNameOfMerged, triples);
+			RevisionManagement.executeINSERT(graphNameOfMerged, commit.triples);
 		} else {	
 			// Copy graph B to temporary merged graph
 			String queryCopy = String.format("COPY <%s> TO <%s>", graphNameOfBranchB, graphNameOfMerged);
@@ -789,7 +789,7 @@ public class MergeManagement {
 						}
 					} else {
 						// MERGE WITH query - conflicting triple
-						Model model = JenaModelManagement.readNTripleStringToJenaModel(triples);
+						Model model = JenaModelManagement.readNTripleStringToJenaModel(commit.triples);
 						// Create ASK query which will check if the model contains the specified triple
 						String queryAsk = String.format(
 								  "ASK { %n"
@@ -868,9 +868,9 @@ public class MergeManagement {
 
 		// Create list with the 2 predecessors - the order is important - fist item will specify the branch were the new merged revision will be created
 		ArrayList<String> usedRevisionNumbers = new ArrayList<String>();
-		usedRevisionNumbers.add(branchNameB);
-		usedRevisionNumbers.add(branchNameA);
-		return RevisionManagement.createNewRevision(graphName, addedTriples, removedTriples, user, commitMessage, usedRevisionNumbers);
+		usedRevisionNumbers.add(commit.branchNameB);
+		usedRevisionNumbers.add(commit.branchNameA);
+		return RevisionManagement.createNewRevision(commit.graphName, addedTriples, removedTriples, commit.user, commit.message, usedRevisionNumbers);
 	}
 	
 	/**
@@ -892,26 +892,26 @@ public class MergeManagement {
 	 * @return new revision number
 	 * @throws InternalErrorException 
 	 */
-	public static ArrayList<String> createRebaseMergedTripleList(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type, String triples) throws InternalErrorException {
+	public static ArrayList<String> createRebaseMergedTripleList(final R43plesMergeCommit commit, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type) throws InternalErrorException {
 		
-		RevisionGraph graph = new RevisionGraph(graphName);
+		RevisionGraph graph = new RevisionGraph(commit.graphName);
 		
 		//set the triple list
 		ArrayList<String> list = new ArrayList<String>();
 		
 		// Create an empty temporary graph which will contain the merged full content
-		String graphNameOfMerged = graphName + "-RM-MERGED-TEMP";
+		String graphNameOfMerged = commit.graphName + "-RM-MERGED-TEMP";
 		TripleStoreInterfaceSingleton.get().executeCreateGraph(graphNameOfMerged);
 		
 		// Get the full graph name of branch A
-		String graphNameOfBranchA = graph.getReferenceGraph(branchNameA);
+		String graphNameOfBranchA = graph.getReferenceGraph(commit.branchNameA);
 		// Get the full graph name of branch B
-		String graphNameOfBranchB = graph.getReferenceGraph(branchNameB);
+		String graphNameOfBranchB = graph.getReferenceGraph(commit.branchNameB);
 		
-		logger.info("the triples: "+ triples);
+		logger.info("the triples: "+ commit.triples);
 		if (type.equals(MergeQueryTypeEnum.MANUAL)) {
 			// Manual merge query
-			RevisionManagement.executeINSERT(graphNameOfMerged, triples);
+			RevisionManagement.executeINSERT(graphNameOfMerged, commit.triples);
 		} else {	
 			// Copy graph B to temporary merged graph
 			String queryCopy = String.format("COPY <%s> TO <%s>", graphNameOfBranchB, graphNameOfMerged);
@@ -988,7 +988,7 @@ public class MergeManagement {
 					}else {
 						
 						// MERGE WITH query - conflicting triple
-						Model model = JenaModelManagement.readNTripleStringToJenaModel(triples);
+						Model model = JenaModelManagement.readNTripleStringToJenaModel(commit.triples);
 						// Create ASK query which will check if the model contains the specified triple
 						String queryAsk = String.format(
 								  "ASK { %n"

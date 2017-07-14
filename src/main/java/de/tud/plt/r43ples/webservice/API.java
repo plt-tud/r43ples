@@ -14,9 +14,9 @@ import javax.ws.rs.core.MediaType;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.FastForwardControl;
 import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.merging.FastForwardControl;
 
 @Path("api/")
 public class API {

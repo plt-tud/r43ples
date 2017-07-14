@@ -45,7 +45,7 @@ public class RevisionManagement {
 	 * @param datetime
 	 * 			time stamp to be inserted in commit
 	 */
-	protected static String putGraphUnderVersionControl(final String graphName, final String datetime) {
+	public static String putGraphUnderVersionControl(final String graphName, final String datetime) {
 
 		logger.debug("Put existing graph under version control with the name " + graphName);
 

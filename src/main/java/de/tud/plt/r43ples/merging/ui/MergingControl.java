@@ -22,6 +22,7 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.JenaModelManagement;
+import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.TripleObjectTypeEnum;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
@@ -150,7 +151,9 @@ public class MergingControl {
 				+ "}"
 				+ "ORDER BY ?predicate ?object", commitModel.getGraphName(), branchName, individualUri);
 		
-		String resultBranch1 = Interface.sparqlSelectConstructAsk(query, "text/xml", false);
+		R43plesRequest request = new R43plesRequest(query, "text/xml");
+		
+		String resultBranch1 = Interface.sparqlSelectConstructAsk(request, false);
 		ResultSet resultSetBranch1 = ResultSetFactory.fromXML(resultBranch1);
 		while(resultSetBranch1.hasNext()) {
 	    	QuerySolution qsBranch1 = resultSetBranch1.next();

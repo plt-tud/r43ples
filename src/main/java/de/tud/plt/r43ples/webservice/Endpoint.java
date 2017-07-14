@@ -9,8 +9,6 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -40,6 +38,9 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.JenaModelManagement;
+import de.tud.plt.r43ples.management.R43plesCommit;
+import de.tud.plt.r43ples.management.R43plesMergeCommit;
+import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SparqlRewriter;
@@ -59,35 +60,6 @@ import de.tud.plt.r43ples.merging.ui.MergingControl;
  */
 @Path("sparql")
 public class Endpoint {
-
-	private final static int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
-	
-	private final static Pattern patternSelectAskConstructQuery = Pattern.compile(
-			"(?<type>SELECT|ASK|CONSTRUCT).*WHERE\\s*\\{(?<where>.*)\\}", 
-			patternModifier);
-	private final static Pattern patternUpdateQuery = Pattern.compile(
-			"(?<action>INSERT|DELETE).*<(?<graph>[^>]*)>",
-			patternModifier);
-	private final static Pattern patternCreateGraph = Pattern.compile(
-			"CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
-			patternModifier);
-	private final static Pattern patternDropGraph = Pattern.compile(
-			"DROP\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
-			patternModifier);
-	private final static Pattern patternBranchOrTagQuery = Pattern.compile(
-			"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"\\s*TO\\s*\"(?<name>[^\"]*)\"",
-			patternModifier);
-	
-	private final static Pattern patternUser = Pattern.compile(
-			"USER\\s*\"(?<user>[^\"]*)\"",
-			patternModifier);
-	private final static Pattern patternCommitMessage = Pattern.compile(
-			"MESSAGE\\s*\"(?<message>[^\"]*)\"", 
-			patternModifier);
-
-	private final static Pattern patternMergeQuery =  Pattern.compile(
-			"(MERGE|MERGE FF|REBASE)\\s*(AUTO|MANUAL)?\\s*GRAPH\\s*<([^>]*?)>\\s*(SDD\\s*<([^>]*?)>)?\\s*BRANCH\\s*\"([^\"]*?)\"\\s*INTO\\s*\"([^\"]*?)\"",
-			patternModifier);
 
 	
 	@Context
@@ -366,42 +338,30 @@ public class Endpoint {
 		logger.debug(String.format("SPARQL request (format=%s, query_rewriting=%s) -> %n %s", format, query_rewriting, sparqlQuery));
 		
         
-		
-		String user = null;
-		Matcher userMatcher = patternUser.matcher(sparqlQuery);
-		if (userMatcher.find()) {
-			user = userMatcher.group("user");
-			sparqlQuery = userMatcher.replaceAll("");
-		}
-		String message = null;
-		Matcher messageMatcher = patternCommitMessage.matcher(sparqlQuery);
-		if (messageMatcher.find()) {
-			message = messageMatcher.group("message");
-			sparqlQuery = messageMatcher.replaceAll("");
-		}
-		
+		R43plesRequest request = new R43plesRequest(sparqlQuery, format);
+
 		String result;
-		if (patternSelectAskConstructQuery.matcher(sparqlQuery).find()) {
-			result = Interface.sparqlSelectConstructAsk(sparqlQuery, format, query_rewriting);
+		if (request.isSelectAskConstructQuery()) {
+			result = Interface.sparqlSelectConstructAsk(request, query_rewriting);
 		}
-		else if (patternUpdateQuery.matcher(sparqlQuery).find()) {
-			Interface.sparqlUpdate(sparqlQuery, user, message);
+		else if (request.isUpdateQuery()) {
+			Interface.sparqlUpdate(new R43plesCommit(request));
 			result = "Query executed";
 		}
-		else if (patternCreateGraph.matcher(sparqlQuery).find()) {
+		else if (request.isCreateGraphQuery()) {
 			String graphName = Interface.sparqlCreateGraph(sparqlQuery);
 			result = "Graph <"+graphName+"> successfully created";
 		}
-		else if (patternDropGraph.matcher(sparqlQuery).find()) {
+		else if (request.isDropGraphQuery()) {
 			Interface.sparqlDropGraph(sparqlQuery);
 			result = "Graph successfully dropped";
 		}
-		else if (patternBranchOrTagQuery.matcher(sparqlQuery).find()) {
-			Interface.sparqlTagOrBranch(sparqlQuery, user, message);
+		else if (request.isBranchOrTagQuery()) {
+			Interface.sparqlTagOrBranch(new R43plesCommit(request));
 			result = "Tagging or branching successful";
 		}
-		else if (patternMergeQuery.matcher(sparqlQuery).find()) {
-			return getMergeResponse(sparqlQuery, user, message, format);
+		else if (request.isMergeQuery()) {
+			return getMergeResponse(new R43plesMergeCommit(request));
 		}
 		else
 			throw new QueryErrorException("No R43ples query detected");
@@ -480,11 +440,11 @@ public class Endpoint {
 	 * @param format the result format
 	 * @throws InternalErrorException 
 	 */
-	private Response getMergeResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
+	private Response getMergeResponse(final R43plesMergeCommit commit) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Merge query detected");
 		
-		MergeResult mresult = Interface.sparqlMerge(sparqlQuery, user, commitMessage, format);
+		MergeResult mresult = Interface.sparqlMerge(commit);
 		RevisionGraph graph = new RevisionGraph(mresult.graph);
 		
 		if (mresult.hasConflict) {
@@ -503,7 +463,7 @@ public class Endpoint {
 		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", graph.getRevisionNumber(mresult.branchA));
 		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", graph.getRevisionNumber(mresult.branchB));			
 		
-		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(sparqlQuery));	
+		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(commit.query_sparql));	
 		
 		return responseBuilder.build();	
 	}

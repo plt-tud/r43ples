@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.management;
+package de.tud.plt.r43ples.dataset;
 
 import javax.ws.rs.core.MediaType;
 
