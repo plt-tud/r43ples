@@ -13,6 +13,7 @@ public class RevisionDraft {
 	public String graphName;
 	public String revisionName;
 	public String revisionNumber;
+	public String revisionNumber2 = null;
 	public String revisionGraph;
 	
 	
@@ -27,7 +28,7 @@ public class RevisionDraft {
 		this.graphName = graphName;
 		this.revisionGraph = RevisionManagement.getRevisionGraph(graphName);
 		this.revisionName = revisionName;
-		this.revisionNumber= RevisionManagement.getRevisionNumber(revisionGraph, revisionName);
+		this.revisionNumber = RevisionManagement.getRevisionNumber(revisionGraph, revisionName);
 		
 		this.newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName);
 		
@@ -43,6 +44,6 @@ public class RevisionDraft {
 		String revNumber = RevisionManagement.getRevisionNumber(revisionGraph, revisionNumber);
 		return ((this.graphName.equals(graphName)) && (this.revisionNumber.equals(revNumber)));
 	}
-	
+		
 	
 }
