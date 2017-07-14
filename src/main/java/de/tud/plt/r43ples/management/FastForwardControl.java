@@ -21,19 +21,20 @@ public class FastForwardControl {
 	 * @throws InternalErrorException 
 	 * 
 	 */
-	public static boolean performFastForward(final String revisionGraph, final String branchNameA, final String branchNameB,
+	public static boolean performFastForward(final RevisionGraph graph, final String branchNameA, final String branchNameB,
 			final String user, final String dateTime, final String message) throws InternalErrorException{
-		if (!FastForwardControl.fastForwardCheck(revisionGraph, branchNameA, branchNameB)) {
+		String revisionGraph = graph.getRevisionGraphUri();
+		if (!FastForwardControl.fastForwardCheck(graph, branchNameA, branchNameB)) {
 			return false;
 		}
-		String branchUriA = RevisionManagement.getBranchUri(revisionGraph, branchNameA);
-		String branchUriB = RevisionManagement.getBranchUri(revisionGraph, branchNameB);
+		String branchUriA = graph.getBranchUri(branchNameA);
+		String branchUriB = graph.getBranchUri(branchNameB);
 		
-		String fullGraphUriA = RevisionManagement.getFullGraphUri(revisionGraph, branchUriA);
-		String fullGraphUriB = RevisionManagement.getFullGraphUri(revisionGraph, branchUriB);
+		String fullGraphUriA = graph.getFullGraphUri(branchUriA);
+		String fullGraphUriB = graph.getFullGraphUri(branchUriB);
 	
-		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
-		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
+		String revisionUriA = graph.getRevisionUri(branchNameA);
+		String revisionUriB = graph.getRevisionUri(branchNameB);
 		
 		RevisionManagement.moveBranchReference(revisionGraph, branchUriA, revisionUriA, revisionUriB);
 		
@@ -60,21 +61,21 @@ public class FastForwardControl {
 	 * @param branch2	name of branch2
 	 */
 	
-	public static boolean fastForwardCheck(String revisionGraph, String branch1 , String branch2) {
+	public static boolean fastForwardCheck(RevisionGraph revisionGraph, String branch1 , String branch2) {
 		if(branch1.equals(branch2)) {
 			return false;
 		}
 		
 		try {
 			//get last revision of each branch
-			String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branch1);
-			String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branch2);
+			String revisionUriA = revisionGraph.getRevisionUri(branch1);
+			String revisionUriB = revisionGraph.getRevisionUri(branch2);
 		
 			String query = RevisionManagement.prefixes
 				+ String.format("ASK { GRAPH <%s> { "
-						+ "<%s> prov:wasDerivedFrom* <%s> ."
+						+ "<%s> prov:wasDerivedFrom+ <%s> ."
 						+ " }} ",
-						revisionGraph, revisionUriB, revisionUriA);
+						revisionGraph.getRevisionGraphUri(), revisionUriB, revisionUriA);
 			
 			return TripleStoreInterfaceSingleton.get().executeAskQuery(query);
 		}

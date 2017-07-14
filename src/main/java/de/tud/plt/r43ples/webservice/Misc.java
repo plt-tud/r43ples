@@ -25,6 +25,7 @@ import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.GitRepositoryState;
+import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.visualisation.VisualisationBatik;
@@ -170,7 +171,9 @@ public class Misc {
 		logger.info("Get Content of graph " + graphName);
 		String format = (format_query != null) ? format_query : format_header;
 		logger.debug("format: " + format);
-		String result = RevisionManagement.getContentOfGraphByConstruct(graphName, format);
+		
+		RevisionGraph graph = new RevisionGraph(graphName);
+		String result = graph.getContentOfRevisionGraph(format);
 		ResponseBuilder response = Response.ok();
 		return response.entity(result).type(format).build();
 	}

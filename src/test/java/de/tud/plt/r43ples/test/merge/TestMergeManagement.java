@@ -16,6 +16,7 @@ import org.junit.Test;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.DataSetGenerationResult;
+import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.merging.MergeManagement;
@@ -27,6 +28,8 @@ import de.tud.plt.r43ples.merging.MergeManagement;
 public class TestMergeManagement {
 
 	private static DataSetGenerationResult ds;
+	private static RevisionGraph graph;
+	
 	
 	/**
 	 * @throws ConfigurationException 
@@ -37,6 +40,7 @@ public class TestMergeManagement {
 	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException, IOException {
 		Config.readConfig("r43ples.test.conf");
 		ds = SampleDataSet.createSampleDataSetMerging();
+		graph = new RevisionGraph(ds.graphName);
 	}
 
 
@@ -49,7 +53,7 @@ public class TestMergeManagement {
 	@Test
 	public final void testGetCommonRevisionWithShortestPath() {
 		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(
-				RevisionManagement.getRevisionGraph(ds.graphName),
+				graph.getRevisionGraphUri(),
 				ds.graphName+"-revision-"+ds.revisions.get("b1-1"), 
 				ds.graphName+"-revision-"+ds.revisions.get("b2-2"));
 		Assert.assertEquals(ds.graphName+"-revision-"+ds.revisions.get("master-1"), commonRevision);
@@ -61,7 +65,7 @@ public class TestMergeManagement {
 	@Test
 	public final void testGetPathBetweenStartAndTargetRevision() {
 		LinkedList<String> path = MergeManagement.getPathBetweenStartAndTargetRevision(
-				RevisionManagement.getRevisionGraph(ds.graphName),
+				graph.getRevisionGraphUri(),
 				ds.graphName+"-revision-"+ds.revisions.get("master-0"), 
 				ds.graphName+"-revision-"+ds.revisions.get("b2-1"));
 		LinkedList<String> expected = new LinkedList<String>();
@@ -78,7 +82,7 @@ public class TestMergeManagement {
 	@Test
 	public final void testGetPathBetweenStartAndTargetRevision2() {
 		LinkedList<String> path = MergeManagement.getPathBetweenStartAndTargetRevision(
-				RevisionManagement.getRevisionGraph(ds.graphName),
+				graph.getRevisionGraphUri(),
 				ds.graphName+"-revision-"+ds.revisions.get("master-1"),
 				ds.graphName+"-revision-"+ds.revisions.get("b1-1"));
 		LinkedList<String> expected = new LinkedList<String>();

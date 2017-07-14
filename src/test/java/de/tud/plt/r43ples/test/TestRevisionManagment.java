@@ -15,6 +15,7 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.DataSetGenerationResult;
 import de.tud.plt.r43ples.management.ResourceManagement;
+import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SampleDataSet;
 import de.tud.plt.r43ples.webservice.Endpoint;
@@ -24,6 +25,7 @@ public class TestRevisionManagment {
 	
 	
     private static DataSetGenerationResult ds;
+    private static RevisionGraph graph;
 	private final String format = "application/sparql-results+xml";
     private final Endpoint ep = new Endpoint();
 	private String result;
@@ -35,6 +37,7 @@ public class TestRevisionManagment {
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
 		ds = SampleDataSet.createSampleDataset1();
+		graph = new RevisionGraph(ds.graphName);
 	}
 	
 	private final String query_template = ""
@@ -66,20 +69,19 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void test_reference_uri() throws InternalErrorException {
-		String revisionGraph = RevisionManagement.getRevisionGraph(ds.graphName);
-		String res = RevisionManagement.getBranchUri(revisionGraph, "master");
+		String res = graph.getBranchUri("master");
 		Assert.assertEquals(ds.graphName+"-master", res);
 	}
 	
 	@Test
 	public void test_revision_uri() throws InternalErrorException {
-		String uri = RevisionManagement.getRevisionUri(RevisionManagement.getRevisionGraph(ds.graphName), ds.revisions.get("master-4"));
+		String uri = graph.getRevisionUri(ds.revisions.get("master-4"));
 		Assert.assertEquals(ds.graphName+"-revision-"+ds.revisions.get("master-4"), uri);
 	}
 	
 	@Test
 	public void test_master_number() {
-		String revNumberMaster = RevisionManagement.getMasterRevisionNumber(ds.graphName);
+		String revNumberMaster = graph.getMasterRevisionNumber();
 		Assert.assertEquals(ds.revisions.get("master-5"), revNumberMaster);
 	}
 	
@@ -234,24 +236,22 @@ public class TestRevisionManagment {
 	public void testBranching() throws InternalErrorException {
 		RevisionManagement.createBranch(ds.graphName, ds.revisions.get("master-2"), "testBranch", "test_user", "branching as junit test");
 
-		String revisionGraph = RevisionManagement.getRevisionGraph(ds.graphName);
-		
 		String rev = RevisionManagement.createNewRevision(ds.graphName, "<a> <b> <c>", "", "test_user", "test_commitMessage", "testBranch");
-		String revNumber = RevisionManagement.getRevisionNumber(revisionGraph, "testBranch");
+		String revNumber = graph.getRevisionNumber("testBranch");
 		Assert.assertEquals(rev, revNumber);
 		
 		String rev2 = RevisionManagement.createNewRevision(ds.graphName, "<a> <b> <d>", "", "test_user", "test_commitMessage", "testBranch");
-		String revNumber2 = RevisionManagement.getRevisionNumber(revisionGraph, "testBranch");
+		String revNumber2 = graph.getRevisionNumber("testBranch");
 		Assert.assertEquals(rev2, revNumber2);
 		
 		RevisionManagement.createBranch(ds.graphName, rev2, "testBranch2", "test_user", "branching as junit test");
 		String rev3 = RevisionManagement.createNewRevision(ds.graphName, "<a> <b> <e>", "", "test_user", "test_commitMessage", "testBranch2");
-		String revNumber3 = RevisionManagement.getRevisionNumber(revisionGraph, "testBranch2");
+		String revNumber3 = graph.getRevisionNumber("testBranch2");
 		Assert.assertEquals(rev3, revNumber3);
 		
 		RevisionManagement.createBranch(ds.graphName, rev2, "testBranch2a", "test_user", "branching as junit test");
 		String rev4 = RevisionManagement.createNewRevision(ds.graphName, "<a> <b> <f>", "", "test_user", "test_commitMessage", "testBranch2a");
-		String revNumber4 = RevisionManagement.getRevisionNumber(revisionGraph, "testBranch2a");
+		String revNumber4 = graph.getRevisionNumber("testBranch2a");
 		Assert.assertEquals(rev4, revNumber4);
 	}
 	
