@@ -8,6 +8,7 @@ It provides different revisions of named graphs via a SPARQL interface. All info
 [![Build Status](https://travis-ci.org/plt-tud/r43ples.png?branch=master)](https://travis-ci.org/plt-tud/r43ples)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/2125/badge.svg)](https://scan.coverity.com/projects/2125)
 [![codecov](https://codecov.io/gh/plt-tud/r43ples/graph/badge.svg)](https://codecov.io/gh/plt-tud/r43ples)
+[![codebeat badge](https://codebeat.co/badges/8b09853d-1312-44a0-979b-579fe8551468)](https://codebeat.co/projects/github-com-plt-tud-r43ples-develop)
 [![Ohloh Project Status](https://www.ohloh.net/p/r43ples/widgets/project_thin_badge.gif)](https://www.ohloh.net/p/r43ples)
 
 
