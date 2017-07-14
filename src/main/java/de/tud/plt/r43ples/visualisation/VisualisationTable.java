@@ -22,7 +22,7 @@ import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.revisionTree.Commit;
 import de.tud.plt.r43ples.revisionTree.StructuredTree;
 
-public class VisualisationBatik {
+public class VisualisationTable {
 	
 	private static final int TIMELINEVIEW_WIDTH = 70;
 
@@ -42,7 +42,7 @@ public class VisualisationBatik {
 	private MessagesTableView msgView;
 	
 
-	public VisualisationBatik(StructuredTree revisionTree) {
+	public VisualisationTable(StructuredTree revisionTree) {
 		commits = revisionTree.getCommits();
 		Collections.reverse(commits);
 		
@@ -93,14 +93,14 @@ public class VisualisationBatik {
 
 	public static String getHtmlOutput(String graphName) {
 		MustacheFactory mf = new DefaultMustacheFactory();
-		Mustache mustache = mf.compile("templates/graphvisualisation_batik.mustache");
+		Mustache mustache = mf.compile("templates/graphvisualisation_table.mustache");
 		StringWriter sw = new StringWriter();
 
 		// get graph tree
 		RevisionGraph graph = new RevisionGraph(graphName);
 		String revisionGraphUri = graph.getRevisionGraphUri();
 		StructuredTree graphTree = StructuredTree.getTreeOfGraph(revisionGraphUri);
-		VisualisationBatik visu = new VisualisationBatik(graphTree);
+		VisualisationTable visu = new VisualisationTable(graphTree);
 		
 		Map<String, Object> scope = new HashMap<String, Object>();
 		scope.put("graphName", graphName);
