@@ -37,21 +37,6 @@ public class RevisionManagement {
 	/** The logger. **/
 	private static Logger logger = Logger.getLogger(RevisionManagement.class);
 	
-	/** The SPARQL prefixes
-	 * **/
-	public static final String prefixes = 
-			  "PREFIX rmo:	<http://eatld.et.tu-dresden.de/rmo#> \n"
-			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
-			+ "PREFIX dc-terms:	<http://purl.org/dc/terms/> \n" 
-			+ "PREFIX xsd:	<http://www.w3.org/2001/XMLSchema#> \n"
-			+ "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
-			+ "PREFIX sdd:	<http://eatld.et.tu-dresden.de/sdd#> \n"
-			+ "PREFIX rpo: <http://eatld.et.tu-dresden.de/rpo#> \n"
-			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
-			+ "PREFIX rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n"
-			+ "PREFIX owl:	<http://www.w3.org/2002/07/owl#> \n";
-
-
 	/**
 	 * Put existing graph under version control. Existence of graph is not checked. Current date is used for commit timestamp
 	 * 
@@ -70,7 +55,7 @@ public class RevisionManagement {
 			revisiongraph += "x";
 		}
 		
-		String queryAddRevisionGraph = prefixes + String.format(
+		String queryAddRevisionGraph = Config.prefixes + String.format(
 				"INSERT DATA { GRAPH <%1$s> {"
 				+ "  <%2$s> a rmo:Graph;"
 				+ "    rmo:hasRevisionGraph <%3$s>;"
@@ -100,15 +85,15 @@ public class RevisionManagement {
 				+ "	rdfs:label \"master\".",
 				branchUri, graphName, revisionUri);
 
-		queryContent += String.format(""
-				+ "<%s> a rmo:RevisionCommit, rmo:BranchCommit; "
+		queryContent += String.format(
+				"<%s> a rmo:RevisionCommit, rmo:BranchCommit; "
 				+ "	prov:wasAssociatedWith <%s> ;" 
 				+ "	prov:generated <%s>, <%s> ;" 
 				+ "	dc-terms:title \"initial commit\" ;" 
 				+ "	prov:atTime \"%s\"^^xsd:dateTime .%n",
 				commitUri,  "http://eatld.et.tu-dresden.de/user/r43ples", revisionUri, branchUri, datetime);
 		
-		String queryRevision = prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisiongraph, queryContent);
+		String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisiongraph, queryContent);
 		
 		//TripleStoreInterfaceSingleton.get().executeCreateGraph(graph);
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryRevision);
@@ -203,11 +188,12 @@ public class RevisionManagement {
 	 */
 	public static String createNewRevisionWithPatch(final String graphName, final String addSetGraphUri, final String deleteSetGraphUri,
 			final String user, final String commitMessage, final String usedRevisionNumber) throws InternalErrorException {
-		String newRevisionNumber = getNextRevisionNumber(graphName);
-		String referenceGraph = getReferenceGraph(graphName, usedRevisionNumber);
 
-		addNewRevisionFromChangeSet(user, commitMessage, graphName, usedRevisionNumber, newRevisionNumber, referenceGraph, addSetGraphUri, deleteSetGraphUri); 
-		return newRevisionNumber;
+		RevisionDraft d = new RevisionDraft(graphName, usedRevisionNumber);
+		d.addSetURI = addSetGraphUri;
+		d.deleteSetURI = deleteSetGraphUri;
+		addNewRevisionFromChangeSet(user, commitMessage, d); 
+		return d.newRevisionNumber;
 	}
 	
 	public static String createNewRevision(final String graphName, final String addedAsNTriples,
@@ -244,37 +230,33 @@ public class RevisionManagement {
 		logger.info("Create new revision for graph " + graphName);
 
 		// General variables
-		String newRevisionNumber = getNextRevisionNumber(graphName);
-		String addSetGraphUri = graphName + "-addSet-" + newRevisionNumber;
-		String removeSetGraphUri = graphName + "-deleteSet-" + newRevisionNumber;
-		String referenceGraph = getReferenceGraph(graphName, usedRevisionNumber.get(0));
+		RevisionDraft draft = new RevisionDraft(graphName, usedRevisionNumber.get(0) );
 
 		// Add Meta Information
-		addMetaInformationForNewRevision(graphName, user, timeStamp, commitMessage, usedRevisionNumber,
-				newRevisionNumber, addSetGraphUri, removeSetGraphUri);
-
+		addMetaInformationForNewRevision(draft, user, timeStamp, commitMessage);
+		
 		// Update full graph of branch
 		if (removedAsNTriples!=null && !removedAsNTriples.isEmpty()) {
-			RevisionManagement.executeDELETE(referenceGraph, removedAsNTriples);
+			RevisionManagement.executeDELETE(draft.referenceFullGraph, removedAsNTriples);
 		}
 		if (addedAsNTriples!=null && !addedAsNTriples.isEmpty()) {
-			RevisionManagement.executeINSERT(referenceGraph, addedAsNTriples);
+			RevisionManagement.executeINSERT(draft.referenceFullGraph, addedAsNTriples);
 		}
 
 		// Create new graph with addSet-newRevisionNumber
 		if (addedAsNTriples!=null && !addedAsNTriples.isEmpty()) {
-			logger.debug("Create new graph with name " + addSetGraphUri);
+			logger.debug("Create new graph with name " + draft.addSetURI);
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
-				addSetGraphUri));
-			RevisionManagement.executeINSERT(addSetGraphUri, addedAsNTriples);
+					draft.addSetURI));
+			RevisionManagement.executeINSERT(draft.addSetURI, addedAsNTriples);
 		}
 
 		// Create new graph with deleteSet-newRevisionNumber
 		if (removedAsNTriples!=null && !removedAsNTriples.isEmpty()) {
-			logger.debug("Create new graph with name " + removeSetGraphUri);
+			logger.debug("Create new graph with name " + draft.deleteSetURI);
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
-					removeSetGraphUri));
-			RevisionManagement.executeINSERT(removeSetGraphUri, removedAsNTriples);
+					draft.deleteSetURI));
+			RevisionManagement.executeINSERT(draft.deleteSetURI, removedAsNTriples);
 		}
 		
 		// Remove branch from which changes were merged, if available
@@ -295,7 +277,7 @@ public class RevisionManagement {
 //			TripleStoreInterfaceSingleton.get().executeQueryWithAuthorization(query);
 //		}
 
-		return newRevisionNumber;
+		return draft.newRevisionNumber;
 	}
 
 	/**
@@ -313,29 +295,27 @@ public class RevisionManagement {
 	 * @throws InternalErrorException
 	 */
 	protected static void addNewRevisionFromChangeSet(final String user, final String commitMessage,
-			String graphName, String revisionName, String newRevisionNumber, String referenceFullGraph,
-			String addSetGraphUri, String deleteSetGraphUri) throws InternalErrorException {
+			RevisionDraft draft) throws InternalErrorException {
 		// remove doubled data
 		// (already existing triples in add set; not existing triples in delete set)
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
-				"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }", addSetGraphUri,
-				referenceFullGraph));
+				"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }", 
+				draft.addSetURI, draft.referenceFullGraph));
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
 				"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } MINUS { GRAPH <%s> { ?s ?p ?o. } } }",
-				deleteSetGraphUri, deleteSetGraphUri, referenceFullGraph));
+				draft.deleteSetURI, draft.deleteSetURI, draft.referenceFullGraph));
 
 		// merge change sets into reference graph
 		// (copy add set to reference graph; remove delete set from reference graph)
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
 				"INSERT { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }",
-				referenceFullGraph,	addSetGraphUri));
+				draft.referenceFullGraph, draft.addSetURI));
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(
 				"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }", 
-				referenceFullGraph,	deleteSetGraphUri));
+				draft.referenceFullGraph, draft.deleteSetURI));
 
 		// add meta information to R43ples
-		RevisionManagement.addMetaInformationForNewRevision(graphName, user, commitMessage, revisionName,
-				newRevisionNumber, addSetGraphUri, deleteSetGraphUri);
+		RevisionManagement.addMetaInformationForNewRevision(draft, user, commitMessage);
 	}
 
 	
@@ -350,12 +330,9 @@ public class RevisionManagement {
 	 * @param deleteSetGraphUri
 	 * @throws InternalErrorException
 	 */
-	public static void addMetaInformationForNewRevision(final String graphName, final String user,
-			final String commitMessage, final String usedRevisionNumber,
-			final String newRevisionNumber, final String addSetGraphUri, final String deleteSetGraphUri) throws InternalErrorException {
-		ArrayList<String> list = new ArrayList<String>();
-		list.add(usedRevisionNumber);
-		addMetaInformationForNewRevision(graphName, user, getDateString(), commitMessage, list, newRevisionNumber, addSetGraphUri, deleteSetGraphUri);
+	public static void addMetaInformationForNewRevision(final RevisionDraft draft, final String user,
+			final String commitMessage) throws InternalErrorException {
+		addMetaInformationForNewRevision(draft, user, getDateString(), commitMessage);
 	}
 
 	/**
@@ -376,30 +353,26 @@ public class RevisionManagement {
 	 *            name of the graph which holds the delete set
 	 * @throws InternalErrorException 
 	 */
-	public static void addMetaInformationForNewRevision(final String graphName, final String user, final String timeStamp,
-			final String commitMessage, final ArrayList<String> usedRevisionNumber,
-			final String newRevisionNumber, final String addSetGraphUri, final String removeSetGraphUri) throws InternalErrorException {
+	public static void addMetaInformationForNewRevision(final RevisionDraft draft, final String user, final String timeStamp,
+			final String commitMessage) throws InternalErrorException {
 		
-		String revisionGraph = getRevisionGraph(graphName);
 		String personUri = getUserName(user);
-		String revisionUri = graphName + "-revision-" + newRevisionNumber;
-		String commitUri = graphName + "-commit-" + newRevisionNumber;
-		String branchUri = getBranchUri(revisionGraph, usedRevisionNumber.get(0));
+		String revisionUri = draft.graphName + "-revision-" + draft.newRevisionNumber;
+		String commitUri = draft.graphName + "-commit-" + draft.newRevisionNumber;
+		RevisionGraph graph = new RevisionGraph(draft.graphName);
+		String branchUri = graph.getBranchUri(draft.revisionName);
+		String revUriOld = graph.getRevisionUri(draft.revisionNumber);
 
 		// Create a new commit (activity)
 		StringBuilder queryContent = new StringBuilder(1000);
-		queryContent.append(String.format(""
-				+ "<%s> a rmo:RevisionCommit; " 
+		queryContent.append(String.format(
+				"<%s> a rmo:RevisionCommit; " 
 				+ "	prov:wasAssociatedWith <%s>;"
 				+ "	prov:generated <%s>;" 
-				+ "	dc-terms:title \"%s\";" 
+				+ "	dc-terms:title \"%s\";"
+				+ " prov:used <%s> ;" 
 				+ "	prov:atTime \"%s\"^^xsd:dateTime. %n", commitUri,
-				personUri, revisionUri, commitMessage, timeStamp));
-
-		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
-			String revUri = getRevisionUri(revisionGraph, iterator.next());
-			queryContent.append(String.format("<%s> prov:used <%s>. %n", commitUri, revUri));
-		}
+				personUri, revisionUri, commitMessage, revUriOld, timeStamp));
 
 		// Create new revision
 		queryContent.append(String.format(
@@ -407,34 +380,40 @@ public class RevisionManagement {
 				+ "	rmo:addSet <%s> ; %n"
 				+ "	rmo:deleteSet <%s> ; %n"
 				+ "	rmo:revisionNumber \"%s\" ; %n"
-				+ "	rmo:belongsTo <%s> . %n"
-				,  revisionUri, addSetGraphUri, removeSetGraphUri, newRevisionNumber, branchUri));
-		for (Iterator<String> iterator = usedRevisionNumber.iterator(); iterator.hasNext();) {
-			String revUri = getRevisionUri(revisionGraph, iterator.next());
-			queryContent.append(String.format("<%s> prov:wasDerivedFrom <%s> .", revisionUri, revUri));
+				+ "	rmo:belongsTo <%s> ; %n"
+				+ " prov:wasDerivedFrom <%s> . %n"
+				,  revisionUri, draft.addSetURI, draft.deleteSetURI, draft.newRevisionNumber, branchUri, revUriOld));
+
+		// Add second parent revision if available
+		if (draft.revisionNumber2 != null) {
+			String revUri2 = graph.getRevisionUri(draft.revisionNumber2);
+			queryContent.append(String.format(""
+					+ "<%s> prov:used <%s>. %n"
+					+ "<%s> prov:wasDerivedFrom <%s> .", commitUri, revUri2, revisionUri, revUri2));
 		}
-		String query = prefixes
-				+ String.format("INSERT DATA { GRAPH <%s> { %s } }", revisionGraph,
+		
+		String query = Config.prefixes
+				+ String.format("INSERT DATA { GRAPH <%s> { %s } }", draft.revisionGraph,
 						queryContent.toString());
 		
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
 
 		// Move branch to new revision
-		String branchIdentifier = usedRevisionNumber.get(0).toString();
-		String oldRevisionUri = getRevisionUri(revisionGraph, branchIdentifier);
+		String branchIdentifier = draft.revisionName; //or revisionNumber //TODO
+		String oldRevisionUri = graph.getRevisionUri(branchIdentifier);
 
-		String queryBranch = prefixes + String.format("" 
+		String queryBranch = Config.prefixes + String.format("" 
 					+ "SELECT ?branch " 
 					+ "WHERE { GRAPH <%s> {" 
 					+ "	?branch a rmo:Branch; "
 					+ "		rmo:references <%s>."
 					+ "	{?branch rdfs:label \"%s\"} UNION {<%s> rmo:revisionNumber \"%s\"}" 
 					+ "} }",
-					revisionGraph, oldRevisionUri, branchIdentifier, oldRevisionUri,
+					draft.revisionGraph, oldRevisionUri, branchIdentifier, oldRevisionUri,
 						branchIdentifier);
 		QuerySolution sol = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryBranch).next();
 		String branchName = sol.getResource("?branch").toString();
-		moveBranchReference(revisionGraph, branchName, oldRevisionUri, revisionUri);
+		moveBranchReference(draft.revisionGraph, branchName, oldRevisionUri, revisionUri);
 	}
 
 	/** move the reference in the specified revision graph from the old revision to the new one
@@ -446,7 +425,7 @@ public class RevisionManagement {
 	 *  */
 	public static void moveBranchReference(final String revisionGraph, final String branchName, final String revisionOld, final String revisionNew){
 		// delete old reference
-		String query = prefixes	+ String.format(""
+		String query = Config.prefixes	+ String.format(""
 				+ "DELETE DATA { GRAPH <%1$s> { <%2$s> rmo:references <%3$s>. } };" 
 				+ "INSERT DATA { GRAPH <%1$s> { <%2$s> rmo:references <%4$s>. } }",
 				revisionGraph, branchName, revisionOld, revisionNew);
@@ -469,7 +448,7 @@ public class RevisionManagement {
 		while(riter.hasNext()) {
 			String revision = riter.next();
 
-			String query = RevisionManagement.prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:belongsTo <%s>. } };%n",
+			String query = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:belongsTo <%s>. } };%n",
 					revisionGraph, revision, branch);
 			
 			logger.debug("revisionlist info" + revision);
@@ -552,9 +531,10 @@ public class RevisionManagement {
 			final String message) throws InternalErrorException {
 		logger.info("Create new " + referenceType + " '"+ newReferenceName+"' for graph " + graphName);
 		
-		String revisionGraph = getRevisionGraph(graphName);
+		RevisionGraph graph = new RevisionGraph(graphName);
+		String revisionGraph = graph.getRevisionGraphUri();
 		// Check branch existence
-		if (checkReferenceNameExistence(revisionGraph, newReferenceName)) {
+		if (graph.hasReference(newReferenceName)) {
 			// Branch name is already in use
 			logger.error("The reference name '" + newReferenceName + "' is for the graph '" + graphName
 					+ "' already in use.");
@@ -566,7 +546,7 @@ public class RevisionManagement {
 			String commitUri = graphName + "-commit-" + referenceType + "-" + newReferenceName;
 			String referenceUri = graphName + "-" + referenceType + "-" + newReferenceName;
 			String referenceTypeUri = referenceType.equals("tag") ? "rmo:Tag" : "rmo:Branch";
-			String revisionUri = getRevisionUri(revisionGraph, revisionNumber);
+			String revisionUri = graph.getRevisionUri(revisionNumber);
 			String personUri = getUserName(user);
 
 			// Create a new commit (activity)
@@ -592,7 +572,7 @@ public class RevisionManagement {
 			generateFullGraphOfRevision(graphName, revisionNumber, referenceUri);
 
 			// Execute queries
-			String query = prefixes
+			String query = Config.prefixes
 					+ String.format("INSERT DATA { GRAPH <%s> { %s } } ;", revisionGraph, queryContent);
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
 		}
@@ -628,8 +608,9 @@ public class RevisionManagement {
 			final String tempGraphName) throws InternalErrorException {
 		logger.info("Rebuild whole content of revision " + revisionName + " of graph <" + graphName
 				+ "> into temporary graph <" + tempGraphName + ">");
-		String revisionGraph = getRevisionGraph(graphName);
-		String revisionNumber = getRevisionNumber(revisionGraph, revisionName);
+		RevisionGraph graph = new RevisionGraph(graphName);
+		String revisionGraph = graph.getRevisionGraphUri();
+		String revisionNumber = graph.getRevisionNumber(revisionName);
 
 		// Create temporary graph
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <" + tempGraphName + ">");
@@ -642,7 +623,7 @@ public class RevisionManagement {
 		// Copy branch to temporary graph
 		String number = list.pollFirst().getRevisionNumber();
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(
-				"COPY GRAPH <" + RevisionManagement.getReferenceGraph(graphName, number) + "> TO GRAPH <"
+				"COPY GRAPH <" + graph.getReferenceGraph(number) + "> TO GRAPH <"
 						+ tempGraphName + ">");
 
 		while (!list.isEmpty()) {
@@ -664,223 +645,7 @@ public class RevisionManagement {
 
 	}
 
-	/**
-	 * Get the revision URI for a given reference name or revision number
-	 * 
-	 * @param revisionGraph
-	 *            the graph name
-	 * @param revisionIdentifier
-	 *            reference name or revision number
-	 * @return URI of identified revision
-	 * @throws InternalErrorException 
-	 */
-	public static String getRevisionUri(final String revisionGraph, final String revisionIdentifier) throws InternalErrorException {
-		String query = prefixes
-				+ String.format(
-						"SELECT ?rev WHERE { GRAPH <%s> {"
-							+ "{?rev a rmo:Revision; rmo:revisionNumber \"%s\" .}"
-							+ "UNION {?rev a rmo:Revision. ?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%s\" .}"
-							+ "} }", revisionGraph, revisionIdentifier, revisionIdentifier);
-		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
-		if (resultSet.hasNext()) {
-			QuerySolution qs = resultSet.next();
-			if (resultSet.hasNext()) {
-				logger.error("Identifier not unique: " + revisionIdentifier);
-				throw new InternalErrorException("Identifier not unique: " + revisionIdentifier);
-			}
-			return qs.getResource("?rev").toString();
-		} else {
-			logger.error("No Revision or Reference found with identifier: " + revisionIdentifier);
-			throw new InternalErrorException("No Revision or Reference found with identifier: "
-					+ revisionIdentifier);
-		}
-	}
 
-	/**
-	 * Get the reference URI of a branch for a given reference name or revision number
-	 * 
-	 * @param graphName
-	 *            the graph name
-	 * @param referenceIdentifier
-	 *            reference name or revision number
-	 * @return URI of identified revision
-	 * @throws InternalErrorException 
-	 */
-	public static String getBranchUri(final String revisionGraph, final String referenceIdentifier) throws InternalErrorException {
-		String query = prefixes
-				+ String.format("SELECT ?ref " 
-						+ "WHERE { GRAPH <%s> {"
-						+ "	?ref a rmo:Branch; rmo:references ?rev."
-						+ " ?rev a rmo:Revision."
-						+ "	{?rev rmo:revisionNumber \"%s\".} UNION {?ref rdfs:label \"%s\" .}"
-						+ "} }",
-						revisionGraph, referenceIdentifier, referenceIdentifier);
-		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
-		if (resultSet.hasNext()) {
-			QuerySolution qs = resultSet.next();
-			if (resultSet.hasNext()) {
-				throw new InternalErrorException("Identifier is not unique for specified graph name: "
-						+ referenceIdentifier);
-			}
-			return qs.getResource("?ref").toString();
-		} else {
-			throw new InternalErrorException("No Revision or Reference found with identifier: "
-					+ referenceIdentifier);
-		}
-	}
-
-	/**
-	 * Get the graph URI containing the full copy of a reference for a given
-	 * reference name or revision number
-	 * 
-	 * @param graphName
-	 *            the graph name
-	 * @param referenceIdentifier
-	 *            reference name or revision number
-	 * @return first graph name of full graph for specified reference and graph
-	 * @throws InternalErrorException 
-	 */
-	public static String getReferenceGraph(final String graphName, final String referenceIdentifier) throws InternalErrorException {
-		String revisionGraph = getRevisionGraph(graphName);
-		String query = prefixes + String.format("" 
-				+ "SELECT ?graph " 
-				+ "WHERE { GRAPH  <%s> {" 
-				+ "	?ref a rmo:Reference; "
-				+ "		rmo:references ?rev;" 
-				+ "		rmo:fullGraph ?graph."
-				+ " ?rev a rmo:Revision."
-				+ "	{?ref rdfs:label \"%s\"} UNION {?rev rmo:revisionNumber \"%s\"}" 
-				+ "} }", revisionGraph, referenceIdentifier, referenceIdentifier);
-		logger.debug(query);
-		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
-		if (resultSet.hasNext()) {
-			QuerySolution qs = resultSet.next();
-			return qs.getResource("?graph").toString();
-		} else {
-			throw new InternalErrorException("No reference graph found for graph <"+graphName+"> and identifier \""+ referenceIdentifier+"\"");
-		}
-	}
-
-	/**
-	 * Get the revision number of a given reference name.
-	 * 
-	 * @param revisionGraph
-	 *            the revision graph where information about the history of the graph is stored
-	 * @param referenceName
-	 *            the reference name
-	 * @return the revision number of given reference name
-	 * @throws InternalErrorException 
-	 */
-	public static String getRevisionNumber(final String revisionGraph, final String referenceName) throws InternalErrorException {
-		String query = prefixes + String.format(""
-				+ "SELECT ?revNumber WHERE { GRAPH <%s> {"
-				+ "	?rev a rmo:Revision; rmo:revisionNumber ?revNumber."
-				+ "	{?rev rmo:revisionNumber \"%s\".} UNION {?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%s\".}"
-				+ "} }", 
-				revisionGraph, referenceName, referenceName);
-		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
-		if (resultSet.hasNext()) {
-			QuerySolution qs = resultSet.next();
-			if (resultSet.hasNext()) {
-				throw new InternalErrorException("Identifier not unique: " + referenceName);
-			}
-			return qs.getLiteral("?revNumber").toString();
-		} else {
-			throw new InternalErrorException("No Revision or Reference found with identifier: "
-					+ referenceName);
-		}
-	}
-
-	
-
-	/**
-	 * Get the MASTER revision number of a graph.
-	 * 
-	 * @param graphName
-	 *            the graph name
-	 * @return the MASTER revision number
-	 */
-	public static String getMasterRevisionNumber(final String graphName) {
-		logger.info("Get MASTER revision number of graph " + graphName);
-
-		String revisionGraph = getRevisionGraph(graphName);
-		String queryString = prefixes + String.format(""
-				+ "SELECT ?revisionNumber "  
-				+ "WHERE { GRAPH <%s> {"
-				+ "	?master a rmo:Master; rmo:references ?revision . "
-				+ "	?revision rmo:revisionNumber ?revisionNumber . " 
-				+ "} }", revisionGraph);
-		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryString);
-		if (results.hasNext()){
-			QuerySolution qs = results.next();
-			return qs.getLiteral("?revisionNumber").getString();
-		}
-		else {
-			return null;
-		}
-	}
-
-	/** Returns new unique revision number for specified graph
-	 * 
-	 * 
-	 * @param graphName
-	 * @return new revision number
-	 * @throws InternalErrorException 
-	 */
-	public static String getNextRevisionNumber(final String graphName) throws InternalErrorException {
-		// create UID and check whether the uid number already in named graph exist, if yes , than create it once again,
-		// if not , return this one
-		
-		//UID nextNumberUid = new UID();
-		//String nextNumber = nextNumberUid.toString();
-		int nextNumber = 0;
-		
-		String revisionGraph = getRevisionGraph(graphName);
-		String query = prefixes
-				+ String.format(
-					"SELECT ?nr "
-					+ "WHERE { GRAPH <%s> {"
-					+ "	?rev a rmo:Revision; rmo:revisionNumber ?nr ."
-					+ " } "
-					+ "}ORDER BY DESC(xsd:integer(?nr))", revisionGraph);
-		try {
-			ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
-			QuerySolution qs = results.next();
-			nextNumber = qs.getLiteral("?nr").getInt()+1;
-		}
-		catch (Exception e){
-			nextNumber = 0;
-		}
-		
-		int count = 0;
-		while (existRevisionNumber(""+nextNumber, revisionGraph)){
-			nextNumber++;
-			count++;
-			if (count==100)
-				throw new InternalErrorException("No new revision number found");
-		}
-		
-		return ""+nextNumber;
-	}
-	
-	/**
-	 * checks whether the revision number already exist
-	 * @param revisionNumber
-	 * @return boolean*/
-	
-	public static boolean existRevisionNumber(final String revisionNumber, final String revisionGraph) {
-		String queryASK = prefixes
-				+ String.format(""
-						+ "ASK {"
-						+ "	GRAPH <%1$s> { " 
-						+ " 	{ ?rev a rmo:Revision; rmo:revisionNumber \"%2$s\". }"
-						+ "		UNION "
-						+ "		{?rev a rmo:Revision. ?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%2$s\" .}"
-						+ "} } ",
-						revisionGraph, revisionNumber);
-		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
-	}
-	
 
 
 	/**
@@ -951,23 +716,34 @@ public class RevisionManagement {
 		String sparqlQuery;
 		
 		if (graphName.equals("")) {
-			sparqlQuery = prefixes + String.format(""
+			sparqlQuery = Config.prefixes + String.format(""
 					+ "CONSTRUCT { ?s ?p ?o. }"
 					+ "WHERE { "
 					+ "	GRAPH <%s> { ?graph a rmo:Graph; rmo:hasRevisionGraph ?revisiongraph.}"
 					+ "	GRAPH ?revisionGraph {?s ?p ?o.}"
 					+ "}", Config.revision_graph);
+			return TripleStoreInterfaceSingleton.get().executeConstructQuery(sparqlQuery, format);
 		} else {
-			String revisionGraph = getRevisionGraph(graphName);
-			sparqlQuery = prefixes + String.format(""
-					+ "CONSTRUCT { ?s ?p ?o. }"
-					+ "WHERE { GRAPH <%s> { " 
-					+ "	?s ?p ?o.}"
-					+ "}",
-					revisionGraph);
+			RevisionGraph graph = new RevisionGraph(graphName);
+			return graph.getContentOfRevisionGraph(format);
 		}
-		return TripleStoreInterfaceSingleton.get().executeConstructQuery(sparqlQuery, format);
+		
 	}
+	
+	/**
+	 * Get the content of this revision graph by execution of CONSTRUCT.
+	 * 
+	 * @param graphName the graphName
+	 * @param format RDF serialization format which should be returned
+	 * @return the constructed graph content as specified RDF serialization format
+	 */
+	public static String getContentOfGraph(final String graphName, final String format) {
+		String query = Config.prefixes + String.format(
+				  "CONSTRUCT {?s ?p ?o} %n"
+				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
+		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		
+	}
+
 
 	/**
 	 * Get revised graphs in R43ples.
@@ -977,7 +753,7 @@ public class RevisionManagement {
 	 * @return String containing the SPARQL response in specified format
 	 */
 	public static String getRevisedGraphsSparql(final String format) {
-		String sparqlQuery = prefixes
+		String sparqlQuery = Config.prefixes
 				+ String.format("" 
 						+ "SELECT DISTINCT ?graph " 
 						+ "WHERE {"
@@ -993,7 +769,7 @@ public class RevisionManagement {
 	 * @return result set
 	 */
 	public static ResultSet getRevisedGraphs() {
-		String sparqlQuery = prefixes
+		String sparqlQuery = Config.prefixes
 				+ String.format("" 
 						+ "SELECT DISTINCT ?graph " 
 						+ "WHERE {"
@@ -1021,50 +797,6 @@ public class RevisionManagement {
 	
 
 	/**
-	 * Deletes all revision information for a specific named graph including all full
-	 * graphs and information in the R43ples system.
-	 * 
-	 * @param graph
-	 *            graph to be purged
-	 */
-	public static void purgeRevisionInformation(final String graphName) {
-		logger.info("Purge revision information of graph " + graphName);
-		// Drop all full graphs as well as add and delete sets which are related
-		// to specified graph
-		String revisionGraph = getRevisionGraph(graphName);
-		String query = prefixes	+ String.format(""
-				+ "SELECT DISTINCT ?graph "
-				+ "WHERE { GRAPH <%s> {"
-				+ " {?rev rmo:addSet ?graph}" 
-				+ " UNION {?rev rmo:deleteSet ?graph}"
-				+ " UNION {?ref rmo:fullGraph ?graph}"
-				+ "} }", revisionGraph);
-				
-		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
-		while (results.hasNext()) {
-			QuerySolution qs = results.next();
-			if (qs.get("?graph").isResource()) {
-					String graph = qs.getResource("graph").toString();
-					TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <" + graph + ">");
-					logger.debug("Graph deleted: " + graph);
-			}
-		}
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", revisionGraph));
-		
-		// Remove information from revision graph
-		String queryDelete = prefixes + String.format(
-					   	"DELETE { "
-						+ "GRAPH <%s> {	<%s> ?p ?o.}"
-						+ "}" 
-						+ "WHERE {"
-						+ "	GRAPH <%s> { <%s> a rmo:Graph; ?p ?o.}" 
-						+ "}"
-						, Config.revision_graph, graphName, Config.revision_graph, graphName);
-		
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryDelete);
-	}
-
-	/**
 	 * @param user
 	 *            name as string
 	 * @return URI of person
@@ -1072,7 +804,7 @@ public class RevisionManagement {
 	public static String getUserName(final String user) {
 		// When user does not already exists - create new
 
-		String query = prefixes
+		String query = Config.prefixes
 				+ String.format("SELECT ?personUri { GRAPH <%s>  { " + "?personUri a prov:Person;"
 						+ "  rdfs:label \"%s\"." + "} }", Config.revision_graph, user);
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
@@ -1088,7 +820,7 @@ public class RevisionManagement {
 				e.printStackTrace();
 			}
 			logger.debug("User does not exists. Create user " + personUri + ".");
-			query = prefixes
+			query = Config.prefixes
 					+ String.format("INSERT DATA { GRAPH <%s> { <%s> a prov:Person; rdfs:label \"%s\". } }",
 							Config.revision_graph, personUri, user);
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
@@ -1096,35 +828,6 @@ public class RevisionManagement {
 		}
 	}
 	
-	/**
-	 * get the names of all branches of a named graph
-	 * @param graphName name of graph
-	 * @return list of the name of branch
-	 * */
-	public static ArrayList<String> getAllBranchNamesOfGraph(String graphName) {
-		logger.info("Get all branch names of graph "+ graphName);
-		ArrayList<String> list = new ArrayList<String>();	
-		if (graphName != null) {
-			String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-			String sparqlQuery = RevisionManagement.prefixes
-					+ String.format(
-					  "SELECT DISTINCT ?label %n"
-					+ "FROM <%s> %n"
-					+ "WHERE { %n"
-					+ "	?branch a rmo:Branch ;"
-					+ "		rdfs:label ?label . "
-					+ "} %n"
-					+ "ORDER BY ?label", revisionGraph);
-			
-			ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(sparqlQuery);
-			while (results.hasNext()) {
-				QuerySolution qs = results.next();
-				list.add(qs.getLiteral("label").toString());
-			}		
-		}
-		logger.debug("All branches: " +list);
-		return list;
-	}
 
 
 	/**
@@ -1138,68 +841,8 @@ public class RevisionManagement {
 		logger.debug("Time stamp created: " + dateString);
 		return dateString;
 	}
+	
 
-	/** returns the name of the named graph which stores all revision information for the specified revised named graph
-	 * 
-	 * @param graphName uri of the revised named graph
-	 * @return uri of the revision graph for this graph
-	 */
-	public static String getRevisionGraph(final String graphName) {
-		String query = String.format(
-				  "SELECT ?revisionGraph "
-				+ "WHERE { GRAPH <%s> {"
-				+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#hasRevisionGraph> ?revisionGraph ."
-				+ "} }", Config.revision_graph, graphName);
-			
-			ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
-			
-			if (results.hasNext()) {
-				QuerySolution qs = results.next();
-				return qs.getResource("?revisionGraph").toString();
-			} else {
-				return null;
-			}
-	}
-	
-	/**
-	 * Check whether the branch name is already used by specified graph name.
-	 * 
-	 * @param revisionGraph
-	 *            the revision graph which stores information about the revised graph
-	 * @param referenceName
-	 *            the branch name to check
-	 * @return true when branch already exists elsewhere false
-	 */
-	private static boolean checkReferenceNameExistence(final String revisionGraph, final String referenceName) {
-		String queryASK = prefixes
-				+ String.format("ASK { GRAPH <%s> { ?ref a rmo:Reference; rdfs:label \"%s\".  }} ",
-						revisionGraph, referenceName);
-		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
-	}
-
-	/**
-	 * Checks if specified revision of the graph is a branch revision, meaning a
-	 * terminal node in a branch.
-	 * 
-	 * @param graphName
-	 *            name of the revisioned graph
-	 * @param identifier
-	 *            revision number or branch or tag name of the graph
-	 * @return true if specified revision of the graph is a branch
-	 */
-	public static boolean isBranch(final String graphName, final String identifier) {
-		String revisionGraph = getRevisionGraph(graphName);
-		String queryASK = prefixes
-				+ String.format(""
-						+ "ASK { GRAPH <%s> { " 
-						+ " ?rev a rmo:Revision. "
-						+ " ?ref a rmo:Reference; rmo:references ?rev ."
-						+ " { ?rev rmo:revisionNumber \"%s\"} UNION { ?ref rdfs:label \"%s\"} }} ",
-						revisionGraph, identifier, identifier);
-		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
-	}
-	
-	
 	/**
 	 * Get the ADD set URI of a given revision URI.
 	 * 
@@ -1250,20 +893,6 @@ public class RevisionManagement {
 	}
 	
 	
-	/**
-	 * Get the content of a graph by execution of CONSTRUCT.
-	 * 
-	 * @param graphName the graphName
-	 * @param format RDF serialisation format which should be returned
-	 * @return the constructed graph content as specified RDF serialisation format
-	 */
-	public static String getContentOfGraphByConstruct(String graphName, String format) {
-		String query = RevisionManagement.prefixes + Config.getPrefixes() + String.format(
-				  "CONSTRUCT {?s ?p ?o} %n"
-				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
-		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		
-	}
-	
 	
 	/** Creates an RDF description for the revision tree of the graphs specified in the given SPARQL query
 	 * @param query SPARQL query
@@ -1291,7 +920,7 @@ public class RevisionManagement {
 	}
 	
 	public static String getResponseHeader(String graphList) {
-		String queryConstruct = RevisionManagement.prefixes + String.format(
+		String queryConstruct = Config.prefixes + String.format(
 				  "CONSTRUCT {"
 				+ " ?ref a ?type;"
 				+ "		rdfs:label ?label;"
@@ -1313,59 +942,6 @@ public class RevisionManagement {
 		String header = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryConstruct, FileUtils.langTurtle);
 		return header;
 	}
-	
-	public static String getFullGraphUri(final String revisionGraph, final String branchURI) {
-		String query = String.format(
-				  "SELECT ?fullGraphURI %n"
-			    + "WHERE { GRAPH <%s> {%n"
-				+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#fullGraph> ?fullGraphURI . %n"
-				+ "} }", revisionGraph, branchURI);
-			
-		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		
-		if (results.hasNext()) {
-			QuerySolution qs = results.next();
-			return qs.getResource("?fullGraphURI").toString();
-		} else {
-			return null;
-		}
-	}
-	
-	/** Get SDD for graphName
-	 * 
-	 * @param graphName
-	 * @param sdd
-	 * @param sddURI
-	 * @return specified SDD if not null otherwise the default SDD for the specified graph
-	 * @throws InternalErrorException
-	 */
-	public static String getSDD(String graphName, String sdd)
-			throws InternalErrorException {
-		if (sdd != null && !sdd.equals("")) {
-			return sdd;
-		} else {
-			// Default SDD
-			// Query the referenced SDD
-			String querySDD = String.format(
-					  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
-					+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> %n"
-					+ "SELECT ?defaultSDD %n"
-					+ "WHERE { GRAPH <%s> {	%n"
-					+ "	<%s> a rmo:Graph ;%n"
-					+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
-					+ "} }", Config.revision_graph, graphName);
-			
-			ResultSet resultSetSDD = TripleStoreInterfaceSingleton.get().executeSelectQuery(querySDD);
-			if (resultSetSDD.hasNext()) {
-				QuerySolution qs = resultSetSDD.next();
-				return qs.getResource("?defaultSDD").toString();
-			} else {
-				throw new InternalErrorException("Error in revision graph! Selected graph <" + graphName + "> has no default SDD referenced.");
-			}
-		}
-	}
-
-
-	
 }
 

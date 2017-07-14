@@ -39,7 +39,7 @@ public class DatasetGenerationManagement {
 				+ "MESSAGE \"%s\" %n"
 				+ "BRANCH GRAPH <%s> REVISION \"%s\" TO \"%s\"", user, message, graphName, revision, branchName);
 		ep.sparql(MediaType.TEXT_HTML, query);
-		logger.info("New branch \"" + graphName +"\" for <" + graphName +"> created.");
+		logger.info("New branch \"" + branchName +"\" for <" + graphName +"> created.");
 	}
 	
 	

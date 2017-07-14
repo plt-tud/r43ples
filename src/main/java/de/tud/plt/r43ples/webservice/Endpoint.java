@@ -40,6 +40,7 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.JenaModelManagement;
+import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.merging.MergeResult;
@@ -241,7 +242,7 @@ public class Endpoint {
 	 * @throws InternalErrorException 
 	 */
 	public final Response sparql(final String format, final String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
-		if (sparqlQuery.equals("")) {
+		if ("".equals(sparqlQuery)) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
 			} else {
@@ -479,6 +480,7 @@ public class Endpoint {
 		logger.info("Merge query detected");
 		
 		MergeResult mresult = Interface.sparqlMerge(sparqlQuery, user, commitMessage, format);
+		RevisionGraph graph = new RevisionGraph(mresult.graph);
 		
 		if (mresult.hasConflict) {
 			responseBuilder = Response.status(Response.Status.CONFLICT);
@@ -493,9 +495,8 @@ public class Endpoint {
 		}
 		
 		// Return the revision number which were used (convert tag or branch identifier to revision number)
-		String revisionGraph = RevisionManagement.getRevisionGraph(mresult.graph);
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(revisionGraph, mresult.branchA));
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(revisionGraph, mresult.branchB));			
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", graph.getRevisionNumber(mresult.branchA));
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", graph.getRevisionNumber(mresult.branchB));			
 		
 		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(sparqlQuery));	
 		

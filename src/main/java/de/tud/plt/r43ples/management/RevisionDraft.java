@@ -13,6 +13,7 @@ public class RevisionDraft {
 	public String graphName;
 	public String revisionName;
 	public String revisionNumber;
+	public String revisionNumber2 = null;
 	public String revisionGraph;
 	
 	
@@ -21,28 +22,31 @@ public class RevisionDraft {
 	public String deleteSetURI;
 	public String referenceFullGraph;
 	
+	private RevisionGraph graph;
+	
 	
 	
 	public RevisionDraft(final String graphName, final String revisionName) throws InternalErrorException {
 		this.graphName = graphName;
-		this.revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+		this.graph = new RevisionGraph(graphName);
+		this.revisionGraph = graph.getRevisionGraphUri();
 		this.revisionName = revisionName;
-		this.revisionNumber= RevisionManagement.getRevisionNumber(revisionGraph, revisionName);
+		this.revisionNumber = graph.getRevisionNumber(revisionName);
 		
-		this.newRevisionNumber = RevisionManagement.getNextRevisionNumber(graphName);
+		this.newRevisionNumber = graph.getNextRevisionNumber();
 		
 		this.addSetURI = graphName + "-addSet-" + newRevisionNumber;
 		this.deleteSetURI = graphName + "-deleteSet-" + newRevisionNumber;
-		this.referenceFullGraph = RevisionManagement.getReferenceGraph(graphName, revisionName);
+		this.referenceFullGraph = graph.getReferenceGraph(revisionName);
 	}
 	
 	
 	
 	public boolean equals(final String graphName, final String revisionNumber) throws InternalErrorException{
-		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-		String revNumber = RevisionManagement.getRevisionNumber(revisionGraph, revisionNumber);
-		return ((this.graphName.equals(graphName)) && (this.revisionNumber.equals(revNumber)));
+		RevisionGraph otherGraph = new RevisionGraph(graphName);
+		String otherRevisionNumber = otherGraph.getRevisionNumber(revisionNumber);
+		return ((this.graphName.equals(graphName)) && (this.revisionNumber.equals(otherRevisionNumber)));
 	}
-	
+		
 	
 }

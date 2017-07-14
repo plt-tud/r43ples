@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.merging.model.structure.Patch;
@@ -21,8 +22,6 @@ public class RebaseControl {
 	private String branchNameB;
 	private String branchNameA;
 	private PatchGroup patchGroup;
-	
-	
 	
 	
 	
@@ -44,15 +43,15 @@ public class RebaseControl {
 			throw new InternalErrorException("Graph <"+graphName+"> does not exist.");
 		}
 	
-		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+		RevisionGraph graph = new RevisionGraph(graphName);
 		// Check if A and B are different revisions
-		if (RevisionManagement.getRevisionNumber(revisionGraph, branchNameA).equals(RevisionManagement.getRevisionNumber(revisionGraph, branchNameB))) {
+		if (graph.getRevisionNumber(branchNameA).equals(graph.getRevisionNumber(branchNameB))) {
 			// Branches are equal - throw error
 			throw new InternalErrorException("Specified branches are equal");
 		}
 		
 		// Check if both are terminal nodes
-		if (!(RevisionManagement.isBranch(graphName, branchNameA) && RevisionManagement.isBranch(graphName, branchNameB))) {
+		if (!(graph.hasBranch(branchNameA) && graph.hasBranch(branchNameB))) {
 			throw new InternalErrorException("Non terminal nodes were used ");
 		}
 	}

@@ -19,6 +19,7 @@ import com.hp.hpl.jena.util.FileUtils;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.JenaModelManagement;
+import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
@@ -206,8 +207,9 @@ public class MergeManagement {
 		// Get the full graph name of first revision or create full revision graph of first revision
 		String fullGraphNameCommonRevision = "";
 		Boolean tempGraphWasCreated = false;
+		RevisionGraph graph = new RevisionGraph(graphName);
 		try {
-			fullGraphNameCommonRevision = RevisionManagement.getReferenceGraph(graphName, firstRevisionNumber);
+			fullGraphNameCommonRevision = graph.getReferenceGraph(firstRevisionNumber);
 		} catch (InternalErrorException e) {
 			// Create a temporary full graph
 			fullGraphNameCommonRevision = graphName + "RM-TEMP-REVISION-PROGRESS-FULLGRAPH";
@@ -697,14 +699,16 @@ public class MergeManagement {
 	 */
 	public static String createMergedRevision(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type, String triples) throws InternalErrorException {
 		 
+		RevisionGraph graph = new RevisionGraph(graphName);
+		
 		// Create an empty temporary graph which will contain the merged full content
 		String graphNameOfMerged = graphName + "-RM-MERGED-TEMP";
 		createNewGraph(graphNameOfMerged);
 		
 		// Get the full graph name of branch A
-		String graphNameOfBranchA = RevisionManagement.getReferenceGraph(graphName, branchNameA);
+		String graphNameOfBranchA = graph.getReferenceGraph(branchNameA);
 		// Get the full graph name of branch B
-		String graphNameOfBranchB = RevisionManagement.getReferenceGraph(graphName, branchNameB);
+		String graphNameOfBranchB = graph.getReferenceGraph(branchNameB);
 		
 		if (type.equals(MergeQueryTypeEnum.MANUAL)) {
 			// Manual merge query

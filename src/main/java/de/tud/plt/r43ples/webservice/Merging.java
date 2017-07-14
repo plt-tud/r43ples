@@ -23,6 +23,7 @@ import com.github.mustachejava.MustacheFactory;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.FastForwardControl;
 import de.tud.plt.r43ples.management.Interface;
+import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.model.structure.MergeCommitModel;
@@ -83,13 +84,13 @@ public class Merging {
 			throw new InternalErrorException("strategy name has to be provided");
 					
 		ResponseBuilder response = Response.ok();
+		RevisionGraph graph = new RevisionGraph(graphName);
 		
 		// Fast Forward
 		if(strategy.equals("Fast-Forward")){
 			MergeCommitModel commitModel = new MergeCommitModel(graphName, sddName, user, message, branch1, branch2, "Fast-Forward", null);
 			
-			String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-			boolean ff_successful = FastForwardControl.performFastForward(revisionGraph, branch1, branch2, user, RevisionManagement.getDateString(), message);
+			boolean ff_successful = FastForwardControl.performFastForward(graph, branch1, branch2, user, RevisionManagement.getDateString(), message);
 
 			if (ff_successful){
 				response = Response.ok();

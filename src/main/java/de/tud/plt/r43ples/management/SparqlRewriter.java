@@ -68,6 +68,7 @@ public class SparqlRewriter {
 	private Expr last_revision;
 	private String revisionNumber;
 	private String graphName; 
+	private RevisionGraph graph;
 	
 	public static String rewriteQuery(final String query_r43ples) throws InternalErrorException {
 		SparqlRewriter sr = new SparqlRewriter();
@@ -83,10 +84,11 @@ public class SparqlRewriter {
 	private boolean updateRevision(){
 		revisionNumber = revisions.removeFirst();
 		graphName = graphs.removeFirst();
-		if (RevisionManagement.isBranch(graphName, revisionNumber))
+		graph = new RevisionGraph(graphName);
+		if (graph.hasBranch(revisionNumber))
 			return false;
 		else {
-			String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+			String revisionGraph = graph.getRevisionGraphUri();
 			Tree tree =  new Tree(revisionGraph);
 			LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
 			logger.debug("Path to revision: " + list.toString());
@@ -113,9 +115,9 @@ public class SparqlRewriter {
 		while (m2.find()) {
 			String graphName = m2.group("graph");
 			String referenceName = m2.group("revision").toLowerCase();
+			RevisionGraph graph = new RevisionGraph(graphName);
 			
-			String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-			String revisionNumber = RevisionManagement.getRevisionNumber(revisionGraph, referenceName);
+			String revisionNumber = graph.getRevisionNumber(referenceName);
 			graphs.add(graphName);
 			revisions.add(revisionNumber);
 
@@ -152,7 +154,7 @@ public class SparqlRewriter {
 			else {
 				ElementNamedGraph ng_new;
 				try {
-					ng_new = new ElementNamedGraph(NodeFactory.createURI(RevisionManagement.getReferenceGraph(graphName, revisionNumber)), eg_original);
+					ng_new = new ElementNamedGraph(NodeFactory.createURI(graph.getReferenceGraph(revisionNumber)), eg_original);
 					return ng_new;
 				} catch (InternalErrorException e) {
 					e.printStackTrace();
@@ -217,7 +219,7 @@ public class SparqlRewriter {
 
 			Node g_delete_set_full_graph = Var.alloc("g_delete_set_full_graph_" + statement_i);
 			Node g_add_set = Var.alloc("g_add_set_" + statement_i);
-			Node g_revisiongraph = NodeFactory.createURI(RevisionManagement.getRevisionGraph(graphName));			
+			Node g_revisiongraph = NodeFactory.createURI(graph.getRevisionGraphUri());			
 			
 			Var var_r_delete_set = Var.alloc("r_delete_set_" + statement_i);
 			Var var_r_add_set = Var.alloc("r_add_set_" + statement_i);

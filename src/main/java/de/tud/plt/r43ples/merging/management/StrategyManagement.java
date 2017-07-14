@@ -7,7 +7,7 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
-import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 public class StrategyManagement {
@@ -42,7 +42,7 @@ public class StrategyManagement {
 	/** get the delta removed width versionUri
 	 * @param uri of the added or removed triple set*/
 	public static LinkedList<String> createAddedOrRemovedTripleSet(String addedOrRemovedDelta) {
-		String query = RevisionManagement.prefixes + String.format(""
+		String query = Config.prefixes + String.format(""
 				+"SELECT DISTINCT ?s ?p ?o %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"		{ ?s ?p ?o . } %n"
@@ -73,7 +73,7 @@ public class StrategyManagement {
 	/** get number of revision
 	 * @param uri of revision*/
 	public static String getRevisionNumber(String revisionGraph, String revisionUri){
-		String query = RevisionManagement.prefixes + String.format(""
+		String query = Config.prefixes + String.format(""
 				+"SELECT DISTINCT ?revisionNumber %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"   {<%s> rmo:revisionNumber ?revisionNumber. } }%n",
@@ -93,7 +93,7 @@ public class StrategyManagement {
 	/** get client name
 	 * @param uri of commit */
 	public static String getCommitUserUri(String revisionGraph, String commitUri) {
-		String query = RevisionManagement.prefixes + String.format(""
+		String query = Config.prefixes + String.format(""
 				+"SELECT DISTINCT ?user %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"   {<%s> prov:wasAssociatedWith ?user. } }%n",
@@ -115,7 +115,7 @@ public class StrategyManagement {
 	/** get client message
 	 * @param uri of commit*/
 	public static String getCommitMessage(String revisionGraph, String commitUri) {
-		String query = RevisionManagement.prefixes + String.format(""
+		String query = Config.prefixes + String.format(""
 				+"SELECT DISTINCT ?message %n"
 				+"WHERE{ GRAPH <%s> %n"
 				+"   {<%s> dc-terms:title ?message. } }%n",

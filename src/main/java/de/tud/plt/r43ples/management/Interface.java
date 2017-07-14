@@ -40,7 +40,7 @@ public class Interface {
 		if (query_rewriting) {
 			String query_rewritten = SparqlRewriter.rewriteQuery(query);
 			result = TripleStoreInterfaceSingleton.get()
-					.executeSelectConstructAskQuery(Config.getPrefixes() + query_rewritten, format);
+					.executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + query_rewritten, format);
 		} else {
 			result = getSelectConstructAskResponseClassic(query, format);
 		}
@@ -68,6 +68,8 @@ public class Interface {
 			String revisionNumber = m.group("revision").toLowerCase();
 			String newGraphName;
 
+			RevisionGraph graph = new RevisionGraph(graphName);
+					
 			// if no revision number is declared use the MASTER as default
 			if (revisionNumber == null) {
 				revisionNumber = "master";
@@ -77,8 +79,8 @@ public class Interface {
 				// revisions are already created in the named graphs
 				newGraphName = graphName;
 			} else {
-				if (RevisionManagement.isBranch(graphName, revisionNumber)) {
-					newGraphName = RevisionManagement.getReferenceGraph(graphName, revisionNumber);
+				if (graph.hasBranch(revisionNumber)) {
+					newGraphName = graph.getReferenceGraph(revisionNumber);
 				} else {
 					// Respond with specified revision, therefore the revision
 					// must be generated - saved in graph <graphName-revisionNumber>
@@ -92,7 +94,7 @@ public class Interface {
 
 		}
 		String response = TripleStoreInterfaceSingleton.get()
-				.executeSelectConstructAskQuery(Config.getPrefixes() + queryM, format);
+				.executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + queryM, format);
 		return response;
 	}
 
@@ -145,7 +147,8 @@ public class Interface {
 				String graphName = m2a.group("graph");
 				String revisionName = m2a.group("revision").toLowerCase();
 
-				if (!RevisionManagement.isBranch(graphName, revisionName)) {
+				RevisionGraph graph = new RevisionGraph(graphName);
+				if (!graph.hasBranch(revisionName)) {
 					throw new InternalErrorException("Revision is not referenced by a branch");
 				}
 				RevisionDraft d = null;
@@ -200,9 +203,8 @@ public class Interface {
 
 		// V. add changesets to full graph and add meta information in revision
 		// graphs
-		for (RevisionDraft d : revList) {
-			RevisionManagement.addNewRevisionFromChangeSet(user, commitMessage, d.graphName, d.revisionName,
-					d.newRevisionNumber, d.referenceFullGraph, d.addSetURI, d.deleteSetURI);
+		for (RevisionDraft draft : revList) {
+			RevisionManagement.addNewRevisionFromChangeSet(user, commitMessage, draft);
 		}
 	}
 
@@ -220,7 +222,8 @@ public class Interface {
 			// Create graph
 			TripleStoreInterfaceSingleton.get().executeCreateGraph(graphName);
 
-			if (RevisionManagement.getMasterRevisionNumber(graphName) == null) {
+			RevisionGraph graph = new RevisionGraph(graphName);
+			if (graph.getMasterRevisionNumber() == null) {
 				// Add R43ples information
 				RevisionManagement.putGraphUnderVersionControl(graphName);
 			}
@@ -239,7 +242,8 @@ public class Interface {
 		while (m.find()) {
 			found = true;
 			String graphName = m.group("graph");
-			RevisionManagement.purgeRevisionInformation(graphName);
+			RevisionGraph graph = new RevisionGraph(graphName);
+			graph.purgeRevisionInformation();
 		}
 		if (!found) {
 			throw new QueryErrorException("Query contain errors:\n" + query);
@@ -312,9 +316,9 @@ public class Interface {
 	 */
 	public static MergeResult mergeFastForward(final String graphName, final String branchNameA,
 			final String branchNameB, final String user, final String commitMessage) throws InternalErrorException {
-		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
+		RevisionGraph graph = new RevisionGraph(graphName);
 		MergeResult result = new MergeResult(graphName, branchNameA, branchNameB);
-		result.hasConflict = !FastForwardControl.performFastForward(revisionGraph, branchNameA, branchNameB, user,
+		result.hasConflict = !FastForwardControl.performFastForward(graph, branchNameA, branchNameB, user,
 				RevisionManagement.getDateString(), commitMessage);
 
 		return result;
@@ -339,9 +343,10 @@ public class Interface {
 			final boolean with, final String triples, final String type, final String sdd, final String user,
 			final String commitMessage, final String format) throws InternalErrorException {
 
-		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
-		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
+		RevisionGraph graph = new RevisionGraph(graphName);
+		String revisionGraph = graph.getRevisionGraphUri();
+		String revisionUriA = graph.getRevisionUri(branchNameA);
+		String revisionUriB = graph.getRevisionUri(branchNameB);
 
 		logger.debug("type: " + type);
 		logger.debug("graph: " + graphName);
@@ -359,20 +364,20 @@ public class Interface {
 		}
 
 		// Check if A and B are different revisions
-		if (RevisionManagement.getRevisionNumber(revisionGraph, branchNameA)
-				.equals(RevisionManagement.getRevisionNumber(revisionGraph, branchNameB))) {
+		if (graph.getRevisionNumber(branchNameA)
+				.equals(graph.getRevisionNumber(branchNameB))) {
 			// Branches are equal - throw error
 			throw new InternalErrorException("Specified branches are equal");
 		}
 
 		// Check if both are terminal nodes
-		if (!(RevisionManagement.isBranch(graphName, branchNameA)
-				&& RevisionManagement.isBranch(graphName, branchNameB))) {
-			throw new InternalErrorException("Non terminal nodes were used");
+		if (!(graph.hasBranch(branchNameA)
+				&& graph.hasBranch(branchNameB))) {
+			throw new InternalErrorException("No terminal nodes were used");
 		}
 
 		// Differ between MERGE query with specified SDD and without SDD
-		String usedSDDURI = RevisionManagement.getSDD(graphName, sdd);
+		String usedSDDURI = graph.getSDD(sdd);
 
 		// Get the common revision with shortest path
 		mresult.commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA,
@@ -425,7 +430,7 @@ public class Interface {
 				// Difference model contains conflicts
 				// Return the conflict model to the client
 				mresult.hasConflict = true;
-				mresult.conflictModel = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format);
+				mresult.conflictModel = RevisionManagement.getContentOfGraph(graphNameDiff, format);
 
 			} else {
 				// Difference model contains no conflicts
@@ -459,9 +464,10 @@ public class Interface {
 			final boolean with, final String triples, final String type, final String sdd, final String user,
 			final String commitMessage, final String format) throws InternalErrorException {
 
-		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
-		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
+		RevisionGraph graph = new RevisionGraph(graphName);
+		String revisionGraph = graph.getRevisionGraphUri();
+		String revisionUriA = graph.getRevisionUri(branchNameA);
+		String revisionUriB = graph.getRevisionUri(branchNameB);
 
 		logger.debug("type: " + type);
 		logger.debug("graph: " + graphName);
@@ -477,7 +483,7 @@ public class Interface {
 		rebaseControl.checkIfRebaseIsPossible();
 
 		// Differ between MERGE query with specified SDD and without SDD
-		String usedSDDURI = RevisionManagement.getSDD(graphName, sdd);
+		String usedSDDURI = graph.getSDD(sdd);
 
 		// Get the common revision with shortest path
 		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA,
@@ -557,7 +563,7 @@ public class Interface {
 			} else {
 				rebaseControl.forceRebaseProcess();
 			}
-			mresult.conflictModel = RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format);
+			mresult.conflictModel = RevisionManagement.getContentOfGraph(graphNameDiff, format);
 
 		} else {
 			throw new InternalErrorException("This is not a valid MERGE query");

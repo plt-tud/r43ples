@@ -19,6 +19,7 @@ import com.hp.hpl.jena.util.FileUtils;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.JenaModelManagement;
+import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merge.SDDTripleStateEnum;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
@@ -176,6 +177,8 @@ public class MergeManagement {
 			LinkedList<String> listB, String graphNameRevisionProgressB, String uriB) throws InternalErrorException {
 		logger.info("Create the revision progress of branch A and B.");
 		
+		RevisionGraph graph = new RevisionGraph(graphName);
+		
 		// Get the common revision
 		String commonRevision = null;
 		if ((listA.size() > 0) && (listB.size() > 0)) {
@@ -206,7 +209,7 @@ public class MergeManagement {
 		String fullGraphNameCommonRevision = "";
 		Boolean tempGraphWasCreated = false;
 		try {
-			fullGraphNameCommonRevision = RevisionManagement.getReferenceGraph(graphName, firstRevisionNumber);
+			fullGraphNameCommonRevision = graph.getReferenceGraph(firstRevisionNumber);
 		} catch (InternalErrorException e) {
 			// Create a temporary full graph
 			fullGraphNameCommonRevision = graphName + "RM-TEMP-REVISION-PROGRESS-FULLGRAPH";
@@ -697,15 +700,17 @@ public class MergeManagement {
 	 */
 	public static String createMergedRevision(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type, String triples) throws InternalErrorException {
 		 
+		RevisionGraph graph = new RevisionGraph(graphName);
+				
 		// Create an empty temporary graph which will contain the merged full content
 		String graphNameOfMerged = graphName + "-RM-MERGED-TEMP";
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameOfMerged));
 		TripleStoreInterfaceSingleton.get().executeCreateGraph(graphNameOfMerged);
 		
 		// Get the full graph name of branch A
-		String graphNameOfBranchA = RevisionManagement.getReferenceGraph(graphName, branchNameA);
+		String graphNameOfBranchA = graph.getReferenceGraph(branchNameA);
 		// Get the full graph name of branch B
-		String graphNameOfBranchB = RevisionManagement.getReferenceGraph(graphName, branchNameB);
+		String graphNameOfBranchB = graph.getReferenceGraph(branchNameB);
 		
 		if (type.equals(MergeQueryTypeEnum.MANUAL)) {
 			// Manual merge query
@@ -888,6 +893,9 @@ public class MergeManagement {
 	 * @throws InternalErrorException 
 	 */
 	public static ArrayList<String> createRebaseMergedTripleList(String graphName, String branchNameA, String branchNameB, String user, String commitMessage, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type, String triples) throws InternalErrorException {
+		
+		RevisionGraph graph = new RevisionGraph(graphName);
+		
 		//set the triple list
 		ArrayList<String> list = new ArrayList<String>();
 		
@@ -896,9 +904,9 @@ public class MergeManagement {
 		TripleStoreInterfaceSingleton.get().executeCreateGraph(graphNameOfMerged);
 		
 		// Get the full graph name of branch A
-		String graphNameOfBranchA = RevisionManagement.getReferenceGraph(graphName, branchNameA);
+		String graphNameOfBranchA = graph.getReferenceGraph(branchNameA);
 		// Get the full graph name of branch B
-		String graphNameOfBranchB = RevisionManagement.getReferenceGraph(graphName, branchNameB);
+		String graphNameOfBranchB = graph.getReferenceGraph(branchNameB);
 		
 		logger.info("the triples: "+ triples);
 		if (type.equals(MergeQueryTypeEnum.MANUAL)) {

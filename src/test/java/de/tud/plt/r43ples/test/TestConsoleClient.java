@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import de.tud.plt.r43ples.client.ConsoleClient;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.RevisionGraph;
 
 public class TestConsoleClient {
 
@@ -40,7 +40,8 @@ public class TestConsoleClient {
 	@Test
 	public final void testMain() throws ConfigurationException, IOException, InternalErrorException {
 		ConsoleClient.main("--new --graph http://test.com".split(" "));
-		String reference = RevisionManagement.getReferenceGraph("http://test.com", "master");
+		RevisionGraph graph = new RevisionGraph("http://test.com");
+		String reference = graph.getReferenceGraph("master");
 		Assert.assertEquals("http://test.com", reference);
 	}
 

@@ -23,41 +23,42 @@ public class SampleDataSet {
 
 	public static DataSetGenerationResult createSampleDataset1() throws InternalErrorException  {
 		DataSetGenerationResult result = new DataSetGenerationResult();	
-		String graph = "http://test.com/r43ples-dataset-1";
-		result.graphName = graph;
-		RevisionManagement.purgeRevisionInformation(graph);
-		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graph, "2016-01-01T14:51:37.011");
+		String graphName = "http://test.com/r43ples-dataset-1";
+		result.graphName = graphName;
+		RevisionGraph graph = new RevisionGraph(graphName);
+		graph.purgeRevisionInformation();
+		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graphName, "2016-01-01T14:51:37.011");
 		result.revisions.put("master-0", revisionNumber0);
 
-		String revisionNumber1 = RevisionManagement.createNewRevision(graph,
+		String revisionNumber1 = RevisionManagement.createNewRevision(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-1.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset1/removed-1.nt"), user,
 				"2016-01-01T14:51:37.012",
 				"test commit message 1", revisionNumber0);
 		result.revisions.put("master-1", revisionNumber1);
 		
-		String revisionNumber2 = RevisionManagement.createNewRevision(graph,
+		String revisionNumber2 = RevisionManagement.createNewRevision(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-2.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset1/removed-2.nt"), user,
 				"2016-01-02T09:06:52.521",
 				"test commit message 2", revisionNumber1);
 		result.revisions.put("master-2", revisionNumber2);
 		
-		String revisionNumber3 = RevisionManagement.createNewRevision(graph,
+		String revisionNumber3 = RevisionManagement.createNewRevision(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-3.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset1/removed-3.nt"), user,
 				"2016-01-08T14:07:59.739",
 				"test commit message 3", revisionNumber2);
 		result.revisions.put("master-3", revisionNumber3);
 		
-		String revisionNumber4 = RevisionManagement.createNewRevision(graph,
+		String revisionNumber4 = RevisionManagement.createNewRevision(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-4.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset1/removed-4.nt"), user,
 				"2016-01-10T08:12:23.018",
 				"test commit message 4", revisionNumber3);
 		result.revisions.put("master-4", revisionNumber4);
 		
-		String revisionNumber5 = RevisionManagement.createNewRevision(graph,
+		String revisionNumber5 = RevisionManagement.createNewRevision(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset1/added-5.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset1/removed-5.nt"), user,
 				"2016-01-21T23:07:52.104",
@@ -68,18 +69,19 @@ public class SampleDataSet {
 
 	public static DataSetGenerationResult createSampleDataset2() throws InternalErrorException {
 		DataSetGenerationResult result = new DataSetGenerationResult();	
-		String graph = "http://test.com/r43ples-dataset-2";
-		result.graphName = graph;
-		RevisionManagement.purgeRevisionInformation(graph);
-		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graph);
+		String graphName = "http://test.com/r43ples-dataset-2";
+		result.graphName = graphName;
+		RevisionGraph graph = new RevisionGraph(graphName);
+		graph.purgeRevisionInformation();
+		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 		result.revisions.put("master-0", revisionNumber0);
 
-		String revisionNumber1 = RevisionManagement.createNewRevision(graph,
+		String revisionNumber1 = RevisionManagement.createNewRevision(graphName,
 				ResourceManagement.getContentFromResource("samples/test2-addSet-1.nt"),
 				ResourceManagement.getContentFromResource("samples/test2-deleteSet-1.nt"), user,
 				"test commit message 1", revisionNumber0);
 		result.revisions.put("master-1", revisionNumber1);
-		String revisionNumber2 = RevisionManagement.createNewRevision(graph,
+		String revisionNumber2 = RevisionManagement.createNewRevision(graphName,
 				ResourceManagement.getContentFromResource("samples/test2-addSet-2.nt"),
 				ResourceManagement.getContentFromResource("samples/test2-deleteSet-2.nt"), user,
 				"test commit message 2", revisionNumber1);
@@ -89,37 +91,38 @@ public class SampleDataSet {
 	
 	public static DataSetGenerationResult createSampleDataset3() throws InternalErrorException  {
 		DataSetGenerationResult result = new DataSetGenerationResult();	
-		String graph = "http://test.com/r43ples-dataset-3";
-		result.graphName = graph;
-		RevisionManagement.purgeRevisionInformation(graph);
-		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graph, "2015-01-01T14:51:37");
+		String graphName = "http://test.com/r43ples-dataset-3";
+		result.graphName = graphName;
+		RevisionGraph graph = new RevisionGraph(graphName);
+		graph.purgeRevisionInformation();
+		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graphName, "2015-01-01T14:51:37");
 		result.revisions.put("master-0", revisionNumber0);
 		
 		
-		String revisionNumber1 = RevisionManagement.createNewRevision(graph,
+		String revisionNumber1 = RevisionManagement.createNewRevision(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-1.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-1.nt"), user,
 				"2015-02-01T21:32:52",
 				"test commit message 1", revisionNumber0);
 		result.revisions.put("master-1", revisionNumber1);
 		// Create a new branch B1
-				DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graph, revisionNumber1, "B1");
+				DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, revisionNumber1, "B1");
 
-		String revisionB1_0 = RevisionManagement.createNewRevision(graph,
+		String revisionB1_0 = RevisionManagement.createNewRevision(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-2.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-2.nt"), user,
 				"2015-03-02T09:06:52",
 				"test commit message 2", "B1".toLowerCase());
 		result.revisions.put("b1-0", revisionB1_0);
 		
-		String revisionNumber3 = RevisionManagement.createNewRevision(graph,
+		String revisionNumber3 = RevisionManagement.createNewRevision(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-3.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-3.nt"), user,
 				"2015-04-08T14:07:59",
 				"test commit message 3", revisionNumber1);
 		result.revisions.put("master-3", revisionNumber3);
 		
-		String revisionNumber4 = RevisionManagement.createNewRevision(graph,
+		String revisionNumber4 = RevisionManagement.createNewRevision(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-4.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-4.nt"), user,
 				"2015-05-10T08:12:23",
@@ -128,7 +131,7 @@ public class SampleDataSet {
 		ArrayList<String> usedRevisions5 = new ArrayList<>();
 		usedRevisions5.add(revisionNumber4);
 		usedRevisions5.add(revisionB1_0);
-		String revisionNumber5 = RevisionManagement.createNewRevision(graph,
+		String revisionNumber5 = RevisionManagement.createNewRevision(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-5.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-5.nt"), user,
 				"2015-06-21T23:07:52",
@@ -163,8 +166,10 @@ public class SampleDataSet {
 		String graphName = "http://test.com/r43ples-dataset-merging";
 		result.graphName = graphName;
 		
+		RevisionGraph graph = new RevisionGraph(graphName);
+		
 		//delete the old graph
-		RevisionManagement.purgeRevisionInformation(graphName);
+		graph.purgeRevisionInformation();
 		
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 		result.revisions.put("master-0", revision0);
@@ -244,9 +249,11 @@ public class SampleDataSet {
 	 */
 	public static String createSampleDataSetRebase() throws InternalErrorException {
 		String graphName = "http://test.com/r43ples-dataset-rebase";
+		
+		RevisionGraph graph = new RevisionGraph(graphName);
 
 		//delete the old graph
-		RevisionManagement.purgeRevisionInformation(graphName);
+		graph.purgeRevisionInformation();
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 
 		// Initial commit
@@ -300,6 +307,9 @@ public class SampleDataSet {
 	 */
 	public static String createSampleDataSetMergingClasses() throws InternalErrorException {		
 		String graphName = "http://test.com/r43ples-dataset-merging-classes";
+		
+		RevisionGraph graph = new RevisionGraph(graphName);
+		
 		/** The initial content file path **/
 		String initialContentFilePath = "verification/ExampleGraphClasses_initial.triples";
 
@@ -307,7 +317,7 @@ public class SampleDataSet {
 		String initialContent = ResourceManagement.getContentFromResource(initialContentFilePath);
 
 		//delete the old graph
-		RevisionManagement.purgeRevisionInformation(graphName);
+		graph.purgeRevisionInformation();
 		
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 
@@ -373,9 +383,11 @@ public class SampleDataSet {
 	 */
 	public static String createSampleDataSetRenaming() throws InternalErrorException {
 		String graphName = "http://test.com/r43ples-dataset-renaming";
+		
+		RevisionGraph graph = new RevisionGraph(graphName);
 
 		//delete the old graph
-		RevisionManagement.purgeRevisionInformation(graphName);
+		graph.purgeRevisionInformation();
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 
 		// Initial commit
@@ -446,8 +458,10 @@ public class SampleDataSet {
 	public static String createSampleDataSetComplexStructure() throws InternalErrorException {
 		String graphName = "http://test.com/r43ples-dataset-complex-structure";
 		
+		RevisionGraph graph = new RevisionGraph(graphName);
+		
 		//delete the old graph
-		RevisionManagement.purgeRevisionInformation(graphName);
+		graph.purgeRevisionInformation();
 		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 		
 		// Initial commit
