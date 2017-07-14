@@ -135,19 +135,29 @@ public class Endpoint {
 			@FormParam("format") final String formatQuery, 
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
 			@FormParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
-		String format = formatQuery;
+		try {
+			String format = getFormat(formatQuery);
+			logger.info("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
+			return sparql(format, sparqlQuery, query_rewriting);
+		} catch (Exception e) {
+			return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
+		}
+	}
+
+	private String getFormat(final String formatQuery) throws Exception {
 		if (formatQuery == null){
 			List<Variant> reqVariants = Variant.mediaTypes(MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_HTML_TYPE, 
 					MediaType.APPLICATION_JSON_TYPE, TEXT_TURTLE_TYPE, APPLICATION_RDF_XML_TYPE, APPLICATION_SPARQL_RESULTS_XML_TYPE).build();
 			Variant bestVariant = request.selectVariant(reqVariants);
 	        if (bestVariant == null) {
-	            return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
+	        	throw new Exception("Requested datatype not available");
 	        }
         	MediaType reqMediaType = bestVariant.getMediaType();
-        	format = reqMediaType.toString();
+        	return reqMediaType.toString();
 		}
-		logger.info("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
-		return sparql(format, sparqlQuery, query_rewriting);
+		else {
+			return formatQuery;
+		}
 	}
 	
 	/**
@@ -201,16 +211,11 @@ public class Endpoint {
 			@QueryParam("format") final String formatQuery, 
 			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
 			@QueryParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
-		String format = formatQuery;
-		if (formatQuery == null){
-			List<Variant> reqVariants = Variant.mediaTypes(MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_HTML_TYPE, 
-					MediaType.APPLICATION_JSON_TYPE, TEXT_TURTLE_TYPE, APPLICATION_RDF_XML_TYPE, APPLICATION_SPARQL_RESULTS_XML_TYPE).build();
-			Variant bestVariant = request.selectVariant(reqVariants);
-	        if (bestVariant == null) {
-	            return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
-	        }
-        	MediaType reqMediaType = bestVariant.getMediaType();
-        	format = reqMediaType.toString();
+		String format;
+		try {
+			format = getFormat(formatQuery);
+		} catch (Exception e) {
+			return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
 		}		
 		
 		String sparqlQueryDecoded;
