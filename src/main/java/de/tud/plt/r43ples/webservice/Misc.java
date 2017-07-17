@@ -26,11 +26,9 @@ import com.github.mustachejava.MustacheFactory;
 import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.GitRepositoryState;
-import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.visualisation.VisualisationBatik;
-import de.tud.plt.r43ples.visualisation.VisualisationD3;
-import de.tud.plt.r43ples.visualisation.VisualisationG6;
+import de.tud.plt.r43ples.visualisation.VisualisationTable;
+import de.tud.plt.r43ples.visualisation.VisualisationGraph;
 
 @Path("/")
 public class Misc {
@@ -141,13 +139,11 @@ public class Misc {
 		logger.info("Get Revision Graph: " + graph + " (format: " + format+")");
 		
 		ResponseBuilder response = Response.ok();
-		if (format.equals("batik")) {
+		if (format.equals("table")) {
 			response.type(MediaType.TEXT_HTML);
-			response.entity(VisualisationBatik.getHtmlOutput(graph));
-		} else if (format.equals("d3")) {
-			response.entity(VisualisationD3.getHtmlOutput(graph));
-		} else if (format.equals("g6")) {
-			response.entity(VisualisationG6.getHtmlOutput(graph));
+			response.entity(VisualisationTable.getHtmlOutput(graph));
+		}  else if (format.equals("graph")) {
+			response.entity(VisualisationGraph.getHtmlOutput(graph));
 		}
 		else {
 			response.entity(RevisionManagement.getRevisionInformation(graph, format));
@@ -171,9 +167,8 @@ public class Misc {
 		logger.info("Get Content of graph " + graphName);
 		String format = (format_query != null) ? format_query : format_header;
 		logger.debug("format: " + format);
-		
-		RevisionGraph graph = new RevisionGraph(graphName);
-		String result = graph.getContentOfRevisionGraph(format);
+
+		String result = RevisionManagement.getContentOfGraph(graphName, format);
 		ResponseBuilder response = Response.ok();
 		return response.entity(result).type(format).build();
 	}

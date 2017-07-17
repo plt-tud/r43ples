@@ -9,11 +9,11 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
 
-public class VisualisationD3 {
+public class VisualisationGraph {
 	
 	public static String getHtmlOutput(String graphName) {
 		MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/graphvisualisation_d3.mustache");
+	    Mustache mustache = mf.compile("templates/graphvisualisation_graph.mustache");
 	    StringWriter sw = new StringWriter();
 	    
 	    Map<String, Object> scope = new HashMap<String, Object>();
