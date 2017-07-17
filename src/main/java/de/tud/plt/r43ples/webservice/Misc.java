@@ -25,7 +25,6 @@ import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.visualisation.VisualisationTable;
 import de.tud.plt.r43ples.visualisation.VisualisationGraph;
@@ -45,7 +44,6 @@ public class Misc {
 		logger.info("Get Landing page");
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
 		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());	
 		
 		StringWriter sw = new StringWriter();
 	    MustacheFactory mf = new DefaultMustacheFactory();
@@ -71,7 +69,6 @@ public class Misc {
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
 		htmlMap.put("help_active", true);
 		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());	
 		return htmlMap;
 	}
 	

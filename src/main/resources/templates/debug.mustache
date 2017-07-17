@@ -38,6 +38,15 @@ WHERE {
 			</form>
 		</div>
 	</div>
+	<div class="col-sm-6">
+		<h3>Version information</h3>
+		{{#version}}<p>Version: {{toString}}</p>{{/version}}
+		{{^version}}
+			<p>Git: {{git.commitId}} ({{git.describeShort}})</p>
+			<p>Branch: {{git.branch}}</p>
+			<p>Date: {{git.commitTime}}</p>
+		{{/version}}
+	</div>
 	<div id="debug-information" class="col-sm-6">
 		<h3>Existing graphs in triplestore</h3>
 		<ul>
