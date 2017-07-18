@@ -56,3 +56,9 @@ deploy:
     tags: true
     all_branches: true
 
+notifications:
+  email:
+    - markus.graube@tu-dresden.de
+    - stephan.hensel@tu-dresden.de
+
+
