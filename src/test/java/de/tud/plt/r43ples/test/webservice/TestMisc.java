@@ -89,13 +89,10 @@ public class TestMisc extends JerseyTest {
 		String result = target("revisiongraph").queryParam("graph", dataset).queryParam("format", "text/turtle").request().get(String.class);
 		Assert.assertThat(result, containsString("@prefix"));
 		
-		result = target("revisiongraph").queryParam("graph", dataset).queryParam("format", "d3").request().get(String.class);
-		Assert.assertThat(result, containsString("<div id=\"visualisation\""));
-		
-		result = target("revisiongraph").queryParam("graph", dataset).queryParam("format", "batik").request().get(String.class);
+		result = target("revisiongraph").queryParam("graph", dataset).queryParam("format", "table").request().get(String.class);
 		Assert.assertThat(result, containsString("<svg"));
 		
-		result = target("revisiongraph").queryParam("graph", dataset).queryParam("format", "g6").request().get(String.class);
+		result = target("revisiongraph").queryParam("graph", dataset).queryParam("format", "graph").request().get(String.class);
 		Assert.assertThat(result, containsString("<div id=\"visualisation\""));
 	}
 
