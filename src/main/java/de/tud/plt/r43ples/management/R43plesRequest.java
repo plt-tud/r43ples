@@ -20,7 +20,7 @@ private final static int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + 
 			"DROP\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
 			patternModifier);
 	private final Pattern patternBranchOrTagQuery = Pattern.compile(
-			"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>[^>\\?]*)(\\?|>)(\\s*REVISION\\s*\"|revision=)(?<revision>([^\">]))(>|\")\\s*TO\\s*\"(?<name>[^\"]*)\"",
+			"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>[^>\\?]*)(\\?|>)(\\s*REVISION\\s*\"|revision=)(?<revision>([^\">]+))(>|\")\\s*TO\\s*\"(?<name>[^\"]*)\"",
 			patternModifier);
 
 	private final Pattern patternMergeQuery =  Pattern.compile(
