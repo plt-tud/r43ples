@@ -57,7 +57,7 @@ public class Interface {
 	private static String getSelectConstructAskResponseClassic(final String query, final String format)
 			throws InternalErrorException {
 		final Pattern patternSelectFromPart = Pattern.compile(
-				"(?<type>FROM|GRAPH)\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"",
+				"(?<type>FROM|GRAPH)\\s*<(?<graph>[^>\\?]*)(\\?|>)(\\s*REVISION\\s*\"|revision=)(?<revision>([^\">]+))(>|\")",
 				Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
 
 		String queryM = query;
