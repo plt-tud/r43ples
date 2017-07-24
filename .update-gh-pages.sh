@@ -4,8 +4,8 @@
 # with README.md to gh-pages in order to update th website
 # only executed if master branch changes
 
-if [ "$TRAVIS_BRANCH" != "master" ]; then 
-    echo "Not on master branch -> no update of gh-pages!"
+if [ "$TRAVIS_BRANCH" != "develop" ]; then 
+    echo "Not on develop branch -> no update of gh-pages!"
     exit 0;
 fi
 

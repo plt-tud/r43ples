@@ -17,7 +17,7 @@ as well as for revision-enhanced SPARQL queries, named R43ples queries.
 The R43ples endpoint allows to specify revisions which should be queried for each named graph used inside a SPARQL query.
 The whole revision information is stored in additional graphs in the attached Jena TDB.
 
-The [website](http://plt-tud.github.io/r43ples) of R43ples contains further [project information](http://plt-tud.github.io/r43ples/site/project-reports.html) including [Javadocs](http://plt-tud.github.io/r43ples/site/apidocs/).
+The [website](http://plt-tud.github.io/r43ples) of R43ples contains further [project information](http://plt-tud.github.io/r43ples/site/project-reports.html) including [Javadocs](http://plt-tud.github.io/r43ples/site/apidocs/) of the *develop* branch.
 A running test server should be available under [http://eatld.et.tu-dresden.de:9998/r43ples/sparql](http://eatld.et.tu-dresden.de:9998/r43ples/sparql)
 
 
