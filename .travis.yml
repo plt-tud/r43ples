@@ -25,17 +25,12 @@ addons:
     branch_pattern: coverity_scan
 
 
-before_script:
-    #- wget "https://cloudstore.zih.tu-dresden.de/public.php?service=files&t=27bfa7d71ed6b9d3e3225da318cc4639&download" -O virtuoso.deb
-    #- sudo dpkg -i virtuoso.deb
-
 script:
-    - mvn -q test
+    - mvn -q site
 
 
 after_success:
     - ./.coverity.sh
-    - ./.update-gh-pages.sh
     - bash <(curl -s https://codecov.io/bash)
     
 
@@ -44,7 +39,15 @@ before_deploy:
     - mvn package -DskipTests=true -DfinalName=r43ples-$TRAVIS_TAG
     
 deploy:
-    # deploy to GitHub releases for every tag
+  # Deploy to gh-pages on develop
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  local_dir: target/site
+  on:
+    branch: develop
+  
+  # deploy to GitHub releases for every tag
   provider: releases
   api_key:
     secure: RHaHxxXNfD8GQBaEfKv2lmpcJK+FeOBt0N0Djz1loTY/VScOEQQRMpWWK7f3Z0O8D8fWKxRHjUKSM63OR7zo6JafIOQU1l/DzS+YK0Rt9NJuGm6MZHc5V32tf2CBBzS8hZJ6MKrCdPJb0WIP+w++zu64ccsFF9ZhWf7EYZ9BYug=
