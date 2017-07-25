@@ -39,25 +39,21 @@ before_deploy:
     - mvn package -DskipTests=true -DfinalName=r43ples-$TRAVIS_TAG
     
 deploy:
-  # Deploy to gh-pages on develop
-  provider: pages
-  skip_cleanup: true
-  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
-  local_dir: target/site
-  on:
-    branch: develop
-  
-  # deploy to GitHub releases for every tag
-  provider: releases
-  api_key:
-    secure: RHaHxxXNfD8GQBaEfKv2lmpcJK+FeOBt0N0Djz1loTY/VScOEQQRMpWWK7f3Z0O8D8fWKxRHjUKSM63OR7zo6JafIOQU1l/DzS+YK0Rt9NJuGm6MZHc5V32tf2CBBzS8hZJ6MKrCdPJb0WIP+w++zu64ccsFF9ZhWf7EYZ9BYug=
-  file:
-    - target/r43ples-$TRAVIS_TAG--jar-with-dependencies.jar
-    - target/r43ples-$TRAVIS_TAG.deb
-  skip_cleanup: true
-  on:
-    tags: true
-    all_branches: true
+  - provider: pages
+    skip_cleanup: true
+    github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+    local_dir: target/site
+    on:
+      branch: develop
+  - provider: releases
+    api_key:
+      secure: RHaHxxXNfD8GQBaEfKv2lmpcJK+FeOBt0N0Djz1loTY/VScOEQQRMpWWK7f3Z0O8D8fWKxRHjUKSM63OR7zo6JafIOQU1l/DzS+YK0Rt9NJuGm6MZHc5V32tf2CBBzS8hZJ6MKrCdPJb0WIP+w++zu64ccsFF9ZhWf7EYZ9BYug=
+    file:
+      - target/r43ples-$TRAVIS_TAG--jar-with-dependencies.jar
+      - target/r43ples-$TRAVIS_TAG.deb
+    skip_cleanup: true
+    on:
+      tags: true
 
 notifications:
   email:
