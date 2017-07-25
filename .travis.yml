@@ -35,14 +35,16 @@ after_success:
     
 
 before_deploy:
+    - ./.update-gh-pages.sh
     # http://stackoverflow.com/questions/25916249/deploying-a-maven-version-to-github-using-travis-ci
     - mvn package -DskipTests=true -DfinalName=r43ples-$TRAVIS_TAG
+    
     
 deploy:
   - provider: pages
     skip_cleanup: true
     github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
-    local_dir: target/site
+    local_dir: gh-pages
     on:
       branch: develop
   - provider: releases
