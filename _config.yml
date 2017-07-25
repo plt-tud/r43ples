@@ -1,4 +1,7 @@
 theme: jekyll-theme-architect
+title: R43ples
+show_downloads: true
+google_analytics: false
 gems:
    - jekyll-mentions
    - jemoji

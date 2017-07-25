@@ -3,6 +3,7 @@ cov-int/
 bin/
 target/
 database/
+gh-pages/
 
 *~
 .settings
