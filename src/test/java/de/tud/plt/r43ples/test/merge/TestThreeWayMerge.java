@@ -1,11 +1,12 @@
 package de.tud.plt.r43ples.test.merge;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
 import javax.ws.rs.core.Response;
 
+import de.tud.plt.r43ples.test.R43plesTest;
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
@@ -18,18 +19,21 @@ import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
-import de.tud.plt.r43ples.webservice.Endpoint;
 
 
-public class TestThreeWayMerge {
+/**
+ * Tests the 3-Way-Merge of the merge management.
+ *
+ * @author Xinyu Yang
+ * @author Stephan Hensel
+ */
+public class TestThreeWayMerge extends R43plesTest {
 
 	/** The graph name. **/
 	private static String graphName;
 	/** The user. **/
-	private static String user = "xinyu";
-	
-	private final Endpoint 	ep = new Endpoint();
-	
+	private static String user = "jUnitUser";
+
 	
 	/**
 	 * Initialize TestClass
@@ -69,21 +73,19 @@ public class TestThreeWayMerge {
 	@Test
 	public void testCreatedGraph() throws SAXException, InternalErrorException, IOException {
 		// Test branch B1
-		String result1 = ep.sparql(createSelectQuery(graphName, "B1")).getEntity().toString();
-		String expected1 = ResourceManagement.getContentFromResource("threeway/response-B1.xml");
-		assertXMLEqual(expected1, result1);
-		
-		
+		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "B1")).getEntity().toString();
+		String expected1 = ResourceManagement.getContentFromResource("threeway/response-B1.ttl");
+		assertTrue(check_isomorphism(result1, "TURTLE", expected1, "TURTLE"));
+
 		// Test branch B2
-		String result3 = ep.sparql(createSelectQuery(graphName, "B2")).getEntity().toString();
-		String expected3 = ResourceManagement.getContentFromResource("threeway/response-B2.xml");
-		assertXMLEqual(expected3, result3);
-		
-		
+		String result3 = ep.sparql("text/turtle", createConstructQuery(graphName, "B2")).getEntity().toString();
+		String expected3 = ResourceManagement.getContentFromResource("threeway/response-B2.ttl");
+		assertTrue(check_isomorphism(result3, "TURTLE", expected3, "TURTLE"));
+
 		// Test branch MASTER
-		String result5 = ep.sparql(createSelectQuery(graphName, "master")).getEntity().toString();
-		String expected5 = ResourceManagement.getContentFromResource("threeway/response-MASTER.xml");
-		assertXMLEqual(expected5, result5);
+		String result5 = ep.sparql("text/turtle", createConstructQuery(graphName, "master")).getEntity().toString();
+		String expected5 = ResourceManagement.getContentFromResource("threeway/response-MASTER.ttl");
+		assertTrue(check_isomorphism(result5, "TURTLE", expected5, "TURTLE"));
 	}
 	
 	
@@ -103,10 +105,9 @@ public class TestThreeWayMerge {
 		// Merge B1 into B2
 		ep.sparql(createAutoMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
 		// Test branch B1
-		String result1 = ep.sparql(createSelectQuery(graphName, "B2")).getEntity().toString();
-		
-		String expected1 = ResourceManagement.getContentFromResource("threeway/auto/response-B1-into-B2.xml");
-		assertXMLEqual(expected1, result1);
+		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "B2")).getEntity().toString();
+		String expected1 = ResourceManagement.getContentFromResource("threeway/auto/response-B1-into-B2.ttl");
+		assertTrue(check_isomorphism(result1, "TURTLE", expected1, "TURTLE"));
 		
 	}
 	
@@ -135,11 +136,9 @@ public class TestThreeWayMerge {
 		Assert.assertNull(queryResult1.getEntity());
 
 		// Test branch B2
-		String result1 = ep.sparql(createSelectQuery(graphName, "B2")).getEntity().toString();
-		
-
-		String expected1 = ResourceManagement.getContentFromResource("threeway/common/response-B1-into-B2.xml");
-		assertXMLEqual(expected1, result1);
+		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "B2")).getEntity().toString();
+		String expected1 = ResourceManagement.getContentFromResource("threeway/common/response-B1-into-B2.ttl");
+		assertTrue(check_isomorphism(result1, "TURTLE", expected1, "TURTLE"));
 
 	}
 	
@@ -169,26 +168,26 @@ public class TestThreeWayMerge {
 		ep.sparql(createManualMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
 		
 		// Test branch B2
-		String result1 = ep.sparql(createSelectQuery(graphName, "B2")).getEntity().toString();
-		String expected1 = ResourceManagement.getContentFromResource("threeway/manual/response-B1-into-B2.xml");
-		assertXMLEqual(expected1, result1);
+		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "B2")).getEntity().toString();
+		String expected1 = ResourceManagement.getContentFromResource("threeway/manual/response-B1-into-B2.ttl");
+		assertTrue(check_isomorphism(result1, "TURTLE", expected1, "TURTLE"));
 		
 	}
-	
-	
+
+
 	/**
-	 * Create the SELECT query.
-	 * 
+	 * Create the CONSTRUCT query.
+	 *
 	 * @param graphName the graph name
 	 * @param revision the revision
 	 * @return the query
 	 */
-	private String createSelectQuery(String graphName, String revision) {
-		return String.format( "SELECT * FROM <%s> REVISION \"%s\" %n"
-							+ "WHERE { %n"
-							+ "	?s ?p ?o . %n"
-							+ "} %n"
-							+ "ORDER BY ?s ?p ?o", graphName, revision);
+	private String createConstructQuery(String graphName, String revision) {
+		return String.format( "CONSTRUCT FROM <%s> REVISION \"%s\" %n"
+				+ "WHERE { %n"
+				+ "	?s ?p ?o . %n"
+				+ "} %n"
+				+ "ORDER BY ?s ?p ?o", graphName, revision);
 	}
 	
 

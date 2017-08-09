@@ -1,9 +1,10 @@
 package de.tud.plt.r43ples.test.merge;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
+import de.tud.plt.r43ples.test.R43plesTest;
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Before;
@@ -15,18 +16,21 @@ import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
-import de.tud.plt.r43ples.webservice.Endpoint;
 
 
-public class TestFastForwardMerge {
+/**
+ * Tests fast forwarding of the merge management.
+ *
+ * @author Xinyu Yang
+ * @author Stephan Hensel
+ */
+public class TestFastForwardMerge extends R43plesTest {
 
 	/** The graph name. **/
 	private static String graphName;
 	/** The user. **/
-	private static String user = "xinyu";
-	
-	private final Endpoint 	ep = new Endpoint();
-	
+	private static String user = "jUnitUser";
+
 	
 	/**
 	 * Initialize TestClass
@@ -63,38 +67,36 @@ public class TestFastForwardMerge {
 	@Test
 	public void testFastForwardMerge() throws InternalErrorException, SAXException, IOException {
 		// Test branch B1
-		String result_b1 = ep.sparql(createSelectQuery(graphName, "B1")).getEntity().toString();
-		String expected_b1 = ResourceManagement.getContentFromResource("threeway/response-B1.xml");
-		assertXMLEqual(expected_b1, result_b1);	
-		
+		String result_b1 = ep.sparql("text/turtle", createConstructQuery(graphName, "B1")).getEntity().toString();
+		String expected_b1 = ResourceManagement.getContentFromResource("threeway/response-B1.ttl");
+		assertTrue(check_isomorphism(result_b1, "TURTLE", expected_b1, "TURTLE"));
+
 		// Test branch MASTER
-		String result_master = ep.sparql(createSelectQuery(graphName, "master")).getEntity().toString();
-		String expected_master = ResourceManagement.getContentFromResource("threeway/response-MASTER.xml");
-		assertXMLEqual(expected_master, result_master);
+		String result_master = ep.sparql("text/turtle", createConstructQuery(graphName, "master")).getEntity().toString();
+		String expected_master = ResourceManagement.getContentFromResource("threeway/response-MASTER.ttl");
+		assertTrue(check_isomorphism(result_master, "TURTLE", expected_master, "TURTLE"));
 
 		// Test fast forward
-		ep.sparql(createFastForwardMergeQuery(graphName, user, "Merge B1 into Master", "B1", "master"));
-		result_master = ep.sparql(createSelectQuery(graphName, "master")).getEntity().toString();		
-		assertXMLEqual(expected_b1, result_master);	
+		ep.sparql("text/turtle", createFastForwardMergeQuery(graphName, user, "Merge B1 into Master", "B1", "master"));
+		result_master = ep.sparql("text/turtle", createConstructQuery(graphName, "master")).getEntity().toString();
+		assertTrue(check_isomorphism(result_master, "TURTLE", expected_b1, "TURTLE"));
 	}
-	
-	
-	
+
+
 	/**
-	 * Create the SELECT query.
-	 * 
+	 * Create the CONSTRUCT query.
+	 *
 	 * @param graphName the graph name
 	 * @param revision the revision
 	 * @return the query
 	 */
-	private String createSelectQuery(String graphName, String revision) {
-		return String.format( "SELECT * FROM <%s> REVISION \"%s\" %n"
-							+ "WHERE { %n"
-							+ "	?s ?p ?o . %n"
-							+ "} %n"
-							+ "ORDER BY ?s ?p ?o", graphName, revision);
+	private String createConstructQuery(String graphName, String revision) {
+		return String.format( "CONSTRUCT FROM <%s> REVISION \"%s\" %n"
+				+ "WHERE { %n"
+				+ "	?s ?p ?o . %n"
+				+ "} %n"
+				+ "ORDER BY ?s ?p ?o", graphName, revision);
 	}
-	
 
 
 	/**

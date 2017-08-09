@@ -21,13 +21,16 @@ import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.MergeManagement;
 
+
 /**
  * @author Markus Graube
  *
  */
 public class TestMergeManagement {
 
+	/** The data set generation result. **/
 	private static DataSetGenerationResult ds;
+	/** The revision graph. **/
 	private static RevisionGraph graph;
 	
 	
@@ -44,9 +47,6 @@ public class TestMergeManagement {
 	}
 
 
-
-
-
 	/**
 	 * Test method for {@link de.tud.plt.r43ples.merging.MergeManagement#getCommonRevisionWithShortestPath(java.lang.String, java.lang.String)}.
 	 */
@@ -58,6 +58,7 @@ public class TestMergeManagement {
 				ds.graphName+"-revision-"+ds.revisions.get("b2-2"));
 		Assert.assertEquals(ds.graphName+"-revision-"+ds.revisions.get("master-1"), commonRevision);
 	}
+
 
 	/**
 	 * Test method for {@link de.tud.plt.r43ples.merging.MergeManagement#getPathBetweenStartAndTargetRevision(java.lang.String, java.lang.String)}.
@@ -75,7 +76,8 @@ public class TestMergeManagement {
 		expected.add(ds.graphName+"-revision-"+ds.revisions.get("b2-1"));
 		Assert.assertEquals(expected, path);
 	}
-	
+
+
 	/**
 	 * Test method for {@link de.tud.plt.r43ples.merging.MergeManagement#getPathBetweenStartAndTargetRevision(java.lang.String, java.lang.String)}.
 	 */
@@ -92,7 +94,8 @@ public class TestMergeManagement {
 		expected.add(ds.graphName+"-revision-"+ds.revisions.get("b1-1"));
 		Assert.assertEquals(expected, path);
 	}
-	
+
+
 	@Test
 	public void testResponseHeader() {
 		String sparql = "SELECT * "

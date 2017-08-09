@@ -1,11 +1,13 @@
 package de.tud.plt.r43ples.test.merge;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
 import javax.ws.rs.core.Response;
 
+import de.tud.plt.r43ples.test.R43plesTest;
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
@@ -18,18 +20,21 @@ import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.ResourceManagement;
-import de.tud.plt.r43ples.webservice.Endpoint;
 
 
-public class TestRebaseMerge {
+/**
+ * Tests the 3-Way-Merge of the merge management.
+ *
+ * @author Xinyu Yang
+ * @author Stephan Hensel
+ */
+public class TestRebaseMerge extends R43plesTest {
 
 	/** The graph name. **/
 	private static String graphName;
 	/** The user. **/
-	private static String user = "xinyu";
-	
-	private final Endpoint 	ep = new Endpoint();
-	
+	private static String user = "jUnitUser";
+
 	
 	/**
 	 * Initialize TestClass
@@ -54,8 +59,7 @@ public class TestRebaseMerge {
 		graphName = SampleDataSet.createSampleDataSetRebase();
 	}
 	
-	
-	
+
 	/**
 	 * Test the created graph.
 	 * 
@@ -65,21 +69,19 @@ public class TestRebaseMerge {
 	@Test
 	public void testCreatedGraph() throws IOException, SAXException, InternalErrorException {
 		// Test branch B1
-		String result1 = ep.sparql(createSelectQuery(graphName, "B1")).getEntity().toString();
-		String expected1 = ResourceManagement.getContentFromResource("rebase/response-B1.xml");
-		assertXMLEqual(expected1, result1);
-		
+		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "B1")).getEntity().toString();
+		String expected1 = ResourceManagement.getContentFromResource("rebase/response-B1.ttl");
+		assertTrue(check_isomorphism(result1, "TURTLE", expected1, "TURTLE"));
 		
 		// Test branch B2
-		String result2 = ep.sparql(createSelectQuery(graphName, "B2")).getEntity().toString();
-		String expected2 = ResourceManagement.getContentFromResource("rebase/response-B2.xml");
-		assertXMLEqual(expected2, result2);
-		
+		String result2 = ep.sparql("text/turtle", createConstructQuery(graphName, "B2")).getEntity().toString();
+		String expected2 = ResourceManagement.getContentFromResource("rebase/response-B2.ttl");
+		assertTrue(check_isomorphism(result2, "TURTLE", expected2, "TURTLE"));
 		
 		// Test branch MASTER
-		String result3 = ep.sparql(createSelectQuery(graphName, "master")).getEntity().toString();
-		String expected3 = ResourceManagement.getContentFromResource("rebase/response-MASTER.xml");
-		assertXMLEqual(expected3, result3);
+		String result3 = ep.sparql("text/turtle", createConstructQuery(graphName, "master")).getEntity().toString();
+		String expected3 = ResourceManagement.getContentFromResource("rebase/response-MASTER.ttl");
+		assertTrue(check_isomorphism(result3, "TURTLE", expected3, "TURTLE"));
 	}
 	
 	
@@ -99,9 +101,9 @@ public class TestRebaseMerge {
 		// Merge B1 into Master
 		ep.sparql(createCommonRebaseMergeQuery(graphName, sdd, user, "Merge B1 into Master", "B1", "master"));
 		// Test branch master
-		String result1 = ep.sparql(createSelectQuery(graphName, "master")).getEntity().toString();
-		String expected1 = ResourceManagement.getContentFromResource("rebase/response-B1-into-Master.xml");
-		assertXMLEqual(expected1, result1);;
+		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "master")).getEntity().toString();
+		String expected1 = ResourceManagement.getContentFromResource("rebase/response-B1-into-Master.ttl");
+		assertTrue(check_isomorphism(result1, "TURTLE", expected1, "TURTLE"));
 	}
 	
 	/**
@@ -119,10 +121,9 @@ public class TestRebaseMerge {
 		// Merge B2 into Master
 		ep.sparql(createCommonRebaseMergeQuery(graphName, sdd, user, "Merge B2 into Master", "B2", "master"));
 		// Test branch master
-		String result2 = ep.sparql(createSelectQuery(graphName, "master")).getEntity().toString();
-		String expected2 = ResourceManagement.getContentFromResource("rebase/response-B2-into-Master.xml");
-		assertXMLEqual(expected2, result2);
-		
+		String result2 = ep.sparql("text/turtle", createConstructQuery(graphName, "master")).getEntity().toString();
+		String expected2 = ResourceManagement.getContentFromResource("rebase/response-B2-into-Master.ttl");
+		assertTrue(check_isomorphism(result2, "TURTLE", expected2, "TURTLE"));
 	}
 		
 
@@ -141,10 +142,9 @@ public class TestRebaseMerge {
 		// Merge B1 into B2
 		ep.sparql(createAutoRebaseMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
 		// Test branch B1
-		String result1 = ep.sparql(createSelectQuery(graphName, "B2")).getEntity().toString();
-		String expected1 = ResourceManagement.getContentFromResource("rebase/auto/response-B1-into-B2.xml");
-		assertXMLEqual(expected1, result1);
-		
+		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "B2")).getEntity().toString();
+		String expected1 = ResourceManagement.getContentFromResource("rebase/auto/response-B1-into-B2.ttl");
+		assertTrue(check_isomorphism(result1, "TURTLE", expected1, "TURTLE"));
 	}
 	
 	
@@ -171,13 +171,30 @@ public class TestRebaseMerge {
 		Assert.assertNull(queryResult1.getEntity());
 
 		// Test branch B2
-		String result1 = ep.sparql(createSelectQuery(graphWithConflict, "B2")).getEntity().toString();
-		String expected1 = ResourceManagement.getContentFromResource("rebase/common/response-B1-into-B2.xml");
-		assertXMLEqual(expected1, result1);
-
+		String result1 = ep.sparql("text/turtle", createConstructQuery(graphWithConflict, "B2")).getEntity().toString();
+		String expected1 = ResourceManagement.getContentFromResource("rebase/common/response-B1-into-B2.ttl");
+		assertTrue(check_isomorphism(result1, "TURTLE", expected1, "TURTLE"));
 	}
 
-	
+
+	//TODO Create tests for FORCE and MANUAL
+
+	/**
+	 * Create the CONSTRUCT query.
+	 *
+	 * @param graphName the graph name
+	 * @param revision the revision
+	 * @return the query
+	 */
+	private String createConstructQuery(String graphName, String revision) {
+		return String.format( "CONSTRUCT FROM <%s> REVISION \"%s\" %n"
+				+ "WHERE { %n"
+				+ "	?s ?p ?o . %n"
+				+ "} %n"
+				+ "ORDER BY ?s ?p ?o", graphName, revision);
+	}
+
+
 	/**
 	 * Create the SELECT query.
 	 * 
