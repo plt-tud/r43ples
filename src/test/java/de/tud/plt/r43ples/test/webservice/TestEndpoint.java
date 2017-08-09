@@ -79,6 +79,17 @@ public class TestEndpoint extends JerseyTest {
 		String expected = ResourceManagement.getContentFromResource("response-1.1-3.xml");
 		assertXMLEqual(expected, result);
 	}
+
+	@Test
+	public void testSelectURIFragment() throws SAXException, IOException {
+		String query = String.format(""
+				+ "SELECT * FROM <%s?revision=B2>"
+				+ "WHERE { ?s ?p ?o. }"
+				+ "ORDER BY ?s ?p ?o", dsm.graphName);
+		String result = target("sparql").queryParam("query", URLEncoder.encode(query, "UTF-8")).queryParam("format", format).request().get(String.class);
+		String expected = ResourceManagement.getContentFromResource("response-1.1-3.xml");
+		assertXMLEqual(expected, result);
+	}
 	
 	@Test
 	public void testPOSTDirect() throws SAXException, IOException {

@@ -22,7 +22,7 @@ if [[ "$COMMITS" -le "1" ]]; then
     git fetch origin +coverity_scan:coverity_scan
     git checkout coverity_scan
     git merge --ff --log -m "merge from develop to coverity_scan" origin/develop
-    git push https://$GITAUTH@github.com/plt-tud/r43ples
+    git push https://$GITHUB_AUTH_TOKEN@github.com/plt-tud/r43ples
 else
     echo "Already pushed to coverity_scan today"
 fi 
