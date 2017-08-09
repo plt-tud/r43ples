@@ -8,6 +8,7 @@ gh-pages/
 *~
 .settings
 .externalToolBuilders/
+.metadata/
 
 *.conf
 r43ples.log*
