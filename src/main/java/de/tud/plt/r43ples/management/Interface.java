@@ -26,10 +26,10 @@ public class Interface {
 
 	/**
 	 * 
-	 * @param query
-	 *            R43ples query string
-	 * @param format
-	 *            serialization format of the result
+//	 * @param query
+//	 *            R43ples query string
+//	 * @param format
+//	 *            serialization format of the result
 	 * @param query_rewriting
 	 *            option if query rewriting should be enabled
 	 * @return string containing result of the query
@@ -102,9 +102,9 @@ public class Interface {
 	/**
 	 * currently not thread-safe
 	 * 
-	 * @param query
-	 * @param user
-	 * @param message
+//	 * @param query
+//	 * @param user
+//	 * @param message
 	 * @throws InternalErrorException
 	 */
 	public static void sparqlUpdate(R43plesCommit commit)
@@ -141,7 +141,7 @@ public class Interface {
 		m = patternUpdateRevision.matcher(commit.query_sparql);
 		while (m.find()) {
 			String action = m.group("action");
-			String updateClause = QueryParser.getStringEnclosedinBraces(commit.query_sparql, m.end());
+			String updateClause = getStringEnclosedinBraces(commit.query_sparql, m.end());
 
 			Matcher m2a = patternGraphWithRevision.matcher(updateClause);
 			while (m2a.find()) {
@@ -161,7 +161,7 @@ public class Interface {
 					d = new RevisionDraft(graphName, revisionName);
 					revList.add(d);
 				}
-				String graphClause = QueryParser.getStringEnclosedinBraces(updateClause, m2a.end());
+				String graphClause = getStringEnclosedinBraces(updateClause, m2a.end());
 
 				if (action.equalsIgnoreCase("INSERT")) {
 					queryRewritten += String.format("GRAPH <%s> { %s }", d.addSetURI, graphClause);
@@ -176,7 +176,7 @@ public class Interface {
 		Matcher m1 = patternWhere.matcher(commit.query_sparql);
 		if (m1.find()) {
 			queryRewritten += "WHERE {";
-			String whereClause = QueryParser.getStringEnclosedinBraces(commit.query_sparql, m1.end());
+			String whereClause = getStringEnclosedinBraces(commit.query_sparql, m1.end());
 
 			Matcher m1a = patternGraphWithRevision.matcher(whereClause);
 			while (m1a.find()) {
@@ -186,7 +186,7 @@ public class Interface {
 				// rewriting option
 				String tempGraphName = graphName + "-temp";
 				RevisionManagement.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
-				String GraphClause = QueryParser.getStringEnclosedinBraces(whereClause, m1a.end());
+				String GraphClause = getStringEnclosedinBraces(whereClause, m1a.end());
 				queryRewritten += String.format("GRAPH <%s> { %s }", tempGraphName, GraphClause);
 			}
 			queryRewritten += "}";
@@ -306,16 +306,16 @@ public class Interface {
 
 	/**
 	 * 
-	 * @param graphName
-	 * @param branchNameA
-	 * @param branchNameB
-	 * @param with
-	 * @param triples
-	 * @param type
-	 * @param sdd
-	 * @param user
-	 * @param commitMessage
-	 * @param format
+//	 * @param graphName
+//	 * @param branchNameA
+//	 * @param branchNameB
+//	 * @param with
+//	 * @param triples
+//	 * @param type
+//	 * @param sdd
+//	 * @param user
+//	 * @param commitMessage
+//	 * @param format
 	 * @return
 	 * @throws InternalErrorException
 	 */
@@ -413,16 +413,7 @@ public class Interface {
 
 	/**
 	 * 
-	 * @param graphName
-	 * @param branchNameA
-	 * @param branchNameB
-	 * @param with
-	 * @param triples
-	 * @param type
-	 * @param sdd
-	 * @param user
-	 * @param commitMessage
-	 * @param format
+	 * @param commit
 	 * @return
 	 * @throws InternalErrorException
 	 */
@@ -523,6 +514,19 @@ public class Interface {
 		}
 
 		return mresult;
+	}
+
+	private static String getStringEnclosedinBraces(final String string, int start_pos){
+		int end_pos = start_pos;
+		int count_parenthesis = 1;
+		while (count_parenthesis>0) {
+			end_pos++;
+			char ch = string.charAt(end_pos);
+			if (ch=='{') count_parenthesis++;
+			if (ch=='}') count_parenthesis--;
+		}
+		String substring = string.substring(start_pos, end_pos);
+		return substring;
 	}
 
 }
