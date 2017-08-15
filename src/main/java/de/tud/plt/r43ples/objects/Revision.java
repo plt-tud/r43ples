@@ -63,6 +63,7 @@ public class Revision {
      * @throws InternalErrorException
      */
     public Revision getDerivedFromRevision() throws InternalErrorException {
+        //TODO merged revisions will have two derived from revisions
         logger.info("Get derived from revision of revision " + revisionIdentifier + ".");
         String query = Config.prefixes + String.format(""
                 + "SELECT ?rev "
@@ -194,7 +195,8 @@ public class Revision {
             addSetURI = qs.getResource("?addSetURI").toString();
             deleteSetURI = qs.getResource("?deleteSetURI").toString();
         } else {
-            throw new InternalErrorException("No additional information found for revision " + revisionIdentifier + ".");
+            //TODO Check if add and delete sets are optional for first revision
+//            throw new InternalErrorException("No additional information found for revision " + revisionIdentifier + ".");
         }
     }
 

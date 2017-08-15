@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.tud.plt.r43ples.objects.Revision;
+import de.tud.plt.r43ples.optimization.implementations.SimplePathCalculation;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
@@ -350,8 +352,10 @@ public class Interface {
 		String usedSDDURI = graph.getSDD(commit.sdd);
 
 		// Get the common revision with shortest path
-		mresult.commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA,
-				revisionUriB);
+		//TODO change when restructured to interface - only test of interface design
+		mresult.commonRevision = new SimplePathCalculation(TripleStoreInterfaceSingleton.get()).getCommonRevisionWithShortestPath(graph, new Revision(graph, revisionUriA, false), new Revision(graph, revisionUriB, false)).getRevisionURI();
+//		mresult.commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA,
+//				revisionUriB);
 
 		// Create the revision progress for A and B
 		String graphNameA = commit.graphName + "-RM-REVISION-PROGRESS-A";
@@ -433,8 +437,11 @@ public class Interface {
 		String usedSDDURI = graph.getSDD(commit.sdd);
 
 		// Get the common revision with shortest path
-		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA,
-				revisionUriB);
+		//TODO change when restructured to interface - only test of interface design
+		String commonRevision = new SimplePathCalculation(TripleStoreInterfaceSingleton.get()).getCommonRevisionWithShortestPath(graph, new Revision(graph, revisionUriA, false), new Revision(graph, revisionUriB, false)).getRevisionURI();
+
+//		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA,
+//				revisionUriB);
 
 		// create the patch and patch group
 		LinkedList<String> revisionList = MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph,

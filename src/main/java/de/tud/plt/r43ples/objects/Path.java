@@ -46,12 +46,21 @@ public class Path {
     }
 
     /**
-     * Adds a revision to the revision path.
+     * Adds a revision to the revision path end.
      *
      * @param revision the revision to add to the end of the list
      */
-    public void addRevision(Revision revision) {
+    public void addRevisionToPathEnd(Revision revision) {
         revisionPath.add(revision);
+    }
+
+    /**
+     * Adds a revision to the revision path start.
+     *
+     * @param revision the revision to add to the end of the list
+     */
+    public void addRevisionToPathStart(Revision revision) {
+        revisionPath.addFirst(revision);
     }
 
     /**

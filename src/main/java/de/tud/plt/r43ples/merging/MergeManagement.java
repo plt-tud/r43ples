@@ -46,19 +46,19 @@ public class MergeManagement {
 			+ "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
 			+ "PREFIX sdd: <http://eatld.et.tu-dresden.de/sdd#> \n";
 	
-	
+
 	/**
 	 * Get the common revision of the specified revisions which has the shortest path to the two.
 	 * To ensure wise results the revisions should be terminal branch nodes.
-	 * 
+	 *
 	 * @param revision1 the first revision should be a terminal branch node
 	 * @param revision2 the second revision should be a terminal branch node
 	 * @return the nearest common revision
 	 */
 	public static String getCommonRevisionWithShortestPath(final String revisionGraph, final String revision1, final String revision2) {
-		
+
 		logger.info("Get the common revision of <" + revision1 + "> and <" + revision2 + "> which has the shortest path.");
-		
+
 		String query = String.format(
 			  "PREFIX prov: <http://www.w3.org/ns/prov#> "
 			  + "SELECT DISTINCT ?revision "
@@ -76,28 +76,28 @@ public class MergeManagement {
 			  + "LIMIT 1",
 			  revisionGraph, revision1, revision2);
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
-		
+
 		if (results.hasNext()) {
 			QuerySolution qs = results.next();
 			logger.info("Common revision found.");
 			return qs.getResource("?revision").toString();
 		}
-		
+
 		logger.info("No common revision could be found.");
-		return null;		
+		return null;
 	}
-	
-	
+
+
 	/**
 	 * Calculate the path from start revision to target revision.
-	 * 
+	 *
 	 * @param startRevision the start revision
 	 * @param targetRevision the target revision
 	 * @return linked list with all revisions from start revision to target revision
 	 */
 	public static LinkedList<String> getPathBetweenStartAndTargetRevision(
 			final String revisionGraph,	final String startRevision, final String targetRevision) {
-		
+
 		logger.info("Calculate the shortest path from revision <" + startRevision + "> to <" + targetRevision + "> .");
 		String query = String.format(
 			  "PREFIX prov: <http://www.w3.org/ns/prov#> %n"
@@ -109,15 +109,15 @@ public class MergeManagement {
 			+ "		OPTIONAL{?revision prov:wasDerivedFrom ?previousRevision}"
 			+ " }"
 			+ "}", revisionGraph, targetRevision, startRevision);
-		
+
 		HashMap<String, ArrayList<String>> resultMap = new HashMap<String, ArrayList<String>>();
 		LinkedList<String> list = new LinkedList<String>();
-		
+
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 
 		// Path element counter
 		int counterLength = 0;
-		
+
 		while (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
 			String resource = qs.getResource("?revision").toString();
@@ -134,18 +134,18 @@ public class MergeManagement {
 				resultMap.put(resource, arrayList);
 			}
 		}
-		
+
 		// Sort the result map -> sorted list of path elements
 		// A merged revision can have two predecessors -> it is important to choose the right predecessor revision according to the selected path
 		String currentPathElement = targetRevision;
 		for (int i = 0; i < counterLength; i++) {
 			list.addFirst(currentPathElement);
-			
+
 			// Check if start revision was already reached
 			if (currentPathElement.equals(startRevision)) {
 				return list;
 			}
-			
+
 			if (resultMap.get(currentPathElement).size() > 1) {
 				if (resultMap.containsKey(resultMap.get(currentPathElement).get(0))) {
 					currentPathElement = resultMap.get(currentPathElement).get(0);
@@ -159,8 +159,8 @@ public class MergeManagement {
 
 		return list;
 	}
-	
-	
+
+
 	/**
 	 * Create the revision progresses for both branches.
 	 * 
