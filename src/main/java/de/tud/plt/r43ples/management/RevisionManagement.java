@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.QuerySolution;
@@ -21,8 +22,7 @@ import com.hp.hpl.jena.util.FileUtils;
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.merging.MergeManagement;
-import de.tud.plt.r43ples.revisionTree.Revision;
-import de.tud.plt.r43ples.revisionTree.Tree;
+import de.tud.plt.r43ples.objects.Revision;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 /**
@@ -609,19 +609,19 @@ public class RevisionManagement {
 		logger.info("Rebuild whole content of revision " + revisionName + " of graph <" + graphName
 				+ "> into temporary graph <" + tempGraphName + ">");
 		RevisionGraph graph = new RevisionGraph(graphName);
-		String revisionGraph = graph.getRevisionGraphUri();
-		String revisionNumber = graph.getRevisionNumber(revisionName);
+		Revision revision = graph.getRevision(revisionName);
 
 		// Create temporary graph
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <" + tempGraphName + ">");
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery("CREATE GRAPH <" + tempGraphName + ">");
 
 		// Create path to revision
-		Tree tree =  new Tree(revisionGraph);
-		LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
+
+		LinkedList<Revision> list = PathCalculationSingleton.getInstance().getPathToRevisionWithFullGraph(graph, revision)
+				.getRevisionPath();
 
 		// Copy branch to temporary graph
-		String number = list.pollFirst().getRevisionNumber();
+		String number = list.removeLast().getRevisionIdentifier();
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(
 				"COPY GRAPH <" + graph.getReferenceGraph(number) + "> TO GRAPH <"
 						+ tempGraphName + ">");
@@ -638,9 +638,9 @@ public class RevisionManagement {
 			if (RevisionManagement.checkGraphExistence(graph_added))
 				TripleStoreInterfaceSingleton.get().executeUpdateQuery(  "DELETE { GRAPH <" + tempGraphName+ "> { ?s ?p ?o.} }"
 														+ "WHERE  { GRAPH <" + graph_added	+ "> { ?s ?p ?o.} }");
-			Revision first = list.pollFirst();
+			Revision first = list.removeLast();
 			if (first!=null)
-				number = first.getRevisionNumber();
+				number = first.getRevisionIdentifier();
 		}
 
 	}

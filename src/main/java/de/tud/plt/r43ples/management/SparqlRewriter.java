@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.graph.Node;
@@ -34,8 +35,7 @@ import com.hp.hpl.jena.sparql.util.ExprUtils;
 import com.hp.hpl.jena.vocabulary.RDF;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.revisionTree.Revision;
-import de.tud.plt.r43ples.revisionTree.Tree;
+import de.tud.plt.r43ples.objects.Revision;
 
 /**
  * Rewrites SPARQL queries in order to reflect old revisions.
@@ -80,21 +80,22 @@ public class SparqlRewriter {
 	 * 
 	 * @return false if revisionNumber is still a branch, otherwise true
 	 */
-	private boolean updateRevision(){
+	private boolean updateRevision() throws InternalErrorException {
 		revisionNumber = revisions.removeFirst();
 		String graphName = graphs.removeFirst();
 		graph = new RevisionGraph(graphName);
 		if (graph.hasBranch(revisionNumber))
 			return false;
 		else {
-			String revisionGraph = graph.getRevisionGraphUri();
-			Tree tree =  new Tree(revisionGraph);
-			LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
+			Revision revision = graph.getRevision(revisionNumber);
+			LinkedList<Revision> list = PathCalculationSingleton.getInstance().getPathToRevisionWithFullGraph(graph, revision)
+					.getRevisionPath();
+
 			logger.debug("Path to revision: " + list.toString());
-			last_revision = ExprUtils.nodeToExpr(NodeFactory.createURI(list.get(0).getRevisionUri()));
-			list.removeLast();
+			last_revision = ExprUtils.nodeToExpr(NodeFactory.createURI(list.getLast().getRevisionURI()));
+			list.removeFirst();
 			for (Revision ns : list) {
-				expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(ns.getRevisionUri())));
+				expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(ns.getRevisionURI())));
 			}
 			return true;
 		}
@@ -144,7 +145,7 @@ public class SparqlRewriter {
 	 * @param el_orginal
 	 * @return rewritten element group
 	 */
-	private Element getRewrittenElement(final Element el_orginal) {
+	private Element getRewrittenElement(final Element el_orginal) throws InternalErrorException {
 		if (el_orginal.getClass().equals(ElementNamedGraph.class)) {
 			ElementNamedGraph ng_original = (ElementNamedGraph) el_orginal;
 			ElementGroup eg_original = (ElementGroup) ng_original.getElement();
