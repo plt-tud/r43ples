@@ -427,8 +427,10 @@ public class Interface {
 
 		RevisionGraph graph = new RevisionGraph(commit.graphName);
 		String revisionGraph = graph.getRevisionGraphUri();
-		String revisionUriA = graph.getRevisionUri(commit.branchNameA);
-		String revisionUriB = graph.getRevisionUri(commit.branchNameB);
+		Revision revisionA = graph.getRevision(commit.branchNameA);
+		Revision revisionB = graph.getRevision(commit.branchNameB);
+		String revisionUriA = revisionA.getRevisionURI();
+		String revisionUriB = revisionB.getRevisionURI();
 
 		MergeResult mresult = new MergeResult(commit);
 
@@ -440,7 +442,9 @@ public class Interface {
 
 		// Get the common revision with shortest path
 		//TODO change when restructured to interface - only test of interface design
-		String commonRevision = PathCalculationSingleton.getInstance().getCommonRevisionWithShortestPath(graph, new Revision(graph, revisionUriA, false), new Revision(graph, revisionUriB, false)).getRevisionURI();
+		String commonRevision = PathCalculationSingleton.getInstance()
+                .getCommonRevisionWithShortestPath(graph, revisionA, revisionB)
+                .getRevisionURI();
 
 //		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA,
 //				revisionUriB);
