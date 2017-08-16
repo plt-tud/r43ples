@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.ResourceManagement;
+import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 
