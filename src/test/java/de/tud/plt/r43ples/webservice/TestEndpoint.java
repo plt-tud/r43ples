@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.test.webservice;
+package de.tud.plt.r43ples.webservice;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.hamcrest.core.StringContains.containsString;
@@ -28,9 +28,6 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import de.tud.plt.r43ples.webservice.Endpoint;
-import de.tud.plt.r43ples.webservice.Merging;
-import de.tud.plt.r43ples.webservice.Misc;
 
 
 public class TestEndpoint extends JerseyTest {
