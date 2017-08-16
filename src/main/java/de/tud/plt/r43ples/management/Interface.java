@@ -112,7 +112,7 @@ public class Interface {
 	public static void sparqlUpdate(R43plesCommit commit)
 			throws InternalErrorException {
 
-		final Pattern patternUpdateRevision = Pattern.compile("(?<action>INSERT|DELETE)(?<data>\\s*DATA){0,1}\\s*\\{",
+		final Pattern patternUpdateRevision = Pattern.compile("(?<action>INSERT|DELETE)(?<data>\\s*DATA)?\\s*\\{",
 				patternModifier);
 		final Pattern patternWhere = Pattern.compile("WHERE\\s*\\{", patternModifier);
 

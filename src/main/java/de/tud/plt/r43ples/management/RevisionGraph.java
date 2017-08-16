@@ -171,7 +171,7 @@ public class RevisionGraph {
 		
 		//UID nextNumberUid = new UID();
 		//String nextNumber = nextNumberUid.toString();
-		int nextNumber = 0;
+		int nextNumber;
 		
 		String revisionGraph = this.getRevisionGraphUri();
 		String query = Config.prefixes

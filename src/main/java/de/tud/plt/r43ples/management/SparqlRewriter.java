@@ -67,7 +67,6 @@ public class SparqlRewriter {
 	private ExprList expression_list_revision_path = new ExprList();
 	private Expr last_revision;
 	private String revisionNumber;
-	private String graphName; 
 	private RevisionGraph graph;
 	
 	public static String rewriteQuery(final String query_r43ples) throws InternalErrorException {
@@ -83,7 +82,7 @@ public class SparqlRewriter {
 	 */
 	private boolean updateRevision(){
 		revisionNumber = revisions.removeFirst();
-		graphName = graphs.removeFirst();
+		String graphName = graphs.removeFirst();
 		graph = new RevisionGraph(graphName);
 		if (graph.hasBranch(revisionNumber))
 			return false;

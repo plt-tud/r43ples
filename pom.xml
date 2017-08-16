@@ -358,7 +358,8 @@
 						<format>html</format>
 						<format>xml</format>
 					</formats>
-			    </configuration>
+					<check/>
+				</configuration>
 			</plugin>
 			
 			<plugin>
@@ -475,6 +476,7 @@
 						<format>html</format>
 						<format>xml</format>
 					</formats>
+					<check/>
 				</configuration>
 			</plugin>
 		</plugins>

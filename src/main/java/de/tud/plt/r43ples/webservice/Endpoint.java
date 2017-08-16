@@ -241,7 +241,7 @@ public class Endpoint {
 	 * @return
 	 * @throws InternalErrorException
 	 */
-	private final Response sparql(final String format, final String sparqlQuery, final String query_rewriting) throws InternalErrorException {
+	private Response sparql(final String format, final String sparqlQuery, final String query_rewriting) throws InternalErrorException {
 		String option = query_rewriting.toLowerCase();
 		if (option.equals("on") || option.equals("true") || option.equals("new"))
 			return sparql(format, sparqlQuery, true);

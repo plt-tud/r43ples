@@ -44,7 +44,6 @@ public class MergingControl {
 	
 	/** Merge Query Model. **/
 	private MergeCommitModel commitModel;
-	private String conflictModel;
 	private List<Individual> individualList;
 
 	private String commonRevision;
@@ -84,7 +83,7 @@ public class MergingControl {
 		logger.info("Merge query produced conflicts.");
 		this.commitModel = commitModel;
 		this.commonRevision = mresult.commonRevision;
-		this.conflictModel = mresult.conflictModel;
+		String conflictModel = mresult.conflictModel;
 		
 		
 		Model jenaModel = JenaModelManagement.readStringToJenaModel(conflictModel, "TURTLE");
