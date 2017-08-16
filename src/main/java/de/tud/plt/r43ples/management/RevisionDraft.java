@@ -21,14 +21,11 @@ public class RevisionDraft {
 	public String addSetURI;
 	public String deleteSetURI;
 	public String referenceFullGraph;
-	
-	private RevisionGraph graph;
-	
-	
-	
+
+
 	public RevisionDraft(final String graphName, final String revisionName) throws InternalErrorException {
 		this.graphName = graphName;
-		this.graph = new RevisionGraph(graphName);
+		RevisionGraph graph = new RevisionGraph(graphName);
 		this.revisionGraph = graph.getRevisionGraphUri();
 		this.revisionName = revisionName;
 		this.revisionNumber = graph.getRevisionNumber(revisionName);

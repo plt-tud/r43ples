@@ -47,7 +47,7 @@ ParseTurtle.prototype.parse = function (str){
 	this.parse_triple(arg, '', status);
 	if(arg.line) this.parseError("Unbalanced parse end: " + arg.line,arg);
 	return this.triples;
-}
+};
 
 
 /**
