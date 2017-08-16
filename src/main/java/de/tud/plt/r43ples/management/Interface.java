@@ -226,7 +226,7 @@ public class Interface {
 			TripleStoreInterfaceSingleton.get().executeCreateGraph(graphName);
 
 			RevisionGraph graph = new RevisionGraph(graphName);
-			if (graph.getMasterRevisionNumber() == null) {
+			if (graph.getMasterRevision() == null) {
 				// Add R43ples information
 				RevisionManagement.putGraphUnderVersionControl(graphName);
 			}
