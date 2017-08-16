@@ -80,7 +80,7 @@ public class TestRevisionManagment {
 	}
 	
 	@Test
-	public void test_master_number() {
+	public void test_master_number() throws InternalErrorException {
 		String revNumberMaster = graph.getMasterRevision().getRevisionIdentifier();
 		Assert.assertEquals(ds.revisions.get("master-5"), revNumberMaster);
 	}

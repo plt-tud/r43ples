@@ -211,7 +211,7 @@ public class Interface {
 		}
 	}
 
-	public static String sparqlCreateGraph(final String query) throws QueryErrorException {
+	public static String sparqlCreateGraph(final String query) throws QueryErrorException, InternalErrorException {
 		final Pattern patternCreateGraph = Pattern.compile("CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
 				patternModifier);
 		String graphName = null;
