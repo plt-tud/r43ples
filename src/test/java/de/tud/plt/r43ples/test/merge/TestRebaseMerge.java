@@ -19,7 +19,7 @@ import org.xml.sax.SAXException;
 import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.ResourceManagement;
+import de.tud.plt.r43ples.iohelper.ResourceManagement;
 
 
 /**

@@ -15,7 +15,7 @@ import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
 import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.ResourceManagement;
+import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.webservice.Endpoint;
