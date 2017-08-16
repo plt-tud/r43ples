@@ -344,8 +344,9 @@ public class RevisionGraph {
 	 * @param revisionIdentifier
 	 *            reference name or revision number
 	 * @return Revision object
+	 * @throws InternalErrorExeption
 	 */
-	public Revision getRevision(final String revisionIdentifier) {
+	public Revision getRevision(final String revisionIdentifier) throws InternalErrorException {
 		return new Revision(this, revisionIdentifier, true);
 	}
 
