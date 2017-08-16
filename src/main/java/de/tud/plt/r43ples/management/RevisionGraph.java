@@ -146,14 +146,15 @@ public class RevisionGraph {
 
 		String revisionGraph = this.getRevisionGraphUri();
 		String queryString = Config.prefixes + String.format(""
-				+ "SELECT ?revision "
+				+ "SELECT ?revisionNumber "
 				+ "WHERE { GRAPH <%s> {"
 				+ "	?master a rmo:Master; rmo:references ?revision . "
+				+ " ?revision rmo:revisionNumber ?revisionNumber ."
 				+ "} }", revisionGraph);
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryString);
 		if (results.hasNext()){
 			QuerySolution qs = results.next();
-			return this.getRevision(qs.getLiteral("?revision").getString());
+			return this.getRevision(qs.getLiteral("?revisionNumber").toString());
 		}
 		else {
 			return null;
