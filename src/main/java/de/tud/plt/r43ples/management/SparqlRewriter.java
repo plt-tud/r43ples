@@ -116,7 +116,7 @@ public class SparqlRewriter {
 			String referenceName = m2.group("revision").toLowerCase();
 			RevisionGraph graph = new RevisionGraph(graphName);
 			
-			String revisionNumber = graph.getRevisionNumber(referenceName);
+			String revisionNumber = graph.getRevisionIdentifier(referenceName);
 			graphs.add(graphName);
 			revisions.add(revisionNumber);
 

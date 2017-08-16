@@ -23,19 +23,28 @@ public class RevisionGraph {
 
 	/** The logger. **/
 	private Logger logger = Logger.getLogger(RevisionManagement.class);
-	
+
+	/** The graph name. **/
 	private String graphName;
 
 	/**
 	 * 
-	 * @param graphName Uri of the named graph which R43ples manages
+	 * @param graphName URI of the named graph which R43ples manages
 	 */
-	public RevisionGraph(final String graphName){
+	public RevisionGraph(final String graphName) {
 		this.graphName = graphName;
 	}
-	
-	
-	
+
+
+	/**
+	 * Get the graph name.
+	 *
+	 * @return the graph name
+	 */
+	public String getGraphName() {
+		return graphName;
+	}
+
 	/**
 	 * Get the content of this revision graph by execution of CONSTRUCT.
 	 * 
@@ -161,12 +170,13 @@ public class RevisionGraph {
 		}
 	}
 	
-	/** Returns new unique revision number for this graph
+	/**
+	 * Returns new unique revision identifier for this graph.
 	 * 
-	 * @return new revision number
+	 * @return new revision identifier
 	 * @throws InternalErrorException 
 	 */
-	public String getNextRevisionNumber() throws InternalErrorException {
+	public String getNextRevisionIdentifier() throws InternalErrorException {
 		// create UID and check whether the uid number already in named graph exist, if yes , than create it once again,
 		// if not , return this one
 		
@@ -353,31 +363,30 @@ public class RevisionGraph {
 
 
 	/**
-	 * Get the revision number of a given reference name.
-	 * 
-	 * @param referenceName
-	 *            the reference name
-	 * @return the revision number of given reference name
+	 * Get the revision identifier while it is not necessary to know if the specified identifier parameter is a reference or the resulting revision identifier itself.
+	 *
+	 * @param identifier the identifier to look for (referenc or revision identifier itself)
+	 * @return the revision identifier
 	 * @throws InternalErrorException 
 	 */
-	public String getRevisionNumber(final String referenceName) throws InternalErrorException {
+	public String getRevisionIdentifier(final String identifier) throws InternalErrorException {
 		String revisionGraph = this.getRevisionGraphUri();
 		String query = Config.prefixes + String.format(""
 				+ "SELECT ?revNumber WHERE { GRAPH <%s> {"
 				+ "	?rev a rmo:Revision; rmo:revisionNumber ?revNumber."
 				+ "	{?rev rmo:revisionNumber \"%s\".} UNION {?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%s\".}"
 				+ "} }", 
-				revisionGraph, referenceName, referenceName);
+				revisionGraph, identifier, identifier);
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		if (resultSet.hasNext()) {
 			QuerySolution qs = resultSet.next();
 			if (resultSet.hasNext()) {
-				throw new InternalErrorException("Identifier not unique: " + referenceName);
+				throw new InternalErrorException("Identifier not unique: " + identifier);
 			}
 			return qs.getLiteral("?revNumber").toString();
 		} else {
 			throw new InternalErrorException("No Revision or Reference found with identifier: "
-					+ referenceName);
+					+ identifier);
 		}
 	}
 

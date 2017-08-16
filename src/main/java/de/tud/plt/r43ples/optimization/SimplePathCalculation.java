@@ -25,6 +25,7 @@ public class SimplePathCalculation implements PathCalculation {
     /** The logger. **/
     private Logger logger = Logger.getLogger(SimplePathCalculation.class);
 
+    // Dependencies
     /** The triple store interface to use. **/
     private TripleStoreInterface tripleStoreInterface;
 
@@ -33,6 +34,7 @@ public class SimplePathCalculation implements PathCalculation {
      * The constructor.
      */
     protected SimplePathCalculation() {
+        // Dependencies
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
     }
 

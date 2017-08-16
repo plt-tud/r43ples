@@ -52,7 +52,7 @@ public class RebaseControl {
 	
 		RevisionGraph graph = new RevisionGraph(graphName);
 		// Check if A and B are different revisions
-		if (graph.getRevisionNumber(branchNameA).equals(graph.getRevisionNumber(branchNameB))) {
+		if (graph.getRevisionIdentifier(branchNameA).equals(graph.getRevisionIdentifier(branchNameB))) {
 			// Branches are equal - throw error
 			throw new InternalErrorException("Specified branches are equal");
 		}

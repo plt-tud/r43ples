@@ -26,6 +26,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
 
+import de.tud.plt.r43ples.management.*;
 import org.apache.log4j.Logger;
 
 import com.github.mustachejava.DefaultMustacheFactory;
@@ -36,14 +37,6 @@ import com.hp.hpl.jena.shared.NoWriterForLangException;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
-import de.tud.plt.r43ples.management.Interface;
-import de.tud.plt.r43ples.management.JenaModelManagement;
-import de.tud.plt.r43ples.management.R43plesCommit;
-import de.tud.plt.r43ples.management.R43plesMergeCommit;
-import de.tud.plt.r43ples.management.R43plesRequest;
-import de.tud.plt.r43ples.management.RevisionGraph;
-import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.ui.MergingControl;
 
@@ -345,7 +338,9 @@ public class Endpoint {
 			result = Interface.sparqlSelectConstructAsk(request, query_rewriting);
 		}
 		else if (request.isUpdateQuery()) {
-			Interface.sparqlUpdate(new R43plesCommit(request));
+			CommitDraft commitDraft = new CommitDraft(request);
+			commitDraft.createCommitInTripleStore();
+//			Interface.sparqlUpdate(request);
 			result = "Query executed";
 		}
 		else if (request.isCreateGraphQuery()) {
@@ -460,8 +455,8 @@ public class Endpoint {
 		}
 		
 		// Return the revision number which were used (convert tag or branch identifier to revision number)
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", graph.getRevisionNumber(mresult.branchA));
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", graph.getRevisionNumber(mresult.branchB));			
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", graph.getRevisionIdentifier(mresult.branchA));
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", graph.getRevisionIdentifier(mresult.branchB));
 		
 		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(commit.query_sparql));	
 		
