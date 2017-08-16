@@ -39,7 +39,7 @@ public class RevisionGraph {
 	/**
 	 * Get the content of this revision graph by execution of CONSTRUCT.
 	 * 
-	 * @param graphName the graphName
+//	 * @param graphName the graphName
 	 * @param format RDF serialization format which should be returned
 	 * @return the constructed graph content as specified RDF serialization format
 	 */
@@ -137,8 +137,8 @@ public class RevisionGraph {
 	/**
 	 * Get the MASTER revision number of a graph.
 	 * 
-	 * @param graphName
-	 *            the graph name
+//	 * @param graphName
+//	 *            the graph name
 	 * @return the MASTER revision number
 	 */
 	public String getMasterRevisionNumber() {
@@ -344,10 +344,10 @@ public class RevisionGraph {
 	 * @param revisionIdentifier
 	 *            reference name or revision number
 	 * @return Revision object
-	 * @throws InternalErrorExeption
+	 * @throws InternalErrorException
 	 */
 	public Revision getRevision(final String revisionIdentifier) throws InternalErrorException {
-		return new Revision(this, revisionIdentifier, true);
+		return new Revision(this, getRevisionUri(revisionIdentifier), false);
 	}
 
 
