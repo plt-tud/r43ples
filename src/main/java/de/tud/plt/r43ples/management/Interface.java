@@ -7,9 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.tud.plt.r43ples.objects.Revision;
-import de.tud.plt.r43ples.optimization.PathCalculation;
 import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
-import de.tud.plt.r43ples.optimization.SimplePathCalculation;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;

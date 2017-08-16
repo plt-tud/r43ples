@@ -1,6 +1,5 @@
 package de.tud.plt.r43ples.test.merge;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -195,21 +194,6 @@ public class TestRebaseMerge extends R43plesTest {
 	}
 
 
-	/**
-	 * Create the SELECT query.
-	 * 
-	 * @param graphName the graph name
-	 * @param revision the revision
-	 * @return the query
-	 */
-	private String createSelectQuery(String graphName, String revision) {
-		return String.format( "SELECT * FROM <%s> REVISION \"%s\" %n"
-							+ "WHERE { %n"
-							+ "	?s ?p ?o . %n"
-							+ "} %n"
-							+ "ORDER BY ?s ?p ?o", graphName, revision);
-	}
-	
 	
 	/**
 	 * Create COMMON-REBASE-MERGE query.
