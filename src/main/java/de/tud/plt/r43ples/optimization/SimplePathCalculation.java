@@ -36,6 +36,50 @@ public class SimplePathCalculation implements PathCalculation {
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
     }
 
+
+    /**
+     * Get the path to the nearest revision which has a full graph.
+     *
+     * @param revisionGraph the revision graph
+     * @param revision revision where the search should start
+     * @return path containing all revisions from start revision to next revision with a full graph
+     * @throws InternalErrorException
+     */
+    @Override
+    public Path getPathToRevisionWithFullGraph(RevisionGraph revisionGraph, Revision revision) throws InternalErrorException {
+        logger.info("Get path to full graph revision starting from revision " + revision.getRevisionIdentifier());
+        String query = Config.prefixes + String.format(""
+                + "SELECT DISTINCT ?revision "
+                + "WHERE { "
+                + "    GRAPH <%1$s> {"
+                + "        ?revision prov:wasDerivedFrom* <%2$s> ."
+                + "        ?reference rmo:references ?revision ."
+                + "    }"
+                + "}", revisionGraph.getRevisionGraphUri(), revision.getRevisionURI());
+        this.logger.info(query);
+
+        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
+
+
+        Path bestPath = null;
+
+        while (resultSet.hasNext()) {
+            QuerySolution qs = resultSet.next();
+            String revision_uri_end = qs.getResource("?revision").toString();
+            Revision revision_end = new Revision(revisionGraph, revision_uri_end, false);
+
+            Path path = this.getPathBetweenStartAndTargetRevision(revisionGraph, revision, revision_end);
+            if (bestPath==null || bestPath.getRevisionPath().size()> path.getRevisionPath().size()){
+            	this.logger.info("new best path: "+ path.getRevisionPath().size());
+                bestPath = path;
+            }
+        }
+        return bestPath;
+    }
+
+
+
+
     /**
      * Get the common revision of the specified revisions which has the shortest path to the two.
      * To ensure wise results the revisions should be terminal branch nodes.

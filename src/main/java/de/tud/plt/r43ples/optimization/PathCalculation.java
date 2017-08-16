@@ -14,6 +14,18 @@ import de.tud.plt.r43ples.objects.Revision;
  */
 public interface PathCalculation {
 
+
+    /**
+     * Get the path to the nearest revision which has a full graph.
+     *
+     * @param revisionGraph the revision graph
+     * @param revision revision where the search should start
+     * @return path containing all revisions from start revision to next revision with a full graph
+     */
+    Path getPathToRevisionWithFullGraph(RevisionGraph revisionGraph, Revision revision) throws InternalErrorException;
+
+
+
     /**
      * Get the common revision of the specified revisions which has the shortest path to the two.
      * To ensure wise results the revisions should be terminal branch nodes.
