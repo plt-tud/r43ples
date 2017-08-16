@@ -44,7 +44,7 @@ public class Commit {
         this.revisionGraph = revisionGraph;
         this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
 
-        calculateAdditionalInformation();
+        retrieveAdditionalInformation();
     }
 
     /**
@@ -52,7 +52,7 @@ public class Commit {
      *
      * @throws InternalErrorException
      */
-    private void calculateAdditionalInformation() throws InternalErrorException {
+    private void retrieveAdditionalInformation() throws InternalErrorException {
         logger.info("Get additional information of current commit URI " + commitURI + ".");
         String query = Config.prefixes + String.format(""
                 + "SELECT ?title ?time ?person "
