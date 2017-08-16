@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.optimization.implementations;
+package de.tud.plt.r43ples.optimization;
 
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
@@ -7,8 +7,8 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.objects.Path;
 import de.tud.plt.r43ples.objects.Revision;
-import de.tud.plt.r43ples.optimization.interfaces.PathCalculation;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -32,8 +32,8 @@ public class SimplePathCalculation implements PathCalculation {
     /**
      * The constructor.
      */
-    public SimplePathCalculation(TripleStoreInterface tripleStoreInterface) {
-        this.tripleStoreInterface = tripleStoreInterface;
+    protected SimplePathCalculation() {
+        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
     }
 
     /**

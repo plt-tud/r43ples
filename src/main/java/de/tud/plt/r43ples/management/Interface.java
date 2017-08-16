@@ -7,7 +7,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.tud.plt.r43ples.objects.Revision;
-import de.tud.plt.r43ples.optimization.implementations.SimplePathCalculation;
+import de.tud.plt.r43ples.optimization.PathCalculation;
+import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
+import de.tud.plt.r43ples.optimization.SimplePathCalculation;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
@@ -353,7 +355,7 @@ public class Interface {
 
 		// Get the common revision with shortest path
 		//TODO change when restructured to interface - only test of interface design
-		mresult.commonRevision = new SimplePathCalculation(TripleStoreInterfaceSingleton.get()).getCommonRevisionWithShortestPath(graph, new Revision(graph, revisionUriA, false), new Revision(graph, revisionUriB, false)).getRevisionURI();
+		mresult.commonRevision = PathCalculationSingleton.getInstance().getCommonRevisionWithShortestPath(graph, new Revision(graph, revisionUriA, false), new Revision(graph, revisionUriB, false)).getRevisionURI();
 //		mresult.commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA,
 //				revisionUriB);
 
@@ -438,7 +440,7 @@ public class Interface {
 
 		// Get the common revision with shortest path
 		//TODO change when restructured to interface - only test of interface design
-		String commonRevision = new SimplePathCalculation(TripleStoreInterfaceSingleton.get()).getCommonRevisionWithShortestPath(graph, new Revision(graph, revisionUriA, false), new Revision(graph, revisionUriB, false)).getRevisionURI();
+		String commonRevision = PathCalculationSingleton.getInstance().getCommonRevisionWithShortestPath(graph, new Revision(graph, revisionUriA, false), new Revision(graph, revisionUriB, false)).getRevisionURI();
 
 //		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA,
 //				revisionUriB);
