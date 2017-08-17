@@ -3,6 +3,7 @@ package de.tud.plt.r43ples.test;
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
-public class TestUpdate {
+public class TestUpdate extends R43plesTest {
 	
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(TestUpdate.class);
@@ -45,7 +46,7 @@ public class TestUpdate {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
-		ds1 = SampleDataSet.createSampleDataset1();
+		//ds1 = SampleDataSet.createSampleDataset1();
 	}
 
 	@Before
@@ -116,13 +117,11 @@ public class TestUpdate {
 	
 	@Test
 	public void testRestructuringAlternative() throws SAXException, IOException, InternalErrorException {
-		String query = "SELECT ?s ?p ?o FROM <"+dsm.graphName+"> REVISION \"B2\"\n"
-        		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
-		String result = ep.sparql(format, query).getEntity().toString();
-        String expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2.xml");
-        assertXMLEqual(expected, result);
-        
-		// restructure commit to B2
+		String result = ep.sparql("text/turtle", createConstructQuery(dsm.graphName, "B2")).getEntity().toString();
+		String expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2.ttl");
+		assertTrue(check_isomorphism(result, "TURTLE", expected, "TURTLE"));
+
+		// restructure commit to B2 (change URI of subject and predicate)
 		logger.debug("Restructure commit to B2");
 		String query_restructure = String.format(""
 				+ "USER \"shensel\" %n"
@@ -141,12 +140,11 @@ public class TestUpdate {
 				+ "} }", 
 				dsm.graphName);
 		logger.debug("Execute query: \n" + query_restructure);
-		result = ep.sparql(format, query_restructure).toString();
+		ep.sparql(format, query_restructure).toString();
 		
-		result = ep.sparql(format, query).getEntity().toString();
-		logger.debug("Result: "+result);
-        expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2-restructured.xml");
-        assertXMLEqual(expected, result);
+		result = ep.sparql("text/turtle", createConstructQuery(dsm.graphName, "B2")).getEntity().toString();
+		expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2-restructured.ttl");
+		assertTrue(check_isomorphism(result, "TURTLE", expected, "TURTLE"));
 	}
 	
 	@Test
@@ -164,6 +162,23 @@ public class TestUpdate {
 		Assert.assertThat(result, containsString("\"C\""));
 		Assert.assertThat(result, not(containsString("\"D\"")));
 		Assert.assertThat(result, not(containsString("\"E\"")));
+	}
+
+
+
+	/**
+	 * Create the CONSTRUCT query.
+	 *
+	 * @param graphName the graph name
+	 * @param revision the revision
+	 * @return the query
+	 */
+	private String createConstructQuery(String graphName, String revision) {
+		return String.format( "CONSTRUCT FROM <%s> REVISION \"%s\" %n"
+				+ "WHERE { %n"
+				+ "	?s ?p ?o . %n"
+				+ "} %n"
+				+ "ORDER BY ?s ?p ?o", graphName, revision);
 	}
 
 }

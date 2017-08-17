@@ -29,11 +29,11 @@ public class TestSampleDataSet {
 //		Assert.assertEquals("http://test.com/r43ples-dataset-2", graph);
 //	}
 //
-//	@Test
-//	public final void testCreateSampleDataSetMerging() throws InternalErrorException {
-//		String graph = SampleDataSet.createSampleDataSetMerging().graphName;
-//		Assert.assertEquals("http://test.com/r43ples-dataset-merging", graph);
-//	}
+	@Test
+	public final void testCreateSampleDataSetMerging() throws InternalErrorException {
+		String graph = SampleDataSet.createSampleDataSetMerging().graphName;
+		Assert.assertEquals("http://test.com/r43ples-dataset-merging", graph);
+	}
 //
 //	@Test
 //	public final void testCreateSampleDataSetMergingClasses() throws IOException, InternalErrorException {

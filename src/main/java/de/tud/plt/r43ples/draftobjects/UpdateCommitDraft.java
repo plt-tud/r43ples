@@ -230,7 +230,7 @@ public class UpdateCommitDraft extends CommitDraft {
 		String revisionUri = draft.getRevisionURI();
 
 		String commitUri = draft.getRevisionGraph().getGraphName() + "-commit-" + draft.getNewRevisionIdentifier();
-		String branchUri = draft.getRevisionGraph().getBranchUri(draft.getDerivedFromRevisionIdentifier());
+		String branchUri = draft.getRevisionGraph().getBranchUri(draft.getDerivedFromIdentifier());//getDerivedFromRevisionIdentifier());
 		String revUriOld = draft.getRevisionGraph().getRevisionUri(draft.getDerivedFromRevisionIdentifier());
 
 		// Create a new commit (activity)
@@ -281,7 +281,7 @@ public class UpdateCommitDraft extends CommitDraft {
 		Revision newRevision = new Revision(draft.getRevisionGraph(), draft.getNewRevisionIdentifier(), revisionUri, draft.getAddSetURI(), draft.getDeleteSetURI());
 		newRevision.getDerivedFromRevision();
 
-		return new UpdateCommit(revisionDraft.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), newRevision.getDerivedFromRevision(), newRevision);
+		return new UpdateCommit(draft.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), newRevision.getDerivedFromRevision(), newRevision);
 	}
 
 	/**

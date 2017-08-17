@@ -19,6 +19,8 @@ public class RevisionDraft {
     private Logger logger = Logger.getLogger(RevisionDraft.class);
     /** The revision identifier of the revision from which the new one should be derive from. **/
     private String derivedFromRevisionIdentifier;
+    /** The derived from identifier. (The revision identifier of the revision or the reference identifier from which the new revision should be derive from.) **/
+    private String derivedFromIdentifier;
     /** The revision identifier of the revision which should be created. **/
     private String newRevisionIdentifier;
     /** The revision URI. **/
@@ -54,9 +56,13 @@ public class RevisionDraft {
      * @throws InternalErrorException
      */
     public RevisionDraft(RevisionGraph revisionGraph, String derivedFromIdentifier, String addSet, String deleteSet) throws InternalErrorException {
-		this.revisionGraph = revisionGraph;
+        // Dependencies
+        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+
+        this.revisionGraph = revisionGraph;
         this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
 		this.derivedFromRevisionIdentifier = revisionGraph.getRevisionIdentifier(derivedFromIdentifier);
+		this.derivedFromIdentifier = derivedFromIdentifier;
      	this.newRevisionIdentifier = revisionGraph.getNextRevisionIdentifier();
      	this.revisionURI = revisionGraph.getGraphName() + "-revision-" + newRevisionIdentifier;
 		
@@ -66,9 +72,6 @@ public class RevisionDraft {
 
 		this.addSet = addSet;
 		this.deleteSet = deleteSet;
-
-		// Dependencies
-        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 	}
 
     /**
@@ -79,9 +82,13 @@ public class RevisionDraft {
      * @throws InternalErrorException
      */
     public RevisionDraft(RevisionGraph revisionGraph, String derivedFromIdentifier) throws InternalErrorException {
+        // Dependencies
+        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+
         this.revisionGraph = revisionGraph;
         this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
         this.derivedFromRevisionIdentifier = revisionGraph.getRevisionIdentifier(derivedFromIdentifier);
+        this.derivedFromIdentifier = derivedFromIdentifier;
         this.newRevisionIdentifier = revisionGraph.getNextRevisionIdentifier();
         this.revisionURI = revisionGraph.getGraphName() + "-revision-" + newRevisionIdentifier;
 
@@ -91,9 +98,6 @@ public class RevisionDraft {
 
         this.addSet = null;
         this.deleteSet = null;
-
-        // Dependencies
-        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
     }
 
     /**
@@ -193,6 +197,15 @@ public class RevisionDraft {
      */
     public String getDerivedFromRevisionIdentifier() {
         return derivedFromRevisionIdentifier;
+    }
+
+    /**
+     * Get the derived from identifier. (The revision identifier of the revision or the reference identifier from which the new revision should be derive from.)
+     *
+     * @return the derived from identifier
+     */
+    public String getDerivedFromIdentifier() {
+        return derivedFromIdentifier;
     }
 
     /**

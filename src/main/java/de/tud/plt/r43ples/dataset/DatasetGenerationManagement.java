@@ -15,6 +15,8 @@ import de.tud.plt.r43ples.webservice.Endpoint;
  */
 public class DatasetGenerationManagement {
 
+	// TODO move to tests if necessary or delete the whole content
+
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(DatasetGenerationManagement.class);
 	/** The endpoint. **/
@@ -34,6 +36,7 @@ public class DatasetGenerationManagement {
 	 * @throws InternalErrorException 
 	 */
 	public static void createNewBranch(String user, String message, String graphName, String revision, String branchName) throws InternalErrorException {
+		//TODO Change to new Reference commit
 		String query = String.format(""
 				+ "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
