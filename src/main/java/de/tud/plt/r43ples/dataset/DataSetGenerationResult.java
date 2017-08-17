@@ -5,6 +5,6 @@ import java.util.HashMap;
 public class DataSetGenerationResult {
 
 	public String graphName;
-	public HashMap<String, String> revisions = new HashMap<String, String>();
+	public HashMap<String, String> revisions = new HashMap<>();
 	
 }

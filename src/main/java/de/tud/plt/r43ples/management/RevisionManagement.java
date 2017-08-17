@@ -12,6 +12,8 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.tud.plt.r43ples.draftobjects.CommitDraft;
+import de.tud.plt.r43ples.draftobjects.UpdateCommitDraft;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.QuerySolution;
@@ -108,7 +110,8 @@ public class RevisionManagement {
 	 *            the graph name of the existing graph
 	 */
 	public static String putGraphUnderVersionControl(final String graphName) {
-		return putGraphUnderVersionControl(graphName, getDateString());
+		// TODO Create date by using commit information
+		return putGraphUnderVersionControl(graphName, "2017-08-17T13:57:11");
 	}
 
 
@@ -122,14 +125,14 @@ public class RevisionManagement {
 		if (usedRevisionNumber.size() > 1) {
 			// TODO currently not implemented
 		} else {
-			CommitDraft commitDraft = new CommitDraft(graphName, addedAsNTriples, removedAsNTriples, user, timeStamp, commitMessage, usedRevisionNumber.get(0));
+			UpdateCommitDraft commitDraft = new UpdateCommitDraft(graphName, addedAsNTriples, removedAsNTriples, user, commitMessage, usedRevisionNumber.get(0));
 			commitDraft.createCommitInTripleStore();
 		}
 		return null;
 		//return createNewRevision(graphName, addedAsNTriples, removedAsNTriples, user, timeStamp, commitMessage, usedRevisionNumber);
 	}
 
-	
+
 	/**
 	 * Create a new revision.
 	 *
@@ -157,8 +160,8 @@ public class RevisionManagement {
 		list.add(usedRevisionNumber);
 		return createNewRevision(graphName, addedAsNTriples, removedAsNTriples, user, timeStamp, commitMessage, list);
 	}
-	
-	
+
+
 	/**
 	 * Create a new revision.
 	 *
@@ -182,7 +185,7 @@ public class RevisionManagement {
 										   final String user, final String commitMessage, final String usedRevisionNumber) throws InternalErrorException {
 		ArrayList<String> list = new ArrayList<String>();
 		list.add(usedRevisionNumber);
-		return createNewRevision(graphName, addedAsNTriples, removedAsNTriples, user, getDateString(), commitMessage, list);
+		return createNewRevision(graphName, addedAsNTriples, removedAsNTriples, user, "TEST", commitMessage, list);
 	}
 
 	/**
@@ -198,7 +201,7 @@ public class RevisionManagement {
 	 *            the user name who creates the revision
 	 * @param commitMessage
 	 *            the title of the revision
-	 * @param usedRevisionNumber
+
 	 *            the number of the revision which is used for creation of the
 	 *            new revision
 	 * @return new revision number
@@ -207,9 +210,9 @@ public class RevisionManagement {
 	public static String createNewRevision(final String graphName, final String addedAsNTriples, final String removedAsNTriples,
 										   final String user, final String commitMessage, final ArrayList<String> list) throws InternalErrorException {
 
-		return createNewRevision(graphName, addedAsNTriples, removedAsNTriples, user, getDateString(), commitMessage, list);
+		return createNewRevision(graphName, addedAsNTriples, removedAsNTriples, user, "TEST", commitMessage, list);
 	}
-	
+
 	/**
 	 * create new revision with patch with addedUri and removedUri
 	 * 
@@ -582,7 +585,8 @@ public class RevisionManagement {
 					+ "' is for the graph '" + graphName + "' already in use.");
 		} else {
 			// General variables
-			String dateString = getDateString();
+			// TODO Create date by using commit information
+			String dateString = "2017-08-17T13:57:11";
 			String commitUri = graphName + "-commit-" + referenceType + "-" + newReferenceName;
 			String referenceUri = graphName + "-" + referenceType + "-" + newReferenceName;
 			String referenceTypeUri = referenceType.equals("tag") ? "rmo:Tag" : "rmo:Branch";
@@ -870,17 +874,7 @@ public class RevisionManagement {
 	
 
 
-	/**
-	 * @return current date formatted as xsd:DateTime
-	 */
-	public static String getDateString() {
-		// Create current time stamp
-		Date date = new Date();
-		DateFormat df = new SimpleDateFormat("yyyy'-'MM'-'dd'T'HH:mm:ss.SSS");
-		String dateString = df.format(date);
-		logger.debug("Time stamp created: " + dateString);
-		return dateString;
-	}
+
 	
 
 	/**

@@ -26,6 +26,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
 
+import de.tud.plt.r43ples.draftobjects.CommitDraft;
+import de.tud.plt.r43ples.draftobjects.UpdateCommitDraft;
 import de.tud.plt.r43ples.management.*;
 import org.apache.log4j.Logger;
 
@@ -338,8 +340,8 @@ public class Endpoint {
 			result = Interface.sparqlSelectConstructAsk(request, query_rewriting);
 		}
 		else if (request.isUpdateQuery()) {
-			CommitDraft commitDraft = new CommitDraft(request);
-			commitDraft.createCommitInTripleStore();
+			UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(request);
+			updateCommitDraft.createCommitInTripleStore();
 //			Interface.sparqlUpdate(request);
 			result = "Query executed";
 		}

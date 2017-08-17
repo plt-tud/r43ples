@@ -22,10 +22,7 @@ public class ConsoleClientArgs {
   
   @Parameter(names = {"-u", "--user"}, description = "user name")
   public String user = "console client";
-  
-  @Parameter(names = {"-t", "--timestamp"}, description = "time stamp (default: current time stamp)")
-  public String time_stamp = RevisionManagement.getDateString();
-  
+
   @Parameter(names = {"-m", "--message"}, description = "commit message")
   public String message = "console client commit";
   

@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.objects;
+package de.tud.plt.r43ples.existentobjects;
 
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
@@ -20,8 +20,8 @@ public class Commit {
 
     /** The commit URI. */
     private String commitURI;
-    /** The commit title. */
-    private String commitTitle;
+    /** The commit message. */
+    private String commitMessage;
     /** The commit time stamp. */
     private String commitTimeStamp;
     /** The associated person name. */
@@ -48,6 +48,25 @@ public class Commit {
     }
 
     /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param commitURI the commit URI
+     * @param user the user
+     * @param timeStamp the time stamp
+     * @param message the message
+     * @throws InternalErrorException
+     */
+    public Commit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message) throws InternalErrorException {
+        this.revisionGraph = revisionGraph;
+        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
+        this.commitURI = commitURI;
+        this.commitAssociatedPersonName = user;
+        this.commitTimeStamp = timeStamp;
+        this.commitMessage = message;
+    }
+
+    /**
      * Calculate additional information of the current commit and store this information to local variables.
      *
      * @throws InternalErrorException
@@ -66,7 +85,7 @@ public class Commit {
         ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
         if (resultSet.hasNext()) {
             QuerySolution qs = resultSet.next();
-            commitTitle = qs.getLiteral("?title").toString();
+            commitMessage = qs.getLiteral("?title").toString();
             commitTimeStamp = qs.getLiteral("?timeStamp").toString();
             commitAssociatedPersonName = qs.getResource("?person").toString();
         } else {

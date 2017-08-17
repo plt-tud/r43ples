@@ -12,7 +12,7 @@ import com.hp.hpl.jena.query.ResultSet;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import de.tud.plt.r43ples.objects.Revision;
+import de.tud.plt.r43ples.existentobjects.Revision;
 
 /**
  * The class RevisionGraph provides functionality for one named graph which is managed by R43ples

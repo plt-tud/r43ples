@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.objects;
+package de.tud.plt.r43ples.existentobjects;
 
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;

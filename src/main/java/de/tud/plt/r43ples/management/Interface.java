@@ -2,11 +2,10 @@ package de.tud.plt.r43ples.management;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.tud.plt.r43ples.objects.Revision;
+import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
 import org.apache.log4j.Logger;
 
@@ -300,8 +299,10 @@ public class Interface {
 	public static MergeResult mergeFastForward(final R43plesMergeCommit commit) throws InternalErrorException {
 		RevisionGraph graph = new RevisionGraph(commit.graphName);
 		MergeResult result = new MergeResult(commit);
+		// TODO Create date by using commit information
+		String dateString = "2017-08-17T13:57:11";
 		result.hasConflict = !FastForwardControl.performFastForward(graph, commit.branchNameB, commit.branchNameA, commit.user,
-				RevisionManagement.getDateString(), commit.message);
+				dateString, commit.message);
 
 		return result;
 	}
@@ -479,8 +480,8 @@ public class Interface {
 			String removedAsNTriples = addedAndRemovedTriples.get(1);
 
 			String basisRevisionNumber = rebaseControl.forceRebaseProcess();
-			RevisionManagement.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,
-					basisRevisionNumber);
+			//TODO This will change because of the new Commit classes
+//			RevisionManagement.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,	basisRevisionNumber);
 			mresult.graphStrategy = "auto-rebase";
 		} else if ((commit.type != null) && (commit.type.equalsIgnoreCase("MANUAL")) && !commit.with) {
 			logger.info("MANUAL REBASE query detected");
@@ -491,8 +492,9 @@ public class Interface {
 			String removedAsNTriples = addedAndRemovedTriples.get(1);
 
 			String basisRevisionNumber = rebaseControl.forceRebaseProcess();
-			RevisionManagement.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,
-					basisRevisionNumber);
+			//TODO This will change because of the new Commit classes
+//			RevisionManagement.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,
+//					basisRevisionNumber);
 			mresult.graphStrategy = "manual-rebase";
 		} else if ((commit.type == null) && commit.with) {
 			logger.info("REBASE WITH query detected");
@@ -503,8 +505,9 @@ public class Interface {
 			String removedAsNTriples = addedAndRemovedTriples.get(1);
 
 			String basisRevisionNumber = rebaseControl.forceRebaseProcess();
-			RevisionManagement.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,
-					basisRevisionNumber);
+			//TODO This will change because of the new Commit classes
+//			RevisionManagement.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,
+//					basisRevisionNumber);
 
 			mresult.graphStrategy = "with-rebase";
 		} else if ((commit.type == null) && !commit.with) {
@@ -527,17 +530,5 @@ public class Interface {
 		return mresult;
 	}
 
-//	private static String getStringEnclosedinBraces(final String string, int start_pos){
-//		int end_pos = start_pos;
-//		int count_parenthesis = 1;
-//		while (count_parenthesis>0) {
-//			end_pos++;
-//			char ch = string.charAt(end_pos);
-//			if (ch=='{') count_parenthesis++;
-//			if (ch=='}') count_parenthesis--;
-//		}
-//		String substring = string.substring(start_pos, end_pos);
-//		return substring;
-//	}
 
 }

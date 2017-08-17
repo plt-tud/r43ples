@@ -1,7 +1,7 @@
 package de.tud.plt.r43ples.management;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.objects.Revision;
+import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
@@ -21,6 +21,8 @@ public class RevisionDraft {
     private String derivedFromRevisionIdentifier;
     /** The revision identifier of the revision which should be created. **/
     private String newRevisionIdentifier;
+    /** The revision URI. **/
+    private String revisionURI;
     /** The ADD set URI. */
     private String addSetURI;
     /** The DELETE set URI. */
@@ -56,6 +58,7 @@ public class RevisionDraft {
         this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
 		this.derivedFromRevisionIdentifier = revisionGraph.getRevisionIdentifier(derivedFromIdentifier);
      	this.newRevisionIdentifier = revisionGraph.getNextRevisionIdentifier();
+     	this.revisionURI = revisionGraph.getGraphName() + "-revision-" + newRevisionIdentifier;
 		
 		this.addSetURI = revisionGraph.getGraphName() + "-addSet-" + newRevisionIdentifier;
 		this.deleteSetURI = revisionGraph.getGraphName() + "-deleteSet-" + newRevisionIdentifier;
@@ -80,6 +83,7 @@ public class RevisionDraft {
         this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
         this.derivedFromRevisionIdentifier = revisionGraph.getRevisionIdentifier(derivedFromIdentifier);
         this.newRevisionIdentifier = revisionGraph.getNextRevisionIdentifier();
+        this.revisionURI = revisionGraph.getGraphName() + "-revision-" + newRevisionIdentifier;
 
         this.addSetURI = revisionGraph.getGraphName() + "-addSet-" + newRevisionIdentifier;
         this.deleteSetURI = revisionGraph.getGraphName() + "-deleteSet-" + newRevisionIdentifier;
@@ -120,7 +124,7 @@ public class RevisionDraft {
             RevisionManagement.executeINSERT(deleteSetURI, deleteSet);
         }
 
-        return new Revision(revisionGraph, newRevisionIdentifier, true);
+        return new Revision(revisionGraph, newRevisionIdentifier, revisionURI, addSetURI, deleteSetURI);
     }
 
     /**
@@ -162,6 +166,15 @@ public class RevisionDraft {
      */
     public RevisionGraph getRevisionGraph() {
         return revisionGraph;
+    }
+
+    /**
+     * Get the revision URI.
+     *
+     * @return the revision URI
+     */
+    public String getRevisionURI() {
+        return revisionURI;
     }
 
     /**

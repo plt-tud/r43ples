@@ -1,10 +1,11 @@
-package de.tud.plt.r43ples.objects;
+package de.tud.plt.r43ples.existentobjects;
 
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionGraph;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
@@ -32,6 +33,10 @@ public class Revision {
     /** The corresponding revision graph. */
     private RevisionGraph revisionGraph;
 
+    // Dependencies
+    /** The triplestore interface to use. **/
+    protected TripleStoreInterface tripleStoreInterface;
+
 
     /**
      * The constructor.
@@ -42,6 +47,9 @@ public class Revision {
      * @throws InternalErrorException
      */
     public Revision(RevisionGraph revisionGraph, String revisionInformation, boolean isIdentifier) throws InternalErrorException {
+        // Dependencies
+        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+
         this.revisionGraph = revisionGraph;
         this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
 
@@ -54,6 +62,28 @@ public class Revision {
         }
 
         calculateAdditionalInformation();
+    }
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param revisionIdentifier the revision identifier
+     * @param revisionURI the revision URI
+     * @param addSetURI the add set URI
+     * @param deleteSetURI the delete set URI
+     */
+    public Revision(RevisionGraph revisionGraph, String revisionIdentifier, String revisionURI, String addSetURI, String deleteSetURI) {
+        // Dependencies
+        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+
+        this.revisionGraph = revisionGraph;
+        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
+
+        this.revisionIdentifier = revisionIdentifier;
+        this.revisionURI = revisionURI;
+        this.addSetURI = addSetURI;
+        this.deleteSetURI = deleteSetURI;
     }
 
     /**
@@ -72,7 +102,7 @@ public class Revision {
                 + "	?rev a rmo:Revision. "
                 + "} }", revisionGraphURI, revisionURI);
         this.logger.debug(query);
-        ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
+        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
         if (resultSet.hasNext()) {
             QuerySolution qs = resultSet.next();
             return new Revision(revisionGraph, qs.getResource("?rev").toString(), false);
@@ -96,7 +126,7 @@ public class Revision {
                 + "	 prov:generated <%s>. "
                 + "} }", revisionGraphURI, revisionURI);
         this.logger.debug(query);
-        ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
+        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
         if (resultSet.hasNext()) {
             QuerySolution qs = resultSet.next();
             return new Commit(revisionGraph, qs.getResource("?com").toString());
@@ -120,7 +150,7 @@ public class Revision {
                 + "	?branch a rmo:Branch. "
                 + "} }", revisionGraphURI, revisionURI);
         this.logger.debug(query);
-        ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
+        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
         if (resultSet.hasNext()) {
             QuerySolution qs = resultSet.next();
             return new Branch(revisionGraph, qs.getResource("?branch").toString(), false);
@@ -189,7 +219,7 @@ public class Revision {
                 + "  rmo:deleteSet ?deleteSetURI. "
                 + "} }", revisionGraphURI, revisionURI);
         this.logger.debug(query);
-        ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
+        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
         if (resultSet.hasNext()) {
             QuerySolution qs = resultSet.next();
             addSetURI = qs.getResource("?addSetURI").toString();
@@ -216,7 +246,7 @@ public class Revision {
                 + "	 rmo:revisionNumber \"%s\". "
                 + "} }", revisionGraphURI, revisionIdentifier);
         this.logger.debug(query);
-        ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
+        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
         if (resultSet.hasNext()) {
             QuerySolution qs = resultSet.next();
             return qs.getResource("?uri").toString();
@@ -241,7 +271,7 @@ public class Revision {
                 + "	 rmo:revisionNumber ?id. "
                 + "} }", revisionGraphURI, revisionURI);
         this.logger.debug(query);
-        ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
+        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
         if (resultSet.hasNext()) {
             QuerySolution qs = resultSet.next();
             return qs.getLiteral("?id").toString();

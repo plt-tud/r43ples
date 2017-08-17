@@ -5,8 +5,8 @@ import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionGraph;
-import de.tud.plt.r43ples.objects.Path;
-import de.tud.plt.r43ples.objects.Revision;
+import de.tud.plt.r43ples.existentobjects.Path;
+import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.revisionTree.Tree;
 
 import org.custommonkey.xmlunit.XMLUnit;

@@ -90,8 +90,9 @@ public class Merging {
 		// Fast Forward
 		if(strategy.equals("Fast-Forward")){
 			MergeCommitModel commitModel = new MergeCommitModel(graphName, sddName, user, message, branch1, branch2, "Fast-Forward", null);
-			
-			boolean ff_successful = FastForwardControl.performFastForward(graph, branch1, branch2, user, RevisionManagement.getDateString(), message);
+			// TODO Create date by using commit information
+			String dateString = "2017-08-17T13:57:11";
+			boolean ff_successful = FastForwardControl.performFastForward(graph, branch1, branch2, user, dateString, message);
 
 			if (ff_successful){
 				response = Response.ok();
