@@ -17,6 +17,8 @@ public class TestSampleDataSet {
 		Config.readConfig("r43ples.test.conf");
 	}
 
+	// TODO Add checks for the single revisions
+
 	@Test
 	public final void testCreateSampleDataset1() throws InternalErrorException {
 		String graph = SampleDataSet.createSampleDataset1().graphName;
