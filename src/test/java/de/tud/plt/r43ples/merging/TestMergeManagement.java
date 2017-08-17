@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.tud.plt.r43ples.test.merge;
+package de.tud.plt.r43ples.merging;
 
 import static org.hamcrest.core.StringContains.containsString;
 
@@ -19,7 +19,6 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.merging.MergeManagement;
 
 
 /**

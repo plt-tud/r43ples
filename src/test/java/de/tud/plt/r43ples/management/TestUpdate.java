@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.test;
+package de.tud.plt.r43ples.management;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 import static org.hamcrest.core.IsNot.not;
@@ -21,7 +21,6 @@ import org.xml.sax.SAXException;
 import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
 import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
