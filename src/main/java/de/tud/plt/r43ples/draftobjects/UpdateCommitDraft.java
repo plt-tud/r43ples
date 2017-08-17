@@ -59,8 +59,8 @@ public class UpdateCommitDraft extends CommitDraft {
 	public UpdateCommitDraft(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException {
 		super(null);
 		this.revisionDraft = new RevisionDraft(new RevisionGraph(graphName), derivedFromIdentifier, addSet, deleteSet);
-		setUser(user);
-		setMessage(message);
+		this.setUser(user);
+		this.setMessage(message);
 		this.isCreatedWithRequest = false;
 	}
 
@@ -76,7 +76,7 @@ public class UpdateCommitDraft extends CommitDraft {
 			commitList.add(addMetaInformation(revisionDraft));
 			return commitList;
 		} else {
-			return updateChangeSetsByRewrittenQuery();
+			return this.updateChangeSetsByRewrittenQuery();
 		}
 	}
 
