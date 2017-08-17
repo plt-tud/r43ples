@@ -7,7 +7,6 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionGraph;
 import de.tud.plt.r43ples.existentobjects.Path;
 import de.tud.plt.r43ples.existentobjects.Revision;
-import de.tud.plt.r43ples.revisionTree.Tree;
 
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
@@ -16,7 +15,6 @@ import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.util.LinkedList;
 
 
 public class TestSimplePathCalculation {
@@ -53,13 +51,6 @@ public class TestSimplePathCalculation {
         RevisionGraph revisionGraph2 = new RevisionGraph(ds2);
         Revision revision2 = revisionGraph2.getRevision("1");
         Path test2 = pathCalc.getPathToRevisionWithFullGraph(revisionGraph2, revision2);
-        
-        
-        Tree tree = new Tree(revisionGraph2.getRevisionGraphUri());
-        LinkedList<de.tud.plt.r43ples.revisionTree.Revision> a = tree.getPathToRevision("1");
-        LinkedList<Revision> b = test2.getRevisionPath();
-        
-        
         Assert.assertEquals(4,test2.getRevisionPath().size());
     }
 }
