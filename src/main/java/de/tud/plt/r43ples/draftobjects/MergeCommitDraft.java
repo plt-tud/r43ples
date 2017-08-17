@@ -1,3 +1,32 @@
+package de.tud.plt.r43ples.draftobjects;
+
+import de.tud.plt.r43ples.management.R43plesRequest;
+
+/**
+ * Collection of information for creating a new merge commit.
+ *
+ * @author Stephan Hensel
+ */
+public class MergeCommitDraft extends CommitDraft {
+
+
+    /**
+     * The constructor.
+     *
+     * @param request the request received by R43ples
+     */
+    public MergeCommitDraft(R43plesRequest request) {
+        super(request);
+    }
+
+    // TODO
+
+}
+
+
+
+
+
 //package de.tud.plt.r43ples.draftobjects;
 //
 //import com.hp.hpl.jena.query.QuerySolution;
