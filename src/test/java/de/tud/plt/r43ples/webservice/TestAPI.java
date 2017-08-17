@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.test;
+package de.tud.plt.r43ples.webservice;
 
 import static org.hamcrest.core.StringContains.containsString;
 

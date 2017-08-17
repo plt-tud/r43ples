@@ -28,7 +28,8 @@ public class RevisionGraph {
 	private String graphName;
 
 	/**
-	 * 
+	 * Constructs a RevisionGraph for the specified graphName
+	 *
 	 * @param graphName URI of the named graph which R43ples manages
 	 */
 	public RevisionGraph(final String graphName) {
@@ -144,26 +145,25 @@ public class RevisionGraph {
 	}
 	
 	/**
-	 * Get the MASTER revision number of a graph.
-	 * 
-//	 * @param graphName
-//	 *            the graph name
-	 * @return the MASTER revision number
+	 * Get the MASTER revision of this revision graph.
+	 *
+	 * @return the MASTER revision
+	 * @throws InternalErrorException
 	 */
-	public String getMasterRevisionNumber() {
+	public Revision getMasterRevision() throws InternalErrorException{
 		logger.info("Get MASTER revision number of graph " + graphName);
 
 		String revisionGraph = this.getRevisionGraphUri();
 		String queryString = Config.prefixes + String.format(""
-				+ "SELECT ?revisionNumber "  
+				+ "SELECT ?revisionNumber "
 				+ "WHERE { GRAPH <%s> {"
 				+ "	?master a rmo:Master; rmo:references ?revision . "
-				+ "	?revision rmo:revisionNumber ?revisionNumber . " 
+				+ " ?revision rmo:revisionNumber ?revisionNumber ."
 				+ "} }", revisionGraph);
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryString);
 		if (results.hasNext()){
 			QuerySolution qs = results.next();
-			return qs.getLiteral("?revisionNumber").getString();
+			return this.getRevision(qs.getLiteral("?revisionNumber").toString());
 		}
 		else {
 			return null;

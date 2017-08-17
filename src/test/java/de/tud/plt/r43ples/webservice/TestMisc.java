@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.tud.plt.r43ples.test.webservice;
+package de.tud.plt.r43ples.webservice;
 
 import static org.hamcrest.core.StringContains.containsString;
 
@@ -24,7 +24,6 @@ import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import de.tud.plt.r43ples.webservice.Misc;
 
 /**
  * @author Markus Graube
