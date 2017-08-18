@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import javax.ws.rs.core.Response;
 
+import de.tud.plt.r43ples.R43plesTest;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.log4j.Logger;
 import org.custommonkey.xmlunit.XMLUnit;
