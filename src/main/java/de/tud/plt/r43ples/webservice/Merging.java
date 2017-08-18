@@ -23,7 +23,7 @@ import com.github.mustachejava.MustacheFactory;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.R43plesMergeCommit;
-import de.tud.plt.r43ples.management.RevisionGraph;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.FastForwardControl;
 import de.tud.plt.r43ples.merging.MergeResult;

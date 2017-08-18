@@ -6,6 +6,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
 import org.apache.log4j.Logger;
 

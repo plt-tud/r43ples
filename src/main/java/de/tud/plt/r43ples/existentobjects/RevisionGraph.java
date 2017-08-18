@@ -1,7 +1,9 @@
-package de.tud.plt.r43ples.management;
+package de.tud.plt.r43ples.existentobjects;
 
 import java.util.ArrayList;
 
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.RevisionManagement;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.QuerySolution;

@@ -26,10 +26,9 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
 
-import de.tud.plt.r43ples.draftobjects.CommitDraft;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
-import de.tud.plt.r43ples.draftobjects.UpdateCommitDraft;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.*;
 import org.apache.log4j.Logger;
 

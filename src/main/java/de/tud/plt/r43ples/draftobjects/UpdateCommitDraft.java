@@ -3,6 +3,7 @@ package de.tud.plt.r43ples.draftobjects;
 import com.hp.hpl.jena.query.QuerySolution;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.existentobjects.UpdateCommit;
 import de.tud.plt.r43ples.management.*;
 import org.apache.log4j.Logger;

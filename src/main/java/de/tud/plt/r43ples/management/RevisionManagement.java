@@ -3,18 +3,13 @@ package de.tud.plt.r43ples.management;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
-import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
-import de.tud.plt.r43ples.draftobjects.UpdateCommitDraft;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
 import org.apache.log4j.Logger;
 

@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.R43plesMergeCommit;
-import de.tud.plt.r43ples.management.RevisionGraph;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.merging.model.structure.Patch;

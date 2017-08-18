@@ -1,21 +1,16 @@
 package de.tud.plt.r43ples.dataset;
 
 import java.io.IOException;
-import java.util.ArrayList;
 
-import com.hp.hpl.jena.update.Update;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
-import de.tud.plt.r43ples.draftobjects.UpdateCommitDraft;
-import de.tud.plt.r43ples.existentobjects.Commit;
-import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
 import de.tud.plt.r43ples.existentobjects.UpdateCommit;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
-import de.tud.plt.r43ples.management.RevisionGraph;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagement;
 
 /**

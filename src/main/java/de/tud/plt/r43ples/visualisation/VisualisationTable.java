@@ -18,7 +18,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
-import de.tud.plt.r43ples.management.RevisionGraph;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.revisionTree.Commit;
 import de.tud.plt.r43ples.revisionTree.StructuredTree;
 

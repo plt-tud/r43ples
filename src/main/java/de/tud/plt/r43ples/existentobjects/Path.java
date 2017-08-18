@@ -1,6 +1,5 @@
 package de.tud.plt.r43ples.existentobjects;
 
-import de.tud.plt.r43ples.management.RevisionGraph;
 import org.apache.log4j.Logger;
 
 import java.util.LinkedList;
