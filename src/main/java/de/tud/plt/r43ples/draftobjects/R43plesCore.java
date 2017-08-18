@@ -1,6 +1,7 @@
 package de.tud.plt.r43ples.draftobjects;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
 import de.tud.plt.r43ples.existentobjects.UpdateCommit;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import org.apache.log4j.Logger;
@@ -27,7 +28,7 @@ public class R43plesCore implements R43plesCoreInterface {
     }
 
     /**
-     * Create a new update Commit.
+     * Create a new update commit.
      *
      * @param request the request received by R43ples
      * @return the list of created update commits
@@ -40,7 +41,7 @@ public class R43plesCore implements R43plesCoreInterface {
     }
 
     /**
-     * Create a new update Commit.
+     * Create a new update commit.
      *
      * @param graphName the graph name
      * @param addSet the add set as N-Triples
@@ -55,6 +56,20 @@ public class R43plesCore implements R43plesCoreInterface {
     public ArrayList<UpdateCommit> createUpdateCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException {
         UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(graphName, addSet, deleteSet, user, message, derivedFromIdentifier);
         return updateCommitDraft.createCommitInTripleStore();
+    }
+
+
+
+
+
+    @Override
+    public ThreeWayMergeCommit createThreeWayMergeCommit(R43plesRequest request) throws InternalErrorException {
+        return null;
+    }
+
+    @Override
+    public ThreeWayMergeCommit createThreeWayMergeCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifierSource, String derivedFromIdentifierTarget) throws InternalErrorException {
+        return null;
     }
 
 }

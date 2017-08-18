@@ -9,6 +9,7 @@ import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
 import de.tud.plt.r43ples.draftobjects.UpdateCommitDraft;
 import de.tud.plt.r43ples.existentobjects.Commit;
 import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
 import de.tud.plt.r43ples.existentobjects.UpdateCommit;
 import org.apache.log4j.Logger;
 
@@ -98,7 +99,9 @@ public class SampleDataSet {
 	}
 
 	public static DataSetGenerationResult createSampleDataset2() throws InternalErrorException {
-		//TODO Change to new creation process
+
+		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
+
 		DataSetGenerationResult result = new DataSetGenerationResult();
 		String graphName = "http://test.com/r43ples-dataset-2";
 		result.graphName = graphName;
@@ -107,21 +110,26 @@ public class SampleDataSet {
 		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graphName);
 		result.revisions.put("master-0", revisionNumber0);
 
-		String revisionNumber1 = RevisionManagement.createNewRevision(graphName,
+		ArrayList<UpdateCommit> commitList1 = r43plesCore.createUpdateCommit(graphName,
 				ResourceManagement.getContentFromResource("samples/test2-addSet-1.nt"),
 				ResourceManagement.getContentFromResource("samples/test2-deleteSet-1.nt"), user,
-				"test commit message 1", revisionNumber0);
+				"test commit message 1", "master");
+		String revisionNumber1 = commitList1.get(0).getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("master-1", revisionNumber1);
-		String revisionNumber2 = RevisionManagement.createNewRevision(graphName,
+
+		ArrayList<UpdateCommit> commitList2 = r43plesCore.createUpdateCommit(graphName,
 				ResourceManagement.getContentFromResource("samples/test2-addSet-2.nt"),
 				ResourceManagement.getContentFromResource("samples/test2-deleteSet-2.nt"), user,
-				"test commit message 2", revisionNumber1);
+				"test commit message 2", "master");
+		String revisionNumber2 = commitList2.get(0).getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("master-2", revisionNumber2);
+
 		return result;
 	}
 
 	public static DataSetGenerationResult createSampleDataset3() throws InternalErrorException  {
-		//TODO Change to new creation process
+		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
+
 		DataSetGenerationResult result = new DataSetGenerationResult();
 		String graphName = "http://test.com/r43ples-dataset-3";
 		result.graphName = graphName;
@@ -130,45 +138,44 @@ public class SampleDataSet {
 		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graphName, "2015-01-01T14:51:37");
 		result.revisions.put("master-0", revisionNumber0);
 
-
-		String revisionNumber1 = RevisionManagement.createNewRevision(graphName,
+		ArrayList<UpdateCommit> commitList1 = r43plesCore.createUpdateCommit(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-1.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-1.nt"), user,
-				"2015-02-01T21:32:52",
-				"test commit message 1", revisionNumber0);
+				"test commit message 1", "master");
+		String revisionNumber1 = commitList1.get(0).getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("master-1", revisionNumber1);
 		// Create a new branch B1
-				DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, revisionNumber1, "B1");
+		String branchNameB1 = "b1";
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, revisionNumber1, branchNameB1);
 
-		String revisionB1_0 = RevisionManagement.createNewRevision(graphName,
+		ArrayList<UpdateCommit> commitListB1_0 = r43plesCore.createUpdateCommit(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-2.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-2.nt"), user,
-				"2015-03-02T09:06:52",
-				"test commit message 2", "B1".toLowerCase());
+				"test commit message 2", "master");
+		String revisionB1_0 = commitListB1_0.get(0).getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("b1-0", revisionB1_0);
 
-		String revisionNumber3 = RevisionManagement.createNewRevision(graphName,
+		ArrayList<UpdateCommit> commitList3 = r43plesCore.createUpdateCommit(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-3.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-3.nt"), user,
-				"2015-04-08T14:07:59",
-				"test commit message 3", revisionNumber1);
+				"test commit message 3", "master");
+		String revisionNumber3 = commitList3.get(0).getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("master-3", revisionNumber3);
 
-		String revisionNumber4 = RevisionManagement.createNewRevision(graphName,
+		ArrayList<UpdateCommit> commitList4 = r43plesCore.createUpdateCommit(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-4.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-4.nt"), user,
-				"2015-05-10T08:12:23",
-				"test commit message 4", revisionNumber3);
+				"test commit message 4", "master");
+		String revisionNumber4 = commitList4.get(0).getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("master-4", revisionNumber4);
-		ArrayList<String> usedRevisions5 = new ArrayList<>();
-		usedRevisions5.add(revisionNumber4);
-		usedRevisions5.add(revisionB1_0);
-		String revisionNumber5 = RevisionManagement.createNewRevision(graphName,
+
+		ThreeWayMergeCommit mergeCommit5 = r43plesCore.createThreeWayMergeCommit(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-5.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-5.nt"), user,
-				"2015-06-21T23:07:52",
-				"test commit message 5", usedRevisions5);
+				"test commit message 5", branchNameB1, "master");
+		String revisionNumber5 = mergeCommit5.getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("master-5", revisionNumber5);
+
 		return result;
 	}
 
@@ -193,7 +200,6 @@ public class SampleDataSet {
 	public static DataSetGenerationResult createSampleDataSetMerging() throws InternalErrorException {
 		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
 
-		//TODO Change to new creation process
 		DataSetGenerationResult result = new DataSetGenerationResult();
 		String graphName = "http://test.com/r43ples-dataset-merging";
 		result.graphName = graphName;
@@ -421,7 +427,8 @@ public class SampleDataSet {
 	 * @throws InternalErrorException
 	 */
 	public static String createSampleDataSetRenaming() throws InternalErrorException {
-		//TODO Change to new creation process
+		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
+
 		String graphName = "http://test.com/r43ples-dataset-renaming";
 
 		RevisionGraph graph = new RevisionGraph(graphName);
@@ -434,35 +441,42 @@ public class SampleDataSet {
 		String triples = "<http://example.com/testS> <http://example.com/testP1> \"A\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP1> \"B\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP2> \"C\". \n";
-		String revision1 = RevisionManagement.createNewRevision(graphName, triples, null, user, "Initial commit", revision0);
+		ArrayList<UpdateCommit> commitList1 = r43plesCore.createUpdateCommit(graphName, triples, null, user, "Initial commit", revision0);
+		String revision1 = commitList1.get(0).getGeneratedRevision().getRevisionIdentifier();
 
 		// Create a new branch B1
+		String branchNameB1 = "b1";
 		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, revision1, "B1");
 
 		// Create a new branch B2
+		String branchNameB2 = "b2";
 		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2", graphName, revision1, "B2");
 
 		// First commit to B1
 		String triplesInsert = "<http://example.com/testS> <http://example.com/testP2> \"D\". \n";
 
 		String triplesDelete = "<http://example.com/testS> <http://example.com/testP1> \"A\". \n";
-		String revisionB1_0 = RevisionManagement.createNewRevision(graphName, triplesInsert, triplesDelete, user, "First commit to B1", "B1".toLowerCase());
+		ArrayList<UpdateCommit> commitListB1_0 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user, "First commit to B1", branchNameB1);
+		String revisionB1_0 = commitListB1_0.get(0).getGeneratedRevision().getRevisionIdentifier();
 
 		// First commit to B2
 		triplesInsert = "<http://example.com/testS> <http://example.com/testP2> \"D\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP2> \"H\". \n";
 		triplesDelete = "<http://example.com/testS> <http://example.com/testP2> \"C\". \n";
-		String revisionB2_0 = RevisionManagement.createNewRevision(graphName, triplesInsert, triplesDelete, user, "First commit to B2", "B2".toLowerCase());
+		ArrayList<UpdateCommit> commitListB2_0 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user, "First commit to B2", branchNameB2);
+		String revisionB2_0 = commitListB2_0.get(0).getGeneratedRevision().getRevisionIdentifier();
 
 		// Second commit to B1
 		triplesInsert = "<http://example.com/testS> <http://example.com/testP1> \"G\". \n";
 		triplesDelete = "<http://example.com/testS> <http://example.com/testP2> \"D\". \n";
-		RevisionManagement.createNewRevision(graphName, triplesInsert, triplesDelete, user, "Second commit to B1", revisionB1_0);
+		ArrayList<UpdateCommit> commitListB1_1 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user, "Second commit to B1", branchNameB1);
+		String revisionB1_1 = commitListB1_1.get(0).getGeneratedRevision().getRevisionIdentifier();
 
 		// Second commit to B2
 		triplesInsert = "<http://example.com/testS> <http://example.com/testP2> \"I\". \n";
-		RevisionManagement.createNewRevision(graphName, triplesInsert, null, user, "Second commit to B2", revisionB2_0);
-		logger.info("Example graph <" + graphName +"> created.");
+		ArrayList<UpdateCommit> commitListB2_1 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user, "Second commit to B2", branchNameB2);
+		String revisionB2_1 = commitListB2_1.get(0).getGeneratedRevision().getRevisionIdentifier();
+		logger.info("Example graph <" + graphName + "> created.");
 
 		return graphName;
 	}

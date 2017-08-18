@@ -46,7 +46,7 @@ public class TestUpdate extends R43plesTest {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
-		//ds1 = SampleDataSet.createSampleDataset1();
+		ds1 = SampleDataSet.createSampleDataset1();
 	}
 
 	@Before
