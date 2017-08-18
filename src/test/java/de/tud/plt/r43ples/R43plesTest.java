@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.test;
+package de.tud.plt.r43ples;
 
 import org.apache.log4j.Logger;
 

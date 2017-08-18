@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.test;
+package de.tud.plt.r43ples.management;
 
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 

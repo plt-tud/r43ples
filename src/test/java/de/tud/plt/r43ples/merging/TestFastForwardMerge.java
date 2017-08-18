@@ -1,10 +1,10 @@
-package de.tud.plt.r43ples.test.merge;
+package de.tud.plt.r43ples.merging;
 
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
-import de.tud.plt.r43ples.test.R43plesTest;
+import de.tud.plt.r43ples.R43plesTest;
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Before;
@@ -19,7 +19,7 @@ import de.tud.plt.r43ples.iohelper.ResourceManagement;
 
 
 /**
- * Tests fast forwarding of the merge management.
+ * Tests fast forwarding of the merging management.
  *
  * @author Xinyu Yang
  * @author Stephan Hensel

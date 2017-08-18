@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.test;
+package de.tud.plt.r43ples.dataset;
 
 import java.io.IOException;
 

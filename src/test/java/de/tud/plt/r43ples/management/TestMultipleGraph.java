@@ -1,13 +1,14 @@
 /**
  * 
  */
-package de.tud.plt.r43ples.test;
+package de.tud.plt.r43ples.management;
 
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 
+import de.tud.plt.r43ples.R43plesTest;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
 import org.junit.BeforeClass;

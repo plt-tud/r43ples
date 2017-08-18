@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.tud.plt.r43ples.test;
+package de.tud.plt.r43ples.management;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.junit.Assert;

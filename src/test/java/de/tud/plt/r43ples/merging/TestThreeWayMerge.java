@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.test.merge;
+package de.tud.plt.r43ples.merging;
 
 import static org.junit.Assert.assertTrue;
 
@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import javax.ws.rs.core.Response;
 
-import de.tud.plt.r43ples.test.R43plesTest;
+import de.tud.plt.r43ples.R43plesTest;
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
@@ -22,7 +22,7 @@ import de.tud.plt.r43ples.iohelper.ResourceManagement;
 
 
 /**
- * Tests the 3-Way-Merge of the merge management.
+ * Tests the 3-Way-Merge of the merging management.
  *
  * @author Xinyu Yang
  * @author Stephan Hensel

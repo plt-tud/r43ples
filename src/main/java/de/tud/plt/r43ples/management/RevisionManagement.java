@@ -218,7 +218,7 @@ public class RevisionManagement {
 
 	/**
 	 * create new revision with patch with addedUri and removedUri
-	 * 
+	 *
 	 * @param graphName
 	 *            the graph name
 	 * @param addSetGraphUri
@@ -231,7 +231,7 @@ public class RevisionManagement {
 	 *            the title of the revision
 	 * @param usedRevisionNumber
 	 *            the number of the revision which is used for creation of the
-	 *            new revision 
+	 *            new revision
 	 * @return new revision number
 	 * @throws InternalErrorException 
 	 */
@@ -246,7 +246,7 @@ public class RevisionManagement {
 //		return d.newRevisionNumber;
 		return null;
 	}
-	
+
 
 
 //	/**
