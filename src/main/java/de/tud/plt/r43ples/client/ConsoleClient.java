@@ -3,6 +3,9 @@ package de.tud.plt.r43ples.client;
 import java.io.File;
 import java.io.IOException;
 
+import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
+import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
+import de.tud.plt.r43ples.existentobjects.UpdateCommit;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -62,13 +65,16 @@ public class ConsoleClient {
 			graph.purgeRevisionInformation();
 			TripleStoreInterfaceSingleton.get().executeCreateGraph(args_client.graph);
 			RevisionManagement.putGraphUnderVersionControl(args_client.graph);
-			logger.info("Graph created: "+ args_client.graph);
+			logger.info("Graph created: " + args_client.graph);
 		} else {
 			String addSet = readFile(args_client.add_set);
 			String deleteSet = readFile(args_client.delete_set);
-		
-			String result = RevisionManagement.createNewRevision(args_client.graph, addSet, deleteSet, args_client.user, args_client.message, args_client.branch);
-			logger.info("New Revision: "+ result);			
+
+			R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
+			UpdateCommit commit1 = r43plesCore.createUpdateCommit(args_client.graph, addSet, deleteSet, args_client.user, args_client.message, args_client.branch);
+			String result = commit1.getGeneratedRevision().getRevisionIdentifier();
+
+			logger.info("New Revision: " + result);
 		}
 	}
 

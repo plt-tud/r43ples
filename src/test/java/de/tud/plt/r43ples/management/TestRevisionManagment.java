@@ -3,7 +3,11 @@ package de.tud.plt.r43ples.management;
 import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
+import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
+import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
+import de.tud.plt.r43ples.existentobjects.UpdateCommit;
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
@@ -234,23 +238,29 @@ public class TestRevisionManagment {
 	
 	@Test
 	public void testBranching() throws InternalErrorException {
+		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
+
 		RevisionManagement.createBranch(ds.graphName, ds.revisions.get("master-2"), "testBranch", "test_user", "branching as junit test");
 
-		String rev = RevisionManagement.createNewRevision(ds.graphName, "<a> <b> <c>", "", "test_user", "test_commitMessage", "testBranch");
+		UpdateCommit commit1 = r43plesCore.createUpdateCommit(ds.graphName, "<a> <b> <c>", "", "test_user", "test_commitMessage", "testBranch");
+		String rev = commit1.getGeneratedRevision().getRevisionIdentifier();
 		String revNumber = graph.getRevisionIdentifier("testBranch");
 		Assert.assertEquals(rev, revNumber);
-		
-		String rev2 = RevisionManagement.createNewRevision(ds.graphName, "<a> <b> <d>", "", "test_user", "test_commitMessage", "testBranch");
+
+		UpdateCommit commit2 = r43plesCore.createUpdateCommit(ds.graphName, "<a> <b> <d>", "", "test_user", "test_commitMessage", "testBranch");
+		String rev2 = commit2.getGeneratedRevision().getRevisionIdentifier();
 		String revNumber2 = graph.getRevisionIdentifier("testBranch");
 		Assert.assertEquals(rev2, revNumber2);
 		
 		RevisionManagement.createBranch(ds.graphName, rev2, "testBranch2", "test_user", "branching as junit test");
-		String rev3 = RevisionManagement.createNewRevision(ds.graphName, "<a> <b> <e>", "", "test_user", "test_commitMessage", "testBranch2");
+		UpdateCommit commit3 = r43plesCore.createUpdateCommit(ds.graphName, "<a> <b> <e>", "", "test_user", "test_commitMessage", "testBranch2");
+		String rev3 = commit3.getGeneratedRevision().getRevisionIdentifier();
 		String revNumber3 = graph.getRevisionIdentifier("testBranch2");
 		Assert.assertEquals(rev3, revNumber3);
 		
 		RevisionManagement.createBranch(ds.graphName, rev2, "testBranch2a", "test_user", "branching as junit test");
-		String rev4 = RevisionManagement.createNewRevision(ds.graphName, "<a> <b> <f>", "", "test_user", "test_commitMessage", "testBranch2a");
+		UpdateCommit commit4 = r43plesCore.createUpdateCommit(ds.graphName, "<a> <b> <f>", "", "test_user", "test_commitMessage", "testBranch2a");
+		String rev4 = commit4.getGeneratedRevision().getRevisionIdentifier();
 		String revNumber4 = graph.getRevisionIdentifier("testBranch2a");
 		Assert.assertEquals(rev4, revNumber4);
 	}

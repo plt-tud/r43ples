@@ -870,7 +870,10 @@ public class MergeManagement {
 		ArrayList<String> usedRevisionNumbers = new ArrayList<String>();
 		usedRevisionNumbers.add(commit.branchNameB);
 		usedRevisionNumbers.add(commit.branchNameA);
-		return RevisionManagement.createNewRevision(commit.graphName, addedTriples, removedTriples, commit.user, commit.message, usedRevisionNumbers);
+
+		// TODO This does currently not work => change to merge commit
+		//return RevisionManagement.createNewRevision(commit.graphName, addedTriples, removedTriples, commit.user, commit.message, usedRevisionNumbers);
+		return null;
 	}
 	
 	/**

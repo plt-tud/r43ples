@@ -33,10 +33,10 @@ public interface R43plesCoreInterface {
      * @param user the user
      * @param message the message
      * @param derivedFromIdentifier the revision identifier of the revision or the reference identifier from which the new revision should be derive from
-     * @return the list of created update commits
+     * @return the created update commit
      * @throws InternalErrorException
      */
-    ArrayList<UpdateCommit> createUpdateCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException;
+    UpdateCommit createUpdateCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException;
 
 
     /**
