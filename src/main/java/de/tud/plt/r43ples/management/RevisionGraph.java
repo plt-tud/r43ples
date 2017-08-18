@@ -1,6 +1,3 @@
-/**
- * 
- */
 package de.tud.plt.r43ples.management;
 
 import java.util.ArrayList;

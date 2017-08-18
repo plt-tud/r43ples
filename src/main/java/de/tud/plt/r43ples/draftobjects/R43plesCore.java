@@ -1,6 +1,7 @@
 package de.tud.plt.r43ples.draftobjects;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.InitialCommit;
 import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
 import de.tud.plt.r43ples.existentobjects.UpdateCommit;
 import de.tud.plt.r43ples.management.R43plesRequest;
@@ -25,6 +26,37 @@ public class R43plesCore implements R43plesCoreInterface {
      */
     protected R43plesCore() {
 
+    }
+
+    /**
+     * Create a new initial commit.
+     *
+     * @param request the request received by R43ples
+     * @return the created initial commit
+     * @throws InternalErrorException
+     */
+    @Override
+    public InitialCommit createInitialCommit(R43plesRequest request) throws InternalErrorException {
+        InitialCommitDraft initialCommitDraft = new InitialCommitDraft(request);
+        return initialCommitDraft.createCommitInTripleStore();
+    }
+
+    /**
+     * Create a new initial commit..
+     *
+     * @param graphName the graph name
+     * @param addSet the add set as N-Triples
+     * @param deleteSet the delete set as N-Triples
+     * @param user the user
+     * @param message the message
+     * @param derivedFromIdentifier the revision identifier of the revision or the reference identifier from which the new revision should be derive from
+     * @return the created update commit
+     * @throws InternalErrorException
+     */
+    @Override
+    public InitialCommit createInitialCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException {
+        InitialCommitDraft initialCommitDraft = new InitialCommitDraft(graphName, addSet, deleteSet, user, message);
+        return initialCommitDraft.createCommitInTripleStore();
     }
 
     /**
