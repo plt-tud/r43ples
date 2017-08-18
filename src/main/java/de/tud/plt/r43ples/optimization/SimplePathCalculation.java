@@ -15,12 +15,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * This class implements the PathCalculation interface and provides simple not optimized algorithms to calculate paths between revisions.
+ * This class implements the PathCalculationInterface interface and provides simple not optimized algorithms to calculate paths between revisions.
  *
  * @author Stephan Hensel
  *
  */
-public class SimplePathCalculation implements PathCalculation {
+public class SimplePathCalculation implements PathCalculationInterface {
 
     /** The logger. **/
     private Logger logger = Logger.getLogger(SimplePathCalculation.class);

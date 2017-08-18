@@ -39,7 +39,7 @@ public class UpdateCommitDraft extends CommitDraft {
 	 *
 	 * @param request the request received by R43ples
 	 */
-	public UpdateCommitDraft(R43plesRequest request){
+	protected UpdateCommitDraft(R43plesRequest request){
 		super(request);
 		this.isCreatedWithRequest = true;
 	}
@@ -56,7 +56,7 @@ public class UpdateCommitDraft extends CommitDraft {
 	 * @param derivedFromIdentifier the revision identifier of the revision or the reference identifier from which the new revision should be derive from
 	 * @throws InternalErrorException
 	 */
-	public UpdateCommitDraft(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException {
+	protected UpdateCommitDraft(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException {
 		super(null);
 		this.revisionDraft = new RevisionDraft(new RevisionGraph(graphName), derivedFromIdentifier, addSet, deleteSet);
 		this.setUser(user);
@@ -69,7 +69,7 @@ public class UpdateCommitDraft extends CommitDraft {
 	 *
 	 * @return the list of created commits
 	 */
-	public ArrayList<UpdateCommit> createCommitInTripleStore() throws InternalErrorException {
+	protected ArrayList<UpdateCommit> createCommitInTripleStore() throws InternalErrorException {
 		if (!isCreatedWithRequest) {
 			revisionDraft.createRevisionInTripleStore();
 			ArrayList<UpdateCommit> commitList = new ArrayList<>();

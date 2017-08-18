@@ -13,7 +13,7 @@ public class PathCalculationSingleton {
     private static Logger logger = Logger.getLogger(PathCalculationSingleton.class);
 
     /** The path calculation object. **/
-    private static PathCalculation pathCalculation;
+    private static PathCalculationInterface pathCalculation;
 
 
     /**
@@ -28,7 +28,7 @@ public class PathCalculationSingleton {
      *
      * @return the instance of the path calculation implementation
      */
-    public static PathCalculation getInstance() {
+    public static PathCalculationInterface getInstance() {
         if (pathCalculation!=null)
             return pathCalculation;
         else {

@@ -12,7 +12,7 @@ import de.tud.plt.r43ples.existentobjects.Revision;
  * @author Stephan Hensel
  *
  */
-public interface PathCalculation {
+public interface PathCalculationInterface {
 
 
     /**

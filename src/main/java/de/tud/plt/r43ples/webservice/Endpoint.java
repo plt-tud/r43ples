@@ -27,6 +27,8 @@ import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
 
 import de.tud.plt.r43ples.draftobjects.CommitDraft;
+import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
+import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
 import de.tud.plt.r43ples.draftobjects.UpdateCommitDraft;
 import de.tud.plt.r43ples.management.*;
 import org.apache.log4j.Logger;
@@ -331,7 +333,8 @@ public class Endpoint {
 	 */
 	private Response getSparqlResponse(String format, String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
 		logger.debug(String.format("SPARQL request (format=%s, query_rewriting=%s) -> %n %s", format, query_rewriting, sparqlQuery));
-		
+
+		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
         
 		R43plesRequest request = new R43plesRequest(sparqlQuery, format);
 
@@ -340,8 +343,9 @@ public class Endpoint {
 			result = Interface.sparqlSelectConstructAsk(request, query_rewriting);
 		}
 		else if (request.isUpdateQuery()) {
-			UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(request);
-			updateCommitDraft.createCommitInTripleStore();
+			r43plesCore.createUpdateCommit(request);
+//			UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(request);
+//			updateCommitDraft.createCommitInTripleStore();
 //			Interface.sparqlUpdate(request);
 			result = "Query executed";
 		}

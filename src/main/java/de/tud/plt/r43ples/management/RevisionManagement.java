@@ -12,6 +12,8 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
+import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
 import de.tud.plt.r43ples.draftobjects.UpdateCommitDraft;
 import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
 import org.apache.log4j.Logger;
@@ -121,12 +123,13 @@ public class RevisionManagement {
 										   final String removedAsNTriples, final String user, final String timeStamp, final String commitMessage,
 										   final ArrayList<String> usedRevisionNumber) throws InternalErrorException {
 		//String timeStamp = getDateString();
-
+		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
 		if (usedRevisionNumber.size() > 1) {
 			// TODO currently not implemented
 		} else {
-			UpdateCommitDraft commitDraft = new UpdateCommitDraft(graphName, addedAsNTriples, removedAsNTriples, user, commitMessage, usedRevisionNumber.get(0));
-			commitDraft.createCommitInTripleStore();
+			r43plesCore.createUpdateCommit(graphName, addedAsNTriples, removedAsNTriples, user, commitMessage, usedRevisionNumber.get(0));
+//			UpdateCommitDraft commitDraft = new UpdateCommitDraft(graphName, addedAsNTriples, removedAsNTriples, user, commitMessage, usedRevisionNumber.get(0));
+//			commitDraft.createCommitInTripleStore();
 		}
 		return null;
 		//return createNewRevision(graphName, addedAsNTriples, removedAsNTriples, user, timeStamp, commitMessage, usedRevisionNumber);

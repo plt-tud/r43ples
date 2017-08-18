@@ -15,7 +15,7 @@ import de.tud.plt.r43ples.webservice.Endpoint;
  */
 public class DatasetGenerationManagement {
 
-	// TODO move to tests if necessary or delete the whole content
+	// TODO Change this class to a template class which provides queries as strings, do not execute the queries
 
 	/** The logger. */
 	private static Logger logger = Logger.getLogger(DatasetGenerationManagement.class);
