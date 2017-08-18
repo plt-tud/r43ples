@@ -17,8 +17,8 @@ import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
 import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionGraph;
-import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 
 
 /**
@@ -101,7 +101,7 @@ public class TestMergeManagement {
 				+ "FROM <"+ds.graphName+">"
 				+ "WHERE { ?s ?p ?o}";
 				
-		String result = RevisionManagement.getResponseHeaderFromQuery(sparql);
+		String result = RevisionManagementOriginal.getResponseHeaderFromQuery(sparql);
 		Assert.assertThat(result, containsString("Master"));
 	}
 

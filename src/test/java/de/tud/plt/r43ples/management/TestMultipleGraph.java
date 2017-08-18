@@ -18,9 +18,7 @@ import org.xml.sax.SAXException;
 import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
 import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
-import de.tud.plt.r43ples.management.RevisionManagement;
 
 /**
  * @author Markus Graube
@@ -104,7 +102,7 @@ public class TestMultipleGraph extends R43plesTest {
 				+ "FROM <" + ds1.graphName +">"
 				+ "WHERE { ?s ?p ?o}";
 				
-		String result = RevisionManagement.getResponseHeaderFromQuery(sparql);
+		String result = RevisionManagementOriginal.getResponseHeaderFromQuery(sparql);
 		Assert.assertThat(result, containsString("Master"));
 	}
 	
@@ -115,7 +113,7 @@ public class TestMultipleGraph extends R43plesTest {
 				+ "FROM <" + ds2.graphName +">"
 				+ "WHERE { ?s ?p ?o}";
 				
-		String result = RevisionManagement.getResponseHeaderFromQuery(sparql);
+		String result = RevisionManagementOriginal.getResponseHeaderFromQuery(sparql);
 		Assert.assertThat(result, containsString("Master"));
 	}
 
