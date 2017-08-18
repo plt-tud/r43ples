@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
+import de.tud.plt.r43ples.existentobjects.InitialCommit;
 import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
 import de.tud.plt.r43ples.existentobjects.UpdateCommit;
 import de.tud.plt.r43ples.management.RevisionManagementOriginal;
@@ -40,9 +41,10 @@ public class SampleDataSet {
 		RevisionGraph graph = new RevisionGraph(graphName);
 		graph.purgeRevisionInformation();
 
-
-		String revisionNumber0 = RevisionManagementOriginal.putGraphUnderVersionControl(graphName, "2016-01-01T14:51:37.011");
-		// TODO revisionNumber0 type will change because putGraphUnderVersionControl will move to commit
+		InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, null, null, user, "Create graph");
+		String revisionNumber0 = initialCommit.getGeneratedRevision().getRevisionIdentifier();
+		//String revisionNumber0 = RevisionManagementOriginal.putGraphUnderVersionControl(graphName, "2016-01-01T14:51:37.011");
+		// TODO revisionNumber0 type will change because putGraphUnderRevisionControl will move to commit
 		//result.revisions.put("master-0", new Revision(graph, revisionNumber0, true);
 		result.revisions.put("master-0", revisionNumber0);
 
@@ -203,7 +205,7 @@ public class SampleDataSet {
 
 		//delete the old graph
 		graph.purgeRevisionInformation();
-		// TODO revisionNumber0 type will change because putGraphUnderVersionControl will move to commit
+		// TODO revisionNumber0 type will change because putGraphUnderRevisionControl will move to commit
 		String revision0 = RevisionManagementOriginal.putGraphUnderVersionControl(graphName);
 		result.revisions.put("master-0", revision0);
 

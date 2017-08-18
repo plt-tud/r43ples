@@ -58,6 +58,22 @@ public class RevisionManagement {
     }
 
     /**
+     * Get a new revision graph URI.
+     *
+     * @param revisionGraphName  the revision graph name
+     * @return the new revision graph URI
+     * @throws InternalErrorException
+     */
+    protected String getNewRevisionGraphURI(String revisionGraphName) throws InternalErrorException {
+        String revisionGraphURI = revisionGraphName + "-revisiongraph";
+        if (!checkNamedGraphExistence(revisionGraphURI)) {
+            return revisionGraphURI;
+        } else {
+            throw new InternalErrorException("The calculated revision graph URI is already in use.");
+        }
+    }
+
+    /**
      * Get a new revision URI.
      *
      * @param revisionGraph      the corresponding revision graph

@@ -22,8 +22,10 @@ public class RevisionGraph {
 	/** The logger. **/
 	private Logger logger = Logger.getLogger(RevisionManagementOriginal.class);
 
-	/** The graph name. **/
+	/** The URI of the named graph which R43ples manages. **/
 	private String graphName;
+	/** The revision graph URI. **/
+	private String revisionGraphURI;
 
 	/**
 	 * Constructs a RevisionGraph for the specified graphName
@@ -32,8 +34,19 @@ public class RevisionGraph {
 	 */
 	public RevisionGraph(final String graphName) {
 		this.graphName = graphName;
+		this.revisionGraphURI = null;
 	}
 
+	/**
+	 * Constructs a RevisionGraph for the specified graphName
+	 *
+	 * @param graphName URI of the named graph which R43ples manages
+	 * @param revisionGraphURI the revision graph URI
+	 */
+	public RevisionGraph(final String graphName, final String revisionGraphURI) {
+		this.graphName = graphName;
+		this.revisionGraphURI = revisionGraphURI;
+	}
 
 	/**
 	 * Get the graph name.
@@ -61,20 +74,24 @@ public class RevisionGraph {
 	 * @return uri of the revision graph for this graph
 	 */
 	public String getRevisionGraphUri() {
-		String query = String.format(
-				  "SELECT ?revisionGraph "
-				+ "WHERE { GRAPH <%s> {"
-				+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#hasRevisionGraph> ?revisionGraph ."
-				+ "} }", Config.revision_graph, graphName);
-			
+		if (revisionGraphURI == null) {
+			String query = String.format(
+					"SELECT ?revisionGraph "
+							+ "WHERE { GRAPH <%s> {"
+							+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#hasRevisionGraph> ?revisionGraph ."
+							+ "} }", Config.revision_graph, graphName);
+
 			ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
-			
+
 			if (results.hasNext()) {
 				QuerySolution qs = results.next();
-				return qs.getResource("?revisionGraph").toString();
+				revisionGraphURI = qs.getResource("?revisionGraph").toString();
 			} else {
 				return null;
 			}
+		}
+
+		return revisionGraphURI;
 	}
 
 	/**

@@ -42,19 +42,18 @@ public class R43plesCore implements R43plesCoreInterface {
     }
 
     /**
-     * Create a new initial commit..
+     * Create a new initial commit.
      *
      * @param graphName the graph name
      * @param addSet the add set as N-Triples
      * @param deleteSet the delete set as N-Triples
      * @param user the user
      * @param message the message
-     * @param derivedFromIdentifier the revision identifier of the revision or the reference identifier from which the new revision should be derive from
      * @return the created update commit
      * @throws InternalErrorException
      */
     @Override
-    public InitialCommit createInitialCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException {
+    public InitialCommit createInitialCommit(String graphName, String addSet, String deleteSet, String user, String message) throws InternalErrorException {
         InitialCommitDraft initialCommitDraft = new InitialCommitDraft(graphName, addSet, deleteSet, user, message);
         return initialCommitDraft.createCommitInTripleStore();
     }

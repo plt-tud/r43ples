@@ -1,12 +1,20 @@
 package de.tud.plt.r43ples.draftobjects;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.exception.QueryErrorException;
+import de.tud.plt.r43ples.existentobjects.Branch;
 import de.tud.plt.r43ples.existentobjects.InitialCommit;
+import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.hp.hpl.jena.vocabulary.DB.graphName;
 
 /**
  * Collection of information for creating a new initial commit.
@@ -20,29 +28,30 @@ public class InitialCommitDraft extends CommitDraft {
      **/
     private Logger logger = Logger.getLogger(InitialCommitDraft.class);
 
-//    /** The pattern modifier. **/
-//    private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
-//
-//    /** The revision draft. **/
-//    private RevisionDraft revisionDraft;
+    /** The pattern modifier. **/
+    private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
+
+    /** The revision draft. **/
+    private RevisionDraft revisionDraft;
     /**
      * States if this commit draft was created by a request or add and delete sets. (true => request, false => add/delete sets)
      **/
     private boolean isCreatedWithRequest;
+
 
     /**
      * The constructor.
      * Creates an initial commit draft by using the corresponding R43ples request.
      *
      * @param request the request received by R43ples
+     * @throws InternalErrorException
      */
-    public InitialCommitDraft(R43plesRequest request) {
+    public InitialCommitDraft(R43plesRequest request) throws InternalErrorException {
         super(request);
+        String graphName = getGraphNameOfRequest();
+        this.revisionDraft = new RevisionDraft(getRevisionManagement(), new RevisionGraph(graphName, getRevisionManagement().getNewRevisionGraphURI(graphName)), null, null);
         this.isCreatedWithRequest = true;
     }
-
-    // TODO
-
 
     /**
      * The constructor.
@@ -57,9 +66,9 @@ public class InitialCommitDraft extends CommitDraft {
      */
     protected InitialCommitDraft(String graphName, String addSet, String deleteSet, String user, String message) throws InternalErrorException {
         super(null);
-//        this.revisionDraft = new RevisionDraft(new RevisionGraph(graphName), derivedFromIdentifier, addSet, deleteSet);
         this.setUser(user);
         this.setMessage(message);
+        this.revisionDraft = new RevisionDraft(getRevisionManagement(), new RevisionGraph(graphName, getRevisionManagement().getNewRevisionGraphURI(graphName)), addSet, deleteSet);
         this.isCreatedWithRequest = false;
     }
 
@@ -69,34 +78,58 @@ public class InitialCommitDraft extends CommitDraft {
      * @return the list of created commits
      */
     protected InitialCommit createCommitInTripleStore() throws InternalErrorException {
-        if (!isCreatedWithRequest) {
-//            revisionDraft.createRevisionInTripleStore();
-//            ArrayList<UpdateCommit> commitList = new ArrayList<>();
-//            commitList.add(addMetaInformation(revisionDraft));
-//            return commitList;
+        String commitUri = getRevisionManagement().getNewCommitURI(revisionDraft.getRevisionGraph(), revisionDraft.getNewRevisionIdentifier());
+        String masterUri = getRevisionManagement().getNewMasterURI(revisionDraft.getRevisionGraph());
+
+        // Create graph
+        if (!getRevisionManagement().checkNamedGraphExistence(revisionDraft.getRevisionGraph().getGraphName())) {
+            getTripleStoreInterface().executeCreateGraph(revisionDraft.getRevisionGraph().getGraphName());
         } else {
-//            return this.updateChangeSetsByRewrittenQuery();
+            throw new InternalErrorException("The calculated revision graph is already in use.");
         }
-        return null;
+
+        addMetaInformation(revisionDraft, commitUri, masterUri);
+
+        Revision generatedRevision = revisionDraft.createRevisionInTripleStore();
+        Branch generatedBranch = new Branch(revisionDraft.getRevisionGraph(), masterUri, false);
+
+        return new InitialCommit(revisionDraft.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), generatedRevision, generatedBranch);
     }
 
+    /**
+     * Extracts the graph name out of the given request.
+     *
+     * @return the graph name
+     * @throws InternalErrorException
+     */
+    private String getGraphNameOfRequest() throws InternalErrorException {
+        final Pattern patternCreateGraph = Pattern.compile("CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
+                patternModifier);
 
+        String graphName = null;
+        Matcher m = patternCreateGraph.matcher(getRequest().query_sparql);
+        boolean found = false;
+        while (m.find()) {
+            found = true;
+            graphName = m.group("graph");
+            // String silent = m.group("silent");
+        }
+        if (!found) {
+            throw new QueryErrorException("Query doesn't contain a correct CREATE query:\n" + getRequest().query_sparql);
+        }
+
+        return graphName;
+    }
 
     /**
-     * Put existing graph under version control. Existence of graph is not checked. Current date is used for commit timestamp
+     * Creates a new revision graph for the new graph under revision control and adds the necessary meta data.
      *
-     * @param graphName the graph name of the existing graph
+     * @param revisionDraft the revision draft
+     * @param commitUri the commit URI
+     * @param branchUri the branch URI
+     * @throws InternalErrorException
      */
-    public String putGraphUnderVersionControl(final String graphName, final String datetime) throws InternalErrorException {
-//        getTripleStoreInterface()
-        // TODO Move to initial commit
-        logger.debug("Put existing graph under version control with the name " + graphName);
-
-        String revisiongraph = graphName + "-revisiongraph";
-//TODO
-//        while (checkGraphExistence(revisiongraph)){
-//            revisiongraph += "x";
-//        }
+    private void addMetaInformation(RevisionDraft revisionDraft, String commitUri, String branchUri) throws InternalErrorException {
 
         String queryAddRevisionGraph = Config.prefixes + String.format(
                 "INSERT DATA { GRAPH <%1$s> {"
@@ -104,24 +137,15 @@ public class InitialCommitDraft extends CommitDraft {
                         + "    rmo:hasRevisionGraph <%3$s>;"
                         + "    sddo:hasDefaultSDD sdd:defaultSDD."
                         + "} }",
-                Config.revision_graph, graphName, revisiongraph);
+                Config.revision_graph, graphName, revisionDraft.getRevisionGraph().getRevisionGraphUri());
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryAddRevisionGraph);
-
-        //TODO Create RevisionGraph object
-        RevisionGraph revisionGraph = new RevisionGraph(graphName);
-
-        // TODO get initial revision identifier
-        String initialRevisionIdentifier = "1";
-        String revisionUri = getRevisionManagement().getNewRevisionURI(revisionGraph, initialRevisionIdentifier);
-        String commitUri = getRevisionManagement().getNewCommitURI(revisionGraph, initialRevisionIdentifier);
-        String branchUri = getRevisionManagement().getNewMasterURI(revisionGraph);
 
         // Create new revision
         String queryContent = String.format(
                 "<%s> a rmo:Revision;"
                         + "	rmo:revisionNumber \"%s\";"
                         + "	rmo:belongsTo <%s>. ",
-                revisionUri, initialRevisionIdentifier, branchUri);
+                revisionDraft.getRevisionURI(), revisionDraft.getNewRevisionIdentifier(), branchUri);
 
         // Add MASTER branch
         queryContent += String.format(
@@ -129,7 +153,7 @@ public class InitialCommitDraft extends CommitDraft {
                         + " rmo:fullGraph <%s>;"
                         + "	rmo:references <%s>;"
                         + "	rdfs:label \"master\".",
-                branchUri, graphName, revisionUri);
+                branchUri, graphName, revisionDraft.getRevisionURI());
 
         queryContent += String.format(
                 "<%s> a rmo:RevisionCommit, rmo:BranchCommit; "
@@ -137,15 +161,12 @@ public class InitialCommitDraft extends CommitDraft {
                         + "	prov:generated <%s>, <%s> ;"
                         + "	dc-terms:title \"initial commit\" ;"
                         + "	prov:atTime \"%s\"^^xsd:dateTime .%n",
-                commitUri,  "http://eatld.et.tu-dresden.de/user/r43ples", revisionUri, branchUri, datetime);
+                commitUri,  "http://eatld.et.tu-dresden.de/user/r43ples", revisionDraft.getRevisionURI(), branchUri, getTimeStamp());
 
-        String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisiongraph, queryContent);
+        String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisionDraft.getRevisionGraph().getRevisionGraphUri(), queryContent);
 
-        //TripleStoreInterfaceSingleton.get().executeCreateGraph(graph);
-        TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryRevision);
+        getTripleStoreInterface().executeUpdateQuery(queryRevision);
 
-        return initialRevisionIdentifier;
     }
-
 
 }

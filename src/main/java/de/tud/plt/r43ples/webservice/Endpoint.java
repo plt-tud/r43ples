@@ -28,6 +28,7 @@ import javax.ws.rs.core.Variant;
 
 import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
+import de.tud.plt.r43ples.existentobjects.InitialCommit;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.*;
 import org.apache.log4j.Logger;
@@ -349,8 +350,9 @@ public class Endpoint {
 			result = "Query executed";
 		}
 		else if (request.isCreateGraphQuery()) {
-			String graphName = Interface.sparqlCreateGraph(sparqlQuery);
-			result = "Graph <"+graphName+"> successfully created";
+			InitialCommit initialCommit = r43plesCore.createInitialCommit(request);
+//			String graphName = Interface.sparqlCreateGraph(sparqlQuery);
+			result = "Graph <" + initialCommit.getGeneratedRevision().getRevisionGraph().getGraphName() + "> successfully created";
 		}
 		else if (request.isDropGraphQuery()) {
 			Interface.sparqlDropGraph(sparqlQuery);

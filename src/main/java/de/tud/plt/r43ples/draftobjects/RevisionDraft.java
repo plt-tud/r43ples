@@ -111,6 +111,36 @@ public class RevisionDraft {
     }
 
     /**
+     * The constructor.
+     * Usage only for initial commit (there is no derived from revision identifier, initial revision identifier will be calculated).
+     * Add and delete sets can be specified which are associated with this revision.
+     *
+     * @param revisionManagement the current revision management instance
+     * @param revisionGraph the revision graph
+     * @param addSet the add set of the revision as N-Triples
+     * @param deleteSet the delete set of the revision as N-Triples
+     * @throws InternalErrorException
+     */
+    public RevisionDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, String addSet, String deleteSet) throws InternalErrorException {
+        // Dependencies
+        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+
+        this.revisionManagement = revisionManagement;
+        this.revisionGraph = revisionGraph;
+        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
+        this.newRevisionIdentifier = revisionGraph.getNextRevisionIdentifier();
+
+        this.revisionURI = this.revisionManagement.getNewRevisionURI(revisionGraph, newRevisionIdentifier);
+        this.addSetURI = this.revisionManagement.getNewAddSetURI(revisionGraph, newRevisionIdentifier);
+        this.deleteSetURI = this.revisionManagement.getNewDeleteSetURI(revisionGraph, newRevisionIdentifier);
+
+        this.referenceFullGraph = this.revisionManagement.getNewMasterURI(revisionGraph);
+
+        this.addSet = addSet;
+        this.deleteSet = deleteSet;
+    }
+
+    /**
      * Creates the revision draft as a new revision in the triplestore and updates the referenced full graph.
      *
      * @return the created revision
