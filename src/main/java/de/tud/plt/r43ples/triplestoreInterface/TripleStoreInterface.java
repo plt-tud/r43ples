@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.ResultSet;
@@ -14,7 +15,6 @@ import com.hp.hpl.jena.sparql.resultset.ResultsFormat;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.JenaModelManagement;
-import de.tud.plt.r43ples.management.RevisionManagement;
 
 
 public abstract class TripleStoreInterface {
@@ -23,12 +23,12 @@ public abstract class TripleStoreInterface {
 	private static Logger logger = Logger.getLogger(TripleStoreInterface.class);
 	
 	protected void init() {
-		if (!RevisionManagement.checkGraphExistence(Config.revision_graph)){
+		if (!RevisionManagementOriginal.checkGraphExistence(Config.revision_graph)){
 			logger.debug("Create revision graph: "+ Config.revision_graph);
 			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
 	 	}
 		
-		if (!RevisionManagement.checkGraphExistence(Config.sdd_graph)){
+		if (!RevisionManagementOriginal.checkGraphExistence(Config.sdd_graph)){
 			// Insert default content into SDD graph
 			logger.info("Create sdd graph from " + Config.sdd_graph_defaultContent);
 			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
@@ -36,7 +36,7 @@ public abstract class TripleStoreInterface {
 			Model jena_model = JenaModelManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent);
 			String model = JenaModelManagement.convertJenaModelToNTriple(jena_model);
 			logger.debug("SDD model: " + model);	
-			RevisionManagement.executeINSERT(Config.sdd_graph, model);
+			RevisionManagementOriginal.executeINSERT(Config.sdd_graph, model);
 	 	}		
 	}
 	

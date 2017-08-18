@@ -88,7 +88,7 @@ public class Interface {
 					// Respond with specified revision, therefore the revision
 					// must be generated - saved in graph <graphName-revisionNumber>
 					newGraphName = graphName + "-" + revisionNumber;
-					RevisionManagement.generateFullGraphOfRevision(graphName, revisionNumber, newGraphName);
+					RevisionManagementOriginal.generateFullGraphOfRevision(graphName, revisionNumber, newGraphName);
 				}
 			}
 
@@ -120,7 +120,7 @@ public class Interface {
 			RevisionGraph graph = new RevisionGraph(graphName);
 			if (graph.getMasterRevision() == null) {
 				// Add R43ples information
-				RevisionManagement.putGraphUnderVersionControl(graphName);
+				RevisionManagementOriginal.putGraphUnderVersionControl(graphName);
 			}
 		}
 		if (!found) {
@@ -160,9 +160,9 @@ public class Interface {
 			String revisionNumber = m.group("revision").toLowerCase();
 			String referenceName = m.group("name").toLowerCase();
 			if (action.equals("TAG")) {
-				RevisionManagement.createTag(graphName, revisionNumber, referenceName, commit.user, commit.message);
+				RevisionManagementOriginal.createTag(graphName, revisionNumber, referenceName, commit.user, commit.message);
 			} else if (action.equals("BRANCH")) {
-				RevisionManagement.createBranch(graphName, revisionNumber, referenceName, commit.user, commit.message);
+				RevisionManagementOriginal.createBranch(graphName, revisionNumber, referenceName, commit.user, commit.message);
 			} else {
 				throw new QueryErrorException("Error in query: " + commit.query_sparql);
 			}
@@ -224,7 +224,7 @@ public class Interface {
 
 		MergeResult mresult = new MergeResult(commit);
 
-		if (!RevisionManagement.checkGraphExistence(commit.graphName)) {
+		if (!RevisionManagementOriginal.checkGraphExistence(commit.graphName)) {
 			logger.warn("Graph <" + commit.graphName + "> does not exist.");
 			throw new InternalErrorException("Graph <" + commit.graphName + "> does not exist.");
 		}
@@ -295,7 +295,7 @@ public class Interface {
 				// Difference model contains conflicts
 				// Return the conflict model to the client
 				mresult.hasConflict = true;
-				mresult.conflictModel = RevisionManagement.getContentOfGraph(graphNameDiff, commit.format);
+				mresult.conflictModel = RevisionManagementOriginal.getContentOfGraph(graphNameDiff, commit.format);
 
 			} else {
 				// Difference model contains no conflicts
@@ -374,7 +374,7 @@ public class Interface {
 
 			String basisRevisionNumber = rebaseControl.forceRebaseProcess();
 			//TODO This will change because of the new Commit classes
-//			RevisionManagement.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,	basisRevisionNumber);
+//			RevisionManagementOriginal.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,	basisRevisionNumber);
 			mresult.graphStrategy = "auto-rebase";
 		} else if ((commit.type != null) && (commit.type.equalsIgnoreCase("MANUAL")) && !commit.with) {
 			logger.info("MANUAL REBASE query detected");
@@ -386,7 +386,7 @@ public class Interface {
 
 			String basisRevisionNumber = rebaseControl.forceRebaseProcess();
 			//TODO This will change because of the new Commit classes
-//			RevisionManagement.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,
+//			RevisionManagementOriginal.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,
 //					basisRevisionNumber);
 			mresult.graphStrategy = "manual-rebase";
 		} else if ((commit.type == null) && commit.with) {
@@ -399,7 +399,7 @@ public class Interface {
 
 			String basisRevisionNumber = rebaseControl.forceRebaseProcess();
 			//TODO This will change because of the new Commit classes
-//			RevisionManagement.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,
+//			RevisionManagementOriginal.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,
 //					basisRevisionNumber);
 
 			mresult.graphStrategy = "with-rebase";
@@ -414,7 +414,7 @@ public class Interface {
 			} else {
 				rebaseControl.forceRebaseProcess();
 			}
-			mresult.conflictModel = RevisionManagement.getContentOfGraph(graphNameDiff, commit.format);
+			mresult.conflictModel = RevisionManagementOriginal.getContentOfGraph(graphNameDiff, commit.format);
 
 		} else {
 			throw new InternalErrorException("This is not a valid MERGE query");

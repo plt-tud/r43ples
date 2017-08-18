@@ -3,7 +3,7 @@ package de.tud.plt.r43ples.merging;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 public class FastForwardControl {
@@ -39,7 +39,7 @@ public class FastForwardControl {
 		String revisionUriA = graph.getRevisionUri(branchNameA);
 		String revisionUriB = graph.getRevisionUri(branchNameB);
 		
-		RevisionManagement.moveBranchReference(revisionGraph, branchUriA, revisionUriA, revisionUriB);
+		RevisionManagementOriginal.moveBranchReference(revisionGraph, branchUriA, revisionUriA, revisionUriB);
 		
 		String commitUri = revisionGraph+"-ff-commit-"+branchNameA+"-"+branchNameB;
 		String query = Config.prefixes + String.format(""
@@ -52,8 +52,8 @@ public class FastForwardControl {
 				+ "} }",
 				revisionGraph, commitUri, branchUriA, revisionUriA, revisionUriB, user, dateTime, message);
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
-		RevisionManagement.updateBelongsTo(revisionGraph, branchUriA, revisionUriA, revisionUriB);	
-		RevisionManagement.fullGraphCopy(fullGraphUriB, fullGraphUriA);
+		RevisionManagementOriginal.updateBelongsTo(revisionGraph, branchUriA, revisionUriA, revisionUriB);
+		RevisionManagementOriginal.fullGraphCopy(fullGraphUriB, fullGraphUriA);
 		return true;
 	}
 	

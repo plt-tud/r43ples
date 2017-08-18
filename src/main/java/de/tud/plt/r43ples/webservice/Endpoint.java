@@ -282,7 +282,7 @@ public class Endpoint {
 	    Mustache mustache = mf.compile("templates/endpoint.mustache");
 	    StringWriter sw = new StringWriter();
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
-	    htmlMap.put("graphList", RevisionManagement.getRevisedGraphsList());
+	    htmlMap.put("graphList", RevisionManagementOriginal.getRevisedGraphsList());
 	    htmlMap.put("endpoint_active", true);
 	    mustache.execute(sw, htmlMap);		
 		String content = sw.toString();
@@ -378,7 +378,7 @@ public class Endpoint {
 			responseBuilder.entity(result);
 		}
 		responseBuilder.type(format);
-		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(sparqlQuery));		
+		responseBuilder.header("r43ples-revisiongraph", RevisionManagementOriginal.getResponseHeaderFromQuery(sparqlQuery));
 		return responseBuilder.build();
 	}
 
@@ -463,7 +463,7 @@ public class Endpoint {
 		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", graph.getRevisionIdentifier(mresult.branchA));
 		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", graph.getRevisionIdentifier(mresult.branchB));
 		
-		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(commit.query_sparql));	
+		responseBuilder.header("r43ples-revisiongraph", RevisionManagementOriginal.getResponseHeaderFromQuery(commit.query_sparql));
 		
 		return responseBuilder.build();	
 	}

@@ -6,12 +6,12 @@ import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
 import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
 import de.tud.plt.r43ples.existentobjects.UpdateCommit;
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.management.RevisionManagement;
 
 /**
  * Creates different sample data sets.
@@ -41,7 +41,7 @@ public class SampleDataSet {
 		graph.purgeRevisionInformation();
 
 
-		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graphName, "2016-01-01T14:51:37.011");
+		String revisionNumber0 = RevisionManagementOriginal.putGraphUnderVersionControl(graphName, "2016-01-01T14:51:37.011");
 		// TODO revisionNumber0 type will change because putGraphUnderVersionControl will move to commit
 		//result.revisions.put("master-0", new Revision(graph, revisionNumber0, true);
 		result.revisions.put("master-0", revisionNumber0);
@@ -102,7 +102,7 @@ public class SampleDataSet {
 		result.graphName = graphName;
 		RevisionGraph graph = new RevisionGraph(graphName);
 		graph.purgeRevisionInformation();
-		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graphName);
+		String revisionNumber0 = RevisionManagementOriginal.putGraphUnderVersionControl(graphName);
 		result.revisions.put("master-0", revisionNumber0);
 
 		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName,
@@ -130,7 +130,7 @@ public class SampleDataSet {
 		result.graphName = graphName;
 		RevisionGraph graph = new RevisionGraph(graphName);
 		graph.purgeRevisionInformation();
-		String revisionNumber0 = RevisionManagement.putGraphUnderVersionControl(graphName, "2015-01-01T14:51:37");
+		String revisionNumber0 = RevisionManagementOriginal.putGraphUnderVersionControl(graphName, "2015-01-01T14:51:37");
 		result.revisions.put("master-0", revisionNumber0);
 
 		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName,
@@ -204,7 +204,7 @@ public class SampleDataSet {
 		//delete the old graph
 		graph.purgeRevisionInformation();
 		// TODO revisionNumber0 type will change because putGraphUnderVersionControl will move to commit
-		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
+		String revision0 = RevisionManagementOriginal.putGraphUnderVersionControl(graphName);
 		result.revisions.put("master-0", revision0);
 
 		// Initial commit
@@ -294,7 +294,7 @@ public class SampleDataSet {
 
 		//delete the old graph
 		graph.purgeRevisionInformation();
-		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
+		String revision0 = RevisionManagementOriginal.putGraphUnderVersionControl(graphName);
 
 		// Initial commit
 		String triples = "<http://example.com/testS> <http://example.com/testP> \"A\". \n"
@@ -367,7 +367,7 @@ public class SampleDataSet {
 		//delete the old graph
 		graph.purgeRevisionInformation();
 
-		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
+		String revision0 = RevisionManagementOriginal.putGraphUnderVersionControl(graphName);
 
 		// Initial commit
 		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, initialContent, null, user, "Initial commit", revision0);
@@ -443,7 +443,7 @@ public class SampleDataSet {
 
 		//delete the old graph
 		graph.purgeRevisionInformation();
-		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
+		String revision0 = RevisionManagementOriginal.putGraphUnderVersionControl(graphName);
 
 		// Initial commit
 		String triples = "<http://example.com/testS> <http://example.com/testP1> \"A\". \n"
@@ -526,7 +526,7 @@ public class SampleDataSet {
 
 		//delete the old graph
 		graph.purgeRevisionInformation();
-		String revision0 = RevisionManagement.putGraphUnderVersionControl(graphName);
+		String revision0 = RevisionManagementOriginal.putGraphUnderVersionControl(graphName);
 
 		// Initial commit
 		String triples =  "<http://example.com/testS> <http://example.com/testP> \"A\". \n"
@@ -583,7 +583,7 @@ public class SampleDataSet {
 		// First commit to B2X
 		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"J\". \n";
 		DatasetGenerationManagement.executeInsertQuery(user, "First commit to B2X", graphName, "B2X", triplesInsert);
-		RevisionManagement.createTag(graphName, "b2x", "v0.2", "butler", "tag version v0.2");
+		RevisionManagementOriginal.createTag(graphName, "b2x", "v0.2", "butler", "tag version v0.2");
 
 		// Second commit to B2X
 		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";

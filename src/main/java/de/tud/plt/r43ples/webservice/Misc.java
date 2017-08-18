@@ -25,7 +25,7 @@ import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.visualisation.VisualisationTable;
 import de.tud.plt.r43ples.visualisation.VisualisationGraph;
 
@@ -143,7 +143,7 @@ public class Misc {
 			response.entity(VisualisationGraph.getHtmlOutput(graph));
 		}
 		else {
-			response.entity(RevisionManagement.getRevisionInformation(graph, format));
+			response.entity(RevisionManagementOriginal.getRevisionInformation(graph, format));
 			response.type(format);
 		}
 		return response.build();
@@ -165,7 +165,7 @@ public class Misc {
 		String format = (format_query != null) ? format_query : format_header;
 		logger.debug("format: " + format);
 
-		String result = RevisionManagement.getContentOfGraph(graphName, format);
+		String result = RevisionManagementOriginal.getContentOfGraph(graphName, format);
 		ResponseBuilder response = Response.ok();
 		return response.entity(result).type(format).build();
 	}

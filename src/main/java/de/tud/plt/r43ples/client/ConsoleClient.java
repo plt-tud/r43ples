@@ -16,7 +16,7 @@ import com.beust.jcommander.ParameterException;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 public class ConsoleClient {
@@ -64,7 +64,7 @@ public class ConsoleClient {
 			RevisionGraph graph = new RevisionGraph(args_client.graph);
 			graph.purgeRevisionInformation();
 			TripleStoreInterfaceSingleton.get().executeCreateGraph(args_client.graph);
-			RevisionManagement.putGraphUnderVersionControl(args_client.graph);
+			RevisionManagementOriginal.putGraphUnderVersionControl(args_client.graph);
 			logger.info("Graph created: " + args_client.graph);
 		} else {
 			String addSet = readFile(args_client.add_set);

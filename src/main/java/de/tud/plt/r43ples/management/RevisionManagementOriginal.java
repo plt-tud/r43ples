@@ -30,10 +30,10 @@ import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
  * @author Markus Graube
  * 
  */
-public class RevisionManagement {
+public class RevisionManagementOriginal {
 
 	/** The logger. **/
-	private static Logger logger = Logger.getLogger(RevisionManagement.class);
+	private static Logger logger = Logger.getLogger(RevisionManagementOriginal.class);
 	
 	/**
 	 * Put existing graph under version control. Existence of graph is not checked. Current date is used for commit timestamp
@@ -366,10 +366,10 @@ public class RevisionManagement {
 			String graph_removed = graphName + "-deleteSet-"+ number;
 			String graph_added   = graphName + "-addSet-"+ number;
 			// Add data to temporary graph
-			if (RevisionManagement.checkGraphExistence(graph_removed))
+			if (RevisionManagementOriginal.checkGraphExistence(graph_removed))
 				TripleStoreInterfaceSingleton.get().executeUpdateQuery("ADD GRAPH <" + graph_removed + "> TO GRAPH <" + tempGraphName + ">");
 			// Remove data from temporary graph (no opposite of SPARQL ADD available)
-			if (RevisionManagement.checkGraphExistence(graph_added))
+			if (RevisionManagementOriginal.checkGraphExistence(graph_added))
 				TripleStoreInterfaceSingleton.get().executeUpdateQuery(  "DELETE { GRAPH <" + tempGraphName+ "> { ?s ?p ?o.} }"
 														+ "WHERE  { GRAPH <" + graph_added	+ "> { ?s ?p ?o.} }");
 			Revision first = list.removeLast();

@@ -194,7 +194,7 @@ public class MergeCommitDraft extends CommitDraft {
 //				// TODO: replace generateFullGraphOfRevision with query
 //				// rewriting option
 //				String tempGraphName = graphName + "-temp";
-//				RevisionManagement.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
+//				RevisionManagementOriginal.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
 //				String GraphClause = getStringEnclosedinBraces(whereClause, m1a.end());
 //				queryRewritten += String.format("GRAPH <%s> { %s }", tempGraphName, GraphClause);
 //			}
@@ -254,7 +254,7 @@ public class MergeCommitDraft extends CommitDraft {
 //	}
 //
 //	private void addMetaInformation(RevisionDraft draft) throws InternalErrorException {
-//		String personUri = RevisionManagement.getUserName(getUser());
+//		String personUri = RevisionManagementOriginal.getUserName(getUser());
 //		String revisionUri = draft.getRevisionGraph().getGraphName() + "-revision-" + draft.getNewRevisionIdentifier();
 //		String commitUri = draft.getRevisionGraph().getGraphName() + "-commit-" + draft.getNewRevisionIdentifier();
 //		String branchUri = draft.getRevisionGraph().getBranchUri(draft.getDerivedFromRevisionIdentifier());
@@ -311,7 +311,7 @@ public class MergeCommitDraft extends CommitDraft {
 //				branchIdentifier);
 //		QuerySolution sol = getTripleStoreInterface().executeSelectQuery(queryBranch).next();
 //		String branchName = sol.getResource("?branch").toString();
-//		RevisionManagement.moveBranchReference(draft.getRevisionGraph().getRevisionGraphUri(), branchName, oldRevisionUri, revisionUri);
+//		RevisionManagementOriginal.moveBranchReference(draft.getRevisionGraph().getRevisionGraphUri(), branchName, oldRevisionUri, revisionUri);
 //	}
 //
 //

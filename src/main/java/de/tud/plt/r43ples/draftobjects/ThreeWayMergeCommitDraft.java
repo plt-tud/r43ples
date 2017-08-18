@@ -58,10 +58,10 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 //
 //		// Update full graph of branch
 //		if (removedAsNTriples!=null && !removedAsNTriples.isEmpty()) {
-//			RevisionManagement.executeDELETE(draft.referenceFullGraph, removedAsNTriples);
+//			RevisionManagementOriginal.executeDELETE(draft.referenceFullGraph, removedAsNTriples);
 //		}
 //		if (addedAsNTriples!=null && !addedAsNTriples.isEmpty()) {
-//			RevisionManagement.executeINSERT(draft.referenceFullGraph, addedAsNTriples);
+//			RevisionManagementOriginal.executeINSERT(draft.referenceFullGraph, addedAsNTriples);
 //		}
 //
 //		// Create new graph with addSet-newRevisionNumber
@@ -69,7 +69,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 //			logger.debug("Create new graph with name " + draft.addSetURI);
 //			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
 //					draft.addSetURI));
-//			RevisionManagement.executeINSERT(draft.addSetURI, addedAsNTriples);
+//			RevisionManagementOriginal.executeINSERT(draft.addSetURI, addedAsNTriples);
 //		}
 //
 //		// Create new graph with deleteSet-newRevisionNumber
@@ -77,7 +77,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 //			logger.debug("Create new graph with name " + draft.deleteSetURI);
 //			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n",
 //					draft.deleteSetURI));
-//			RevisionManagement.executeINSERT(draft.deleteSetURI, removedAsNTriples);
+//			RevisionManagementOriginal.executeINSERT(draft.deleteSetURI, removedAsNTriples);
 //		}
 //
 //		// Remove branch from which changes were merged, if available

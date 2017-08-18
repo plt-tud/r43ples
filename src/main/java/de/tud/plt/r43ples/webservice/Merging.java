@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
 
 import com.github.mustachejava.DefaultMustacheFactory;
@@ -24,7 +25,6 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.R43plesMergeCommit;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.FastForwardControl;
 import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.model.structure.MergeCommitModel;
@@ -42,7 +42,7 @@ public class Merging {
 	public final Response getMerging() {
 		logger.info("Merging - Start page");		
 		
-		List<String> graphList = RevisionManagement.getRevisedGraphsList();	
+		List<String> graphList = RevisionManagementOriginal.getRevisedGraphsList();
 		Map<String, Object> scope = new HashMap<String, Object>();
 	    scope.put("merging_active", true);
 		scope.put("graphList", graphList);

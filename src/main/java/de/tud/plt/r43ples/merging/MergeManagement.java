@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.Query;
@@ -21,7 +22,6 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.JenaModelManagement;
 import de.tud.plt.r43ples.management.R43plesMergeCommit;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 /**
@@ -213,7 +213,7 @@ public class MergeManagement {
 		} catch (InternalErrorException e) {
 			// Create a temporary full graph
 			fullGraphNameCommonRevision = graphName + "RM-TEMP-REVISION-PROGRESS-FULLGRAPH";
-			RevisionManagement.generateFullGraphOfRevision(graphName, firstRevisionNumber, fullGraphNameCommonRevision);
+			RevisionManagementOriginal.generateFullGraphOfRevision(graphName, firstRevisionNumber, fullGraphNameCommonRevision);
 			tempGraphWasCreated = true;
 		}
 		
@@ -275,8 +275,8 @@ public class MergeManagement {
 				String revision = iteList.next();
 				logger.info("Update content by current add and delete set of revision " + revision + " - remove old entries.");
 				// Get the ADD and DELETE set URIs
-				String addSetURI = RevisionManagement.getAddSetURI(revision, revisionGraph);
-				String deleteSetURI = RevisionManagement.getDeleteSetURI(revision, revisionGraph);
+				String addSetURI = RevisionManagementOriginal.getAddSetURI(revision, revisionGraph);
+				String deleteSetURI = RevisionManagementOriginal.getDeleteSetURI(revision, revisionGraph);
 				
 				if ((addSetURI != null) && (deleteSetURI != null)) {
 					
@@ -714,7 +714,7 @@ public class MergeManagement {
 		
 		if (type.equals(MergeQueryTypeEnum.MANUAL)) {
 			// Manual merge query
-			RevisionManagement.executeINSERT(graphNameOfMerged, commit.triples);
+			RevisionManagementOriginal.executeINSERT(graphNameOfMerged, commit.triples);
 		} else {	
 			// Copy graph B to temporary merged graph
 			String queryCopy = String.format("COPY <%s> TO <%s>", graphNameOfBranchB, graphNameOfMerged);
@@ -812,9 +812,9 @@ public class MergeManagement {
 				}
 				// Update the merged graph
 				// Insert triplesToAdd
-				RevisionManagement.executeINSERT(graphNameOfMerged, triplesToAdd);
+				RevisionManagementOriginal.executeINSERT(graphNameOfMerged, triplesToAdd);
 				// Delete triplesToDelete
-				RevisionManagement.executeDELETE(graphNameOfMerged, triplesToDelete);
+				RevisionManagementOriginal.executeDELETE(graphNameOfMerged, triplesToDelete);
 			}
 		}
 		
@@ -872,7 +872,7 @@ public class MergeManagement {
 		usedRevisionNumbers.add(commit.branchNameA);
 
 		// TODO This does currently not work => change to merge commit
-		//return RevisionManagement.createNewRevision(commit.graphName, addedTriples, removedTriples, commit.user, commit.message, usedRevisionNumbers);
+		//return RevisionManagementOriginal.createNewRevision(commit.graphName, addedTriples, removedTriples, commit.user, commit.message, usedRevisionNumbers);
 		return null;
 	}
 	
@@ -914,7 +914,7 @@ public class MergeManagement {
 		logger.info("the triples: "+ commit.triples);
 		if (type.equals(MergeQueryTypeEnum.MANUAL)) {
 			// Manual merge query
-			RevisionManagement.executeINSERT(graphNameOfMerged, commit.triples);
+			RevisionManagementOriginal.executeINSERT(graphNameOfMerged, commit.triples);
 		} else {	
 			// Copy graph B to temporary merged graph
 			String queryCopy = String.format("COPY <%s> TO <%s>", graphNameOfBranchB, graphNameOfMerged);
@@ -1014,9 +1014,9 @@ public class MergeManagement {
 				}
 				// Update the merged graph
 				// Insert triplesToAdd
-				RevisionManagement.executeINSERT(graphNameOfMerged, triplesToAdd);
+				RevisionManagementOriginal.executeINSERT(graphNameOfMerged, triplesToAdd);
 				// Delete triplesToDelete
-				RevisionManagement.executeDELETE(graphNameOfMerged, triplesToDelete);
+				RevisionManagementOriginal.executeDELETE(graphNameOfMerged, triplesToDelete);
 			}
 		}
 		

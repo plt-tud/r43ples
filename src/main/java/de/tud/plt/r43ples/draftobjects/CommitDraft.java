@@ -40,6 +40,8 @@ public class CommitDraft {
 	private String message;
 	/** The time stamp of the commit. **/
 	private Date timeStamp;
+	/** The current revision management instance. */
+	private RevisionManagement revisionManagement;
 
 	// Dependencies
 	/** The triplestore interface to use. **/
@@ -54,6 +56,8 @@ public class CommitDraft {
 	protected CommitDraft(R43plesRequest request){
 		// Dependencies
 		this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+
+		this.revisionManagement = new RevisionManagement();
 
 		this.request = request;
 		if (request != null) {
@@ -166,6 +170,15 @@ public class CommitDraft {
 	 */
 	protected TripleStoreInterface getTripleStoreInterface() {
 		return tripleStoreInterface;
+	}
+
+	/**
+	 * Get current revision management instance.
+	 *
+	 * @return the current revision management instance
+	 */
+	protected RevisionManagement getRevisionManagement() {
+		return revisionManagement;
 	}
 
 }

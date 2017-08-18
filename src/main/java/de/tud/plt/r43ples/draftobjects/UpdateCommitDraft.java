@@ -59,7 +59,7 @@ public class UpdateCommitDraft extends CommitDraft {
 	 */
 	protected UpdateCommitDraft(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException {
 		super(null);
-		this.revisionDraft = new RevisionDraft(new RevisionGraph(graphName), derivedFromIdentifier, addSet, deleteSet);
+		this.revisionDraft = new RevisionDraft(getRevisionManagement(), new RevisionGraph(graphName), derivedFromIdentifier, addSet, deleteSet);
 		this.setUser(user);
 		this.setMessage(message);
 		this.isCreatedWithRequest = false;
@@ -136,7 +136,7 @@ public class UpdateCommitDraft extends CommitDraft {
 						d = draft;
 				}
 				if (d == null) {
-					d = new RevisionDraft(graph, revisionName);
+					d = new RevisionDraft(getRevisionManagement(), graph, revisionName);
 					revList.add(d);
 				}
 				String graphClause = getStringEnclosedinBraces(updateClause, m2a.end());
@@ -163,7 +163,7 @@ public class UpdateCommitDraft extends CommitDraft {
 				// TODO: replace generateFullGraphOfRevision with query
 				// rewriting option
 				String tempGraphName = graphName + "-temp";
-				RevisionManagement.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
+				RevisionManagementOriginal.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
 				String GraphClause = getStringEnclosedinBraces(whereClause, m1a.end());
 				queryRewritten += String.format("GRAPH <%s> { %s }", tempGraphName, GraphClause);
 			}
@@ -226,7 +226,7 @@ public class UpdateCommitDraft extends CommitDraft {
 	 * @throws InternalErrorException
 	 */
 	private UpdateCommit addMetaInformation(RevisionDraft draft) throws InternalErrorException {
-		String personUri = RevisionManagement.getUserName(getUser());
+		String personUri = RevisionManagementOriginal.getUserName(getUser());
 
 		String revisionUri = draft.getRevisionURI();
 
@@ -276,7 +276,7 @@ public class UpdateCommitDraft extends CommitDraft {
 				branchIdentifier);
 		QuerySolution sol = getTripleStoreInterface().executeSelectQuery(queryBranch).next();
 		String branchName = sol.getResource("?branch").toString();
-		RevisionManagement.moveBranchReference(draft.getRevisionGraph().getRevisionGraphUri(), branchName, oldRevisionUri, revisionUri);
+		RevisionManagementOriginal.moveBranchReference(draft.getRevisionGraph().getRevisionGraphUri(), branchName, oldRevisionUri, revisionUri);
 
 
 		Revision newRevision = new Revision(draft.getRevisionGraph(), draft.getNewRevisionIdentifier(), revisionUri, draft.getAddSetURI(), draft.getDeleteSetURI());

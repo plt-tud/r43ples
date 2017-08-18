@@ -5,12 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map.Entry;
 
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.R43plesMergeCommit;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.management.RevisionManagement;
 import de.tud.plt.r43ples.merging.management.StrategyManagement;
 import de.tud.plt.r43ples.merging.model.structure.Patch;
 import de.tud.plt.r43ples.merging.model.structure.PatchGroup;
@@ -45,7 +45,7 @@ public class RebaseControl {
 	 */
 	public void checkIfRebaseIsPossible() throws InternalErrorException {
 		// Check if graph already exists
-		if (!RevisionManagement.checkGraphExistence(graphName)){
+		if (!RevisionManagementOriginal.checkGraphExistence(graphName)){
 			logger.error("Graph <"+graphName+"> does not exist.");
 			throw new InternalErrorException("Graph <"+graphName+"> does not exist.");
 		}
@@ -75,8 +75,8 @@ public class RebaseControl {
 			String revisionUri = rIter.next();
 			String commitUri = StrategyManagement.getCommitUri(revisionGraph, revisionUri);
 			
-			String addSet = RevisionManagement.getAddSetURI(revisionUri, revisionGraph);
-			String deleteSet = RevisionManagement.getDeleteSetURI(revisionUri, revisionGraph);
+			String addSet = RevisionManagementOriginal.getAddSetURI(revisionUri, revisionGraph);
+			String deleteSet = RevisionManagementOriginal.getDeleteSetURI(revisionUri, revisionGraph);
 			
 			String patchNumber = StrategyManagement.getRevisionNumber(revisionGraph, revisionUri);
 			String patchUser = StrategyManagement.getCommitUserUri(revisionGraph, commitUri);
@@ -112,7 +112,7 @@ public class RebaseControl {
 			Entry<String, Patch> pEntry = pIter.next();
 			Patch patch = pEntry.getValue();
 		
-			String newRevisionNumber = RevisionManagement.createNewRevisionWithPatch(
+			String newRevisionNumber = RevisionManagementOriginal.createNewRevisionWithPatch(
 					graphName, patch.getAddedSetUri(), patch.getRemovedSetUri(),
 					patch.getPatchUser(), patch.getPatchMessage(), basisRevisionNumber);
 			

@@ -2,6 +2,7 @@ package de.tud.plt.r43ples.draftobjects;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.InitialCommit;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
@@ -86,7 +87,7 @@ public class InitialCommitDraft extends CommitDraft {
      *
      * @param graphName the graph name of the existing graph
      */
-    public String putGraphUnderVersionControl(final String graphName, final String datetime) {
+    public String putGraphUnderVersionControl(final String graphName, final String datetime) throws InternalErrorException {
 //        getTripleStoreInterface()
         // TODO Move to initial commit
         logger.debug("Put existing graph under version control with the name " + graphName);
@@ -106,18 +107,21 @@ public class InitialCommitDraft extends CommitDraft {
                 Config.revision_graph, graphName, revisiongraph);
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryAddRevisionGraph);
 
+        //TODO Create RevisionGraph object
+        RevisionGraph revisionGraph = new RevisionGraph(graphName);
 
-        String revisionNumber = "1";
-        String revisionUri = graphName + "-revision-" + revisionNumber;
-        String commitUri = graphName + "-commit-" + revisionNumber;
-        String branchUri = graphName + "-master";
+        // TODO get initial revision identifier
+        String initialRevisionIdentifier = "1";
+        String revisionUri = getRevisionManagement().getNewRevisionURI(revisionGraph, initialRevisionIdentifier);
+        String commitUri = getRevisionManagement().getNewCommitURI(revisionGraph, initialRevisionIdentifier);
+        String branchUri = getRevisionManagement().getNewMasterURI(revisionGraph);
 
         // Create new revision
         String queryContent = String.format(
                 "<%s> a rmo:Revision;"
                         + "	rmo:revisionNumber \"%s\";"
                         + "	rmo:belongsTo <%s>. ",
-                revisionUri, revisionNumber, branchUri);
+                revisionUri, initialRevisionIdentifier, branchUri);
 
         // Add MASTER branch
         queryContent += String.format(
@@ -140,7 +144,7 @@ public class InitialCommitDraft extends CommitDraft {
         //TripleStoreInterfaceSingleton.get().executeCreateGraph(graph);
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryRevision);
 
-        return revisionNumber;
+        return initialRevisionIdentifier;
     }
 
 

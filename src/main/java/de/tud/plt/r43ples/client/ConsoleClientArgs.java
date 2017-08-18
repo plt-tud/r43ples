@@ -4,8 +4,6 @@ package de.tud.plt.r43ples.client;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParametersDelegate;
 
-import de.tud.plt.r43ples.management.RevisionManagement;
-
 public class ConsoleClientArgs {
   
   @Parameter(names = {"-g", "--graph"}, required=true, description = "uri of graph")

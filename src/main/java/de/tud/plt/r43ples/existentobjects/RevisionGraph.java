@@ -3,7 +3,7 @@ package de.tud.plt.r43ples.existentobjects;
 import java.util.ArrayList;
 
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.QuerySolution;
@@ -11,7 +11,6 @@ import com.hp.hpl.jena.query.ResultSet;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import de.tud.plt.r43ples.existentobjects.Revision;
 
 /**
  * The class RevisionGraph provides functionality for one named graph which is managed by R43ples
@@ -21,7 +20,7 @@ import de.tud.plt.r43ples.existentobjects.Revision;
 public class RevisionGraph {
 
 	/** The logger. **/
-	private Logger logger = Logger.getLogger(RevisionManagement.class);
+	private Logger logger = Logger.getLogger(RevisionManagementOriginal.class);
 
 	/** The graph name. **/
 	private String graphName;
@@ -53,7 +52,7 @@ public class RevisionGraph {
 	 * @return the constructed graph content as specified RDF serialization format
 	 */
 	public String getContentOfRevisionGraph(final String format) {
-		return RevisionManagement.getContentOfGraph(this.getRevisionGraphUri(), format);	
+		return RevisionManagementOriginal.getContentOfGraph(this.getRevisionGraphUri(), format);
 	}
 
 
