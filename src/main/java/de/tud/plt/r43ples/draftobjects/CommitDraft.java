@@ -43,7 +43,7 @@ public class CommitDraft {
 
 	// Dependencies
 	/** The triplestore interface to use. **/
-	protected TripleStoreInterface tripleStoreInterface;
+	private TripleStoreInterface tripleStoreInterface;
 
 
 	/**
@@ -51,7 +51,7 @@ public class CommitDraft {
 	 *
 	 * @param request the request received by R43ples
 	 */
-	public CommitDraft(R43plesRequest request){
+	protected CommitDraft(R43plesRequest request){
 		// Dependencies
 		this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 
@@ -119,7 +119,7 @@ public class CommitDraft {
 	 *
 	 * @return the associated user name of the commit
 	 */
-	public String getUser() {
+	protected String getUser() {
 		return user;
 	}
 
@@ -137,7 +137,7 @@ public class CommitDraft {
 	 *
 	 * @return the message of the commit
 	 */
-	public String getMessage() {
+	protected String getMessage() {
 		return message;
 	}
 
@@ -155,7 +155,7 @@ public class CommitDraft {
 	 *
 	 * @return the time stamp of the commit
 	 */
-	public String getTimeStamp() {
+	protected String getTimeStamp() {
 		return formatDateString(timeStamp);
 	}
 
@@ -164,7 +164,7 @@ public class CommitDraft {
 	 *
 	 * @return the triplestore interface to use
 	 */
-	public TripleStoreInterface getTripleStoreInterface() {
+	protected TripleStoreInterface getTripleStoreInterface() {
 		return tripleStoreInterface;
 	}
 
