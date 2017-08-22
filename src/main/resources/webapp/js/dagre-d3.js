@@ -4046,7 +4046,7 @@ var _ = require("../lodash");
 module.exports = dfs;
 
 /*
- * A helper that preforms a pre- or post-order traversal on the input graph
+ * A iohelper that preforms a pre- or post-order traversal on the input graph
  * and returns the nodes in the order they were visited. This algorithm treats
  * the input as undirected.
  *

@@ -9,8 +9,6 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -28,6 +26,11 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
 
+import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
+import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
+import de.tud.plt.r43ples.existentobjects.InitialCommit;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.management.*;
 import org.apache.log4j.Logger;
 
 import com.github.mustachejava.DefaultMustacheFactory;
@@ -38,10 +41,6 @@ import com.hp.hpl.jena.shared.NoWriterForLangException;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
-import de.tud.plt.r43ples.management.Interface;
-import de.tud.plt.r43ples.management.JenaModelManagement;
-import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.ui.MergingControl;
 
@@ -58,35 +57,6 @@ import de.tud.plt.r43ples.merging.ui.MergingControl;
  */
 @Path("sparql")
 public class Endpoint {
-
-	private final static int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
-	
-	private final static Pattern patternSelectAskConstructQuery = Pattern.compile(
-			"(?<type>SELECT|ASK|CONSTRUCT).*WHERE\\s*\\{(?<where>.*)\\}", 
-			patternModifier);
-	private final static Pattern patternUpdateQuery = Pattern.compile(
-			"(?<action>INSERT|DELETE).*<(?<graph>[^>]*)>",
-			patternModifier);
-	private final static Pattern patternCreateGraph = Pattern.compile(
-			"CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
-			patternModifier);
-	private final static Pattern patternDropGraph = Pattern.compile(
-			"DROP\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
-			patternModifier);
-	private final static Pattern patternBranchOrTagQuery = Pattern.compile(
-			"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"\\s*TO\\s*\"(?<name>[^\"]*)\"",
-			patternModifier);
-	
-	private final static Pattern patternUser = Pattern.compile(
-			"USER\\s*\"(?<user>[^\"]*)\"",
-			patternModifier);
-	private final static Pattern patternCommitMessage = Pattern.compile(
-			"MESSAGE\\s*\"(?<message>[^\"]*)\"", 
-			patternModifier);
-
-	private final static Pattern patternMergeQuery =  Pattern.compile(
-			"(MERGE|MERGE FF|REBASE)\\s*(AUTO|MANUAL)?\\s*GRAPH\\s*<([^>]*?)>\\s*(SDD\\s*<([^>]*?)>)?\\s*BRANCH\\s*\"([^\"]*?)\"\\s*INTO\\s*\"([^\"]*?)\"",
-			patternModifier);
 
 	
 	@Context
@@ -134,19 +104,29 @@ public class Endpoint {
 			@FormParam("format") final String formatQuery, 
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
 			@FormParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
-		String format = formatQuery;
+		try {
+			String format = getFormat(formatQuery);
+			logger.info("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
+			return sparql(format, sparqlQuery, query_rewriting);
+		} catch (Exception e) {
+			return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
+		}
+	}
+
+	private String getFormat(final String formatQuery) throws Exception {
 		if (formatQuery == null){
 			List<Variant> reqVariants = Variant.mediaTypes(MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_HTML_TYPE, 
 					MediaType.APPLICATION_JSON_TYPE, TEXT_TURTLE_TYPE, APPLICATION_RDF_XML_TYPE, APPLICATION_SPARQL_RESULTS_XML_TYPE).build();
 			Variant bestVariant = request.selectVariant(reqVariants);
 	        if (bestVariant == null) {
-	            return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
+	        	throw new Exception("Requested datatype not available");
 	        }
         	MediaType reqMediaType = bestVariant.getMediaType();
-        	format = reqMediaType.toString();
+        	return reqMediaType.toString();
 		}
-		logger.info("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
-		return sparql(format, sparqlQuery, query_rewriting);
+		else {
+			return formatQuery;
+		}
 	}
 	
 	/**
@@ -200,16 +180,11 @@ public class Endpoint {
 			@QueryParam("format") final String formatQuery, 
 			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
 			@QueryParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
-		String format = formatQuery;
-		if (formatQuery == null){
-			List<Variant> reqVariants = Variant.mediaTypes(MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_HTML_TYPE, 
-					MediaType.APPLICATION_JSON_TYPE, TEXT_TURTLE_TYPE, APPLICATION_RDF_XML_TYPE, APPLICATION_SPARQL_RESULTS_XML_TYPE).build();
-			Variant bestVariant = request.selectVariant(reqVariants);
-	        if (bestVariant == null) {
-	            return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
-	        }
-        	MediaType reqMediaType = bestVariant.getMediaType();
-        	format = reqMediaType.toString();
+		String format;
+		try {
+			format = getFormat(formatQuery);
+		} catch (Exception e) {
+			return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
 		}		
 		
 		String sparqlQueryDecoded;
@@ -241,7 +216,7 @@ public class Endpoint {
 	 * @throws InternalErrorException 
 	 */
 	public final Response sparql(final String format, final String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
-		if (sparqlQuery.equals("")) {
+		if ("".equals(sparqlQuery)) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
 			} else {
@@ -263,7 +238,7 @@ public class Endpoint {
 	 * @return
 	 * @throws InternalErrorException
 	 */
-	private final Response sparql(final String format, final String sparqlQuery, final String query_rewriting) throws InternalErrorException {
+	private Response sparql(final String format, final String sparqlQuery, final String query_rewriting) throws InternalErrorException {
 		String option = query_rewriting.toLowerCase();
 		if (option.equals("on") || option.equals("true") || option.equals("new"))
 			return sparql(format, sparqlQuery, true);
@@ -308,7 +283,7 @@ public class Endpoint {
 	    Mustache mustache = mf.compile("templates/endpoint.mustache");
 	    StringWriter sw = new StringWriter();
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
-	    htmlMap.put("graphList", RevisionManagement.getRevisedGraphsList());
+	    htmlMap.put("graphList", RevisionManagementOriginal.getRevisedGraphsList());
 	    htmlMap.put("endpoint_active", true);
 	    mustache.execute(sw, htmlMap);		
 		String content = sw.toString();
@@ -358,44 +333,37 @@ public class Endpoint {
 	 */
 	private Response getSparqlResponse(String format, String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
 		logger.debug(String.format("SPARQL request (format=%s, query_rewriting=%s) -> %n %s", format, query_rewriting, sparqlQuery));
-		
+
+		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
         
-		
-		String user = null;
-		Matcher userMatcher = patternUser.matcher(sparqlQuery);
-		if (userMatcher.find()) {
-			user = userMatcher.group("user");
-			sparqlQuery = userMatcher.replaceAll("");
-		}
-		String message = null;
-		Matcher messageMatcher = patternCommitMessage.matcher(sparqlQuery);
-		if (messageMatcher.find()) {
-			message = messageMatcher.group("message");
-			sparqlQuery = messageMatcher.replaceAll("");
-		}
-		
+		R43plesRequest request = new R43plesRequest(sparqlQuery, format);
+
 		String result;
-		if (patternSelectAskConstructQuery.matcher(sparqlQuery).find()) {
-			result = Interface.sparqlSelectConstructAsk(sparqlQuery, format, query_rewriting);
+		if (request.isSelectAskConstructQuery()) {
+			result = Interface.sparqlSelectConstructAsk(request, query_rewriting);
 		}
-		else if (patternUpdateQuery.matcher(sparqlQuery).find()) {
-			Interface.sparqlUpdate(sparqlQuery, user, message);
+		else if (request.isUpdateQuery()) {
+			r43plesCore.createUpdateCommit(request);
+//			UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(request);
+//			updateCommitDraft.createCommitInTripleStore();
+//			Interface.sparqlUpdate(request);
 			result = "Query executed";
 		}
-		else if (patternCreateGraph.matcher(sparqlQuery).find()) {
-			String graphName = Interface.sparqlCreateGraph(sparqlQuery);
-			result = "Graph <"+graphName+"> successfully created";
+		else if (request.isCreateGraphQuery()) {
+			InitialCommit initialCommit = r43plesCore.createInitialCommit(request);
+//			String graphName = Interface.sparqlCreateGraph(sparqlQuery);
+			result = "Graph <" + initialCommit.getGeneratedRevision().getRevisionGraph().getGraphName() + "> successfully created";
 		}
-		else if (patternDropGraph.matcher(sparqlQuery).find()) {
+		else if (request.isDropGraphQuery()) {
 			Interface.sparqlDropGraph(sparqlQuery);
 			result = "Graph successfully dropped";
 		}
-		else if (patternBranchOrTagQuery.matcher(sparqlQuery).find()) {
-			Interface.sparqlTagOrBranch(sparqlQuery, user, message);
+		else if (request.isBranchOrTagQuery()) {
+			Interface.sparqlTagOrBranch(new R43plesCommit(request));
 			result = "Tagging or branching successful";
 		}
-		else if (patternMergeQuery.matcher(sparqlQuery).find()) {
-			return getMergeResponse(sparqlQuery, user, message, format);
+		else if (request.isMergeQuery()) {
+			return getMergeResponse(new R43plesMergeCommit(request));
 		}
 		else
 			throw new QueryErrorException("No R43ples query detected");
@@ -412,7 +380,7 @@ public class Endpoint {
 			responseBuilder.entity(result);
 		}
 		responseBuilder.type(format);
-		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(sparqlQuery));		
+		responseBuilder.header("r43ples-revisiongraph", RevisionManagementOriginal.getResponseHeaderFromQuery(sparqlQuery));
 		return responseBuilder.build();
 	}
 
@@ -474,11 +442,12 @@ public class Endpoint {
 	 * @param format the result format
 	 * @throws InternalErrorException 
 	 */
-	private Response getMergeResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
+	private Response getMergeResponse(final R43plesMergeCommit commit) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 		logger.info("Merge query detected");
 		
-		MergeResult mresult = Interface.sparqlMerge(sparqlQuery, user, commitMessage, format);
+		MergeResult mresult = Interface.sparqlMerge(commit);
+		RevisionGraph graph = new RevisionGraph(mresult.graph);
 		
 		if (mresult.hasConflict) {
 			responseBuilder = Response.status(Response.Status.CONFLICT);
@@ -493,11 +462,10 @@ public class Endpoint {
 		}
 		
 		// Return the revision number which were used (convert tag or branch identifier to revision number)
-		String revisionGraph = RevisionManagement.getRevisionGraph(mresult.graph);
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(revisionGraph, mresult.branchA));
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(revisionGraph, mresult.branchB));			
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", graph.getRevisionIdentifier(mresult.branchA));
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", graph.getRevisionIdentifier(mresult.branchB));
 		
-		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(sparqlQuery));	
+		responseBuilder.header("r43ples-revisiongraph", RevisionManagementOriginal.getResponseHeaderFromQuery(commit.query_sparql));
 		
 		return responseBuilder.build();	
 	}

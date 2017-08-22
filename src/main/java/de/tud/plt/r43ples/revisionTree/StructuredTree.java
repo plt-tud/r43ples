@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 
-import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 public class StructuredTree {
@@ -56,7 +56,7 @@ public class StructuredTree {
 	private void updateBranches(String revisionGraph) {
 		//query all branches
 		
-		String queryBranches = RevisionManagement.prefixes + String.format(
+		String queryBranches = Config.prefixes + String.format(
 						"SELECT ?branch ?title ?commit%n"
 						+ "WHERE { GRAPH <%s> { %n"
 						+ "  ?branch a rmo:Branch;%n"
@@ -78,7 +78,7 @@ public class StructuredTree {
 
 	private void updateTags(String revisionGraph) {
 		// query all tags
-		String queryBranches = RevisionManagement.prefixes + String.format(
+		String queryBranches = Config.prefixes + String.format(
 						"SELECT ?tag ?title ?commit%n"
 						+ "WHERE { GRAPH <%s> {%n"
 						+ "?tag a rmo:Tag;%n"
@@ -115,7 +115,7 @@ public class StructuredTree {
 
 	private void updateCommits(String revisionGraph) {
 		// query all commits
-		String queryCommits = RevisionManagement.prefixes + String.format(
+		String queryCommits = Config.prefixes + String.format(
 						"SELECT ?commit ?time ?prev ?next ?title ?authname ?branch%n"
 						+ "WHERE { GRAPH <%s> {%n"
 						+ "?commit a rmo:RevisionCommit;%n"

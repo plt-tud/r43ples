@@ -100,7 +100,7 @@ public class Config {
 		}
 	}
 	
-	public static String getPrefixes(){
+	public static String getUserDefinedSparqlPrefixes(){
 		StringBuilder sb = new StringBuilder();
 		Set<String> set = user_defined_prefixes.keySet();
 		Iterator<String> it = set.iterator();
@@ -111,5 +111,19 @@ public class Config {
 		}
 		return sb.toString();
 	}
+
+	/** The SPARQL prefixes
+	 * **/
+	public static final String prefixes = 
+			  "PREFIX rmo:	<http://eatld.et.tu-dresden.de/rmo#> \n"
+			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
+			+ "PREFIX dc-terms:	<http://purl.org/dc/terms/> \n" 
+			+ "PREFIX xsd:	<http://www.w3.org/2001/XMLSchema#> \n"
+			+ "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
+			+ "PREFIX sdd:	<http://eatld.et.tu-dresden.de/sdd#> \n"
+			+ "PREFIX rpo: <http://eatld.et.tu-dresden.de/rpo#> \n"
+			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
+			+ "PREFIX rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n"
+			+ "PREFIX owl:	<http://www.w3.org/2002/07/owl#> \n";
 
 }

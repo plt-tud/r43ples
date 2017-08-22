@@ -14,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
 
 import com.github.mustachejava.DefaultMustacheFactory;
@@ -21,9 +22,10 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.FastForwardControl;
 import de.tud.plt.r43ples.management.Interface;
-import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.R43plesMergeCommit;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.merging.FastForwardControl;
 import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.model.structure.MergeCommitModel;
 import de.tud.plt.r43ples.merging.ui.MergingControl;
@@ -40,7 +42,7 @@ public class Merging {
 	public final Response getMerging() {
 		logger.info("Merging - Start page");		
 		
-		List<String> graphList = RevisionManagement.getRevisedGraphsList();	
+		List<String> graphList = RevisionManagementOriginal.getRevisedGraphsList();
 		Map<String, Object> scope = new HashMap<String, Object>();
 	    scope.put("merging_active", true);
 		scope.put("graphList", graphList);
@@ -83,13 +85,14 @@ public class Merging {
 			throw new InternalErrorException("strategy name has to be provided");
 					
 		ResponseBuilder response = Response.ok();
+		RevisionGraph graph = new RevisionGraph(graphName);
 		
 		// Fast Forward
 		if(strategy.equals("Fast-Forward")){
 			MergeCommitModel commitModel = new MergeCommitModel(graphName, sddName, user, message, branch1, branch2, "Fast-Forward", null);
-			
-			String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-			boolean ff_successful = FastForwardControl.performFastForward(revisionGraph, branch1, branch2, user, RevisionManagement.getDateString(), message);
+			// TODO Create date by using commit information
+			String dateString = "2017-08-17T13:57:11";
+			boolean ff_successful = FastForwardControl.performFastForward(graph, branch1, branch2, user, dateString, message);
 
 			if (ff_successful){
 				response = Response.ok();
@@ -137,7 +140,8 @@ public class Merging {
 		// Three Way Merge
 		else {			
 			MergeCommitModel commitModel = new MergeCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way", null);
-			MergeResult mresult = Interface.mergeThreeWay(graphName, branch1, branch2, false, null, null, null, user, message, "text/turtle");
+			R43plesMergeCommit commit = new R43plesMergeCommit(graphName, branch1, branch2, user, message, "text/turtle");
+			MergeResult mresult = Interface.mergeThreeWay(commit);
 							
 			if(!mresult.hasConflict){
 				response.entity(commitModel.getReportView());				

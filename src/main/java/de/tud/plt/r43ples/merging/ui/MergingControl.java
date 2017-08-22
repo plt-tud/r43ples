@@ -19,9 +19,10 @@ import com.hp.hpl.jena.query.ResultSetFactory;
 import com.hp.hpl.jena.rdf.model.Model;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.JenaModelManagement;
-import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.TripleObjectTypeEnum;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
@@ -43,7 +44,6 @@ public class MergingControl {
 	
 	/** Merge Query Model. **/
 	private MergeCommitModel commitModel;
-	private String conflictModel;
 	private List<Individual> individualList;
 
 	private String commonRevision;
@@ -83,7 +83,7 @@ public class MergingControl {
 		logger.info("Merge query produced conflicts.");
 		this.commitModel = commitModel;
 		this.commonRevision = mresult.commonRevision;
-		this.conflictModel = mresult.conflictModel;
+		String conflictModel = mresult.conflictModel;
 		
 		
 		Model jenaModel = JenaModelManagement.readStringToJenaModel(conflictModel, "TURTLE");
@@ -121,7 +121,7 @@ public class MergingControl {
 
 		
 		// Get all subjects from difference model
-		String querySubject = RevisionManagement.prefixes +
+		String querySubject = Config.prefixes +
 				  "SELECT DISTINCT ?subject "
 				+ "WHERE { "
 				+ " ?triple rdf:subject ?subject."
@@ -142,7 +142,7 @@ public class MergingControl {
 	
 	private HashMap<Triple, Boolean> addTriplesOfIndividual(String individualUri, String branchName) throws InternalErrorException{
 		HashMap<Triple, Boolean> triples = new HashMap<Triple, Boolean>();
-		String query = RevisionManagement.prefixes + String.format(
+		String query = Config.prefixes + String.format(
 				  "SELECT ?predicate ?object %n"
 				+ "FROM <%s> REVISION \"%s\" %n"
 				+ "WHERE { %n"
@@ -150,7 +150,9 @@ public class MergingControl {
 				+ "}"
 				+ "ORDER BY ?predicate ?object", commitModel.getGraphName(), branchName, individualUri);
 		
-		String resultBranch1 = Interface.sparqlSelectConstructAsk(query, "text/xml", false);
+		R43plesRequest request = new R43plesRequest(query, "text/xml");
+		
+		String resultBranch1 = Interface.sparqlSelectConstructAsk(request, false);
 		ResultSet resultSetBranch1 = ResultSetFactory.fromXML(resultBranch1);
 		while(resultSetBranch1.hasNext()) {
 	    	QuerySolution qsBranch1 = resultSetBranch1.next();

@@ -70,7 +70,7 @@ public class MessagesTableView {
 		// header line
 		g.drawString("Number", pos, y);
 		int numberWidth = fm.stringWidth("Number");
-		y = VisualisationBatik.LINE_HEIGHT;
+		y = VisualisationTable.LINE_HEIGHT;
 
 		for (Commit c : commits) {
 			
@@ -80,18 +80,18 @@ public class MessagesTableView {
 			// calculate offset of next column
 			numberWidth = Math.max(numberWidth, fm.stringWidth(rev));
 
-			y += VisualisationBatik.LINE_HEIGHT;
+			y += VisualisationTable.LINE_HEIGHT;
 		}
 		
 		
-		pos += numberWidth + VisualisationBatik.PADDING;
+		pos += numberWidth + VisualisationTable.PADDING;
 		
 		// Commit message
 		// header line
 		y=0;
 		g.drawString("Commit Message", pos, y);
 		int commitWidth = fm.stringWidth("Commit Message");
-		y += VisualisationBatik.LINE_HEIGHT;
+		y += VisualisationTable.LINE_HEIGHT;
 
 		for (Commit c : commits) {
 			String message = c.getMessage();
@@ -142,10 +142,10 @@ public class MessagesTableView {
 			// calculate offset of next column
 			commitWidth = Math.max(commitWidth, branchesWidth + fm.stringWidth(message));
 
-			y += VisualisationBatik.LINE_HEIGHT;
+			y += VisualisationTable.LINE_HEIGHT;
 		}
 		
-		pos += commitWidth + VisualisationBatik.PADDING;
+		pos += commitWidth + VisualisationTable.PADDING;
 
 		
 		// Author
@@ -154,7 +154,7 @@ public class MessagesTableView {
 		// header line
 		g.drawString("Author", pos, y);
 		int authorWidth = fm.stringWidth("Author");
-		y += VisualisationBatik.LINE_HEIGHT;
+		y += VisualisationTable.LINE_HEIGHT;
 
 		for (Commit c : commits) {
 			String author = c.getAuthor();
@@ -163,7 +163,7 @@ public class MessagesTableView {
 			// calculate offset of next column
 			authorWidth = Math.max(authorWidth, fm.stringWidth(author));
 
-			y += VisualisationBatik.LINE_HEIGHT;
+			y += VisualisationTable.LINE_HEIGHT;
 		}
 		pos += authorWidth;
 		dimension = new Dimension(pos, y);

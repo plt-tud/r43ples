@@ -26,6 +26,7 @@ import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 @Path("debug")
@@ -109,6 +110,7 @@ public class Debug {
 		htmlMap.put("graphs", TripleStoreInterfaceSingleton.get().getGraphs());
 	    htmlMap.put("debug_active", true);
 	    htmlMap.put("revisionGraph", Config.revision_graph);
+	    htmlMap.put("git", GitRepositoryState.getGitRepositoryState());	
 	    StringWriter sw = new StringWriter();	    
 		MustacheFactory mf = new DefaultMustacheFactory();
 	    Mustache mustache = mf.compile("templates/debug.mustache");

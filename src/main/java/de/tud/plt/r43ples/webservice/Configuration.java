@@ -18,8 +18,6 @@ import org.glassfish.jersey.server.mvc.Template;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.GitRepositoryState;
-
 /**
  * REST services for managing the configuration on R43ples
  * @author mgraube
@@ -42,8 +40,7 @@ public class Configuration {
 	public final Map<String, Object> getConfiguration() throws InternalErrorException {
 		logger.info("Get Configuration page");
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
-		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());
+		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion());
 	    htmlMap.put("revisionGraph", Config.revision_graph);
 	    htmlMap.put("triplestore_type", Config.triplestore_type);
 	    htmlMap.put("triplestore_url", Config.triplestore_url);

@@ -23,13 +23,11 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
+import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.GitRepositoryState;
-import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.visualisation.VisualisationBatik;
-import de.tud.plt.r43ples.visualisation.VisualisationD3;
-import de.tud.plt.r43ples.visualisation.VisualisationG6;
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.visualisation.VisualisationTable;
+import de.tud.plt.r43ples.visualisation.VisualisationGraph;
 
 @Path("/")
 public class Misc {
@@ -46,7 +44,6 @@ public class Misc {
 		logger.info("Get Landing page");
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
 		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());	
 		
 		StringWriter sw = new StringWriter();
 	    MustacheFactory mf = new DefaultMustacheFactory();
@@ -72,7 +69,6 @@ public class Misc {
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
 		htmlMap.put("help_active", true);
 		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());	
 		return htmlMap;
 	}
 	
@@ -140,16 +136,14 @@ public class Misc {
 		logger.info("Get Revision Graph: " + graph + " (format: " + format+")");
 		
 		ResponseBuilder response = Response.ok();
-		if (format.equals("batik")) {
+		if (format.equals("table")) {
 			response.type(MediaType.TEXT_HTML);
-			response.entity(VisualisationBatik.getHtmlOutput(graph));
-		} else if (format.equals("d3")) {
-			response.entity(VisualisationD3.getHtmlOutput(graph));
-		} else if (format.equals("g6")) {
-			response.entity(VisualisationG6.getHtmlOutput(graph));
+			response.entity(VisualisationTable.getHtmlOutput(graph));
+		}  else if (format.equals("graph")) {
+			response.entity(VisualisationGraph.getHtmlOutput(graph));
 		}
 		else {
-			response.entity(RevisionManagement.getRevisionInformation(graph, format));
+			response.entity(RevisionManagementOriginal.getRevisionInformation(graph, format));
 			response.type(format);
 		}
 		return response.build();
@@ -170,7 +164,8 @@ public class Misc {
 		logger.info("Get Content of graph " + graphName);
 		String format = (format_query != null) ? format_query : format_header;
 		logger.debug("format: " + format);
-		String result = RevisionManagement.getContentOfGraphByConstruct(graphName, format);
+
+		String result = RevisionManagementOriginal.getContentOfGraph(graphName, format);
 		ResponseBuilder response = Response.ok();
 		return response.entity(result).type(format).build();
 	}
