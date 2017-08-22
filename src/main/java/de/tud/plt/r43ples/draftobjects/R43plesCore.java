@@ -1,9 +1,7 @@
 package de.tud.plt.r43ples.draftobjects;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.existentobjects.InitialCommit;
-import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
-import de.tud.plt.r43ples.existentobjects.UpdateCommit;
+import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import org.apache.log4j.Logger;
 
@@ -89,9 +87,36 @@ public class R43plesCore implements R43plesCoreInterface {
         return updateCommitDraft.createCommitInTripleStore().get(0);
     }
 
+    /**
+     * Create a new reference commit.
+     *
+     * @param request the request received by R43ples
+     * @return the created reference commit
+     * @throws InternalErrorException
+     */
+    @Override
+    public ReferenceCommit createReferenceCommit(R43plesRequest request) throws InternalErrorException {
+        ReferenceCreationCommitDraft referenceCreationCommitDraft = new ReferenceCreationCommitDraft(request);
+        return referenceCreationCommitDraft.createCommitInTripleStore();
+    }
 
-
-
+    /**
+     * Create a new reference commit.
+     *
+     * @param graphName the graph name
+     * @param referenceName the reference name
+     * @param revisionIdentifier the revision identifier (the corresponding revision will be the current base for the reference)
+     * @param user the user
+     * @param message the message
+     * @param isBranch states if the created reference is a branch or a tag. (branch => true; tag => false)
+     * @return the created reference commit
+     * @throws InternalErrorException
+     */
+    @Override
+    public ReferenceCommit createReferenceCommit(String graphName, String referenceName, String revisionIdentifier, String user, String message, boolean isBranch) throws InternalErrorException {
+        ReferenceCreationCommitDraft referenceCreationCommitDraft = new ReferenceCreationCommitDraft(graphName, referenceName, revisionIdentifier, user, message, isBranch);
+        return referenceCreationCommitDraft.createCommitInTripleStore();
+    }
 
     @Override
     public ThreeWayMergeCommit createThreeWayMergeCommit(R43plesRequest request) throws InternalErrorException {

@@ -2,6 +2,7 @@ package de.tud.plt.r43ples.draftobjects;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.InitialCommit;
+import de.tud.plt.r43ples.existentobjects.ReferenceCommit;
 import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
 import de.tud.plt.r43ples.existentobjects.UpdateCommit;
 import de.tud.plt.r43ples.management.R43plesRequest;
@@ -61,6 +62,32 @@ public interface R43plesCoreInterface {
      * @throws InternalErrorException
      */
     UpdateCommit createUpdateCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException;
+
+    /**
+     * Create a new reference commit.
+     *
+     * @param request the request received by R43ples
+     * @return the created reference commit
+     * @throws InternalErrorException
+     */
+    ReferenceCommit createReferenceCommit(R43plesRequest request) throws InternalErrorException;
+
+    /**
+     * Create a new reference commit.
+     *
+     * @param graphName the graph name
+     * @param referenceName the reference name
+     * @param revisionIdentifier the revision identifier (the corresponding revision will be the current base for the reference)
+     * @param user the user
+     * @param message the message
+     * @param isBranch states if the created reference is a branch or a tag. (branch => true; tag => false)
+     * @return the created reference commit
+     * @throws InternalErrorException
+     */
+    ReferenceCommit createReferenceCommit(String graphName, String referenceName, String revisionIdentifier, String user, String message, boolean isBranch) throws InternalErrorException;
+
+
+
 
 
     /**

@@ -166,7 +166,7 @@ public class RevisionManagement {
         if (!checkNamedGraphExistence(branchURI)) {
             return branchURI;
         } else {
-            throw new InternalErrorException("The calculated master URI is already in use.");
+            throw new InternalErrorException("The calculated branch URI is already in use.");
         }
     }
 
@@ -199,7 +199,7 @@ public class RevisionManagement {
         if (!checkNamedGraphExistence(tagURI)) {
             return tagURI;
         } else {
-            throw new InternalErrorException("The calculated master URI is already in use.");
+            throw new InternalErrorException("The calculated tag URI is already in use.");
         }
     }
 
@@ -217,6 +217,40 @@ public class RevisionManagement {
             return commitURI;
         } else {
             throw new InternalErrorException("The calculated commit URI is already in use.");
+        }
+    }
+
+    /**
+     * Get a new branch commit URI.
+     *
+     * @param revisionGraph      the corresponding revision graph
+     * @param branchIdentifier the branch identifier of the created branch
+     * @return the new branch commit URI
+     * @throws InternalErrorException
+     */
+    protected String getNewBranchCommitURI(RevisionGraph revisionGraph, String branchIdentifier) throws InternalErrorException {
+        String commitURI = revisionGraph.getGraphName() + "-commit-branch-" + branchIdentifier;
+        if (!checkNamedGraphExistence(commitURI)) {
+            return commitURI;
+        } else {
+            throw new InternalErrorException("The calculated branch commit URI is already in use.");
+        }
+    }
+
+    /**
+     * Get a new tag commit URI.
+     *
+     * @param revisionGraph    the corresponding revision graph
+     * @param tagIdentifier the tag identifier of the created tag
+     * @return the new tag commit URI
+     * @throws InternalErrorException
+     */
+    protected String getNewTagCommitURI(RevisionGraph revisionGraph, String tagIdentifier) throws InternalErrorException {
+        String commitURI = revisionGraph.getGraphName() + "-commit-tag-" + tagIdentifier;
+        if (!checkNamedGraphExistence(commitURI)) {
+            return commitURI;
+        } else {
+            throw new InternalErrorException("The calculated tag commit URI is already in use.");
         }
     }
 

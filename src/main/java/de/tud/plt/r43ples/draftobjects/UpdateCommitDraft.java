@@ -262,7 +262,7 @@ public class UpdateCommitDraft extends CommitDraft {
 		getTripleStoreInterface().executeUpdateQuery(query);
 
 		// Move branch to new revision
-		String branchIdentifier = draft.getDerivedFromRevisionIdentifier(); //or revisionNumber //TODO
+		String branchIdentifier = draft.getDerivedFromIdentifier(); //or revisionNumber //TODO
 		String oldRevisionUri = draft.getRevisionGraph().getRevisionUri(branchIdentifier);
 
 		String queryBranch = Config.prefixes + String.format(""

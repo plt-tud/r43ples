@@ -21,9 +21,7 @@ import java.util.regex.Pattern;
  */
 public class InitialCommitDraft extends CommitDraft {
 
-    /**
-     * The logger.
-     **/
+    /** The logger. **/
     private Logger logger = Logger.getLogger(InitialCommitDraft.class);
 
     /** The pattern modifier. **/
@@ -31,9 +29,7 @@ public class InitialCommitDraft extends CommitDraft {
 
     /** The revision draft. **/
     private RevisionDraft revisionDraft;
-    /**
-     * States if this commit draft was created by a request or add and delete sets. (true => request, false => add/delete sets)
-     **/
+    /** States if this commit draft was created by a request or add and delete sets. (true => request, false => add/delete sets) **/
     private boolean isCreatedWithRequest;
 
 
@@ -154,7 +150,7 @@ public class InitialCommitDraft extends CommitDraft {
                 branchUri, revisionDraft.getRevisionGraph().getGraphName(), revisionDraft.getRevisionURI());
 
         queryContent += String.format(
-                "<%s> a rmo:RevisionCommit, rmo:BranchCommit; "
+                "<%s> a rmo:RevisionCommit, rmo:ReferenceCommit; "
                         + "	prov:wasAssociatedWith <%s> ;"
                         + "	prov:generated <%s>, <%s> ;"
                         + "	dc-terms:title \"initial commit\" ;"

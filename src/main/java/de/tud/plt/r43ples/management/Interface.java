@@ -105,33 +105,6 @@ public class Interface {
 
 
 
-//	public static String sparqlCreateGraph(final String query) throws QueryErrorException, InternalErrorException {
-//
-//		final Pattern patternCreateGraph = Pattern.compile("CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
-//				patternModifier);
-//		String graphName = null;
-//		Matcher m = patternCreateGraph.matcher(query);
-//		boolean found = false;
-//		while (m.find()) {
-//			found = true;
-//			graphName = m.group("graph");
-//			// String silent = m.group("silent");
-//
-//			// Create graph
-//			TripleStoreInterfaceSingleton.get().executeCreateGraph(graphName);
-//
-//			RevisionGraph graph = new RevisionGraph(graphName);
-//			if (graph.getMasterRevision() == null) {
-//				// Add R43ples information
-//				RevisionManagementOriginal.putGraphUnderVersionControl(graphName);
-//			}
-//		}
-//		if (!found) {
-//			throw new QueryErrorException("Query doesn't contain a correct CREATE query:\n" + query);
-//		}
-//		return graphName;
-//	}
-
 	public static void sparqlDropGraph(final String query) throws QueryErrorException {
 		final Pattern patternDropGraph = Pattern.compile("DROP\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
 				patternModifier);
@@ -145,33 +118,6 @@ public class Interface {
 		}
 		if (!found) {
 			throw new QueryErrorException("Query contain errors:\n" + query);
-		}
-	}
-
-	public static void sparqlTagOrBranch(final R43plesCommit commit)
-			throws InternalErrorException, QueryErrorException {
-		final Pattern patternBranchOrTagQuery = Pattern.compile(
-				"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"\\s*TO\\s*\"(?<name>[^\"]*)\"",
-				patternModifier);
-		Matcher m = patternBranchOrTagQuery.matcher(commit.query_sparql);
-
-		boolean foundEntry = false;
-		while (m.find()) {
-			foundEntry = true;
-			String action = m.group("action");
-			String graphName = m.group("graph");
-			String revisionNumber = m.group("revision").toLowerCase();
-			String referenceName = m.group("name").toLowerCase();
-			if (action.equals("TAG")) {
-				RevisionManagementOriginal.createTag(graphName, revisionNumber, referenceName, commit.user, commit.message);
-			} else if (action.equals("BRANCH")) {
-				RevisionManagementOriginal.createBranch(graphName, revisionNumber, referenceName, commit.user, commit.message);
-			} else {
-				throw new QueryErrorException("Error in query: " + commit.query_sparql);
-			}
-		}
-		if (!foundEntry) {
-			throw new QueryErrorException("Error in query: " + commit.query_sparql);
 		}
 	}
 

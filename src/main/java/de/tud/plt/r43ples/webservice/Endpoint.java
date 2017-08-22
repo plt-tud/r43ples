@@ -29,6 +29,7 @@ import javax.ws.rs.core.Variant;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
 import de.tud.plt.r43ples.existentobjects.InitialCommit;
+import de.tud.plt.r43ples.existentobjects.ReferenceCommit;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.*;
 import org.apache.log4j.Logger;
@@ -86,8 +87,8 @@ public class Endpoint {
 	/**
 	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).
 	 * 
-	 * @param formatHeader
-	 *            format specified in the HTTP header
+//	 * @param formatHeader
+//	 *            format specified in the HTTP header
 	 * @param formatQuery
 	 *            format specified in the HTTP parameters
 	 * @param sparqlQuery
@@ -133,7 +134,7 @@ public class Endpoint {
 	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).
 	 * Direct method (http://www.w3.org/TR/2013/REC-sparql11-protocol-20130321/#query-via-post-direct)
 	 * 
-	 * @param formatHeader
+//	 * @param formatHeader
 	 *            format specified in the HTTP header
 	 * @param sparqlQuery
 	 *            the SPARQL query specified in the HTTP POST body
@@ -163,7 +164,7 @@ public class Endpoint {
 	 * Provides Service Description if no query is specified and RDF
 	 * representation is requested
 	 * 
-	 * @param formatHeader
+//	 * @param formatHeader
 	 *            format specified in the HTTP header
 	 * @param formatQuery
 	 *            format specified in the HTTP parameters
@@ -359,7 +360,8 @@ public class Endpoint {
 			result = "Graph successfully dropped";
 		}
 		else if (request.isBranchOrTagQuery()) {
-			Interface.sparqlTagOrBranch(new R43plesCommit(request));
+			ReferenceCommit referenceCommit = r43plesCore.createReferenceCommit(request);
+//			Interface.sparqlTagOrBranch(new R43plesCommit(request));
 			result = "Tagging or branching successful";
 		}
 		else if (request.isMergeQuery()) {
@@ -438,8 +440,8 @@ public class Endpoint {
 	 * 
 	 * Using command: MERGE GRAPH \<graphURI\> BRANCH "branchNameA" INTO "branchNameB"
 	 * 
-	 * @param sparqlQuery the SPARQL query
-	 * @param format the result format
+//	 * @param sparqlQuery the SPARQL query
+//	 * @param format the result format
 	 * @throws InternalErrorException 
 	 */
 	private Response getMergeResponse(final R43plesMergeCommit commit) throws InternalErrorException {

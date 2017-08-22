@@ -3,10 +3,7 @@ package de.tud.plt.r43ples.dataset;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.existentobjects.InitialCommit;
-import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
-import de.tud.plt.r43ples.existentobjects.UpdateCommit;
+import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
@@ -591,7 +588,7 @@ public class SampleDataSet {
 		// First commit to B2X
 		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"J\". \n";
 		DatasetGenerationManagement.executeInsertQuery(user, "First commit to B2X", graphName, "B2X", triplesInsert);
-		RevisionManagementOriginal.createTag(graphName, "b2x", "v0.2", "butler", "tag version v0.2");
+        ReferenceCommit referenceCommit = r43plesCore.createReferenceCommit(graphName, "v0.2", "b2x", user, "tag version v0.2", false);
 
 		// Second commit to B2X
 		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
