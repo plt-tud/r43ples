@@ -8,14 +8,9 @@ import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.existentobjects.Path;
 import de.tud.plt.r43ples.existentobjects.Revision;
 
-import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
-
 
 public class TestSimplePathCalculation {
 
@@ -28,15 +23,12 @@ public class TestSimplePathCalculation {
      */
     @BeforeClass
     public static void setUpBeforeClass() throws Exception {
-        XMLUnit.setIgnoreWhitespace(true);
         Config.readConfig("r43ples.test.conf");
         ds1 = SampleDataSet.createSampleDataset1();
         ds2 = SampleDataSet.createSampleDataSetComplexStructure();
     }
 
     /**
-     * @throws IOException
-     * @throws SAXException
      * @throws InternalErrorException
      */
     @Test

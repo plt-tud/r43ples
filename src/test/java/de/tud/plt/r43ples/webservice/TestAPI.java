@@ -5,7 +5,6 @@ import static org.hamcrest.core.StringContains.containsString;
 import javax.ws.rs.core.Application;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.AfterClass;
@@ -32,7 +31,6 @@ public class TestAPI extends JerseyTest {
     
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException {
-		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.test.conf");
 		ds1 = SampleDataSet.createSampleDataset1();
 	}
