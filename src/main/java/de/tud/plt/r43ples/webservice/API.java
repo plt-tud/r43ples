@@ -11,11 +11,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.FastForwardControl;
-import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.merging.FastForwardControl;
 
 @Path("api/")
 public class API {
@@ -35,15 +36,16 @@ public class API {
 		logger.info("Get Revised Graphs");
 		String format = (format_query != null) ? format_query : format_header;
 		logger.debug("format: " + format);
-		return RevisionManagement.getRevisedGraphsSparql(format);
+		return RevisionManagementOriginal.getRevisedGraphsSparql(format);
 	}
 	
 	
 	@Path("getBranches")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public final ArrayList<String> getBranchesOfGraph(@QueryParam("graph") final String graph) throws IOException {
-		return RevisionManagement.getAllBranchNamesOfGraph(graph);
+	public final ArrayList<String> getBranchesOfGraph(@QueryParam("graph") final String graphName) throws IOException {
+		RevisionGraph graph = new RevisionGraph(graphName);
+		return graph.getAllBranchNames();
 	}
 	
 	/**
@@ -55,8 +57,8 @@ public class API {
 	public final boolean fastForwardCheckGET(@HeaderParam("Accept") final String formatHeader, @QueryParam("graph") @DefaultValue("") final String graphName,
 			@QueryParam("branch1") @DefaultValue("") final String branch1, @QueryParam("branch2") @DefaultValue("") final String branch2) throws IOException, InternalErrorException {
 		logger.info("FastForwardCheckProcess (graph: "+ graphName+"; branch1:"+branch1+"; branch2:"+branch2+")");
-		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-		return FastForwardControl.fastForwardCheck(revisionGraph, branch1, branch2);
+		RevisionGraph graph = new RevisionGraph(graphName);
+		return FastForwardControl.fastForwardCheck(graph, branch1, branch2);
 	}
 		
 

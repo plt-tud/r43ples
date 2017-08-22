@@ -1273,7 +1273,7 @@ PROTOTYPE._setWidget = function()
 	CLASS_DISABLED = on ? 'ui-state-disabled' : 'qtip-disabled';
 	tooltip.toggleClass(CLASS_DISABLED, disabled);
 
-	tooltip.toggleClass('ui-helper-reset '+createWidgetClass(), on).toggleClass(CLASS_DEFAULT, this.options.style.def && !on);
+	tooltip.toggleClass('ui-iohelper-reset '+createWidgetClass(), on).toggleClass(CLASS_DEFAULT, this.options.style.def && !on);
 
 	if(elements.content) {
 		elements.content.toggleClass( createWidgetClass('content'), on);
@@ -1382,7 +1382,7 @@ PROTOTYPE._unbind = function(targets, suffix) {
 	return this;
 };
 
-// Global delegation helper
+// Global delegation iohelper
 function delegate(selector, events, method) {
 	$(document.body).delegate(selector,
 		(events.split ? events : events.join('.'+NAMESPACE + ' ')) + '.'+NAMESPACE,

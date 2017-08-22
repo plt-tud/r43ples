@@ -13,7 +13,7 @@ WHERE
           { ?r_delete_set_1
                       <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://eatld.et.tu-dresden.de/rmo#Revision> ;
                       <http://eatld.et.tu-dresden.de/rmo#deleteSet>  ?g_delete_set_full_graph_1 .
-            FILTER ( ?r_delete_set_1 IN (:r43ples-dataset-1-revision-6, :r43ples-dataset-1-revision-5, :r43ples-dataset-1-revision-4) )
+            FILTER ( ?r_delete_set_1 IN (:r43ples-dataset-1-revision-4, :r43ples-dataset-1-revision-5, :r43ples-dataset-1-revision-6) )
           }
       }
     MINUS
@@ -23,7 +23,7 @@ WHERE
           { ?r_delete_set_1 (<http://www.w3.org/ns/prov#wasDerivedFrom>)* ?r_add_set_1 . 
             ?r_add_set_1  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://eatld.et.tu-dresden.de/rmo#Revision> ;
                       <http://eatld.et.tu-dresden.de/rmo#addSet>  ?g_add_set_1 .
-            FILTER ( ?r_add_set_1 IN (:r43ples-dataset-1-revision-6, :r43ples-dataset-1-revision-5, :r43ples-dataset-1-revision-4) )
+            FILTER ( ?r_add_set_1 IN (:r43ples-dataset-1-revision-4, :r43ples-dataset-1-revision-5, :r43ples-dataset-1-revision-6) )
           }
       }
     MINUS
@@ -38,7 +38,7 @@ WHERE
               { ?r_delete_set_2
                           <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://eatld.et.tu-dresden.de/rmo#Revision> ;
                           <http://eatld.et.tu-dresden.de/rmo#deleteSet>  ?g_delete_set_full_graph_2 .
-                FILTER ( ?r_delete_set_2 IN (:r43ples-dataset-1-revision-6, :r43ples-dataset-1-revision-5, :r43ples-dataset-1-revision-4) )
+                FILTER ( ?r_delete_set_2 IN (:r43ples-dataset-1-revision-4, :r43ples-dataset-1-revision-5, :r43ples-dataset-1-revision-6) )
               }
           }
         MINUS
@@ -48,7 +48,7 @@ WHERE
               { ?r_delete_set_2 (<http://www.w3.org/ns/prov#wasDerivedFrom>)* ?r_add_set_2 . 
                 ?r_add_set_2  <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>  <http://eatld.et.tu-dresden.de/rmo#Revision> ;
                           <http://eatld.et.tu-dresden.de/rmo#addSet>  ?g_add_set_2 .
-                FILTER ( ?r_add_set_2 IN (:r43ples-dataset-1-revision-6, :r43ples-dataset-1-revision-5, :r43ples-dataset-1-revision-4) )
+                FILTER ( ?r_add_set_2 IN (:r43ples-dataset-1-revision-4, :r43ples-dataset-1-revision-5, :r43ples-dataset-1-revision-6) )
               }
           }
       }

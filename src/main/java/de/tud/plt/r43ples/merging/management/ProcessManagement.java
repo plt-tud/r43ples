@@ -12,9 +12,8 @@ import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
 
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.merge.SDDTripleStateEnum;
 import de.tud.plt.r43ples.merging.ResolutionStateEnum;
+import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
 import de.tud.plt.r43ples.merging.TripleObjectTypeEnum;
 import de.tud.plt.r43ples.merging.model.structure.Difference;
 import de.tud.plt.r43ples.merging.model.structure.DifferenceGroup;
@@ -46,7 +45,7 @@ public class ProcessManagement {
 		
 		
 		// Query all difference groups
-		String queryDifferenceGroups = RevisionManagement.prefixes + 
+		String queryDifferenceGroups = Config.prefixes + 
 				  "SELECT ?uri ?tripleStateA ?tripleStateB ?automaticResolutionState ?conflicting "
 				+ "WHERE { "
 				+ "	?uri a rpo:DifferenceGroup ; "
@@ -72,7 +71,7 @@ public class ProcessManagement {
 	    	DifferenceGroup differenceGroup = new DifferenceGroup(tripleStateA, tripleStateB, automaticResolutionState, conflicting);
 	    	
 	    	// Query all differences
-			String queryDifferences = RevisionManagement.prefixes + String.format(
+			String queryDifferences = Config.prefixes + String.format(
 					  "SELECT ?subject ?predicate ?object ?referencedRevisionA ?referencedRevisionB %n"
 					+ "WHERE { %n"
 					+ "	<%s> a rpo:DifferenceGroup ; %n"
@@ -121,7 +120,7 @@ public class ProcessManagement {
 		    	String referencedRevisionLabelB = null;
 		    	
 				if ((referencedRevisionA != null) && (referencedRevisionB == null)) {
-					String query = RevisionManagement.prefixes + String.format(
+					String query = Config.prefixes + String.format(
 							  "SELECT ?rev %n"
 							+ "FROM <%s> %n"
 							+ "WHERE { %n"
@@ -136,7 +135,7 @@ public class ProcessManagement {
 						referencedRevisionLabelA = qs.getLiteral("?rev").toString();
 					}
 				} else if ((referencedRevisionA == null) && (referencedRevisionB != null)) {
-					String query = RevisionManagement.prefixes + String.format(
+					String query = Config.prefixes + String.format(
 							  "SELECT ?rev %n"
 							+ "FROM <%s> %n"
 							+ "WHERE { %n"
@@ -152,7 +151,7 @@ public class ProcessManagement {
 						referencedRevisionLabelB = qs.getLiteral("?rev").toString();
 					}
 				} else if ((referencedRevisionA != null) && (referencedRevisionB != null)) {
-					String query = RevisionManagement.prefixes + String.format(
+					String query = Config.prefixes + String.format(
 							  "SELECT ?revA ?revB %n"
 							+ "FROM <%s> %n"
 							+ "WHERE { %n"
