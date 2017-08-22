@@ -42,7 +42,7 @@ public class HeaderInformation {
 
     }
 
-    public String getResponseHeader(String graphList) {
+    protected String getResponseHeader(String graphList) {
         String queryConstruct = Config.prefixes + String.format(
                 "CONSTRUCT {"
                         + " ?ref a ?type;"
@@ -66,7 +66,7 @@ public class HeaderInformation {
         return header;
     }
 
-    public void checkUpToDate(final String clientRevisionInformation, final String sparqlQuery) throws OutdatedException {
+    protected void checkUpToDate(final String clientRevisionInformation, final String sparqlQuery) throws OutdatedException {
 
         Model clientModel = JenaModelManagement.readStringToJenaModel(clientRevisionInformation, "TURTLE");
 
