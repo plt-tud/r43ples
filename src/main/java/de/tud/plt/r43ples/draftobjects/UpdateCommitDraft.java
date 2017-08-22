@@ -33,6 +33,9 @@ public class UpdateCommitDraft extends CommitDraft {
 	/** States if this commit draft was created by a request or add and delete sets. (true => request, false => add/delete sets) **/
 	private boolean isCreatedWithRequest;
 
+	/** RDF model string of revisoin information used to check if it is up to date (optional) */
+	private String revisionInformation = null;
+
 
 	/**
 	 * The constructor.
@@ -43,6 +46,7 @@ public class UpdateCommitDraft extends CommitDraft {
 	protected UpdateCommitDraft(R43plesRequest request){
 		super(request);
 		this.isCreatedWithRequest = true;
+		this.revisionInformation = request.revisionInformation;
 	}
 
 	/**
@@ -71,12 +75,22 @@ public class UpdateCommitDraft extends CommitDraft {
 	 * @return the list of created commits
 	 */
 	protected ArrayList<UpdateCommit> createCommitInTripleStore() throws InternalErrorException {
+
+		if (this.revisionInformation.length()>0 && this.getRequest()!=null) {
+			logger.info("Revision information available during commit. Check if it is up to date!");
+			HeaderInformation hi = new HeaderInformation();
+			hi.checkUpToDate(this.revisionInformation, this.getRequest().query_sparql);
+		}
+		else {
+			logger.info("No revision information available. Skip uptodate check!");
+		}
 		if (!isCreatedWithRequest) {
 			revisionDraft.createRevisionInTripleStore();
 			ArrayList<UpdateCommit> commitList = new ArrayList<>();
 			commitList.add(addMetaInformation(revisionDraft));
 			return commitList;
 		} else {
+
 			return this.updateChangeSetsByRewrittenQuery();
 		}
 	}

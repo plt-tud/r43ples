@@ -32,7 +32,7 @@ public class R43plesCommit extends R43plesRequest{
 	 * @param request the request received by R43ples
 	 */
 	public R43plesCommit(final R43plesRequest request){
-		super(request.query_r43ples, request.format);
+		super(request.query_r43ples, request.format, request.revisionInformation);
 		this.query_sparql = request.query_sparql;
 		this.extractUser();
 		this.extractMessage();
