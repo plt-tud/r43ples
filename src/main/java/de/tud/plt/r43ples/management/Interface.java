@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
+import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
@@ -103,31 +105,32 @@ public class Interface {
 
 
 
-	public static String sparqlCreateGraph(final String query) throws QueryErrorException, InternalErrorException {
-		final Pattern patternCreateGraph = Pattern.compile("CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
-				patternModifier);
-		String graphName = null;
-		Matcher m = patternCreateGraph.matcher(query);
-		boolean found = false;
-		while (m.find()) {
-			found = true;
-			graphName = m.group("graph");
-			// String silent = m.group("silent");
-
-			// Create graph
-			TripleStoreInterfaceSingleton.get().executeCreateGraph(graphName);
-
-			RevisionGraph graph = new RevisionGraph(graphName);
-			if (graph.getMasterRevision() == null) {
-				// Add R43ples information
-				RevisionManagementOriginal.putGraphUnderVersionControl(graphName);
-			}
-		}
-		if (!found) {
-			throw new QueryErrorException("Query doesn't contain a correct CREATE query:\n" + query);
-		}
-		return graphName;
-	}
+//	public static String sparqlCreateGraph(final String query) throws QueryErrorException, InternalErrorException {
+//
+//		final Pattern patternCreateGraph = Pattern.compile("CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
+//				patternModifier);
+//		String graphName = null;
+//		Matcher m = patternCreateGraph.matcher(query);
+//		boolean found = false;
+//		while (m.find()) {
+//			found = true;
+//			graphName = m.group("graph");
+//			// String silent = m.group("silent");
+//
+//			// Create graph
+//			TripleStoreInterfaceSingleton.get().executeCreateGraph(graphName);
+//
+//			RevisionGraph graph = new RevisionGraph(graphName);
+//			if (graph.getMasterRevision() == null) {
+//				// Add R43ples information
+//				RevisionManagementOriginal.putGraphUnderVersionControl(graphName);
+//			}
+//		}
+//		if (!found) {
+//			throw new QueryErrorException("Query doesn't contain a correct CREATE query:\n" + query);
+//		}
+//		return graphName;
+//	}
 
 	public static void sparqlDropGraph(final String query) throws QueryErrorException {
 		final Pattern patternDropGraph = Pattern.compile("DROP\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
