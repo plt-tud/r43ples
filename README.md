@@ -177,7 +177,11 @@ Here, the Revision Management Ontology (RMO) is used to model revisions, branche
 
 ### HTTP Header information
 
-Each response header contains information about the revision information of the graphs specified in the requests. This information follows the RMO and is transferred as Turtle serialization.
+Each response header contains information about the revision information of the graphs specified in the requests in the *r43ples-revisiongraph* HTTP header field. This information follows the RMO and is transferred as Turtle serialization.
+
+Clients can also pass this information in R43ples update queries to the R43ples server via the *r43ples-revisiongraph* HTTP header attribute.
+The server will check if the client is aware of the most recent version of the involved revised graphs. If this is not the case,
+the update query will be rejected.
 
 
 
