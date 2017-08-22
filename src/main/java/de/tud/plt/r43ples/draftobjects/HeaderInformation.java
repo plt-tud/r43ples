@@ -6,8 +6,8 @@ import de.tud.plt.r43ples.exception.OutdatedException;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.JenaModelManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-
 import org.apache.log4j.Logger;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,8 +43,10 @@ public class HeaderInformation {
     }
 
     protected String getResponseHeader(String graphList) {
-        String queryConstruct = Config.prefixes + String.format(
-                "CONSTRUCT {"
+        String queryConstruct = String.format(
+                    "PREFIX rmo:	<http://eatld.et.tu-dresden.de/rmo#> "
+                        + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> %n"
+                        + "CONSTRUCT {"
                         + " ?ref a ?type;"
                         + "		rdfs:label ?label;"
                         + "		rmo:references ?rev."
