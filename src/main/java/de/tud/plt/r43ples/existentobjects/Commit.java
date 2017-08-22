@@ -42,6 +42,7 @@ public class Commit {
     public Commit(RevisionGraph revisionGraph, String commitURI) throws InternalErrorException {
         this.revisionGraph = revisionGraph;
         this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
+        this.commitURI = commitURI;
 
         retrieveAdditionalInformation();
     }

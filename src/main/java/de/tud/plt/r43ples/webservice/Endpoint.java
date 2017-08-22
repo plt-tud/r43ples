@@ -23,6 +23,7 @@ import de.tud.plt.r43ples.draftobjects.HeaderInformation;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
 import de.tud.plt.r43ples.existentobjects.InitialCommit;
+import de.tud.plt.r43ples.existentobjects.ReferenceCommit;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.*;
 import org.apache.log4j.Logger;
@@ -384,7 +385,8 @@ public class Endpoint {
 			result = "Graph successfully dropped";
 		}
 		else if (request.isBranchOrTagQuery()) {
-			Interface.sparqlTagOrBranch(new R43plesCommit(request));
+			ReferenceCommit referenceCommit = r43plesCore.createReferenceCommit(request);
+//			Interface.sparqlTagOrBranch(new R43plesCommit(request));
 			result = "Tagging or branching successful";
 		}
 		else if (request.isMergeQuery()) {
