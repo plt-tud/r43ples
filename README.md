@@ -171,7 +171,11 @@ R43ples provides some functionalities additionally via an external API, even if 
 
 ### Extended SPARQL proxy
 
-![System Structure](https://github.com/plt-tud/r43ples/blob/develop/doc/R43ples-system.v02.png)
+R43ples itself does not story any information. All information in the revised graphs and about the revised graphs
+are stored in the attached triplestore. R43ples acts only as a proxy which evaluates additional revision information
+in the SPARQL queries.
+
+![System Structure](./doc/r43ples-system.png)
 
 
 ### Revision information
@@ -180,9 +184,12 @@ All information about the revision history of all named graphs is stored in the 
 
 Here, the Revision Management Ontology (RMO) is used to model revisions, branches and tags. Furthermore commits are stored which connect each revision, tag and branch with its prior revision.
 
-An exemplary revision graph is shown here:
+The RMO is derived from the PROV ontology:
+![RMO example](./doc/ontology/RMO.png)
 
-![Sample1](./doc/ontology/RMO_example.png)
+An exemplary revision graph is shown here:
+![RMO example](./doc/ontology/RMO_example.png)
+
 
 
 ### HTTP Header information
