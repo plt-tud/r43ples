@@ -76,7 +76,7 @@ public class UpdateCommitDraft extends CommitDraft {
 	 */
 	protected ArrayList<UpdateCommit> createCommitInTripleStore() throws InternalErrorException {
 
-		if (this.revisionInformation.length()>0 && this.getRequest()!=null) {
+		if (this.revisionInformation!=null && this.revisionInformation.length()>0 && this.getRequest()!=null) {
 			logger.info("Revision information available during commit. Check if it is up to date!");
 			HeaderInformation hi = new HeaderInformation();
 			hi.checkUpToDate(this.revisionInformation, this.getRequest().query_sparql);

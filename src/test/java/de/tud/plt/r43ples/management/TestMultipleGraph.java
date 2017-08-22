@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 import java.io.IOException;
 
 import de.tud.plt.r43ples.R43plesTest;
+import de.tud.plt.r43ples.draftobjects.HeaderInformation;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -101,8 +102,8 @@ public class TestMultipleGraph extends R43plesTest {
 		String sparql = "SELECT *"
 				+ "FROM <" + ds1.graphName +">"
 				+ "WHERE { ?s ?p ?o}";
-				
-		String result = RevisionManagementOriginal.getResponseHeaderFromQuery(sparql);
+
+		String result = new HeaderInformation().getResponseHeaderFromQuery(sparql);
 		Assert.assertThat(result, containsString("Master"));
 	}
 	
@@ -113,7 +114,7 @@ public class TestMultipleGraph extends R43plesTest {
 				+ "FROM <" + ds2.graphName +">"
 				+ "WHERE { ?s ?p ?o}";
 				
-		String result = RevisionManagementOriginal.getResponseHeaderFromQuery(sparql);
+		String result = new HeaderInformation().getResponseHeaderFromQuery(sparql);
 		Assert.assertThat(result, containsString("Master"));
 	}
 

@@ -229,6 +229,25 @@ public class Endpoint {
 			return getSparqlResponse(format, sparqlQuery, revision_information, query_rewriting);
 		}
 	}
+
+	/**
+	 * Interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * Provides HTML form if no query is specified and HTML is requested
+	 * Provides Service Description if no query is specified and RDF
+	 * representation is requested
+	 *
+	 * @param format
+	 *            mime type for response format
+	 * @param sparqlQuery
+	 *            decoded SPARQL query
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
+	 * @return the response
+	 * @throws InternalErrorException
+	 */
+	public final Response sparql(final String format, final String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
+		return sparql(format, sparqlQuery, null, query_rewriting);
+	}
 	
 	/**
 	 * 
