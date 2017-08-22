@@ -1,7 +1,10 @@
 package de.tud.plt.r43ples.draftobjects;
 
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
@@ -42,8 +45,35 @@ public class RevisionManagement {
      * @return the list of named graphs URIs
      */
     private ArrayList<String> getAllNamedGraphsURIs() {
-        // TODO Create the corresponding SPARQL query
-        return null;
+        logger.info("Get all named graph URIs.");
+
+        ArrayList<String> uriList = new ArrayList<>();
+
+        String query = Config.prefixes + String.format(""
+                + "SELECT DISTINCT ?uri\n"
+                + "WHERE {\n"
+                + "  GRAPH <%s> {\n"
+                + "    ?graph a rmo:Graph;\n"
+                + "      rmo:hasRevisionGraph ?uriGraph.\n"
+                + "  }\n"
+                + "  GRAPH ?uriGraph {\n"
+                + "    { bind( ?uriGraph as ?uri) }\n"
+                + "    UNION\n"
+                + "    { ?ref rmo:fullGraph ?uri. }\n"
+                + "    UNION\n"
+                + "    { ?rev rmo:addSet ?uri. }\n"
+                + "    UNION\n"
+                + "    { ?rev rmo:deleteSet ?uri }\n"
+                + "  }\n"
+                + "}\n", Config.revision_graph);
+        this.logger.debug(query);
+        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
+        while (resultSet.hasNext()) {
+            QuerySolution qs = resultSet.next();
+            uriList.add(qs.getResource("?uri").toString());
+        }
+
+        return uriList;
     }
 
     /**
@@ -53,8 +83,7 @@ public class RevisionManagement {
      * @return true if the named graph URI is already in use
      */
     protected boolean checkNamedGraphExistence(String namedGraphURI) {
-        //TODO return getAllNamedGraphsURIs().contains(namedGraphURI);
-        return false;
+        return getAllNamedGraphsURIs().contains(namedGraphURI);
     }
 
     /**
