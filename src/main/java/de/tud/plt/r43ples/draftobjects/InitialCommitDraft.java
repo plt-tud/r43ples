@@ -14,8 +14,6 @@ import org.apache.log4j.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.hp.hpl.jena.vocabulary.DB.graphName;
-
 /**
  * Collection of information for creating a new initial commit.
  *
@@ -137,7 +135,7 @@ public class InitialCommitDraft extends CommitDraft {
                         + "    rmo:hasRevisionGraph <%3$s>;"
                         + "    sddo:hasDefaultSDD sdd:defaultSDD."
                         + "} }",
-                Config.revision_graph, graphName, revisionDraft.getRevisionGraph().getRevisionGraphUri());
+                Config.revision_graph, revisionDraft.getRevisionGraph().getGraphName(), revisionDraft.getRevisionGraph().getRevisionGraphUri());
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryAddRevisionGraph);
 
         // Create new revision
@@ -153,7 +151,7 @@ public class InitialCommitDraft extends CommitDraft {
                         + " rmo:fullGraph <%s>;"
                         + "	rmo:references <%s>;"
                         + "	rdfs:label \"master\".",
-                branchUri, graphName, revisionDraft.getRevisionURI());
+                branchUri, revisionDraft.getRevisionGraph().getGraphName(), revisionDraft.getRevisionURI());
 
         queryContent += String.format(
                 "<%s> a rmo:RevisionCommit, rmo:BranchCommit; "

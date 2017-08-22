@@ -1,18 +1,17 @@
 package de.tud.plt.r43ples.dataset;
 
-import java.io.IOException;
-
 import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.InitialCommit;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
 import de.tud.plt.r43ples.existentobjects.UpdateCommit;
+import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
 
-import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.iohelper.ResourceManagement;
-import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import java.io.IOException;
 
 /**
  * Creates different sample data sets.
