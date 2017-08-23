@@ -106,9 +106,9 @@ public class ReferenceCreationCommitDraft extends CommitDraft {
     }
 
     /**
-     * Creates the commit draft as a new commit in the triple store and creates the corresponding revisions.
+     * Creates the commit draft as a new commit in the triple store.
      *
-     * @return the list of created commits
+     * @return the created reference commit
      */
     protected ReferenceCommit createCommitInTripleStore() throws InternalErrorException {
         RevisionGraph revisionGraph = new RevisionGraph(graphName);
