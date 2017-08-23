@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.management;
+package de.tud.plt.r43ples.iohelper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
+import de.tud.plt.r43ples.management.Config;
 
 public class JenaModelManagement {
 	

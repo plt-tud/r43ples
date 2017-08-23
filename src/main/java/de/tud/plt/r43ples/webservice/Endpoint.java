@@ -23,8 +23,8 @@ import de.tud.plt.r43ples.draftobjects.HeaderInformation;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
 import de.tud.plt.r43ples.existentobjects.InitialCommit;
-import de.tud.plt.r43ples.existentobjects.ReferenceCommit;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.*;
 import org.apache.log4j.Logger;
 

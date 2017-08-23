@@ -14,7 +14,7 @@ import com.hp.hpl.jena.shared.NoWriterForLangException;
 import com.hp.hpl.jena.sparql.resultset.ResultsFormat;
 
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.JenaModelManagement;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 
 
 public abstract class TripleStoreInterface {

@@ -4,7 +4,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.util.FileUtils;
 import de.tud.plt.r43ples.exception.OutdatedException;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.JenaModelManagement;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
