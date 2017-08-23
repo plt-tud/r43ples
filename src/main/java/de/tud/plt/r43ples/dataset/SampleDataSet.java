@@ -522,7 +522,7 @@ public class SampleDataSet {
 	 */
 	public static String createSampleDataSetComplexStructure() throws InternalErrorException {
 		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
-
+        // TODO The branch creation must be changed after the keyword REVISION the revisionIdentifier must follow not the branch identifier!
 		String graphName = "http://test.com/r43ples-dataset-complex-structure";
 
 		RevisionGraph graph = new RevisionGraph(graphName);

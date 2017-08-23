@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.rdf.model.Model;
 
-import de.tud.plt.r43ples.management.JenaModelManagement;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
 /**
