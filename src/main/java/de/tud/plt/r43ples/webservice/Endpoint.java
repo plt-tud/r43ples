@@ -345,14 +345,10 @@ public class Endpoint {
 		}
 		else if (request.isUpdateQuery()) {
 			r43plesCore.createUpdateCommit(request);
-//			UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(request);
-//			updateCommitDraft.createCommitInTripleStore();
-//			Interface.sparqlUpdate(request);
 			result = "Query executed";
 		}
 		else if (request.isCreateGraphQuery()) {
 			InitialCommit initialCommit = r43plesCore.createInitialCommit(request);
-//			String graphName = Interface.sparqlCreateGraph(sparqlQuery);
 			result = "Graph <" + initialCommit.getGeneratedRevision().getRevisionGraph().getGraphName() + "> successfully created";
 		}
 		else if (request.isDropGraphQuery()) {
@@ -360,8 +356,7 @@ public class Endpoint {
 			result = "Graph successfully dropped";
 		}
 		else if (request.isBranchOrTagQuery()) {
-			ReferenceCommit referenceCommit = r43plesCore.createReferenceCommit(request);
-//			Interface.sparqlTagOrBranch(new R43plesCommit(request));
+			r43plesCore.createReferenceCommit(request);
 			result = "Tagging or branching successful";
 		}
 		else if (request.isMergeQuery()) {

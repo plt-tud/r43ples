@@ -227,7 +227,6 @@ public class SparqlRewriter {
 
 			ElementGroup eg_fullgraph = new ElementGroup();
 			Node anon = NodeFactory.createAnon();
-//			eg_fullgraph.addElement(new ElementBind( var_r_delete_set, ExprUtils.nodeToExpr(branch)));
 			eg_fullgraph.addTriplePattern(new Triple(anon, rmo_references, var_r_delete_set));
 			eg_fullgraph.addTriplePattern(new Triple(anon, rmo_fullGraph, g_delete_set_full_graph));
 			eg_fullgraph.addElementFilter(new ElementFilter(new E_Equals(new ExprVar(var_r_delete_set), last_revision)));

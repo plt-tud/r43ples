@@ -97,7 +97,7 @@ public class InitialCommitDraft extends CommitDraft {
      * @throws InternalErrorException
      */
     private String getGraphNameOfRequest() throws InternalErrorException {
-        final Pattern patternCreateGraph = Pattern.compile("CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
+        final Pattern patternCreateGraph = Pattern.compile("CREATE\\s*(SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
                 patternModifier);
 
         String graphName = null;
@@ -106,7 +106,6 @@ public class InitialCommitDraft extends CommitDraft {
         while (m.find()) {
             found = true;
             graphName = m.group("graph");
-            // String silent = m.group("silent");
         }
         if (!found) {
             throw new QueryErrorException("Query doesn't contain a correct CREATE query:\n" + getRequest().query_sparql);

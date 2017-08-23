@@ -187,16 +187,12 @@ public class RevisionGraph {
 	
 	/**
 	 * Returns new unique revision identifier for this graph.
-	 * 
+	 *
 	 * @return new revision identifier
 	 * @throws InternalErrorException 
 	 */
 	public String getNextRevisionIdentifier() throws InternalErrorException {
-		// create UID and check whether the uid number already in named graph exist, if yes , than create it once again,
-		// if not , return this one
-		
-		//UID nextNumberUid = new UID();
-		//String nextNumber = nextNumberUid.toString();
+		//
 		int nextNumber;
 		
 		String revisionGraph = this.getRevisionGraphUri();
