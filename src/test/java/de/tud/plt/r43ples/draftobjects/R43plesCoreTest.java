@@ -13,6 +13,7 @@ import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.JenaModelManagement;
+import de.tud.plt.r43ples.management.R43plesRequest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -67,6 +68,36 @@ public class R43plesCoreTest {
 
     @Test
     public void createInitialCommitWithRequest() throws Exception {
+        R43plesRequest req = new R43plesRequest( "CREATE GRAPH <http://example.com/test>" , null, null );
+        core.createInitialCommit(req);
+
+        RevisionGraph rg = new RevisionGraph("http://example.com/test");
+
+        String result = rg.getContentOfRevisionGraph("TURTLE");
+        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_initial.ttl");
+
+        Model model_result = JenaModelManagement.readStringToJenaModel(result, "TURTLE");
+        Model model_expected = JenaModelManagement.readStringToJenaModel(expected, "TURTLE");
+
+        // Remove timestamp for test
+        Property provAtTime = model_result.getProperty("http://www.w3.org/ns/prov#atTime");
+        StmtIterator stmtIterator = model_result.listStatements(null, provAtTime, (RDFNode) null);
+        model_result.remove(stmtIterator);
+        StmtIterator stmtIterator2 = model_expected.listStatements(null, provAtTime, (RDFNode) null);
+        model_expected.remove(stmtIterator2);
+
+        Assert.assertTrue(model_result.isIsomorphicWith(model_expected));
+
+        // Try to make another initial commit on same graph -> should throw exception
+        try {
+            core.createInitialCommit(req);
+
+            Assert.fail("Try to make another initial commit on same graph should throw exception");
+        } catch (InternalErrorException e) {
+        }
+
+        rg.purgeRevisionInformation();
+
     }
 
     @Test
