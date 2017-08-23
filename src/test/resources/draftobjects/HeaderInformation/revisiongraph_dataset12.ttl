@@ -1,0 +1,18 @@
+@prefix rmo:   <http://eatld.et.tu-dresden.de/rmo#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://test.com/r43ples-dataset-2-revision-2>
+        rmo:revisionNumber  "2" .
+
+<http://test.com/r43ples-dataset-2-master>
+        a               rmo:Branch , rmo:Master ;
+        rdfs:label      "master" ;
+        rmo:references  <http://test.com/r43ples-dataset-2-revision-2> .
+
+<http://test.com/r43ples-dataset-1-revision-5>
+        rmo:revisionNumber  "5" .
+
+<http://test.com/r43ples-dataset-1-master>
+        a               rmo:Branch , rmo:Master ;
+        rdfs:label      "master" ;
+        rmo:references  <http://test.com/r43ples-dataset-1-revision-5> .
