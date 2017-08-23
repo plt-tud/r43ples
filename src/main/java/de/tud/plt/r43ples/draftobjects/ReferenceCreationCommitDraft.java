@@ -43,6 +43,7 @@ public class ReferenceCreationCommitDraft extends CommitDraft {
      * The constructor.
      *
      * @param request the request received by R43ples
+     * @throws InternalErrorException
      */
     public ReferenceCreationCommitDraft(R43plesRequest request) throws InternalErrorException {
         super(request);
