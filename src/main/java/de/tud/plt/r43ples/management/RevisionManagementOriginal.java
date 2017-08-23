@@ -36,91 +36,16 @@ public class RevisionManagementOriginal {
 	private static Logger logger = Logger.getLogger(RevisionManagementOriginal.class);
 	
 
-	/**
-	 * create new revision with patch with addedUri and removedUri
-	 *
-	 * @param graphName
-	 *            the graph name
-	 * @param addSetGraphUri
-	 *           uri of the data set of added triples as N-Triples
-	 * @param deleteSetGraphUri
-	 *           uri of the data set of removed triples as N-Triples
-	 * @param user
-	 *            the user name who creates the revision
-	 * @param commitMessage
-	 *            the title of the revision
-	 * @param usedRevisionNumber
-	 *            the number of the revision which is used for creation of the
-	 *            new revision
-	 * @return new revision number
-	 * @throws InternalErrorException 
-	 */
-	public static String createNewRevisionWithPatch(final String graphName, final String addSetGraphUri, final String deleteSetGraphUri,
-			final String user, final String commitMessage, final String usedRevisionNumber) throws InternalErrorException {
-
-		// TODO currently not working
-//		RevisionDraft d = new RevisionDraft(graphName, usedRevisionNumber);
-//		d.addSetURI = addSetGraphUri;
-//		d.deleteSetURI = deleteSetGraphUri;
-//		addNewRevisionFromChangeSet(user, commitMessage, d);
-//		return d.newRevisionNumber;
-		return null;
-	}
 
 
 
 
 
-
-	/** move the reference in the specified revision graph from the old revision to the new one
-	 * 
-	 * @param revisionGraph revision graph in the triplestore
-	 * @param branchName name of branch
-	 * @param revisionOld uri of the old revision
-	 * @param revisionNew uri of the new revision
-	 *  */
-	public static void moveBranchReference(final String revisionGraph, final String branchName, final String revisionOld, final String revisionNew){
-		// delete old reference
-		String query = Config.prefixes	+ String.format(""
-				+ "DELETE DATA { GRAPH <%1$s> { <%2$s> rmo:references <%3$s>. } };" 
-				+ "INSERT DATA { GRAPH <%1$s> { <%2$s> rmo:references <%4$s>. } }",
-				revisionGraph, branchName, revisionOld, revisionNew);
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
-	}
 	
 	
-	/**
-	 * updates all revisions between A and B and let them belong to the specified branch
-	 * 
-	 * @param revisionGraph 
-	 * @param branch URI of the branch
-	 * @param revisionStart uri of start revision
-	 * @param revisionStop uri of last revision
-	 * */
-	public static void updateBelongsTo(final String revisionGraph, String branch, String revisionStart, String revisionStop ){
-		LinkedList<String> revisionList =  MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, revisionStart, revisionStop);
-		
-		Iterator<String> riter = revisionList.iterator();
-		while(riter.hasNext()) {
-			String revision = riter.next();
 
-			String query = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:belongsTo <%s>. } };%n",
-					revisionGraph, revision, branch);
-			
-			logger.debug("revisionlist info" + revision);
-			logger.debug("updated info" + query);
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);			
-		}
-	}
 	
-	/** copy graph of branchA to fullgraph of branchB
-	 * @param sourceGraph uri of source graph
-	 * @param targetGraph uri of target graph
-	 * */
-	public static void fullGraphCopy(String sourceGraph, String targetGraph) {	
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(
-				"COPY GRAPH <" + sourceGraph + "> TO GRAPH <"+ targetGraph + ">");
-	}
+
 
 	/**
 	 * Checks if graph exists in triple store. Works only when the graph is not

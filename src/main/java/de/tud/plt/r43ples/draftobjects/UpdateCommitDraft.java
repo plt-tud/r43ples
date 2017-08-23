@@ -277,8 +277,7 @@ public class UpdateCommitDraft extends CommitDraft {
 				branchIdentifier);
 		QuerySolution sol = getTripleStoreInterface().executeSelectQuery(queryBranch).next();
 		String branchName = sol.getResource("?branch").toString();
-		RevisionManagementOriginal.moveBranchReference(draft.getRevisionGraph().getRevisionGraphUri(), branchName, oldRevisionUri, revisionUri);
-
+		moveBranchReference(draft.getRevisionGraph().getRevisionGraphUri(), branchName, oldRevisionUri, revisionUri);
 
 		Revision newRevision = new Revision(draft.getRevisionGraph(), draft.getNewRevisionIdentifier(), revisionUri, draft.getAddSetURI(), draft.getDeleteSetURI());
 		newRevision.getDerivedFromRevision();
@@ -293,7 +292,7 @@ public class UpdateCommitDraft extends CommitDraft {
 	 * @param start_pos the start position
 	 * @return the enclosed in braces string
 	 */
-	private static String getStringEnclosedinBraces(final String string, int start_pos){
+	private String getStringEnclosedinBraces(final String string, int start_pos){
 		int end_pos = start_pos;
 		int count_parenthesis = 1;
 		while (count_parenthesis>0) {
@@ -304,6 +303,23 @@ public class UpdateCommitDraft extends CommitDraft {
 		}
 		String substring = string.substring(start_pos, end_pos);
 		return substring;
+	}
+
+	/**
+	 * Move the reference in the specified revision graph from the old revision to the new one.
+	 *
+	 * @param revisionGraph revision graph in the triplestore
+	 * @param branchName name of the branch
+	 * @param revisionOld uri of the old revision
+	 * @param revisionNew uri of the new revision
+	 *  */
+	public void moveBranchReference(final String revisionGraph, final String branchName, final String revisionOld, final String revisionNew) {
+		// delete old reference and create new one
+		String query = Config.prefixes	+ String.format(""
+						+ "DELETE DATA { GRAPH <%1$s> { <%2$s> rmo:references <%3$s>. } };"
+						+ "INSERT DATA { GRAPH <%1$s> { <%2$s> rmo:references <%4$s>. } }",
+				revisionGraph, branchName, revisionOld, revisionNew);
+		getTripleStoreInterface().executeUpdateQuery(query);
 	}
 
 }

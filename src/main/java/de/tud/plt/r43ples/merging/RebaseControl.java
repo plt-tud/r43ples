@@ -112,7 +112,7 @@ public class RebaseControl {
 			Entry<String, Patch> pEntry = pIter.next();
 			Patch patch = pEntry.getValue();
 		
-			String newRevisionNumber = RevisionManagementOriginal.createNewRevisionWithPatch(
+			String newRevisionNumber = createNewRevisionWithPatch(
 					graphName, patch.getAddedSetUri(), patch.getRemovedSetUri(),
 					patch.getPatchUser(), patch.getPatchMessage(), basisRevisionNumber);
 			
@@ -120,4 +120,36 @@ public class RebaseControl {
 		}
 		return basisRevisionNumber;	
 	}
+
+	/**
+	 * create new revision with patch with addedUri and removedUri
+	 *
+	 * @param graphName
+	 *            the graph name
+	 * @param addSetGraphUri
+	 *           uri of the data set of added triples as N-Triples
+	 * @param deleteSetGraphUri
+	 *           uri of the data set of removed triples as N-Triples
+	 * @param user
+	 *            the user name who creates the revision
+	 * @param commitMessage
+	 *            the title of the revision
+	 * @param usedRevisionNumber
+	 *            the number of the revision which is used for creation of the
+	 *            new revision
+	 * @return new revision number
+	 * @throws InternalErrorException
+	 */
+	public static String createNewRevisionWithPatch(final String graphName, final String addSetGraphUri, final String deleteSetGraphUri,
+													final String user, final String commitMessage, final String usedRevisionNumber) throws InternalErrorException {
+
+		// TODO currently not working
+//		RevisionDraft d = new RevisionDraft(graphName, usedRevisionNumber);
+//		d.addSetURI = addSetGraphUri;
+//		d.deleteSetURI = deleteSetGraphUri;
+//		addNewRevisionFromChangeSet(user, commitMessage, d);
+//		return d.newRevisionNumber;
+		return null;
+	}
+
 }

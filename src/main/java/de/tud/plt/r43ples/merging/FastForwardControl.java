@@ -6,6 +6,9 @@ import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
+import java.util.Iterator;
+import java.util.LinkedList;
+
 public class FastForwardControl {
 
 	/**
@@ -13,7 +16,7 @@ public class FastForwardControl {
 	 * 
 	 * Note: branch B remains the same, only branch A is updated
 	 * 
-	 * @param revisionGraph URI of revision graph where fast forward should take place
+	 * @param graph URI of revision graph where fast forward should take place
 	 * @param branchNameA name of branch A which should be forwarded
 	 * @param branchNameB name of branch which should be forwarded to
 	 * @param user	username which is responsible for the commit
@@ -39,7 +42,7 @@ public class FastForwardControl {
 		String revisionUriA = graph.getRevisionUri(branchNameA);
 		String revisionUriB = graph.getRevisionUri(branchNameB);
 		
-		RevisionManagementOriginal.moveBranchReference(revisionGraph, branchUriA, revisionUriA, revisionUriB);
+		moveBranchReference(revisionGraph, branchUriA, revisionUriA, revisionUriB);
 		
 		String commitUri = revisionGraph+"-ff-commit-"+branchNameA+"-"+branchNameB;
 		String query = Config.prefixes + String.format(""
@@ -52,8 +55,8 @@ public class FastForwardControl {
 				+ "} }",
 				revisionGraph, commitUri, branchUriA, revisionUriA, revisionUriB, user, dateTime, message);
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
-		RevisionManagementOriginal.updateBelongsTo(revisionGraph, branchUriA, revisionUriA, revisionUriB);
-		RevisionManagementOriginal.fullGraphCopy(fullGraphUriB, fullGraphUriA);
+		updateBelongsTo(revisionGraph, branchUriA, revisionUriA, revisionUriB);
+		fullGraphCopy(fullGraphUriB, fullGraphUriA);
 		return true;
 	}
 	
@@ -85,6 +88,56 @@ public class FastForwardControl {
 		catch (InternalErrorException e){
 			return false;
 		}
+	}
+
+	/**
+	 * Move the reference in the specified revision graph from the old revision to the new one.
+	 *
+	 * @param revisionGraph revision graph in the triplestore
+	 * @param branchName name of the branch
+	 * @param revisionOld uri of the old revision
+	 * @param revisionNew uri of the new revision
+	 *  */
+	public static void moveBranchReference(final String revisionGraph, final String branchName, final String revisionOld, final String revisionNew) {
+		// delete old reference and create new one
+		String query = Config.prefixes	+ String.format(""
+						+ "DELETE DATA { GRAPH <%1$s> { <%2$s> rmo:references <%3$s>. } };"
+						+ "INSERT DATA { GRAPH <%1$s> { <%2$s> rmo:references <%4$s>. } }",
+				revisionGraph, branchName, revisionOld, revisionNew);
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
+	}
+
+	/**
+	 * updates all revisions between A and B and let them belong to the specified branch
+	 *
+	 * @param revisionGraph
+	 * @param branch URI of the branch
+	 * @param revisionStart uri of start revision
+	 * @param revisionStop uri of last revision
+	 * */
+	public static void updateBelongsTo(final String revisionGraph, String branch, String revisionStart, String revisionStop ){
+		LinkedList<String> revisionList =  MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, revisionStart, revisionStop);
+
+		Iterator<String> riter = revisionList.iterator();
+		while(riter.hasNext()) {
+			String revision = riter.next();
+
+			String query = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:belongsTo <%s>. } };%n",
+					revisionGraph, revision, branch);
+
+//			logger.debug("revisionlist info" + revision);
+//			logger.debug("updated info" + query);
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
+		}
+	}
+
+	/** copy graph of branchA to fullgraph of branchB
+	 * @param sourceGraph uri of source graph
+	 * @param targetGraph uri of target graph
+	 * */
+	public static void fullGraphCopy(String sourceGraph, String targetGraph) {
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery(
+				"COPY GRAPH <" + sourceGraph + "> TO GRAPH <"+ targetGraph + ">");
 	}
 	
 }
