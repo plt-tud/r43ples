@@ -2,6 +2,7 @@ package de.tud.plt.r43ples.draftobjects;
 
 import com.hp.hpl.jena.query.QuerySolution;
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.exception.OutdatedException;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.existentobjects.UpdateCommit;
@@ -40,7 +41,7 @@ public class UpdateCommitDraft extends CommitDraft {
 	 *
 	 * @param request the request received by R43ples
 	 */
-	protected UpdateCommitDraft(R43plesRequest request){
+	protected UpdateCommitDraft(R43plesRequest request) throws OutdatedException {
 		super(request);
 		this.isCreatedWithRequest = true;
 	}

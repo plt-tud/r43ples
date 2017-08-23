@@ -425,57 +425,6 @@ public class RevisionManagementOriginal {
 			return null;
 		}
 	}
-	
-	
-	
-	/** Creates an RDF description for the revision tree of the graphs specified in the given SPARQL query
-	 * @param query SPARQL query
-	 * @return RDF string containing information for graphs specified in query 
-	 */
-	public static String getResponseHeaderFromQuery(String query) {
-		final Pattern patternGraph = Pattern.compile(
-				"(GRAPH|FROM|INTO)\\s*<(?<graph>[^>]*)>\\s*",
-				Pattern.CASE_INSENSITIVE);
-		
-		StringBuilder graphNames = new StringBuilder();
-		Matcher m = patternGraph.matcher(query);
-		m.find();
-		while (!m.hitEnd()) {
-			String graphName = m.group("graph");
-			graphNames.append("<"+graphName+">");
-			m.find();
-			if (!m.hitEnd())
-				graphNames.append(", ");			
-		}
-		String names = graphNames.toString();
-		String result = getResponseHeader(names);
-		return result;
-		
-	}
-	
-	public static String getResponseHeader(String graphList) {
-		String queryConstruct = Config.prefixes + String.format(
-				  "CONSTRUCT {"
-				+ " ?ref a ?type;"
-				+ "		rdfs:label ?label;"
-				+ "		rmo:references ?rev."
-				+ " ?rev rmo:revisionNumber ?number . %n"
-				+ "} %n"
-				+ "WHERE {"
-				+ " GRAPH <%s> {"
-				+ "   ?graph a rmo:Graph; rmo:hasRevisionGraph ?revisionGraph."
-				+ "   FILTER (?graph IN (%s))"
-				+ " }"
-				+ " GRAPH ?revisionGraph { "
-				+ " ?ref a ?type;"
-				+ "		rdfs:label ?label;%n"
-				+ "		rmo:references ?rev."
-				+ " ?rev rmo:revisionNumber ?number . %n"
-				+ "FILTER (?type IN (rmo:Tag, rmo:Master, rmo:Branch)) %n"
-				+ "} }", Config.revision_graph, graphList);
-		String header = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryConstruct, FileUtils.langTurtle);
-		return header;
-	}
 		
 }
 

@@ -10,14 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
@@ -26,6 +19,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.core.Variant;
 
+import de.tud.plt.r43ples.draftobjects.HeaderInformation;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
 import de.tud.plt.r43ples.existentobjects.InitialCommit;
@@ -87,8 +81,9 @@ public class Endpoint {
 	/**
 	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).
 	 * 
-//	 * @param formatHeader
-//	 *            format specified in the HTTP header
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
 	 * @param formatQuery
 	 *            format specified in the HTTP parameters
 	 * @param sparqlQuery
@@ -104,11 +99,12 @@ public class Endpoint {
 	public final Response sparqlPOST(
 			@FormParam("format") final String formatQuery, 
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
+			@HeaderParam("r43ples-revisiongraph") @DefaultValue("") final String revision_information,
 			@FormParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
 		try {
 			String format = getFormat(formatQuery);
-			logger.info("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
-			return sparql(format, sparqlQuery, query_rewriting);
+			logger.info("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")" + revision_information);
+			return sparql(format, sparqlQuery, revision_information, query_rewriting);
 		} catch (Exception e) {
 			return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
 		}
@@ -133,9 +129,10 @@ public class Endpoint {
 	/**
 	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).
 	 * Direct method (http://www.w3.org/TR/2013/REC-sparql11-protocol-20130321/#query-via-post-direct)
-	 * 
-//	 * @param formatHeader
-	 *            format specified in the HTTP header
+	 *
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
 	 * @param sparqlQuery
 	 *            the SPARQL query specified in the HTTP POST body
 	 * @return HTTP response
@@ -145,6 +142,7 @@ public class Endpoint {
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	@Consumes("application/sparql-query")
 	public final Response sparqlPOSTdirectly(
+			@HeaderParam("r43ples-revisiongraph") @DefaultValue("") final String revision_information,
 			final String sparqlQuery) throws InternalErrorException {
 		List<Variant> reqVariants = Variant.mediaTypes(MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_HTML_TYPE, 
 				MediaType.APPLICATION_JSON_TYPE, TEXT_TURTLE_TYPE, APPLICATION_RDF_XML_TYPE, APPLICATION_SPARQL_RESULTS_XML_TYPE).build();
@@ -155,7 +153,7 @@ public class Endpoint {
     	MediaType reqMediaType = bestVariant.getMediaType();
     	String format = reqMediaType.toString();
 		logger.info("SPARQL POST query directly (format: "+format+", query: "+sparqlQuery +")");
-		return sparql(reqMediaType.toString(), sparqlQuery);
+		return sparql(reqMediaType.toString(), sparqlQuery, revision_information, false);
 	}
 	
 	/**
@@ -163,9 +161,10 @@ public class Endpoint {
 	 * Provides HTML form if no query is specified and HTML is requested
 	 * Provides Service Description if no query is specified and RDF
 	 * representation is requested
-	 * 
-//	 * @param formatHeader
-	 *            format specified in the HTTP header
+	 *
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
 	 * @param formatQuery
 	 *            format specified in the HTTP parameters
 	 * @param sparqlQuery
@@ -180,6 +179,7 @@ public class Endpoint {
 	public final Response sparqlGET(
 			@QueryParam("format") final String formatQuery, 
 			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
+			@HeaderParam("r43ples-revisiongraph") @DefaultValue("") final String revision_information,
 			@QueryParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
 		String format;
 		try {
@@ -196,7 +196,7 @@ public class Endpoint {
 			sparqlQueryDecoded = sparqlQuery;
 		}
 		logger.info("SPARQL GET query (format: "+format+", query: "+sparqlQueryDecoded +")");
-		return sparql(format, sparqlQueryDecoded, query_rewriting);
+		return sparql(format, sparqlQueryDecoded, revision_information, query_rewriting);
 	}
 	
 	
@@ -211,12 +211,15 @@ public class Endpoint {
 	 *            mime type for response format
 	 * @param sparqlQuery
 	 *            decoded SPARQL query
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
 	 * @param query_rewriting
 	 * 			  should query rewriting option be used
 	 * @return the response
 	 * @throws InternalErrorException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
+	private final Response sparql(final String format, final String sparqlQuery, final String revision_information, final boolean query_rewriting) throws InternalErrorException {
 		if ("".equals(sparqlQuery)) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
@@ -224,8 +227,27 @@ public class Endpoint {
 				return getServiceDescriptionResponse(format);
 			}
 		} else {
-			return getSparqlResponse(format, sparqlQuery, query_rewriting);
+			return getSparqlResponse(format, sparqlQuery, revision_information, query_rewriting);
 		}
+	}
+
+	/**
+	 * Interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * Provides HTML form if no query is specified and HTML is requested
+	 * Provides Service Description if no query is specified and RDF
+	 * representation is requested
+	 *
+	 * @param format
+	 *            mime type for response format
+	 * @param sparqlQuery
+	 *            decoded SPARQL query
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
+	 * @return the response
+	 * @throws InternalErrorException
+	 */
+	public final Response sparql(final String format, final String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
+		return sparql(format, sparqlQuery, null, query_rewriting);
 	}
 	
 	/**
@@ -234,17 +256,20 @@ public class Endpoint {
 	 *            mime type for response format
 	 * @param sparqlQuery
 	 *            decoded SPARQL query
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
 	 * @param query_rewriting
 	 * 			  string determining if query rewriting option be used
 	 * @return
 	 * @throws InternalErrorException
 	 */
-	private Response sparql(final String format, final String sparqlQuery, final String query_rewriting) throws InternalErrorException {
+	private Response sparql(final String format, final String sparqlQuery, final String revision_information, final String query_rewriting) throws InternalErrorException {
 		String option = query_rewriting.toLowerCase();
 		if (option.equals("on") || option.equals("true") || option.equals("new"))
-			return sparql(format, sparqlQuery, true);
+			return sparql(format, sparqlQuery, revision_information, true);
 		else
-			return sparql(format, sparqlQuery, false);
+			return sparql(format, sparqlQuery, revision_information, false);
 	}
 	
 	/**
@@ -261,12 +286,12 @@ public class Endpoint {
 	 * @throws InternalErrorException 
 	 */
 	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException {
-		return sparql(format, sparqlQuery, false);
+		return sparql(format, sparqlQuery, null, false);
 	}
 	
 	
 	public final Response sparql(final String sparqlQuery) throws InternalErrorException {
-		return sparql("application/xml", sparqlQuery, false);
+		return sparql("application/xml", sparqlQuery, null, false);
 	}
 	
 	
@@ -332,12 +357,12 @@ public class Endpoint {
 	 * @return HTTP response of evaluating the sparql query 
 	 * @throws InternalErrorException
 	 */
-	private Response getSparqlResponse(String format, String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
-		logger.debug(String.format("SPARQL request (format=%s, query_rewriting=%s) -> %n %s", format, query_rewriting, sparqlQuery));
+	private Response getSparqlResponse(String format, String sparqlQuery, final String revision_information, final boolean query_rewriting) throws InternalErrorException {
+		logger.info(String.format("SPARQL request (format=%s, query_rewriting=%s, header=%s) -> %n %s", format, query_rewriting,revision_information, sparqlQuery));
 
 		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
-        
-		R43plesRequest request = new R43plesRequest(sparqlQuery, format);
+
+		R43plesRequest request = new R43plesRequest(sparqlQuery, format, revision_information);
 
 		String result;
 		if (request.isSelectAskConstructQuery()) {
@@ -377,7 +402,8 @@ public class Endpoint {
 			responseBuilder.entity(result);
 		}
 		responseBuilder.type(format);
-		responseBuilder.header("r43ples-revisiongraph", RevisionManagementOriginal.getResponseHeaderFromQuery(sparqlQuery));
+		HeaderInformation hi = new HeaderInformation();
+		responseBuilder.header("r43ples-revisiongraph", hi.getResponseHeaderFromQuery(sparqlQuery));
 		return responseBuilder.build();
 	}
 
@@ -434,9 +460,10 @@ public class Endpoint {
 	 * Creates a merge between the specified branches.
 	 * 
 	 * Using command: MERGE GRAPH \<graphURI\> BRANCH "branchNameA" INTO "branchNameB"
-	 * 
-//	 * @param sparqlQuery the SPARQL query
-//	 * @param format the result format
+	 *
+	 * @param commit R43plesMergeCommit object containing all information about the merge
+	 *
+	 * @return http reponse
 	 * @throws InternalErrorException 
 	 */
 	private Response getMergeResponse(final R43plesMergeCommit commit) throws InternalErrorException {
@@ -461,8 +488,9 @@ public class Endpoint {
 		// Return the revision number which were used (convert tag or branch identifier to revision number)
 		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", graph.getRevisionIdentifier(mresult.branchA));
 		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", graph.getRevisionIdentifier(mresult.branchB));
-		
-		responseBuilder.header("r43ples-revisiongraph", RevisionManagementOriginal.getResponseHeaderFromQuery(commit.query_sparql));
+
+		HeaderInformation hi = new HeaderInformation();
+		responseBuilder.header("r43ples-revisiongraph", hi.getResponseHeaderFromQuery(commit.query_sparql));
 		
 		return responseBuilder.build();	
 	}

@@ -43,15 +43,32 @@ public class R43plesRequest {
 	public final String format;
 	/** The resulting SPARQL query. **/
 	public String query_sparql;
+	/** revision information as RDF model string **/
+	public String revisionInformation = null;
 
 
     /**
-     * The constructor.
+     * The constructor with specified revision information
      *
      * @param query the query received by R43ples
      * @param format the query format
+	 * @param revisionInformation revision information as RDF model string
      */
-    public R43plesRequest(final String query, final String format) {
+    public R43plesRequest(final String query, final String format, final String revisionInformation) {
+		this.query_r43ples = query;
+		this.format = format;
+		this.query_sparql = query;
+		if (revisionInformation!="")
+			this.revisionInformation = revisionInformation;
+	}
+
+	/**
+	 * The constructor.
+	 *
+	 * @param query the query received by R43ples
+	 * @param format the query format
+	 */
+	public R43plesRequest(final String query, final String format) {
 		this.query_r43ples = query;
 		this.format = format;
 		this.query_sparql = query;

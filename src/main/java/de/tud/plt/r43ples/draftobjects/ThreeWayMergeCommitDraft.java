@@ -1,5 +1,6 @@
 package de.tud.plt.r43ples.draftobjects;
 
+import de.tud.plt.r43ples.exception.OutdatedException;
 import de.tud.plt.r43ples.management.R43plesRequest;
 
 /**
@@ -15,7 +16,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
      *
      * @param request the request received by R43ples
      */
-    public ThreeWayMergeCommitDraft(R43plesRequest request) {
+    public ThreeWayMergeCommitDraft(R43plesRequest request) throws OutdatedException {
         super(request);
     }
 

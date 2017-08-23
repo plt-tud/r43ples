@@ -8,6 +8,7 @@ import static org.hamcrest.core.StringContains.containsString;
 import java.io.IOException;
 import java.util.LinkedList;
 
+import de.tud.plt.r43ples.draftobjects.HeaderInformation;
 import org.apache.commons.configuration.ConfigurationException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -100,8 +101,9 @@ public class TestMergeManagement {
 		String sparql = "SELECT * "
 				+ "FROM <"+ds.graphName+">"
 				+ "WHERE { ?s ?p ?o}";
-				
-		String result = RevisionManagementOriginal.getResponseHeaderFromQuery(sparql);
+
+		HeaderInformation hi = new HeaderInformation();
+		String result = hi.getResponseHeaderFromQuery(sparql);
 		Assert.assertThat(result, containsString("Master"));
 	}
 

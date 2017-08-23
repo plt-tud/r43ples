@@ -1,5 +1,6 @@
 package de.tud.plt.r43ples.draftobjects;
 
+import de.tud.plt.r43ples.exception.OutdatedException;
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;

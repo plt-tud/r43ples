@@ -1,5 +1,6 @@
 package de.tud.plt.r43ples.draftobjects;
 
+import de.tud.plt.r43ples.exception.OutdatedException;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
@@ -40,6 +41,8 @@ public class CommitDraft {
 	private String message;
 	/** The time stamp of the commit. **/
 	private Date timeStamp;
+	/** RDF model string of revisoin information used to check if it is up to date (optional) */
+	private String revisionInformation;
 	/** The current revision management instance. */
 	private RevisionManagement revisionManagement;
 
@@ -52,8 +55,10 @@ public class CommitDraft {
 	 * The constructor.
 	 *
 	 * @param request the request received by R43ples
+	 *
+	 * @throws OutdatedException
 	 */
-	protected CommitDraft(R43plesRequest request){
+	protected CommitDraft(R43plesRequest request) throws OutdatedException {
 		// Dependencies
 		this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 
@@ -63,6 +68,17 @@ public class CommitDraft {
 		if (request != null) {
 			this.extractUser();
 			this.extractMessage();
+			if (request.revisionInformation!=null) {
+				this.revisionInformation = request.revisionInformation;
+
+				if (this.revisionInformation.length() > 0 && this.getRequest() != null) {
+					logger.info("Revision information available during commit. Check if it is up to date!");
+					HeaderInformation hi = new HeaderInformation();
+					hi.checkUpToDate(this.revisionInformation, this.getRequest().query_sparql);
+				} else {
+					logger.info("No revision information available. Skip uptodate check!");
+				}
+			}
 		}
 		this.timeStamp = new Date();
 	}
