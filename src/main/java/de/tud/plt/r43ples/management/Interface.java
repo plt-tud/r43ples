@@ -5,8 +5,6 @@ import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
-import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
@@ -14,7 +12,6 @@ import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
-import de.tud.plt.r43ples.merging.FastForwardControl;
 import de.tud.plt.r43ples.merging.MergeManagement;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.merging.MergeResult;
@@ -119,34 +116,6 @@ public class Interface {
 		if (!found) {
 			throw new QueryErrorException("Query contain errors:\n" + query);
 		}
-	}
-//
-//	public static MergeResult sparqlMerge(final R43plesMergeCommit commit) throws InternalErrorException {
-//		if (commit.action.equals("MERGE"))
-//			return mergeThreeWay(commit);
-//		else if (commit.action.equals("REBASE"))
-//			return mergeRebase(commit);
-//		else if (commit.action.equals("MERGE FF"))
-//			return mergeFastForward(commit);
-//		else
-//			throw new InternalErrorException("Merge Query has errors");
-//	}
-
-	/**
-	 * 
-	 * 
-	 * @return if fast-forward was successful
-	 * @throws InternalErrorException
-	 */
-	public static MergeResult mergeFastForward(final R43plesMergeCommit commit) throws InternalErrorException {
-		RevisionGraph graph = new RevisionGraph(commit.graphName);
-		MergeResult result = new MergeResult(commit);
-		// TODO Create date by using commit information
-		String dateString = "2017-08-17T13:57:11";
-		result.hasConflict = !FastForwardControl.performFastForward(graph, commit.branchNameB, commit.branchNameA, commit.user,
-				dateString, commit.message);
-
-		return result;
 	}
 
 	/**

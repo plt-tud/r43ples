@@ -22,10 +22,8 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.R43plesMergeCommit;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.merging.FastForwardControl;
 import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.model.structure.MergeCommitModel;
 import de.tud.plt.r43ples.merging.ui.MergingControl;
@@ -92,7 +90,8 @@ public class Merging {
 			MergeCommitModel commitModel = new MergeCommitModel(graphName, sddName, user, message, branch1, branch2, "Fast-Forward", null);
 			// TODO Create date by using commit information
 			String dateString = "2017-08-17T13:57:11";
-			boolean ff_successful = FastForwardControl.performFastForward(graph, branch1, branch2, user, dateString, message);
+			// TODO Change to new merge commit structure using R43ples core
+			boolean ff_successful = false;//FastForwardControl.performFastForward(graph, branch1, branch2, user, dateString, message);
 
 			if (ff_successful){
 				response = Response.ok();
@@ -139,21 +138,21 @@ public class Merging {
 		}
 		// Three Way Merge
 		else {			
-			MergeCommitModel commitModel = new MergeCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way", null);
-			R43plesMergeCommit commit = new R43plesMergeCommit(graphName, branch1, branch2, user, message, "text/turtle");
-			// TODO Change to new merge commit structure using R43ples core
-			MergeResult mresult = null;//Interface.mergeThreeWay(commit);
-							
-			if(!mresult.hasConflict){
-				response.entity(commitModel.getReportView());				
+//			MergeCommitModel commitModel = new MergeCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way", null);
+//			R43plesMergeCommit commit = new R43plesMergeCommit(graphName, branch1, branch2, user, message, "text/turtle");
+//			// TODO Change to new merge commit structure using R43ples core
+//			MergeResult mresult = null;//Interface.mergeThreeWay(commit);
+//
+//			if(!mresult.hasConflict){
+//				response.entity(commitModel.getReportView());
+//				return response.build();
+//			} else {
+//				MergingControl mergingControl = new MergingControl();
+//				// show page for resolving conflicts
+//				mergingControl.getMergeProcess(commitModel, mresult);
+//				response.entity(mergingControl.getViewHtmlOutput());
 				return response.build();
-			} else {
-				MergingControl mergingControl = new MergingControl();
-				// show page for resolving conflicts
-				mergingControl.getMergeProcess(commitModel, mresult);
-				response.entity(mergingControl.getViewHtmlOutput());
-				return response.build();
-			}
+//			}
 		}	
 	}			
 

@@ -16,7 +16,6 @@ import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.merging.FastForwardControl;
 
 @Path("api/")
 public class API {
@@ -58,7 +57,8 @@ public class API {
 			@QueryParam("branch1") @DefaultValue("") final String branch1, @QueryParam("branch2") @DefaultValue("") final String branch2) throws IOException, InternalErrorException {
 		logger.info("FastForwardCheckProcess (graph: "+ graphName+"; branch1:"+branch1+"; branch2:"+branch2+")");
 		RevisionGraph graph = new RevisionGraph(graphName);
-		return FastForwardControl.fastForwardCheck(graph, branch1, branch2);
+		//TODO Why do we need this?
+		return false;//FastForwardControl.fastForwardCheck(graph, branch1, branch2);
 	}
 		
 
