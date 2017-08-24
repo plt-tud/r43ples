@@ -45,8 +45,7 @@ public class Branch extends Reference {
      * @throws InternalErrorException
      */
     public Revision getLeafRevision() throws InternalErrorException {
-        //TODO Implement method
-        return null;
+        return this.getRevisionGraph().getRevision(this.getReferenceIdentifier());
     }
 
 }

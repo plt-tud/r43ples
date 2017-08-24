@@ -107,6 +107,15 @@ public class Reference {
     }
 
     /**
+     * Get the revision graph of the reference.
+     *
+     * @return revision graph of the reference
+     */
+    public RevisionGraph getRevisionGraph() {
+        return this.revisionGraph;
+    }
+
+    /**
      * Calculate the reference URI for a given reference identifier
      *
      * @param referenceIdentifier the reference identifier

@@ -45,7 +45,7 @@ public class RevisionManagement {
      * @return the list of named graphs URIs
      */
     private ArrayList<String> getAllNamedGraphsURIs() {
-        logger.info("Get all named graph URIs.");
+        this.logger.debug("Get all named graph URIs.");
 
         ArrayList<String> uriList = new ArrayList<>();
 
