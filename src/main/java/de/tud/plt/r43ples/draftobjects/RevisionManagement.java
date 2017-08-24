@@ -238,6 +238,24 @@ public class RevisionManagement {
     }
 
     /**
+     * Get a new fast forward merge commit URI.
+     *
+     * @param revisionGraph the corresponding revision graph
+     * @param sourceRevisionIdentifier the source revision identifier
+     * @param targetRevisionIdentifier the target revision identifier
+     * @return the new commit URI
+     * @throws InternalErrorException
+     */
+    protected String getNewFastForwardMergeCommitURI(RevisionGraph revisionGraph, String sourceRevisionIdentifier, String targetRevisionIdentifier) throws InternalErrorException {
+        String commitURI = revisionGraph.getGraphName() + "-ff-commit-merge-" + sourceRevisionIdentifier + "-" + targetRevisionIdentifier;
+        if (!checkNamedGraphExistence(commitURI)) {
+            return commitURI;
+        } else {
+            throw new InternalErrorException("The calculated commit URI is already in use.");
+        }
+    }
+
+    /**
      * Get a new branch commit URI.
      *
      * @param revisionGraph      the corresponding revision graph

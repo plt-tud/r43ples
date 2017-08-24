@@ -124,6 +124,7 @@ public class SimplePathCalculation implements PathCalculationInterface {
 
     /**
      * Calculate the path from start revision to target revision.
+     * Example: target prov:wasDerivedFrom source
      *
      * @param revisionGraph the revision graph
      * @param startRevision the start revision

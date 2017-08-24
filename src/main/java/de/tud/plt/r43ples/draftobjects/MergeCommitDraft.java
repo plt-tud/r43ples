@@ -9,6 +9,8 @@ import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
 import de.tud.plt.r43ples.management.R43plesCommit;
 import de.tud.plt.r43ples.management.R43plesMergeCommit;
 import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.optimization.PathCalculationInterface;
+import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
 import org.apache.log4j.Logger;
 
 import java.util.regex.Matcher;
@@ -53,6 +55,10 @@ public class MergeCommitDraft extends CommitDraft {
     /** States if this commit draft was created by a request or add and delete sets. (true => request, false => add/delete sets) **/
     private boolean isCreatedWithRequest;
 
+    //Dependencies
+    /** The path calculation interface to use. **/
+    private PathCalculationInterface pathCalculationInterface;
+
 
     /**
      * The constructor.
@@ -62,6 +68,9 @@ public class MergeCommitDraft extends CommitDraft {
      */
     public MergeCommitDraft(R43plesRequest request) throws InternalErrorException {
         super(request);
+        // Dependencies
+        this.pathCalculationInterface = PathCalculationSingleton.getInstance();
+
         this.extractRequestInformation();
         this.isCreatedWithRequest = true;
     }
@@ -84,6 +93,9 @@ public class MergeCommitDraft extends CommitDraft {
      */
     protected MergeCommitDraft(String graphName, String branchNameFrom, String branchNameInto, String user, String message, String sdd, MergeActions action, String triples, MergeTypes type, boolean with) throws InternalErrorException {
         super(null);
+        // Dependencies
+        this.pathCalculationInterface = PathCalculationSingleton.getInstance();
+
         this.setUser(user);
         this.setMessage(message);
 
@@ -179,9 +191,9 @@ public class MergeCommitDraft extends CommitDraft {
         if (action.equals(MergeActions.MERGE) && ((type == null) || !type.equals(MergeTypes.FORCE))) {
             ThreeWayMergeCommitDraft threeWayMergeCommit = new ThreeWayMergeCommitDraft(graphName, branchNameFrom, branchNameInto, getUser(), getMessage(), sdd, triples, type, with);
             return threeWayMergeCommit.createCommitInTripleStore();
-        } else if (action.equals(MergeActions.MERGE_FF) && type.equals(null)) {
-            //TODO Merge FF
-            throw new InternalErrorException("Fast forward merge currently not implemented.");
+        } else if (action.equals(MergeActions.MERGE_FF) && (type == null)) {
+            FastForwardMergeCommitDraft fastForwardMergeCommitDraft = new FastForwardMergeCommitDraft(graphName, branchNameFrom, branchNameInto, getUser(), getMessage(), sdd, triples, type, with);
+            return fastForwardMergeCommitDraft.createCommitInTripleStore();
         } else if (action.equals(MergeActions.REBASE)) {
             // TODO Rebase
             // TODO Advanced rebase
@@ -270,6 +282,15 @@ public class MergeCommitDraft extends CommitDraft {
      */
     protected boolean isWith() {
         return with;
+    }
+
+    /**
+     * Get the path calculation interface.
+     *
+     * @return the path calculation interface
+     */
+    protected PathCalculationInterface getPathCalculationInterface() {
+        return pathCalculationInterface;
     }
 
 }

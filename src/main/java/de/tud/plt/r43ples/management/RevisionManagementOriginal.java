@@ -276,7 +276,7 @@ public class RevisionManagementOriginal {
 
 		String query = Config.prefixes
 				+ String.format("SELECT ?personUri { GRAPH <%s>  { " + "?personUri a prov:Person;"
-						+ "  rdfs:label \"%s\"." + "} }", Config.revision_graph, user);
+						+ "  rdfs:label \"%s\"." + "} }", Config.revision_graph, user); //TODO check if the users are created within the special revision graph - maybe move to RevisionGraph
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		if (results.hasNext()) {
 			logger.debug("User " + user + " already exists.");

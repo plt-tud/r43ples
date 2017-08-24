@@ -4,14 +4,14 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import org.apache.log4j.Logger;
 
 /**
- * Provides information of an already existent three way merge commit.
+ * Provides information of an already existent fast forward merge commit.
  *
  * @author Stephan Hensel
  */
-public class ThreeWayMergeCommit extends MergeCommit {
+public class FastForwardMergeCommit extends MergeCommit {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(ThreeWayMergeCommit.class);
+    private Logger logger = Logger.getLogger(FastForwardMergeCommit.class);
 
 
     /**
@@ -21,7 +21,7 @@ public class ThreeWayMergeCommit extends MergeCommit {
      * @param commitURI the commit URI
      * @throws InternalErrorException
      */
-    public ThreeWayMergeCommit(RevisionGraph revisionGraph, String commitURI) throws InternalErrorException {
+    public FastForwardMergeCommit(RevisionGraph revisionGraph, String commitURI) throws InternalErrorException {
         super(revisionGraph, commitURI);
     }
 
@@ -44,9 +44,9 @@ public class ThreeWayMergeCommit extends MergeCommit {
      * @param differenceModelURI the URI of the difference model graph
      * @throws InternalErrorException
      */
-    public ThreeWayMergeCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message,
-                       Revision usedSourceRevision, Branch usedSourceBranch, Revision usedTargetRevision, Branch usedTargetBranch, Revision generatedRevision,
-                       Revision commonRevision, boolean hasConflict, String conflictModel, String differenceModelURI) throws InternalErrorException {
+    public FastForwardMergeCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message,
+                                  Revision usedSourceRevision, Branch usedSourceBranch, Revision usedTargetRevision, Branch usedTargetBranch, Revision generatedRevision,
+                                  Revision commonRevision, boolean hasConflict, String conflictModel, String differenceModelURI) throws InternalErrorException {
         super(revisionGraph, commitURI, user, timeStamp, message, usedSourceRevision, usedSourceBranch, usedTargetRevision, usedTargetBranch, generatedRevision,
                 commonRevision, hasConflict, conflictModel, differenceModelURI);
     }
