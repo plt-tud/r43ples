@@ -1,37 +1,26 @@
 package de.tud.plt.r43ples.merging.ui;
 
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
+import com.hp.hpl.jena.query.*;
+import com.hp.hpl.jena.rdf.model.Model;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.Interface;
+import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.merging.MergeResult;
+import de.tud.plt.r43ples.merging.TripleObjectTypeEnum;
+import de.tud.plt.r43ples.merging.management.ProcessManagement;
+import de.tud.plt.r43ples.merging.model.structure.*;
+import org.apache.log4j.Logger;
+
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.log4j.Logger;
-
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFactory;
-import com.hp.hpl.jena.rdf.model.Model;
-
-import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.Interface;
-import de.tud.plt.r43ples.iohelper.JenaModelManagement;
-import de.tud.plt.r43ples.management.R43plesRequest;
-import de.tud.plt.r43ples.merging.MergeResult;
-import de.tud.plt.r43ples.merging.TripleObjectTypeEnum;
-import de.tud.plt.r43ples.merging.management.ProcessManagement;
-import de.tud.plt.r43ples.merging.model.structure.DifferenceModel;
-import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeModel;
-import de.tud.plt.r43ples.merging.model.structure.HighLevelChangeTableModel;
-import de.tud.plt.r43ples.merging.model.structure.Individual;
-import de.tud.plt.r43ples.merging.model.structure.MergeCommitModel;
-import de.tud.plt.r43ples.merging.model.structure.Triple;
 
 
 public class MergingControl {
@@ -84,11 +73,11 @@ public class MergingControl {
 		this.commitModel = commitModel;
 		this.commonRevision = mresult.commonRevision;
 		String conflictModel = mresult.conflictModel;
-		
-		
-		Model jenaModel = JenaModelManagement.readStringToJenaModel(conflictModel, "TURTLE");
-				
-		// create model for triple view
+
+
+        Model jenaModel = JenaModelManagement.readTurtleStringToJenaModel(conflictModel);
+
+        // create model for triple view
 		differenceModel = ProcessManagement.readDifferenceModel(jenaModel);		
 
 		// Create the individual models of both branches

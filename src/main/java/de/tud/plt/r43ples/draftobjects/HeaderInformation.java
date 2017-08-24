@@ -3,8 +3,8 @@ package de.tud.plt.r43ples.draftobjects;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.util.FileUtils;
 import de.tud.plt.r43ples.exception.OutdatedException;
-import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
@@ -70,11 +70,11 @@ public class HeaderInformation {
 
     protected void checkUpToDate(final String clientRevisionInformation, final String sparqlQuery) throws OutdatedException {
 
-        Model clientModel = JenaModelManagement.readStringToJenaModel(clientRevisionInformation, "TURTLE");
+        Model clientModel = JenaModelManagement.readTurtleStringToJenaModel(clientRevisionInformation);
 
         String recentRevisionInformation = this.getResponseHeaderFromQuery(sparqlQuery);
 
-        Model serverModel = JenaModelManagement.readStringToJenaModel(recentRevisionInformation, "TURTLE");
+        Model serverModel = JenaModelManagement.readTurtleStringToJenaModel(recentRevisionInformation);
 
         if (!clientModel.isIsomorphicWith(serverModel)) {
              throw new OutdatedException(clientModel, serverModel);

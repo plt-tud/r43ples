@@ -1,16 +1,19 @@
 package de.tud.plt.r43ples.dataset;
 
-import java.io.IOException;
-
+import com.hp.hpl.jena.rdf.model.Model;
+import de.tud.plt.r43ples.R43plesTest;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
+import de.tud.plt.r43ples.iohelper.ResourceManagement;
+import de.tud.plt.r43ples.management.Config;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.tud.plt.r43ples.dataset.SampleDataSet;
-import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.Config;
+import java.io.IOException;
 
-public class TestSampleDataSet {
+public class TestSampleDataSet extends R43plesTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -23,7 +26,19 @@ public class TestSampleDataSet {
 	public final void testCreateSampleDataset1() throws InternalErrorException {
 		String graph = SampleDataSet.createSampleDataset1().graphName;
 		Assert.assertEquals("http://test.com/r43ples-dataset-1", graph);
-	}
+
+        RevisionGraph rg = new RevisionGraph(graph);
+        String revisiongraph_turtle = rg.getContentOfRevisionGraph("TURTLE");
+        String revisiongraph_expected = ResourceManagement.getContentFromResource("dataset/revisiongraph_dataset1.ttl");
+
+        Model model_actual = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_turtle);
+        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_expected);
+
+        this.removeTimeStampFromModel(model_actual);
+        this.removeTimeStampFromModel(model_expected);
+
+        Assert.assertTrue(model_actual.isIsomorphicWith(model_expected));
+    }
 
 	@Test
 	public final void testCreateSampleDataset2() throws InternalErrorException {

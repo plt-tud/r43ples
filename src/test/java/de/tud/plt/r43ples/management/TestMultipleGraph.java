@@ -3,23 +3,22 @@
  */
 package de.tud.plt.r43ples.management;
 
-import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-
 import de.tud.plt.r43ples.R43plesTest;
+import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
+import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.draftobjects.HeaderInformation;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
-import de.tud.plt.r43ples.dataset.SampleDataSet;
-import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.iohelper.ResourceManagement;
+import java.io.IOException;
+
+import static org.hamcrest.core.StringContains.containsString;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Markus Graube
@@ -66,16 +65,16 @@ public class TestMultipleGraph extends R43plesTest {
 	public final void testMultipleGraphs() throws SAXException, IOException, InternalErrorException {
 		result = ep.sparql("text/turtle", get_query_template("master-1", "master-1")).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-1-1.ttl");
-		assertTrue(check_isomorphism(result, "TURTLE", expected, "TURTLE"));	
-		
-		result = ep.sparql("text/turtle", get_query_template("master-2", "master-1")).getEntity().toString();
+        assertTrue(check_isomorphism(result, expected));
+
+        result = ep.sparql("text/turtle", get_query_template("master-2", "master-1")).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-2-1.ttl");
-		assertTrue(check_isomorphism(result, "TURTLE", expected, "TURTLE"));	
-		
-		result = ep.sparql("text/turtle", get_query_template("master-2", "master-2")).getEntity().toString();
+        assertTrue(check_isomorphism(result, expected));
+
+        result = ep.sparql("text/turtle", get_query_template("master-2", "master-2")).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-2-2.ttl");
-		assertTrue(check_isomorphism(result, "TURTLE", expected, "TURTLE"));
-	}
+        assertTrue(check_isomorphism(result, expected));
+    }
 	
 	/**
 	 * @throws IOException 
@@ -86,16 +85,16 @@ public class TestMultipleGraph extends R43plesTest {
 	public final void testMultipleGraphsQueryRewriting() throws SAXException, IOException, InternalErrorException {
 		result = ep.sparql("text/turtle", get_query_template("master-1", "master-1"), true).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-1-1.ttl");
-		assertTrue(check_isomorphism(result, "TURTLE", expected, "TURTLE"));
-		
-		result = ep.sparql("text/turtle", get_query_template("master-2", "master-1"), true).getEntity().toString();
+        assertTrue(check_isomorphism(result, expected));
+
+        result = ep.sparql("text/turtle", get_query_template("master-2", "master-1"), true).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-2-1.ttl");
-		assertTrue(check_isomorphism(result, "TURTLE", expected, "TURTLE"));
-		
-		result = ep.sparql("text/turtle", get_query_template("master-2", "master-2"), true).getEntity().toString();
+        assertTrue(check_isomorphism(result, expected));
+
+        result = ep.sparql("text/turtle", get_query_template("master-2", "master-2"), true).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-2-2.ttl");
-		assertTrue(check_isomorphism(result, "TURTLE", expected, "TURTLE"));
-	}
+        assertTrue(check_isomorphism(result, expected));
+    }
 	
 	@Test
 	public void testResponseHeader() {

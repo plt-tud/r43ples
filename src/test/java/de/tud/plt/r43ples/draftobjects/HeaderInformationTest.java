@@ -39,12 +39,12 @@ public class HeaderInformationTest extends R43plesTest {
         String query = ResourceManagement.getContentFromResource("draftobjects/HeaderInformation/query1.rq");
         String result = hi.getResponseHeaderFromQuery(query);
         String expected = ResourceManagement.getContentFromResource("draftobjects/HeaderInformation/revisiongraph_dataset1.ttl");
-        Assert.assertTrue(this.check_isomorphism(result, "TURTLE", expected, "TURTLE"));
+        Assert.assertTrue(this.check_isomorphism(result, expected));
 
         String query2 = ResourceManagement.getContentFromResource("draftobjects/HeaderInformation/query2.rq");
         String result2 = hi.getResponseHeaderFromQuery(query2);
         String expected2 = ResourceManagement.getContentFromResource("draftobjects/HeaderInformation/revisiongraph_dataset12.ttl");
-        Assert.assertTrue(this.check_isomorphism(result2, "TURTLE", expected2, "TURTLE"));
+        Assert.assertTrue(this.check_isomorphism(result2, expected2));
     }
 
 

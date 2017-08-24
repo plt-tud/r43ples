@@ -8,6 +8,7 @@ import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
+import de.tud.plt.r43ples.R43plesTest;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
@@ -19,7 +20,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-public class R43plesCoreTest {
+public class R43plesCoreTest extends R43plesTest {
 
     R43plesCore core = new R43plesCore();
 
@@ -43,15 +44,11 @@ public class R43plesCoreTest {
         String result = rg.getContentOfRevisionGraph("TURTLE");
         String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_initial.ttl");
 
-        Model model_result = JenaModelManagement.readStringToJenaModel(result, "TURTLE");
-        Model model_expected = JenaModelManagement.readStringToJenaModel(expected, "TURTLE");
+        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
+        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
 
-        // Remove timestamp for test
-        Property provAtTime = model_result.getProperty("http://www.w3.org/ns/prov#atTime");
-        StmtIterator stmtIterator = model_result.listStatements(null, provAtTime, (RDFNode) null);
-        model_result.remove(stmtIterator);
-        StmtIterator stmtIterator2 = model_expected.listStatements(null, provAtTime, (RDFNode) null);
-        model_expected.remove(stmtIterator2);
+        this.removeTimeStampFromModel(model_result);
+        this.removeTimeStampFromModel(model_expected);
 
         Assert.assertTrue(model_result.isIsomorphicWith(model_expected));
 
@@ -76,8 +73,8 @@ public class R43plesCoreTest {
         String result = rg.getContentOfRevisionGraph("TURTLE");
         String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_initial.ttl");
 
-        Model model_result = JenaModelManagement.readStringToJenaModel(result, "TURTLE");
-        Model model_expected = JenaModelManagement.readStringToJenaModel(expected, "TURTLE");
+        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
+        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
 
         // Remove timestamp for test
         Property provAtTime = model_result.getProperty("http://www.w3.org/ns/prov#atTime");
