@@ -1,0 +1,5 @@
+<http://test.com/r43ples-dataset-1-master>  a   <http://eatld.et.tu-dresden.de/rmo#Branch> .
+<http://test.com/r43ples-dataset-1-master>  a   <http://eatld.et.tu-dresden.de/rmo#Master> .
+<http://test.com/r43ples-dataset-1-master>  <http://www.w3.org/2000/01/rdf-schema#label>  "master" .
+<http://test.com/r43ples-dataset-1-master>  <http://eatld.et.tu-dresden.de/rmo#references>  <http://test.com/r43ples-dataset-1-revision-5> .
+<http://test.com/r43ples-dataset-1-revision-5> <http://eatld.et.tu-dresden.de/rmo#revisionNumber>  "5" .
