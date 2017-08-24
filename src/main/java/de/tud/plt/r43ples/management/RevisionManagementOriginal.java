@@ -266,11 +266,12 @@ public class RevisionManagementOriginal {
 	
 
 	/**
-	 * @param user
-	 *            name as string
-	 * @return URI of person
+	 * Get the user URI. If the user does not exist then the user will be created.
+	 *
+	 * @param user name as string
+	 * @return URI of user
 	 */
-	public static String getUserName(final String user) {
+	public static String getUserURI(final String user) {
 		// When user does not already exists - create new
 
 		String query = Config.prefixes

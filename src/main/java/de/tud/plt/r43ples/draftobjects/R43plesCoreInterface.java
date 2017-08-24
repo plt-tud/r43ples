@@ -1,10 +1,7 @@
 package de.tud.plt.r43ples.draftobjects;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.existentobjects.InitialCommit;
-import de.tud.plt.r43ples.existentobjects.ReferenceCommit;
-import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
-import de.tud.plt.r43ples.existentobjects.UpdateCommit;
+import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.management.R43plesRequest;
 
 import java.util.ArrayList;
@@ -86,9 +83,14 @@ public interface R43plesCoreInterface {
      */
     ReferenceCommit createReferenceCommit(String graphName, String referenceName, String revisionIdentifier, String user, String message, boolean isBranch) throws InternalErrorException;
 
-
-
-
+    /**
+     * Create a new merge commit.
+     *
+     * @param request the request received by R43ples
+     * @return the created merge commit
+     * @throws InternalErrorException
+     */
+    MergeCommit createMergeCommit(R43plesRequest request) throws InternalErrorException;
 
     /**
      * Create a new three way merge commit.

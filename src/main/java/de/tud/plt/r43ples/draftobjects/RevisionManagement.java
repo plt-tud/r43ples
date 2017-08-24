@@ -221,6 +221,23 @@ public class RevisionManagement {
     }
 
     /**
+     * Get a new three way merge commit URI.
+     *
+     * @param revisionGraph      the corresponding revision graph
+     * @param revisionIdentifier the revision identifier of the created revision
+     * @return the new commit URI
+     * @throws InternalErrorException
+     */
+    protected String getNewThreeWayMergeCommitURI(RevisionGraph revisionGraph, String revisionIdentifier) throws InternalErrorException {
+        String commitURI = revisionGraph.getGraphName() + "-commit-merge-" + revisionIdentifier;
+        if (!checkNamedGraphExistence(commitURI)) {
+            return commitURI;
+        } else {
+            throw new InternalErrorException("The calculated commit URI is already in use.");
+        }
+    }
+
+    /**
      * Get a new branch commit URI.
      *
      * @param revisionGraph      the corresponding revision graph
@@ -251,6 +268,74 @@ public class RevisionManagement {
             return commitURI;
         } else {
             throw new InternalErrorException("The calculated tag commit URI is already in use.");
+        }
+    }
+
+    /**
+     * Get a new temporary revision progress URI (from).
+     *
+     * @param revisionGraph    the corresponding revision graph
+     * @return the new temporary revision progress URI (from)
+     * @throws InternalErrorException
+     */
+    protected String getTemporaryRevisionProgressFromURI(RevisionGraph revisionGraph) throws InternalErrorException {
+        // TODO Create one method which calculates a temporary random URI (Attention the methods which are using this URI will have to drop the named graph after the usage is finished!)
+        String tempURI = revisionGraph.getGraphName() + "-RM-REVISION-PROGRESS-FROM";
+        if (!checkNamedGraphExistence(tempURI)) {
+            return tempURI;
+        } else {
+            throw new InternalErrorException("The calculated temporary URI is already in use.");
+        }
+    }
+
+    /**
+     * Get a new temporary revision progress URI (into).
+     *
+     * @param revisionGraph    the corresponding revision graph
+     * @return the new temporary revision progress URI (into)
+     * @throws InternalErrorException
+     */
+    protected String getTemporaryRevisionProgressIntoURI(RevisionGraph revisionGraph) throws InternalErrorException {
+        // TODO Create one method which calculates a temporary random URI (Attention the methods which are using this URI will have to drop the named graph after the usage is finished!)
+        String tempURI = revisionGraph.getGraphName() + "-RM-REVISION-PROGRESS-INTO";
+        if (!checkNamedGraphExistence(tempURI)) {
+            return tempURI;
+        } else {
+            throw new InternalErrorException("The calculated temporary URI is already in use.");
+        }
+    }
+
+    /**
+     * Get a new temporary difference model URI.
+     *
+     * @param revisionGraph    the corresponding revision graph
+     * @return the new temporary difference model URI
+     * @throws InternalErrorException
+     */
+    protected String getTemporaryDifferenceModelURI(RevisionGraph revisionGraph) throws InternalErrorException {
+        // TODO Create one method which calculates a temporary random URI (Attention the methods which are using this URI will have to drop the named graph after the usage is finished!)
+        String tempURI = revisionGraph.getGraphName() + "-RM-DIFFERENCE-MODEL";
+        if (!checkNamedGraphExistence(tempURI)) {
+            return tempURI;
+        } else {
+            throw new InternalErrorException("The calculated temporary URI is already in use.");
+        }
+    }
+
+    /**
+     * Get a new temporary merged URI.
+     *
+     * @param revisionGraph    the corresponding revision graph
+     * @return the new temporary difference model URI
+     * @throws InternalErrorException
+     */
+    protected String getTemporaryMergedURI(RevisionGraph revisionGraph) throws InternalErrorException {
+        // TODO Create one method which calculates a temporary random URI (Attention the methods which are using this URI will have to drop the named graph after the usage is finished!)
+        String tempURI = revisionGraph.getGraphName() + "-RM-MERGED-TEMP";
+        if (!checkNamedGraphExistence(tempURI)) {
+            return tempURI;
+        } else {
+            throw new InternalErrorException("The calculated temporary URI is already in use.");
         }
     }
 

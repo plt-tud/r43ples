@@ -94,24 +94,33 @@ public class Commit {
     }
 
     /**
-     * Get the used revision.
+     * Get the revision graph.
      *
-     * @return the used revision
-     * @throws InternalErrorException
+     * @return the revision graph
      */
-    public Revision getUsedRevision() throws InternalErrorException {
-        //TODO Implement method
-        return null;
+    public RevisionGraph getRevisionGraph() {
+        return revisionGraph;
     }
 
-    /**
-     * Get the generated revision.
-     *
-     * @return the generated revision
-     * @throws InternalErrorException
-     */
-    public Revision getGeneratedRevision() throws InternalErrorException {
-        //TODO Implement method
-        return null;
-    }
+//    /**
+//     * Get the used revision.
+//     *
+//     * @return the used revision
+//     * @throws InternalErrorException
+//     */
+//    public Revision getUsedRevision() throws InternalErrorException {
+//        //TODO Implement method/Move to children
+//        return null;
+//    }
+//
+//    /**
+//     * Get the generated revision.
+//     *
+//     * @return the generated revision
+//     * @throws InternalErrorException
+//     */
+//    public Revision getGeneratedRevision() throws InternalErrorException {
+//        //TODO Implement method/Move to children
+//        return null;
+//    }
 }

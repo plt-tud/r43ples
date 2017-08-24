@@ -1,6 +1,5 @@
 package de.tud.plt.r43ples.draftobjects;
 
-import de.tud.plt.r43ples.exception.OutdatedException;
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
@@ -162,7 +161,7 @@ public class ReferenceCreationCommitDraft extends CommitDraft {
             // General variables
             String referenceTypeUri = isBranch ? "rmo:Branch" : "rmo:Tag";
             String revisionUri = graph.getRevisionUri(revisionIdentifier);
-            String personUri = RevisionManagementOriginal.getUserName(getUser());
+            String personUri = RevisionManagementOriginal.getUserURI(getUser());
 
             // Create a new commit (activity)
             String queryContent = String.format(""

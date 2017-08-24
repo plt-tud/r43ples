@@ -1,6 +1,7 @@
 package de.tud.plt.r43ples.draftobjects;
 
 import de.tud.plt.r43ples.exception.OutdatedException;
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
@@ -195,6 +196,24 @@ public class CommitDraft {
 	 */
 	protected RevisionManagement getRevisionManagement() {
 		return revisionManagement;
+	}
+
+
+	/**
+	 * Move the reference in the specified revision graph from the old revision to the new one.
+	 *
+	 * @param revisionGraphURI the revision graph URI in the triplestore
+	 * @param branchURI the URI of the branch
+	 * @param revisionUriOld uri of the old revision
+	 * @param revisionUriNew uri of the new revision
+	 *  */
+	protected void moveBranchReference(final String revisionGraphURI, final String branchURI, final String revisionUriOld, final String revisionUriNew) {
+		// delete old reference and create new one
+		String query = Config.prefixes	+ String.format(""
+						+ "DELETE DATA { GRAPH <%1$s> { <%2$s> rmo:references <%3$s>. } };"
+						+ "INSERT DATA { GRAPH <%1$s> { <%2$s> rmo:references <%4$s>. } }",
+				revisionGraphURI, branchURI, revisionUriOld, revisionUriNew);
+		getTripleStoreInterface().executeUpdateQuery(query);
 	}
 
 }

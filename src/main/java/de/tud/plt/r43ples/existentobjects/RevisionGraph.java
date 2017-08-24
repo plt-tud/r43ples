@@ -326,7 +326,19 @@ public class RevisionGraph {
 					+ referenceIdentifier);
 		}
 	}
-	
+
+	/**
+	 * Get the revision object for a given reference name or revision number
+	 *
+	 * @param branchInformation the branch information (identifier or URI of the branch)
+	 * @param isIdentifier identifies if the identifier or the URI of the branch is specified (identifier => true; URI => false)
+	 * @return Branch object
+	 * @throws InternalErrorException
+	 */
+	public Branch getBranch(final String branchInformation, final boolean isIdentifier) throws InternalErrorException {
+		return new Branch(this, branchInformation, isIdentifier);
+	}
+
 	/**
 	 * Get the revision URI for a given reference name or revision number
 	 * 

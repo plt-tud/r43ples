@@ -3,6 +3,9 @@ package de.tud.plt.r43ples.draftobjects;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.OutdatedException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
+import de.tud.plt.r43ples.existentobjects.MergeCommit;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
 import de.tud.plt.r43ples.management.R43plesCommit;
 import de.tud.plt.r43ples.management.R43plesMergeCommit;
 import de.tud.plt.r43ples.management.R43plesRequest;
@@ -25,8 +28,8 @@ public class MergeCommitDraft extends CommitDraft {
     private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
     /** The merge query pattern. **/
     private final Pattern patternMergeQuery = Pattern.compile(
-            "(?<action>MERGE|REBASE|MERGE FF)\\s*(?<type>FORCE|AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(SDD\\s*<(?<sdd>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(?<with>\\s*WITH\\s*\\{(?<triples>.*)\\})?",
-            patternModifier);
+            "(?<action>MERGE|REBASE|MERGE FF)\\s*(?<type>FORCE|AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(SDD\\s*<(?<sdd>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameFrom>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameInto>[^\"]*?)\"(?<with>\\s*WITH\\s*\\{(?<triples>.*)\\})?",
+            patternModifier); //TODO add COUNT for advanced rebase
 
     /** The triples of the query WITH part. **/
     private String triples;
@@ -38,6 +41,8 @@ public class MergeCommitDraft extends CommitDraft {
     private String sdd;
     /** The graph name **/
     private String graphName;
+    /** The revision graph. **/
+    private RevisionGraph revisionGraph;
     /** The query type (FORCE, AUTO, MANUAL). **/
     private MergeTypes type;
     /** The query action (MERGE, REBASE, MERGE FF). **/
@@ -47,6 +52,7 @@ public class MergeCommitDraft extends CommitDraft {
 
     /** States if this commit draft was created by a request or add and delete sets. (true => request, false => add/delete sets) **/
     private boolean isCreatedWithRequest;
+
 
     /**
      * The constructor.
@@ -82,6 +88,7 @@ public class MergeCommitDraft extends CommitDraft {
         this.setMessage(message);
 
         this.graphName = graphName;
+        this.revisionGraph = new RevisionGraph(graphName);
         this.branchNameFrom = branchNameFrom;
         this.branchNameInto = branchNameInto;
         this.sdd = sdd;
@@ -101,96 +108,168 @@ public class MergeCommitDraft extends CommitDraft {
     private void extractRequestInformation() throws InternalErrorException {
         Matcher m = patternMergeQuery.matcher(getRequest().query_sparql);
 
-//        boolean foundEntry = false;
-//
-//        action = m.group("action");
-//        type = m.group("type");
-//        graphName = m.group("graph");
-//        sdd = m.group("sdd");
-//        branchNameFrom = m.group("branchNameFrom").toLowerCase();
-//        branchNameInto = m.group("branchNameInto").toLowerCase();
-//        with = m.group("with") != null;
-//        triples = m.group("triples");
-//
-//        logger.debug("type: " + type);
-//        logger.debug("graph: " + graphName);
-//        logger.debug("sdd: " + sdd);
-//        logger.debug("branchNameFrom: " + branchNameA);
-//        logger.debug("branchNameInto: " + branchNameB);
-//        logger.debug("with: " + with);
-//        logger.debug("triples: " + triples);
+        boolean foundEntry = false;
 
+        while (m.find()) {
+            foundEntry = true;
+
+            switch (m.group("action").toUpperCase()) {
+                case "MERGE":
+                    action = MergeActions.MERGE;
+                    break;
+                case "REBASE":
+                    action = MergeActions.REBASE;
+                    break;
+                case "MERGE FF":
+                    action = MergeActions.MERGE_FF;
+                    break;
+                default:
+                    action = null;
+                    break;
+            }
+            String typeID = m.group("type");
+            if (typeID != null) {
+                switch (typeID.toUpperCase()) {
+                    case "AUTO":
+                        type = MergeTypes.AUTO;
+                        break;
+                    case "MANUAL":
+                        type = MergeTypes.MANUAL;
+                        break;
+                    case "FORCE":
+                        type = MergeTypes.FORCE;
+                        break;
+                    default:
+                        type = null;
+                        break;
+                }
+            } else {
+                type = null;
+            }
+
+            graphName = m.group("graph");
+            revisionGraph = new RevisionGraph(graphName);
+            sdd = m.group("sdd");
+            branchNameFrom = m.group("branchNameFrom").toLowerCase();
+            branchNameInto = m.group("branchNameInto").toLowerCase();
+            with = m.group("with") != null;
+            triples = m.group("triples");
+
+            logger.debug("type: " + type);
+            logger.debug("graph: " + graphName);
+            logger.debug("sdd: " + sdd);
+            logger.debug("branchNameFrom: " + branchNameFrom);
+            logger.debug("branchNameInto: " + branchNameInto);
+            logger.debug("with: " + with);
+            logger.debug("triples: " + triples);
+        }
+        if (!foundEntry) {
+            throw new QueryErrorException("Error in query: " + getRequest().query_sparql);
+        }
 
     }
 
-//        while (m.find()) {
-//            foundEntry = true;
-//            String action = m.group("action");
-//            this.graphName = m.group("graph");
-//            this.revisionIdentifier = m.group("revision").toLowerCase();
-//            this.referenceName = m.group("name").toLowerCase();
-//            if (action.equals("TAG")) {
-//                this.isBranch = false;
-//            } else if (action.equals("BRANCH")) {
-//                this.isBranch = true;
-//            } else {
-//                throw new QueryErrorException("Error in query: " + getRequest().query_sparql);
-//            }
-//        }
-//        if (!foundEntry) {
-//            throw new QueryErrorException("Error in query: " + getRequest().query_sparql);
-//        }
-//    }
-//
-//
-//
-//        public R43plesMergeCommit(R43plesRequest request) throws InternalErrorException {
-//            super(request);
-//            Matcher m = patternMergeQuery.matcher(request.query_sparql);
-//            if (!m.find())
-//                throw new InternalErrorException("Error in query: " + request.query_sparql);
-//
-//            action = m.group("action");
-//            type = m.group("type");
-//            graphName = m.group("graph");
-//            sdd = m.group("sdd");
-//            branchNameA = m.group("branchNameA").toLowerCase();
-//            branchNameB = m.group("branchNameB").toLowerCase();
-//            with = m.group("with")!=null;
-//            triples = m.group("triples");
-//
-//            logger.debug("type: " + type);
-//            logger.debug("graph: " + graphName);
-//            logger.debug("sdd: " + sdd);
-//            logger.debug("branchNameA: " + branchNameA);
-//            logger.debug("branchNameB: " + branchNameB);
-//            logger.debug("with: " + with);
-//            logger.debug("triples: " + triples);
-//        }
-//
-//
-//        public R43plesMergeCommit(final String graphName,
-//                                  final String branchNameA,
-//                                  final String branchNameB,
-//                                  final String user,
-//                                  final String message,
-//                                  final String format
-//        ) {
-//            super(new R43plesRequest("", format));
-//            this.graphName = graphName;
-//            this.branchNameA = branchNameA;
-//            this.branchNameB = branchNameB;
-//            this.user = user;
-//            this.message = message;
-//            this.sdd = null;
-//            this.action = null;
-//            this.triples = null;
-//            this.type = null;
-//            this.with = false;
-//        }
-//
-//
-//
+    /**
+     * Creates the commit draft as a new commit in the triple store and creates the corresponding revisions.
+     *
+     * @return the created commit
+     */
+    protected MergeCommit createCommitInTripleStore() throws InternalErrorException {
+        // Select the right child element and create a corresponding commit using the createCommitInTripleStore method.
+        if (action.equals(MergeActions.MERGE) && ((type == null) || !type.equals(MergeTypes.FORCE))) {
+            ThreeWayMergeCommitDraft threeWayMergeCommit = new ThreeWayMergeCommitDraft(graphName, branchNameFrom, branchNameInto, getUser(), getMessage(), sdd, triples, type, with);
+            return threeWayMergeCommit.createCommitInTripleStore();
+        } else if (action.equals(MergeActions.MERGE_FF) && type.equals(null)) {
+            //TODO Merge FF
+            throw new InternalErrorException("Fast forward merge currently not implemented.");
+        } else if (action.equals(MergeActions.REBASE)) {
+            // TODO Rebase
+            // TODO Advanced rebase
+            throw new InternalErrorException("Rebase and advanced rebase currently not implemented.");
+        } else {
+            throw new QueryErrorException("Error in query: " + getRequest().query_sparql);
+        }
+    }
 
+    /**
+     * Get the triples of the query WITH part.
+     *
+     * @return the triples of the query WITH part
+     */
+    protected String getTriples() {
+        return triples;
+    }
+
+    /**
+     * Get the branch name (from).
+     *
+     * @return the branch name
+     */
+    protected String getBranchNameFrom() {
+        return branchNameFrom;
+    }
+
+    /**
+     * Get the branch name (into).
+     *
+     * @return the branch name
+     */
+    protected String getBranchNameInto() {
+        return branchNameInto;
+    }
+
+    /**
+     * Get the SDD URI to use.
+     *
+     * @return the SDD URI to use
+     */
+    protected String getSdd() {
+        return sdd;
+    }
+
+    /**
+     * The revision graph.
+     *
+     * @return the revision graph
+     */
+    protected RevisionGraph getRevisionGraph() {
+        return revisionGraph;
+    }
+
+    /**
+     * The graph name.
+     *
+     * @return the graph name
+     */
+    protected String getGraphName() {
+        return graphName;
+    }
+
+    /**
+     * Get the query type (FORCE, AUTO, MANUAL).
+     *
+     * @return the query type
+     */
+    protected MergeTypes getType() {
+        return type;
+    }
+
+    /**
+     * Get the query action (MERGE, REBASE, MERGE FF).
+     *
+     * @return the query action
+     */
+    protected MergeActions getAction() {
+        return action;
+    }
+
+    /**
+     * Get the boolean indicator if the WITH part os available.
+     *
+     * @return true if the WITH part is available
+     */
+    protected boolean isWith() {
+        return with;
+    }
 
 }

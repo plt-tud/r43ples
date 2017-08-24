@@ -23,6 +23,7 @@ import de.tud.plt.r43ples.draftobjects.HeaderInformation;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
 import de.tud.plt.r43ples.existentobjects.InitialCommit;
+import de.tud.plt.r43ples.existentobjects.MergeCommit;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.*;
@@ -385,7 +386,8 @@ public class Endpoint {
 			result = "Tagging or branching successful";
 		}
 		else if (request.isMergeQuery()) {
-			return getMergeResponse(new R43plesMergeCommit(request));
+            logger.info("Merge query detected");
+            return getMergeResponse(r43plesCore.createMergeCommit(request), request);
 		}
 		else
 			throw new QueryErrorException("No R43ples query detected");
@@ -457,40 +459,35 @@ public class Endpoint {
 
 
 	/** 
-	 * Creates a merge between the specified branches.
-	 * 
-	 * Using command: MERGE GRAPH \<graphURI\> BRANCH "branchNameA" INTO "branchNameB"
+	 * Creates the merge response.
 	 *
-	 * @param commit R43plesMergeCommit object containing all information about the merge
+	 * @param commit merge commit object containing all information about the merge
+     * @param request the original R43ples request.
 	 *
-	 * @return http reponse
+	 * @return the http response
 	 * @throws InternalErrorException 
 	 */
-	private Response getMergeResponse(final R43plesMergeCommit commit) throws InternalErrorException {
+	private Response getMergeResponse(MergeCommit commit, R43plesRequest request) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
-		logger.info("Merge query detected");
-		
-		MergeResult mresult = Interface.sparqlMerge(commit);
-		RevisionGraph graph = new RevisionGraph(mresult.graph);
-		
-		if (mresult.hasConflict) {
+
+		if (commit.isHasConflict()) {
 			responseBuilder = Response.status(Response.Status.CONFLICT);
-			responseBuilder.entity(mresult.conflictModel);
+			responseBuilder.entity(commit.getConflictModel());
 		}
 		String graphNameHeader;
 		try {
-			graphNameHeader = URLEncoder.encode(mresult.graph, "UTF-8");
+			graphNameHeader = URLEncoder.encode(commit.getRevisionGraph().getGraphName(), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
-			graphNameHeader = mresult.graph;
+			graphNameHeader = commit.getRevisionGraph().getGraphName();
 		}
 		
-		// Return the revision number which were used (convert tag or branch identifier to revision number)
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", graph.getRevisionIdentifier(mresult.branchA));
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", graph.getRevisionIdentifier(mresult.branchB));
+		// Return the revision identifiers which were used (convert tag or branch identifier to revision identifier)
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-From", commit.getUsedSourceRevision().getRevisionIdentifier());
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-Into", commit.getUsedTargetRevision().getRevisionIdentifier());
 
 		HeaderInformation hi = new HeaderInformation();
-		responseBuilder.header("r43ples-revisiongraph", hi.getResponseHeaderFromQuery(commit.query_sparql));
+		responseBuilder.header("r43ples-revisiongraph", hi.getResponseHeaderFromQuery(request.query_sparql));
 		
 		return responseBuilder.build();	
 	}

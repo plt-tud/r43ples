@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import de.tud.plt.r43ples.existentobjects.Path;
+import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
 
@@ -164,64 +166,43 @@ public class MergeManagement {
 	/**
 	 * Create the revision progresses for both branches.
 	 * 
-	 * @param listA the linked list with all revisions from start revision to target revision of branch A
-	 * @param graphNameRevisionProgressA the graph name of the revision progress of branch A
-	 * @param uriA the URI of the revision progress of branch A
-	 * @param listB the linked list with all revisions from start revision to target revision branch B
-	 * @param graphNameRevisionProgressB the graph name of the revision progress of branch B
-	 * @param uriB the URI of the revision progress of branch B
+	 * @param pathFrom the path with all revisions from start revision to target revision of the from branch
+	 * @param graphNameRevisionProgressFrom the graph name of the revision progress of the from branch
+	 * @param uriFrom the URI of the revision progress of the from branch
+	 * @param pathInto the linked list with all revisions from start revision to target revision of the into branch
+	 * @param graphNameRevisionProgressInto the graph name of the revision progress of the into branch
+	 * @param uriInto the URI of the revision progress of the into branch
 	 * @throws InternalErrorException 
 	 */
 	public static void createRevisionProgresses(final String revisionGraph, final String graphName,
-			LinkedList<String> listA, String graphNameRevisionProgressA, String uriA, 
-			LinkedList<String> listB, String graphNameRevisionProgressB, String uriB) throws InternalErrorException {
-		logger.info("Create the revision progress of branch A and B.");
-		
+												Path pathFrom, String graphNameRevisionProgressFrom, String uriFrom,
+												Path pathInto, String graphNameRevisionProgressInto, String uriInto, Revision commonRevision) throws InternalErrorException {
+		logger.info("Create the revision progress of branch from and into.");
+
 		RevisionGraph graph = new RevisionGraph(graphName);
 		
-		// Get the common revision
-		String commonRevision = null;
-		if ((listA.size() > 0) && (listB.size() > 0)) {
-			commonRevision = listA.getFirst();
-		} else {
+		if (!((pathFrom.getRevisionPath().size() > 0) && (pathInto.getRevisionPath().size() > 0))) {
 			throw new InternalErrorException("Revision path contains no revisions.");
 		}
 
-		// Get the revision number of first revision
-		logger.info("Get the revision number of first revision.");
-		String firstRevisionNumber = "";
-
-		String query = String.format(
-			  "SELECT ?number %n"
-			+ "WHERE { %n"
-			+ "	GRAPH <%s> {"
-			+ "		<%s> <http://eatld.et.tu-dresden.de/rmo#revisionNumber> ?number ."
-			+ "} }", revisionGraph, commonRevision, commonRevision);
-		
-		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
-		
-		if (results.hasNext()) {
-			QuerySolution qs = results.next();
-			firstRevisionNumber = qs.getLiteral("?number").toString();
-		}
-		
-		// Get the full graph name of first revision or create full revision graph of first revision
-		String fullGraphNameCommonRevision = "";
+		// Get the full graph name of common revision or create full revision graph of common revision
+		String fullGraphNameCommonRevision;
 		Boolean tempGraphWasCreated = false;
 		try {
-			fullGraphNameCommonRevision = graph.getReferenceGraph(firstRevisionNumber);
+			fullGraphNameCommonRevision = graph.getReferenceGraph(commonRevision.getRevisionIdentifier());
 		} catch (InternalErrorException e) {
 			// Create a temporary full graph
+			// TODO move to new RevisionManagement
 			fullGraphNameCommonRevision = graphName + "RM-TEMP-REVISION-PROGRESS-FULLGRAPH";
-			RevisionManagementOriginal.generateFullGraphOfRevision(graphName, firstRevisionNumber, fullGraphNameCommonRevision);
+			RevisionManagementOriginal.generateFullGraphOfRevision(graphName, commonRevision.getRevisionIdentifier(), fullGraphNameCommonRevision);
 			tempGraphWasCreated = true;
 		}
 		
-		// Create revision progress of branch A
-		createRevisionProgress(revisionGraph, listA, fullGraphNameCommonRevision, graphNameRevisionProgressA, uriA);
+		// Create revision progress of branch from
+		createRevisionProgress(revisionGraph, pathFrom, fullGraphNameCommonRevision, graphNameRevisionProgressFrom, uriFrom);
 		
-		// Create revision progress of branch A
-		createRevisionProgress(revisionGraph, listB, fullGraphNameCommonRevision, graphNameRevisionProgressB, uriB);
+		// Create revision progress of branch into
+		createRevisionProgress(revisionGraph, pathInto, fullGraphNameCommonRevision, graphNameRevisionProgressInto, uriInto);
 		
 		// Drop the temporary full graph
 		if (tempGraphWasCreated) {
@@ -235,21 +216,21 @@ public class MergeManagement {
 	/**
 	 * Create the revision progress.
 	 * 
-	 * @param list the linked list with all revisions from start revision to target revision
+	 * @param path the path with all revisions from start revision to target revision
 	 * @param fullGraphNameCommonRevision the full graph name of the common revision (first revision of path)
 	 * @param graphNameRevisionProgress the graph name of the revision progress
 	 * @param uri the URI of the revision progress
 	 * @throws InternalErrorException 
 	 */
-	public static void createRevisionProgress(final String revisionGraph, LinkedList<String> list, String fullGraphNameCommonRevision, String graphNameRevisionProgress, String uri) throws InternalErrorException {
+	public static void createRevisionProgress(final String revisionGraph, Path path, String fullGraphNameCommonRevision, String graphNameRevisionProgress, String uri) throws InternalErrorException {
 		logger.info("Create the revision progress of " + uri + " in graph " + graphNameRevisionProgress + ".");
 		
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameRevisionProgress));
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphNameRevisionProgress));
-		Iterator<String> iteList = list.iterator();
+		Iterator<Revision> iteList = path.getRevisionPath().iterator();
 		
 		if (iteList.hasNext()) {
-			String firstRevision = iteList.next();
+			String firstRevision = iteList.next().getRevisionURI();
 			
 			// Create the initial content
 			logger.info("Create the initial content.");
@@ -265,14 +246,14 @@ public class MergeManagement {
 				+ "} } WHERE { %n"
 				+ "	GRAPH <%s> %n"
 				+ "		{ ?s ?p ?o . } %n"
-				+ "}",graphNameRevisionProgress, uri, firstRevision, fullGraphNameCommonRevision);
+				+ "}", graphNameRevisionProgress, uri, firstRevision, fullGraphNameCommonRevision);
 		
 			// Execute the query which generates the initial content
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryInitial);
 						
 			// Update content by current add and delete set - remove old entries
 			while (iteList.hasNext()) {
-				String revision = iteList.next();
+				String revision = iteList.next().getRevisionURI();
 				logger.info("Update content by current add and delete set of revision " + revision + " - remove old entries.");
 				// Get the ADD and DELETE set URIs
 				String addSetURI = RevisionManagementOriginal.getAddSetURI(revision, revisionGraph);
@@ -677,221 +658,23 @@ public class MergeManagement {
 			}
 		}
 	}
-	
-	
-	/**
-	 * Create a merged revision.
-	 * 
-	 * @param graphName the graph name
-	 * @param branchNameA the name of branch A
-	 * @param branchNameB the name of branch B
-	 * @param user the user
-	 * @param commitMessage the commit message
-	 * @param graphNameDifferenceTripleModel the graph name of the difference triple model
-	 * @param graphNameRevisionProgressA the graph name of the revisions progress A
-	 * @param uriA the URI A
-	 * @param graphNameRevisionProgressB the graph name of the revisions progress B
-	 * @param uriB the URI B
-	 * @param uriSDD the URI of the SDD
-	 * @param type the merge query type
-	 * @param triples the triples which are belonging to the current merge query in N-Triple serialization
-	 * @return new revision number
-	 * @throws InternalErrorException 
-	 */
-	public static String createMergedRevision(final R43plesMergeCommit commit, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD, MergeQueryTypeEnum type) throws InternalErrorException {
-		 
-		RevisionGraph graph = new RevisionGraph(commit.graphName);
-				
-		// Create an empty temporary graph which will contain the merged full content
-		String graphNameOfMerged = commit.graphName + "-RM-MERGED-TEMP";
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameOfMerged));
-		TripleStoreInterfaceSingleton.get().executeCreateGraph(graphNameOfMerged);
-		
-		// Get the full graph name of branch A
-		String graphNameOfBranchA = graph.getReferenceGraph(commit.branchNameA);
-		// Get the full graph name of branch B
-		String graphNameOfBranchB = graph.getReferenceGraph(commit.branchNameB);
-		
-		if (type.equals(MergeQueryTypeEnum.MANUAL)) {
-			// Manual merge query
-			RevisionManagementOriginal.executeINSERT(graphNameOfMerged, commit.triples);
-		} else {	
-			// Copy graph B to temporary merged graph
-			String queryCopy = String.format("COPY <%s> TO <%s>", graphNameOfBranchB, graphNameOfMerged);
-			TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryCopy);
-			
-			// Get the triples from branch A which should be added to/removed from the merged revision
-			String triplesToAdd = "";
-			String triplesToDelete = "";
-			
-			// Get all difference groups
-			String queryDifferenceGroup = prefixes + String.format(
-					  "SELECT ?differenceCombinationURI ?automaticResolutionState ?tripleStateA ?tripleStateB ?conflict %n"
-					+ "WHERE { GRAPH <%s> { %n"
-					+ "	?differenceCombinationURI a rpo:DifferenceGroup ; %n"
-					+ "		sddo:automaticResolutionState ?automaticResolutionState ; %n"
-					+ "		sddo:hasTripleStateA ?tripleStateA ; %n"
-					+ "		sddo:hasTripleStateB ?tripleStateB ; %n"
-					+ "		sddo:isConflicting ?conflict . %n"
-					+ "} }", graphNameDifferenceTripleModel);
-	
-			// Iterate over all difference groups
-			ResultSet resultSetDifferenceGroups = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryDifferenceGroup);
-			while (resultSetDifferenceGroups.hasNext()) {
-				QuerySolution qsCurrentDifferenceGroup = resultSetDifferenceGroups.next();
-	
-				String currentDifferencGroupURI = qsCurrentDifferenceGroup.getResource("?differenceCombinationURI").toString();
-				String currentDifferencGroupAutomaticResolutionState = qsCurrentDifferenceGroup.getResource("?automaticResolutionState").toString();
-//				Currently not needed
-//				String currentDifferencGroupTripleStateA = qsCurrentDifferenceGroup.getResource("?tripleStateA").toString();
-//				String currentDifferencGroupTripleStateB = qsCurrentDifferenceGroup.getResource("?tripleStateB").toString();
-				boolean currentDifferencGroupConflict = qsCurrentDifferenceGroup.getLiteral("?conflict").getBoolean();
-				
-				// Get all differences (triples) of current difference group
-				String queryDifference = prefixes + String.format(
-						  "SELECT ?s ?p ?o %n"
-						+ "WHERE { GRAPH <%s> { %n"
-						+ "	<%s> a rpo:DifferenceGroup ; %n"
-						+ "		rpo:hasDifference ?blankDifference . %n"
-						+ "	?blankDifference a rpo:Difference ; %n"
-						+ "		rpo:hasTriple ?triple . %n"
-						+ "	?triple rdf:subject ?s . %n"
-						+ "	?triple rdf:predicate ?p . %n"
-						+ "	?triple rdf:object ?o . %n"
-						+ "} }", graphNameDifferenceTripleModel, currentDifferencGroupURI);
-				
-				// Iterate over all differences (triples)
-				ResultSet resultSetDifferences = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryDifference);
-				while (resultSetDifferences.hasNext()) {
-					QuerySolution qsCurrentDifference = resultSetDifferences.next();
-					
-					String subject = "<" + qsCurrentDifference.getResource("?s").toString() + ">";
-					String predicate = "<" + qsCurrentDifference.getResource("?p").toString() + ">";
-	
-					// Differ between literal and resource
-					String object = "";
-					if (qsCurrentDifference.get("?o").isLiteral()) {
-						object = "\"" + qsCurrentDifference.getLiteral("?o").toString() + "\"";
-					} else {
-						object = "<" + qsCurrentDifference.getResource("?o").toString() + ">";
-					}
-					
-					if (	type.equals(MergeQueryTypeEnum.AUTO) || 
-							type.equals(MergeQueryTypeEnum.COMMON) || 
-							(type.equals(MergeQueryTypeEnum.WITH) && !currentDifferencGroupConflict) ) {
-						// MERGE AUTO or common MERGE query
-						if (currentDifferencGroupAutomaticResolutionState.equals(SDDTripleStateEnum.ADDED.getSddRepresentation())) {
-							// Triple should be added
-							triplesToAdd += subject + " " + predicate + " " + object + " . \n";
-						} else {
-							// Triple should be deleted
-							triplesToDelete += subject + " " + predicate + " " + object + " . \n";
-						}
-					} else {
-						// MERGE WITH query - conflicting triple
-						Model model = JenaModelManagement.readNTripleStringToJenaModel(commit.triples);
-						// Create ASK query which will check if the model contains the specified triple
-						String queryAsk = String.format(
-								  "ASK { %n"
-								+ " %s %s %s %n"
-								+ "}", subject, predicate, object);
-						Query query = QueryFactory.create(queryAsk);
-						QueryExecution qe = QueryExecutionFactory.create(query, model);
-						boolean resultAsk = qe.execAsk();
-						qe.close();
-						model.close();
-						if (resultAsk) {
-							// Model contains the specified triple
-							// Triple should be added
-							triplesToAdd += subject + " " + predicate + " " + object + " . \n";
-						} else {
-							// Triple should be deleted
-							triplesToDelete += subject + " " + predicate + " " + object + " . \n";
-						}
-					}
-				}
-				// Update the merged graph
-				// Insert triplesToAdd
-				RevisionManagementOriginal.executeINSERT(graphNameOfMerged, triplesToAdd);
-				// Delete triplesToDelete
-				RevisionManagementOriginal.executeDELETE(graphNameOfMerged, triplesToDelete);
-			}
-		}
-		
-		// Calculate the add and delete sets
-		
-		// Get all added triples (concatenate all triples which are in MERGED but not in A and all triples which are in MERGED but not in B)
-		String queryAddedTriples = String.format(
-				  "CONSTRUCT {?s ?p ?o} %n"
-				+ "WHERE { %n"
-				+ "	GRAPH <%s> { ?s ?p ?o } %n"
-				+ "	FILTER NOT EXISTS { "
-				+ "		GRAPH <%s> { ?s ?p ?o } %n"
-				+ "	} %n"
-				+ "}", graphNameOfMerged, graphNameOfBranchA);
-		
-		String addedTriples = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
-		
-		queryAddedTriples = String.format(
-				  "CONSTRUCT {?s ?p ?o} %n"
-				+ "WHERE { %n"
-				+ "	GRAPH <%s> { ?s ?p ?o } %n"
-				+ "	FILTER NOT EXISTS { %n"
-				+ "		GRAPH <%s> { ?s ?p ?o } %n"
-				+ "	} %n"
-				+ "}", graphNameOfMerged, graphNameOfBranchB);
 
-		addedTriples += TripleStoreInterfaceSingleton.get().executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
-		
-		// Get all removed triples (concatenate all triples which are in A but not in MERGED and all triples which are in B but not in MERGED)
-		String queryRemovedTriples = String.format(
-				  "CONSTRUCT {?s ?p ?o} %n"
-				+ "WHERE { %n"
-				+ "	GRAPH <%s> { ?s ?p ?o } %n"
-				+ "	FILTER NOT EXISTS { %n"
-				+ "		GRAPH <%s> { ?s ?p ?o } %n"
-				+ "	} %n"
-				+ "}", graphNameOfBranchA, graphNameOfMerged);
-		
-		String removedTriples = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
-		
-		queryRemovedTriples = String.format(
-				  "CONSTRUCT {?s ?p ?o} %n"
-				+ "WHERE { %n"
-				+ "	GRAPH <%s> { ?s ?p ?o } %n"
-				+ "	FILTER NOT EXISTS { %n"
-				+ "		GRAPH <%s> { ?s ?p ?o } %n"
-				+ "	} %n"
-				+ "}", graphNameOfBranchB, graphNameOfMerged);
-		
-		removedTriples += TripleStoreInterfaceSingleton.get().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
-
-		// Create list with the 2 predecessors - the order is important - fist item will specify the branch were the new merged revision will be created
-		ArrayList<String> usedRevisionNumbers = new ArrayList<String>();
-		usedRevisionNumbers.add(commit.branchNameB);
-		usedRevisionNumbers.add(commit.branchNameA);
-
-		// TODO This does currently not work => change to merge commit
-		//return RevisionManagementOriginal.createNewRevision(commit.graphName, addedTriples, removedTriples, commit.user, commit.message, usedRevisionNumbers);
-		return null;
-	}
-	
 	/**
 	 * Create a rebase merged revision.
 	 * 
-	 * @param graphName the graph name
-	 * @param branchNameA the name of branch A
-	 * @param branchNameB the name of branch B
-	 * @param user the user
-	 * @param commitMessage the commit message
-	 * @param graphNameDifferenceTripleModel the graph name of the difference triple model
-	 * @param graphNameRevisionProgressA the graph name of the revisions progress A
-	 * @param uriA the URI A
-	 * @param graphNameRevisionProgressB the graph name of the revisions progress B
-	 * @param uriB the URI B
-	 * @param uriSDD the URI of the SDD
-	 * @param type the merge query type
-	 * @param triples the triples which are belonging to the current merge query in N-Triple serialization
+//	 * @param graphName the graph name
+//	 * @param branchNameA the name of branch A
+//	 * @param branchNameB the name of branch B
+//	 * @param user the user
+//	 * @param commitMessage the commit message
+//	 * @param graphNameDifferenceTripleModel the graph name of the difference triple model
+//	 * @param graphNameRevisionProgressA the graph name of the revisions progress A
+//	 * @param uriA the URI A
+//	 * @param graphNameRevisionProgressB the graph name of the revisions progress B
+//	 * @param uriB the URI B
+//	 * @param uriSDD the URI of the SDD
+//	 * @param type the merge query type
+//	 * @param triples the triples which are belonging to the current merge query in N-Triple serialization
 	 * @return new revision number
 	 * @throws InternalErrorException 
 	 */

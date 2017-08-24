@@ -120,17 +120,17 @@ public class Interface {
 			throw new QueryErrorException("Query contain errors:\n" + query);
 		}
 	}
-
-	public static MergeResult sparqlMerge(final R43plesMergeCommit commit) throws InternalErrorException {
-		if (commit.action.equals("MERGE"))
-			return mergeThreeWay(commit);
-		else if (commit.action.equals("REBASE"))
-			return mergeRebase(commit);
-		else if (commit.action.equals("MERGE FF"))
-			return mergeFastForward(commit);
-		else
-			throw new InternalErrorException("Merge Query has errors");
-	}
+//
+//	public static MergeResult sparqlMerge(final R43plesMergeCommit commit) throws InternalErrorException {
+//		if (commit.action.equals("MERGE"))
+//			return mergeThreeWay(commit);
+//		else if (commit.action.equals("REBASE"))
+//			return mergeRebase(commit);
+//		else if (commit.action.equals("MERGE FF"))
+//			return mergeFastForward(commit);
+//		else
+//			throw new InternalErrorException("Merge Query has errors");
+//	}
 
 	/**
 	 * 
@@ -147,115 +147,6 @@ public class Interface {
 				dateString, commit.message);
 
 		return result;
-	}
-
-	/**
-	 * 
-//	 * @param graphName
-//	 * @param branchNameA
-//	 * @param branchNameB
-//	 * @param with
-//	 * @param triples
-//	 * @param type
-//	 * @param sdd
-//	 * @param user
-//	 * @param commitMessage
-//	 * @param format
-	 * @return
-	 * @throws InternalErrorException
-	 */
-	public static MergeResult mergeThreeWay(final R43plesMergeCommit commit) throws InternalErrorException {
-
-		RevisionGraph graph = new RevisionGraph(commit.graphName);
-		String revisionGraph = graph.getRevisionGraphUri();
-		String revisionUriA = graph.getRevisionUri(commit.branchNameA);
-		String revisionUriB = graph.getRevisionUri(commit.branchNameB);
-
-		MergeResult mresult = new MergeResult(commit);
-
-		if (!RevisionManagementOriginal.checkGraphExistence(commit.graphName)) {
-			logger.warn("Graph <" + commit.graphName + "> does not exist.");
-			throw new InternalErrorException("Graph <" + commit.graphName + "> does not exist.");
-		}
-
-		// Check if A and B are different revisions
-		if (graph.getRevisionIdentifier(commit.branchNameA)
-				.equals(graph.getRevisionIdentifier(commit.branchNameB))) {
-			// Branches are equal - throw error
-			throw new InternalErrorException("Specified branches are equal");
-		}
-
-		// Check if both are terminal nodes
-		if (!(graph.hasBranch(commit.branchNameA)
-				&& graph.hasBranch(commit.branchNameB))) {
-			throw new InternalErrorException("No terminal nodes were used");
-		}
-
-		// Differ between MERGE query with specified SDD and without SDD
-		String usedSDDURI = graph.getSDD(commit.sdd);
-
-		// Get the common revision with shortest path
-		//TODO change when restructured to interface - only test of interface design
-		mresult.commonRevision = PathCalculationSingleton.getInstance().getCommonRevisionWithShortestPath(graph, new Revision(graph, revisionUriA, false), new Revision(graph, revisionUriB, false)).getRevisionURI();
-//		mresult.commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA,
-//				revisionUriB);
-
-		// Create the revision progress for A and B
-		String graphNameA = commit.graphName + "-RM-REVISION-PROGRESS-A";
-		String graphNameB = commit.graphName + "-RM-REVISION-PROGRESS-B";
-		String graphNameDiff = commit.graphName + "-RM-DIFFERENCE-MODEL";
-		mresult.graphDiff = graphNameDiff;
-		String uriA = "http://eatld.et.tu-dresden.de/branch-A";
-		String uriB = "http://eatld.et.tu-dresden.de/branch-B";
-
-		MergeManagement.createRevisionProgresses(revisionGraph, commit.graphName,
-				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, mresult.commonRevision,revisionUriA),
-				graphNameA, uriA, 
-				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph,	mresult.commonRevision, revisionUriB),
-				graphNameB, uriB);
-
-		// Create difference model
-		MergeManagement.createDifferenceTripleModel(commit.graphName, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
-				usedSDDURI);
-
-		// Differ between the different merge queries
-		if ((commit.type != null) && (commit.type.equalsIgnoreCase("AUTO")) && !commit.with) {
-			logger.debug("AUTO MERGE query detected");
-			// Create the merged revision
-			mresult.newRevisionNumber = MergeManagement.createMergedRevision(commit, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI,
-					MergeQueryTypeEnum.AUTO);
-		} else if ((commit.type != null) && (commit.type.equalsIgnoreCase("MANUAL")) && commit.with) {
-			logger.debug("MANUAL MERGE query detected");
-			// Create the merged revision
-			mresult.newRevisionNumber = MergeManagement.createMergedRevision(commit, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI,
-					MergeQueryTypeEnum.MANUAL);
-		} else if ((commit.type == null) && commit.with) {
-			logger.debug("MERGE WITH query detected");
-			// Create the merged revision
-			mresult.newRevisionNumber = MergeManagement.createMergedRevision(commit, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI,
-					MergeQueryTypeEnum.WITH);
-		} else if ((commit.type == null) && !commit.with) {
-			logger.debug("MERGE query detected");
-			// Check if difference model contains conflicts
-			String queryASK = String.format("ASK { %n" + "	GRAPH <%s> { %n"
-					+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
-					+ "	} %n" + "}", graphNameDiff);
-			if (TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK)) {
-				// Difference model contains conflicts
-				// Return the conflict model to the client
-				mresult.hasConflict = true;
-				mresult.conflictModel = RevisionManagementOriginal.getContentOfGraph(graphNameDiff, commit.format);
-
-			} else {
-				// Difference model contains no conflicts
-				// Create the merged revision
-				mresult.newRevisionNumber = MergeManagement.createMergedRevision(commit, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI,
-						MergeQueryTypeEnum.COMMON);
-			}
-		} else {
-			throw new InternalErrorException("This is not a valid MERGE query");
-		}
-		return mresult;
 	}
 
 	/**
@@ -303,11 +194,12 @@ public class Interface {
 		String uriA = "http://eatld.et.tu-dresden.de/branch-A";
 		String uriB = "http://eatld.et.tu-dresden.de/branch-B";
 
-		MergeManagement.createRevisionProgresses(revisionGraph, commit.graphName,
-				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriA),
-				graphNameA, uriA,
-				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriB),
-				graphNameB, uriB);
+		//TODO Change parameter to Path
+//		MergeManagement.createRevisionProgresses(revisionGraph, commit.graphName,
+//				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriA),
+//				graphNameA, uriA,
+//				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriB),
+//				graphNameB, uriB);
 
 		// Create difference model
 		MergeManagement.createDifferenceTripleModel(commit.graphName, graphNameDiff, graphNameA, uriA, graphNameB, uriB,

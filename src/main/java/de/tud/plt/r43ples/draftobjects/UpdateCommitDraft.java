@@ -227,11 +227,10 @@ public class UpdateCommitDraft extends CommitDraft {
 	 * @throws InternalErrorException
 	 */
 	private UpdateCommit addMetaInformation(RevisionDraft draft) throws InternalErrorException {
-		String personUri = RevisionManagementOriginal.getUserName(getUser());
+		String personUri = RevisionManagementOriginal.getUserURI(getUser());
 
 		String revisionUri = draft.getRevisionURI();
-
-		String commitUri = draft.getRevisionGraph().getGraphName() + "-commit-" + draft.getNewRevisionIdentifier();
+		String commitUri = getRevisionManagement().getNewCommitURI(draft.getRevisionGraph(), draft.getNewRevisionIdentifier());
 		String branchUri = draft.getRevisionGraph().getBranchUri(draft.getDerivedFromIdentifier());
 		String revUriOld = draft.getRevisionGraph().getRevisionUri(draft.getDerivedFromRevisionIdentifier());
 
@@ -301,25 +300,7 @@ public class UpdateCommitDraft extends CommitDraft {
 			if (ch=='{') count_parenthesis++;
 			if (ch=='}') count_parenthesis--;
 		}
-		String substring = string.substring(start_pos, end_pos);
-		return substring;
-	}
-
-	/**
-	 * Move the reference in the specified revision graph from the old revision to the new one.
-	 *
-	 * @param revisionGraph revision graph in the triplestore
-	 * @param branchName name of the branch
-	 * @param revisionOld uri of the old revision
-	 * @param revisionNew uri of the new revision
-	 *  */
-	public void moveBranchReference(final String revisionGraph, final String branchName, final String revisionOld, final String revisionNew) {
-		// delete old reference and create new one
-		String query = Config.prefixes	+ String.format(""
-						+ "DELETE DATA { GRAPH <%1$s> { <%2$s> rmo:references <%3$s>. } };"
-						+ "INSERT DATA { GRAPH <%1$s> { <%2$s> rmo:references <%4$s>. } }",
-				revisionGraph, branchName, revisionOld, revisionNew);
-		getTripleStoreInterface().executeUpdateQuery(query);
+		return string.substring(start_pos, end_pos);
 	}
 
 }

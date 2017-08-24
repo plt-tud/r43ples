@@ -118,6 +118,23 @@ public class R43plesCore implements R43plesCoreInterface {
         return referenceCreationCommitDraft.createCommitInTripleStore();
     }
 
+    /**
+     * Create a new merge commit.
+     *
+     * @param request the request received by R43ples
+     * @return the created merge commit
+     * @throws InternalErrorException
+     */
+    @Override
+    public MergeCommit createMergeCommit(R43plesRequest request) throws InternalErrorException {
+        MergeCommitDraft mergeCommitDraft = new MergeCommitDraft(request);
+        return mergeCommitDraft.createCommitInTripleStore();
+    }
+
+
+
+
+
     @Override
     public ThreeWayMergeCommit createThreeWayMergeCommit(R43plesRequest request) throws InternalErrorException {
         return null;

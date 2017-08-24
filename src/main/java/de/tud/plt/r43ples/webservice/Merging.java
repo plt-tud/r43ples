@@ -141,7 +141,8 @@ public class Merging {
 		else {			
 			MergeCommitModel commitModel = new MergeCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way", null);
 			R43plesMergeCommit commit = new R43plesMergeCommit(graphName, branch1, branch2, user, message, "text/turtle");
-			MergeResult mresult = Interface.mergeThreeWay(commit);
+			// TODO Change to new merge commit structure using R43ples core
+			MergeResult mresult = null;//Interface.mergeThreeWay(commit);
 							
 			if(!mresult.hasConflict){
 				response.entity(commitModel.getReportView());				
