@@ -9,11 +9,9 @@ import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.draftobjects.HeaderInformation;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 import java.io.IOException;
 
@@ -38,7 +36,6 @@ public class TestMultipleGraph extends R43plesTest {
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.test.conf");
 		ds1 = SampleDataSet.createSampleDataset1();
 		ds2 = SampleDataSet.createSampleDataset2();
@@ -57,13 +54,12 @@ public class TestMultipleGraph extends R43plesTest {
 	}
 
 	/**
-	 * @throws IOException 
-	 * @throws SAXException 
-	 * @throws InternalErrorException 
+     * @throws IOException
+     * @throws InternalErrorException
 	 */
 	@Test
-	public final void testMultipleGraphs() throws SAXException, IOException, InternalErrorException {
-		result = ep.sparql("text/turtle", get_query_template("master-1", "master-1")).getEntity().toString();
+    public final void testMultipleGraphs() throws IOException, InternalErrorException {
+        result = ep.sparql("text/turtle", get_query_template("master-1", "master-1")).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-1-1.ttl");
         assertTrue(check_isomorphism(result, expected));
 
@@ -77,13 +73,12 @@ public class TestMultipleGraph extends R43plesTest {
     }
 	
 	/**
-	 * @throws IOException 
-	 * @throws SAXException 
-	 * @throws InternalErrorException 
+     * @throws IOException
+     * @throws InternalErrorException
 	 */
 	@Test
-	public final void testMultipleGraphsQueryRewriting() throws SAXException, IOException, InternalErrorException {
-		result = ep.sparql("text/turtle", get_query_template("master-1", "master-1"), true).getEntity().toString();
+    public final void testMultipleGraphsQueryRewriting() throws IOException, InternalErrorException {
+        result = ep.sparql("text/turtle", get_query_template("master-1", "master-1"), true).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("response-TwoGraphs-1-1.ttl");
         assertTrue(check_isomorphism(result, expected));
 
