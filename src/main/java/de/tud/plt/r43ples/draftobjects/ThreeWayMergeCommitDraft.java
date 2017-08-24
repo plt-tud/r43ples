@@ -10,7 +10,6 @@ import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagementOriginal;
-import de.tud.plt.r43ples.merging.MergeManagement;
 import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
 import org.apache.log4j.Logger;
@@ -89,14 +88,14 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
         Revision fromRevision = new Revision(getRevisionGraph(), revisionUriFrom, false);
         Revision intoRevision = new Revision(getRevisionGraph(), revisionUriInto, false);
 
-        MergeManagement.createRevisionProgresses(revisionGraphURI, getGraphName(),
+        createRevisionProgresses(revisionGraphURI, getGraphName(),
                 this.getPathCalculationInterface().getPathBetweenStartAndTargetRevision(getRevisionGraph(), commonRevision, fromRevision),
                 namedGraphUriFrom, uriA,
                 this.getPathCalculationInterface().getPathBetweenStartAndTargetRevision(getRevisionGraph(), commonRevision, intoRevision),
                 namedGraphUriInto, uriB, commonRevision);
 
         // Create difference model
-        MergeManagement.createDifferenceTripleModel(getGraphName(), namedGraphUriDiff, namedGraphUriFrom, uriA, namedGraphUriInto, uriB,
+        createDifferenceTripleModel(getGraphName(), namedGraphUriDiff, namedGraphUriFrom, uriA, namedGraphUriInto, uriB,
                 usedSDDURI);
 
         // The created revision

@@ -1,21 +1,13 @@
 package de.tud.plt.r43ples.management;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
-import de.tud.plt.r43ples.merging.MergeManagement;
-import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
-import de.tud.plt.r43ples.merging.MergeResult;
-import de.tud.plt.r43ples.merging.RebaseControl;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 public class Interface {
@@ -118,120 +110,7 @@ public class Interface {
 		}
 	}
 
-	/**
-	 * 
-	 * @param commit
-	 * @return
-	 * @throws InternalErrorException
-	 */
-	public static MergeResult mergeRebase(final R43plesMergeCommit commit) throws InternalErrorException {
 
-		RevisionGraph graph = new RevisionGraph(commit.graphName);
-		String revisionGraph = graph.getRevisionGraphUri();
-		Revision revisionA = graph.getRevision(commit.branchNameA);
-		Revision revisionB = graph.getRevision(commit.branchNameB);
-		String revisionUriA = revisionA.getRevisionURI();
-		String revisionUriB = revisionB.getRevisionURI();
-
-		MergeResult mresult = new MergeResult(commit);
-
-		RebaseControl rebaseControl =  new RebaseControl(commit);
-		rebaseControl.checkIfRebaseIsPossible();
-
-		// Differ between MERGE query with specified SDD and without SDD
-		String usedSDDURI = graph.getSDD(commit.sdd);
-
-		// Get the common revision with shortest path
-		//TODO change when restructured to interface - only test of interface design
-		String commonRevision = PathCalculationSingleton.getInstance()
-                .getCommonRevisionWithShortestPath(graph, revisionA, revisionB)
-                .getRevisionURI();
-
-//		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA,
-//				revisionUriB);
-
-		// create the patch and patch group
-		LinkedList<String> revisionList = MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph,
-				commonRevision, revisionUriA);
-
-		rebaseControl.createPatchGroupOfBranch(revisionGraph, revisionUriB, revisionList);
-
-		// Create the revision progress for A and B
-		String graphNameA = commit.graphName + "-RM-REVISION-PROGRESS-A";
-		String graphNameB = commit.graphName + "-RM-REVISION-PROGRESS-B";
-		String graphNameDiff = commit.graphName + "-RM-DIFFERENCE-MODEL";
-		String uriA = "http://eatld.et.tu-dresden.de/branch-A";
-		String uriB = "http://eatld.et.tu-dresden.de/branch-B";
-
-		//TODO Change parameter to Path
-//		MergeManagement.createRevisionProgresses(revisionGraph, commit.graphName,
-//				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriA),
-//				graphNameA, uriA,
-//				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriB),
-//				graphNameB, uriB);
-
-		// Create difference model
-		MergeManagement.createDifferenceTripleModel(commit.graphName, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
-				usedSDDURI);
-		
-		if ((commit.type != null) && (commit.type.equalsIgnoreCase("AUTO")) && !commit.with) {
-			logger.info("AUTO REBASE query detected");
-			// Create the merged revision
-			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(commit, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
-					usedSDDURI, MergeQueryTypeEnum.AUTO);
-			String addedAsNTriples = addedAndRemovedTriples.get(0);
-			String removedAsNTriples = addedAndRemovedTriples.get(1);
-
-			String basisRevisionNumber = rebaseControl.forceRebaseProcess();
-			//TODO This will change because of the new Commit classes
-//			RevisionManagementOriginal.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,	basisRevisionNumber);
-			mresult.graphStrategy = "auto-rebase";
-		} else if ((commit.type != null) && (commit.type.equalsIgnoreCase("MANUAL")) && !commit.with) {
-			logger.info("MANUAL REBASE query detected");
-			// Create the merged revision
-			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(commit, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
-					usedSDDURI, MergeQueryTypeEnum.MANUAL);
-			String addedAsNTriples = addedAndRemovedTriples.get(0);
-			String removedAsNTriples = addedAndRemovedTriples.get(1);
-
-			String basisRevisionNumber = rebaseControl.forceRebaseProcess();
-			//TODO This will change because of the new Commit classes
-//			RevisionManagementOriginal.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,
-//					basisRevisionNumber);
-			mresult.graphStrategy = "manual-rebase";
-		} else if ((commit.type == null) && commit.with) {
-			logger.info("REBASE WITH query detected");
-			// Create the merged revision -- newTriples
-			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(commit, graphNameDiff, graphNameA, uriA, graphNameB, uriB,
-					usedSDDURI, MergeQueryTypeEnum.WITH);
-			String addedAsNTriples = addedAndRemovedTriples.get(0);
-			String removedAsNTriples = addedAndRemovedTriples.get(1);
-
-			String basisRevisionNumber = rebaseControl.forceRebaseProcess();
-			//TODO This will change because of the new Commit classes
-//			RevisionManagementOriginal.createNewRevision(commit.graphName, addedAsNTriples, removedAsNTriples, commit.user, commit.message,
-//					basisRevisionNumber);
-
-			mresult.graphStrategy = "with-rebase";
-		} else if ((commit.type == null) && !commit.with) {
-			logger.info("COMMON REBASE query detected");
-			// Check if difference model contains conflicts
-			String queryASK = String.format("ASK { %n" + "	GRAPH <%s> { %n"
-					+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
-					+ "	} %n" + "}", graphNameDiff);
-			if (TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK)) {
-				mresult.hasConflict = true;
-			} else {
-				rebaseControl.forceRebaseProcess();
-			}
-			mresult.conflictModel = RevisionManagementOriginal.getContentOfGraph(graphNameDiff, commit.format);
-
-		} else {
-			throw new InternalErrorException("This is not a valid MERGE query");
-		}
-
-		return mresult;
-	}
 
 
 }
