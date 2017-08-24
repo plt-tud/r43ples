@@ -3,16 +3,11 @@
  */
 package de.tud.plt.r43ples.webservice;
 
-import static org.hamcrest.core.StringContains.containsString;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.MediaType;
-
+import de.tud.plt.r43ples.dataset.SampleDataSet;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.commons.configuration.ConfigurationException;
-import org.custommonkey.xmlunit.XMLUnit;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.AfterClass;
@@ -20,10 +15,12 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.tud.plt.r43ples.dataset.SampleDataSet;
-import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.MediaType;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import static org.hamcrest.core.StringContains.containsString;
 
 /**
  * @author Markus Graube
@@ -40,7 +37,6 @@ public class TestMisc extends JerseyTest {
     
 	@BeforeClass
 	public static void setUpBeforeClass() throws ConfigurationException, URISyntaxException, IOException, InternalErrorException {
-		XMLUnit.setIgnoreWhitespace(true);
 		Config.readConfig("r43ples.test.conf");
 		dataset = SampleDataSet.createSampleDataSetComplexStructure();
 	}

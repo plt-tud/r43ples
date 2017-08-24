@@ -1,17 +1,13 @@
 package de.tud.plt.r43ples.iohelper;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
-import java.util.Map.Entry;
-
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import de.tud.plt.r43ples.management.Config;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.Map.Entry;
 
 public class JenaModelManagement {
 	
@@ -69,10 +65,20 @@ public class JenaModelManagement {
 	 * @return the model
 	 */
 	public static Model readNTripleStringToJenaModel(String triples) {
-		return readStringToJenaModel(triples, "N-TRIPLE");
-	}
-	
-	
+        return readStringToJenaModel(triples, "N-TRIPLE");
+    }
+
+    /**
+     * Read Turtle string to jena model.
+     *
+     * @param triples the triples in turtle serialization
+     * @return the model
+     */
+    public static Model readTurtleStringToJenaModel(String triples) {
+        return readStringToJenaModel(triples, "TURTLE");
+    }
+
+
 	/**
 	 * Converts a jena model to the specified serialization. 
 	 * 
@@ -89,17 +95,27 @@ public class JenaModelManagement {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 			return "";
-		}
-	}
-	
-	/**
-	 * Converts a jena model to N-Triple serialization. 
-	 * 
-	 * @param model the jena model
+        }
+    }
+
+    /**
+     * Converts a jena model to N-Triple serialization.
+     *
+     * @param model the jena model
 	 * @return the string which contains the N-Triples
 	 */
-	public static String convertJenaModelToNTriple(Model model) {
-		return convertJenaModelToString(model, "N-TRIPLES");
-	}
+    public static String convertJenaModelToNTriple(Model model) {
+        return convertJenaModelToString(model, "N-TRIPLES");
+    }
+
+    /**
+     * Converts a jena model to Turtle serialization.
+     *
+     * @param model the jena model
+     * @return the string which contains the Turtle serialization
+     */
+    public static String convertJenaModelToTurtle(Model model) {
+        return convertJenaModelToString(model, "TURTLE");
+    }
 
 }
