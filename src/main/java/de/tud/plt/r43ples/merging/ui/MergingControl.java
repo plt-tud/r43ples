@@ -10,7 +10,6 @@ import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.R43plesRequest;
-import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.TripleObjectTypeEnum;
 import de.tud.plt.r43ples.merging.management.ProcessManagement;
 import de.tud.plt.r43ples.merging.model.structure.*;
@@ -59,34 +58,34 @@ public class MergingControl {
 	
 	
 
-	/**
-	 * 
-	 * @param response
-	 * @param graphName
-	 * @param branchNameA
-	 * @param branchNameB
-	 * @param format
-	 * @throws InternalErrorException
-	 */
-	public void getMergeProcess(MergeCommitModel commitModel, MergeResult mresult) throws InternalErrorException {
-		logger.info("Merge query produced conflicts.");
-		this.commitModel = commitModel;
-		this.commonRevision = mresult.commonRevision;
-		String conflictModel = mresult.conflictModel;
-
-
-        Model jenaModel = JenaModelManagement.readTurtleStringToJenaModel(conflictModel);
-
-        // create model for triple view
-		differenceModel = ProcessManagement.readDifferenceModel(jenaModel);		
-
-		// Create the individual models of both branches
-		individualList = createIndividualsList(commitModel, jenaModel);
-		
-		// create high level view instances
-		//highLevelChangeModel = ProcessManagement.createHighLevelChangeRenamingModel(differenceModel);
-		highLevelChangeTableModel = ProcessManagement.createHighLevelChangeTableModel(highLevelChangeModel);
-	}
+//	/**
+//	 *
+//	 * @param response
+//	 * @param graphName
+//	 * @param branchNameA
+//	 * @param branchNameB
+//	 * @param format
+//	 * @throws InternalErrorException
+//	 */
+//	public void getMergeProcess(MergeCommitModel commitModel, MergeResult mresult) throws InternalErrorException {
+//		logger.info("Merge query produced conflicts.");
+//		this.commitModel = commitModel;
+//		this.commonRevision = mresult.commonRevision;
+//		String conflictModel = mresult.conflictModel;
+//
+//
+//        Model jenaModel = JenaModelManagement.readTurtleStringToJenaModel(conflictModel);
+//
+//        // create model for triple view
+//		differenceModel = ProcessManagement.readDifferenceModel(jenaModel);
+//
+//		// Create the individual models of both branches
+//		individualList = createIndividualsList(commitModel, jenaModel);
+//
+//		// create high level view instances
+//		//highLevelChangeModel = ProcessManagement.createHighLevelChangeRenamingModel(differenceModel);
+//		highLevelChangeTableModel = ProcessManagement.createHighLevelChangeTableModel(highLevelChangeModel);
+//	}
 	
 		
 	

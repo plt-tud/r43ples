@@ -1,19 +1,16 @@
 package de.tud.plt.r43ples.draftobjects;
 
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.exception.OutdatedException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
-import de.tud.plt.r43ples.existentobjects.*;
-import de.tud.plt.r43ples.management.*;
-import de.tud.plt.r43ples.merging.SDDTripleStateEnum;
+import de.tud.plt.r43ples.existentobjects.MergeCommit;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.optimization.PathCalculationInterface;
 import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
-import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,8 +28,8 @@ public class MergeCommitDraft extends CommitDraft {
     private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
     /** The merge query pattern. **/
     private final Pattern patternMergeQuery = Pattern.compile(
-            "(?<action>MERGE|REBASE|MERGE FF)\\s*(?<type>FORCE|AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(SDD\\s*<(?<sdd>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameFrom>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameInto>[^\"]*?)\"(?<with>\\s*WITH\\s*\\{(?<triples>.*)\\})?",
-            patternModifier); //TODO add COUNT for advanced rebase
+            "(?<action>MERGE)\\s*(?<type>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(SDD\\s*<(?<sdd>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameFrom>[^\"]*?)\"\\s*INTO\\s*BRANCH\\s*\"(?<branchNameInto>[^\"]*?)\"(?<with>\\s*WITH\\s*\\{(?<triples>.*)\\})?",
+            patternModifier);
 
     /** The triples of the query WITH part. **/
     private String triples;
@@ -130,9 +127,6 @@ public class MergeCommitDraft extends CommitDraft {
                 case "MERGE":
                     action = MergeActions.MERGE;
                     break;
-                case "PICK":
-                    action = MergeActions.PICK;
-                    break;
                 default:
                     action = null;
                     break;
@@ -218,10 +212,6 @@ public class MergeCommitDraft extends CommitDraft {
                 FastForwardMergeCommitDraft fastForwardMergeCommitDraft = new FastForwardMergeCommitDraft(graphName, branchNameFrom, branchNameInto, getUser(), getMessage(), sdd, triples, type, with);
                 return fastForwardMergeCommitDraft.createCommitInTripleStore();
             }
-        } else if (action.equals(MergeActions.PICK)) {
-            // TODO Rebase
-            // TODO Advanced rebase
-            throw new InternalErrorException("Rebase and advanced rebase currently not implemented.");
         } else {
             throw new QueryErrorException("Error in query: " + getRequest().query_sparql);
         }

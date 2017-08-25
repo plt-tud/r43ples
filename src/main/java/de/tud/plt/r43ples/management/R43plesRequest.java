@@ -34,7 +34,7 @@ public class R43plesRequest {
 			patternModifier);
     /** Pattern for MERGE queries. **/
 	private final Pattern patternMergeQuery =  Pattern.compile(
-			"(MERGE|MERGE FF|REBASE)\\s*(FORCE|AUTO|MANUAL)?\\s*GRAPH\\s*<([^>]*?)>\\s*(SDD\\s*<([^>]*?)>)?\\s*BRANCH\\s*\"([^\"]*?)\"\\s*INTO\\s*\"([^\"]*?)\"",
+			"(MERGE)\\s*(AUTO|MANUAL)?\\s*GRAPH\\s*<([^>]*?)>\\s*(SDD\\s*<([^>]*?)>)?\\s*BRANCH\\s*\"([^\"]*?)\"\\s*INTO\\s*BRANCH\\s*\"([^\"]*?)\"",
 			patternModifier);
 	
 	/** The original query received by R43ples. **/

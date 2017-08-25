@@ -205,7 +205,7 @@ public class TestThreeWayMerge extends R43plesTest {
 	private String createAutoMergeQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB) {
 		return String.format( "USER \"%s\" %n"
 							+ "MESSAGE \"%s\" %n"
-							+ "MERGE AUTO GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\"", user, commitMessage, graphName, sdd, branchNameA, branchNameB);
+							+ "MERGE AUTO GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO BRANCH \"%s\"", user, commitMessage, graphName, sdd, branchNameA, branchNameB);
 	}
 	
 	
@@ -223,7 +223,7 @@ public class TestThreeWayMerge extends R43plesTest {
 	private String createCommonMergeQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB) {
 		return String.format( "USER \"%s\" %n"
 							+ "MESSAGE \"%s\" %n"
-							+ "MERGE GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\"", user, commitMessage, graphName, sdd, branchNameA, branchNameB);
+							+ "MERGE GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO BRANCH \"%s\"", user, commitMessage, graphName, sdd, branchNameA, branchNameB);
 	}
 
 	
@@ -242,7 +242,7 @@ public class TestThreeWayMerge extends R43plesTest {
 	private String createMergeWithQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB, String triples) {
 		return String.format( "USER \"%s\" %n"
 							+ "MESSAGE \"%s\" %n"
-							+ "MERGE GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\" WITH { %n"
+							+ "MERGE GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO BRANCH \"%s\" WITH { %n"
 							+ "	%s %n"
 							+ "}", user, commitMessage, graphName, sdd, branchNameA, branchNameB, triples);
 	}
@@ -263,7 +263,7 @@ public class TestThreeWayMerge extends R43plesTest {
 	private String createManualMergeQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB, String triples) {
 		return String.format( "USER \"%s\" %n"
 							+ "MESSAGE \"%s\" %n"
-							+ "MERGE MANUAL GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO \"%s\" WITH { %n"
+							+ "MERGE MANUAL GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO BRANCH \"%s\" WITH { %n"
 							+ "	%s %n"
 							+ "}", user, commitMessage, graphName, sdd, branchNameA, branchNameB, triples);
 	}

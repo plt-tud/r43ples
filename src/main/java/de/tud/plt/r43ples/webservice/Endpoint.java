@@ -24,7 +24,6 @@ import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
 import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
 import de.tud.plt.r43ples.existentobjects.InitialCommit;
 import de.tud.plt.r43ples.existentobjects.MergeCommit;
-import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.*;
 import org.apache.log4j.Logger;
@@ -37,7 +36,6 @@ import com.hp.hpl.jena.shared.NoWriterForLangException;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
-import de.tud.plt.r43ples.merging.MergeResult;
 import de.tud.plt.r43ples.merging.ui.MergingControl;
 
 
