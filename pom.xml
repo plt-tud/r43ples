@@ -349,69 +349,65 @@
 			    <artifactId>coveralls-maven-plugin</artifactId>
 			    <version>3.1.0</version>
 			</plugin>
-                        
-                        <plugin>
-                                <groupId>org.codehaus.mojo</groupId>
-                                <artifactId>exec-maven-plugin</artifactId>
-                                <version>1.4.0</version>
-                                <executions>
-                                        <execution>
-                                                <goals>
-                                                        <goal>exec</goal>
-                                                </goals>
-                                        </execution>
-                                </executions>
-                                <configuration>
-                                    <executable>java</executable>
-                                        <arguments>
-                                            <argument>-classpath</argument>
-                                            <classpath />
-                                            <argument>${exec.java.mainclass}</argument>
-                                        </arguments>
-                                </configuration>
-                        </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <executable>java</executable>
+                    <arguments>
+                        <argument>-classpath</argument>
+                        <classpath/>
+                        <argument>${exec.java.mainclass}</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.10.4</version>
+                <configuration>
+                    <doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
+                    <docletArtifact>
+                        <groupId>org.umlgraph</groupId>
+                        <artifactId>umlgraph</artifactId>
+                        <version>5.6.6</version>
+                    </docletArtifact>
+                    <additionalparam>
+                        -all
+                        -inferrel
+                        -inferdep
+                        -hide java.*
+                        -collpackages java.util.*
+                        -qualify
+                        -postfixpackage
+                        -views
+                    </additionalparam>
+                    <useStandardDocletOptions>true</useStandardDocletOptions>
+                    <charset>UTF-8</charset>
+                    <encoding>UTF-8</encoding>
+                    <docencoding>UTF-8</docencoding>
+                    <breakiterator>true</breakiterator>
+                    <version>true</version>
+                    <author>true</author>
+                    <keywords>true</keywords>
+                    <failOnError>false</failOnError>
+                </configuration>
+            </plugin>
 
 		</plugins>
 	</build>
 
 	<reporting>
 		<plugins>
-			<plugin>
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>3.0.0-M1</version>
-				<configuration>
-					<doclet>org.umlgraph.doclet.UmlGraphDoc</doclet>
-			          <docletArtifact>
-			            <groupId>org.umlgraph</groupId>
-			            <artifactId>umlgraph</artifactId>
-			            <version>5.6.6</version>
-			          </docletArtifact>
-			          <additionalparam>
-			          	-all
-			          	-inferrel  
-			          	-inferdep 
-			          	-hide java.* 
-			          	-collpackages java.util.* 
-			          	-qualify 
-			          	-postfixpackage
-			          	-views
-			          </additionalparam>
-			          <useStandardDocletOptions>true</useStandardDocletOptions>
-					<charset>UTF-8</charset>
-					<encoding>UTF-8</encoding>
-					<docencoding>UTF-8</docencoding>
-					<breakiterator>true</breakiterator>
-					<version>true</version>
-					<author>true</author>
-					<keywords>true</keywords>
-              		<failOnError>false</failOnError>
-				</configuration>
-			</plugin>
- 			<plugin>
- 			 	<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.0.1</version>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 		        <artifactId>maven-jxr-plugin</artifactId>
@@ -461,7 +457,6 @@
 				</configuration>
 			</plugin>
 		</plugins>
-
 	</reporting>	
 
 	<profiles>

@@ -5,10 +5,7 @@ import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
-
-import java.io.IOException;
 
 /**
  * Creates different sample data sets.
@@ -282,7 +279,6 @@ public class SampleDataSet {
 	 *
 	 *
 	 * @throws InternalErrorException
-	 * @throws IOException
 	 *
 	 */
 	public static String createSampleDataSetRebase() throws InternalErrorException {
@@ -348,7 +344,7 @@ public class SampleDataSet {
 	/**
 	 *
 	 *
-	 * @returns graphName
+	 * @return graphName
 	 * @throws InternalErrorException
 	 */
 	public static String createSampleDataSetMergingClasses() throws InternalErrorException {
@@ -432,7 +428,7 @@ public class SampleDataSet {
 	 *
 	 * Contains the renaming of 1A to 1G.
 	 *
-	 * @returns graphName
+	 * @return graphName
 	 * @throws InternalErrorException
 	 */
 	public static String createSampleDataSetRenaming() throws InternalErrorException {
@@ -517,7 +513,7 @@ public class SampleDataSet {
 	 * ---X----------+-------------X-------------------X-----------------------(MASTER)-----------------------------+--
 	 * DEL: -                   DEL: C              DEL: M
 	 *
-	 * @returns graphName
+	 * @return graphName
 	 * @throws InternalErrorException
 	 */
 	public static String createSampleDataSetComplexStructure() throws InternalErrorException {
