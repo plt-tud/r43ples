@@ -131,18 +131,29 @@ public class R43plesCore implements R43plesCoreInterface {
         return mergeCommitDraft.createCommitInTripleStore();
     }
 
-
-
-
-
     @Override
     public ThreeWayMergeCommit createThreeWayMergeCommit(R43plesRequest request) throws InternalErrorException {
+        //TODO
         return null;
     }
 
     @Override
     public ThreeWayMergeCommit createThreeWayMergeCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifierSource, String derivedFromIdentifierTarget) throws InternalErrorException {
+        //TODO
         return null;
+    }
+
+    /**
+     * Create a new pick commit.
+     *
+     * @param request the request received by R43ples
+     * @return the created pick commit
+     * @throws InternalErrorException
+     */
+    @Override
+    public PickCommit createPickCommit(R43plesRequest request) throws InternalErrorException {
+        PickCommitDraft pickCommitDraft = new PickCommitDraft(request);
+        return pickCommitDraft.createCommitInTripleStore();
     }
 
 }

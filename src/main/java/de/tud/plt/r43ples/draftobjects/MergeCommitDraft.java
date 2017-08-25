@@ -167,7 +167,6 @@ public class MergeCommitDraft extends CommitDraft {
         if (!foundEntry) {
             throw new QueryErrorException("Error in query: " + getRequest().query_sparql);
         }
-
     }
 
     /**

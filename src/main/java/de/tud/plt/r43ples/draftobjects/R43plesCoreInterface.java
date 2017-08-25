@@ -116,4 +116,13 @@ public interface R43plesCoreInterface {
      */
     ThreeWayMergeCommit createThreeWayMergeCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifierSource, String derivedFromIdentifierTarget) throws InternalErrorException;
 
+    /**
+     * Create a new pick commit.
+     *
+     * @param request the request received by R43ples
+     * @return the created pick commit
+     * @throws InternalErrorException
+     */
+    PickCommit createPickCommit(R43plesRequest request) throws InternalErrorException;
+
 }

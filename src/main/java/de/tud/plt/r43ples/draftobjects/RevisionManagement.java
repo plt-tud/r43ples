@@ -247,7 +247,7 @@ public class RevisionManagement {
      * @throws InternalErrorException
      */
     protected String getNewFastForwardMergeCommitURI(RevisionGraph revisionGraph, String sourceRevisionIdentifier, String targetRevisionIdentifier) throws InternalErrorException {
-        String commitURI = revisionGraph.getGraphName() + "-ff-commit-merge-" + sourceRevisionIdentifier + "-" + targetRevisionIdentifier;
+        String commitURI = revisionGraph.getGraphName() + "-commit-ff-merge-" + sourceRevisionIdentifier + "-" + targetRevisionIdentifier;
         if (!checkNamedGraphExistence(commitURI)) {
             return commitURI;
         } else {
@@ -259,13 +259,18 @@ public class RevisionManagement {
      * Get a new rebase merge commit URI.
      *
      * @param revisionGraph the corresponding revision graph
-     * @param sourceRevisionIdentifier the source revision identifier
+     * @param startRevisionIdentifier the start revision identifier
+     * @param endRevisionIdentifier the end revision identifier
+     * @param targetBranchIdentifier the target branch identifier
      * @param targetRevisionIdentifier the target revision identifier
      * @return the new commit URI
      * @throws InternalErrorException
      */
-    protected String getNewRebaseMergeCommitURI(RevisionGraph revisionGraph, String sourceRevisionIdentifier, String targetRevisionIdentifier) throws InternalErrorException {
-        String commitURI = revisionGraph.getGraphName() + "-ff-commit-merge-" + sourceRevisionIdentifier + "-" + targetRevisionIdentifier;
+    protected String getNewPickCommitURI(RevisionGraph revisionGraph, String startRevisionIdentifier, String endRevisionIdentifier, String targetBranchIdentifier, String targetRevisionIdentifier) throws InternalErrorException {
+        if (endRevisionIdentifier == null) {
+            endRevisionIdentifier = "";
+        }
+        String commitURI = revisionGraph.getGraphName() + "-commit-pick-" + startRevisionIdentifier + "-" + endRevisionIdentifier + "-" + targetBranchIdentifier + "-" + targetRevisionIdentifier;
         if (!checkNamedGraphExistence(commitURI)) {
             return commitURI;
         } else {

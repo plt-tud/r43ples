@@ -34,7 +34,11 @@ public class R43plesRequest {
 			patternModifier);
     /** Pattern for MERGE queries. **/
 	private final Pattern patternMergeQuery =  Pattern.compile(
-			"(MERGE)\\s*(AUTO|MANUAL)?\\s*GRAPH\\s*<([^>]*?)>\\s*(SDD\\s*<([^>]*?)>)?\\s*BRANCH\\s*\"([^\"]*?)\"\\s*INTO\\s*BRANCH\\s*\"([^\"]*?)\"",
+			"MERGE\\s*(AUTO|MANUAL)?\\s*GRAPH\\s*<([^>]*?)>\\s*(SDD\\s*<([^>]*?)>)?\\s*BRANCH\\s*\"([^\"]*?)\"\\s*INTO\\s*BRANCH\\s*\"([^\"]*?)\"",
+			patternModifier);
+	/** Pattern for PICK queries. **/
+	private final Pattern patternPickQuery =  Pattern.compile(
+			"PICK\\s*GRAPH\\s*<([^>]*?)>\\s*REVISION\\s*\"([^\"]*?)\"\\s*(TO\\s*REVISION\\s*\"([^\"]*?)\"\\s*)?INTO\\s*BRANCH\\s*\"([^\"]*?)\"",
 			patternModifier);
 	
 	/** The original query received by R43ples. **/
@@ -126,6 +130,15 @@ public class R43plesRequest {
      */
 	public boolean isMergeQuery() {
 		return patternMergeQuery.matcher(query_sparql).find();
+	}
+
+	/**
+	 * Test if the SPARQL query is a PICK query.
+	 *
+	 * @return true if the query is a PICK query.
+	 */
+	public boolean isPickQuery() {
+		return patternPickQuery.matcher(query_sparql).find();
 	}
 
 }

@@ -387,6 +387,11 @@ public class Endpoint {
             logger.info("Merge query detected");
             return getMergeResponse(r43plesCore.createMergeCommit(request), request);
 		}
+		else if (request.isPickQuery()) {
+			logger.info("Pick query detected");
+			r43plesCore.createPickCommit(request);
+			result = "Revision(s) successfully picked";
+		}
 		else
 			throw new QueryErrorException("No R43ples query detected");
 
