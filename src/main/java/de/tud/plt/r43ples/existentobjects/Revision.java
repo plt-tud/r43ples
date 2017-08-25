@@ -3,6 +3,7 @@ package de.tud.plt.r43ples.existentobjects;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
@@ -26,6 +27,10 @@ public class Revision {
     private String addSetURI;
     /** The DELETE set URI. */
     private String deleteSetURI;
+    /** The ADD set content as N-TRIPLES. **/
+    private String addSetContent;
+    /** The DELETE set content as N-TRIPLES. **/
+    private String deleteSetContent;
 
     /** The revision graph URI. */
     private String revisionGraphURI;
@@ -204,6 +209,32 @@ public class Revision {
     }
 
     /**
+     * Get the add set content.
+     *
+     * @return the add set content
+     */
+    public String getAddSetContent() {
+        if (addSetContent == null) {
+            // Calculate the ADD set content
+            this.addSetContent = getContentOfNamedGraphAsN3(this.addSetURI);
+        }
+        return addSetContent;
+    }
+
+    /**
+     * Get the delete set content.
+     *
+     * @return the delete set content
+     */
+    public String getDeleteSetContent() {
+        if (deleteSetContent == null) {
+            // Calculate the ADD set content
+            this.deleteSetContent = getContentOfNamedGraphAsN3(this.deleteSetURI);
+        }
+        return deleteSetContent;
+    }
+
+    /**
      * Calculate additional information of the current revision and store this information to local variables.
      *
      * @throws InternalErrorException
@@ -277,6 +308,20 @@ public class Revision {
         } else {
             throw new InternalErrorException("No revision identifier found for revision URI " + revisionURI + ".");
         }
+    }
+
+    /**
+     * Get the content of a named graph as N-TRIPLES.
+     *
+     * @param namedGraphURI the named graph URI
+     * @return the content of the named graph as N-TRIPLES
+     */
+    private String getContentOfNamedGraphAsN3(String namedGraphURI) {
+        String query = Config.prefixes + String.format(
+                "CONSTRUCT {?s ?p ?o} %n"
+                        + "WHERE { GRAPH <%s> {?s ?p ?o} }", namedGraphURI);
+        String resultAsTurtle = tripleStoreInterface.executeConstructQuery(query, "TURTLE");
+        return JenaModelManagement.convertJenaModelToNTriple(JenaModelManagement.readStringToJenaModel(resultAsTurtle, "TURTLE"));
     }
 
 }

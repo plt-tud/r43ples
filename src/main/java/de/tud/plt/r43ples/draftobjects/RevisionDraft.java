@@ -142,6 +142,7 @@ public class RevisionDraft {
 
     /**
      * Creates the revision draft as a new revision in the triplestore and updates the referenced full graph.
+     * Does not update any meta data.
      *
      * @return the created revision
      */

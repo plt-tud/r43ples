@@ -57,35 +57,8 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
      * @return the commit (has attribute which indicates if the commit was executed or not)
      */
     protected FastForwardMergeCommit createCommitInTripleStore() throws InternalErrorException {
-        String revisionGraphURI = getRevisionGraph().getRevisionGraphUri();
         String revisionUriFrom = getRevisionGraph().getRevisionUri(getBranchNameFrom());
         String revisionUriInto = getRevisionGraph().getRevisionUri(getBranchNameInto());
-
-        if (!getRevisionManagement().checkNamedGraphExistence(getGraphName())) {
-            logger.warn("Graph <" + getGraphName() + "> does not exist.");
-            throw new InternalErrorException("Graph <" + getGraphName() + "> does not exist.");
-        }
-
-        // Check if from and into are different revisions
-        if (revisionUriFrom.equals(revisionUriInto)) {
-            // Branches are equal - throw error
-            throw new InternalErrorException("Specified branches are equal");
-        }
-
-        // Check if both are terminal nodes
-        if (!(getRevisionGraph().hasBranch(getBranchNameFrom()) && getRevisionGraph().hasBranch(getBranchNameInto()))) {
-            throw new InternalErrorException("No terminal nodes were used");
-        }
-
-        // Check if the into revision is derived from the from revision
-        String query = Config.prefixes
-                + String.format("ASK { GRAPH <%s> { "
-                        + "<%s> prov:wasDerivedFrom+ <%s> ."
-                        + " }} ",
-                revisionGraphURI, revisionUriFrom, revisionUriInto);
-        if (!getTripleStoreInterface().executeAskQuery(query)) {
-            throw new InternalErrorException("The fast forward can not be applied to this two branches because the derived from check is failing.");
-        }
 
         Revision usedSourceRevision = new Revision(getRevisionGraph(), revisionUriFrom, false);
         Revision usedTargetRevision = new Revision(getRevisionGraph(), revisionUriInto, false);
@@ -167,16 +140,6 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
 
             TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
         }
-    }
-
-    /**
-     * Copy a full graph from one branch to another.
-     * @param sourceGraphURI the URI of the source graph
-     * @param targetGraphURI the URI of the target graph
-     * */
-    public void fullGraphCopy(String sourceGraphURI, String targetGraphURI) {
-        TripleStoreInterfaceSingleton.get().executeUpdateQuery(
-                "COPY GRAPH <" + sourceGraphURI + "> TO GRAPH <"+ targetGraphURI + ">");
     }
 
 }

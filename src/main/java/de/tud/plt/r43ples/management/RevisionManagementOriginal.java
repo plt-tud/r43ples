@@ -207,7 +207,6 @@ public class RevisionManagementOriginal {
 		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		
 	}
 
-
 	/**
 	 * Get revised graphs in R43ples.
 	 * 

@@ -6,5 +6,5 @@ package de.tud.plt.r43ples.draftobjects;
  * @author Stephan Hensel
  */
 public enum MergeActions {
-    MERGE, REBASE, MERGE_FF
+    MERGE, PICK
 }

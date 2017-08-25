@@ -113,7 +113,7 @@ public class TestFastForwardMerge extends R43plesTest {
 	private String createFastForwardMergeQuery(String graphName, String user, String commitMessage, String branchNameA, String branchNameB) {
 		return String.format( "USER \"%s\" %n"
 							+ "MESSAGE \"%s\" %n"
-							+ "MERGE FF GRAPH <%s> BRANCH \"%s\" INTO \"%s\"", user, commitMessage, graphName, branchNameA, branchNameB);
+							+ "MERGE GRAPH <%s> BRANCH \"%s\" INTO \"%s\"", user, commitMessage, graphName, branchNameA, branchNameB);
 	}
 
 

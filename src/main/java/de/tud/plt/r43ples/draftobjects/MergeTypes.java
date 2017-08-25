@@ -6,5 +6,5 @@ package de.tud.plt.r43ples.draftobjects;
  * @author Stephan Hensel
  */
 public enum MergeTypes {
-    FORCE, AUTO, MANUAL
+    AUTO, MANUAL
 }
