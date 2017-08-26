@@ -3,17 +3,14 @@
  */
 package de.tud.plt.r43ples.management;
 
+import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
+import de.tud.plt.r43ples.dataset.SampleDataSet;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import org.apache.commons.configuration.ConfigurationException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
-import de.tud.plt.r43ples.dataset.SampleDataSet;
-import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.iohelper.ResourceManagement;
-import de.tud.plt.r43ples.management.SparqlRewriter;
 
 /**
  * @author Markus Graube
@@ -45,7 +42,7 @@ public class TestSparqlRewriter {
 		
 		String result = SparqlRewriter.rewriteQuery(query);
 		String expected = String.format(
-				ResourceManagement.getContentFromResource("rewritten-query1.rq"),
+				ResourceManagement.getContentFromResource("sparqlrewriter/rewritten-query1.rq"),
 				ds.revisions.get("master-5"), ds.revisions.get("master-4"), ds.revisions.get("master-3"));
 		Assert.assertEquals(expected, result);
 	}
@@ -68,7 +65,7 @@ public class TestSparqlRewriter {
 				
 		String result = SparqlRewriter.rewriteQuery(query);
 		String expected = String.format(
-				ResourceManagement.getContentFromResource("rewritten-query2.rq"),
+				ResourceManagement.getContentFromResource("sparqlrewriter/rewritten-query2.rq"),
 				ds.revisions.get("master-5"), ds.revisions.get("master-4"), ds.revisions.get("master-3"));
 		Assert.assertEquals(expected, result);
 	}
