@@ -17,7 +17,9 @@ import java.io.IOException;
 
 public class TestSampleDataSet extends R43plesTest {
 
-	@BeforeClass
+    private final String queryTemplate = "CONSTRUCT {?s ?p ?o} WHERE { GRAPH <%s> REVISION \"%s\" {?s ?p ?o} }";
+
+    @BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		Config.readConfig("r43ples.test.conf");
 	}
@@ -29,54 +31,50 @@ public class TestSampleDataSet extends R43plesTest {
 		String graph = SampleDataSet.createSampleDataset1().graphName;
 		Assert.assertEquals("http://test.com/r43ples-dataset-1", graph);
 
+		// Check revision graph
         RevisionGraph rg = new RevisionGraph(graph);
         String revisiongraph_turtle = rg.getContentOfRevisionGraph("TURTLE");
         String revisiongraph_expected = ResourceManagement.getContentFromResource("dataset/dataset1/revisiongraph.ttl");
-
-        Model model_actual = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_turtle);
+        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_turtle);
         Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_expected);
-
-        this.removeTimeStampFromModel(model_actual);
+        this.removeTimeStampFromModel(model_result);
         this.removeTimeStampFromModel(model_expected);
-
-        this.check_isomorphism(model_actual, model_expected);
-
-        String queryTemplate = "CONSTRUCT {?s ?p ?o} WHERE { GRAPH <%s> REVISION \"%s\" {?s ?p ?o} }";
+        Assert.assertTrue(this.check_isomorphism(model_result, model_expected));
 
         // Check revision 1
         String query = String.format(queryTemplate, graph, "1");
         R43plesRequest request = new R43plesRequest(query, "text/turtle");
         String result = Interface.sparqlSelectConstructAsk(request, false);
         String expected = ResourceManagement.getContentFromResource("dataset/dataset1/rev-1.ttl");
-        this.check_isomorphism(result, expected);
+        Assert.assertTrue(this.check_isomorphism(result, expected));
 
         // Check revision 2
         query = String.format(queryTemplate, graph, "2");
         request = new R43plesRequest(query, "text/turtle");
         result = Interface.sparqlSelectConstructAsk(request, false);
         expected = ResourceManagement.getContentFromResource("dataset/dataset1/rev-2.ttl");
-        this.check_isomorphism(result, expected);
+        Assert.assertTrue(this.check_isomorphism(result, expected));
 
         // Check revision 3
         query = String.format(queryTemplate, graph, "3");
         request = new R43plesRequest(query, "text/turtle");
         result = Interface.sparqlSelectConstructAsk(request, false);
         expected = ResourceManagement.getContentFromResource("dataset/dataset1/rev-3.ttl");
-        this.check_isomorphism(result, expected);
+        Assert.assertTrue(this.check_isomorphism(result, expected));
 
         // Check revision 4
         query = String.format(queryTemplate, graph, "4");
         request = new R43plesRequest(query, "text/turtle");
         result = Interface.sparqlSelectConstructAsk(request, false);
         expected = ResourceManagement.getContentFromResource("dataset/dataset1/rev-4.ttl");
-        this.check_isomorphism(result, expected);
+        Assert.assertTrue(this.check_isomorphism(result, expected));
 
         // Check revision 5
         query = String.format(queryTemplate, graph, "5");
         request = new R43plesRequest(query, "text/turtle");
         result = Interface.sparqlSelectConstructAsk(request, false);
         expected = ResourceManagement.getContentFromResource("dataset/dataset1/rev-5.ttl");
-        this.check_isomorphism(result, expected);
+        Assert.assertTrue(this.check_isomorphism(result, expected));
     }
 
 	@Test
