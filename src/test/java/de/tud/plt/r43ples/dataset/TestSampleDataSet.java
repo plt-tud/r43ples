@@ -81,6 +81,30 @@ public class TestSampleDataSet extends R43plesTest {
 	public final void testCreateSampleDataset2() throws InternalErrorException {
 		String graph = SampleDataSet.createSampleDataset2().graphName;
 		Assert.assertEquals("http://test.com/r43ples-dataset-2", graph);
+
+        // Check revision graph
+        RevisionGraph rg = new RevisionGraph(graph);
+        String revisiongraph_turtle = rg.getContentOfRevisionGraph("TURTLE");
+        String revisiongraph_expected = ResourceManagement.getContentFromResource("dataset/dataset2/revisiongraph.ttl");
+        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_turtle);
+        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_expected);
+        this.removeTimeStampFromModel(model_result);
+        this.removeTimeStampFromModel(model_expected);
+        Assert.assertTrue(this.check_isomorphism(model_result, model_expected));
+
+        // Check revision 1
+        String query = String.format(queryTemplate, graph, "1");
+        R43plesRequest request = new R43plesRequest(query, "text/turtle");
+        String result = Interface.sparqlSelectConstructAsk(request, false);
+        String expected = ResourceManagement.getContentFromResource("dataset/dataset2/rev-1.ttl");
+        Assert.assertTrue(this.check_isomorphism(result, expected));
+
+        // Check revision 2
+        query = String.format(queryTemplate, graph, "2");
+        request = new R43plesRequest(query, "text/turtle");
+        result = Interface.sparqlSelectConstructAsk(request, false);
+        expected = ResourceManagement.getContentFromResource("dataset/dataset2/rev-2.ttl");
+        Assert.assertTrue(this.check_isomorphism(result, expected));
 	}
 
 	@Test

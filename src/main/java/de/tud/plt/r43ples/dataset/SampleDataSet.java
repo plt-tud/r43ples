@@ -100,19 +100,20 @@ public class SampleDataSet {
 		result.revisions.put("master-0", revisionNumber0);
 
 		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName,
-				ResourceManagement.getContentFromResource("samples/test2-addSet-1.nt"),
-				ResourceManagement.getContentFromResource("samples/test2-deleteSet-1.nt"), user,
+				ResourceManagement.getContentFromResource("samples/dataset2/added-1.nt"),
+				ResourceManagement.getContentFromResource("samples/dataset2/removed-1.nt"), user,
 				"test commit message 1", "master");
 		String revisionNumber1 = commit1.getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("master-1", revisionNumber1);
 
 		UpdateCommit commit2 = r43plesCore.createUpdateCommit(graphName,
-				ResourceManagement.getContentFromResource("samples/test2-addSet-2.nt"),
-				ResourceManagement.getContentFromResource("samples/test2-deleteSet-2.nt"), user,
+				ResourceManagement.getContentFromResource("samples/dataset2/added-2.nt"),
+				ResourceManagement.getContentFromResource("samples/dataset2/removed-2.nt"), user,
 				"test commit message 2", "master");
 		String revisionNumber2 = commit2.getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("master-2", revisionNumber2);
 
+		logger.info("SampleDataset2 successfully created");
 		return result;
 	}
 
