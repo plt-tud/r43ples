@@ -134,6 +134,16 @@ There are some additional keywords which extends SPARQL and can be used to contr
 		USER "mgraube"
 		MESSAGE "merge example"
 		MERGE GRAPH <test> BRANCH "branch-1" INTO "branch-2"
+		
+* Pick a revision into a branch
+        
+        USER "Mister X."
+        MESSAGE "pick single revision example"
+        PICK GRAPH <test> REVISION "56" INTO BRANCH "develop"
+        
+        USER "Mister X."
+        MESSAGE "pick multiple revisions example"
+        PICK GRAPH <test> REVISION "56" TO REVISION "62" INTO BRANCH "develop"
 
 
 #### Query Rewriting option
