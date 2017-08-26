@@ -1,21 +1,15 @@
 package de.tud.plt.r43ples.triplestoreInterface;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.log4j.Logger;
-
-import virtuoso.jena.driver.VirtGraph;
-import virtuoso.jena.driver.VirtuosoQueryExecution;
-import virtuoso.jena.driver.VirtuosoQueryExecutionFactory;
-import virtuoso.jena.driver.VirtuosoUpdateFactory;
-import virtuoso.jena.driver.VirtuosoUpdateRequest;
-
 import com.hp.hpl.jena.query.Query;
 import com.hp.hpl.jena.query.QueryFactory;
 import com.hp.hpl.jena.query.ResultSet;
 import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.log4j.Logger;
+import virtuoso.jena.driver.*;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Interface for accessing Virtuoso over a JDBC bridge
@@ -99,7 +93,6 @@ public class VirtuosoInterface extends TripleStoreInterface {
 
 	@Override
 	public Iterator<String> getGraphs() {
-	//	return set.listNames();
 		ResultSet resultSet = executeSelectQuery("SELECT DISTINCT ?graph WHERE { GRAPH ?graph { ?s ?p ?o}}");
 		List<String> list = new ArrayList<String>();
 		while (resultSet.hasNext())
