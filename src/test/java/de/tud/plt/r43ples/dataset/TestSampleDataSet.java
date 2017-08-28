@@ -129,35 +129,35 @@ public class TestSampleDataSet extends R43plesTest {
         // Check revision 1
         String query = String.format(queryTemplate, graph, "1");
         R43plesRequest request = new R43plesRequest(query, "text/turtle");
-        String result = Interface.sparqlSelectConstructAsk(request, false);
+        String result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
         String expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-1.ttl");
         Assert.assertTrue(this.check_isomorphism(result, expected));
 
         // Check revision 2
         query = String.format(queryTemplate, graph, "2");
         request = new R43plesRequest(query, "text/turtle");
-        result = Interface.sparqlSelectConstructAsk(request, false);
+        result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
         expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-2.ttl");
         Assert.assertTrue(this.check_isomorphism(result, expected));
 
         // Check revision 3
         query = String.format(queryTemplate, graph, "3");
         request = new R43plesRequest(query, "text/turtle");
-        result = Interface.sparqlSelectConstructAsk(request, false);
+        result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
         expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-3.ttl");
         Assert.assertTrue(this.check_isomorphism(result, expected));
 
         // Check revision 4
         query = String.format(queryTemplate, graph, "4");
         request = new R43plesRequest(query, "text/turtle");
-        result = Interface.sparqlSelectConstructAsk(request, false);
+        result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
         expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-4.ttl");
         Assert.assertTrue(this.check_isomorphism(result, expected));
 
         // Check revision 5
         query = String.format(queryTemplate, graph, "5");
         request = new R43plesRequest(query, "text/turtle");
-        result = Interface.sparqlSelectConstructAsk(request, false);
+        result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
         expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-5.ttl");
         Assert.assertTrue(this.check_isomorphism(result, expected));
 
