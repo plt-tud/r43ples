@@ -101,7 +101,7 @@ public class Misc {
 			graphs.add(SampleDataSet.createSampleDataSetRenaming());
 		}
 		if (graph.equals("complex-structure") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataSetComplexStructure());
+			graphs.add(SampleDataSet.createSampleDataSetComplexStructure().graphName);
 		}
 		if (graph.equals("rebase") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetRebase());

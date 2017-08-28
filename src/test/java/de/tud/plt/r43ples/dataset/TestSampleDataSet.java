@@ -127,8 +127,8 @@ public class TestSampleDataSet extends R43plesTest {
 
 	@Test
 	public final void testCreateSampleDataSetComplexStructure() throws InternalErrorException {
-		String graph = SampleDataSet.createSampleDataSetComplexStructure();
-		Assert.assertEquals("http://test.com/r43ples-dataset-complex-structure", graph);
+		DataSetGenerationResult result = SampleDataSet.createSampleDataSetComplexStructure();
+		Assert.assertEquals("http://test.com/r43ples-dataset-complex-structure", result.graphName);
 	}
 
 }

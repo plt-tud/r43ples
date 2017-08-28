@@ -261,10 +261,6 @@ public class SampleDataSet {
 	}
 
 
-
-
-
-
 	/**
 	 * Create an example graph of the following structure,
 	 *
@@ -517,107 +513,141 @@ public class SampleDataSet {
 	 * @return graphName
 	 * @throws InternalErrorException
 	 */
-	public static String createSampleDataSetComplexStructure() throws InternalErrorException {
+	public static DataSetGenerationResult createSampleDataSetComplexStructure() throws InternalErrorException {
 		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
-        // TODO The branch creation must be changed after the keyword REVISION the revisionIdentifier must follow not the branch identifier!
+
 		String graphName = "http://test.com/r43ples-dataset-complex-structure";
 
+		DataSetGenerationResult result = new DataSetGenerationResult();
+
+		// Branch identifier
+		String masterBranch = "master";
+		String b1Branch = "B1";
+		String b2Branch = "B2";
+		String b1XBranch = "B1X";
+		String b2XBranch = "B2X";
+
 		RevisionGraph graph = new RevisionGraph(graphName);
+		result.graphName = graphName;
 
 		//delete the old graph
 		graph.purgeRevisionInformation();
-
-        InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, null, null, user, "Create graph");
-        String revision0 = initialCommit.getGeneratedRevision().getRevisionIdentifier();
 
 		// Initial commit
 		String triples =  "<http://example.com/testS> <http://example.com/testP> \"A\". \n"
 						+ "<http://example.com/testS> <http://example.com/testP> \"B\". \n"
 						+ "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
-		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, triples, null, user, "Initial commit", revision0);
-		String revision1 = commit1.getGeneratedRevision().getRevisionIdentifier();
+		InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, triples, null, user, "Initial commit");
+		String revisionIdentifierMaster_1 = initialCommit.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("master-1", revisionIdentifierMaster_1);
 
 		// Create a new branch B1
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, revision1, "B1");
-
+		ReferenceCommit b1Commit = r43plesCore.createReferenceCommit(graphName, b1Branch, revisionIdentifierMaster_1, user, "Create a new branch B1", true);
 		// Create a new branch B2
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2", graphName, revision1, "B2");
+		ReferenceCommit b2Commit = r43plesCore.createReferenceCommit(graphName, b2Branch, revisionIdentifierMaster_1, user, "Create a new branch B2", true);
 
 		// First commit to B1
 		String triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"D\". \n"
 								+ "<http://example.com/testS> <http://example.com/testP> \"E\". \n";
 		String triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"A\". \n";
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B1", graphName, "B1", triplesInsert, triplesDelete);
+		UpdateCommit b1Commit1 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user,"First commit to B1", b1Branch);
+		String revisionIdentifierB1_1 = b1Commit1.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("b1-1", revisionIdentifierB1_1);
 
 		// Second commit to B1
 		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"G\". \n";
 		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"D\". \n";
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Second commit to B1", graphName, "B1", triplesInsert, triplesDelete);
+		UpdateCommit b1Commit2 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user,"Second commit to B1", b1Branch);
+		String revisionIdentifierB1_2 = b1Commit2.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("b1-2", revisionIdentifierB1_2);
 
 		// Create a new branch B1X
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1X", graphName, "B1", "B1X");
+		ReferenceCommit b1XCommit = r43plesCore.createReferenceCommit(graphName, b1XBranch, revisionIdentifierB1_2, user, "Create a new branch B1X", true);
 
 		// First commit to B1X
 		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"B\". \n";
-		DatasetGenerationManagement.executeDeleteQuery(user, "First commit to B1X", graphName, "B1X", triplesDelete);
+		UpdateCommit b1XCommit1 = r43plesCore.createUpdateCommit(graphName, null, triplesDelete, user,"First commit to B1X", b1XBranch);
+		String revisionIdentifierB1X_1 = b1XCommit1.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("b1X-1", revisionIdentifierB1X_1);
 
 		// Second commit to B1X
 		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
-		DatasetGenerationManagement.executeDeleteQuery(user, "Second commit to B1X", graphName, "B1X", triplesDelete);
+		UpdateCommit b1XCommit2 = r43plesCore.createUpdateCommit(graphName, null, triplesDelete, user,"Second commit to B1X", b1XBranch);
+		String revisionIdentifierB1X_2 = b1XCommit2.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("b1X-2", revisionIdentifierB1X_2);
 
 		// Third commit to B1
 		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"F\". \n";
-		DatasetGenerationManagement.executeInsertQuery(user, "Third commit to B1", graphName, "B1", triplesInsert);
+		UpdateCommit b1Commit3 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user,"Third commit to B1", b1Branch);
+		String revisionIdentifierB1_3 = b1Commit3.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("b1-3", revisionIdentifierB1_3);
 
 		// First commit to B2
 		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"D\". \n"
 						+ "<http://example.com/testS> <http://example.com/testP> \"H\". \n";
 		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "First commit to B2", graphName, "B2", triplesInsert, triplesDelete);
+		UpdateCommit b2Commit1 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user,"First commit to B2", b2Branch);
+		String revisionIdentifierB2_1 = b2Commit1.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("b2-1", revisionIdentifierB2_1);
 
 		// Second commit to B2
 		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"I\". \n";
-		DatasetGenerationManagement.executeInsertQuery(user, "Second commit to B2", graphName, "B2", triplesInsert);
+		UpdateCommit b2Commit2 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user,"Second commit to B2", b2Branch);
+		String revisionIdentifierB2_2 = b2Commit2.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("b2-2", revisionIdentifierB2_2);
 
 		// Create a new branch B2X
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2X", graphName, "B2", "B2X");
+		ReferenceCommit b2XCommit = r43plesCore.createReferenceCommit(graphName, b2XBranch, revisionIdentifierB2_2, user, "Create a new branch B2X", true);
 
 		// First commit to B2X
 		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"J\". \n";
-		DatasetGenerationManagement.executeInsertQuery(user, "First commit to B2X", graphName, "B2X", triplesInsert);
-        ReferenceCommit referenceCommit = r43plesCore.createReferenceCommit(graphName, "v0.2", "b2x", user, "tag version v0.2", false);
+		UpdateCommit b2XCommit1 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user,"First commit to B2X", b2XBranch);
+		String revisionIdentifierB2X_1 = b2XCommit1.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("b2X-1", revisionIdentifierB2X_1);
+
+		// Tag the last revision of branch B2X
+        ReferenceCommit tagCommit = r43plesCore.createReferenceCommit(graphName, "v0.2", revisionIdentifierB2X_1, user, "tag version v0.2", false);
 
 		// Second commit to B2X
 		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
 		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"I\". \n";
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Second commit to B2X", graphName, "B2X", triplesInsert, triplesDelete);
+		UpdateCommit b2XCommit2 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user,"Second commit to B2X", b2XBranch);
+		String revisionIdentifierB2X_2 = b2XCommit2.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("b2X-2", revisionIdentifierB2X_2);
 
 		// Third commit to B2
 		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"K\". \n"
 						+ "<http://example.com/testS> <http://example.com/testP> \"L\". \n";
 		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"I\". \n";
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Third commit to B2", graphName, "B2", triplesInsert, triplesDelete);
-
+		UpdateCommit b2Commit3 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user,"Third commit to B2", b2Branch);
+		String revisionIdentifierB2_3 = b2Commit3.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("b2-3", revisionIdentifierB2_3);
 
 		// Fourth commit to B2
 		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"M\". \n";
-		DatasetGenerationManagement.executeInsertQuery(user, "Fourth commit to B2", graphName, "B2", triplesInsert);
+		UpdateCommit b2Commit4 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user,"Fourth commit to B2", b2Branch);
+		String revisionIdentifierB2_4 = b2Commit4.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("b2-4", revisionIdentifierB2_4);
 
 		// Second commit to master
 		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"M\". \n"
 						+ "<http://example.com/testS> <http://example.com/testP> \"N\". \n";
 		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Second commit to MASTER", graphName, "master", triplesInsert, triplesDelete);
+		UpdateCommit masterCommit2 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user,"Second commit to MASTER", masterBranch);
+		String revisionIdentifierMaster_2 = masterCommit2.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("master-2", revisionIdentifierMaster_2);
 
 		// Third commit to master
 		triplesInsert =	  "<http://example.com/testS> <http://example.com/testP> \"P\". \n"
 						+ "<http://example.com/testS> <http://example.com/testP> \"R\". \n"
 						+ "<http://example.com/testS> <http://example.com/testP> \"S\". \n";
 		triplesDelete =	  "<http://example.com/testS> <http://example.com/testP> \"M\". \n";
-		DatasetGenerationManagement.executeInsertDeleteQuery(user, "Third commit to MASTER", graphName, "master", triplesInsert, triplesDelete);
+		UpdateCommit masterCommit3 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user,"Third commit to MASTER", masterBranch);
+		String revisionIdentifierMaster_3 = masterCommit3.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("master-3", revisionIdentifierMaster_3);
 
 		logger.info("Example graph <" + graphName +"> created.");
-		return graphName;
+		return result;
 	}
 	
 }

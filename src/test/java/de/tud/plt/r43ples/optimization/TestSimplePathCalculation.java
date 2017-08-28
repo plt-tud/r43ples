@@ -15,7 +15,7 @@ import org.junit.Test;
 public class TestSimplePathCalculation {
 
     private static DataSetGenerationResult ds1;
-    private static String ds2;
+    private static DataSetGenerationResult ds2;
 
 
     /**
@@ -40,7 +40,7 @@ public class TestSimplePathCalculation {
         Path test = pathCalc.getPathToRevisionWithFullGraph(revisionGraph, revision);
         Assert.assertEquals(5, test.getRevisionPath().size());
         
-        RevisionGraph revisionGraph2 = new RevisionGraph(ds2);
+        RevisionGraph revisionGraph2 = new RevisionGraph(ds2.graphName);
         Revision revision2 = revisionGraph2.getRevision("1");
         Path test2 = pathCalc.getPathToRevisionWithFullGraph(revisionGraph2, revision2);
         Assert.assertEquals(4,test2.getRevisionPath().size());

@@ -3,6 +3,7 @@
  */
 package de.tud.plt.r43ples.webservice;
 
+import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
 import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
@@ -28,7 +29,7 @@ import static org.hamcrest.core.StringContains.containsString;
  */
 public class TestMisc extends JerseyTest {
 	
-	private static String dataset;
+	private static DataSetGenerationResult dataset;
 
 	@Override
     protected Application configure() {
@@ -73,7 +74,7 @@ public class TestMisc extends JerseyTest {
 		result = target("createSampleDataset").queryParam("dataset", "forcerebase").request().get(String.class);
 		result = target("createSampleDataset").queryParam("dataset", "fastforward").request().get(String.class);		
 		result = target("createSampleDataset").request().get(String.class);
-		Assert.assertThat(result, containsString(dataset));
+		Assert.assertThat(result, containsString(dataset.graphName));
 	}
 
 	/**
