@@ -1,7 +1,7 @@
 package de.tud.plt.r43ples.dataset;
 
-import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
-import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
+import de.tud.plt.r43ples.core.R43plesCoreInterface;
+import de.tud.plt.r43ples.core.R43plesCoreSingleton;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;

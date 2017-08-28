@@ -23,8 +23,8 @@ import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.merging.model.structure.MergeCommitModel;
-import de.tud.plt.r43ples.merging.ui.MergingControl;
+import de.tud.plt.r43ples.mergingUI.model.structure.MergeCommitModel;
+import de.tud.plt.r43ples.mergingUI.ui.MergingControl;
 
 @Path("merging")
 public class Merging {

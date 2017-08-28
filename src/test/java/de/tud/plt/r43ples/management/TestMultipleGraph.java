@@ -6,7 +6,7 @@ package de.tud.plt.r43ples.management;
 import de.tud.plt.r43ples.R43plesTest;
 import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
 import de.tud.plt.r43ples.dataset.SampleDataSet;
-import de.tud.plt.r43ples.draftobjects.HeaderInformation;
+import de.tud.plt.r43ples.core.HeaderInformation;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import org.junit.Assert;
