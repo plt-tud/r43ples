@@ -134,7 +134,7 @@ public class RevisionDraft {
         this.addSetURI = this.revisionManagement.getNewAddSetURI(revisionGraph, newRevisionIdentifier);
         this.deleteSetURI = this.revisionManagement.getNewDeleteSetURI(revisionGraph, newRevisionIdentifier);
 
-        this.referenceFullGraph = this.revisionManagement.getNewMasterURI(revisionGraph);
+        this.referenceFullGraph = revisionGraph.getGraphName();
 
         this.addSet = addSet;
         this.deleteSet = deleteSet;
