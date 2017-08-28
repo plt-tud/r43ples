@@ -110,6 +110,61 @@ public class TestSampleDataSet extends R43plesTest {
         Assert.assertTrue(this.check_isomorphism(result, expected));
 	}
 
+    @Test
+    public void createSampleDataset3() throws Exception {
+        String graph = SampleDataSet.createSampleDataset3().graphName;
+        Assert.assertEquals("http://test.com/r43ples-dataset-3", graph);
+
+        // Check revision graph
+        RevisionGraph rg = new RevisionGraph(graph);
+        String revisiongraph_turtle = rg.getContentOfRevisionGraph("TURTLE");
+        Assert.assertEquals("", revisiongraph_turtle);
+        String revisiongraph_expected = ResourceManagement.getContentFromResource("dataset/dataset3/revisiongraph.ttl");
+        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_turtle);
+        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_expected);
+        this.removeTimeStampFromModel(model_result);
+        this.removeTimeStampFromModel(model_expected);
+        Assert.assertTrue(this.check_isomorphism(model_result, model_expected));
+
+        // Check revision 1
+        String query = String.format(queryTemplate, graph, "1");
+        R43plesRequest request = new R43plesRequest(query, "text/turtle");
+        String result = Interface.sparqlSelectConstructAsk(request, false);
+        String expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-1.ttl");
+        Assert.assertTrue(this.check_isomorphism(result, expected));
+
+        // Check revision 2
+        query = String.format(queryTemplate, graph, "2");
+        request = new R43plesRequest(query, "text/turtle");
+        result = Interface.sparqlSelectConstructAsk(request, false);
+        expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-2.ttl");
+        Assert.assertTrue(this.check_isomorphism(result, expected));
+
+        // Check revision 3
+        query = String.format(queryTemplate, graph, "3");
+        request = new R43plesRequest(query, "text/turtle");
+        result = Interface.sparqlSelectConstructAsk(request, false);
+        expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-3.ttl");
+        Assert.assertTrue(this.check_isomorphism(result, expected));
+
+        // Check revision 4
+        query = String.format(queryTemplate, graph, "4");
+        request = new R43plesRequest(query, "text/turtle");
+        result = Interface.sparqlSelectConstructAsk(request, false);
+        expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-4.ttl");
+        Assert.assertTrue(this.check_isomorphism(result, expected));
+
+        // Check revision 5
+        query = String.format(queryTemplate, graph, "5");
+        request = new R43plesRequest(query, "text/turtle");
+        result = Interface.sparqlSelectConstructAsk(request, false);
+        expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-5.ttl");
+        Assert.assertTrue(this.check_isomorphism(result, expected));
+
+    }
+
+
+
 	@Test
 	public final void testCreateSampleDataSetMerging() throws InternalErrorException {
 		String graph = SampleDataSet.createSampleDataSetMerging().graphName;
