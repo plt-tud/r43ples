@@ -178,7 +178,7 @@ public class SimplePathCalculation implements PathCalculationInterface {
             path.addRevisionToPathStart(new Revision(revisionGraph, currentPathElement, false));
 
             // Check if start revision was already reached
-            if (currentPathElement.equals(startRevision)) {
+            if (currentPathElement.equals(startRevision.getRevisionURI())) {
                 return path;
             }
 
