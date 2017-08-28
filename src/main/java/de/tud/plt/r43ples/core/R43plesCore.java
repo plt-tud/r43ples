@@ -1,11 +1,18 @@
 package de.tud.plt.r43ples.core;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.existentobjects.*;
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.management.SparqlRewriter;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * This class implements the R43ples core interface and provides methods to access the core functions of R43ples.
@@ -131,11 +138,6 @@ public class R43plesCore implements R43plesCoreInterface {
         return mergeCommitDraft.createCommitInTripleStore();
     }
 
-    @Override
-    public ThreeWayMergeCommit createThreeWayMergeCommit(R43plesRequest request) throws InternalErrorException {
-        //TODO
-        return null;
-    }
 
     @Override
     public ThreeWayMergeCommit createThreeWayMergeCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifierSource, String derivedFromIdentifierTarget) throws InternalErrorException {
@@ -154,6 +156,105 @@ public class R43plesCore implements R43plesCoreInterface {
     public PickCommit createPickCommit(R43plesRequest request) throws InternalErrorException {
         PickCommitDraft pickCommitDraft = new PickCommitDraft(request);
         return pickCommitDraft.createCommitInTripleStore();
+    }
+
+    /**
+     * Drop graph query. This query will delete the whole graph and all corresponding revision information.
+     *
+     * @param query the query
+     * @throws QueryErrorException
+    */
+    @Override
+    public void sparqlDropGraph(final String query) throws QueryErrorException {
+        /* The pattern modifier. */
+        int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
+        final Pattern patternDropGraph = Pattern.compile("DROP\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
+                patternModifier);
+        Matcher m = patternDropGraph.matcher(query);
+        boolean found = false;
+        while (m.find()) {
+            found = true;
+            String graphName = m.group("graph");
+            RevisionGraph graph = new RevisionGraph(graphName);
+            graph.purgeRevisionInformation();
+        }
+        if (!found) {
+            throw new QueryErrorException("Query contain errors:\n" + query);
+        }
+    }
+
+    /**
+     * Get the response of a SPARQL query (SELECT, CONSTRUCT, ASK).
+     *
+     * @param request the request
+     * @param query_rewriting option if query rewriting should be enabled (true => enabled)
+     * @return the query response
+     * @throws InternalErrorException
+     */
+    @Override
+    public String getSparqlSelectConstructAskResponse(final R43plesRequest request, final boolean query_rewriting) throws InternalErrorException {
+        String result;
+        if (query_rewriting) {
+            String query_rewritten = SparqlRewriter.rewriteQuery(request.query_sparql);
+            result = TripleStoreInterfaceSingleton.get()
+                    .executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + query_rewritten, request.format);
+        } else {
+            result = getSparqlSelectConstructAskResponseClassic(request.query_sparql, request.format);
+        }
+        return result;
+    }
+
+    /**
+     * Get the response of a SPARQL query (SELECT, CONSTRUCT, ASK). Classic way.
+     *
+     * @param query the query
+     * @param format the result format
+     * @return the query response
+     * @throws InternalErrorException
+     */
+    private String getSparqlSelectConstructAskResponseClassic(final String query, final String format)
+            throws InternalErrorException {
+        final Pattern patternSelectFromPart = Pattern.compile(
+                "(?<type>FROM|GRAPH)\\s*<(?<graph>[^>\\?]*)(\\?|>)(\\s*REVISION\\s*\"|revision=)(?<revision>([^\">]+))(>|\")",
+                Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+
+        String queryM = query;
+
+        Matcher m = patternSelectFromPart.matcher(queryM);
+        while (m.find()) {
+            String graphName = m.group("graph");
+            String type = m.group("type");
+            String revisionNumber = m.group("revision").toLowerCase();
+            String newGraphName;
+
+            RevisionGraph graph = new RevisionGraph(graphName);
+
+            // if no revision number is declared use the MASTER as default
+            if (revisionNumber == null) {
+                revisionNumber = "master";
+            }
+            if (revisionNumber.equalsIgnoreCase("master")) {
+                // Respond with MASTER revision - nothing to be done - MASTER
+                // revisions are already created in the named graphs
+                newGraphName = graphName;
+            } else {
+                if (graph.hasBranch(revisionNumber)) {
+                    newGraphName = graph.getReferenceGraph(revisionNumber);
+                } else {
+                    // Respond with specified revision, therefore the revision
+                    // must be generated - saved in graph <graphName-revisionNumber>
+                    newGraphName = graphName + "-" + revisionNumber;
+                    RevisionManagementOriginal.generateFullGraphOfRevision(graphName, revisionNumber, newGraphName);
+                }
+            }
+
+            queryM = m.replaceFirst(type + " <" + newGraphName + ">");
+            m = patternSelectFromPart.matcher(queryM);
+
+        }
+        String response = TripleStoreInterfaceSingleton.get()
+                .executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + queryM, format);
+        return response;
     }
 
 }

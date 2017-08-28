@@ -365,7 +365,7 @@ public class Endpoint {
 
 		String result;
 		if (request.isSelectAskConstructQuery()) {
-			result = Interface.sparqlSelectConstructAsk(request, query_rewriting);
+			result = r43plesCore.getSparqlSelectConstructAskResponse(request, query_rewriting);
 		}
 		else if (request.isUpdateQuery()) {
 			r43plesCore.createUpdateCommit(request);
@@ -376,7 +376,7 @@ public class Endpoint {
 			result = "Graph <" + initialCommit.getGeneratedRevision().getRevisionGraph().getGraphName() + "> successfully created";
 		}
 		else if (request.isDropGraphQuery()) {
-			Interface.sparqlDropGraph(sparqlQuery);
+			r43plesCore.sparqlDropGraph(sparqlQuery);
 			result = "Graph successfully dropped";
 		}
 		else if (request.isBranchOrTagQuery()) {

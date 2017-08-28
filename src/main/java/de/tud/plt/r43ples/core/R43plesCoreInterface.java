@@ -1,6 +1,7 @@
 package de.tud.plt.r43ples.core;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.management.R43plesRequest;
 
@@ -95,15 +96,6 @@ public interface R43plesCoreInterface {
     /**
      * Create a new three way merge commit.
      *
-     * @param request the request received by R43ples
-     * @return the created three way merge commit
-     * @throws InternalErrorException
-     */
-    ThreeWayMergeCommit createThreeWayMergeCommit(R43plesRequest request) throws InternalErrorException;
-
-    /**
-     * Create a new three way merge commit.
-     *
      * @param graphName the graph name
      * @param addSet the add set as N-Triples
      * @param deleteSet the delete set as N-Triples
@@ -125,4 +117,21 @@ public interface R43plesCoreInterface {
      */
     PickCommit createPickCommit(R43plesRequest request) throws InternalErrorException;
 
+    /**
+     * Drop graph query. This query will delete the whole graph and all corresponding revision information.
+     *
+     * @param query the query
+     * @throws QueryErrorException
+     */
+    void sparqlDropGraph(final String query) throws QueryErrorException;
+
+    /**
+     * Get the response of a SPARQL query (SELECT, CONSTRUCT, ASK).
+     *
+     * @param request the request
+     * @param query_rewriting option if query rewriting should be enabled (true => enabled)
+     * @return the query response
+     * @throws InternalErrorException
+     */
+    String getSparqlSelectConstructAskResponse(final R43plesRequest request, final boolean query_rewriting) throws InternalErrorException;
 }

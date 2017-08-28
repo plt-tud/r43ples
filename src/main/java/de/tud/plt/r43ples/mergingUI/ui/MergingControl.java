@@ -5,13 +5,13 @@ import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Model;
+import de.tud.plt.r43ples.core.R43plesCoreInterface;
+import de.tud.plt.r43ples.core.R43plesCoreSingleton;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.Interface;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.mergingUI.TripleObjectTypeEnum;
 import de.tud.plt.r43ples.mergingUI.management.ProcessManagement;
-import de.tud.plt.r43ples.mergingUI.model.structure.*;
 import de.tud.plt.r43ples.mergingUI.model.structure.*;
 import org.apache.log4j.Logger;
 
@@ -139,8 +139,8 @@ public class MergingControl {
 				+ "ORDER BY ?predicate ?object", commitModel.getGraphName(), branchName, individualUri);
 		
 		R43plesRequest request = new R43plesRequest(query, "text/xml");
-		
-		String resultBranch1 = Interface.sparqlSelectConstructAsk(request, false);
+		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
+		String resultBranch1 = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
 		ResultSet resultSetBranch1 = ResultSetFactory.fromXML(resultBranch1);
 		while(resultSetBranch1.hasNext()) {
 	    	QuerySolution qsBranch1 = resultSetBranch1.next();
