@@ -9,7 +9,10 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import de.tud.plt.r43ples.R43plesTest;
+import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.PickCommit;
+import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
@@ -21,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class R43plesCoreTest extends R43plesTest {
+
 
     R43plesCore core = new R43plesCore();
 
@@ -42,7 +46,7 @@ public class R43plesCoreTest extends R43plesTest {
         RevisionGraph rg = new RevisionGraph(graphName);
 
         String result = rg.getContentOfRevisionGraph("TURTLE");
-        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_initial.ttl");
+        String expected = ResourceManagement.getContentFromResource("core/R43plesCore/revisiongraph_initial.ttl");
 
         Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
         Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
@@ -71,7 +75,7 @@ public class R43plesCoreTest extends R43plesTest {
         RevisionGraph rg = new RevisionGraph("http://example.com/test");
 
         String result = rg.getContentOfRevisionGraph("TURTLE");
-        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_initial.ttl");
+        String expected = ResourceManagement.getContentFromResource("core/R43plesCore/revisiongraph_initial.ttl");
 
         Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
         Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
@@ -119,6 +123,39 @@ public class R43plesCoreTest extends R43plesTest {
 
     @Test
     public void createThreeWayMergeCommit1() throws Exception {
+    }
+
+    @Test
+    public void createPickCommit() throws Exception {
+        String graphName = SampleDataSet.createSampleDataSetComplexStructure().graphName;
+        RevisionGraph rg = new RevisionGraph(graphName);
+
+        Assert.assertEquals(rg.getMasterRevision().getRevisionIdentifier(), "13");
+
+        String query = String.format("" +
+                        "USER \"test\" " +
+                        "MESSAGE \"pick test\"" +
+                        "PICK GRAPH <%s> REVISION \"%s\" INTO BRANCH \"%s\"",
+                graphName, "1", "master");
+        R43plesRequest request = new R43plesRequest(query, "text/turtle");
+        PickCommit result = core.createPickCommit(request);
+
+        Revision masterRevision = result.getGeneratedRevisions().get(0);
+        Assert.assertEquals(masterRevision.getRevisionIdentifier(), "14");
+        Assert.assertEquals(rg.getMasterRevision().getRevisionIdentifier(), "14");
+
+        String revisiongraph_actual = rg.getContentOfRevisionGraph("TURTLE");
+        String revisiongraph_expected = ResourceManagement.getContentFromResource("core/R43plesCore/revisiongraph_datasetComplex_pick_1.ttl");
+        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_actual);
+        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_expected);
+        this.removeTimeStampFromModel(model_result);
+        this.removeTimeStampFromModel(model_expected);
+        Assert.assertTrue(this.check_isomorphism(model_result, model_expected));
+
+        String query_content = String.format("CONSTRUCT {?s ?p ?o} WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
+        String content_actual = core.getSparqlSelectConstructAskResponse(new R43plesRequest(query_content, "text/turtle"), false);
+        String content_expected = ResourceManagement.getContentFromResource("core/R43plesCore/datasetComplex_pick_1_into_master.ttl");
+        Assert.assertTrue(this.check_isomorphism(content_actual, content_expected));
     }
 
 }

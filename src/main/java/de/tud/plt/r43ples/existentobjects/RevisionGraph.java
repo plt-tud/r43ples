@@ -1,16 +1,14 @@
 package de.tud.plt.r43ples.existentobjects;
 
-import java.util.ArrayList;
-
-import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
-import org.apache.log4j.Logger;
-
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
-
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.log4j.Logger;
+
+import java.util.ArrayList;
 
 /**
  * The class RevisionGraph provides functionality for one named graph which is managed by R43ples
@@ -166,7 +164,7 @@ public class RevisionGraph {
 	 * @throws InternalErrorException
 	 */
 	public Revision getMasterRevision() throws InternalErrorException{
-		logger.info("Get MASTER revision number of graph " + graphName);
+        logger.info("Get MASTER revision of graph " + graphName);
 
 		String revisionGraph = this.getRevisionGraphUri();
 		String queryString = Config.prefixes + String.format(""
@@ -181,8 +179,8 @@ public class RevisionGraph {
 			return this.getRevision(qs.getLiteral("?revisionNumber").toString());
 		}
 		else {
-			return null;
-		}
+            throw new InternalErrorException("No master for graph <" + this.graphName + "> available");
+        }
 	}
 	
 	/**
