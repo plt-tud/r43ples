@@ -1,12 +1,10 @@
 package de.tud.plt.r43ples.merging;
 
-import static org.junit.Assert.assertTrue;
-
-import java.io.IOException;
-
-import javax.ws.rs.core.Response;
-
 import de.tud.plt.r43ples.R43plesTest;
+import de.tud.plt.r43ples.dataset.SampleDataSet;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.iohelper.ResourceManagement;
+import de.tud.plt.r43ples.management.Config;
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
@@ -15,10 +13,10 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.tud.plt.r43ples.dataset.SampleDataSet;
-import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.iohelper.ResourceManagement;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+
+import static org.junit.Assert.assertTrue;
 
 
 /**
@@ -27,7 +25,7 @@ import de.tud.plt.r43ples.iohelper.ResourceManagement;
  * @author Xinyu Yang
  * @author Stephan Hensel
  */
-public class TestRebaseMerge extends R43plesTest {
+public class RebaseMergeTest extends R43plesTest {
 
 	/** The graph name. **/
 	private static String graphName;

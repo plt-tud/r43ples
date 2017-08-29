@@ -1,17 +1,11 @@
 package de.tud.plt.r43ples.webservice;
 
-import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
-import static org.hamcrest.core.StringContains.containsString;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URLEncoder;
-
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
+import de.tud.plt.r43ples.dataset.SampleDataSet;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.iohelper.ResourceManagement;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -22,15 +16,19 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
-import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
-import de.tud.plt.r43ples.dataset.SampleDataSet;
-import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.iohelper.ResourceManagement;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Application;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URLEncoder;
+
+import static org.custommonkey.xmlunit.XMLAssert.assertXMLEqual;
+import static org.hamcrest.core.StringContains.containsString;
 
 
-public class TestEndpoint extends JerseyTest {
+public class EndpointJerseyTest extends JerseyTest {
 
 	private static final String format = "application/sparql-results+xml";
 	
@@ -219,6 +217,6 @@ public class TestEndpoint extends JerseyTest {
 		String result = target("merging").request().get(String.class);
 		Assert.assertThat(result, containsString("Merge"));
 	}
-	
+
 
 }

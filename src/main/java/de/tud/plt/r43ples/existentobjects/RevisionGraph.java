@@ -1,16 +1,14 @@
 package de.tud.plt.r43ples.existentobjects;
 
-import java.util.ArrayList;
-
-import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
-import org.apache.log4j.Logger;
-
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
-
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.log4j.Logger;
+
+import java.util.ArrayList;
 
 /**
  * The class RevisionGraph provides functionality for one named graph which is managed by R43ples
@@ -59,8 +57,7 @@ public class RevisionGraph {
 
 	/**
 	 * Get the content of this revision graph by execution of CONSTRUCT.
-	 * 
-//	 * @param graphName the graphName
+	 *
 	 * @param format RDF serialization format which should be returned
 	 * @return the constructed graph content as specified RDF serialization format
 	 */
@@ -418,8 +415,8 @@ public class RevisionGraph {
 	 * checks whether the revision number already exist
 	 * @param revisionNumber
 	 * @return boolean*/
-	
-	public boolean hasRevisionNumber(final String revisionNumber) {
+
+	private boolean hasRevisionNumber(final String revisionNumber) {
 		String revisionGraph = this.getRevisionGraphUri();
 		String queryASK = Config.prefixes
 				+ String.format(""

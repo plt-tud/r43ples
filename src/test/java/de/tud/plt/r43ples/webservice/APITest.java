@@ -1,9 +1,10 @@
 package de.tud.plt.r43ples.webservice;
 
-import static org.hamcrest.core.StringContains.containsString;
-
-import javax.ws.rs.core.Application;
-
+import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
+import de.tud.plt.r43ples.dataset.SampleDataSet;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.commons.configuration.ConfigurationException;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.test.JerseyTest;
@@ -12,15 +13,12 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
-import de.tud.plt.r43ples.dataset.SampleDataSet;
-import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import de.tud.plt.r43ples.webservice.API;
+import javax.ws.rs.core.Application;
+
+import static org.hamcrest.core.StringContains.containsString;
 
 
-public class TestAPI extends JerseyTest {
+public class APITest extends JerseyTest {
 	
 	private static DataSetGenerationResult ds1;
 	

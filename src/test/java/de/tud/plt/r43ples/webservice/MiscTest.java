@@ -27,7 +27,7 @@ import static org.hamcrest.core.StringContains.containsString;
  * @author Markus Graube
  *
  */
-public class TestMisc extends JerseyTest {
+public class MiscTest extends JerseyTest {
 	
 	private static DataSetGenerationResult dataset;
 
