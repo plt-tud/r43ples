@@ -1,14 +1,9 @@
 package de.tud.plt.r43ples.client;
 
-import java.io.File;
-import java.io.IOException;
-
-import de.tud.plt.r43ples.core.R43plesCoreInterface;
-import de.tud.plt.r43ples.core.R43plesCoreSingleton;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
-import de.tud.plt.r43ples.draftobjects.R43plesCoreInterface;
-import de.tud.plt.r43ples.draftobjects.R43plesCoreSingleton;
+import de.tud.plt.r43ples.core.R43plesCoreInterface;
+import de.tud.plt.r43ples.core.R43plesCoreSingleton;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.existentobjects.UpdateCommit;
@@ -18,15 +13,9 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 
-import com.beust.jcommander.JCommander;
-import com.beust.jcommander.ParameterException;
-
-import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import java.io.File;
 import java.io.IOException;
+
 
 public class ConsoleClient {
 
