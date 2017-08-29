@@ -94,19 +94,20 @@ public interface R43plesCoreInterface {
     MergeCommit createMergeCommit(R43plesRequest request) throws InternalErrorException;
 
     /**
-     * Create a new three way merge commit.
+     * Creates a three way merge commit draft by using the corresponding meta information.
      *
      * @param graphName the graph name
-     * @param addSet the add set as N-Triples
-     * @param deleteSet the delete set as N-Triples
+     * @param branchNameFrom the branch name (from)
+     * @param branchNameInto the branch name (into)
      * @param user the user
      * @param message the message
-     * @param derivedFromIdentifierSource the source revision identifier of the revision or the reference identifier from which the new revision should be derive from
-     * @param derivedFromIdentifierTarget the target revision identifier of the revision or the reference identifier from which the new revision should be derive from, the corresponding branch will be used to store the new revision
-     * @return the created three way merge commit
+     * @param sdd the SDD URI to use
+     * @param triples the triples of the query WITH part
+     * @param type the query type (FORCE, AUTO, MANUAL)
+     * @param with states if the WITH part is available
      * @throws InternalErrorException
      */
-    ThreeWayMergeCommit createThreeWayMergeCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifierSource, String derivedFromIdentifierTarget) throws InternalErrorException;
+    ThreeWayMergeCommit createThreeWayMergeCommit(String graphName, String branchNameFrom, String branchNameInto, String user, String message, String sdd, String triples, MergeTypes type, boolean with) throws InternalErrorException;
 
     /**
      * Create a new pick commit.

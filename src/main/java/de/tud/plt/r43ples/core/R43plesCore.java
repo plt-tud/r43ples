@@ -138,11 +138,24 @@ public class R43plesCore implements R43plesCoreInterface {
         return mergeCommitDraft.createCommitInTripleStore();
     }
 
-
+    /**
+     * Creates a three way merge commit draft by using the corresponding meta information.
+     *
+     * @param graphName the graph name
+     * @param branchNameFrom the branch name (from)
+     * @param branchNameInto the branch name (into)
+     * @param user the user
+     * @param message the message
+     * @param sdd the SDD URI to use
+     * @param triples the triples of the query WITH part
+     * @param type the query type (FORCE, AUTO, MANUAL)
+     * @param with states if the WITH part is available
+     * @throws InternalErrorException
+     */
     @Override
-    public ThreeWayMergeCommit createThreeWayMergeCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifierSource, String derivedFromIdentifierTarget) throws InternalErrorException {
-        //TODO
-        return null;
+    public ThreeWayMergeCommit createThreeWayMergeCommit(String graphName, String branchNameFrom, String branchNameInto, String user, String message, String sdd, String triples, MergeTypes type, boolean with) throws InternalErrorException {
+        ThreeWayMergeCommitDraft threeWayMergeCommit = new ThreeWayMergeCommitDraft(graphName, branchNameFrom, branchNameInto, user, message, sdd, triples, type, with);
+        return threeWayMergeCommit.createCommitInTripleStore();
     }
 
     /**

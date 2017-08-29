@@ -1,5 +1,6 @@
 package de.tud.plt.r43ples.dataset;
 
+import de.tud.plt.r43ples.core.MergeTypes;
 import de.tud.plt.r43ples.core.R43plesCoreInterface;
 import de.tud.plt.r43ples.core.R43plesCoreSingleton;
 import de.tud.plt.r43ples.exception.InternalErrorException;
@@ -143,7 +144,7 @@ public class SampleDataSet {
 		UpdateCommit commitB1_0 = r43plesCore.createUpdateCommit(graphName,
 				ResourceManagement.getContentFromResource("samples/dataset3/added-2.nt"),
 				ResourceManagement.getContentFromResource("samples/dataset3/removed-2.nt"), user,
-				"test commit message 2", "master");
+				"test commit message 2", branchNameB1);
 		String revisionB1_0 = commitB1_0.getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("b1-0", revisionB1_0);
 
@@ -161,12 +162,14 @@ public class SampleDataSet {
 		String revisionNumber4 = commit4.getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("master-4", revisionNumber4);
 
-		ThreeWayMergeCommit mergeCommit5 = r43plesCore.createThreeWayMergeCommit(graphName,
-				ResourceManagement.getContentFromResource("samples/dataset3/added-5.nt"),
-				ResourceManagement.getContentFromResource("samples/dataset3/removed-5.nt"), user,
-				"test commit message 5", branchNameB1, "master");
-		String revisionNumber5 = mergeCommit5.getGeneratedRevision().getRevisionIdentifier();
-		result.revisions.put("master-5", revisionNumber5);
+//		ThreeWayMergeCommit mergeCommit5 = r43plesCore.createThreeWayMergeCommit(graphName, branchNameB1, "master", user, "test commit message 5",
+//				null, null, MergeTypes.AUTO, false);
+////				graphName,
+////				ResourceManagement.getContentFromResource("samples/dataset3/added-5.nt"),
+////				ResourceManagement.getContentFromResource("samples/dataset3/removed-5.nt"), user,
+////				"test commit message 5", branchNameB1, "master");
+//		String revisionNumber5 = mergeCommit5.getGeneratedRevision().getRevisionIdentifier();
+//		result.revisions.put("master-5", revisionNumber5);
 
 		return result;
 	}
