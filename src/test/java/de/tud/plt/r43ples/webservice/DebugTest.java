@@ -28,7 +28,7 @@ import static org.hamcrest.core.StringContains.containsString;
  * @author Markus Graube
  *
  */
-public class TestDebug extends JerseyTest {
+public class DebugTest extends JerseyTest {
 	
 	@Override
     protected Application configure() {

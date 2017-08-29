@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 
-public class TestSampleDataSet extends R43plesTest {
+public class SampleDataSetTest extends R43plesTest {
 
     private final String queryTemplate = "CONSTRUCT {?s ?p ?o} WHERE { GRAPH <%s> REVISION \"%s\" {?s ?p ?o} }";
     private static R43plesCoreInterface r43plesCore;

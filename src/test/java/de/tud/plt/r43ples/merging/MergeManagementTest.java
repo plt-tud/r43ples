@@ -28,7 +28,7 @@ import static org.hamcrest.core.StringContains.containsString;
  * @author Markus Graube
  *
  */
-public class TestMergeManagement {
+public class MergeManagementTest {
 
 	/** The data set generation result. **/
 	private static DataSetGenerationResult ds;

@@ -17,15 +17,18 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import static org.hamcrest.core.StringContains.containsString;
+
 public class HeaderInformationTest extends R43plesTest {
     private static DataSetGenerationResult ds1;
+    private static DataSetGenerationResult ds2;
     private static HeaderInformation hi;
 
     @BeforeClass
     public static void setUp() throws Exception {
         Config.readConfig("r43ples.test.conf");
-        SampleDataSet.createSampleDataset1();
-        SampleDataSet.createSampleDataset2();
+        ds1 = SampleDataSet.createSampleDataset1();
+        ds2 = SampleDataSet.createSampleDataset2();
         hi = new HeaderInformation();
     }
 
@@ -67,6 +70,27 @@ public class HeaderInformationTest extends R43plesTest {
 
         }
 
+    }
+
+    @Test
+    public void testResponseHeader() {
+        String sparql = "SELECT *"
+                + "FROM <" + ds1.graphName + ">"
+                + "WHERE { ?s ?p ?o}";
+
+        String result = new HeaderInformation().getResponseHeaderFromQuery(sparql);
+        Assert.assertThat(result, containsString("Master"));
+    }
+
+    @Test
+    public void testResponseHeader2() {
+        String sparql = "SELECT *"
+                + "FROM <" + ds1.graphName + ">"
+                + "FROM <" + ds2.graphName + ">"
+                + "WHERE { ?s ?p ?o}";
+
+        String result = new HeaderInformation().getResponseHeaderFromQuery(sparql);
+        Assert.assertThat(result, containsString("Master"));
     }
 
 }
