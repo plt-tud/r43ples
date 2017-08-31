@@ -40,7 +40,7 @@ public interface PathCalculationInterface {
 
     /**
      * Calculate the path from start revision to target revision.
-     * Example: target prov:wasDerivedFrom source
+     * Example: target rmo:wasDerivedFrom source
      *
      * @param revisionGraph the revision graph
      * @param startRevision the start revision

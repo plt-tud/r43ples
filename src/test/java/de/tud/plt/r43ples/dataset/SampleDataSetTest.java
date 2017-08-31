@@ -42,6 +42,7 @@ public class SampleDataSetTest extends R43plesTest {
         Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_expected);
         this.removeTimeStampFromModel(model_result);
         this.removeTimeStampFromModel(model_expected);
+
         Assert.assertTrue(this.check_isomorphism(model_result, model_expected));
 
         // Check revision 1

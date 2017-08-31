@@ -56,6 +56,7 @@ public class RevisionManagementOriginal {
 	}
 
 	/**
+	 * //TODO Use the RevisionGraph and the revision to access the necessary data
 	 * Creates the whole revision from the add and delete sets of the
 	 * predecessors. Saved in graph tempGraphName.
 	 * 
@@ -79,7 +80,6 @@ public class RevisionManagementOriginal {
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery("CREATE GRAPH <" + tempGraphName + ">");
 
 		// Create path to revision
-
 		LinkedList<Revision> list = PathCalculationSingleton.getInstance().getPathToRevisionWithFullGraph(graph, revision)
 				.getRevisionPath();
 

@@ -73,16 +73,42 @@ public interface R43plesCoreInterface {
     /**
      * Create a new reference commit.
      *
-     * @param graphName the graph name
+     * @param revisionGraph the revision graph
      * @param referenceName the reference name
-     * @param revisionIdentifier the revision identifier (the corresponding revision will be the current base for the reference)
+     * @param baseRevision the base revision (this revision will be the current base for the reference)
      * @param user the user
      * @param message the message
      * @param isBranch states if the created reference is a branch or a tag. (branch => true; tag => false)
      * @return the created reference commit
      * @throws InternalErrorException
      */
-    ReferenceCommit createReferenceCommit(String graphName, String referenceName, String revisionIdentifier, String user, String message, boolean isBranch) throws InternalErrorException;
+    ReferenceCommit createReferenceCommit(RevisionGraph revisionGraph, String referenceName, Revision baseRevision, String user, String message, boolean isBranch) throws InternalErrorException;
+
+    /**
+     * Create a new branch commit.
+     *
+     * @param revisionGraph the revision graph
+     * @param referenceName the reference name
+     * @param baseRevision the base revision (this revision will be the current base for the reference)
+     * @param user the user
+     * @param message the message
+     * @return the created branch commit
+     * @throws InternalErrorException
+     */
+    BranchCommit createBranchCommit(RevisionGraph revisionGraph, String referenceName, Revision baseRevision, String user, String message) throws InternalErrorException;
+
+    /**
+     * Create a new tag commit.
+     *
+     * @param revisionGraph the revision graph
+     * @param referenceName the reference name
+     * @param baseRevision the base revision (this revision will be the current base for the reference)
+     * @param user the user
+     * @param message the message
+     * @return the created tag commit
+     * @throws InternalErrorException
+     */
+    TagCommit createTagCommit(RevisionGraph revisionGraph, String referenceName, Revision baseRevision, String user, String message) throws InternalErrorException;
 
     /**
      * Create a new merge commit.
@@ -118,6 +144,7 @@ public interface R43plesCoreInterface {
      */
     PickCommit createPickCommit(R43plesRequest request) throws InternalErrorException;
 
+    // TODO Create objects for drop and select
     /**
      * Drop graph query. This query will delete the whole graph and all corresponding revision information.
      *

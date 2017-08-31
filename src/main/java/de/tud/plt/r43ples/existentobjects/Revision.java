@@ -9,6 +9,8 @@ import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
+
 /**
  * Provides information of an already existent revision.
  *
@@ -36,6 +38,10 @@ public class Revision {
     private String revisionGraphURI;
     /** The corresponding revision graph. */
     private RevisionGraph revisionGraph;
+    /** The change sets of the revision. **/
+    private ArrayList<ChangeSet> changeSets;
+    /** The associated branch. **/
+    private Branch associatedBranch;
 
     // Dependencies
     /** The triplestore interface to use. **/
@@ -64,7 +70,7 @@ public class Revision {
             this.revisionURI = revisionInformation;
             this.revisionIdentifier = calculateRevisionIdentifier(this.revisionURI);
         }
-
+        this.changeSets = new ArrayList<>();
         calculateAdditionalInformation();
     }
 
@@ -74,20 +80,42 @@ public class Revision {
      * @param revisionGraph the revision graph
      * @param revisionIdentifier the revision identifier
      * @param revisionURI the revision URI
-     * @param addSetURI the add set URI
-     * @param deleteSetURI the delete set URI
+     * @param changeSet the change set
+     * @param branch the branch
      */
-    public Revision(RevisionGraph revisionGraph, String revisionIdentifier, String revisionURI, String addSetURI, String deleteSetURI) {
+    public Revision(RevisionGraph revisionGraph, String revisionIdentifier, String revisionURI, ChangeSet changeSet, Branch branch) {
         // Dependencies
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+        this.changeSets = new ArrayList<>();
 
         this.revisionGraph = revisionGraph;
         this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
 
         this.revisionIdentifier = revisionIdentifier;
         this.revisionURI = revisionURI;
-        this.addSetURI = addSetURI;
-        this.deleteSetURI = deleteSetURI;
+        this.changeSets.add(changeSet);
+        this.associatedBranch = branch;
+    }
+
+    /**
+     * The constructor. Adds one change set to an already existing revision.
+     * Only necessary for three way merged revisions which have two change sets.
+     *
+     * @param revision the already existing revision
+     * @param changeSet the change set to add
+     */
+    public Revision(Revision revision, ChangeSet changeSet) {
+        // Dependencies
+        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+
+        this.revisionGraph = revision.getRevisionGraph();
+        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
+
+        this.revisionIdentifier = revision.getRevisionIdentifier();
+        this.revisionURI = revision.getRevisionURI();
+        this.changeSets = new ArrayList<>();
+        this.changeSets.add(revision.getChangeSet());
+        this.changeSets.add(changeSet);
     }
 
     /**
@@ -102,7 +130,7 @@ public class Revision {
         String query = Config.prefixes + String.format(""
                 + "SELECT ?rev "
                 + "WHERE { GRAPH  <%s> {"
-                + "	<%s> prov:wasDerivedFrom ?rev. "
+                + "	<%s> rmo:wasDerivedFrom ?rev. "
                 + "	?rev a rmo:Revision. "
                 + "} }", revisionGraphURI, revisionURI);
         this.logger.debug(query);
@@ -127,7 +155,7 @@ public class Revision {
                 + "SELECT ?com "
                 + "WHERE { GRAPH  <%s> {"
                 + "	?com a rmo:Commit; "
-                + "	 prov:generated <%s>. "
+                + "	 rmo:generated <%s>. "
                 + "} }", revisionGraphURI, revisionURI);
         this.logger.debug(query);
         ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
@@ -146,21 +174,25 @@ public class Revision {
      * @throws InternalErrorException
      */
     public Branch getAssociatedBranch() throws InternalErrorException {
-        logger.info("Get associated branch of revision " + revisionIdentifier + ".");
-        String query = Config.prefixes + String.format(""
-                + "SELECT ?branch "
-                + "WHERE { GRAPH  <%s> {"
-                + "	<%s> rmo:belongsTo ?branch. "
-                + "	?branch a rmo:Branch. "
-                + "} }", revisionGraphURI, revisionURI);
-        this.logger.debug(query);
-        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
-        if (resultSet.hasNext()) {
-            QuerySolution qs = resultSet.next();
-            return new Branch(revisionGraph, qs.getResource("?branch").toString(), false);
-        } else {
-            throw new InternalErrorException("No derived from revision found for revision " + revisionIdentifier + ".");
+        if (associatedBranch == null) {
+            //TODO belongsTo does not exist any more
+            logger.info("Get associated branch of revision " + revisionIdentifier + ".");
+            String query = Config.prefixes + String.format(""
+                    + "SELECT ?branch "
+                    + "WHERE { GRAPH  <%s> {"
+                    + "	<%s> rmo:belongsTo ?branch. "
+                    + "	?branch a rmo:Branch. "
+                    + "} }", revisionGraphURI, revisionURI);
+            this.logger.debug(query);
+            ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
+            if (resultSet.hasNext()) {
+                QuerySolution qs = resultSet.next();
+                associatedBranch = new Branch(revisionGraph, qs.getResource("?branch").toString(), false);
+            } else {
+                throw new InternalErrorException("No derived from revision found for revision " + revisionIdentifier + ".");
+            }
         }
+        return associatedBranch;
     }
 
     /**
@@ -182,21 +214,21 @@ public class Revision {
     }
 
     /**
-     * Get the ADD set URI.
+     * Get the change set.
      *
-     * @return the ADD set URI
+     * @return the change set
      */
-    public String getAddSetURI() {
-        return addSetURI;
+    public ChangeSet getChangeSet() {
+        return changeSets.get(0);
     }
 
     /**
-     * Get the DELETE set URI.
+     * Get the change sets.
      *
-     * @return the DELETE set URI
+     * @return the change sets
      */
-    public String getDeleteSetURI() {
-        return deleteSetURI;
+    public ArrayList<ChangeSet> getChangeSets() {
+        return changeSets;
     }
 
     /**
@@ -206,32 +238,6 @@ public class Revision {
      */
     public RevisionGraph getRevisionGraph() {
         return revisionGraph;
-    }
-
-    /**
-     * Get the add set content.
-     *
-     * @return the add set content
-     */
-    public String getAddSetContent() {
-        if (addSetContent == null) {
-            // Calculate the ADD set content
-            this.addSetContent = getContentOfNamedGraphAsN3(this.addSetURI);
-        }
-        return addSetContent;
-    }
-
-    /**
-     * Get the delete set content.
-     *
-     * @return the delete set content
-     */
-    public String getDeleteSetContent() {
-        if (deleteSetContent == null) {
-            // Calculate the ADD set content
-            this.deleteSetContent = getContentOfNamedGraphAsN3(this.deleteSetURI);
-        }
-        return deleteSetContent;
     }
 
     /**
@@ -255,7 +261,7 @@ public class Revision {
             addSetURI = qs.getResource("?addSetURI").toString();
             deleteSetURI = qs.getResource("?deleteSetURI").toString();
         } else {
-            //TODO Check if add and delete sets are optional for first revision
+            //TODO Check if add and delete sets are optional for first revision - yes they are!
 //            throw new InternalErrorException("No additional information found for revision " + revisionIdentifier + ".");
         }
     }
@@ -273,7 +279,7 @@ public class Revision {
                 + "SELECT ?uri "
                 + "WHERE { GRAPH  <%s> {"
                 + "	?uri a rmo:Revision; "
-                + "	 rmo:revisionNumber \"%s\". "
+                + "	 rmo:revisionIdentifier \"%s\". "
                 + "} }", revisionGraphURI, revisionIdentifier);
         this.logger.debug(query);
         ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
@@ -298,7 +304,7 @@ public class Revision {
                 + "SELECT ?id "
                 + "WHERE { GRAPH  <%s> {"
                 + "	<%s> a rmo:Revision; "
-                + "	 rmo:revisionNumber ?id. "
+                + "	 rmo:revisionIdentifier ?id. "
                 + "} }", revisionGraphURI, revisionURI);
         this.logger.debug(query);
         ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);

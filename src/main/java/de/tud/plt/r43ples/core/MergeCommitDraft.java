@@ -201,7 +201,7 @@ public class MergeCommitDraft extends CommitDraft {
             // Check if the into revision is derived from the from revision and fast forward can be applied
             String query = Config.prefixes
                     + String.format("ASK { GRAPH <%s> { "
-                            + "<%s> prov:wasDerivedFrom+ <%s> ."
+                            + "<%s> rmo:wasDerivedFrom+ <%s> ."
                             + " }} ",
                     revisionGraphURI, revisionUriFrom, revisionUriInto);
             if (!getTripleStoreInterface().executeAskQuery(query)) {
@@ -315,4 +315,5 @@ public class MergeCommitDraft extends CommitDraft {
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(
                 "COPY GRAPH <" + sourceGraphURI + "> TO GRAPH <"+ targetGraphURI + ">");
     }
+
 }

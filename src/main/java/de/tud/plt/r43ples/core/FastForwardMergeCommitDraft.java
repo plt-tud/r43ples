@@ -91,10 +91,10 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
         // Create a new commit (activity)
         StringBuilder queryContent = new StringBuilder(1000);
         queryContent.append(String.format(
-                "<%s> a rmo:FastForwardMergeCommit, rmo:MergeCommit, rmo:Commit; "
-                        + "	prov:wasAssociatedWith <%s> ;"
-                        + "	dc-terms:title \"%s\" ;"
-                        + "	prov:atTime \"%s\"^^xsd:dateTime ; %n"
+                "<%s> a rmo:FastForwardMergeCommit, rmo:MergeCommit, rmo:BasicMergeCommit, rmo:Commit; "
+                        + "	rmo:wasAssociatedWith <%s> ;"
+                        + "	rmo:commitMessage \"%s\" ;"
+                        + "	rmo:atTime \"%s\"^^xsd:dateTime ; %n"
                         + " rmo:usedSourceRevision <%s> ;"
                         + " rmo:usedSourceBranch <%s> ;"
                         + " rmo:usedTargetRevision <%s> ;"
@@ -109,7 +109,6 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
 
         getTripleStoreInterface().executeUpdateQuery(query);
 
-        updateBelongsTo(usedTargetBranch.getReferenceURI(), getPathCalculationInterface().getPathBetweenStartAndTargetRevision(getRevisionGraph(), usedTargetRevision, usedSourceRevision));
         // Update the full graph of the target branch
         fullGraphCopy(getRevisionGraph().getFullGraphUri(usedSourceBranch.getReferenceURI()), getRevisionGraph().getFullGraphUri(usedTargetBranch.getReferenceURI()));
 
@@ -121,25 +120,6 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
         return new FastForwardMergeCommit(getRevisionGraph(), commitURI, getUser(), getTimeStamp(), getMessage(),
                 usedSourceRevision, usedSourceBranch, usedTargetRevision, usedTargetBranch, null,
                 null, false, null, null);
-    }
-
-    /**
-     * Adds a new belongs to property to all revision along the specified path.
-     *
-     * @param branchURI the branch URI
-     * @param path the path to update
-     * */
-    public void updateBelongsTo(String branchURI, Path path){
-
-        Iterator<Revision> revIte = path.getRevisionPath().iterator();
-        while(revIte.hasNext()) {
-            String revision = revIte.next().getRevisionURI();
-
-            String query = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:belongsTo <%s>. } };%n",
-                    getRevisionGraph().getRevisionGraphUri(), revision, branchURI);
-
-            TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
-        }
     }
 
 }

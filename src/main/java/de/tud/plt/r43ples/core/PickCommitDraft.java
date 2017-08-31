@@ -162,20 +162,32 @@ public class PickCommitDraft extends CommitDraft {
         // Copy revisions
         Revision generatedRevision = null;
         if ((path == null) || (path.getRevisionPath().size() == 1)) {
-            generatedRevision = copyRevisionToTargetBranch(startRevision, usedTargetRevision, usedTargetBranch, commitURI);
+            generatedRevision = copyRevisionToTargetBranch(startRevision, usedTargetBranch, commitURI);
             usedSourceRevisions.add(startRevision);
             generatedRevisions.add(generatedRevision);
+
+            // Move source branch to new revision
+            moveBranchReference(revisionGraph.getRevisionGraphUri(), usedTargetBranch.getReferenceURI(), usedTargetRevision.getRevisionURI(), generatedRevision.getRevisionURI());
+
+            // Update the target branch object
+            usedTargetBranch = revisionGraph.getBranch(targetBranchIdentifier, true);
         } else {
             Iterator<Revision> iteRev = path.getRevisionPath().iterator();
             while(iteRev.hasNext()) {
                 Revision currentRevision = iteRev.next();
-                generatedRevision = copyRevisionToTargetBranch(currentRevision, usedTargetRevision, usedTargetBranch, commitURI);
+                generatedRevision = copyRevisionToTargetBranch(currentRevision, usedTargetBranch, commitURI);
                 usedSourceRevisions.add(currentRevision);
                 generatedRevisions.add(generatedRevision);
+
+                // Move source branch to new revision
+                moveBranchReference(revisionGraph.getRevisionGraphUri(), usedTargetBranch.getReferenceURI(), usedTargetRevision.getRevisionURI(), generatedRevision.getRevisionURI());
+
+                // Update the target branch object
+                usedTargetBranch = revisionGraph.getBranch(targetBranchIdentifier, true);
             }
         }
 
-        return addMetaInformation(generatedRevision, usedTargetRevision, usedTargetBranch, commitURI, usedSourceRevisions, generatedRevisions);
+        return addMetaInformation(usedTargetRevision, usedTargetBranch, commitURI, usedSourceRevisions, generatedRevisions);
     }
 
     /**
@@ -183,7 +195,6 @@ public class PickCommitDraft extends CommitDraft {
      *
      * <img src="{@docRoot}../../doc/revision management description/r43ples-pick.png" />
      *
-     * @param generatedRevision the last generated revision
      * @param usedTargetRevision the used target revision (into)
      * @param usedTargetBranch the used target branch (from)
      * @param commitURI the commit URI
@@ -192,17 +203,17 @@ public class PickCommitDraft extends CommitDraft {
      * @return the created commit
      * @throws InternalErrorException
      */
-    private PickCommit addMetaInformation(Revision generatedRevision, Revision usedTargetRevision, Branch usedTargetBranch, String commitURI, ArrayList<Revision> usedSourceRevisions, ArrayList<Revision> generatedRevisions) throws InternalErrorException {
+    private PickCommit addMetaInformation(Revision usedTargetRevision, Branch usedTargetBranch, String commitURI, ArrayList<Revision> usedSourceRevisions, ArrayList<Revision> generatedRevisions) throws InternalErrorException {
 
         String personUri = RevisionManagementOriginal.getUserURI(getUser());
 
         // Create a new commit (activity)
         StringBuilder queryContent = new StringBuilder(1000);
         queryContent.append(String.format(
-                "<%s> a rmo:PickCommit, rmo:Commit; "
-                        + "	prov:wasAssociatedWith <%s> ;"
-                        + "	dc-terms:title \"%s\" ;"
-                        + "	prov:atTime \"%s\"^^xsd:dateTime ; %n"
+                "<%s> a rmo:PickCommit, rmo:BasicMergeCommit, rmo:Commit; "
+                        + "	rmo:wasAssociatedWith <%s> ;"
+                        + "	rmo:commitMessage \"%s\" ;"
+                        + "	rmo:atTime \"%s\"^^xsd:dateTime ; %n"
                         + " rmo:usedTargetRevision <%s> ;"
                         + " rmo:usedTargetBranch <%s> .",
                 commitURI, personUri, getMessage(), getTimeStamp(),
@@ -213,12 +224,6 @@ public class PickCommitDraft extends CommitDraft {
                 queryContent.toString());
 
         getTripleStoreInterface().executeUpdateQuery(query);
-
-        // Move source branch to new revision
-        moveBranchReference(revisionGraph.getRevisionGraphUri(), usedTargetBranch.getReferenceURI(), usedTargetRevision.getRevisionURI(), generatedRevision.getRevisionURI());
-
-        // Update the target branch object
-        usedTargetBranch = revisionGraph.getBranch(targetBranchIdentifier, true);
 
         return new PickCommit(revisionGraph, commitURI, getUser(), getTimeStamp(), getMessage(), usedSourceRevisions, usedTargetRevision, usedTargetBranch, generatedRevisions);
     }
@@ -232,24 +237,21 @@ public class PickCommitDraft extends CommitDraft {
      * @param commitURI the associated commit URI
      * @return the generated revision
      */
-    private Revision copyRevisionToTargetBranch(Revision revisionToCopy, Revision derivedFromRevision, Branch targetBranch, String commitURI) throws InternalErrorException {
+    private Revision copyRevisionToTargetBranch(Revision revisionToCopy, Branch targetBranch, String commitURI) throws InternalErrorException {
 
-        String addSetContent = revisionToCopy.getAddSetContent();
-        String deleteSetContent = revisionToCopy.getDeleteSetContent();
+        String addSetContent = revisionToCopy.getChangeSet().getAddSetContent();
+        String deleteSetContent = revisionToCopy.getChangeSet().getDeleteSetContent();
 
-        RevisionDraft revisionDraft = new RevisionDraft(getRevisionManagement(), revisionGraph, derivedFromRevision.getRevisionIdentifier(), addSetContent, deleteSetContent);
-        Revision generatedRevision = revisionDraft.createRevisionInTripleStore();
+        RevisionDraft revisionDraft = new RevisionDraft(getRevisionManagement(), revisionGraph, targetBranch, addSetContent, deleteSetContent, false);
+        Revision generatedRevision = revisionDraft.createInTripleStore();
 
         // Create the corresponding meta data
         StringBuilder queryContentInsert = new StringBuilder(1000);
         queryContentInsert.append(String.format(
-                "<%1$s> prov:wasDerivedFrom <%2$s>; "
-                        + "	prov:wasQuotedFrom <%3$s> ;"
-                        + "	rmo:belongsTo <%4$s> ."
-                + "<%5$s> prov:generated <%1$s> ; "
-                        + " rmo:usedSourceRevision <%3$s> .",
-                generatedRevision.getRevisionURI(), derivedFromRevision.getRevisionURI(), revisionToCopy.getRevisionURI(),
-                targetBranch.getReferenceURI(), commitURI));
+                "<%1$s> rmo:wasQuotedFrom <%2$s> . "
+                + "<%3$s> prov:generated <%1$s> ; "
+                        + " rmo:usedSourceRevision <%2$s> .",
+                generatedRevision.getRevisionURI(), revisionToCopy.getRevisionURI(), commitURI));
 
         String query = Config.prefixes	+ String.format(""
                         + "INSERT DATA { GRAPH <%1$s> { %2$s } }",

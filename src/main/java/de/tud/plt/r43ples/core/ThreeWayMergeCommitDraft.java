@@ -25,6 +25,11 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
     /** The logger. **/
     private Logger logger = Logger.getLogger(ThreeWayMergeCommitDraft.class);
 
+    /** The used source branch. **/
+    private Branch usedSourceBranch;
+    /** The used target branch. **/
+    private Branch usedTargetBranch;
+
 
     /**
      * The constructor.
@@ -43,6 +48,8 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
      */
     protected ThreeWayMergeCommitDraft(String graphName, String branchNameFrom, String branchNameInto, String user, String message, String sdd, String triples, MergeTypes type, boolean with) throws InternalErrorException {
         super(graphName, branchNameFrom, branchNameInto, user, message, sdd, MergeActions.MERGE, triples, type, with);
+        this.usedSourceBranch = getRevisionGraph().getBranch(getBranchNameFrom(), true);
+        this.usedTargetBranch = getRevisionGraph().getBranch(getBranchNameInto(), true);
     }
 
     /**
@@ -90,17 +97,17 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
         if ((getType() != null) && (getType().equals(MergeTypes.AUTO)) && !isWith()) {
             logger.debug("AUTO MERGE query detected");
             // Create the merged revision
-            revision = createMergedRevision(namedGraphUriDiff, MergeQueryTypeEnum.AUTO);
+            revision = createMergedRevision(namedGraphUriDiff, MergeQueryTypeEnum.AUTO, fromRevision);
             return addMetaInformation(revision, namedGraphUriDiff, commonRevision, fromRevision, intoRevision);
         } else if ((getType() != null) && (getType().equals(MergeTypes.MANUAL)) && isWith()) {
             logger.debug("MANUAL MERGE query detected");
             // Create the merged revision
-            revision = createMergedRevision(namedGraphUriDiff, MergeQueryTypeEnum.MANUAL);
+            revision = createMergedRevision(namedGraphUriDiff, MergeQueryTypeEnum.MANUAL, fromRevision);
             return addMetaInformation(revision, namedGraphUriDiff, commonRevision, fromRevision, intoRevision);
         } else if ((getType() == null) && isWith()) {
             logger.debug("MERGE WITH query detected");
             // Create the merged revision
-            revision = createMergedRevision(namedGraphUriDiff, MergeQueryTypeEnum.WITH);
+            revision = createMergedRevision(namedGraphUriDiff, MergeQueryTypeEnum.WITH, fromRevision);
             return addMetaInformation(revision, namedGraphUriDiff, commonRevision, fromRevision, intoRevision);
         } else if ((getType() == null) && !isWith()) {
             logger.debug("MERGE query detected");
@@ -116,7 +123,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
             } else {
                 // Difference model contains no conflicts
                 // Create the merged revision
-                revision = createMergedRevision(namedGraphUriDiff, MergeQueryTypeEnum.COMMON);
+                revision = createMergedRevision(namedGraphUriDiff, MergeQueryTypeEnum.COMMON, fromRevision);
                 return addMetaInformation(revision, namedGraphUriDiff, commonRevision, fromRevision, intoRevision);
             }
         } else {
@@ -141,19 +148,16 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
         String commitURI = getRevisionManagement().getNewThreeWayMergeCommitURI(getRevisionGraph(), generatedRevision.getRevisionIdentifier());;
 
-        Branch usedSourceBranch = getRevisionGraph().getBranch(getBranchNameFrom(), true);
-        Branch usedTargetBranch = getRevisionGraph().getBranch(getBranchNameInto(), true);
-
         String personUri = RevisionManagementOriginal.getUserURI(getUser());
 
         // Create a new commit (activity)
         StringBuilder queryContent = new StringBuilder(1000);
         queryContent.append(String.format(
-                "<%s> a rmo:ThreeWayMergeCommit, rmo:MergeCommit, rmo:Commit; "
-                        + "	prov:wasAssociatedWith <%s> ;"
-                        + "	dc-terms:title \"%s\" ;"
-                        + "	prov:atTime \"%s\"^^xsd:dateTime ; %n"
-                        + " prov:generated <%s> ;"
+                "<%s> a rmo:ThreeWayMergeCommit, rmo:MergeCommit, rmo:BasicMergeCommit, rmo:Commit; "
+                        + "	rmo:wasAssociatedWith <%s> ;"
+                        + "	rmo:commitMessage \"%s\" ;"
+                        + "	rmo:atTime \"%s\"^^xsd:dateTime ; %n"
+                        + " rmo:generated <%s> ;"
                         + " rmo:usedSourceRevision <%s> ;"
                         + " rmo:usedSourceBranch <%s> ;"
                         + " rmo:usedTargetRevision <%s> ;"
@@ -162,16 +166,11 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                 generatedRevision.getRevisionURI(), usedSourceRevision.getRevisionURI(), usedSourceBranch.getReferenceURI(),
                 usedTargetRevision.getRevisionURI(), usedTargetBranch.getReferenceURI()));
 
-        // Create revision meta data
+        // Create revision meta data for additional change set
         queryContent.append(String.format(
-                "<%s> a rmo:Revision ; %n"
-                        + "	rmo:addSet <%s> ; %n"
-                        + "	rmo:deleteSet <%s> ; %n"
-                        + "	rmo:revisionNumber \"%s\" ; %n"
-                        + "	rmo:belongsTo <%s> ; %n"
-                        + " prov:wasDerivedFrom <%s>, <%s> . %n",
-                generatedRevision.getRevisionURI(), generatedRevision.getAddSetURI(), generatedRevision.getDeleteSetURI(), generatedRevision.getRevisionIdentifier(),
-                usedTargetBranch.getReferenceURI(), usedSourceRevision.getRevisionURI(), usedTargetRevision.getRevisionURI()));
+                "<%s> rmo:hasChangeSet <%s> ; %n"
+                        + "	rmo:wasDerivedFrom <%s> .",
+                generatedRevision.getRevisionURI(), generatedRevision.getChangeSets().get(1), usedSourceRevision.getRevisionURI()));
 
         String query = Config.prefixes
                 + String.format("INSERT DATA { GRAPH <%s> { %s } }", getRevisionGraph().getRevisionGraphUri(),
@@ -194,10 +193,11 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
      *
      * @param graphNameDifferenceTripleModel the graph name of the difference triple model
      * @param type the merge query type
+     * @param usedSourceRevision the used source revision
      * @return the created revision
      * @throws InternalErrorException
      */
-    private Revision createMergedRevision(String graphNameDifferenceTripleModel, MergeQueryTypeEnum type) throws InternalErrorException {
+    private Revision createMergedRevision(String graphNameDifferenceTripleModel, MergeQueryTypeEnum type, Revision usedSourceRevision) throws InternalErrorException {
 
         // Create an empty temporary graph which will contain the merged full content
         String graphNameOfMerged = getRevisionManagement().getTemporaryMergedURI(getRevisionGraph());
@@ -363,10 +363,13 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
         deletedTriples += getTripleStoreInterface().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
 
-        // Creates a new revision draft an creates a corresponding revision - no meta data will be written
-        RevisionDraft revisionDraft = new RevisionDraft(getRevisionManagement(), getRevisionGraph(), getBranchNameInto(), addedTriples, deletedTriples);
+        // Create the merge revision and a change set
+        RevisionDraft revisionDraft = new RevisionDraft(getRevisionManagement(), getRevisionGraph(), usedTargetBranch, addedTriples, deletedTriples, false);
+        Revision generatedRevision = revisionDraft.createInTripleStore();
+        ChangeSetDraft changeSetDraft = new ChangeSetDraft(getRevisionManagement(), getRevisionGraph(), usedSourceRevision, generatedRevision.getRevisionIdentifier(), usedSourceBranch.getReferenceURI(), addedTriples, deletedTriples, false);
+        ChangeSet changeSet = changeSetDraft.createInTripleStore();
 
-        return revisionDraft.createRevisionInTripleStore();
+        return new Revision(generatedRevision, changeSet);
     }
 
     /**

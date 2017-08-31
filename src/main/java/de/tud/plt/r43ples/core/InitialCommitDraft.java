@@ -8,6 +8,7 @@ import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
@@ -31,6 +32,8 @@ public class InitialCommitDraft extends CommitDraft {
     private RevisionDraft revisionDraft;
     /** States if this commit draft was created by a request or add and delete sets. (true => request, false => add/delete sets) **/
     private boolean isCreatedWithRequest;
+    /** The revision graph. **/
+    private RevisionGraph revisionGraph;
 
 
     /**
@@ -43,7 +46,8 @@ public class InitialCommitDraft extends CommitDraft {
     public InitialCommitDraft(R43plesRequest request) throws InternalErrorException {
         super(request);
         String graphName = getGraphNameOfRequest();
-        this.revisionDraft = new RevisionDraft(getRevisionManagement(), new RevisionGraph(graphName, getRevisionManagement().getNewRevisionGraphURI(graphName)), null, null);
+        this.revisionGraph = new RevisionGraph(graphName, getRevisionManagement().getNewRevisionGraphURI(graphName));
+        this.revisionDraft = new RevisionDraft(getRevisionManagement(), revisionGraph, null, null);
         this.isCreatedWithRequest = true;
     }
 
@@ -62,7 +66,8 @@ public class InitialCommitDraft extends CommitDraft {
         super(null);
         this.setUser(user);
         this.setMessage(message);
-        this.revisionDraft = new RevisionDraft(getRevisionManagement(), new RevisionGraph(graphName, getRevisionManagement().getNewRevisionGraphURI(graphName)), addSet, deleteSet);
+        this.revisionGraph = new RevisionGraph(graphName, getRevisionManagement().getNewRevisionGraphURI(graphName));
+        this.revisionDraft = new RevisionDraft(getRevisionManagement(), revisionGraph, addSet, deleteSet);
         this.isCreatedWithRequest = false;
     }
 
@@ -70,10 +75,10 @@ public class InitialCommitDraft extends CommitDraft {
      * Creates the commit draft as a new commit in the triplestore and creates the corresponding revisions.
      *
      * @return the list of created commits
+     * @throws InternalErrorException
      */
-    protected InitialCommit createCommitInTripleStore() throws InternalErrorException {
+    protected InitialCommit createInTripleStore() throws InternalErrorException {
         String commitUri = getRevisionManagement().getNewCommitURI(revisionDraft.getRevisionGraph(), revisionDraft.getNewRevisionIdentifier());
-        String masterUri = getRevisionManagement().getNewMasterURI(revisionDraft.getRevisionGraph());
 
         // Create graph
         if (!getRevisionManagement().checkNamedGraphExistence(revisionDraft.getRevisionGraph().getGraphName())) {
@@ -82,10 +87,14 @@ public class InitialCommitDraft extends CommitDraft {
             throw new InternalErrorException("The calculated revision graph is already in use.");
         }
 
-        addMetaInformation(revisionDraft, commitUri, masterUri);
+        Revision generatedRevision = revisionDraft.createInTripleStore();
 
-        Revision generatedRevision = revisionDraft.createRevisionInTripleStore();
-        Branch generatedBranch = new Branch(revisionDraft.getRevisionGraph(), masterUri, false);
+        MasterDraft masterDraft = new MasterDraft(getRevisionManagement(), revisionGraph, generatedRevision);
+        Branch generatedBranch = masterDraft.createInTripleStore();
+
+        updateReferencedFullGraph(generatedBranch.getFullGraphURI(), generatedRevision.getChangeSet());
+
+        addMetaInformation(generatedRevision, commitUri, generatedBranch.getReferenceURI());
 
         return new InitialCommit(revisionDraft.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), generatedRevision, generatedBranch);
     }
@@ -117,49 +126,34 @@ public class InitialCommitDraft extends CommitDraft {
     /**
      * Creates a new revision graph for the new graph under revision control and adds the necessary meta data.
      *
-     * @param revisionDraft the revision draft
+     * @param generatedRevision the generated revision
      * @param commitUri the commit URI
      * @param branchUri the branch URI
      * @throws InternalErrorException
      */
-    private void addMetaInformation(RevisionDraft revisionDraft, String commitUri, String branchUri) throws InternalErrorException {
+    private void addMetaInformation(Revision generatedRevision, String commitUri, String branchUri) throws InternalErrorException {
 
         String queryAddRevisionGraph = Config.prefixes + String.format(
                 "INSERT DATA { GRAPH <%1$s> {"
-                        + "  <%2$s> a rmo:Graph;"
+                        + "  <%2$s> a rmo:Graph, rmo:Entity ;"
                         + "    rmo:hasRevisionGraph <%3$s>;"
                         + "    sddo:hasDefaultSDD sdd:defaultSDD."
                         + "} }",
-                Config.revision_graph, revisionDraft.getRevisionGraph().getGraphName(), revisionDraft.getRevisionGraph().getRevisionGraphUri());
+                Config.revision_graph, revisionGraph.getGraphName(), revisionGraph.getRevisionGraphUri());
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryAddRevisionGraph);
 
         // Create new revision
         String queryContent = String.format(
-                "<%s> a rmo:Revision;"
-                        + "	rmo:revisionNumber \"%s\";"
-                        + "	rmo:belongsTo <%s>. ",
-                revisionDraft.getRevisionURI(), revisionDraft.getNewRevisionIdentifier(), branchUri);
+                "<%s> a rmo:InitialCommit, rmo:Commit; "
+                        + "	rmo:wasAssociatedWith <%s> ;"
+                        + "	rmo:generated <%s>, <%s> ;"
+                        + "	rmo:commitMessage \"%s\" ;"
+                        + "	rmo:atTime \"%s\"^^xsd:dateTime .%n",
+                commitUri, RevisionManagementOriginal.getUserURI(getUser()), generatedRevision.getRevisionURI(), branchUri, getMessage(), getTimeStamp());
 
-        // Add MASTER branch
-        queryContent += String.format(
-                "<%s> a rmo:Master, rmo:Branch, rmo:Reference;"
-                        + " rmo:fullGraph <%s>;"
-                        + "	rmo:references <%s>;"
-                        + "	rdfs:label \"master\".",
-                branchUri, revisionDraft.getRevisionGraph().getGraphName(), revisionDraft.getRevisionURI());
-
-        queryContent += String.format(
-                "<%s> a rmo:RevisionCommit, rmo:ReferenceCommit; "
-                        + "	prov:wasAssociatedWith <%s> ;"
-                        + "	prov:generated <%s>, <%s> ;"
-                        + "	dc-terms:title \"initial commit\" ;"
-                        + "	prov:atTime \"%s\"^^xsd:dateTime .%n",
-                commitUri,  "http://eatld.et.tu-dresden.de/user/r43ples", revisionDraft.getRevisionURI(), branchUri, getTimeStamp());
-
-        String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisionDraft.getRevisionGraph().getRevisionGraphUri(), queryContent);
+        String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisionGraph.getRevisionGraphUri(), queryContent);
 
         getTripleStoreInterface().executeUpdateQuery(queryRevision);
-
     }
 
 }

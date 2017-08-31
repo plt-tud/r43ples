@@ -21,6 +21,8 @@ public class Reference {
     private String referenceIdentifier;
     /** The reference URI. */
     private String referenceURI;
+    /** The full graph URI. **/
+    private String fullGraphURI;
 
     /** The revision graph URI. */
     private String revisionGraphURI;
@@ -55,13 +57,15 @@ public class Reference {
      * @param revisionGraph the revision graph
      * @param referenceIdentifier the reference identifier
      * @param referenceURI the reference URI
+     * @param fullGraphURI the full graph URI
      * @throws InternalErrorException
      */
-    public Reference(RevisionGraph revisionGraph, String referenceIdentifier, String referenceURI) throws InternalErrorException {
+    public Reference(RevisionGraph revisionGraph, String referenceIdentifier, String referenceURI, String fullGraphURI) throws InternalErrorException {
         this.revisionGraph = revisionGraph;
         this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
         this.referenceIdentifier = referenceIdentifier;
         this.referenceURI = referenceURI;
+        this.fullGraphURI = fullGraphURI;
     }
 
     /**
@@ -76,7 +80,7 @@ public class Reference {
                 + "SELECT ?com "
                 + "WHERE { GRAPH  <%s> {"
                 + "	?com a rmo:Commit; "
-                + "	 prov:generated <%s>. "
+                + "	 rmo:generated <%s>. "
                 + "} }", revisionGraphURI, referenceURI);
         this.logger.debug(query);
         ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
@@ -128,7 +132,7 @@ public class Reference {
                 + "SELECT ?uri "
                 + "WHERE { GRAPH  <%s> {"
                 + "	?uri a rmo:Reference; "
-                + "	 rdfs:label \"%s\". "
+                + "	 rmo:referenceIdentifier \"%s\". "
                 + "} }", revisionGraphURI, referenceIdentifier);
         this.logger.debug(query);
         ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
@@ -152,8 +156,8 @@ public class Reference {
         String query = Config.prefixes + String.format(""
                 + "SELECT ?id "
                 + "WHERE { GRAPH  <%s> {"
-                + "	<%s> a rmo:Branch; "
-                + "	 rdfs:label ?id. "
+                + "	<%s> a rmo:Reference; "
+                + "	 rmo:referenceIdentifier ?id. "
                 + "} }", revisionGraphURI, referenceURI);
         this.logger.debug(query);
         ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
@@ -163,6 +167,19 @@ public class Reference {
         } else {
             throw new InternalErrorException("No reference identifier found for reference URI " + referenceURI + ".");
         }
+    }
+
+    /**
+     * Get the full graph URI.
+     *
+     * @return the full graph URI
+     * @throws InternalErrorException
+     */
+    public String getFullGraphURI() throws InternalErrorException {
+        if (fullGraphURI == null) {
+            fullGraphURI = this.getRevisionGraph().getFullGraphUri(getReferenceURI());
+        }
+        return fullGraphURI;
     }
 
 }

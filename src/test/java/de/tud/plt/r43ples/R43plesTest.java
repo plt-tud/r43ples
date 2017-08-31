@@ -81,7 +81,7 @@ public class R43plesTest {
      */
     public Model removeTimeStampFromModel(Model model) {
         // Remove timestamp for test
-        Property provAtTime = model.getProperty("http://www.w3.org/ns/prov#atTime");
+        Property provAtTime = model.getProperty("http://eatld.et.tu-dresden.de/rmo#atTime");
         StmtIterator stmtIterator = model.listStatements(null, provAtTime, (RDFNode) null);
         model.remove(stmtIterator);
 

@@ -53,7 +53,7 @@ public class ReferenceCommit extends Commit {
      * @param timeStamp the time stamp
      * @param message the message
      * @param usedRevision the used revision
-     * @param generatedReference the generated branch
+     * @param generatedReference the generated reference
      * @throws InternalErrorException
      */
     public ReferenceCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message, Revision usedRevision, Reference generatedReference) throws InternalErrorException {

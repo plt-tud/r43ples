@@ -1,8 +1,8 @@
 package de.tud.plt.r43ples.core;
 
-import com.hp.hpl.jena.query.QuerySolution;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.OutdatedException;
+import de.tud.plt.r43ples.existentobjects.Branch;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.existentobjects.UpdateCommit;
@@ -55,12 +55,12 @@ public class UpdateCommitDraft extends CommitDraft {
 	 * @param deleteSet the delete set as N-Triples
 	 * @param user the user
 	 * @param message the message
-	 * @param derivedFromIdentifier the revision identifier of the revision or the reference identifier from which the new revision should be derive from
+	 * @param branch the branch were the new revision should be created
 	 * @throws InternalErrorException
 	 */
-	protected UpdateCommitDraft(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException {
+	protected UpdateCommitDraft(String graphName, String addSet, String deleteSet, String user, String message, Branch branch) throws InternalErrorException {
 		super(null);
-		this.revisionDraft = new RevisionDraft(getRevisionManagement(), new RevisionGraph(graphName), derivedFromIdentifier, addSet, deleteSet);
+		this.revisionDraft = new RevisionDraft(getRevisionManagement(), new RevisionGraph(graphName), branch, addSet, deleteSet, false);
 		this.setUser(user);
 		this.setMessage(message);
 		this.isCreatedWithRequest = false;
@@ -71,11 +71,11 @@ public class UpdateCommitDraft extends CommitDraft {
 	 *
 	 * @return the list of created commits
 	 */
-	protected ArrayList<UpdateCommit> createCommitInTripleStore() throws InternalErrorException {
+	protected ArrayList<UpdateCommit> createInTripleStore() throws InternalErrorException {
 		if (!isCreatedWithRequest) {
-			revisionDraft.createRevisionInTripleStore();
+			Revision generatedRevision = revisionDraft.createInTripleStore();
 			ArrayList<UpdateCommit> commitList = new ArrayList<>();
-			commitList.add(addMetaInformation(revisionDraft));
+			commitList.add(addMetaInformation(generatedRevision));
 			return commitList;
 		} else {
 			return this.updateChangeSetsByRewrittenQuery();
@@ -120,7 +120,7 @@ public class UpdateCommitDraft extends CommitDraft {
 		m = patternUpdateRevision.matcher(getRequest().query_sparql);
 		while (m.find()) {
 			String action = m.group("action");
-			String updateClause = getStringEnclosedinBraces(getRequest().query_sparql, m.end());
+			String updateClause = getStringEnclosedInBraces(getRequest().query_sparql, m.end());
 
 			Matcher m2a = patternGraphWithRevision.matcher(updateClause);
 			while (m2a.find()) {
@@ -137,15 +137,15 @@ public class UpdateCommitDraft extends CommitDraft {
 						d = draft;
 				}
 				if (d == null) {
-					d = new RevisionDraft(getRevisionManagement(), graph, revisionName);
+					d = null;//TODO new RevisionDraft(getRevisionManagement(), graph, revisionName);
 					revList.add(d);
 				}
-				String graphClause = getStringEnclosedinBraces(updateClause, m2a.end());
+				String graphClause = getStringEnclosedInBraces(updateClause, m2a.end());
 
 				if (action.equalsIgnoreCase("INSERT")) {
-					queryRewritten += String.format("GRAPH <%s> { %s }", d.getAddSetURI(), graphClause);
+					queryRewritten += String.format("GRAPH <%s> { %s }", d.getChangeSet().getAddSetURI(), graphClause);
 				} else if (action.equalsIgnoreCase("DELETE")) {
-					queryRewritten += String.format("GRAPH <%s> { %s }", d.getDeleteSetURI(), graphClause);
+					queryRewritten += String.format("GRAPH <%s> { %s }", d.getChangeSet().getDeleteSetURI(), graphClause);
 				}
 			}
 		}
@@ -155,7 +155,7 @@ public class UpdateCommitDraft extends CommitDraft {
 		Matcher m1 = patternWhere.matcher(getRequest().query_sparql);
 		if (m1.find()) {
 			queryRewritten += "WHERE {";
-			String whereClause = getStringEnclosedinBraces(getRequest().query_sparql, m1.end());
+			String whereClause = getStringEnclosedInBraces(getRequest().query_sparql, m1.end());
 
 			Matcher m1a = patternGraphWithRevision.matcher(whereClause);
 			while (m1a.find()) {
@@ -165,7 +165,7 @@ public class UpdateCommitDraft extends CommitDraft {
 				// rewriting option
 				String tempGraphName = graphName + "-temp";
 				RevisionManagementOriginal.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
-				String GraphClause = getStringEnclosedinBraces(whereClause, m1a.end());
+				String GraphClause = getStringEnclosedInBraces(whereClause, m1a.end());
 				queryRewritten += String.format("GRAPH <%s> { %s }", tempGraphName, GraphClause);
 			}
 			queryRewritten += "}";
@@ -187,7 +187,7 @@ public class UpdateCommitDraft extends CommitDraft {
 		for (RevisionDraft draft : revList) {
 			addNewRevisionFromChangeSet(draft);
 			// add meta information to R43ples
-			commitList.add(addMetaInformation(draft));
+			//TODO commitList.add(addMetaInformation(draft));
 		}
 		return commitList;
 	}
@@ -204,84 +204,56 @@ public class UpdateCommitDraft extends CommitDraft {
 		// (already existing triples in add set; not existing triples in delete set)
 		getTripleStoreInterface().executeUpdateQuery(String.format(
 				"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }",
-				draft.getAddSetURI(), draft.getReferenceFullGraph()));
+				draft.getChangeSet().getAddSetURI(), draft.getReferenceFullGraph()));
 		getTripleStoreInterface().executeUpdateQuery(String.format(
 				"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } MINUS { GRAPH <%s> { ?s ?p ?o. } } }",
-				draft.getDeleteSetURI(), draft.getDeleteSetURI(), draft.getReferenceFullGraph()));
+				draft.getChangeSet().getDeleteSetURI(), draft.getChangeSet().getDeleteSetURI(), draft.getReferenceFullGraph()));
 
 		// merge change sets into reference graph
 		// (copy add set to reference graph; remove delete set from reference graph)
 		getTripleStoreInterface().executeUpdateQuery(String.format(
 				"INSERT { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }",
-				draft.getReferenceFullGraph(), draft.getAddSetURI()));
+				draft.getReferenceFullGraph(), draft.getChangeSet().getAddSetURI()));
 		getTripleStoreInterface().executeUpdateQuery(String.format(
 				"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }",
-				draft.getReferenceFullGraph(), draft.getDeleteSetURI()));
+				draft.getReferenceFullGraph(), draft.getChangeSet().getDeleteSetURI()));
 	}
 
 	/**
 	 * Adds meta information for commit and revision to the revision graph.
 	 *
-	 * @param draft the revision draft
+	 * @param generatedRevision the generated revision
 	 * @return the created commit
 	 * @throws InternalErrorException
 	 */
-	private UpdateCommit addMetaInformation(RevisionDraft draft) throws InternalErrorException {
+	private UpdateCommit addMetaInformation(Revision generatedRevision) throws InternalErrorException {
 		String personUri = RevisionManagementOriginal.getUserURI(getUser());
 
-		String revisionUri = draft.getRevisionURI();
-		String commitUri = getRevisionManagement().getNewCommitURI(draft.getRevisionGraph(), draft.getNewRevisionIdentifier());
-		String branchUri = draft.getRevisionGraph().getBranchUri(draft.getDerivedFromIdentifier());
-		String revUriOld = draft.getRevisionGraph().getRevisionUri(draft.getDerivedFromRevisionIdentifier());
+		String revisionUri = generatedRevision.getRevisionURI();
+		String commitUri = getRevisionManagement().getNewCommitURI(generatedRevision.getRevisionGraph(), generatedRevision.getRevisionIdentifier());
+		String revUriOld = generatedRevision.getDerivedFromRevision().getRevisionURI();
 
 		// Create a new commit (activity)
 		StringBuilder queryContent = new StringBuilder(1000);
 		queryContent.append(String.format(
-				"<%s> a rmo:RevisionCommit; "
-						+ "	prov:wasAssociatedWith <%s>;"
-						+ "	prov:generated <%s>;"
-						+ "	dc-terms:title \"%s\";"
-						+ " prov:used <%s> ;"
-						+ "	prov:atTime \"%s\"^^xsd:dateTime. %n", commitUri,
+				"<%s> a rmo:RevisionCommit, rmo:Commit ; "
+						+ "	rmo:wasAssociatedWith <%s>;"
+						+ "	rmo:generated <%s>;"
+						+ "	rmo:commitMessage \"%s\";"
+						+ " rmo:used <%s> ;"
+						+ "	rmo:atTime \"%s\"^^xsd:dateTime. %n", commitUri,
 				personUri, revisionUri, getMessage(), revUriOld, getTimeStamp()));
 
-		// Create new revision
-		queryContent.append(String.format(
-				"<%s> a rmo:Revision ; %n"
-						+ "	rmo:addSet <%s> ; %n"
-						+ "	rmo:deleteSet <%s> ; %n"
-						+ "	rmo:revisionNumber \"%s\" ; %n"
-						+ "	rmo:belongsTo <%s> ; %n"
-						+ " prov:wasDerivedFrom <%s> . %n"
-				,  revisionUri, draft.getAddSetURI(), draft.getDeleteSetURI(), draft.getNewRevisionIdentifier(), branchUri, revUriOld));
-
 		String query = Config.prefixes
-				+ String.format("INSERT DATA { GRAPH <%s> { %s } }", draft.getRevisionGraph().getRevisionGraphUri(),
+				+ String.format("INSERT DATA { GRAPH <%s> { %s } }", generatedRevision.getRevisionGraph().getRevisionGraphUri(),
 				queryContent.toString());
 
 		getTripleStoreInterface().executeUpdateQuery(query);
 
 		// Move branch to new revision
-		String branchIdentifier = draft.getDerivedFromIdentifier(); //or revisionNumber //TODO
-		String oldRevisionUri = draft.getRevisionGraph().getRevisionUri(branchIdentifier);
+		moveBranchReference(generatedRevision.getRevisionGraph().getRevisionGraphUri(), generatedRevision.getAssociatedBranch().getReferenceURI(), generatedRevision.getDerivedFromRevision().getRevisionURI(), revisionUri);
 
-		String queryBranch = Config.prefixes + String.format(""
-						+ "SELECT ?branch "
-						+ "WHERE { GRAPH <%s> {"
-						+ "	?branch a rmo:Branch; "
-						+ "		rmo:references <%s>."
-						+ "	{?branch rdfs:label \"%s\"} UNION {<%s> rmo:revisionNumber \"%s\"}"
-						+ "} }",
-				draft.getRevisionGraph().getRevisionGraphUri(), oldRevisionUri, branchIdentifier, oldRevisionUri,
-				branchIdentifier);
-		QuerySolution sol = getTripleStoreInterface().executeSelectQuery(queryBranch).next();
-		String branchName = sol.getResource("?branch").toString();
-		moveBranchReference(draft.getRevisionGraph().getRevisionGraphUri(), branchName, oldRevisionUri, revisionUri);
-
-		Revision newRevision = new Revision(draft.getRevisionGraph(), draft.getNewRevisionIdentifier(), revisionUri, draft.getAddSetURI(), draft.getDeleteSetURI());
-		newRevision.getDerivedFromRevision();
-
-		return new UpdateCommit(draft.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), newRevision.getDerivedFromRevision(), newRevision);
+		return new UpdateCommit(generatedRevision.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), generatedRevision.getDerivedFromRevision(), generatedRevision);
 	}
 
 	/**
@@ -291,7 +263,7 @@ public class UpdateCommitDraft extends CommitDraft {
 	 * @param start_pos the start position
 	 * @return the enclosed in braces string
 	 */
-	private String getStringEnclosedinBraces(final String string, int start_pos){
+	private String getStringEnclosedInBraces(final String string, int start_pos){
 		int end_pos = start_pos;
 		int count_parenthesis = 1;
 		while (count_parenthesis>0) {

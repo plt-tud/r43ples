@@ -43,7 +43,7 @@ public class R43plesCore implements R43plesCoreInterface {
     @Override
     public InitialCommit createInitialCommit(R43plesRequest request) throws InternalErrorException {
         InitialCommitDraft initialCommitDraft = new InitialCommitDraft(request);
-        return initialCommitDraft.createCommitInTripleStore();
+        return initialCommitDraft.createInTripleStore();
     }
 
     /**
@@ -60,7 +60,7 @@ public class R43plesCore implements R43plesCoreInterface {
     @Override
     public InitialCommit createInitialCommit(String graphName, String addSet, String deleteSet, String user, String message) throws InternalErrorException {
         InitialCommitDraft initialCommitDraft = new InitialCommitDraft(graphName, addSet, deleteSet, user, message);
-        return initialCommitDraft.createCommitInTripleStore();
+        return initialCommitDraft.createInTripleStore();
     }
 
     /**
@@ -73,7 +73,7 @@ public class R43plesCore implements R43plesCoreInterface {
     @Override
     public ArrayList<UpdateCommit> createUpdateCommit(R43plesRequest request) throws InternalErrorException {
         UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(request);
-        return updateCommitDraft.createCommitInTripleStore();
+        return updateCommitDraft.createInTripleStore();
     }
 
     /**
@@ -90,8 +90,11 @@ public class R43plesCore implements R43plesCoreInterface {
      */
     @Override
     public UpdateCommit createUpdateCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException {
-        UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(graphName, addSet, deleteSet, user, message, derivedFromIdentifier);
-        return updateCommitDraft.createCommitInTripleStore().get(0);
+        //TODO change derivedFromIdentifier to BRANCH
+        RevisionGraph revisionGraph = new RevisionGraph(graphName);
+        Branch branch = new Branch(revisionGraph, derivedFromIdentifier, true);
+        UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(graphName, addSet, deleteSet, user, message, branch);
+        return updateCommitDraft.createInTripleStore().get(0);
     }
 
     /**
@@ -103,16 +106,16 @@ public class R43plesCore implements R43plesCoreInterface {
      */
     @Override
     public ReferenceCommit createReferenceCommit(R43plesRequest request) throws InternalErrorException {
-        ReferenceCreationCommitDraft referenceCreationCommitDraft = new ReferenceCreationCommitDraft(request);
-        return referenceCreationCommitDraft.createCommitInTripleStore();
+        ReferenceCommitDraft referenceCommitDraft = new ReferenceCommitDraft(request);
+        return referenceCommitDraft.createInTripleStore();
     }
 
     /**
      * Create a new reference commit.
      *
-     * @param graphName the graph name
+     * @param revisionGraph the revision graph
      * @param referenceName the reference name
-     * @param revisionIdentifier the revision identifier (the corresponding revision will be the current base for the reference)
+     * @param baseRevision the base revision (this revision will be the current base for the reference)
      * @param user the user
      * @param message the message
      * @param isBranch states if the created reference is a branch or a tag. (branch => true; tag => false)
@@ -120,9 +123,43 @@ public class R43plesCore implements R43plesCoreInterface {
      * @throws InternalErrorException
      */
     @Override
-    public ReferenceCommit createReferenceCommit(String graphName, String referenceName, String revisionIdentifier, String user, String message, boolean isBranch) throws InternalErrorException {
-        ReferenceCreationCommitDraft referenceCreationCommitDraft = new ReferenceCreationCommitDraft(graphName, referenceName, revisionIdentifier, user, message, isBranch);
-        return referenceCreationCommitDraft.createCommitInTripleStore();
+    public ReferenceCommit createReferenceCommit(RevisionGraph revisionGraph, String referenceName, Revision baseRevision, String user, String message, boolean isBranch) throws InternalErrorException {
+        ReferenceCommitDraft referenceCommitDraft = new ReferenceCommitDraft(revisionGraph, referenceName, baseRevision, user, message, isBranch);
+        return referenceCommitDraft.createInTripleStore();
+    }
+
+    /**
+     * Create a new branch commit.
+     *
+     * @param revisionGraph the revision graph
+     * @param referenceName the reference name
+     * @param baseRevision the base revision (this revision will be the current base for the reference)
+     * @param user the user
+     * @param message the message
+     * @return the created branch commit
+     * @throws InternalErrorException
+     */
+    @Override
+    public BranchCommit createBranchCommit(RevisionGraph revisionGraph, String referenceName, Revision baseRevision, String user, String message) throws InternalErrorException {
+        BranchCommitDraft branchCommitDraft = new BranchCommitDraft(revisionGraph, referenceName, baseRevision, user, message);
+        return branchCommitDraft.createInTripleStore();
+    }
+
+    /**
+     * Create a new tag commit.
+     *
+     * @param revisionGraph the revision graph
+     * @param referenceName the reference name
+     * @param baseRevision the base revision (this revision will be the current base for the reference)
+     * @param user the user
+     * @param message the message
+     * @return the created tag commit
+     * @throws InternalErrorException
+     */
+    @Override
+    public TagCommit createTagCommit(RevisionGraph revisionGraph, String referenceName, Revision baseRevision, String user, String message) throws InternalErrorException {
+        TagCommitDraft tagCommitDraft = new TagCommitDraft(revisionGraph, referenceName, baseRevision, user, message);
+        return tagCommitDraft.createInTripleStore();
     }
 
     /**

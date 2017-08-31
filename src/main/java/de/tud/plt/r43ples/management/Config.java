@@ -112,12 +112,12 @@ public class Config {
 		return sb.toString();
 	}
 
-	/** The SPARQL prefixes
-	 * **/
+	//TODO spilt into RMO and others
+	/** The SPARQL prefixes **/
 	public static final String prefixes = 
 			  "PREFIX rmo:	<http://eatld.et.tu-dresden.de/rmo#> \n"
 			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
-			+ "PREFIX dc-terms:	<http://purl.org/dc/terms/> \n" 
+			+ "PREFIX dc-terms:	<http://purl.org/dc/terms/> \n"
 			+ "PREFIX xsd:	<http://www.w3.org/2001/XMLSchema#> \n"
 			+ "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
 			+ "PREFIX sdd:	<http://eatld.et.tu-dresden.de/sdd#> \n"

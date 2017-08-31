@@ -54,7 +54,7 @@ public class SimplePathCalculation implements PathCalculationInterface {
                 + "SELECT DISTINCT ?revision "
                 + "WHERE { "
                 + "    GRAPH <%1$s> {"
-                + "        ?revision prov:wasDerivedFrom* <%2$s> ."
+                + "        ?revision rmo:wasDerivedFrom* <%2$s> ."
                 + "        ?reference rmo:references ?revision ."
                 + "    }"
                 + "}", revisionGraph.getRevisionGraphUri(), revision.getRevisionURI());
@@ -99,12 +99,12 @@ public class SimplePathCalculation implements PathCalculationInterface {
                 + "SELECT DISTINCT ?revision "
                 + "WHERE { "
                 + "    GRAPH <%s> {"
-                + "        <%2$s> prov:wasDerivedFrom+ ?revision ."
-                + "        <%3$s> prov:wasDerivedFrom+ ?revision ."
-                + "        ?next prov:wasDerivedFrom ?revision."
+                + "        <%2$s> rmo:wasDerivedFrom+ ?revision ."
+                + "        <%3$s> rmo:wasDerivedFrom+ ?revision ."
+                + "        ?next rmo:wasDerivedFrom ?revision."
                 + "        FILTER NOT EXISTS {"
-                + "            <%2$s> prov:wasDerivedFrom+ ?next ."
-                + "            <%3$s> prov:wasDerivedFrom+ ?next ."
+                + "            <%2$s> rmo:wasDerivedFrom+ ?next ."
+                + "            <%3$s> rmo:wasDerivedFrom+ ?next ."
                 + "        }"
                 + "    }"
                 + "}"
@@ -124,7 +124,7 @@ public class SimplePathCalculation implements PathCalculationInterface {
 
     /**
      * Calculate the path from start revision to target revision.
-     * Example: target prov:wasDerivedFrom source
+     * Example: target rmo:wasDerivedFrom source
      *
      * @param revisionGraph the revision graph
      * @param startRevision the start revision
@@ -139,9 +139,9 @@ public class SimplePathCalculation implements PathCalculationInterface {
                 + "SELECT DISTINCT ?revision ?previousRevision %n"
                 + "WHERE { %n"
                 + "	GRAPH <%s> { %n"
-                + "		<%s> prov:wasDerivedFrom* ?revision."
-                + "		?revision prov:wasDerivedFrom* <%s>."
-                + "		OPTIONAL{?revision prov:wasDerivedFrom ?previousRevision}"
+                + "		<%s> rmo:wasDerivedFrom* ?revision."
+                + "		?revision rmo:wasDerivedFrom* <%s>."
+                + "		OPTIONAL{?revision rmo:wasDerivedFrom ?previousRevision}"
                 + " }"
                 + "}", revisionGraph.getRevisionGraphUri(), targetRevision.getRevisionURI(), startRevision.getRevisionURI());
         this.logger.debug(query);

@@ -77,9 +77,9 @@ public class Commit {
                 + "SELECT ?title ?time ?person "
                 + "WHERE { GRAPH  <%s> {"
                 + "	<%s> a rmo:Commit; "
-                + "	 dcterms:title ?title; "
-                + "  prov:atTime ?time; "
-                + "  prov:wasAssociatedWith ?person. "
+                + "	 rmo:commitMessage ?title; "
+                + "  rmo:atTime ?time; "
+                + "  rmo:wasAssociatedWith ?person. "
                 + "} }", revisionGraphURI, commitURI);
         this.logger.debug(query);
         ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
