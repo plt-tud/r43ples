@@ -30,13 +30,6 @@ rmo:hasChangeSet rdf:type owl:ObjectProperty ;
                  rdfs:range rmo:ChangeSet .
 
 
-###  http://eatld.et.tu-dresden.de/rmo#hasCommit
-rmo:hasCommit rdf:type owl:ObjectProperty ;
-              rdfs:subPropertyOf prov:hadActivity ;
-              rdfs:domain rmo:ChangeSet ;
-              rdfs:range rmo:Commit .
-
-
 ###  http://eatld.et.tu-dresden.de/rmo#priorRevision
 rmo:priorRevision rdf:type owl:ObjectProperty ;
                   rdfs:subPropertyOf prov:entity ;
