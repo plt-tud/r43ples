@@ -75,7 +75,9 @@ public class UpdateCommitDraft extends CommitDraft {
 		if (!isCreatedWithRequest) {
 			Revision generatedRevision = revisionDraft.createInTripleStore();
 			ArrayList<UpdateCommit> commitList = new ArrayList<>();
-			commitList.add(addMetaInformation(generatedRevision));
+			UpdateCommit updateCommit = addMetaInformation(generatedRevision);
+			commitList.add(updateCommit);
+			updateReferencedFullGraph(generatedRevision.getAssociatedBranch().getFullGraphURI(), generatedRevision.getChangeSet());
 			return commitList;
 		} else {
 			return this.updateChangeSetsByRewrittenQuery();
@@ -164,7 +166,8 @@ public class UpdateCommitDraft extends CommitDraft {
 				// TODO: replace generateFullGraphOfRevision with query
 				// rewriting option
 				String tempGraphName = graphName + "-temp";
-				RevisionManagementOriginal.generateFullGraphOfRevision(graphName, revisionName, tempGraphName);
+				RevisionGraph revisionGraph = new RevisionGraph(graphName);
+				RevisionManagementOriginal.generateFullGraphOfRevision(revisionGraph, revisionGraph.getRevision(revisionName), tempGraphName);
 				String GraphClause = getStringEnclosedInBraces(whereClause, m1a.end());
 				queryRewritten += String.format("GRAPH <%s> { %s }", tempGraphName, GraphClause);
 			}

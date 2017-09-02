@@ -267,7 +267,7 @@ public class R43plesCore implements R43plesCoreInterface {
         final Pattern patternSelectFromPart = Pattern.compile(
                 "(?<type>FROM|GRAPH)\\s*<(?<graph>[^>\\?]*)(\\?|>)(\\s*REVISION\\s*\"|revision=)(?<revision>([^\">]+))(>|\")",
                 Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
-
+// TODO change REVISION to REVISION or BRANCH
         String queryM = query;
 
         Matcher m = patternSelectFromPart.matcher(queryM);
@@ -294,7 +294,7 @@ public class R43plesCore implements R43plesCoreInterface {
                     // Respond with specified revision, therefore the revision
                     // must be generated - saved in graph <graphName-revisionNumber>
                     newGraphName = graphName + "-" + revisionNumber;
-                    RevisionManagementOriginal.generateFullGraphOfRevision(graphName, revisionNumber, newGraphName);
+                    RevisionManagementOriginal.generateFullGraphOfRevision(graph, graph.getRevision(revisionNumber), newGraphName);
                 }
             }
 

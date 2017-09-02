@@ -55,7 +55,7 @@ public class BranchCommitDraft extends ReferenceCommitDraft {
         addMetaInformation(generatedBranch.getReferenceURI(), commitURI);
 
         // Update full graph of branch
-        RevisionManagementOriginal.generateFullGraphOfRevision(getRevisionGraph().getGraphName(), getBaseRevision().getRevisionIdentifier(), generatedBranch.getFullGraphURI());
+        RevisionManagementOriginal.generateFullGraphOfRevision(getRevisionGraph(), getBaseRevision(), generatedBranch.getFullGraphURI());
 
         return new BranchCommit(getRevisionGraph(), commitURI, getUser(), getTimeStamp(), getMessage(), getBaseRevision(), generatedBranch);
     }

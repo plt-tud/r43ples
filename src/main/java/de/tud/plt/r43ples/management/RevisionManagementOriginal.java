@@ -56,54 +56,47 @@ public class RevisionManagementOriginal {
 	}
 
 	/**
-	 * //TODO Use the RevisionGraph and the revision to access the necessary data
 	 * Creates the whole revision from the add and delete sets of the
-	 * predecessors. Saved in graph tempGraphName.
+	 * predecessors. Saved in a new graph with specified named graph URI.
+	 * Already existent graphs will be dropped and recreated.
 	 * 
-	 * @param graphName
-	 *            the graph name
-	 * @param revisionName
-	 *            revision number or revision name to build content for
-	 * @param tempGraphName
-	 *            the graph where the temporary graph is stored
+	 * @param revisionGraph the revision graph
+	 * @param revision the revision
+	 * @param fullGraphURI the named graph URI where the full graph will be stored
 	 * @throws InternalErrorException 
 	 */
-	public static void generateFullGraphOfRevision(final String graphName, final String revisionName,
-			final String tempGraphName) throws InternalErrorException {
-		logger.info("Rebuild whole content of revision " + revisionName + " of graph <" + graphName
-				+ "> into temporary graph <" + tempGraphName + ">");
-		RevisionGraph graph = new RevisionGraph(graphName);
-		Revision revision = graph.getRevision(revisionName);
+	public static void generateFullGraphOfRevision(RevisionGraph revisionGraph, Revision revision, String fullGraphURI) throws InternalErrorException {
+		logger.info("Rebuild whole content of revision " + revision.getRevisionIdentifier() + " of graph <" + revisionGraph.getGraphName()
+				+ "> into temporary graph <" + fullGraphURI + ">");
 
 		// Create temporary graph
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <" + tempGraphName + ">");
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery("CREATE GRAPH <" + tempGraphName + ">");
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <" + fullGraphURI + ">");
+		TripleStoreInterfaceSingleton.get().executeUpdateQuery("CREATE GRAPH <" + fullGraphURI + ">");
 
 		// Create path to revision
-		LinkedList<Revision> list = PathCalculationSingleton.getInstance().getPathToRevisionWithFullGraph(graph, revision)
-				.getRevisionPath();
+		LinkedList<Revision> list = PathCalculationSingleton.getInstance().getPathToRevisionWithFullGraph(revisionGraph, revision).getRevisionPath();
 
 		// Copy branch to temporary graph
-		String number = list.removeLast().getRevisionIdentifier();
+		Revision currentRevision = list.removeLast();
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(
-				"COPY GRAPH <" + graph.getReferenceGraph(number) + "> TO GRAPH <"
-						+ tempGraphName + ">");
+				"COPY GRAPH <" + currentRevision.getAssociatedBranch().getFullGraphURI() + "> TO GRAPH <"
+						+ fullGraphURI + ">");
 
 		while (!list.isEmpty()) {
 			// add- und delete-sets could be extracted from revision tree information
 			// hard coded variant is faster
-			String graph_removed = graphName + "-deleteSet-"+ number;
-			String graph_added   = graphName + "-addSet-"+ number;
+			String graph_deleted = revisionGraph.getGraphName() + "-deleteSet-" + currentRevision.getRevisionIdentifier() + "-" + list.getLast().getRevisionIdentifier();
+			String graph_added   = revisionGraph.getGraphName() + "-addSet-" + currentRevision.getRevisionIdentifier() + "-" + list.getLast().getRevisionIdentifier();;
 			// Add data to temporary graph
-			if (RevisionManagementOriginal.checkGraphExistence(graph_removed))
-				TripleStoreInterfaceSingleton.get().executeUpdateQuery("ADD GRAPH <" + graph_removed + "> TO GRAPH <" + tempGraphName + ">");
+			if (RevisionManagementOriginal.checkGraphExistence(graph_deleted))
+				TripleStoreInterfaceSingleton.get().executeUpdateQuery("ADD GRAPH <" + graph_deleted + "> TO GRAPH <" + fullGraphURI + ">");
 			// Remove data from temporary graph (no opposite of SPARQL ADD available)
 			if (RevisionManagementOriginal.checkGraphExistence(graph_added))
-				TripleStoreInterfaceSingleton.get().executeUpdateQuery(  "DELETE { GRAPH <" + tempGraphName+ "> { ?s ?p ?o.} }"
+				TripleStoreInterfaceSingleton.get().executeUpdateQuery(  "DELETE { GRAPH <" + fullGraphURI+ "> { ?s ?p ?o.} }"
 														+ "WHERE  { GRAPH <" + graph_added	+ "> { ?s ?p ?o.} }");
-			Revision first = list.removeLast();
-			if (first!=null)
-				number = first.getRevisionIdentifier();
+			//Revision first = list.removeLast();
+			//if (first!=null)
+				currentRevision = list.removeLast(); // = first.getRevisionIdentifier();
 		}
 
 	}

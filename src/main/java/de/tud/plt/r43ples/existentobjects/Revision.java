@@ -175,13 +175,12 @@ public class Revision {
      */
     public Branch getAssociatedBranch() throws InternalErrorException {
         if (associatedBranch == null) {
-            //TODO belongsTo does not exist any more
             logger.info("Get associated branch of revision " + revisionIdentifier + ".");
             String query = Config.prefixes + String.format(""
                     + "SELECT ?branch "
                     + "WHERE { GRAPH  <%s> {"
-                    + "	<%s> rmo:belongsTo ?branch. "
-                    + "	?branch a rmo:Branch. "
+                    + "	?branch rmo:references <%s> . "
+                    + "	?branch a rmo:Branch . "
                     + "} }", revisionGraphURI, revisionURI);
             this.logger.debug(query);
             ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
@@ -189,7 +188,7 @@ public class Revision {
                 QuerySolution qs = resultSet.next();
                 associatedBranch = new Branch(revisionGraph, qs.getResource("?branch").toString(), false);
             } else {
-                throw new InternalErrorException("No derived from revision found for revision " + revisionIdentifier + ".");
+                throw new InternalErrorException("Revision " + revisionIdentifier + " is not referenced by a branch.");
             }
         }
         return associatedBranch;

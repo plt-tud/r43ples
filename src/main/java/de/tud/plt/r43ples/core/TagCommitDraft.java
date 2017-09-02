@@ -52,7 +52,7 @@ public class TagCommitDraft extends ReferenceCommitDraft {
         addMetaInformation(generatedTag.getReferenceURI(), commitURI);
 
         // Update full graph of branch
-        RevisionManagementOriginal.generateFullGraphOfRevision(getRevisionGraph().getGraphName(), getBaseRevision().getRevisionIdentifier(), generatedTag.getFullGraphURI());
+        RevisionManagementOriginal.generateFullGraphOfRevision(getRevisionGraph(), getBaseRevision(), generatedTag.getFullGraphURI());
 
         return new TagCommit(getRevisionGraph(), commitURI, getUser(), getTimeStamp(), getMessage(), getBaseRevision(), generatedTag);
     }
