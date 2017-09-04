@@ -1,6 +1,5 @@
 package de.tud.plt.r43ples.core;
 
-import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.Branch;
 import de.tud.plt.r43ples.existentobjects.BranchCommit;
@@ -70,32 +69,23 @@ public class BranchCommitDraft extends ReferenceCommitDraft {
     private void addMetaInformation(String referenceURI, String commitURI) throws InternalErrorException {
         logger.info("Create new branch '" + getReferenceIdentifier() + "' for graph " + getRevisionGraph().getGraphName());
 
-        // Check branch existence
-        if (getRevisionGraph().hasReference(getReferenceIdentifier())) {
-            // Reference name is already in use
-            logger.error("The reference name '" + getReferenceIdentifier() + "' is for the graph '" + getRevisionGraph().getGraphName()
-                    + "' already in use.");
-            throw new IdentifierAlreadyExistsException("The reference name '" + getReferenceIdentifier()
-                    + "' is for the graph '" + getRevisionGraph().getGraphName() + "' already in use.");
-        } else {
-            // General variables
-            String personUri = RevisionManagementOriginal.getUserURI(getUser());
+        // General variables
+        String personUri = RevisionManagementOriginal.getUserURI(getUser());
 
-            // Create a new commit (activity)
-            String queryContent = String.format(""
-                            + "<%s> a rmo:BranchCommit, rmo:ReferenceCommit, rmo:Commit ; "
-                            + "	rmo:wasAssociatedWith <%s> ;"
-                            + "	rmo:generated <%s> ;"
-                            + " rmo:used <%s> ;"
-                            + "	rmo:commitMessage \"%s\" ;"
-                            + "	rmo:atTime \"%s\" .%n",
-                    commitURI, personUri, referenceURI, getBaseRevision().getRevisionURI(), getMessage(), getTimeStamp());
+        // Create a new commit (activity)
+        String queryContent = String.format(""
+                        + "<%s> a rmo:BranchCommit, rmo:ReferenceCommit, rmo:Commit ; "
+                        + "	rmo:wasAssociatedWith <%s> ;"
+                        + "	rmo:generated <%s> ;"
+                        + " rmo:used <%s> ;"
+                        + "	rmo:commitMessage \"%s\" ;"
+                        + "	rmo:atTime \"%s\" .%n",
+                commitURI, personUri, referenceURI, getBaseRevision().getRevisionURI(), getMessage(), getTimeStamp());
 
-            // Execute queries
-            String query = Config.prefixes
-                    + String.format("INSERT DATA { GRAPH <%s> { %s } } ;", getRevisionGraph().getRevisionGraphUri(), queryContent);
-            getTripleStoreInterface().executeUpdateQuery(query);
-        }
+        // Execute queries
+        String query = Config.prefixes
+                + String.format("INSERT DATA { GRAPH <%s> { %s } } ;", getRevisionGraph().getRevisionGraphUri(), queryContent);
+        getTripleStoreInterface().executeUpdateQuery(query);
     }
 
 }

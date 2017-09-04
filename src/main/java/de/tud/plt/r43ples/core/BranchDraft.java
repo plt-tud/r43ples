@@ -2,12 +2,9 @@ package de.tud.plt.r43ples.core;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.Branch;
-import de.tud.plt.r43ples.existentobjects.ChangeSet;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
 /**
@@ -63,7 +60,7 @@ public class BranchDraft extends ReferenceDraft {
                     "<%s> a rmo:Branch, rmo:Reference, rmo:Entity ;"
                             + "	rmo:references <%s> ;"
                             + "	rmo:fullGraph <%s> ;"
-                            + "	rmo:referenceIdentifier <%s> .",
+                            + "	rmo:referenceIdentifier \"%s\" .",
                     getReferenceURI(), getReferencedRevision().getRevisionURI(), getReferencedFullGraphURI(), getReferenceIdentifier());
 
         String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", getRevisionGraph().getRevisionGraphUri(), queryContent);

@@ -152,7 +152,6 @@ public class SampleDataSetTest extends R43plesTest {
         request = new R43plesRequest(query, "text/turtle");
         result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
         expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-3.ttl");
-        Assert.assertEquals("", result);
         Assert.assertTrue(this.check_isomorphism(result, expected));
 
         // Check revision 4
