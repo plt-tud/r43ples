@@ -269,7 +269,7 @@ public class R43plesCore implements R43plesCoreInterface {
 // TODO change REVISION to REVISION or BRANCH
         String queryM = query;
 
-        OldRevision oldRevision = null;
+        FullGraph fullGraph = null;
 
         Matcher m = patternSelectFromPart.matcher(queryM);
         while (m.find()) {
@@ -295,7 +295,7 @@ public class R43plesCore implements R43plesCoreInterface {
                     // Respond with specified revision, therefore the revision
                     // must be generated - saved in graph <graphName-revisionNumber>
                     newGraphName = graphName + "-" + revisionNumber;
-                    oldRevision = new OldRevision(graph, graph.getRevision(revisionNumber), newGraphName);
+                    fullGraph = new FullGraph(graph, graph.getRevision(revisionNumber), newGraphName);
                 }
             }
 
@@ -305,8 +305,8 @@ public class R43plesCore implements R43plesCoreInterface {
         }
         String response = TripleStoreInterfaceSingleton.get()
                 .executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + queryM, format);
-        if (oldRevision != null)
-            oldRevision.purge();
+        if (fullGraph != null)
+            fullGraph.purge();
         return response;
     }
 

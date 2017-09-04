@@ -55,7 +55,7 @@ public class TagCommitDraft extends ReferenceCommitDraft {
         addMetaInformation(generatedTag.getReferenceURI(), commitURI);
 
         // Create full graph for this branch
-        OldRevision oldRevision = new OldRevision(getRevisionGraph(), getBaseRevision(), generatedTag.getFullGraphURI());
+        FullGraph fullGraph = new FullGraph(getRevisionGraph(), getBaseRevision(), generatedTag.getFullGraphURI());
 
         return new TagCommit(getRevisionGraph(), commitURI, getUser(), getTimeStamp(), getMessage(), getBaseRevision(), generatedTag);
     }

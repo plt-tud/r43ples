@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
 
 import java.util.LinkedList;
 
-public class OldRevision {
+public class FullGraph {
 
     private final String fullGraphUri;
     private final Revision revision;
@@ -23,7 +23,7 @@ public class OldRevision {
     /**
      * The logger.
      **/
-    private Logger logger = Logger.getLogger(OldRevision.class);
+    private Logger logger = Logger.getLogger(FullGraph.class);
 
 
     /**
@@ -36,7 +36,7 @@ public class OldRevision {
      * @param fullGraphURI  the named graph URI where the full graph will be stored
      * @throws InternalErrorException
      */
-    public OldRevision(RevisionGraph revisionGraph, Revision revision, String fullGraphURI) throws InternalErrorException {
+    public FullGraph(RevisionGraph revisionGraph, Revision revision, String fullGraphURI) throws InternalErrorException {
         this.fullGraphUri = fullGraphURI;
         this.revisionGraph = revisionGraph;
         this.revision = revision;
@@ -60,21 +60,38 @@ public class OldRevision {
         while (!list.isEmpty()) {
             currentChangeSet = list.remove();
 
-            String graph_deleted = currentChangeSet.getDeleteSetURI();
-            String graph_added = currentChangeSet.getAddSetURI();
-
             // Add data to temporary graph
-            String deleteQuery = String.format("ADD GRAPH <%s> TO GRAPH <%s>", graph_deleted, fullGraphURI);
-            TripleStoreInterfaceSingleton.get().executeUpdateQuery(deleteQuery);
+            String graph_deleted = currentChangeSet.getDeleteSetURI();
+            this.applyDeleteSet(graph_deleted);
 
             // Remove data from temporary graph (no opposite of SPARQL ADD available)
-            String addQuery = String.format("" +
-                    "DELETE { GRAPH <%s> {?s ?p ?o.} } " +
-                    "WHERE  { GRAPH <%s> {?s ?p ?o.} }", fullGraphURI, graph_added);
-            TripleStoreInterfaceSingleton.get().executeUpdateQuery(addQuery);
+            String graph_added = currentChangeSet.getAddSetURI();
+            this.applyAddSet(graph_added);
         }
 
+    }
 
+    /**
+     * Applies delete set stored in named graph graph_deleted
+     *
+     * @param graph_deleted Uri of named graph containing delete set
+     */
+    protected void applyDeleteSet(String graph_deleted) {
+        String deleteQuery = String.format("ADD GRAPH <%s> TO GRAPH <%s>", graph_deleted, this.fullGraphUri);
+        TripleStoreInterfaceSingleton.get().executeUpdateQuery(deleteQuery);
+    }
+
+
+    /**
+     * Applies add set stored in named graph graph_added
+     *
+     * @param graph_added Uri of named graph containing add set
+     */
+    protected void applyAddSet(String graph_added) {
+        String addQuery = String.format("" +
+                "DELETE { GRAPH <%s> {?s ?p ?o.} } " +
+                "WHERE  { GRAPH <%s> {?s ?p ?o.} }", this.fullGraphUri, graph_added);
+        TripleStoreInterfaceSingleton.get().executeUpdateQuery(addQuery);
     }
 
 
