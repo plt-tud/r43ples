@@ -1,5 +1,7 @@
 package de.tud.plt.r43ples.existentobjects;
 
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
@@ -19,6 +21,10 @@ public class ChangeSet {
 
     /** The prior revision. **/
     private Revision priorRevision;
+    /**
+     * The succesor revision.
+     **/
+    private Revision succesorRevision;
 
     /** The ADD set URI. */
     private String addSetURI;
@@ -69,6 +75,31 @@ public class ChangeSet {
      */
     public Revision getPriorRevision() {
         return priorRevision;
+    }
+
+    /**
+     * Get the successor revision.
+     *
+     * @return the successor revision
+     */
+    public Revision getSuccessorRevision() {
+        if (this.succesorRevision == null) {
+            String query = Config.prefixes + String.format(
+                    "SELECT ?successor %n" +
+                            "WHERE { GRAPH <%s> {?successor rmo:hasChangeSet <%s> .} }"
+                    , this.revisionGraph.getRevisionGraphUri(), this.changeSetURI);
+            ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
+
+            if (resultSet.hasNext()) {
+                QuerySolution qs = resultSet.next();
+                try {
+                    this.succesorRevision = new Revision(this.revisionGraph, qs.getResource("?successor").toString(), false);
+                } catch (InternalErrorException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return this.succesorRevision;
     }
 
     /**

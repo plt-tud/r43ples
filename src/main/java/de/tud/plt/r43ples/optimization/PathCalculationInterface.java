@@ -1,9 +1,9 @@
 package de.tud.plt.r43ples.optimization;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.existentobjects.Path;
 import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 
 
 /**
@@ -19,11 +19,10 @@ public interface PathCalculationInterface {
      * Get the path to the nearest revision which has a full graph.
      *
      * @param revisionGraph the revision graph
-     * @param revision revision where the search should start
+     * @param revision      revision where the search should start
      * @return path containing all revisions from start revision to next revision with a full graph
      */
     Path getPathToRevisionWithFullGraph(RevisionGraph revisionGraph, Revision revision) throws InternalErrorException;
-
 
 
     /**
@@ -31,8 +30,8 @@ public interface PathCalculationInterface {
      * To ensure wise results the revisions should be terminal branch nodes.
      *
      * @param revisionGraph the revision graph
-     * @param revision1 the first revision should be a terminal branch node
-     * @param revision2 the second revision should be a terminal branch node
+     * @param revision1     the first revision should be a terminal branch node
+     * @param revision2     the second revision should be a terminal branch node
      * @return the nearest common revision
      * @throws InternalErrorException
      */
@@ -42,12 +41,17 @@ public interface PathCalculationInterface {
      * Calculate the path from start revision to target revision.
      * Example: target rmo:wasDerivedFrom source
      *
-     * @param revisionGraph the revision graph
-     * @param startRevision the start revision
+     * @param revisionGraph  the revision graph
+     * @param startRevision  the start revision
      * @param targetRevision the target revision
      * @return path containing all revisions from start revision to target revision
      * @throws InternalErrorException
      */
     Path getPathBetweenStartAndTargetRevision(RevisionGraph revisionGraph, Revision startRevision, Revision targetRevision) throws InternalErrorException;
+
+
+    ChangeSetPath getChangeSetsBetweenStartAndTargetRevision(RevisionGraph revisionGraph, Revision startRevision, Revision targetRevision) throws InternalErrorException;
+
+    ChangeSetPath getPathOfChangeSets(RevisionGraph revisionGraph, Revision revision) throws InternalErrorException;
 
 }

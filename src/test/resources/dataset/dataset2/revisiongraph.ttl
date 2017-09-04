@@ -10,51 +10,64 @@
 @prefix prov:  <http://www.w3.org/ns/prov#> .
 
 <http://test.com/r43ples-dataset-2-revision-0>
-        a                   rmo:Revision ;
-        rmo:belongsTo       <http://test.com/r43ples-dataset-2-master> ;
-        rmo:revisionNumber  "0" .
+        a                       rmo:Entity , rmo:Revision ;
+        rmo:hasChangeSet        <http://test.com/r43ples-dataset-2-changeset-0> ;
+        rmo:revisionIdentifier  "0" .
+
+<http://test.com/r43ples-dataset-2-changeset-0>
+        a              rmo:ChangeSet ;
+        rmo:addSet     <http://test.com/r43ples-dataset-2-addSet-0> ;
+        rmo:deleteSet  <http://test.com/r43ples-dataset-2-deleteSet-0> .
 
 <http://test.com/r43ples-dataset-2-commit-1>
-        a                       rmo:RevisionCommit ;
-        dc-terms:title          "test commit message 1" ;
-        prov:atTime             "2017-08-26T08:52:28.423"^^xsd:dateTime ;
-        prov:generated          <http://test.com/r43ples-dataset-2-revision-1> ;
-        prov:used               <http://test.com/r43ples-dataset-2-revision-0> ;
-        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+        a                      rmo:Commit , rmo:RevisionCommit ;
+        rmo:atTime             "2017-09-04T13:36:05.908"^^xsd:dateTime ;
+        rmo:commitMessage      "test commit message 1" ;
+        rmo:generated          <http://test.com/r43ples-dataset-2-revision-1> ;
+        rmo:used               <http://test.com/r43ples-dataset-2-revision-0> ;
+        rmo:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
 
 <http://test.com/r43ples-dataset-2-revision-1>
-        a                    rmo:Revision ;
-        rmo:addSet           <http://test.com/r43ples-dataset-2-addSet-1> ;
-        rmo:belongsTo        <http://test.com/r43ples-dataset-2-master> ;
-        rmo:deleteSet        <http://test.com/r43ples-dataset-2-deleteSet-1> ;
-        rmo:revisionNumber   "1" ;
-        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-2-revision-0> .
+        a                       rmo:Entity , rmo:Revision ;
+        rmo:hasChangeSet        <http://test.com/r43ples-dataset-2-changeset-0-1> ;
+        rmo:revisionIdentifier  "1" ;
+        rmo:wasDerivedFrom      <http://test.com/r43ples-dataset-2-revision-0> .
 
 <http://test.com/r43ples-dataset-2-master>
-        a               rmo:Reference , rmo:Branch , rmo:Master ;
-        rdfs:label      "master" ;
-        rmo:fullGraph   <http://test.com/r43ples-dataset-2> ;
-        rmo:references  <http://test.com/r43ples-dataset-2-revision-2> .
+        a                        rmo:Reference , rmo:Branch , rmo:Master ;
+        rmo:fullGraph            <http://test.com/r43ples-dataset-2> ;
+        rmo:referenceIdentifier  "master" ;
+        rmo:references           <http://test.com/r43ples-dataset-2-revision-2> .
 
 <http://test.com/r43ples-dataset-2-commit-2>
-        a                       rmo:RevisionCommit ;
-        dc-terms:title          "test commit message 2" ;
-        prov:atTime             "2017-08-26T08:52:28.61"^^xsd:dateTime ;
-        prov:generated          <http://test.com/r43ples-dataset-2-revision-2> ;
-        prov:used               <http://test.com/r43ples-dataset-2-revision-1> ;
-        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+        a                      rmo:Commit , rmo:RevisionCommit ;
+        rmo:atTime             "2017-09-04T13:36:06.188"^^xsd:dateTime ;
+        rmo:commitMessage      "test commit message 2" ;
+        rmo:generated          <http://test.com/r43ples-dataset-2-revision-2> ;
+        rmo:used               <http://test.com/r43ples-dataset-2-revision-1> ;
+        rmo:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
 
 <http://test.com/r43ples-dataset-2-revision-2>
-        a                    rmo:Revision ;
-        rmo:addSet           <http://test.com/r43ples-dataset-2-addSet-2> ;
-        rmo:belongsTo        <http://test.com/r43ples-dataset-2-master> ;
-        rmo:deleteSet        <http://test.com/r43ples-dataset-2-deleteSet-2> ;
-        rmo:revisionNumber   "2" ;
-        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-2-revision-1> .
+        a                       rmo:Entity , rmo:Revision ;
+        rmo:hasChangeSet        <http://test.com/r43ples-dataset-2-changeset-1-2> ;
+        rmo:revisionIdentifier  "2" ;
+        rmo:wasDerivedFrom      <http://test.com/r43ples-dataset-2-revision-1> .
+
+<http://test.com/r43ples-dataset-2-changeset-1-2>
+        a                  rmo:ChangeSet ;
+        rmo:addSet         <http://test.com/r43ples-dataset-2-addSet-1-2> ;
+        rmo:deleteSet      <http://test.com/r43ples-dataset-2-deleteSet-1-2> ;
+        rmo:priorRevision  <http://test.com/r43ples-dataset-2-revision-1> .
+
+<http://test.com/r43ples-dataset-2-changeset-0-1>
+        a                  rmo:ChangeSet ;
+        rmo:addSet         <http://test.com/r43ples-dataset-2-addSet-0-1> ;
+        rmo:deleteSet      <http://test.com/r43ples-dataset-2-deleteSet-0-1> ;
+        rmo:priorRevision  <http://test.com/r43ples-dataset-2-revision-0> .
 
 <http://test.com/r43ples-dataset-2-commit-0>
-        a                       rmo:ReferenceCommit , rmo:RevisionCommit ;
-        dc-terms:title          "initial commit" ;
-        prov:atTime             "2017-08-26T08:52:28.173"^^xsd:dateTime ;
-        prov:generated          <http://test.com/r43ples-dataset-2-master> , <http://test.com/r43ples-dataset-2-revision-0> ;
-        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/user/r43ples> .
+        a                      rmo:InitialCommit , rmo:Commit ;
+        rmo:atTime             "2017-09-04T13:36:05.711"^^xsd:dateTime ;
+        rmo:commitMessage      "Create graph" ;
+        rmo:generated          <http://test.com/r43ples-dataset-2-master> , <http://test.com/r43ples-dataset-2-revision-0> ;
+        rmo:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .

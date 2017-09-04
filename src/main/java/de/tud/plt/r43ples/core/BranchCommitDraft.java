@@ -2,14 +2,14 @@ package de.tud.plt.r43ples.core;
 
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.exception.QueryErrorException;
-import de.tud.plt.r43ples.existentobjects.*;
+import de.tud.plt.r43ples.existentobjects.Branch;
+import de.tud.plt.r43ples.existentobjects.BranchCommit;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -54,8 +54,8 @@ public class BranchCommitDraft extends ReferenceCommitDraft {
 
         addMetaInformation(generatedBranch.getReferenceURI(), commitURI);
 
-        // Update full graph of branch
-        RevisionManagementOriginal.generateFullGraphOfRevision(getRevisionGraph(), getBaseRevision(), generatedBranch.getFullGraphURI());
+        // Create full graph for this branch
+        OldRevision oldRevision = new OldRevision(getRevisionGraph(), getBaseRevision(), generatedBranch.getFullGraphURI());
 
         return new BranchCommit(getRevisionGraph(), commitURI, getUser(), getTimeStamp(), getMessage(), getBaseRevision(), generatedBranch);
     }

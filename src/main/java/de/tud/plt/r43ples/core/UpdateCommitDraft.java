@@ -6,7 +6,9 @@ import de.tud.plt.r43ples.existentobjects.Branch;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.existentobjects.UpdateCommit;
-import de.tud.plt.r43ples.management.*;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -167,8 +169,9 @@ public class UpdateCommitDraft extends CommitDraft {
 				// rewriting option
 				String tempGraphName = graphName + "-temp";
 				RevisionGraph revisionGraph = new RevisionGraph(graphName);
-				RevisionManagementOriginal.generateFullGraphOfRevision(revisionGraph, revisionGraph.getRevision(revisionName), tempGraphName);
-				String GraphClause = getStringEnclosedInBraces(whereClause, m1a.end());
+                // Create full graph for this branch
+                OldRevision oldRevision = new OldRevision(revisionGraph, revisionGraph.getRevision(revisionName), tempGraphName);
+                String GraphClause = getStringEnclosedInBraces(whereClause, m1a.end());
 				queryRewritten += String.format("GRAPH <%s> { %s }", tempGraphName, GraphClause);
 			}
 			queryRewritten += "}";

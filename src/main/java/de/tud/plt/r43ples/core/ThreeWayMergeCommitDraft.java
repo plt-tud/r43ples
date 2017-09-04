@@ -403,7 +403,8 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
             // Create a temporary full graph
             // TODO move to new RevisionManagement
             fullGraphNameCommonRevision = graphName + "RM-TEMP-REVISION-PROGRESS-FULLGRAPH";
-            RevisionManagementOriginal.generateFullGraphOfRevision(graph, commonRevision, fullGraphNameCommonRevision);
+            // Create full graph for this branch
+            OldRevision oldRevision = new OldRevision(graph, commonRevision, fullGraphNameCommonRevision);
             tempGraphWasCreated = true;
         }
 

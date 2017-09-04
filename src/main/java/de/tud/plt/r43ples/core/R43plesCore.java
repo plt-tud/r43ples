@@ -5,7 +5,6 @@ import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
@@ -270,6 +269,8 @@ public class R43plesCore implements R43plesCoreInterface {
 // TODO change REVISION to REVISION or BRANCH
         String queryM = query;
 
+        OldRevision oldRevision = null;
+
         Matcher m = patternSelectFromPart.matcher(queryM);
         while (m.find()) {
             String graphName = m.group("graph");
@@ -294,7 +295,7 @@ public class R43plesCore implements R43plesCoreInterface {
                     // Respond with specified revision, therefore the revision
                     // must be generated - saved in graph <graphName-revisionNumber>
                     newGraphName = graphName + "-" + revisionNumber;
-                    RevisionManagementOriginal.generateFullGraphOfRevision(graph, graph.getRevision(revisionNumber), newGraphName);
+                    oldRevision = new OldRevision(graph, graph.getRevision(revisionNumber), newGraphName);
                 }
             }
 
@@ -304,6 +305,8 @@ public class R43plesCore implements R43plesCoreInterface {
         }
         String response = TripleStoreInterfaceSingleton.get()
                 .executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + queryM, format);
+        if (oldRevision != null)
+            oldRevision.purge();
         return response;
     }
 

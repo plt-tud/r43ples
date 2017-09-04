@@ -45,11 +45,17 @@ public class SampleDataSetTest extends R43plesTest {
 
         Assert.assertTrue(this.check_isomorphism(model_result, model_expected));
 
+        String query;
+        R43plesRequest request;
+        String result;
+        String expected;
+
+
         // Check revision 1
-        String query = String.format(queryTemplate, graph, "1");
-        R43plesRequest request = new R43plesRequest(query, "text/turtle");
-        String result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
-        String expected = ResourceManagement.getContentFromResource("dataset/dataset1/rev-1.ttl");
+        query = String.format(queryTemplate, graph, "1");
+        request = new R43plesRequest(query, "text/turtle");
+        result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
+        expected = ResourceManagement.getContentFromResource("dataset/dataset1/rev-1.ttl");
         Assert.assertTrue(this.check_isomorphism(result, expected));
 
         // Check revision 2

@@ -2,11 +2,14 @@ package de.tud.plt.r43ples.optimization;
 
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.query.ResultSetFactory;
+import com.hp.hpl.jena.query.ResultSetRewindable;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.existentobjects.ChangeSet;
 import de.tud.plt.r43ples.existentobjects.Path;
 import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
@@ -80,6 +83,45 @@ public class SimplePathCalculation implements PathCalculationInterface {
     }
 
 
+    /**
+     * Get the path to the nearest revision which has a full graph.
+     *
+     * @param revisionGraph the revision graph
+     * @param revision      revision where the search should start
+     * @return path containing all revisions from start revision to next revision with a full graph
+     * @throws InternalErrorException
+     */
+    @Override
+    public ChangeSetPath getPathOfChangeSets(RevisionGraph revisionGraph, Revision revision) throws InternalErrorException {
+        logger.info("Get path of change sets to full graph revision starting from revision " + revision.getRevisionIdentifier());
+        String query = Config.prefixes + String.format(""
+                + "SELECT DISTINCT ?revision "
+                + "WHERE { "
+                + "    GRAPH <%1$s> {"
+                + "        ?revision rmo:wasDerivedFrom* <%2$s> ."
+                + "        ?reference rmo:references ?revision ."
+                + "    }"
+                + "}", revisionGraph.getRevisionGraphUri(), revision.getRevisionURI());
+        this.logger.info(query);
+
+        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
+
+
+        ChangeSetPath bestPath = null;
+
+        while (resultSet.hasNext()) {
+            QuerySolution qs = resultSet.next();
+            String revision_uri_end = qs.getResource("?revision").toString();
+            Revision revision_end = new Revision(revisionGraph, revision_uri_end, false);
+
+            ChangeSetPath path = this.getChangeSetsBetweenStartAndTargetRevision(revisionGraph, revision, revision_end);
+            if (bestPath == null || bestPath.getRevisionPath().size() > path.getRevisionPath().size()) {
+                this.logger.info("new best path: " + path.getRevisionPath().size());
+                bestPath = path;
+            }
+        }
+        return bestPath;
+    }
 
 
     /**
@@ -193,6 +235,74 @@ public class SimplePathCalculation implements PathCalculationInterface {
             }
         }
 
+        return path;
+    }
+
+
+    /**
+     * Calculate the path from start revision to target revision.
+     * Example: target rmo:wasDerivedFrom source
+     *
+     * @param revisionGraph  the revision graph
+     * @param startRevision  the start revision
+     * @param targetRevision the target revision
+     * @return path containing all revisions from start revision to target revision
+     */
+    @Override
+    public ChangeSetPath getChangeSetsBetweenStartAndTargetRevision(RevisionGraph revisionGraph, Revision startRevision, Revision targetRevision) throws InternalErrorException {
+        logger.info("Calculate the shortest path from revision " + startRevision.getRevisionIdentifier() + " to " + targetRevision.getRevisionIdentifier() + ".");
+
+        String query = Config.prefixes + String.format(""
+                + "SELECT DISTINCT ?revision ?previousRevision ?changeSet ?addSet ?deleteSet %n"
+                + "WHERE { %n"
+                + "	GRAPH <%s> { %n"
+                + "		<%s> rmo:wasDerivedFrom* ?revision."
+                + "		?revision rmo:wasDerivedFrom* <%s>."
+                + "		OPTIONAL{" +
+                "           ?revision rmo:wasDerivedFrom ?previousRevision. " +
+                "           ?revision rmo:hasChangeSet ?changeSet. " +
+                "           ?changeSet rmo:priorRevision ?previousRevision; " +
+                "                       rmo:addSet ?addSet ; " +
+                "                   rmo:deleteSet ?deleteSet . " +
+                "}"
+                + " }"
+                + "}", revisionGraph.getRevisionGraphUri(), targetRevision.getRevisionURI(), startRevision.getRevisionURI());
+        this.logger.debug(query);
+
+        ChangeSetPath path = new ChangeSetPath(revisionGraph, startRevision, targetRevision);
+
+        ResultSetRewindable resultSet = ResultSetFactory.copyResults(tripleStoreInterface.executeSelectQuery(query));
+
+        String currentRevisionUri = targetRevision.getRevisionURI();
+        String previousResource;
+        String changeSet;
+
+        while (resultSet.size() > 0) {
+            QuerySolution qs = resultSet.next();
+            String resource = qs.getResource("?revision").toString();
+            if (resource.equals(currentRevisionUri)) {
+                previousResource = qs.getResource("?previousRevision").toString();
+                changeSet = qs.getResource("?changeSet").toString();
+
+                Revision priorRevision = new Revision(revisionGraph, previousResource, false);
+                String addSet = qs.getResource("?addSet").toString();
+                String deleteSet = qs.getResource("?deleteSet").toString();
+
+                ChangeSet cs = new ChangeSet(revisionGraph, priorRevision, addSet, deleteSet, changeSet);
+
+                path.addRevisionToPathEnd(cs);
+                if (priorRevision.getRevisionURI().equals(startRevision.getRevisionURI())) {
+                    return path;
+                }
+                currentRevisionUri = previousResource;
+
+            }
+            if (!resultSet.hasNext()) {
+                resultSet.reset();
+            }
+
+
+        }
         return path;
     }
 

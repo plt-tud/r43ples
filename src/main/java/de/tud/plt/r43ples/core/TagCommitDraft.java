@@ -2,7 +2,10 @@ package de.tud.plt.r43ples.core;
 
 import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.existentobjects.*;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.existentobjects.Tag;
+import de.tud.plt.r43ples.existentobjects.TagCommit;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
@@ -51,8 +54,8 @@ public class TagCommitDraft extends ReferenceCommitDraft {
 
         addMetaInformation(generatedTag.getReferenceURI(), commitURI);
 
-        // Update full graph of branch
-        RevisionManagementOriginal.generateFullGraphOfRevision(getRevisionGraph(), getBaseRevision(), generatedTag.getFullGraphURI());
+        // Create full graph for this branch
+        OldRevision oldRevision = new OldRevision(getRevisionGraph(), getBaseRevision(), generatedTag.getFullGraphURI());
 
         return new TagCommit(getRevisionGraph(), commitURI, getUser(), getTimeStamp(), getMessage(), getBaseRevision(), generatedTag);
     }
