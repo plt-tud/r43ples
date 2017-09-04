@@ -8,6 +8,7 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.ChangeSet;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.optimization.ChangeSetPath;
 import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
@@ -49,16 +50,17 @@ public class FullGraph {
         TripleStoreInterfaceSingleton.get().executeUpdateQuery("CREATE GRAPH <" + fullGraphURI + ">");
 
         // Create path to revision
-        LinkedList<ChangeSet> list = PathCalculationSingleton.getInstance().getPathOfChangeSets(revisionGraph, revision).getRevisionPath();
+        ChangeSetPath changeSetPath = PathCalculationSingleton.getInstance().getPathOfChangeSets(revisionGraph, revision);
 
         // Copy branch to temporary graph
-        ChangeSet currentChangeSet = list.getFirst();
-        Revision currentRevision = currentChangeSet.getSuccessorRevision();
+        Revision currentRevision = changeSetPath.getTargetRevision();
         String copyQuery = "COPY GRAPH <" + currentRevision.getAssociatedBranch().getFullGraphURI() + "> TO GRAPH <" + fullGraphURI + ">";
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(copyQuery);
 
+        // Apply changesets
+        LinkedList<ChangeSet> list = changeSetPath.getRevisionPath();
         while (!list.isEmpty()) {
-            currentChangeSet = list.remove();
+            ChangeSet currentChangeSet = list.remove();
 
             // Add data to temporary graph
             String graph_deleted = currentChangeSet.getDeleteSetURI();

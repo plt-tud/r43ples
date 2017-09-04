@@ -79,4 +79,12 @@ public class ChangeSetPath {
     public LinkedList<ChangeSet> getRevisionPath() {
         return changeSets;
     }
+
+    public Revision getTargetRevision() {
+        return targetRevision;
+    }
+
+    public Revision getStartRevision() {
+        return startRevision;
+    }
 }

@@ -109,11 +109,15 @@ public class SimplePathCalculation implements PathCalculationInterface {
 
         ChangeSetPath bestPath = null;
 
-        while (resultSet.hasNext()) {
+        if (resultSet.hasNext()) {
             QuerySolution qs = resultSet.next();
             String revision_uri_end = qs.getResource("?revision").toString();
             Revision revision_end = new Revision(revisionGraph, revision_uri_end, false);
 
+            if (revision_end.getRevisionIdentifier().equals(revision.getRevisionIdentifier())) {
+                logger.debug("revision is already end of branch");
+                return new ChangeSetPath(revisionGraph, revision, revision_end);
+            }
             ChangeSetPath path = this.getChangeSetsBetweenStartAndTargetRevision(revisionGraph, revision, revision_end);
             if (bestPath == null || bestPath.getRevisionPath().size() > path.getRevisionPath().size()) {
                 this.logger.info("new best path: " + path.getRevisionPath().size());

@@ -248,66 +248,11 @@ public class R43plesCore implements R43plesCoreInterface {
             result = TripleStoreInterfaceSingleton.get()
                     .executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + query_rewritten, request.format);
         } else {
-            result = getSparqlSelectConstructAskResponseClassic(request.query_sparql, request.format);
+            SelectConstructAskQuery selectConstructAskQuery = new SelectConstructAskQuery(request);
+            result = selectConstructAskQuery.performQuery();
         }
         return result;
     }
 
-    /**
-     * Get the response of a SPARQL query (SELECT, CONSTRUCT, ASK). Classic way.
-     *
-     * @param query the query
-     * @param format the result format
-     * @return the query response
-     * @throws InternalErrorException
-     */
-    private String getSparqlSelectConstructAskResponseClassic(final String query, final String format)
-            throws InternalErrorException {
-        final Pattern patternSelectFromPart = Pattern.compile(
-                "(?<type>FROM|GRAPH)\\s*<(?<graph>[^>\\?]*)(\\?|>)(\\s*REVISION\\s*\"|revision=)(?<revision>([^\">]+))(>|\")",
-                Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
-// TODO change REVISION to REVISION or BRANCH
-        String queryM = query;
-
-        FullGraph fullGraph = null;
-
-        Matcher m = patternSelectFromPart.matcher(queryM);
-        while (m.find()) {
-            String graphName = m.group("graph");
-            String type = m.group("type");
-            String revisionNumber = m.group("revision").toLowerCase();
-            String newGraphName;
-
-            RevisionGraph graph = new RevisionGraph(graphName);
-
-            // if no revision number is declared use the MASTER as default
-            if (revisionNumber == null) {
-                revisionNumber = "master";
-            }
-            if (revisionNumber.equalsIgnoreCase("master")) {
-                // Respond with MASTER revision - nothing to be done - MASTER
-                // revisions are already created in the named graphs
-                newGraphName = graphName;
-            } else {
-                if (graph.hasBranch(revisionNumber)) {
-                    newGraphName = graph.getReferenceGraph(revisionNumber);
-                } else {
-                    // Respond with specified revision, therefore the revision
-                    // must be generated - saved in graph <graphName-revisionNumber>
-                    newGraphName = graphName + "-" + revisionNumber;
-                    fullGraph = new FullGraph(graph, graph.getRevision(revisionNumber), newGraphName);
-                }
-            }
-
-            queryM = m.replaceFirst(type + " <" + newGraphName + ">");
-            m = patternSelectFromPart.matcher(queryM);
-
-        }
-        String response = TripleStoreInterfaceSingleton.get()
-                .executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + queryM, format);
-        if (fullGraph != null)
-            fullGraph.purge();
-        return response;
-    }
 
 }
