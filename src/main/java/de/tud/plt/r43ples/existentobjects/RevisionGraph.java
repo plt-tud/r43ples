@@ -163,7 +163,7 @@ public class RevisionGraph {
 	 * @throws InternalErrorException
 	 */
 	public Revision getMasterRevision() throws InternalErrorException{
-		logger.info("Get MASTER revision number of graph " + graphName);
+        logger.info("Get MASTER revision of graph " + graphName);
 
 		String revisionGraph = this.getRevisionGraphUri();
 		String queryString = Config.prefixes + String.format(""
@@ -178,8 +178,8 @@ public class RevisionGraph {
 			return this.getRevision(qs.getLiteral("?revisionNumber").toString());
 		}
 		else {
-			return null;
-		}
+            throw new InternalErrorException("No master for graph <" + this.graphName + "> available");
+        }
 	}
 	
 	/**

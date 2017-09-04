@@ -29,7 +29,7 @@ public class PickCommitDraft extends CommitDraft {
     private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
     /** The merge query pattern. **/
     private final Pattern patternPickQuery = Pattern.compile(
-            "PICK\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*REVISION\\s*\"(?<startRevisionIdentifier>[^\"]*?)\"\\s*(TO\\s*REVISION\\s*\"(?<endRevisionIdentifier>[^\"]*?)\"\\s*)?INTO\\s*BRANCH\\s*\"(?<targetBranchIdentifier>[^\"]*?)\"\"",
+            "PICK\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*REVISION\\s*\"(?<startRevisionIdentifier>[^\"]*?)\"\\s*(TO\\s*REVISION\\s*\"(?<endRevisionIdentifier>[^\"]*?)\"\\s*)?INTO\\s*BRANCH\\s*\"(?<targetBranchIdentifier>[^\"]*?)\"",
             patternModifier);
 
     /** The start revision identifier. **/
@@ -204,9 +204,12 @@ public class PickCommitDraft extends CommitDraft {
                         + "	dc-terms:title \"%s\" ;"
                         + "	prov:atTime \"%s\"^^xsd:dateTime ; %n"
                         + " rmo:usedTargetRevision <%s> ;"
-                        + " rmo:usedTargetBranch <%s> .",
+                        + " rmo:usedTargetBranch <%s> ." +
+                        "<%s> a rmo:Revision;" +
+                        " rmo:revisionNumber \"%s\".",
                 commitURI, personUri, getMessage(), getTimeStamp(),
-                usedTargetRevision.getRevisionURI(), usedTargetBranch.getReferenceURI()));
+                usedTargetRevision.getRevisionURI(), usedTargetBranch.getReferenceURI(),
+                generatedRevision.getRevisionURI(), generatedRevision.getRevisionIdentifier()));
 
         String query = Config.prefixes
                 + String.format("INSERT DATA { GRAPH <%s> { %s } }", revisionGraph.getRevisionGraphUri(),
@@ -243,7 +246,7 @@ public class PickCommitDraft extends CommitDraft {
         // Create the corresponding meta data
         StringBuilder queryContentInsert = new StringBuilder(1000);
         queryContentInsert.append(String.format(
-                "<%1$s> prov:wasDerivedFrom <%2$s>; "
+                "<%1$s> prov:wasDerivedFrom <%2$s> ;"
                         + "	prov:wasQuotedFrom <%3$s> ;"
                         + "	rmo:belongsTo <%4$s> ."
                 + "<%5$s> prov:generated <%1$s> ; "
