@@ -214,7 +214,7 @@ public class SampleDataSet {
 		String triples = "<http://example.com/testS> <http://example.com/testP> \"A\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP> \"B\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP> \"C\". \n";
-		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, triples, null, user, "Initial commit", revision0);
+		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, triples, null, user, "Initial commit", "master");
 		String revision1 = commit1.getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("master-1", revision1);
 
@@ -369,7 +369,7 @@ public class SampleDataSet {
         String revision0 = initialCommit.getGeneratedRevision().getRevisionIdentifier();
 
 		// Initial commit
-		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, initialContent, null, user, "Initial commit", revision0);
+		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, initialContent, null, user, "Initial commit", "master");
 		String revision1 = commit1.getGeneratedRevision().getRevisionIdentifier();
 
 		// Create a new branch B1
@@ -450,7 +450,7 @@ public class SampleDataSet {
 		String triples = "<http://example.com/testS> <http://example.com/testP1> \"A\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP1> \"B\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP2> \"C\". \n";
-		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, triples, null, user, "Initial commit", revision0);
+		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, triples, null, user, "Initial commit", "master");
 		String revision1 = commit1.getGeneratedRevision().getRevisionIdentifier();
 
 		// Create a new branch B1
