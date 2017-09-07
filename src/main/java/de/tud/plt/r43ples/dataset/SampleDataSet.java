@@ -164,14 +164,14 @@ public class SampleDataSet {
 		String revisionNumber4 = commit4.getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("master-4", revisionNumber4);
 
-//		ThreeWayMergeCommit mergeCommit5 = r43plesCore.createThreeWayMergeCommit(graphName, branchNameB1, "master", user, "test commit message 5",
-//				null, null, MergeTypes.AUTO, false);
-////				graphName,
-////				ResourceManagement.getContentFromResource("samples/dataset3/added-5.nt"),
-////				ResourceManagement.getContentFromResource("samples/dataset3/removed-5.nt"), user,
-////				"test commit message 5", branchNameB1, "master");
-//		String revisionNumber5 = mergeCommit5.getGeneratedRevision().getRevisionIdentifier();
-//		result.revisions.put("master-5", revisionNumber5);
+		ThreeWayMergeCommit mergeCommit5 = r43plesCore.createThreeWayMergeCommit(graphName, branchNameB1, "master", user, "test commit message 5",
+				null, null, MergeTypes.AUTO, false);
+//				graphName,
+//				ResourceManagement.getContentFromResource("samples/dataset3/added-5.nt"),
+//				ResourceManagement.getContentFromResource("samples/dataset3/removed-5.nt"), user,
+//				"test commit message 5", branchNameB1, "master");
+		String revisionNumber5 = mergeCommit5.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("master-5", revisionNumber5);
 
 		return result;
 	}
