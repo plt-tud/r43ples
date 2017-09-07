@@ -170,7 +170,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
         queryContent.append(String.format(
                 "<%s> rmo:hasChangeSet <%s> ; %n"
                         + "	rmo:wasDerivedFrom <%s> .",
-                generatedRevision.getRevisionURI(), generatedRevision.getChangeSets().get(1), usedSourceRevision.getRevisionURI()));
+                generatedRevision.getRevisionURI(), generatedRevision.getChangeSets().get(1).getChangeSetURI(), usedSourceRevision.getRevisionURI()));
 
         String query = Config.prefixes
                 + String.format("INSERT DATA { GRAPH <%s> { %s } }", getRevisionGraph().getRevisionGraphUri(),
