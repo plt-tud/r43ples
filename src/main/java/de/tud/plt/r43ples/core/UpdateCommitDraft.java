@@ -170,9 +170,9 @@ public class UpdateCommitDraft extends CommitDraft {
 				String tempGraphName = graphName + "-temp";
 				RevisionGraph revisionGraph = new RevisionGraph(graphName);
                 // Create full graph for this branch
-                FullGraph fullGraph = new FullGraph(revisionGraph, revisionGraph.getRevision(revisionName), tempGraphName);
-                String GraphClause = getStringEnclosedInBraces(whereClause, m1a.end());
-				queryRewritten += String.format("GRAPH <%s> { %s }", tempGraphName, GraphClause);
+				FullGraph fullGraph = new FullGraph(revisionGraph, revisionGraph.getRevision(revisionName));
+				String GraphClause = getStringEnclosedInBraces(whereClause, m1a.end());
+				queryRewritten += String.format("GRAPH <%s> { %s }", fullGraph.getFullGraphUri(), GraphClause);
 			}
 			queryRewritten += "}";
 		}

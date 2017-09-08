@@ -55,7 +55,7 @@ public class SelectConstructAskQuery {
             String graphName = m.group("graph");
             String type = m.group("type");
             String revisionNumber = m.group("revision").toLowerCase();
-            String newGraphName;
+            String fullGraphUri;
 
             RevisionGraph graph = new RevisionGraph(graphName);
 
@@ -63,25 +63,20 @@ public class SelectConstructAskQuery {
             if (revisionNumber == null) {
                 revisionNumber = "master";
             }
-            if (revisionNumber.equalsIgnoreCase("master")) {
-                // Respond with MASTER revision - nothing to be done - MASTER
-                // revisions are already created in the named graphs
-                newGraphName = graphName;
+            if (graph.hasBranch(revisionNumber)) {
+                fullGraphUri = graph.getReferenceGraph(revisionNumber);
             } else {
-                if (graph.hasBranch(revisionNumber)) {
-                    newGraphName = graph.getReferenceGraph(revisionNumber);
-                } else {
-                    // Respond with specified revision, therefore the revision
-                    // must be generated - saved in graph <graphName-revisionNumber>
-                    newGraphName = graphName + "-" + revisionNumber;
-                    fullGraph = new FullGraph(graph, graph.getRevision(revisionNumber), newGraphName);
-                }
+                // Respond with specified revision, therefore the content of the revision
+                // must be generated - saved in graph <graphName-revisionNumber>
+
+                fullGraph = new FullGraph(graph, graph.getRevision(revisionNumber));
+                fullGraphUri = fullGraph.getFullGraphUri();
             }
 
-            queryM = m.replaceFirst(type + " <" + newGraphName + ">");
+            queryM = m.replaceFirst(type + " <" + fullGraphUri + ">");
             m = patternSelectFromPart.matcher(queryM);
-
         }
+
         String response = TripleStoreInterfaceSingleton.get()
                 .executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + queryM, format);
         if (fullGraph != null)

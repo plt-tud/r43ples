@@ -32,16 +32,17 @@ public class SimplePathCalculationTest {
      */
     @Test
     public final void testPathToLeaf() throws InternalErrorException {
-        SimplePathCalculation pathCalc = new SimplePathCalculation();
-        
+
         RevisionGraph revisionGraph = new RevisionGraph(ds1.graphName);
         Revision revision = revisionGraph.getRevision("2");
-        Path test = pathCalc.getPathToRevisionWithFullGraph(revisionGraph, revision);
+        SimplePathCalculation pathCalc = new SimplePathCalculation(revisionGraph);
+        Path test = pathCalc.getPathToRevisionWithFullGraph(revision);
         Assert.assertEquals(5, test.getRevisionPath().size());
         
         RevisionGraph revisionGraph2 = new RevisionGraph(ds2.graphName);
         Revision revision2 = revisionGraph2.getRevision("1");
-        Path test2 = pathCalc.getPathToRevisionWithFullGraph(revisionGraph2, revision2);
+        SimplePathCalculation pathCalc2 = new SimplePathCalculation(revisionGraph2);
+        Path test2 = pathCalc2.getPathToRevisionWithFullGraph(revision2);
         Assert.assertEquals(4,test2.getRevisionPath().size());
     }
 }

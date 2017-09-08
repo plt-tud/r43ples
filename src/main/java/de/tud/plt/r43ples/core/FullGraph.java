@@ -9,7 +9,7 @@ import de.tud.plt.r43ples.existentobjects.ChangeSet;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.optimization.ChangeSetPath;
-import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
+import de.tud.plt.r43ples.optimization.PathCalculationFabric;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
@@ -20,6 +20,7 @@ public class FullGraph {
     private final String fullGraphUri;
     private final Revision revision;
     private final RevisionGraph revisionGraph;
+    private boolean created = false;
 
     /**
      * The logger.
@@ -29,32 +30,62 @@ public class FullGraph {
 
     /**
      * Creates the whole revision from the add and delete sets of the
-     * predecessors. Saved in a new graph with specified named graph URI.
+     * predecessors. Saved in a new graph.
      * Already existent graphs will be dropped and recreated.
      *
      * @param revisionGraph the revision graph
      * @param revision      the revision
-     * @param fullGraphURI  the named graph URI where the full graph will be stored
      * @throws InternalErrorException
      */
-    public FullGraph(RevisionGraph revisionGraph, Revision revision, String fullGraphURI) throws InternalErrorException {
-        this.fullGraphUri = fullGraphURI;
+    public FullGraph(RevisionGraph revisionGraph, Revision revision) throws InternalErrorException {
+
         this.revisionGraph = revisionGraph;
         this.revision = revision;
 
+        if (revision.getAssociatedBranch() != null) {
+            this.fullGraphUri = revision.getAssociatedBranch().getFullGraphURI();
+            this.logger.info("Full graph of revision " + revision.getRevisionIdentifier() + " of graph <" + revisionGraph.getGraphName()
+                    + "> already exists in <" + this.fullGraphUri + ">");
+        } else {
+            this.fullGraphUri = revision.getRevisionURI() + "-fullGraph";
+            this.createNewFullGraph();
+        }
+    }
+
+    /**
+     * Creates the whole revision from the add and delete sets of the
+     * predecessors. Saved in a new graph with specified name.
+     * Already existent graphs will be dropped and recreated.
+     *
+     * @param revisionGraph the revision graph
+     * @param revision      the revision
+     * @param fullGraphUri  URI where full graph should be created
+     * @throws InternalErrorException
+     */
+    public FullGraph(RevisionGraph revisionGraph, Revision revision, String fullGraphUri) throws InternalErrorException {
+
+        this.revisionGraph = revisionGraph;
+        this.revision = revision;
+        this.fullGraphUri = fullGraphUri;
+        this.createNewFullGraph();
+    }
+
+
+    protected void createNewFullGraph() throws InternalErrorException {
+
         this.logger.info("Rebuild whole content of revision " + revision.getRevisionIdentifier() + " of graph <" + revisionGraph.getGraphName()
-                + "> into temporary graph <" + fullGraphURI + ">");
+                + "> into temporary graph <" + this.fullGraphUri + ">");
 
         // Create temporary graph
-        TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <" + fullGraphURI + ">");
-        TripleStoreInterfaceSingleton.get().executeUpdateQuery("CREATE GRAPH <" + fullGraphURI + ">");
+        TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <" + fullGraphUri + ">");
+        TripleStoreInterfaceSingleton.get().executeUpdateQuery("CREATE GRAPH <" + fullGraphUri + ">");
 
         // Create path to revision
-        ChangeSetPath changeSetPath = PathCalculationSingleton.getInstance().getPathOfChangeSets(revisionGraph, revision);
+        ChangeSetPath changeSetPath = PathCalculationFabric.getInstance(revisionGraph).getPathOfChangeSets(revision);
 
         // Copy branch to temporary graph
         Revision currentRevision = changeSetPath.getTargetRevision();
-        String copyQuery = "COPY GRAPH <" + currentRevision.getAssociatedBranch().getFullGraphURI() + "> TO GRAPH <" + fullGraphURI + ">";
+        String copyQuery = "COPY GRAPH <" + currentRevision.getAssociatedBranch().getFullGraphURI() + "> TO GRAPH <" + fullGraphUri + ">";
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(copyQuery);
 
         // Apply changesets
@@ -70,7 +101,7 @@ public class FullGraph {
             String graph_added = currentChangeSet.getAddSetURI();
             this.applyAddSet(graph_added);
         }
-
+        this.created = true;
     }
 
     /**
@@ -79,7 +110,7 @@ public class FullGraph {
      * @param graph_deleted Uri of named graph containing delete set
      */
     protected void applyDeleteSet(String graph_deleted) {
-        String deleteQuery = String.format("ADD GRAPH <%s> TO GRAPH <%s>", graph_deleted, this.fullGraphUri);
+        String deleteQuery = String.format("ADD SILENT GRAPH <%s> TO GRAPH <%s>", graph_deleted, this.fullGraphUri);
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(deleteQuery);
     }
 
@@ -110,7 +141,9 @@ public class FullGraph {
     }
 
     public void purge() {
-        String deleteQuery = String.format("DROP SILENT GRAPH <%s>", this.fullGraphUri);
-        TripleStoreInterfaceSingleton.get().executeUpdateQuery(deleteQuery);
+        if (this.created) {
+            String deleteQuery = String.format("DROP SILENT GRAPH <%s>", this.fullGraphUri);
+            TripleStoreInterfaceSingleton.get().executeUpdateQuery(deleteQuery);
+        }
     }
 }

@@ -6,8 +6,8 @@ import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.optimization.PathCalculationFabric;
 import de.tud.plt.r43ples.optimization.PathCalculationInterface;
-import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -59,11 +59,10 @@ public class PickCommitDraft extends CommitDraft {
      */
     public PickCommitDraft(R43plesRequest request) throws InternalErrorException {
         super(request);
-        // Dependencies
-        this.pathCalculationInterface = PathCalculationSingleton.getInstance();
 
         this.extractRequestInformation();
         this.isCreatedWithRequest = true;
+        this.pathCalculationInterface = PathCalculationFabric.getInstance(this.revisionGraph);
     }
 
     /**
@@ -80,8 +79,6 @@ public class PickCommitDraft extends CommitDraft {
      */
     protected PickCommitDraft(String graphName, String startRevisionIdentifier, String endRevisionIdentifier, String targetBranchIdentifier, String user, String message) throws InternalErrorException {
         super(null);
-        // Dependencies
-        this.pathCalculationInterface = PathCalculationSingleton.getInstance();
 
         this.setUser(user);
         this.setMessage(message);
@@ -91,6 +88,7 @@ public class PickCommitDraft extends CommitDraft {
         this.startRevisionIdentifier = startRevisionIdentifier;
         this.endRevisionIdentifier = endRevisionIdentifier;
         this.targetBranchIdentifier = targetBranchIdentifier;
+        this.pathCalculationInterface = PathCalculationFabric.getInstance(this.revisionGraph);
 
         this.isCreatedWithRequest = false;
     }
@@ -154,7 +152,7 @@ public class PickCommitDraft extends CommitDraft {
         Revision endRevision;
         if (endRevisionIdentifier != null) {
             endRevision = new Revision(revisionGraph, endRevisionIdentifier, true);
-            path = pathCalculationInterface.getPathBetweenStartAndTargetRevision(revisionGraph, endRevision, startRevision);
+            path = pathCalculationInterface.getPathBetweenStartAndTargetRevision(endRevision, startRevision);
         }
 
         String commitURI = getRevisionManagement().getNewPickCommitURI(revisionGraph, startRevisionIdentifier, endRevisionIdentifier, targetBranchIdentifier, usedTargetRevision.getRevisionIdentifier());

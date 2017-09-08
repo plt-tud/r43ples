@@ -3,16 +3,10 @@ package de.tud.plt.r43ples.core;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.Branch;
 import de.tud.plt.r43ples.existentobjects.FastForwardMergeCommit;
-import de.tud.plt.r43ples.existentobjects.Path;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagementOriginal;
-import de.tud.plt.r43ples.optimization.PathCalculationInterface;
-import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
-
-import java.util.Iterator;
 
 /**
  * Collection of information for creating a new fast forward merge commit.
@@ -23,10 +17,6 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
 
     /** The logger. **/
     private Logger logger = Logger.getLogger(FastForwardMergeCommitDraft.class);
-
-    //Dependencies
-    /** The path calculation interface to use. **/
-    private PathCalculationInterface pathCalculationInterface;
 
 
     /**
@@ -46,8 +36,6 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
      */
     protected FastForwardMergeCommitDraft(String graphName, String branchNameFrom, String branchNameInto, String user, String message, String sdd, String triples, MergeTypes type, boolean with) throws InternalErrorException {
         super(graphName, branchNameFrom, branchNameInto, user, message, sdd, MergeActions.MERGE, triples, type, with);
-        // Dependencies
-        this.pathCalculationInterface = PathCalculationSingleton.getInstance();
     }
 
     /**

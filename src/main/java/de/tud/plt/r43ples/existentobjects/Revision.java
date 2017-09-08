@@ -103,18 +103,11 @@ public class Revision {
      *
      * @param revision the already existing revision
      * @param changeSet the change set to add
+     *
+     *  FIXME: Why not used as own method? A constructor does not make sense
      */
-    public Revision(Revision revision, ChangeSet changeSet) {
+    public void addChangeSet(ChangeSet changeSet) {
         // Dependencies
-        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
-
-        this.revisionGraph = revision.getRevisionGraph();
-        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
-
-        this.revisionIdentifier = revision.getRevisionIdentifier();
-        this.revisionURI = revision.getRevisionURI();
-        this.changeSets = new ArrayList<>();
-        this.changeSets.add(revision.getChangeSet());
         this.changeSets.add(changeSet);
     }
 
@@ -170,7 +163,7 @@ public class Revision {
     /**
      * Get the associated branch of the current revision.
      *
-     * @return the associated branch
+     * @return the associated branch or null if revision has no directly associated branch
      * @throws InternalErrorException
      */
     public Branch getAssociatedBranch() throws InternalErrorException {
@@ -188,7 +181,7 @@ public class Revision {
                 QuerySolution qs = resultSet.next();
                 associatedBranch = new Branch(revisionGraph, qs.getResource("?branch").toString(), false);
             } else {
-                throw new InternalErrorException("Revision " + revisionIdentifier + " is not referenced by a branch.");
+                return null;
             }
         }
         return associatedBranch;
