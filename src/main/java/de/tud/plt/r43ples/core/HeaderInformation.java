@@ -38,6 +38,7 @@ public class HeaderInformation {
         }
         String names = graphNames.toString();
         String result = getResponseHeader(names);
+        logger.debug(String.format("Header information for %s: %s", query, result));
         return result;
 
     }
