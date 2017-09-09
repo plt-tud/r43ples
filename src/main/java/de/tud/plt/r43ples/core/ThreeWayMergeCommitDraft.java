@@ -207,9 +207,9 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
         getTripleStoreInterface().executeCreateGraph(graphNameOfMerged);
 
         // Get the full graph name of branch A
-        String graphNameOfBranchA = getRevisionGraph().getReferenceGraph(getBranchNameFrom());
+        String graphNameOfBranchA = usedSourceBranch.getFullGraphURI();
         // Get the full graph name of branch B
-        String graphNameOfBranchB = getRevisionGraph().getReferenceGraph(getBranchNameInto());
+        String graphNameOfBranchB = usedTargetBranch.getFullGraphURI();
 
         if (type.equals(MergeQueryTypeEnum.MANUAL)) {
             // Manual merge query
@@ -367,11 +367,13 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
         // Create the merge revision and a change set
         // TODO: perhaps addedTriplesA should be addedTriplesB; the same for deletedTriples
-        RevisionDraft revisionDraft = new RevisionDraft(getRevisionManagement(), getRevisionGraph(), usedTargetBranch, addedTriplesA, deletedTriplesA, false);
+        RevisionDraft revisionDraft = new RevisionDraft(getRevisionManagement(), getRevisionGraph(), usedTargetBranch,
+                addedTriplesA, deletedTriplesA, false);
         Revision generatedRevision = revisionDraft.createInTripleStore();
 
-        // FIXME: Create second changesets
-        ChangeSetDraft changeSetDraftA = new ChangeSetDraft(getRevisionManagement(), getRevisionGraph(), usedSourceBranch.getLeafRevision(), generatedRevision.getRevisionIdentifier(), usedSourceBranch.getReferenceURI(), addedTriplesB, deletedTriplesB, false);
+        ChangeSetDraft changeSetDraftA = new ChangeSetDraft(getRevisionManagement(), getRevisionGraph(),
+                usedSourceBranch.getLeafRevision(), generatedRevision.getRevisionIdentifier(), usedSourceBranch.getReferenceURI(),
+                addedTriplesB, deletedTriplesB, false);
         ChangeSet changeSetA = changeSetDraftA.createInTripleStore();
 
         generatedRevision.addChangeSet(changeSetA);
@@ -446,8 +448,6 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryInitial);
 
         // Update content by current add and delete set - remove old entries
-
-
         while (path.getRevisionPath().size() > 0) {
             ChangeSet changeSet = path.getRevisionPath().removeLast();
             logger.info("Update content by current add and delete set of changeset " + changeSet + " - remove old entries.");
