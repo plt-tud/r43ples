@@ -123,7 +123,7 @@ public class StructuredTree {
 						+ "rmo:used ?reva;%n"
 						+ "rmo:generated ?revb;%n"
 						+ "rmo:atTime ?time;%n"
-						+ "rmov:wasAssociatedWith ?author.%n"
+						+ "rmo:wasAssociatedWith ?author.%n"
 						+ "OPTIONAL { ?author rdfs:label ?authname. }%n"
 						+ "?reva rmo:revisionIdentifier ?prev.%n"
 						+ "?revb rmo:revisionIdentifier ?next."
