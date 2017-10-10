@@ -4,16 +4,18 @@ import com.hp.hpl.jena.query.*;
 import com.hp.hpl.jena.rdf.model.Model;
 import com.hp.hpl.jena.util.FileUtils;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.existentobjects.*;
+import de.tud.plt.r43ples.existentobjects.Branch;
+import de.tud.plt.r43ples.existentobjects.ChangeSet;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.mergingUI.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.mergingUI.SDDTripleStateEnum;
+import de.tud.plt.r43ples.optimization.ChangeSetPath;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
-
-import java.util.Iterator;
 
 /**
  * Collection of information for creating a new three way merge commit.
@@ -60,15 +62,15 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
      */
     protected ThreeWayMergeCommit createCommitInTripleStore() throws InternalErrorException {
 
-        String revisionGraphURI = getRevisionGraph().getRevisionGraphUri();
-        String revisionUriFrom = getRevisionGraph().getRevisionUri(getBranchNameFrom());
-        String revisionUriInto = getRevisionGraph().getRevisionUri(getBranchNameInto());
+        Revision fromRevision = this.usedSourceBranch.getLeafRevision();
+        ;
+        Revision intoRevision = this.usedTargetBranch.getLeafRevision();
 
         // Differ between MERGE query with specified SDD and without SDD
         String usedSDDURI = getRevisionGraph().getSDD(getSdd());
 
         // Get the common revision with shortest path
-        Revision commonRevision = this.getPathCalculationInterface().getCommonRevisionWithShortestPath(getRevisionGraph(), new Revision(getRevisionGraph(), revisionUriFrom, false), new Revision(getRevisionGraph(), revisionUriInto, false));
+        Revision commonRevision = this.getPathCalculationInterface().getCommonRevisionWithShortestPath(fromRevision, intoRevision);
 
         // Create the revision progress for from and into
         String namedGraphUriFrom = getRevisionManagement().getTemporaryRevisionProgressFromURI(getRevisionGraph());
@@ -77,17 +79,17 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
         String uriA = "http://eatld.et.tu-dresden.de/branch-from";
         String uriB = "http://eatld.et.tu-dresden.de/branch-into";
 
-        Revision fromRevision = new Revision(getRevisionGraph(), revisionUriFrom, false);
-        Revision intoRevision = new Revision(getRevisionGraph(), revisionUriInto, false);
+        ChangeSetPath changesetsFromCommontoSourceBranch = this.getPathCalculationInterface().getChangeSetsBetweenStartAndTargetRevision(commonRevision, fromRevision);
+        ChangeSetPath changesetsFromCommontoTargetBranch = this.getPathCalculationInterface().getChangeSetsBetweenStartAndTargetRevision(commonRevision, intoRevision);
 
-        createRevisionProgresses(revisionGraphURI, getGraphName(),
-                this.getPathCalculationInterface().getPathBetweenStartAndTargetRevision(getRevisionGraph(), commonRevision, fromRevision),
-                namedGraphUriFrom, uriA,
-                this.getPathCalculationInterface().getPathBetweenStartAndTargetRevision(getRevisionGraph(), commonRevision, intoRevision),
-                namedGraphUriInto, uriB, commonRevision);
+
+        createRevisionProgresses(
+                changesetsFromCommontoSourceBranch, namedGraphUriFrom, uriA,
+                changesetsFromCommontoTargetBranch, namedGraphUriInto, uriB,
+                commonRevision);
 
         // Create difference model
-        createDifferenceTripleModel(getGraphName(), namedGraphUriDiff, namedGraphUriFrom, uriA, namedGraphUriInto, uriB,
+        createDifferenceTripleModel(namedGraphUriDiff, namedGraphUriFrom, uriA, namedGraphUriInto, uriB,
                 usedSDDURI);
 
         // The created revision
@@ -205,9 +207,9 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
         getTripleStoreInterface().executeCreateGraph(graphNameOfMerged);
 
         // Get the full graph name of branch A
-        String graphNameOfBranchA = getRevisionGraph().getReferenceGraph(getBranchNameFrom());
+        String graphNameOfBranchA = usedSourceBranch.getFullGraphURI();
         // Get the full graph name of branch B
-        String graphNameOfBranchB = getRevisionGraph().getReferenceGraph(getBranchNameInto());
+        String graphNameOfBranchB = usedTargetBranch.getFullGraphURI();
 
         if (type.equals(MergeQueryTypeEnum.MANUAL)) {
             // Manual merge query
@@ -317,8 +319,8 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
         // Calculate the add and delete sets
 
-        // Get all added triples (concatenate all triples which are in MERGED but not in A and all triples which are in MERGED but not in B)
-        String queryAddedTriples = String.format(
+        // Get all added triples for both changesets
+        String queryAddedTriplesA = String.format(
                 "CONSTRUCT {?s ?p ?o} %n"
                         + "WHERE { %n"
                         + "	GRAPH <%s> { ?s ?p ?o } %n"
@@ -327,9 +329,9 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                         + "	} %n"
                         + "}", graphNameOfMerged, graphNameOfBranchA);
 
-        String addedTriples = getTripleStoreInterface().executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
+        String addedTriplesA = getTripleStoreInterface().executeConstructQuery(queryAddedTriplesA, FileUtils.langNTriple);
 
-        queryAddedTriples = String.format(
+        String queryAddedTriplesB = String.format(
                 "CONSTRUCT {?s ?p ?o} %n"
                         + "WHERE { %n"
                         + "	GRAPH <%s> { ?s ?p ?o } %n"
@@ -338,10 +340,10 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                         + "	} %n"
                         + "}", graphNameOfMerged, graphNameOfBranchB);
 
-        addedTriples += getTripleStoreInterface().executeConstructQuery(queryAddedTriples, FileUtils.langNTriple);
+        String addedTriplesB = getTripleStoreInterface().executeConstructQuery(queryAddedTriplesB, FileUtils.langNTriple);
 
-        // Get all removed triples (concatenate all triples which are in A but not in MERGED and all triples which are in B but not in MERGED)
-        String queryRemovedTriples = String.format(
+        // Get all removed triples for both changesets
+        String queryRemovedTriplesA = String.format(
                 "CONSTRUCT {?s ?p ?o} %n"
                         + "WHERE { %n"
                         + "	GRAPH <%s> { ?s ?p ?o } %n"
@@ -350,9 +352,9 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                         + "	} %n"
                         + "}", graphNameOfBranchA, graphNameOfMerged);
 
-        String deletedTriples = getTripleStoreInterface().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
+        String deletedTriplesA = getTripleStoreInterface().executeConstructQuery(queryRemovedTriplesA, FileUtils.langNTriple);
 
-        queryRemovedTriples = String.format(
+        String queryRemovedTriplesB = String.format(
                 "CONSTRUCT {?s ?p ?o} %n"
                         + "WHERE { %n"
                         + "	GRAPH <%s> { ?s ?p ?o } %n"
@@ -361,15 +363,21 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                         + "	} %n"
                         + "}", graphNameOfBranchB, graphNameOfMerged);
 
-        deletedTriples += getTripleStoreInterface().executeConstructQuery(queryRemovedTriples, FileUtils.langNTriple);
+        String deletedTriplesB = getTripleStoreInterface().executeConstructQuery(queryRemovedTriplesB, FileUtils.langNTriple);
 
         // Create the merge revision and a change set
-        RevisionDraft revisionDraft = new RevisionDraft(getRevisionManagement(), getRevisionGraph(), usedTargetBranch, addedTriples, deletedTriples, false);
+        // TODO: perhaps addedTriplesA should be addedTriplesB; the same for deletedTriples
+        RevisionDraft revisionDraft = new RevisionDraft(getRevisionManagement(), getRevisionGraph(), usedTargetBranch,
+                addedTriplesA, deletedTriplesA, false);
         Revision generatedRevision = revisionDraft.createInTripleStore();
-        ChangeSetDraft changeSetDraft = new ChangeSetDraft(getRevisionManagement(), getRevisionGraph(), usedSourceRevision, generatedRevision.getRevisionIdentifier(), usedSourceBranch.getReferenceURI(), addedTriples, deletedTriples, false);
-        ChangeSet changeSet = changeSetDraft.createInTripleStore();
 
-        return new Revision(generatedRevision, changeSet);
+        ChangeSetDraft changeSetDraftA = new ChangeSetDraft(getRevisionManagement(), getRevisionGraph(),
+                usedSourceBranch.getLeafRevision(), generatedRevision.getRevisionIdentifier(), usedSourceBranch.getReferenceURI(),
+                addedTriplesB, deletedTriplesB, false);
+        ChangeSet changeSetA = changeSetDraftA.createInTripleStore();
+
+        generatedRevision.addChangeSet(changeSetA);
+        return generatedRevision;
     }
 
     /**
@@ -383,297 +391,274 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
      * @param uriInto the URI of the revision progress of the into branch
      * @throws InternalErrorException
      */
-    protected void createRevisionProgresses(final String revisionGraph, final String graphName,
-                                            Path pathFrom, String graphNameRevisionProgressFrom, String uriFrom,
-                                            Path pathInto, String graphNameRevisionProgressInto, String uriInto, Revision commonRevision) throws InternalErrorException {
+    protected void createRevisionProgresses(ChangeSetPath pathFrom, String graphNameRevisionProgressFrom, String uriFrom,
+                                            ChangeSetPath pathInto, String graphNameRevisionProgressInto, String uriInto,
+                                            Revision commonRevision) throws InternalErrorException {
         logger.info("Create the revision progress of branch from and into.");
-
-        RevisionGraph graph = new RevisionGraph(graphName);
 
         if (!((pathFrom.getRevisionPath().size() > 0) && (pathInto.getRevisionPath().size() > 0))) {
             throw new InternalErrorException("Revision path contains no revisions.");
         }
 
         // Get the full graph name of common revision or create full revision graph of common revision
-        String fullGraphNameCommonRevision;
-        Boolean tempGraphWasCreated = false;
-        try {
-            fullGraphNameCommonRevision = graph.getReferenceGraph(commonRevision.getRevisionIdentifier());
-        } catch (InternalErrorException e) {
-            // Create a temporary full graph
-            // TODO move to new RevisionManagement
-            fullGraphNameCommonRevision = graphName + "RM-TEMP-REVISION-PROGRESS-FULLGRAPH";
-            // Create full graph for this branch
-            FullGraph fullGraph = new FullGraph(graph, commonRevision, fullGraphNameCommonRevision);
-            tempGraphWasCreated = true;
-        }
+        FullGraph fullGraph = new FullGraph(this.getRevisionGraph(), commonRevision);
 
         // Create revision progress of branch from
-        createRevisionProgress(revisionGraph, pathFrom, fullGraphNameCommonRevision, graphNameRevisionProgressFrom, uriFrom);
+        createRevisionProgress(fullGraph, pathFrom, graphNameRevisionProgressFrom, uriFrom);
 
         // Create revision progress of branch into
-        createRevisionProgress(revisionGraph, pathInto, fullGraphNameCommonRevision, graphNameRevisionProgressInto, uriInto);
+        createRevisionProgress(fullGraph, pathInto, graphNameRevisionProgressInto, uriInto);
 
         // Drop the temporary full graph
-        if (tempGraphWasCreated) {
-            logger.info("Drop the temporary full graph.");
-            TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <" + fullGraphNameCommonRevision + ">");
-        }
-
+        fullGraph.purge();
     }
 
     /**
      * Create the revision progress.
      *
+     * @param startingFullGraph the full graph name of the revision of path
      * @param path the path with all revisions from start revision to target revision
-     * @param fullGraphNameCommonRevision the full graph name of the common revision (first revision of path)
-     * @param graphNameRevisionProgress the graph name of the revision progress
-     * @param uri the URI of the revision progress
+     * @param graphNameRevisionProgress the graph name where the revision progress should be stored
+     * @param uri the URI where the revision progress should be stored
      * @throws InternalErrorException
      */
-    private void createRevisionProgress(final String revisionGraph, Path path, String fullGraphNameCommonRevision, String graphNameRevisionProgress, String uri) throws InternalErrorException {
+    protected void createRevisionProgress(FullGraph startingFullGraph, ChangeSetPath path, String graphNameRevisionProgress, String uri) throws InternalErrorException {
         logger.info("Create the revision progress of " + uri + " in graph " + graphNameRevisionProgress + ".");
 
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameRevisionProgress));
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("CREATE GRAPH  <%s>", graphNameRevisionProgress));
-        Iterator<Revision> iteList = path.getRevisionPath().iterator();
 
-        if (iteList.hasNext()) {
-            String firstRevision = iteList.next().getRevisionURI();
+        // Create the initial content
+        logger.info("Create the initial content.");
+        String queryInitial = Config.prefixes + String.format(
+                "INSERT { GRAPH <%s> { %n"
+                        + "	<%s> a rpo:RevisionProgress; %n"
+                        + "		rpo:original [ %n"
+                        + "			rdf:subject ?s ; %n"
+                        + "			rdf:predicate ?p ; %n"
+                        + "			rdf:object ?o ; %n"
+                        + "			rmo:references <%s> %n"
+                        + "		] %n"
+                        + "} } WHERE { %n"
+                        + "	GRAPH <%s> %n"
+                        + "		{ ?s ?p ?o . } %n"
+                        + "}", graphNameRevisionProgress, uri, startingFullGraph.getRevision().getRevisionURI(), startingFullGraph.getFullGraphUri());
 
-            // Create the initial content
-            logger.info("Create the initial content.");
-            String queryInitial = Config.prefixes + String.format(
-                    "INSERT { GRAPH <%s> { %n"
-                            + "	<%s> a rpo:RevisionProgress; %n"
-                            + "		rpo:original [ %n"
-                            + "			rdf:subject ?s ; %n"
-                            + "			rdf:predicate ?p ; %n"
-                            + "			rdf:object ?o ; %n"
-                            + "			rmo:references <%s> %n"
-                            + "		] %n"
-                            + "} } WHERE { %n"
-                            + "	GRAPH <%s> %n"
-                            + "		{ ?s ?p ?o . } %n"
-                            + "}", graphNameRevisionProgress, uri, firstRevision, fullGraphNameCommonRevision);
+        // Execute the query which generates the initial content
+        TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryInitial);
 
-            // Execute the query which generates the initial content
-            TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryInitial);
+        // Update content by current add and delete set - remove old entries
+        while (path.getRevisionPath().size() > 0) {
+            ChangeSet changeSet = path.getRevisionPath().removeLast();
+            logger.info("Update content by current add and delete set of changeset " + changeSet + " - remove old entries.");
+            // Get the ADD and DELETE set URIs
+            String addSetURI = changeSet.getAddSetURI();
+            String deleteSetURI = changeSet.getDeleteSetURI();
 
-            // Update content by current add and delete set - remove old entries
-            while (iteList.hasNext()) {
-                String revision = iteList.next().getRevisionURI();
-                logger.info("Update content by current add and delete set of revision " + revision + " - remove old entries.");
-                // Get the ADD and DELETE set URIs
-                String addSetURI = RevisionManagementOriginal.getAddSetURI(revision, revisionGraph);
-                String deleteSetURI = RevisionManagementOriginal.getDeleteSetURI(revision, revisionGraph);
+            if ((addSetURI != null) && (deleteSetURI != null)) {
 
-                if ((addSetURI != null) && (deleteSetURI != null)) {
+                // Update the revision progress with the data of the current revision ADD set
 
-                    // Update the revision progress with the data of the current revision ADD set
+                // Delete old entries (original)
+                String queryRevision = Config.prefixes + String.format(
+                        "DELETE { GRAPH <%s> { %n"
+                                + "	<%s> rpo:original ?blank . %n"
+                                + "	?blank rdf:subject ?s . %n"
+                                + "	?blank rdf:predicate ?p . %n"
+                                + "	?blank rdf:object ?o . %n"
+                                + "	?blank rmo:references ?revision . %n"
+                                + "} } %n"
+                                + "WHERE { "
+                                + "		GRAPH <%s> { %n"
+                                + "			<%s> rpo:original ?blank . %n"
+                                + "			?blank rdf:subject ?s . %n"
+                                + "			?blank rdf:predicate ?p . %n"
+                                + "			?blank rdf:object ?o . %n"
+                                + "			?blank rmo:references ?revision . %n"
+                                + "		} %n"
+                                + "		GRAPH <%s> { %n"
+                                + "			?s ?p ?o %n"
+                                + "		} %n"
+                                + "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
 
-                    // Delete old entries (original)
-                    String queryRevision = Config.prefixes + String.format(
-                            "DELETE { GRAPH <%s> { %n"
-                                    + "	<%s> rpo:original ?blank . %n"
-                                    + "	?blank rdf:subject ?s . %n"
-                                    + "	?blank rdf:predicate ?p . %n"
-                                    + "	?blank rdf:object ?o . %n"
-                                    + "	?blank rmo:references ?revision . %n"
-                                    + "} } %n"
-                                    + "WHERE { "
-                                    + "		GRAPH <%s> { %n"
-                                    + "			<%s> rpo:original ?blank . %n"
-                                    + "			?blank rdf:subject ?s . %n"
-                                    + "			?blank rdf:predicate ?p . %n"
-                                    + "			?blank rdf:object ?o . %n"
-                                    + "			?blank rmo:references ?revision . %n"
-                                    + "		} %n"
-                                    + "		GRAPH <%s> { %n"
-                                    + "			?s ?p ?o %n"
-                                    + "		} %n"
-                                    + "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
+                queryRevision += "\n";
 
-                    queryRevision += "\n";
+                // Delete old entries (added)
+                queryRevision += String.format(
+                        "DELETE { GRAPH <%s> { %n"
+                                + "	<%s> rpo:added ?blank . %n"
+                                + "	?blank rdf:subject ?s . %n"
+                                + "	?blank rdf:predicate ?p . %n"
+                                + "	?blank rdf:object ?o . %n"
+                                + "	?blank rmo:references ?revision . %n"
+                                + "} } %n"
+                                + "WHERE { "
+                                + "		GRAPH <%s> { %n"
+                                + "			<%s> rpo:added ?blank . %n"
+                                + "			?blank rdf:subject ?s . %n"
+                                + "			?blank rdf:predicate ?p . %n"
+                                + "			?blank rdf:object ?o . %n"
+                                + "			?blank rmo:references ?revision . %n"
+                                + "		} %n"
+                                + "		GRAPH <%s> { %n"
+                                + "			?s ?p ?o %n"
+                                + "		} %n"
+                                + "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
 
-                    // Delete old entries (added)
-                    queryRevision += String.format(
-                            "DELETE { GRAPH <%s> { %n"
-                                    + "	<%s> rpo:added ?blank . %n"
-                                    + "	?blank rdf:subject ?s . %n"
-                                    + "	?blank rdf:predicate ?p . %n"
-                                    + "	?blank rdf:object ?o . %n"
-                                    + "	?blank rmo:references ?revision . %n"
-                                    + "} } %n"
-                                    + "WHERE { "
-                                    + "		GRAPH <%s> { %n"
-                                    + "			<%s> rpo:added ?blank . %n"
-                                    + "			?blank rdf:subject ?s . %n"
-                                    + "			?blank rdf:predicate ?p . %n"
-                                    + "			?blank rdf:object ?o . %n"
-                                    + "			?blank rmo:references ?revision . %n"
-                                    + "		} %n"
-                                    + "		GRAPH <%s> { %n"
-                                    + "			?s ?p ?o %n"
-                                    + "		} %n"
-                                    + "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
+                queryRevision += "\n";
 
-                    queryRevision += "\n";
+                // Delete old entries (removed)
+                queryRevision += String.format(
+                        "DELETE { GRAPH <%s> { %n"
+                                + "	<%s> rpo:removed ?blank . %n"
+                                + "	?blank rdf:subject ?s . %n"
+                                + "	?blank rdf:predicate ?p . %n"
+                                + "	?blank rdf:object ?o . %n"
+                                + "	?blank rmo:references ?revision . %n"
+                                + "} } %n"
+                                + "WHERE { "
+                                + "		GRAPH <%s> { %n"
+                                + "			<%s> rpo:removed ?blank . %n"
+                                + "			?blank rdf:subject ?s . %n"
+                                + "			?blank rdf:predicate ?p . %n"
+                                + "			?blank rdf:object ?o . %n"
+                                + "			?blank rmo:references ?revision . %n"
+                                + "		} %n"
+                                + "		GRAPH <%s> { %n"
+                                + "			?s ?p ?o %n"
+                                + "		} %n"
+                                + "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
 
-                    // Delete old entries (removed)
-                    queryRevision += String.format(
-                            "DELETE { GRAPH <%s> { %n"
-                                    + "	<%s> rpo:removed ?blank . %n"
-                                    + "	?blank rdf:subject ?s . %n"
-                                    + "	?blank rdf:predicate ?p . %n"
-                                    + "	?blank rdf:object ?o . %n"
-                                    + "	?blank rmo:references ?revision . %n"
-                                    + "} } %n"
-                                    + "WHERE { "
-                                    + "		GRAPH <%s> { %n"
-                                    + "			<%s> rpo:removed ?blank . %n"
-                                    + "			?blank rdf:subject ?s . %n"
-                                    + "			?blank rdf:predicate ?p . %n"
-                                    + "			?blank rdf:object ?o . %n"
-                                    + "			?blank rmo:references ?revision . %n"
-                                    + "		} %n"
-                                    + "		GRAPH <%s> { %n"
-                                    + "			?s ?p ?o %n"
-                                    + "		} %n"
-                                    + "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, addSetURI);
+                queryRevision += "\n";
 
-                    queryRevision += "\n";
+                // Insert new entries (added)
+                queryRevision += String.format(
+                        "INSERT { GRAPH <%s> {%n"
+                                + "	<%s> a rpo:RevisionProgress; %n"
+                                + "		rpo:added [ %n"
+                                + "			rdf:subject ?s ; %n"
+                                + "			rdf:predicate ?p ; %n"
+                                + "			rdf:object ?o ; %n"
+                                + "			rmo:references <%s> %n"
+                                + "		] %n"
+                                + "} } WHERE { %n"
+                                + "	GRAPH <%s> %n"
+                                + "		{ ?s ?p ?o . } %n"
+                                + "};", graphNameRevisionProgress, uri, changeSet.getChangeSetURI(), addSetURI);
 
-                    // Insert new entries (added)
-                    queryRevision += String.format(
-                            "INSERT { GRAPH <%s> {%n"
-                                    + "	<%s> a rpo:RevisionProgress; %n"
-                                    + "		rpo:added [ %n"
-                                    + "			rdf:subject ?s ; %n"
-                                    + "			rdf:predicate ?p ; %n"
-                                    + "			rdf:object ?o ; %n"
-                                    + "			rmo:references <%s> %n"
-                                    + "		] %n"
-                                    + "} } WHERE { %n"
-                                    + "	GRAPH <%s> %n"
-                                    + "		{ ?s ?p ?o . } %n"
-                                    + "};", graphNameRevisionProgress, uri, revision, addSetURI);
+                queryRevision += "\n \n";
 
-                    queryRevision += "\n \n";
+                // Update the revision progress with the data of the current revision DELETE set
 
-                    // Update the revision progress with the data of the current revision DELETE set
+                // Delete old entries (original)
+                queryRevision += String.format(
+                        "DELETE { GRAPH <%s> { %n"
+                                + "	<%s> rpo:original ?blank . %n"
+                                + "	?blank rdf:subject ?s . %n"
+                                + "	?blank rdf:predicate ?p . %n"
+                                + "	?blank rdf:object ?o . %n"
+                                + "	?blank rmo:references ?revision . %n"
+                                + "} } %n"
+                                + "WHERE { "
+                                + "		GRAPH <%s> { %n"
+                                + "			<%s> rpo:original ?blank . %n"
+                                + "			?blank rdf:subject ?s . %n"
+                                + "			?blank rdf:predicate ?p . %n"
+                                + "			?blank rdf:object ?o . %n"
+                                + "			?blank rmo:references ?revision . %n"
+                                + "		} %n"
+                                + "		GRAPH <%s> { %n"
+                                + "			?s ?p ?o %n"
+                                + "		} %n"
+                                + "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
 
-                    // Delete old entries (original)
-                    queryRevision += String.format(
-                            "DELETE { GRAPH <%s> { %n"
-                                    + "	<%s> rpo:original ?blank . %n"
-                                    + "	?blank rdf:subject ?s . %n"
-                                    + "	?blank rdf:predicate ?p . %n"
-                                    + "	?blank rdf:object ?o . %n"
-                                    + "	?blank rmo:references ?revision . %n"
-                                    + "} } %n"
-                                    + "WHERE { "
-                                    + "		GRAPH <%s> { %n"
-                                    + "			<%s> rpo:original ?blank . %n"
-                                    + "			?blank rdf:subject ?s . %n"
-                                    + "			?blank rdf:predicate ?p . %n"
-                                    + "			?blank rdf:object ?o . %n"
-                                    + "			?blank rmo:references ?revision . %n"
-                                    + "		} %n"
-                                    + "		GRAPH <%s> { %n"
-                                    + "			?s ?p ?o %n"
-                                    + "		} %n"
-                                    + "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
+                queryRevision += "\n";
 
-                    queryRevision += "\n";
+                // Delete old entries (added)
+                queryRevision += String.format(
+                        "DELETE { GRAPH <%s> { %n"
+                                + "	<%s> rpo:added ?blank . %n"
+                                + "	?blank rdf:subject ?s . %n"
+                                + "	?blank rdf:predicate ?p . %n"
+                                + "	?blank rdf:object ?o . %n"
+                                + "	?blank rmo:references ?revision . %n"
+                                + "} } %n"
+                                + "WHERE { "
+                                + "		GRAPH <%s> { %n"
+                                + "			<%s> rpo:added ?blank . %n"
+                                + "			?blank rdf:subject ?s . %n"
+                                + "			?blank rdf:predicate ?p . %n"
+                                + "			?blank rdf:object ?o . %n"
+                                + "			?blank rmo:references ?revision . %n"
+                                + "		} %n"
+                                + "		GRAPH <%s> { %n"
+                                + "			?s ?p ?o %n"
+                                + "		} %n"
+                                + "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
 
-                    // Delete old entries (added)
-                    queryRevision += String.format(
-                            "DELETE { GRAPH <%s> { %n"
-                                    + "	<%s> rpo:added ?blank . %n"
-                                    + "	?blank rdf:subject ?s . %n"
-                                    + "	?blank rdf:predicate ?p . %n"
-                                    + "	?blank rdf:object ?o . %n"
-                                    + "	?blank rmo:references ?revision . %n"
-                                    + "} } %n"
-                                    + "WHERE { "
-                                    + "		GRAPH <%s> { %n"
-                                    + "			<%s> rpo:added ?blank . %n"
-                                    + "			?blank rdf:subject ?s . %n"
-                                    + "			?blank rdf:predicate ?p . %n"
-                                    + "			?blank rdf:object ?o . %n"
-                                    + "			?blank rmo:references ?revision . %n"
-                                    + "		} %n"
-                                    + "		GRAPH <%s> { %n"
-                                    + "			?s ?p ?o %n"
-                                    + "		} %n"
-                                    + "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
+                queryRevision += "\n";
 
-                    queryRevision += "\n";
+                // Delete old entries (removed)
+                queryRevision += String.format(
+                        "DELETE { GRAPH <%s> { %n"
+                                + "	<%s> rpo:removed ?blank . %n"
+                                + "	?blank rdf:subject ?s . %n"
+                                + "	?blank rdf:predicate ?p . %n"
+                                + "	?blank rdf:object ?o . %n"
+                                + "	?blank rmo:references ?revision . %n"
+                                + "} } %n"
+                                + "WHERE { "
+                                + "		GRAPH <%s> { %n"
+                                + "			<%s> rpo:removed ?blank . %n"
+                                + "			?blank rdf:subject ?s . %n"
+                                + "			?blank rdf:predicate ?p . %n"
+                                + "			?blank rdf:object ?o . %n"
+                                + "			?blank rmo:references ?revision . %n"
+                                + "		} %n"
+                                + "		GRAPH <%s> { %n"
+                                + "			?s ?p ?o %n"
+                                + "		} %n"
+                                + "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
 
-                    // Delete old entries (removed)
-                    queryRevision += String.format(
-                            "DELETE { GRAPH <%s> { %n"
-                                    + "	<%s> rpo:removed ?blank . %n"
-                                    + "	?blank rdf:subject ?s . %n"
-                                    + "	?blank rdf:predicate ?p . %n"
-                                    + "	?blank rdf:object ?o . %n"
-                                    + "	?blank rmo:references ?revision . %n"
-                                    + "} } %n"
-                                    + "WHERE { "
-                                    + "		GRAPH <%s> { %n"
-                                    + "			<%s> rpo:removed ?blank . %n"
-                                    + "			?blank rdf:subject ?s . %n"
-                                    + "			?blank rdf:predicate ?p . %n"
-                                    + "			?blank rdf:object ?o . %n"
-                                    + "			?blank rmo:references ?revision . %n"
-                                    + "		} %n"
-                                    + "		GRAPH <%s> { %n"
-                                    + "			?s ?p ?o %n"
-                                    + "		} %n"
-                                    + "};", graphNameRevisionProgress, uri, graphNameRevisionProgress, uri, deleteSetURI);
+                queryRevision += "\n";
 
-                    queryRevision += "\n";
+                // Insert new entries (removed)
+                queryRevision += String.format(
+                        "INSERT { GRAPH <%s> { %n"
+                                + "	<%s> a rpo:RevisionProgress; %n"
+                                + "		rpo:removed [ %n"
+                                + "			rdf:subject ?s ; %n"
+                                + "			rdf:predicate ?p ; %n"
+                                + "			rdf:object ?o ; %n"
+                                + "			rmo:references <%s> %n"
+                                + "		] %n"
+                                + "} } WHERE { %n"
+                                + "	GRAPH <%s> %n"
+                                + "		{ ?s ?p ?o . } %n"
+                                + "}", graphNameRevisionProgress, uri, changeSet.getChangeSetURI(), deleteSetURI);
 
-                    // Insert new entries (removed)
-                    queryRevision += String.format(
-                            "INSERT { GRAPH <%s> { %n"
-                                    + "	<%s> a rpo:RevisionProgress; %n"
-                                    + "		rpo:removed [ %n"
-                                    + "			rdf:subject ?s ; %n"
-                                    + "			rdf:predicate ?p ; %n"
-                                    + "			rdf:object ?o ; %n"
-                                    + "			rmo:references <%s> %n"
-                                    + "		] %n"
-                                    + "} } WHERE { %n"
-                                    + "	GRAPH <%s> %n"
-                                    + "		{ ?s ?p ?o . } %n"
-                                    + "}", graphNameRevisionProgress, uri, revision, deleteSetURI);
+                // Execute the query which updates the revision progress by the current revision
+                TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryRevision);
 
-                    // Execute the query which updates the revision progress by the current revision
-                    TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryRevision);
-
-                } else {
-                    //TODO Error management - is needed when a ADD or DELETE set is not referenced in the current implementation this error should not occur
-                    logger.error("ADD or DELETE set of " + revision + "does not exists.");
-                }
-                logger.info("Revision progress was created.");
+            } else {
+                //TODO Error management - is needed when a ADD or DELETE set is not referenced in the current implementation this error should not occur
+                logger.error("ADD or DELETE set of " + changeSet.getChangeSetURI() + "does not exists.");
             }
+            logger.info("Revision progress was created.");
         }
     }
 
     /**
-     * Create the difference triple model which contains all differing triples.
+     * Create the difference triple model which contains all differing triples and store it in named graph
      *
-     * @param graphName the graph name
-     * @param graphNameDifferenceTripleModel the graph name of the difference triple model
+     * @param graphNameDifferenceTripleModel the graph name where the generated difference triple model should be stored
      * @param graphNameRevisionProgressA the graph name of the revision progress of branch A
      * @param uriA the URI of the revision progress of branch A
      * @param graphNameRevisionProgressB the graph name of the revision progress of branch B
      * @param uriB the URI of the revision progress of branch B
      * @param uriSDD the URI of the SDD to use
      */
-    private void createDifferenceTripleModel(String graphName, String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD){
+    private void createDifferenceTripleModel(String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD) {
 
         logger.info("Create the difference triple model");
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameDifferenceTripleModel));

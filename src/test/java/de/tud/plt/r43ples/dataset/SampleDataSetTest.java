@@ -125,13 +125,12 @@ public class SampleDataSetTest extends R43plesTest {
         // Check revision graph
         RevisionGraph rg = new RevisionGraph(graph);
         String revisiongraph_turtle = rg.getContentOfRevisionGraph("TURTLE");
-//        Assert.assertEquals("", revisiongraph_turtle);
         String revisiongraph_expected = ResourceManagement.getContentFromResource("dataset/dataset3/revisiongraph.ttl");
         Model model_result = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_turtle);
         Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_expected);
         this.removeTimeStampFromModel(model_result);
         this.removeTimeStampFromModel(model_expected);
-        //Assert.assertTrue(this.check_isomorphism(model_result, model_expected));
+        Assert.assertTrue(this.check_isomorphism(model_result, model_expected));
 
         // Check revision 1
         String query = String.format(queryTemplate, graph, "1");

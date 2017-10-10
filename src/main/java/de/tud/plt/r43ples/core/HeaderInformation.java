@@ -38,6 +38,7 @@ public class HeaderInformation {
         }
         String names = graphNames.toString();
         String result = getResponseHeader(names);
+        logger.debug(String.format("Header information for %s: %s", query, result));
         return result;
 
     }
@@ -59,9 +60,9 @@ public class HeaderInformation {
                         + " }"
                         + " GRAPH ?revisionGraph { "
                         + " ?ref a ?type;"
-                        + "		rdfs:label ?label;%n"
+                            + "		rmo:referenceIdentifier ?label;%n"
                         + "		rmo:references ?rev."
-                        + " ?rev rmo:revisionNumber ?number . %n"
+                            + " ?rev rmo:revisionIdentifier ?number . %n"
                         + "FILTER (?type IN (rmo:Tag, rmo:Master, rmo:Branch)) %n"
                         + "} }", Config.revision_graph, graphList);
         String header = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryConstruct, FileUtils.langTurtle);

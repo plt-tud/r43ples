@@ -6,8 +6,8 @@ import de.tud.plt.r43ples.existentobjects.MergeCommit;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.optimization.PathCalculationFabric;
 import de.tud.plt.r43ples.optimization.PathCalculationInterface;
-import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
@@ -66,10 +66,9 @@ public class MergeCommitDraft extends CommitDraft {
      */
     public MergeCommitDraft(R43plesRequest request) throws InternalErrorException {
         super(request);
-        // Dependencies
-        this.pathCalculationInterface = PathCalculationSingleton.getInstance();
 
         this.extractRequestInformation();
+        this.pathCalculationInterface = PathCalculationFabric.getInstance(this.revisionGraph);
         this.isCreatedWithRequest = true;
     }
 
@@ -91,8 +90,6 @@ public class MergeCommitDraft extends CommitDraft {
      */
     protected MergeCommitDraft(String graphName, String branchNameFrom, String branchNameInto, String user, String message, String sdd, MergeActions action, String triples, MergeTypes type, boolean with) throws InternalErrorException {
         super(null);
-        // Dependencies
-        this.pathCalculationInterface = PathCalculationSingleton.getInstance();
 
         this.setUser(user);
         this.setMessage(message);
@@ -106,6 +103,7 @@ public class MergeCommitDraft extends CommitDraft {
         this.triples = triples;
         this.type = type;
         this.with = with;
+        this.pathCalculationInterface = PathCalculationFabric.getInstance(this.revisionGraph);
 
         this.isCreatedWithRequest = false;
     }

@@ -141,7 +141,7 @@ public class RevisionManagementOriginal {
 	 * @return the constructed graph content as specified RDF serialization format
 	 */
 	public static String getContentOfGraph(final String graphName, final String format) {
-		String query = Config.prefixes + String.format(
+		String query = String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
 				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
 		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		

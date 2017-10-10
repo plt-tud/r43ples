@@ -164,12 +164,10 @@ public class SampleDataSet {
 		String revisionNumber4 = commit4.getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("master-4", revisionNumber4);
 
-		ThreeWayMergeCommit mergeCommit5 = r43plesCore.createThreeWayMergeCommit(graphName, branchNameB1, "master", user, "test commit message 5",
+		ThreeWayMergeCommit mergeCommit5 = r43plesCore.createThreeWayMergeCommit(graphName,
+				branchNameB1, "master",
+				user, "test commit message 5",
 				null, null, MergeTypes.AUTO, false);
-//				graphName,
-//				ResourceManagement.getContentFromResource("samples/dataset3/added-5.nt"),
-//				ResourceManagement.getContentFromResource("samples/dataset3/removed-5.nt"), user,
-//				"test commit message 5", branchNameB1, "master");
 		String revisionNumber5 = mergeCommit5.getGeneratedRevision().getRevisionIdentifier();
 		result.revisions.put("master-5", revisionNumber5);
 
@@ -495,24 +493,24 @@ public class SampleDataSet {
 	 * Create an example graph of the following structure:
 	 *
 	 *                                              ADD: -      ADD: -
-	 *                                           +-----X-----------X-----------(Branch B1X)--+
-	 *                                           |  DEL: B      DEL: C                        \
-	 *                                           |                                             \
-	 *                  ADD: D,E       ADD: G    |        ADD: F                                \
-	 *               +-----X--------------X------+-----------X-----------------(Branch B1)-------+--+
-	 *               |  DEL: A         DEL: D             DEL: -                                     \
-	 *               |                                                                                \
-	 *               |                              ADD: J      ADD: C                                 \
-	 *               |                           +-----X-----------X-----------(Branch B2X)--+          \
-	 *               |                           |  DEL: -      DEL: I                        \          \
-	 *               |                           |                                             \          \
-	 *               |  ADD: D,H       ADD: I    |  ADD: K,L    ADD: M                          \          \
-	 *               +-----X--------------X------+-----X-----------X-----------(Branch B2)-------+----------+--+
-	 *               |  DEL: C         DEL: -       DEL: I      DEL: -                                          \
-	 *               |                                                                                           \
-	 *               |                                                                                            \
-	 * ADD: A,B,C    |          ADD: M,N            ADD: P,R,S                                                     \
-	 * ---X----------+-------------X-------------------X-----------------------(MASTER)-----------------------------+--
+	 *                                           +-----3-----------4-----------(Branch B1X)
+	 *                                           |  DEL: B      DEL: C
+	 *                                           |
+	 *                  ADD: D,E       ADD: G    |        ADD: F
+	 *               +-----1--------------2------+-----------5-----------------(Branch B1)
+	 *               |  DEL: A         DEL: D             DEL: -
+	 *               |
+	 *               |                              ADD: J      ADD: C
+	 *               |                           +-----X-----------X-----------(Branch B2X)
+	 *               |                           |  DEL: -      DEL: I
+	 *               |                           |
+	 *               |  ADD: D,H       ADD: I    |  ADD: K,L    ADD: M
+	 *               +-----X--------------X------+-----X-----------X-----------(Branch B2)
+	 *               |  DEL: C         DEL: -       DEL: I      DEL: -
+	 *               |
+	 *               |
+	 * ADD: A,B,C    |          ADD: M,N            ADD: P,R,S
+	 * ---0----------+-------------X-------------------13-----------------------(MASTER)
 	 * DEL: -                   DEL: C              DEL: M
 	 *
 	 * @return graphName
