@@ -51,6 +51,7 @@ public class API {
 	 * @param graphName name of graph
 	 * @param revA identifier of first revision (name, number or tag)
 	 * @param revB identifier of second revision (name, number or tag)
+	 * @param fileFormat preferred output format (trig, nquads)
 	 * @return list of found diffs
 	 */
 	@Path("getDiffs")
