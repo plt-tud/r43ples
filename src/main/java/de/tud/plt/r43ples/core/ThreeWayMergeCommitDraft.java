@@ -63,7 +63,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
     protected ThreeWayMergeCommit createCommitInTripleStore() throws InternalErrorException {
 
         Revision fromRevision = this.usedSourceBranch.getLeafRevision();
-        ;
+
         Revision intoRevision = this.usedTargetBranch.getLeafRevision();
 
         // Differ between MERGE query with specified SDD and without SDD
