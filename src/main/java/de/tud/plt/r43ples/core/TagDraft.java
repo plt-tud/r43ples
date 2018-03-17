@@ -61,7 +61,7 @@ public class TagDraft extends ReferenceDraft {
                     "<%s> a rmo:Tag, rmo:Reference, rmo:Entity ;"
                             + "	rmo:references <%s> ;"
                             + "	rmo:fullGraph <%s> ;"
-                            + "	rmo:referenceIdentifier <%s> .",
+                            + "	rmo:referenceIdentifier \"%s\" .",
                     getReferenceURI(), getReferencedRevision().getRevisionURI(), getReferencedFullGraphURI(), getReferenceIdentifier());
 
         String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", getRevisionGraph().getRevisionGraphUri(), queryContent);
