@@ -94,6 +94,42 @@ public class Commit {
     }
 
     /**
+     * Get the commit URI.
+     *
+     * @return the commit URI
+     */
+    public String getCommitURI() {
+        return commitURI;
+    }
+
+    /**
+     * Get the commit message.
+     *
+     * @return the commit message
+     */
+    public String getCommitMessage() {
+        return commitMessage;
+    }
+
+    /**
+     * Get the commit time stamp.
+     *
+     * @return the commit time stamp
+     */
+    public String getCommitTimeStamp() {
+        return commitTimeStamp;
+    }
+
+    /**
+     * Get the associated person name.
+     *
+     * @return the associated person name
+     */
+    public String getCommitAssociatedPersonName() {
+        return commitAssociatedPersonName;
+    }
+
+    /**
      * Get the revision graph.
      *
      * @return the revision graph
@@ -102,25 +138,4 @@ public class Commit {
         return revisionGraph;
     }
 
-//    /**
-//     * Get the used revision.
-//     *
-//     * @return the used revision
-//     * @throws InternalErrorException
-//     */
-//    public Revision getUsedRevision() throws InternalErrorException {
-//        //TODO Implement method/Move to children
-//        return null;
-//    }
-//
-//    /**
-//     * Get the generated revision.
-//     *
-//     * @return the generated revision
-//     * @throws InternalErrorException
-//     */
-//    public Revision getGeneratedRevision() throws InternalErrorException {
-//        //TODO Implement method/Move to children
-//        return null;
-//    }
 }
