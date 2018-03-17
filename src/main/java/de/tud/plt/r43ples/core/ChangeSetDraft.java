@@ -48,6 +48,8 @@ public class ChangeSetDraft {
 
     /** States if the add and delete sets were already stripped regarding the prior revision. **/
     private boolean isStripped;
+    /** States if the the content of the add and delete sets will be specified by a following rewritten query (in that case add and delete set can be null but the corresponding graphs will be created anyway). **/
+    private boolean isSpecifiedByRewrittenQuery;
 
     // Dependencies
     /** The triple store interface to use. **/
@@ -65,9 +67,10 @@ public class ChangeSetDraft {
      * @param addSet the add set of the revision as N-Triples
      * @param deleteSet the delete set of the revision as N-Triples
      * @param isStripped states if the add and delete sets were already stripped regarding the prior revision
+     * @param isSpecifiedByRewrittenQuery states if the the content of the add and delete sets will be specified by a following rewritten query (in that case add and delete set can be null but the corresponding graphs will be created anyway)
      * @throws InternalErrorException
      */
-    protected ChangeSetDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier, String referencedFullGraphURI, String addSet, String deleteSet, boolean isStripped) throws InternalErrorException {
+    protected ChangeSetDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier, String referencedFullGraphURI, String addSet, String deleteSet, boolean isStripped, boolean isSpecifiedByRewrittenQuery) throws InternalErrorException {
         // Dependencies
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 
@@ -83,6 +86,7 @@ public class ChangeSetDraft {
         this.deleteSetURI = this.revisionManagement.getNewDeleteSetURI(revisionGraph, priorRevision, newRevisionIdentifier);
 
         this.isStripped = isStripped;
+        this.isSpecifiedByRewrittenQuery = isSpecifiedByRewrittenQuery;
 
         this.addSet = addSet;
         this.deleteSet = deleteSet;
@@ -122,6 +126,13 @@ public class ChangeSetDraft {
             logger.debug("Create new graph with name " + deleteSetURI + ".");
             tripleStoreInterface.executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n", deleteSetURI));
             RevisionManagementOriginal.executeINSERT(deleteSetURI, deleteSet);
+        }
+
+        if (isSpecifiedByRewrittenQuery) {
+            logger.debug("Create new graph with name " + addSetURI + " without content.");
+            tripleStoreInterface.executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n", addSetURI));
+            logger.debug("Create new graph with name " + deleteSetURI + " without content.");
+            tripleStoreInterface.executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n", deleteSetURI));
         }
     }
 

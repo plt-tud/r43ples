@@ -15,6 +15,8 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
+import org.junit.FixMethodOrder;
 
 /**
  * This class tests the R43ples core interface.
@@ -23,7 +25,9 @@ import org.junit.Test;
  * @author Stephan Hensel
  *
  */
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class R43plesCoreTest extends R43plesTest {
+
     private TripleStoreInterface tripleStoreInterface;
 
     R43plesCore core = new R43plesCore();
@@ -129,7 +133,7 @@ public class R43plesCoreTest extends R43plesTest {
 
     @Test
     public void createUpdateCommitWithRequest() throws Exception {
-        //TODO test not working
+
         String graphName = "http://example.com/test";
         RevisionGraph rg = new RevisionGraph(graphName);
 
@@ -141,10 +145,10 @@ public class R43plesCoreTest extends R43plesTest {
         R43plesRequest req = new R43plesRequest("USER \"TestUser\" " +
                 "MESSAGE \"update commit during test\" " +
                 "INSERT {\n" +
-                "    GRAPH <test> BRANCH \"" + initialCommit.getGeneratedBranch().getReferenceIdentifier() + "\" {\n" +
+                "    GRAPH <" + graphName + "> BRANCH \"" + initialCommit.getGeneratedBranch().getReferenceIdentifier() + "\" {\n" +
                 "        " + addSet1 + "\n" +
                 "    }\n" +
-                "}", null, null);
+                "} WHERE {?s ?p ?o}", null, null);
 
         core.createUpdateCommit(req);
 
