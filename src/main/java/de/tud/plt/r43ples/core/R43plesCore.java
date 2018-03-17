@@ -83,15 +83,14 @@ public class R43plesCore implements R43plesCoreInterface {
      * @param deleteSet the delete set as N-Triples
      * @param user the user
      * @param message the message
-     * @param derivedFromIdentifier the revision identifier of the revision or the reference identifier from which the new revision should be derive from
+     * @param branchIdentifier the branch identifier (new revision derive from leaf of branch)
      * @return the created update commit
      * @throws InternalErrorException
      */
     @Override
-    public UpdateCommit createUpdateCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException {
-        //TODO change derivedFromIdentifier to BRANCH
+    public UpdateCommit createUpdateCommit(String graphName, String addSet, String deleteSet, String user, String message, String branchIdentifier) throws InternalErrorException {
         RevisionGraph revisionGraph = new RevisionGraph(graphName);
-        Branch branch = new Branch(revisionGraph, derivedFromIdentifier, true);
+        Branch branch = new Branch(revisionGraph, branchIdentifier, true);
         UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(graphName, addSet, deleteSet, user, message, branch);
         return updateCommitDraft.createInTripleStore().get(0);
     }
@@ -253,6 +252,5 @@ public class R43plesCore implements R43plesCoreInterface {
         }
         return result;
     }
-
 
 }

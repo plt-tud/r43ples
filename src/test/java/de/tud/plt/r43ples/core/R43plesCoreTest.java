@@ -3,8 +3,7 @@ package de.tud.plt.r43ples.core;
 import com.hp.hpl.jena.rdf.model.Model;
 import de.tud.plt.r43ples.R43plesTest;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.existentobjects.InitialCommit;
-import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.Config;
@@ -129,6 +128,8 @@ public class R43plesCoreTest extends R43plesTest {
         Assert.assertTrue(check_isomorphism(model_result, model_expected));
 
         rg.purgeRevisionInformation();
+
+        //TODO check content of add/del sets and full graph
     }
 
     @Test
@@ -164,6 +165,8 @@ public class R43plesCoreTest extends R43plesTest {
         Assert.assertTrue(check_isomorphism(model_result, model_expected));
 
         rg.purgeRevisionInformation();
+
+        //TODO check content of add/del sets and full graph
     }
 
     @Test
@@ -173,6 +176,41 @@ public class R43plesCoreTest extends R43plesTest {
 
     @Test
     public void createReferenceCommit1() throws Exception {
+        Assert.fail();
+    }
+
+    @Test
+    public void createBranchCommit() throws Exception {
+
+        String graphName = "http://example.com/test";
+        RevisionGraph rg = new RevisionGraph(graphName);
+
+        InitialCommit initialCommit = core.createInitialCommit(graphName, null, null, "TestUser", "initial commit during test");
+
+        String addSet1 =    "<http://test.com/Adam> <http://test.com/knows> <http://test.com/Bob> .\n" +
+                "<http://test.com/Carlos> <http://test.com/knows> <http://test.com/Danny> .";
+
+        UpdateCommit updateCommit = core.createUpdateCommit(graphName, addSet1, null, "TestUser", "update commit during test", initialCommit.getGeneratedBranch().getReferenceIdentifier());
+
+        core.createBranchCommit(rg, "develop", updateCommit.getGeneratedRevision(), "TestUser", "branch commit during test");
+
+        String result = rg.getContentOfRevisionGraph("TURTLE");
+        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_branchcommit_1.ttl");
+
+        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
+        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
+
+        this.removeTimeStampFromModel(model_result);
+        this.removeTimeStampFromModel(model_expected);
+
+        Assert.assertTrue(check_isomorphism(model_result, model_expected));
+
+        rg.purgeRevisionInformation();
+
+    }
+
+    @Test
+    public void createTagCommit1() throws Exception {
         Assert.fail();
     }
 
