@@ -9,6 +9,8 @@ import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,13 +24,15 @@ import org.junit.Test;
  *
  */
 public class R43plesCoreTest extends R43plesTest {
-
+    private TripleStoreInterface tripleStoreInterface;
 
     R43plesCore core = new R43plesCore();
 
     @Before
     public void setUp() throws Exception {
         Config.readConfig("r43ples.test.conf");
+        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+        tripleStoreInterface.dropAllGraphs();
     }
 
     @After
