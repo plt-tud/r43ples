@@ -66,7 +66,7 @@ public class ReferenceCommitDraft extends CommitDraft {
         this.setUser(user);
         this.setMessage(message);
         this.revisionGraph = revisionGraph;
-        this.referenceIdentifier = referenceIdentifier;
+        this.referenceIdentifier = referenceIdentifier.toLowerCase();
         this.baseRevision = baseRevision;
         this.isBranch = isBranch;
         this.isCreatedWithRequest = false;

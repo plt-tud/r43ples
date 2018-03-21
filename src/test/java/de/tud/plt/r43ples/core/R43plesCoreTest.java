@@ -170,13 +170,127 @@ public class R43plesCoreTest extends R43plesTest {
     }
 
     @Test
-    public void createReferenceCommit() throws Exception {
-        Assert.fail();
+    public void createReferenceCommitBranch() throws Exception {
+
+        String graphName = "http://example.com/test";
+        RevisionGraph rg = new RevisionGraph(graphName);
+
+        InitialCommit initialCommit = core.createInitialCommit(graphName, null, null, "TestUser", "initial commit during test");
+
+        String addSet1 =    "<http://test.com/Adam> <http://test.com/knows> <http://test.com/Bob> .\n" +
+                "<http://test.com/Carlos> <http://test.com/knows> <http://test.com/Danny> .";
+
+        UpdateCommit updateCommit = core.createUpdateCommit(graphName, addSet1, null, "TestUser", "update commit during test", initialCommit.getGeneratedBranch().getReferenceIdentifier());
+
+        core.createReferenceCommit(rg, "develop", updateCommit.getGeneratedRevision(), "TestUser", "branch commit during test", true);
+
+        String result = rg.getContentOfRevisionGraph("TURTLE");
+        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_branchcommit_1.ttl");
+
+        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
+        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
+
+        this.removeTimeStampFromModel(model_result);
+        this.removeTimeStampFromModel(model_expected);
+
+        Assert.assertTrue(check_isomorphism(model_result, model_expected));
+
+        rg.purgeRevisionInformation();
     }
 
     @Test
-    public void createReferenceCommit1() throws Exception {
-        Assert.fail();
+    public void createReferenceCommitTag() throws Exception {
+
+        String graphName = "http://example.com/test";
+        RevisionGraph rg = new RevisionGraph(graphName);
+
+        InitialCommit initialCommit = core.createInitialCommit(graphName, null, null, "TestUser", "initial commit during test");
+
+        String addSet1 =    "<http://test.com/Adam> <http://test.com/knows> <http://test.com/Bob> .\n" +
+                "<http://test.com/Carlos> <http://test.com/knows> <http://test.com/Danny> .";
+
+        UpdateCommit updateCommit = core.createUpdateCommit(graphName, addSet1, null, "TestUser", "update commit during test", initialCommit.getGeneratedBranch().getReferenceIdentifier());
+
+        core.createReferenceCommit(rg, "Version 1.1.0", updateCommit.getGeneratedRevision(), "TestUser", "tag commit during test", false);
+
+        String result = rg.getContentOfRevisionGraph("TURTLE");
+        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_tagcommit_1.ttl");
+
+        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
+        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
+
+        this.removeTimeStampFromModel(model_result);
+        this.removeTimeStampFromModel(model_expected);
+
+        Assert.assertTrue(check_isomorphism(model_result, model_expected));
+
+        rg.purgeRevisionInformation();
+    }
+
+    @Test
+    public void createReferenceCommitWithRequestBranch() throws Exception {
+
+        String graphName = "http://example.com/test";
+        RevisionGraph rg = new RevisionGraph(graphName);
+
+        InitialCommit initialCommit = core.createInitialCommit(graphName, null, null, "TestUser", "initial commit during test");
+
+        String addSet1 =    "<http://test.com/Adam> <http://test.com/knows> <http://test.com/Bob> .\n" +
+                "<http://test.com/Carlos> <http://test.com/knows> <http://test.com/Danny> .";
+
+        UpdateCommit updateCommit = core.createUpdateCommit(graphName, addSet1, null, "TestUser", "update commit during test", initialCommit.getGeneratedBranch().getReferenceIdentifier());
+
+        R43plesRequest req = new R43plesRequest("USER \"TestUser\" " +
+                "MESSAGE \"branch commit during test\" " +
+                "BRANCH GRAPH <" + graphName + "> REVISION \""+ updateCommit.getGeneratedRevision().getRevisionIdentifier() +"\"TO \"develop\"", null, null);
+
+        core.createReferenceCommit(req);
+
+        String result = rg.getContentOfRevisionGraph("TURTLE");
+        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_branchcommit_1.ttl");
+
+        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
+        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
+
+        this.removeTimeStampFromModel(model_result);
+        this.removeTimeStampFromModel(model_expected);
+
+        Assert.assertTrue(check_isomorphism(model_result, model_expected));
+
+        rg.purgeRevisionInformation();
+    }
+
+    @Test
+    public void createReferenceCommitWithRequestTag() throws Exception {
+
+        String graphName = "http://example.com/test";
+        RevisionGraph rg = new RevisionGraph(graphName);
+
+        InitialCommit initialCommit = core.createInitialCommit(graphName, null, null, "TestUser", "initial commit during test");
+
+        String addSet1 =    "<http://test.com/Adam> <http://test.com/knows> <http://test.com/Bob> .\n" +
+                "<http://test.com/Carlos> <http://test.com/knows> <http://test.com/Danny> .";
+
+        UpdateCommit updateCommit = core.createUpdateCommit(graphName, addSet1, null, "TestUser", "update commit during test", initialCommit.getGeneratedBranch().getReferenceIdentifier());
+
+        R43plesRequest req = new R43plesRequest("USER \"TestUser\" " +
+                "MESSAGE \"tag commit during test\" " +
+                "TAG GRAPH <" + graphName + "> REVISION \""+ updateCommit.getGeneratedRevision().getRevisionIdentifier() +"\"TO \"Version 1.1.0\"", null, null);
+
+        core.createReferenceCommit(req);
+
+        String result = rg.getContentOfRevisionGraph("TURTLE");
+        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_tagcommit_1.ttl");
+
+        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
+        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
+
+        this.removeTimeStampFromModel(model_result);
+        this.removeTimeStampFromModel(model_expected);
+
+        Assert.assertTrue(check_isomorphism(model_result, model_expected));
+
+        rg.purgeRevisionInformation();
     }
 
     @Test
