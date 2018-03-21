@@ -35,6 +35,10 @@ public class RevisionDraft {
     private String addSet;
     /** The delete set as N-Triples. **/
     private String deleteSet;
+    /** The add set URI. **/
+    private String addSetURI;
+    /** The delete set URI. **/
+    private String deleteSetURI;
 
     /** The corresponding revision graph. */
     private RevisionGraph revisionGraph;
@@ -81,6 +85,10 @@ public class RevisionDraft {
 
 		this.addSet = addSet;
 		this.deleteSet = deleteSet;
+
+        this.addSetURI = null;
+        this.deleteSetURI = null;
+
 		this.isStripped = isStripped;
 		this.isSpecifiedByRewrittenQuery = false;
 	}
@@ -113,6 +121,10 @@ public class RevisionDraft {
 
         this.addSet = addSet;
         this.deleteSet = deleteSet;
+
+        this.addSetURI = null;
+        this.deleteSetURI = null;
+
         this.isStripped = true;
         this.isSpecifiedByRewrittenQuery = false;
     }
@@ -143,8 +155,48 @@ public class RevisionDraft {
 
         this.addSet = null;
         this.deleteSet = null;
+
+        this.addSetURI = null;
+        this.deleteSetURI = null;
+
         this.isStripped = true;
         this.isSpecifiedByRewrittenQuery = true;
+    }
+
+
+    /**
+     * The constructor. Add and delete set URIs can be specified which are associated with this revision.
+     *
+     * @param revisionManagement the current revision management instance
+     * @param revisionGraph the revision graph
+     * @param branch the branch were the new revision should be created
+     * @param addSetURI the add set URI of the revision
+     * @param deleteSetURI the delete set URI of the revision
+     * @throws InternalErrorException
+     */
+    protected RevisionDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, Branch branch, String addSetURI, String deleteSetURI) throws InternalErrorException {
+        // Dependencies
+        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+
+        this.revisionManagement = revisionManagement;
+        this.revisionGraph = revisionGraph;
+
+        this.branch = branch;
+        this.derivedFromRevision = revisionGraph.getRevision(branch);
+
+        this.newRevisionIdentifier = revisionGraph.getNextRevisionIdentifier();
+        this.revisionURI = this.revisionManagement.getNewRevisionURI(revisionGraph, newRevisionIdentifier);
+
+        this.referenceFullGraph = branch.getFullGraphURI();
+
+        this.addSet = null;
+        this.deleteSet = null;
+
+        this.addSetURI = addSetURI;
+        this.deleteSetURI = deleteSetURI;
+
+        this.isStripped = true;
+        this.isSpecifiedByRewrittenQuery = false;
     }
 
 
@@ -157,7 +209,13 @@ public class RevisionDraft {
     protected Revision createInTripleStore() throws InternalErrorException {
         logger.info("Create new revision for graph " + revisionGraph.getGraphName() + ".");
 
-        ChangeSetDraft changeSetDraft = new ChangeSetDraft(revisionManagement, revisionGraph, derivedFromRevision, newRevisionIdentifier, referenceFullGraph, addSet, deleteSet, isStripped, isSpecifiedByRewrittenQuery);
+        ChangeSetDraft changeSetDraft;
+
+        if ((addSetURI == null) && (deleteSetURI == null)) {
+            changeSetDraft = new ChangeSetDraft(revisionManagement, revisionGraph, derivedFromRevision, newRevisionIdentifier, referenceFullGraph, addSet, deleteSet, isStripped, isSpecifiedByRewrittenQuery);
+        } else {
+            changeSetDraft = new ChangeSetDraft(revisionManagement, revisionGraph, derivedFromRevision, newRevisionIdentifier, referenceFullGraph, addSetURI, deleteSetURI);
+        }
         this.changeSet = changeSetDraft.createInTripleStore();
 
         addMetaInformation();
@@ -196,7 +254,7 @@ public class RevisionDraft {
      * Checks if this revision draft is equal to another one.
      *
      * @param graphName the graph name
-     * @param revisionIdentifier the revision identifier
+     * @param branchIdentifier the branch identifier
      * @return true if the revision is equal
      * @throws InternalErrorException
      */

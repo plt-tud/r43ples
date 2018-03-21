@@ -170,6 +170,72 @@ public class R43plesCoreTest extends R43plesTest {
     }
 
     @Test
+    public void createRevertCommit() throws Exception {
+
+        String graphName = "http://example.com/test";
+        RevisionGraph rg = new RevisionGraph(graphName);
+
+        InitialCommit initialCommit = core.createInitialCommit(graphName, null, null, "TestUser", "initial commit during test");
+
+        String addSet1 =    "<http://test.com/Adam> <http://test.com/knows> <http://test.com/Bob> .\n" +
+                "<http://test.com/Carlos> <http://test.com/knows> <http://test.com/Danny> .";
+
+        UpdateCommit updateCommit = core.createUpdateCommit(graphName, addSet1, null, "TestUser", "update commit during test", initialCommit.getGeneratedBranch().getReferenceIdentifier());
+
+        core.createRevertCommit(rg, updateCommit.getGeneratedRevision().getAssociatedBranch(), "TestUser", "revert commit during test");
+
+        String result = rg.getContentOfRevisionGraph("TURTLE");
+        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_revertcommit_1.ttl");
+
+        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
+        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
+
+        this.removeTimeStampFromModel(model_result);
+        this.removeTimeStampFromModel(model_expected);
+
+        Assert.assertTrue(check_isomorphism(model_result, model_expected));
+
+        rg.purgeRevisionInformation();
+
+        //TODO check content of add/del sets and full graph
+    }
+
+    @Test
+    public void createRevertCommitWithRequest() throws Exception {
+
+        String graphName = "http://example.com/test";
+        RevisionGraph rg = new RevisionGraph(graphName);
+
+        InitialCommit initialCommit = core.createInitialCommit(graphName, null, null, "TestUser", "initial commit during test");
+
+        String addSet1 =    "<http://test.com/Adam> <http://test.com/knows> <http://test.com/Bob> .\n" +
+                "<http://test.com/Carlos> <http://test.com/knows> <http://test.com/Danny> .";
+
+        UpdateCommit updateCommit = core.createUpdateCommit(graphName, addSet1, null, "TestUser", "update commit during test", initialCommit.getGeneratedBranch().getReferenceIdentifier());
+
+        R43plesRequest req = new R43plesRequest("USER \"TestUser\" " +
+                "MESSAGE \"revert commit during test\" " +
+                "REVERT GRAPH <" + graphName + "> BRANCH \"" + updateCommit.getGeneratedRevision().getAssociatedBranch().getReferenceIdentifier() + "\"", null, null);
+
+        core.createRevertCommit(req);
+
+        String result = rg.getContentOfRevisionGraph("TURTLE");
+        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_revertcommit_1.ttl");
+
+        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
+        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
+
+        this.removeTimeStampFromModel(model_result);
+        this.removeTimeStampFromModel(model_expected);
+
+        Assert.assertTrue(check_isomorphism(model_result, model_expected));
+
+        rg.purgeRevisionInformation();
+
+        //TODO check content of add/del sets and full graph
+    }
+
+    @Test
     public void createReferenceCommitBranch() throws Exception {
 
         String graphName = "http://example.com/test";

@@ -369,7 +369,11 @@ public class Endpoint {
 		}
 		else if (request.isUpdateQuery()) {
 			r43plesCore.createUpdateCommit(request);
-			result = "Query executed";
+			result = "Update executed";
+		}
+		else if (request.isRevertQuery()) {
+			r43plesCore.createRevertCommit(request);
+			result = "Revert executed";
 		}
 		else if (request.isCreateGraphQuery()) {
 			InitialCommit initialCommit = r43plesCore.createInitialCommit(request);

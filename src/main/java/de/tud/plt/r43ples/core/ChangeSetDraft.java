@@ -93,6 +93,40 @@ public class ChangeSetDraft {
 	}
 
     /**
+     * The constructor. Add and delete set URIs can be specified which are associated with this revision.
+     *
+     * @param revisionManagement the current revision management instance
+     * @param revisionGraph the revision graph
+     * @param priorRevision the prior revision
+     * @param newRevisionIdentifier the new revision identifier
+     * @param referencedFullGraphURI the referenced full graph URI
+     * @param addSetURI the add set URI of the revision
+     * @param deleteSetURI the delete set URI of the revision
+     * @throws InternalErrorException
+     */
+    protected ChangeSetDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier, String referencedFullGraphURI, String addSetURI, String deleteSetURI) throws InternalErrorException {
+        // Dependencies
+        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+
+        this.revisionManagement = revisionManagement;
+        this.revisionGraph = revisionGraph;
+
+        this.priorRevision = priorRevision;
+        this.newRevisionIdentifier = newRevisionIdentifier;
+        this.referencedFullGraphURI = referencedFullGraphURI;
+
+        this.changeSetURI = this.revisionManagement.getNewChangeSetURI(revisionGraph, priorRevision, newRevisionIdentifier);
+        this.addSetURI = addSetURI;
+        this.deleteSetURI = deleteSetURI;
+
+        this.isStripped = true;
+        this.isSpecifiedByRewrittenQuery = false;
+
+        this.addSet = null;
+        this.deleteSet = null;
+    }
+
+    /**
      * Creates the change set draft with all meta data and named graphs in the triplestore.
      * Creates add and delete sets, strips the resulting sets if necessary and adds meta information.
      *

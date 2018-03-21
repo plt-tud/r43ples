@@ -57,7 +57,7 @@ public class UpdateCommitDraft extends CommitDraft {
 	 * @param deleteSet the delete set as N-Triples
 	 * @param user the user
 	 * @param message the message
-	 * @param branch the branch were the new revision should be created
+	 * @param branch the branch where the new revision should be created
 	 * @throws InternalErrorException
 	 */
 	protected UpdateCommitDraft(String graphName, String addSet, String deleteSet, String user, String message, Branch branch) throws InternalErrorException {

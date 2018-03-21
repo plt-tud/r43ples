@@ -4,14 +4,14 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import org.apache.log4j.Logger;
 
 /**
- * Provides information of an already existent update commit.
+ * Provides information of an already existent revert commit.
  *
  * @author Stephan Hensel
  */
-public class UpdateCommit extends Commit {
+public class RevertCommit extends Commit {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(UpdateCommit.class);
+    private Logger logger = Logger.getLogger(RevertCommit.class);
 
     /** The used revision. **/
     private Revision usedRevision;
@@ -26,7 +26,7 @@ public class UpdateCommit extends Commit {
      * @param commitURI the commit URI
      * @throws InternalErrorException
      */
-    public UpdateCommit(RevisionGraph revisionGraph, String commitURI) throws InternalErrorException {
+    public RevertCommit(RevisionGraph revisionGraph, String commitURI) throws InternalErrorException {
         super(revisionGraph, commitURI);
     }
 
@@ -40,7 +40,7 @@ public class UpdateCommit extends Commit {
      * @param message the message
      * @throws InternalErrorException
      */
-    public UpdateCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message) throws InternalErrorException {
+    public RevertCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message) throws InternalErrorException {
         super(revisionGraph, commitURI, user, timeStamp, message);
     }
 
@@ -56,7 +56,7 @@ public class UpdateCommit extends Commit {
      * @param generatedRevision the generated revision
      * @throws InternalErrorException
      */
-    public UpdateCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message, Revision usedRevision, Revision generatedRevision) throws InternalErrorException {
+    public RevertCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message, Revision usedRevision, Revision generatedRevision) throws InternalErrorException {
         super(revisionGraph, commitURI, user, timeStamp, message);
         this.usedRevision = usedRevision;
         this.generatedRevision = generatedRevision;

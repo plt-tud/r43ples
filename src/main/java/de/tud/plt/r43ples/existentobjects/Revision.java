@@ -25,14 +25,6 @@ public class Revision {
     private String revisionIdentifier;
     /** The revision URI. */
     private String revisionURI;
-    /** The ADD set URI. */
-    private String addSetURI;
-    /** The DELETE set URI. */
-    private String deleteSetURI;
-    /** The ADD set content as N-TRIPLES. **/
-    private String addSetContent;
-    /** The DELETE set content as N-TRIPLES. **/
-    private String deleteSetContent;
 
     /** The revision graph URI. */
     private String revisionGraphURI;
@@ -71,7 +63,6 @@ public class Revision {
             this.revisionIdentifier = calculateRevisionIdentifier(this.revisionURI);
         }
         this.changeSets = new ArrayList<>();
-        calculateAdditionalInformation();
     }
 
     /**
@@ -98,13 +89,10 @@ public class Revision {
     }
 
     /**
-     * The constructor. Adds one change set to an already existing revision.
+     * Adds one change set to an already existing revision.
      * Only necessary for three way merged revisions which have two change sets.
      *
-     * @param revision the already existing revision
      * @param changeSet the change set to add
-     *
-     *  FIXME: Why not used as own method? A constructor does not make sense
      */
     public void addChangeSet(ChangeSet changeSet) {
         // Dependencies
@@ -167,6 +155,7 @@ public class Revision {
      * @throws InternalErrorException
      */
     public Branch getAssociatedBranch() throws InternalErrorException {
+        //FIXME A revision can be referenced by multiple branches - return a list of branches
         if (associatedBranch == null) {
             logger.info("Get associated branch of revision " + revisionIdentifier + ".");
             String query = Config.prefixes + String.format(""
@@ -211,7 +200,7 @@ public class Revision {
      * @return the change set
      */
     public ChangeSet getChangeSet() {
-        return changeSets.get(0);
+        return getChangeSets().get(0);
     }
 
     /**
@@ -220,6 +209,22 @@ public class Revision {
      * @return the change sets
      */
     public ArrayList<ChangeSet> getChangeSets() {
+        if ((changeSets == null) || (changeSets.isEmpty())) {
+            logger.debug("Get additional information of current revision " + revisionIdentifier + ".");
+            String query = Config.prefixes + String.format(""
+                    + "SELECT ?changeSetURI "
+                    + "WHERE { GRAPH  <%s> {"
+                    + "	<%s> a rmo:Revision; "
+                    + "	 rmo:hasChangeSet ?changeSetURI. "
+                    + "} }", revisionGraphURI, revisionURI);
+            this.logger.debug(query);
+            ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
+            if (resultSet.hasNext()) {
+                QuerySolution qs = resultSet.next();
+                changeSets.add(new ChangeSet(revisionGraph, qs.getResource("?changeSetURI").toString()));
+            }
+        }
+
         return changeSets;
     }
 
@@ -230,32 +235,6 @@ public class Revision {
      */
     public RevisionGraph getRevisionGraph() {
         return revisionGraph;
-    }
-
-    /**
-     * Calculate additional information of the current revision and store this information to local variables.
-     *
-     * @throws InternalErrorException
-     */
-    private void calculateAdditionalInformation() throws InternalErrorException {
-        logger.info("Get additional information of current revision " + revisionIdentifier + ".");
-        String query = Config.prefixes + String.format(""
-                + "SELECT ?addSetURI ?deleteSetURI "
-                + "WHERE { GRAPH  <%s> {"
-                + "	<%s> a rmo:Revision; "
-                + "	 rmo:addSet ?addSetURI; "
-                + "  rmo:deleteSet ?deleteSetURI. "
-                + "} }", revisionGraphURI, revisionURI);
-        this.logger.debug(query);
-        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
-        if (resultSet.hasNext()) {
-            QuerySolution qs = resultSet.next();
-            addSetURI = qs.getResource("?addSetURI").toString();
-            deleteSetURI = qs.getResource("?deleteSetURI").toString();
-        } else {
-            //TODO Check if add and delete sets are optional for first revision - yes they are!
-//            throw new InternalErrorException("No additional information found for revision " + revisionIdentifier + ".");
-        }
     }
 
     /**

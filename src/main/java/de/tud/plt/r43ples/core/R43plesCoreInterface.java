@@ -62,6 +62,27 @@ public interface R43plesCoreInterface {
     UpdateCommit createUpdateCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException;
 
     /**
+     * Create a new revert commit. Reverts the last revision of specified branch.
+     *
+     * @param request the request received by R43ples
+     * @return the created revert commit
+     * @throws InternalErrorException
+     */
+    RevertCommit createRevertCommit(R43plesRequest request) throws InternalErrorException;
+
+    /**
+     * Create a new revert commit. Reverts the leaf revision of specified branch.
+     *
+     * @param revisionGraph the revision graph
+     * @param branch the branch (new revision derive from leaf of branch)
+     * @param user the user
+     * @param message the message
+     * @return the created revert commit
+     * @throws InternalErrorException
+     */
+    RevertCommit createRevertCommit(RevisionGraph revisionGraph, Branch branch, String user, String message) throws InternalErrorException;
+
+    /**
      * Create a new reference commit.
      *
      * @param request the request received by R43ples

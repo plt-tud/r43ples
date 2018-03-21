@@ -96,6 +96,35 @@ public class R43plesCore implements R43plesCoreInterface {
     }
 
     /**
+     * Create a new revert commit. Reverts the last revision of specified branch.
+     *
+     * @param request the request received by R43ples
+     * @return the created revert commit
+     * @throws InternalErrorException
+     */
+    @Override
+    public RevertCommit createRevertCommit(R43plesRequest request) throws InternalErrorException {
+        RevertCommitDraft revertCommitDraft = new RevertCommitDraft(request);
+        return revertCommitDraft.createInTripleStore();
+    }
+
+    /**
+     * Create a new revert commit. Reverts the leaf revision of specified branch.
+     *
+     * @param revisionGraph the revision graph
+     * @param branch the branch (new revision derive from leaf of branch)
+     * @param user the user
+     * @param message the message
+     * @return the created revert commit
+     * @throws InternalErrorException
+     */
+    @Override
+    public RevertCommit createRevertCommit(RevisionGraph revisionGraph, Branch branch, String user, String message) throws InternalErrorException {
+        RevertCommitDraft revertCommitDraft = new RevertCommitDraft(revisionGraph, user, message, branch);
+        return revertCommitDraft.createInTripleStore();
+    }
+
+    /**
      * Create a new reference commit.
      *
      * @param request the request received by R43ples
