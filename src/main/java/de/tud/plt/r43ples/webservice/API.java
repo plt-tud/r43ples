@@ -37,8 +37,7 @@ public class API {
 		logger.debug("format: " + format);
 		return RevisionManagementOriginal.getRevisedGraphsSparql(format);
 	}
-	
-	
+
 	@Path("getBranches")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -46,7 +45,41 @@ public class API {
 		RevisionGraph graph = new RevisionGraph(graphName);
 		return graph.getAllBranchNames();
 	}
-	
+
+	/**
+	 * Provide Diffs between to revisions of specified graph
+	 * @param graphName name of graph
+	 * @param revA identifier of first revision (name, number or tag)
+	 * @param revB identifier of second revision (name, number or tag)
+	 * @param fileFormat preferred output format (trig, nquads)
+	 * @return list of found diffs
+	 */
+	@Path("getDiffs")
+	@GET
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml"})
+	public final String getDiffsOfGraph(
+			@QueryParam("graph") final String graphName,
+			@QueryParam("revA") final String revA,
+			@QueryParam("revB") final String revB,
+			@QueryParam("format") final String fileFormat)
+	{
+		logger.info("Get Diffs (graph: " + graphName + " revision a: " + revA + " revision b: " + revB + " format: " + fileFormat + ")");
+
+		// file format optional
+		String format = fileFormat;
+		if (format == null) {
+			format = "trig";
+		}
+
+		// check fileformat before wasting cpu
+		if (format.toLowerCase().contains("trig") || fileFormat.toLowerCase().contains("nquads")) {
+			return RevisionManagementOriginal.getDiffsBetweenStartAndTargetRevision(graphName, revA, revB, format);
+		} else {
+			return "Wrong file format. Use either \"nquads\" or \"trig\" !";
+		}
+
+	}
+
 	/**
 	 * through graph name, branch1 and branch2 to check the right of fast forward strategy
 	 * */
