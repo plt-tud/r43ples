@@ -17,8 +17,6 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.junit.FixMethodOrder;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
@@ -33,7 +31,7 @@ public class R43plesCoreTest extends R43plesTest {
 
     private TripleStoreInterface tripleStoreInterface;
 
-    R43plesCore core = new R43plesCore();
+    private R43plesCore core = new R43plesCore();
 
     @Before
     public void setUp() throws Exception {
@@ -43,7 +41,7 @@ public class R43plesCoreTest extends R43plesTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
     }
 
     @Test
@@ -71,6 +69,7 @@ public class R43plesCoreTest extends R43plesTest {
 
             Assert.fail("Try to make another initial commit on same graph should throw exception");
         } catch (InternalErrorException e) {
+            logger.debug("Internal error was thrown as expected.");
         }
 
         rg.purgeRevisionInformation();
@@ -101,6 +100,7 @@ public class R43plesCoreTest extends R43plesTest {
 
             Assert.fail("Try to make another initial commit on same graph should throw exception");
         } catch (InternalErrorException e) {
+            logger.debug("Internal error was thrown as expected.");
         }
 
         rg.purgeRevisionInformation();
@@ -439,7 +439,7 @@ public class R43plesCoreTest extends R43plesTest {
     }
 
     @Test
-    public void createThreeWayMergeCommit() throws Exception {
+    public void createFastForwardMergeCommit() throws Exception {
 
         String graphName = "http://example.com/test";
         RevisionGraph rg = new RevisionGraph(graphName);
@@ -453,19 +453,19 @@ public class R43plesCoreTest extends R43plesTest {
 
         BranchCommit branchCommit = core.createBranchCommit(rg, "develop", updateCommit1.getGeneratedRevision(), "TestUser", "branch commit during test");
 
-        String addSet2 =    "<http://test.com/Alphabet> <http://test.com/knows> <http://test.com/E> .\n" +
-                "<http://test.com/Alphabet> <http://test.com/knows> <http://test.com/N> .";
+        String addSet2 =    "<http://test.com/Alphabet> <http://test.com/has> <http://test.com/E> .\n" +
+                "<http://test.com/Alphabet> <http://test.com/has> <http://test.com/N> .";
 
         String delSet2 =    "<http://test.com/Alphabet> <http://test.com/has> <http://test.com/A> .";
 
-        UpdateCommit updateCommit2 = core.createUpdateCommit(graphName, addSet2, delSet2, "TestUser", "update commit during test", branchCommit.getGeneratedReference().getReferenceIdentifier());
+        core.createUpdateCommit(graphName, addSet2, delSet2, "TestUser", "update commit during test", branchCommit.getGeneratedReference().getReferenceIdentifier());
 
-        String addSet3 =    "<http://test.com/Alphabet> <http://test.com/knows> <http://test.com/K> .\n" +
-                "<http://test.com/Alphabet> <http://test.com/knows> <http://test.com/Z> .";
+        String addSet3 =    "<http://test.com/Alphabet> <http://test.com/has> <http://test.com/K> .\n" +
+                "<http://test.com/Alphabet> <http://test.com/has> <http://test.com/X> .";
 
         String delSet3 =    "<http://test.com/Alphabet> <http://test.com/has> <http://test.com/B> .";
 
-        UpdateCommit updateCommit3 = core.createUpdateCommit(graphName, addSet3, delSet3, "TestUser", "update commit during test", branchCommit.getGeneratedReference().getReferenceIdentifier());
+        core.createUpdateCommit(graphName, addSet3, delSet3, "TestUser", "update commit during test", branchCommit.getGeneratedReference().getReferenceIdentifier());
 
         R43plesRequest req = new R43plesRequest("USER \"TestUser\" " +
                 "MESSAGE \"merge commit during test\" " +
@@ -473,26 +473,60 @@ public class R43plesCoreTest extends R43plesTest {
 
         core.createMergeCommit(req);
 
-        String result = rg.getContentOfRevisionGraph("TURTLE");
-        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_revisioncommit_1.ttl");
+        // Check all corresponding graphs
+        // List all
+        LinkedList<String> allGraphs = new LinkedList<>();
+        allGraphs.add("http://example.com/test-revisiongraph");
+        allGraphs.add("http://example.com/test");
+        allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-revisions");
+        allGraphs.add("http://example.com/test-addSet-0-1");
+        allGraphs.add("http://example.com/test-develop");
+        allGraphs.add("http://example.com/test-addSet-1-2");
+        allGraphs.add("http://example.com/test-deleteSet-1-2");
+        allGraphs.add("http://example.com/test-addSet-2-3");
+        allGraphs.add("http://example.com/test-deleteSet-2-3");
 
-        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
-        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
-
-        this.removeTimeStampFromModel(model_result);
-        this.removeTimeStampFromModel(model_expected);
-
-        Assert.assertTrue(check_isomorphism(model_result, model_expected));
+        assertListAll(allGraphs,tripleStoreInterface);
+        // R43ples revisions
+        String expected_r43ples = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Merge/r43ples-revisions_fastforwardcommit.ttl");
+        assertContentOfGraph("http://eatld.et.tu-dresden.de/r43ples-revisions", expected_r43ples);
+        // Revision graph
+        String result_rg = rg.getContentOfRevisionGraph("TURTLE");
+        String expected_rg = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Merge/revisiongraph_fastforwardcommit.ttl");
+        assertIsomorphism(result_rg, expected_rg);
+        // Master full graph
+        String expected_master = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Merge/master_fastforwardcommit.ttl");
+        assertContentOfGraph("http://example.com/test", expected_master);
+        // Add set 0-1 full graph
+        String expected_addSet01 = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Merge/addSet01_fastforwardcommit.ttl");
+        assertContentOfGraph("http://example.com/test-addSet-0-1", expected_addSet01);
+        // Develop full graph
+        String expected_develop = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Merge/develop_fastforwardcommit.ttl");
+        assertContentOfGraph("http://example.com/test-develop", expected_develop);
+        // Add set 1-2 full graph
+        String expected_addSet12 = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Merge/addSet12_fastforwardcommit.ttl");
+        assertContentOfGraph("http://example.com/test-addSet-1-2", expected_addSet12);
+        // Del set 1-2 full graph
+        String expected_delSet12 = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Merge/delSet12_fastforwardcommit.ttl");
+        assertContentOfGraph("http://example.com/test-deleteSet-1-2", expected_delSet12);
+        // Add set 2-3 full graph
+        String expected_addSet23 = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Merge/addSet23_fastforwardcommit.ttl");
+        assertContentOfGraph("http://example.com/test-addSet-2-3", expected_addSet23);
+        // Del set 2-3 full graph
+        String expected_delSet23 = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Merge/delSet23_fastforwardcommit.ttl");
+        assertContentOfGraph("http://example.com/test-deleteSet-2-3", expected_delSet23);
 
         rg.purgeRevisionInformation();
-
-
-        Assert.fail();
     }
 
     @Test
-    public void createThreeWayMergeCommit1() throws Exception {
+    public void createThreeWayMergeCommit() {
         Assert.fail();
+//        Iterator<String> iterator = tripleStoreInterface.getGraphs();
+//        while (iterator.hasNext()) {
+//            System.out.println(iterator.next());
+//
+//        }
     }
 
 }

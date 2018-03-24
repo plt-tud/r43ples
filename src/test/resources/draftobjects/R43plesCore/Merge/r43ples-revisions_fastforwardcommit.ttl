@@ -1,0 +1,11 @@
+<http://example.com/test>
+        a       <http://eatld.et.tu-dresden.de/rmo#Graph> , <http://eatld.et.tu-dresden.de/rmo#Entity> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasRevisionGraph>
+                <http://example.com/test-revisiongraph> ;
+        <http://eatld.et.tu-dresden.de/sddo#hasDefaultSDD>
+                <http://eatld.et.tu-dresden.de/sdd#defaultSDD> .
+
+<http://eatld.et.tu-dresden.de/persons/TestUser>
+        a       <http://www.w3.org/ns/prov#Person> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "TestUser" .

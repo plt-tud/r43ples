@@ -25,7 +25,7 @@ import java.util.LinkedList;
 public class R43plesTest {
 
 	/** The logger. **/
-	private static Logger logger = Logger.getLogger(R43plesTest.class);
+	protected static Logger logger = Logger.getLogger(R43plesTest.class);
 	/** The endpoint. **/
 	protected final Endpoint ep = new Endpoint();
 
