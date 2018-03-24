@@ -17,6 +17,10 @@ import org.junit.Test;
 import org.junit.runners.MethodSorters;
 import org.junit.FixMethodOrder;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
+
 /**
  * This class tests the R43ples core interface.
  *
@@ -374,16 +378,31 @@ public class R43plesCoreTest extends R43plesTest {
 
         core.createBranchCommit(rg, "develop", updateCommit.getGeneratedRevision(), "TestUser", "branch commit during test");
 
-        String result = rg.getContentOfRevisionGraph("TURTLE");
-        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_branchcommit_1.ttl");
-
-        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
-        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
-
-        this.removeTimeStampFromModel(model_result);
-        this.removeTimeStampFromModel(model_expected);
-
-        Assert.assertTrue(check_isomorphism(model_result, model_expected));
+        // Check all corresponding graphs
+        // List all
+        LinkedList<String> allGraphs = new LinkedList<>();
+        allGraphs.add("http://example.com/test-revisiongraph");
+        allGraphs.add("http://example.com/test");
+        allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-revisions");
+        allGraphs.add("http://example.com/test-addSet-0-1");
+        allGraphs.add("http://example.com/test-develop");
+        assertListAll(allGraphs,tripleStoreInterface);
+        // R43ples revisions
+        String expected_r43ples = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Branch/r43ples-revisions_branchcommit.ttl");
+        assertContentOfGraph("http://eatld.et.tu-dresden.de/r43ples-revisions", expected_r43ples);
+        // Revision graph
+        String result_rg = rg.getContentOfRevisionGraph("TURTLE");
+        String expected_rg = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Branch/revisiongraph_branchcommit.ttl");
+        assertIsomorphism(result_rg, expected_rg);
+        // Master full graph
+        String expected_master = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Branch/master_branchcommit.ttl");
+        assertContentOfGraph("http://example.com/test", expected_master);
+        // Add set 0-1 full graph
+        String expected_addSet01 = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Branch/addSet01_branchcommit.ttl");
+        assertContentOfGraph("http://example.com/test-addSet-0-1", expected_addSet01);
+        // Develop full graph
+        String expected_develop = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Branch/develop_branchcommit.ttl");
+        assertContentOfGraph("http://example.com/test-develop", expected_develop);
 
         rg.purgeRevisionInformation();
 
@@ -421,6 +440,53 @@ public class R43plesCoreTest extends R43plesTest {
 
     @Test
     public void createThreeWayMergeCommit() throws Exception {
+
+        String graphName = "http://example.com/test";
+        RevisionGraph rg = new RevisionGraph(graphName);
+
+        InitialCommit initialCommit = core.createInitialCommit(graphName, null, null, "TestUser", "initial commit during test");
+
+        String addSet1 =    "<http://test.com/Alphabet> <http://test.com/has> <http://test.com/A> .\n" +
+                "<http://test.com/Alphabet> <http://test.com/has> <http://test.com/B> .";
+
+        UpdateCommit updateCommit1 = core.createUpdateCommit(graphName, addSet1, null, "TestUser", "update commit during test", initialCommit.getGeneratedBranch().getReferenceIdentifier());
+
+        BranchCommit branchCommit = core.createBranchCommit(rg, "develop", updateCommit1.getGeneratedRevision(), "TestUser", "branch commit during test");
+
+        String addSet2 =    "<http://test.com/Alphabet> <http://test.com/knows> <http://test.com/E> .\n" +
+                "<http://test.com/Alphabet> <http://test.com/knows> <http://test.com/N> .";
+
+        String delSet2 =    "<http://test.com/Alphabet> <http://test.com/has> <http://test.com/A> .";
+
+        UpdateCommit updateCommit2 = core.createUpdateCommit(graphName, addSet2, delSet2, "TestUser", "update commit during test", branchCommit.getGeneratedReference().getReferenceIdentifier());
+
+        String addSet3 =    "<http://test.com/Alphabet> <http://test.com/knows> <http://test.com/K> .\n" +
+                "<http://test.com/Alphabet> <http://test.com/knows> <http://test.com/Z> .";
+
+        String delSet3 =    "<http://test.com/Alphabet> <http://test.com/has> <http://test.com/B> .";
+
+        UpdateCommit updateCommit3 = core.createUpdateCommit(graphName, addSet3, delSet3, "TestUser", "update commit during test", branchCommit.getGeneratedReference().getReferenceIdentifier());
+
+        R43plesRequest req = new R43plesRequest("USER \"TestUser\" " +
+                "MESSAGE \"merge commit during test\" " +
+                "MERGE GRAPH <" + graphName + "> BRANCH \""+ branchCommit.getGeneratedReference().getReferenceIdentifier() +"\" INTO BRANCH \"master\"", null, null);
+
+        core.createMergeCommit(req);
+
+        String result = rg.getContentOfRevisionGraph("TURTLE");
+        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_revisioncommit_1.ttl");
+
+        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
+        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
+
+        this.removeTimeStampFromModel(model_result);
+        this.removeTimeStampFromModel(model_expected);
+
+        Assert.assertTrue(check_isomorphism(model_result, model_expected));
+
+        rg.purgeRevisionInformation();
+
+
         Assert.fail();
     }
 
