@@ -33,9 +33,6 @@ public class ReferenceCommitDraft extends CommitDraft {
     /** States if the created reference is a branch or a tag. (branch => true; tag => false) **/
     private boolean isBranch;
 
-    /** States if this commit draft was created by a request or add and delete sets. (true => request, false => add/delete sets) **/
-    private boolean isCreatedWithRequest;
-
 
     /**
      * The constructor.
@@ -46,7 +43,6 @@ public class ReferenceCommitDraft extends CommitDraft {
     public ReferenceCommitDraft(R43plesRequest request) throws InternalErrorException {
         super(request);
         this.extractRequestInformation();
-        this.isCreatedWithRequest = true;
     }
 
     /**
@@ -66,10 +62,9 @@ public class ReferenceCommitDraft extends CommitDraft {
         this.setUser(user);
         this.setMessage(message);
         this.revisionGraph = revisionGraph;
-        this.referenceIdentifier = referenceIdentifier;
+        this.referenceIdentifier = referenceIdentifier.toLowerCase();
         this.baseRevision = baseRevision;
         this.isBranch = isBranch;
-        this.isCreatedWithRequest = false;
     }
 
     /**

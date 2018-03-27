@@ -54,7 +54,7 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
         Branch usedSourceBranch = getRevisionGraph().getBranch(getBranchNameFrom(), true);
         Branch usedTargetBranch = getRevisionGraph().getBranch(getBranchNameInto(), true);
 
-        fullGraphCopy(usedSourceBranch.getReferenceURI(), usedTargetBranch.getReferenceURI());
+        fullGraphCopy(usedSourceBranch.getFullGraphURI(), usedTargetBranch.getFullGraphURI());
 
         return addMetaInformation(usedSourceRevision, usedSourceBranch, usedTargetRevision, usedTargetBranch);
     }

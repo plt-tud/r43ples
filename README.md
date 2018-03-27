@@ -32,7 +32,7 @@ A running test server should be available under [http://eatld.et.tu-dresden.de:9
 ### Compiling
 Maven is used for compiling
 
-    mvn compile exec:exec
+    mvn compile exec:java
 
 Packages (JAR with dependencies for the webservice, a console client and a debian package) can be be built with:
 

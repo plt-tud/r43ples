@@ -56,7 +56,7 @@ public class ChangeSet {
      * @param changeSetURI the change set URI
      * @throws InternalErrorException
      */
-    public ChangeSet(RevisionGraph revisionGraph, Revision priorRevision, String addSetURI, String deleteSetURI, String changeSetURI) throws InternalErrorException {
+    public ChangeSet(RevisionGraph revisionGraph, Revision priorRevision, String addSetURI, String deleteSetURI, String changeSetURI) {
         // Dependencies
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 
@@ -69,11 +69,31 @@ public class ChangeSet {
     }
 
     /**
+     * The constructor
+     *
+     * @param revisionGraph the revision graph
+     * @param changeSetURI the change set URI
+     * @throws InternalErrorException
+     */
+    public ChangeSet(RevisionGraph revisionGraph, String changeSetURI) {
+        // Dependencies
+        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+
+        this.priorRevision = null;
+        this.addSetURI = null;
+        this.deleteSetURI = null;
+        this.changeSetURI = changeSetURI;
+
+        this.revisionGraph = revisionGraph;
+    }
+
+    /**
      * Get the prior revision.
      *
      * @return the prior revision
      */
     public Revision getPriorRevision() {
+        //TODO calculate if empty
         return priorRevision;
     }
 
@@ -117,7 +137,23 @@ public class ChangeSet {
      * @return the ADD set URI
      */
     public String getAddSetURI() {
-        return addSetURI;
+        if (this.addSetURI == null) {
+            logger.debug("Get additional information of current change set " + changeSetURI + ".");
+            String query = Config.prefixes + String.format(""
+                    + "SELECT ?addSetURI "
+                    + "WHERE { GRAPH  <%s> {"
+                    + "	<%s> a rmo:ChangeSet; "
+                    + "	 rmo:addSet ?addSetURI. "
+                    + "} }", revisionGraph.getRevisionGraphUri(), changeSetURI);
+            this.logger.debug(query);
+            ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
+            if (resultSet.hasNext()) {
+                QuerySolution qs = resultSet.next();
+                this.addSetURI = qs.getResource("?addSetURI").toString();
+            }
+        }
+
+        return this.addSetURI;
     }
 
     /**
@@ -126,7 +162,23 @@ public class ChangeSet {
      * @return the DELETE set URI
      */
     public String getDeleteSetURI() {
-        return deleteSetURI;
+        if (this.deleteSetURI == null) {
+            logger.debug("Get additional information of current change set " + changeSetURI + ".");
+            String query = Config.prefixes + String.format(""
+                    + "SELECT ?deleteSetURI "
+                    + "WHERE { GRAPH  <%s> {"
+                    + "	<%s> a rmo:ChangeSet; "
+                    + "	 rmo:deleteSet ?deleteSetURI. "
+                    + "} }", revisionGraph.getRevisionGraphUri(), changeSetURI);
+            this.logger.debug(query);
+            ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
+            if (resultSet.hasNext()) {
+                QuerySolution qs = resultSet.next();
+                this.deleteSetURI = qs.getResource("?deleteSetURI").toString();
+            }
+        }
+
+        return this.deleteSetURI;
     }
 
     /**

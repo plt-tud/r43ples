@@ -10,6 +10,8 @@ import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 /**
@@ -112,7 +114,14 @@ public class RevisionManagement {
      * @throws InternalErrorException
      */
     protected String getNewFullGraphURI(RevisionGraph revisionGraph, String referenceIdentifier) throws InternalErrorException {
-        String fullGraphURI = revisionGraph.getGraphName() + "-" + referenceIdentifier;
+        String fullGraphURI;
+        try {
+            fullGraphURI = revisionGraph.getGraphName() + "-" + URLEncoder.encode(referenceIdentifier, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            throw new InternalErrorException("The specified reference identifier could not be URL encoded.");
+        }
+
         if (!checkNamedGraphExistence(fullGraphURI)) {
             return fullGraphURI;
         } else {
@@ -231,12 +240,19 @@ public class RevisionManagement {
      * @throws InternalErrorException
      */
     protected String getNewBranchURI(RevisionGraph revisionGraph, String branchIdentifier) throws InternalErrorException {
-        String branchURI = revisionGraph.getGraphName() + "-branch-" + branchIdentifier;
+        String branchURI;
+        try {
+            branchURI = revisionGraph.getGraphName() + "-branch-" + URLEncoder.encode(branchIdentifier, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            throw new InternalErrorException("The specified branch identifier could not be URL encoded.");
+        }
+
         if (!checkNamedGraphExistence(branchURI)) {
             return branchURI;
         } else {
             throw new InternalErrorException("The calculated branch URI is already in use.");
-        }
+    }
     }
 
     /**
@@ -264,7 +280,14 @@ public class RevisionManagement {
      * @throws InternalErrorException
      */
     protected String getNewTagURI(RevisionGraph revisionGraph, String tagIdentifier) throws InternalErrorException {
-        String tagURI = revisionGraph.getGraphName() + "-tag-" + tagIdentifier;
+        String tagURI;
+        try {
+            tagURI = revisionGraph.getGraphName() + "-tag-" + URLEncoder.encode(tagIdentifier, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            throw new InternalErrorException("The specified tag identifier could not be URL encoded.");
+        }
+
         if (!checkNamedGraphExistence(tagURI)) {
             return tagURI;
         } else {
@@ -356,7 +379,14 @@ public class RevisionManagement {
      * @throws InternalErrorException
      */
     protected String getNewBranchCommitURI(RevisionGraph revisionGraph, String branchIdentifier) throws InternalErrorException {
-        String commitURI = revisionGraph.getGraphName() + "-commit-branch-" + branchIdentifier;
+        String commitURI;
+        try {
+            commitURI = revisionGraph.getGraphName() + "-commit-branch-" + URLEncoder.encode(branchIdentifier, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            throw new InternalErrorException("The specified branch identifier could not be URL encoded.");
+        }
+
         if (!checkNamedGraphExistence(commitURI)) {
             return commitURI;
         } else {
@@ -373,7 +403,14 @@ public class RevisionManagement {
      * @throws InternalErrorException
      */
     protected String getNewTagCommitURI(RevisionGraph revisionGraph, String tagIdentifier) throws InternalErrorException {
-        String commitURI = revisionGraph.getGraphName() + "-commit-tag-" + tagIdentifier;
+        String commitURI;
+        try {
+            commitURI = revisionGraph.getGraphName() + "-commit-tag-" + URLEncoder.encode(tagIdentifier, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            throw new InternalErrorException("The specified tag identifier could not be URL encoded.");
+        }
+
         if (!checkNamedGraphExistence(commitURI)) {
             return commitURI;
         } else {

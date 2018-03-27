@@ -194,6 +194,14 @@ public class HttpInterface extends TripleStoreInterface {
 			list.add(resultSet.next().getResource("?graph").toString());
 		return list.iterator();
 	}
+
+	@Override
+	public void dropAllGraphs() {
+		Iterator<String> list = getGraphs();
+		while(list.hasNext()) {
+			executeUpdateQuery("DROP SILENT GRAPH <" + list.next() + ">");
+		}
+	}
 	
 	
 }

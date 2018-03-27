@@ -373,7 +373,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
         ChangeSetDraft changeSetDraftA = new ChangeSetDraft(getRevisionManagement(), getRevisionGraph(),
                 usedSourceBranch.getLeafRevision(), generatedRevision.getRevisionIdentifier(), usedSourceBranch.getReferenceURI(),
-                addedTriplesB, deletedTriplesB, false);
+                addedTriplesB, deletedTriplesB, false, false);
         ChangeSet changeSetA = changeSetDraftA.createInTripleStore();
 
         generatedRevision.addChangeSet(changeSetA);

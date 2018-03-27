@@ -121,7 +121,7 @@ public class RevisionGraph {
 	public boolean hasReference(final String referenceName) {
 		String revisionGraph = this.getRevisionGraphUri();
 		String queryASK = Config.prefixes
-				+ String.format("ASK { GRAPH <%s> { ?ref a rmo:Reference; rmo:referenceIdentifier \"%s\".  }} ",
+				+ String.format("ASK WHERE { GRAPH <%s> { ?ref a rmo:Reference; rmo:referenceIdentifier \"%s\".  }} ",
 						revisionGraph, referenceName);
 		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
 	}

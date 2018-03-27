@@ -57,7 +57,7 @@ public class UpdateCommitDraft extends CommitDraft {
 	 * @param deleteSet the delete set as N-Triples
 	 * @param user the user
 	 * @param message the message
-	 * @param branch the branch were the new revision should be created
+	 * @param branch the branch where the new revision should be created
 	 * @throws InternalErrorException
 	 */
 	protected UpdateCommitDraft(String graphName, String addSet, String deleteSet, String user, String message, Branch branch) throws InternalErrorException {
@@ -100,6 +100,8 @@ public class UpdateCommitDraft extends CommitDraft {
 
 		final Pattern patternEmptyGraphPattern = Pattern.compile("GRAPH\\s*<(?<graph>[^>]*)>\\s*\\{\\s*\\}",
 				patternModifier);
+		final Pattern patternGraphWithBranch = Pattern
+				.compile("GRAPH\\s*<(?<graph>[^>]*)>\\s*BRANCH\\s*\"(?<branch>[^\"]*)\"\\s*\\{", patternModifier);
 		final Pattern patternGraphWithRevision = Pattern
 				.compile("GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"\\s*\\{", patternModifier);
 
@@ -120,29 +122,33 @@ public class UpdateCommitDraft extends CommitDraft {
 
 		// II. Rewrite INSERT and DELETE clauses (replace graph names in query
 		// with change set graph names)
-		List<RevisionDraft> revList = new LinkedList<RevisionDraft>();
+		List<RevisionDraft> revDraftList = new LinkedList<>();
+		List<Revision> revList = new LinkedList<>();
 		m = patternUpdateRevision.matcher(getRequest().query_sparql);
 		while (m.find()) {
 			String action = m.group("action");
 			String updateClause = getStringEnclosedInBraces(getRequest().query_sparql, m.end());
 
-			Matcher m2a = patternGraphWithRevision.matcher(updateClause);
+			Matcher m2a = patternGraphWithBranch.matcher(updateClause);
 			while (m2a.find()) {
 				String graphName = m2a.group("graph");
-				String revisionName = m2a.group("revision").toLowerCase();
+				String branchIdentifier = m2a.group("branch").toLowerCase();
 
 				RevisionGraph graph = new RevisionGraph(graphName);
-				if (!graph.hasBranch(revisionName)) {
-					throw new InternalErrorException("Revision is not referenced by a branch");
+				if (!graph.hasBranch(branchIdentifier)) {
+					throw new InternalErrorException("Specified branch identifier is no branch in " + graphName + ".");
 				}
 				RevisionDraft d = null;
-				for (RevisionDraft draft : revList) {
-					if (draft.equals(graphName, revisionName))
+				for (RevisionDraft draft : revDraftList) {
+					if (draft.equals(graphName, branchIdentifier))
 						d = draft;
 				}
 				if (d == null) {
-					d = null;//TODO new RevisionDraft(getRevisionManagement(), graph, revisionName);
-					revList.add(d);
+					RevisionGraph revisionGraph = new RevisionGraph(graphName);
+					d = new RevisionDraft(getRevisionManagement(), revisionGraph, revisionGraph.getBranch(branchIdentifier, true));
+					revList.add(d.createInTripleStore());
+					//d = null;//TODO new RevisionDraft(getRevisionManagement(), graph, revisionName);
+					revDraftList.add(d);
 				}
 				String graphClause = getStringEnclosedInBraces(updateClause, m2a.end());
 
@@ -156,6 +162,7 @@ public class UpdateCommitDraft extends CommitDraft {
 		queryRewritten += "}";
 
 		// III. Rewrite where clause
+		//TODO This part has to be checked!!!
 		Matcher m1 = patternWhere.matcher(getRequest().query_sparql);
 		if (m1.find()) {
 			queryRewritten += "WHERE {";
@@ -190,10 +197,11 @@ public class UpdateCommitDraft extends CommitDraft {
 		// V. add changesets to full graph and add meta information in revision
 		// graphs
 		ArrayList<UpdateCommit> commitList = new ArrayList<>();
-		for (RevisionDraft draft : revList) {
+		for (RevisionDraft draft : revDraftList) {
 			addNewRevisionFromChangeSet(draft);
-			// add meta information to R43ples
-			//TODO commitList.add(addMetaInformation(draft));
+		}
+		for (Revision rev : revList) {
+			addMetaInformation(rev);
 		}
 		return commitList;
 	}

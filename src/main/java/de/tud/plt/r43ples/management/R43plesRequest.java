@@ -20,6 +20,10 @@ public class R43plesRequest {
 	private final Pattern patternUpdateQuery = Pattern.compile(
 			"(?<action>INSERT|DELETE).*<(?<graph>[^>]*)>",
 			patternModifier);
+	/** Pattern for REVERT queries. **/
+	private final Pattern patternRevertQuery =  Pattern.compile(
+			"REVERT\\s*GRAPH\\s*<([^>]*?)>\\s*BRANCH\\s*\"([^\"]*?)\"",
+			patternModifier);
     /** Pattern for CREATE GRAPH queries. **/
 	private final Pattern patternCreateGraph = Pattern.compile(
 			"CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
@@ -88,12 +92,21 @@ public class R43plesRequest {
 	}
 
     /**
-     * Test if the SPARQL query is an UPDATE query.
+     * Test if the SPARQL query is a REVERT query.
      *
-     * @return true if the query is an UPDATE query.
+     * @return true if the query is a REVERT query.
      */
+	public boolean isRevertQuery() {
+        return patternRevertQuery.matcher(query_sparql).find();
+	}
+
+	/**
+	 * Test if the SPARQL query is an UPDATE query.
+	 *
+	 * @return true if the query is an UPDATE query.
+	 */
 	public boolean isUpdateQuery() {
-        return patternUpdateQuery.matcher(query_sparql).find();
+		return patternUpdateQuery.matcher(query_sparql).find();
 	}
 
     /**

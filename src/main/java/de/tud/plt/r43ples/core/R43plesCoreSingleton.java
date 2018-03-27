@@ -24,9 +24,9 @@ public class R43plesCoreSingleton {
     }
 
     /**
-     * Get the instance of the currently chosen path calculation.
+     * Get the instance of R43ples core.
      *
-     * @return the instance of the path calculation implementation
+     * @return the instance of R43ples core
      */
     public static R43plesCoreInterface getInstance() {
         if (r43plesCore!=null)
