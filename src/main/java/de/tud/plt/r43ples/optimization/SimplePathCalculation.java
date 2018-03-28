@@ -302,7 +302,7 @@ public class SimplePathCalculation implements PathCalculationInterface {
                 resultSet.reset();
             }
         }
-        throw new InternalErrorException("Some Error occured");
+        throw new InternalErrorException("Shortest path between revisions could not be found");
     }
 
 }

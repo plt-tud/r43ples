@@ -34,10 +34,13 @@ public class Revision {
     private ArrayList<ChangeSet> changeSets;
     /** The associated branch. **/
     private Branch associatedBranch;
+    /** The associated reference. **/
+    private Reference associatedReference;
 
     // Dependencies
     /** The triplestore interface to use. **/
     protected TripleStoreInterface tripleStoreInterface;
+
 
 
     /**
@@ -146,6 +149,34 @@ public class Revision {
         } else {
             throw new InternalErrorException("No corresponding commit found for revision " + revisionIdentifier + ".");
         }
+    }
+
+    /**
+     * Get the associated reference of the current revision.
+     *
+     * @return the associated reference or null if revision has no directly associated reference
+     * @throws InternalErrorException
+     */
+    public Reference getAssociatedReference() throws InternalErrorException {
+        //FIXME A revision can be referenced by multiple reference - return a list of branches
+        if (associatedReference == null) {
+            logger.info("Get associated reference of revision " + revisionIdentifier + ".");
+            String query = Config.prefixes + String.format(""
+                    + "SELECT ?reference "
+                    + "WHERE { GRAPH  <%s> {"
+                    + "	?reference rmo:references <%s> . "
+                    + "	?reference a rmo:Reference . "
+                    + "} }", revisionGraphURI, revisionURI);
+            this.logger.debug(query);
+            ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
+            if (resultSet.hasNext()) {
+                QuerySolution qs = resultSet.next();
+                associatedReference = new Reference(revisionGraph, qs.getResource("?reference").toString(), false);
+            } else {
+                return null;
+            }
+        }
+        return associatedReference;
     }
 
     /**

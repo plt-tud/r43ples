@@ -43,12 +43,12 @@
         <http://eatld.et.tu-dresden.de/rmo#references>
                 <http://example.com/test-revision-1> .
 
-<http://example.com/test-tag-version+1.1.0>
+<http://example.com/test-tag-Version+1.1.0>
         a       <http://eatld.et.tu-dresden.de/rmo#Tag> , <http://eatld.et.tu-dresden.de/rmo#Reference> , <http://eatld.et.tu-dresden.de/rmo#Entity> ;
         <http://eatld.et.tu-dresden.de/rmo#fullGraph>
-                <http://example.com/test-version+1.1.0> ;
+                <http://example.com/test-Version+1.1.0> ;
         <http://eatld.et.tu-dresden.de/rmo#referenceIdentifier>
-                "version 1.1.0" ;
+                "Version 1.1.0" ;
         <http://eatld.et.tu-dresden.de/rmo#references>
                 <http://example.com/test-revision-1> .
 
@@ -61,14 +61,14 @@
         <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
                 <http://example.com/test-revision-0> .
 
-<http://example.com/test-commit-tag-version+1.1.0>
+<http://example.com/test-commit-tag-Version+1.1.0>
         a       <http://eatld.et.tu-dresden.de/rmo#ReferenceCommit> , <http://eatld.et.tu-dresden.de/rmo#TagCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#atTime>
                 "2018-03-21T13:08:27.304" ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "tag commit during test" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
-                <http://example.com/test-tag-version+1.1.0> ;
+                <http://example.com/test-tag-Version+1.1.0> ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://example.com/test-revision-1> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>

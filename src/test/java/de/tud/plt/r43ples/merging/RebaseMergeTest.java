@@ -7,10 +7,7 @@ import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.Config;
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.xml.sax.SAXException;
 
 import javax.ws.rs.core.Response;
@@ -25,6 +22,7 @@ import static org.junit.Assert.assertTrue;
  * @author Xinyu Yang
  * @author Stephan Hensel
  */
+@Ignore
 public class RebaseMergeTest extends R43plesTest {
 
 	/** The graph name. **/

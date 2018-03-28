@@ -85,7 +85,7 @@ public class FullGraph {
 
         // Copy branch to temporary graph
         Revision currentRevision = changeSetPath.getTargetRevision();
-        String copyQuery = "COPY GRAPH <" + currentRevision.getAssociatedBranch().getFullGraphURI() + "> TO GRAPH <" + fullGraphUri + ">";
+        String copyQuery = "COPY GRAPH <" + currentRevision.getAssociatedReference().getFullGraphURI() + "> TO GRAPH <" + fullGraphUri + ">";
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(copyQuery);
 
         // Apply changesets

@@ -179,9 +179,12 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	@Override
 	public void dropAllGraphs() {
 		Iterator<String> list = getGraphs();
+		dataset.begin(ReadWrite.WRITE);
 		while(list.hasNext()) {
-			executeUpdateQuery("DROP SILENT GRAPH <" + list.next() + ">");
+			dataset.removeNamedModel(list.next());
 		}
+		dataset.commit();
+		dataset.end();
 	}
 	
 }

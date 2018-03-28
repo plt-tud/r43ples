@@ -453,11 +453,11 @@ public class SampleDataSet {
 
 		// Create a new branch B1
 		String branchNameB1 = "b1";
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, revision1, "B1");
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B1", graphName, revision1, branchNameB1);
 
 		// Create a new branch B2
 		String branchNameB2 = "b2";
-		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2", graphName, revision1, "B2");
+		DatasetGenerationManagement.createNewBranch(user, "Create a new branch B2", graphName, revision1, branchNameB2);
 
 		// First commit to B1
 		String triplesInsert = "<http://example.com/testS> <http://example.com/testP2> \"D\". \n";
