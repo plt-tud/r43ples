@@ -91,8 +91,8 @@ public class SparqlRewriter {
 	
 	public String rewrite(final String r43ples_query) throws InternalErrorException {
 		
-		final Pattern pattern1 = Pattern.compile("GRAPH\\s*<(?<graph>\\S*)>\\s*\\{", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
-		final Pattern pattern2 = Pattern.compile("GRAPH\\s*<(?<graph>\\S*)>\\s*REVISION\\s*\"(?<revision>\\S*)\"", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+		final Pattern pattern1 = Pattern.compile("GRAPH\\s*<(?<revisionGraph>\\S*)>\\s*\\{", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+		final Pattern pattern2 = Pattern.compile("GRAPH\\s*<(?<revisionGraph>\\S*)>\\s*REVISION\\s*\"(?<revision>\\S*)\"", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
 				
 		
 		Matcher m1 = pattern1.matcher(r43ples_query);
