@@ -51,10 +51,8 @@ public class BranchCommitDraft extends ReferenceCommitDraft {
         BranchDraft branchDraft = new BranchDraft(getRevisionManagement(), getRevisionGraph(), getBaseRevision(), getReferenceIdentifier());
         Branch generatedBranch = branchDraft.createInTripleStore();
 
-        addMetaInformation(generatedBranch.getReferenceURI(), commitURI);
 
-        // Create full graph for this branch
-        FullGraph fullGraph = new FullGraph(getRevisionGraph(), getBaseRevision(), generatedBranch.getFullGraphURI());
+        addMetaInformation(generatedBranch.getReferenceURI(), commitURI);
 
         return new BranchCommit(getRevisionGraph(), commitURI, getUser(), getTimeStamp(), getMessage(), getBaseRevision(), generatedBranch);
     }
