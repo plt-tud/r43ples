@@ -187,15 +187,8 @@ public class Endpoint {
 			return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
 		}		
 		
-		String sparqlQueryDecoded;
-		try {
-			sparqlQueryDecoded = URLDecoder.decode(sparqlQuery, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			sparqlQueryDecoded = sparqlQuery;
-		}
-		logger.info("SPARQL GET query (format: "+format+", query: "+sparqlQueryDecoded +")");
-		return sparql(format, sparqlQueryDecoded, revision_information, query_rewriting);
+		logger.info("SPARQL GET query (format: "+format+", query: "+sparqlQuery +")");
+		return sparql(format, sparqlQuery, revision_information, query_rewriting);
 	}
 	
 	

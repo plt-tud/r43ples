@@ -353,16 +353,16 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
-                <version>1.6.0</version>
+				<version>1.6.0</version>
                 <executions>
                     <execution>
                         <goals>
-                            <goal>java</goal>
+							<goal>java</goal>
                         </goals>
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>${exec.java.mainclass}</mainClass>
+					<mainClass>${exec.java.mainclass}</mainClass>
                 </configuration>
             </plugin>
 
