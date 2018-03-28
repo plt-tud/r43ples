@@ -62,7 +62,7 @@ public class ReferenceCommitDraft extends CommitDraft {
         this.setUser(user);
         this.setMessage(message);
         this.revisionGraph = revisionGraph;
-        this.referenceIdentifier = referenceIdentifier.toLowerCase();
+        this.referenceIdentifier = referenceIdentifier;
         this.baseRevision = baseRevision;
         this.isBranch = isBranch;
     }
@@ -83,8 +83,8 @@ public class ReferenceCommitDraft extends CommitDraft {
             foundEntry = true;
             String action = m.group("action");
             this.revisionGraph = new RevisionGraph(m.group("graph"));
-            this.baseRevision = new Revision(this.revisionGraph, m.group("revision").toLowerCase(), true);
-            this.referenceIdentifier = m.group("name").toLowerCase();
+            this.baseRevision = new Revision(this.revisionGraph, m.group("revision"), true);
+            this.referenceIdentifier = m.group("name");
             if (action.equals("TAG")) {
                 this.isBranch = false;
             } else if (action.equals("BRANCH")) {

@@ -132,7 +132,7 @@ public class UpdateCommitDraft extends CommitDraft {
 			Matcher m2a = patternGraphWithBranch.matcher(updateClause);
 			while (m2a.find()) {
 				String graphName = m2a.group("graph");
-				String branchIdentifier = m2a.group("branch").toLowerCase();
+				String branchIdentifier = m2a.group("branch");
 
 				RevisionGraph graph = new RevisionGraph(graphName);
 				if (!graph.hasBranch(branchIdentifier)) {
@@ -171,7 +171,7 @@ public class UpdateCommitDraft extends CommitDraft {
 			Matcher m1a = patternGraphWithRevision.matcher(whereClause);
 			while (m1a.find()) {
 				String graphName = m1a.group("graph");
-				String revisionName = m1a.group("revision").toLowerCase();
+				String revisionName = m1a.group("revision");
 				// TODO: replace generateFullGraphOfRevision with query
 				// rewriting option
 				String tempGraphName = graphName + "-temp";
