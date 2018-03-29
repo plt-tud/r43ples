@@ -149,8 +149,8 @@ public class MergeCommitDraft extends CommitDraft {
             graphName = m.group("graph");
             revisionGraph = new RevisionGraph(graphName);
             sdd = m.group("sdd");
-            branchNameFrom = m.group("branchNameFrom").toLowerCase();
-            branchNameInto = m.group("branchNameInto").toLowerCase();
+            branchNameFrom = m.group("branchNameFrom");
+            branchNameInto = m.group("branchNameInto");
             with = m.group("with") != null;
             triples = m.group("triples");
 

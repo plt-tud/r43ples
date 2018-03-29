@@ -34,10 +34,13 @@ public class Revision {
     private ArrayList<ChangeSet> changeSets;
     /** The associated branch. **/
     private Branch associatedBranch;
+    /** The associated reference. **/
+    private Reference associatedReference;
 
     // Dependencies
     /** The triplestore interface to use. **/
     protected TripleStoreInterface tripleStoreInterface;
+
 
 
     /**
@@ -107,7 +110,7 @@ public class Revision {
      */
     public Revision getDerivedFromRevision() throws InternalErrorException {
         //TODO merged revisions will have two derived from revisions
-        logger.info("Get derived from revision of revision " + revisionIdentifier + ".");
+        logger.debug("Get derived from revision of revision " + revisionIdentifier + ".");
         String query = Config.prefixes + String.format(""
                 + "SELECT ?rev "
                 + "WHERE { GRAPH  <%s> {"
@@ -131,7 +134,7 @@ public class Revision {
      * @throws InternalErrorException
      */
     public Commit getCorrespondingCommit() throws InternalErrorException {
-        logger.info("Get corresponding commit of revision " + revisionIdentifier + ".");
+        logger.debug("Get corresponding commit of revision " + revisionIdentifier + ".");
         String query = Config.prefixes + String.format(""
                 + "SELECT ?com "
                 + "WHERE { GRAPH  <%s> {"
@@ -149,6 +152,34 @@ public class Revision {
     }
 
     /**
+     * Get the associated reference of the current revision.
+     *
+     * @return the associated reference or null if revision has no directly associated reference
+     * @throws InternalErrorException
+     */
+    public Reference getAssociatedReference() throws InternalErrorException {
+        //FIXME A revision can be referenced by multiple reference - return a list of branches
+        if (associatedReference == null) {
+            logger.debug("Get associated reference of revision " + revisionIdentifier + ".");
+            String query = Config.prefixes + String.format(""
+                    + "SELECT ?reference "
+                    + "WHERE { GRAPH  <%s> {"
+                    + "	?reference rmo:references <%s> . "
+                    + "	?reference a rmo:Reference . "
+                    + "} }", revisionGraphURI, revisionURI);
+            this.logger.debug(query);
+            ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
+            if (resultSet.hasNext()) {
+                QuerySolution qs = resultSet.next();
+                associatedReference = new Reference(revisionGraph, qs.getResource("?reference").toString(), false);
+            } else {
+                return null;
+            }
+        }
+        return associatedReference;
+    }
+
+    /**
      * Get the associated branch of the current revision.
      *
      * @return the associated branch or null if revision has no directly associated branch
@@ -157,7 +188,7 @@ public class Revision {
     public Branch getAssociatedBranch() throws InternalErrorException {
         //FIXME A revision can be referenced by multiple branches - return a list of branches
         if (associatedBranch == null) {
-            logger.info("Get associated branch of revision " + revisionIdentifier + ".");
+            logger.debug("Get associated branch of revision " + revisionIdentifier + ".");
             String query = Config.prefixes + String.format(""
                     + "SELECT ?branch "
                     + "WHERE { GRAPH  <%s> {"
@@ -245,7 +276,7 @@ public class Revision {
      * @throws InternalErrorException
      */
     private String calculateRevisionURI(String revisionIdentifier) throws InternalErrorException {
-        logger.info("Calculate the revision URI for current revision " + revisionIdentifier + ".");
+        logger.debug("Calculate the revision URI for current revision " + revisionIdentifier + ".");
         String query = Config.prefixes + String.format(""
                 + "SELECT ?uri "
                 + "WHERE { GRAPH  <%s> {"
@@ -270,7 +301,7 @@ public class Revision {
      * @throws InternalErrorException
      */
     private String calculateRevisionIdentifier(String revisionURI) throws InternalErrorException {
-        logger.info("Calculate the revision identifier for current revision URI " + revisionURI + ".");
+        logger.debug("Calculate the revision identifier for current revision URI " + revisionURI + ".");
         String query = Config.prefixes + String.format(""
                 + "SELECT ?id "
                 + "WHERE { GRAPH  <%s> {"

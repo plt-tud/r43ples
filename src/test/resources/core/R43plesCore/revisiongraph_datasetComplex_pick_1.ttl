@@ -1,0 +1,328 @@
+@prefix rpo:   <http://eatld.et.tu-dresden.de/rpo#> .
+@prefix sdd:   <http://eatld.et.tu-dresden.de/sdd#> .
+@prefix dc-terms: <http://purl.org/dc/terms/> .
+@prefix rmo:   <http://eatld.et.tu-dresden.de/rmo#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix sddo:  <http://eatld.et.tu-dresden.de/sddo#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov:  <http://www.w3.org/ns/prov#> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-4>
+        a                    rmo:Revision ;
+        rmo:addSet           <http://test.com/r43ples-dataset-complex-structure-addSet-4> ;
+        rmo:belongsTo        <http://test.com/r43ples-dataset-complex-structure-branch-B1X> ;
+        rmo:deleteSet        <http://test.com/r43ples-dataset-complex-structure-deleteSet-4> ;
+        rmo:revisionNumber   "4" ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-3> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-13>
+        a                    rmo:Revision ;
+        rmo:addSet           <http://test.com/r43ples-dataset-complex-structure-addSet-13> ;
+        rmo:belongsTo        <http://test.com/r43ples-dataset-complex-structure-master> ;
+        rmo:deleteSet        <http://test.com/r43ples-dataset-complex-structure-deleteSet-13> ;
+        rmo:revisionNumber   "13" ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-12> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-8>
+        a                       rmo:RevisionCommit ;
+        dc-terms:title          "First commit to B2X" ;
+        prov:atTime             "2017-08-29T14:05:37.704"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-revision-8> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-7> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-branch-B2X>
+        a                       rmo:Commit , rmo:BranchCommit ;
+        dc-terms:title          "Create a new branch B2X" ;
+        prov:atTime             "2017-08-29T14:05:37.549" ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-branch-B2X> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-7> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-2>
+        a                       rmo:RevisionCommit ;
+        dc-terms:title          "Second commit to B1" ;
+        prov:atTime             "2017-08-29T14:05:35.509"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-revision-2> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-1> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-branch-B2X>
+        a                    rmo:Reference , rmo:Branch ;
+        rdfs:label           "B2X" ;
+        rmo:fullGraph        <http://test.com/r43ples-dataset-complex-structure-branch-B2X> ;
+        rmo:references       <http://test.com/r43ples-dataset-complex-structure-revision-9> ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-7> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-9>
+        a                    rmo:Revision ;
+        rmo:addSet           <http://test.com/r43ples-dataset-complex-structure-addSet-9> ;
+        rmo:belongsTo        <http://test.com/r43ples-dataset-complex-structure-branch-B2X> ;
+        rmo:deleteSet        <http://test.com/r43ples-dataset-complex-structure-deleteSet-9> ;
+        rmo:revisionNumber   "9" ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-8> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-13>
+        a                       rmo:RevisionCommit ;
+        dc-terms:title          "Third commit to MASTER" ;
+        prov:atTime             "2017-08-29T14:05:38.919"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-revision-13> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-12> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-branch-B2>
+        a                       rmo:Commit , rmo:BranchCommit ;
+        dc-terms:title          "Create a new branch B2" ;
+        prov:atTime             "2017-08-29T14:05:34.889" ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-branch-B2> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-3>
+        a                    rmo:Revision ;
+        rmo:addSet           <http://test.com/r43ples-dataset-complex-structure-addSet-3> ;
+        rmo:belongsTo        <http://test.com/r43ples-dataset-complex-structure-branch-B1X> ;
+        rmo:deleteSet        <http://test.com/r43ples-dataset-complex-structure-deleteSet-3> ;
+        rmo:revisionNumber   "3" ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-2> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-12>
+        a                    rmo:Revision ;
+        rmo:addSet           <http://test.com/r43ples-dataset-complex-structure-addSet-12> ;
+        rmo:belongsTo        <http://test.com/r43ples-dataset-complex-structure-master> ;
+        rmo:deleteSet        <http://test.com/r43ples-dataset-complex-structure-deleteSet-12> ;
+        rmo:revisionNumber   "12" ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-0> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-7>
+        a                       rmo:RevisionCommit ;
+        dc-terms:title          "Second commit to B2" ;
+        prov:atTime             "2017-08-29T14:05:37.286"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-revision-7> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-6> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-tag-v0.2>
+        a                    rmo:Tag , rmo:Reference ;
+        rdfs:label           "v0.2" ;
+        rmo:fullGraph        <http://test.com/r43ples-dataset-complex-structure-tag-v0.2> ;
+        rmo:references       <http://test.com/r43ples-dataset-complex-structure-revision-8> ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-8> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-tag-v0.2>
+        a                       rmo:TagCommit , rmo:Commit ;
+        dc-terms:title          "tag version v0.2" ;
+        prov:atTime             "2017-08-29T14:05:37.845" ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-tag-v0.2> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-8> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-1>
+        a                       rmo:RevisionCommit ;
+        dc-terms:title          "First commit to B1" ;
+        prov:atTime             "2017-08-29T14:05:35.13"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-revision-1> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-8>
+        a                    rmo:Revision ;
+        rmo:addSet           <http://test.com/r43ples-dataset-complex-structure-addSet-8> ;
+        rmo:belongsTo        <http://test.com/r43ples-dataset-complex-structure-branch-B2X> ;
+        rmo:deleteSet        <http://test.com/r43ples-dataset-complex-structure-deleteSet-8> ;
+        rmo:revisionNumber   "8" ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-7> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-12>
+        a                       rmo:RevisionCommit ;
+        dc-terms:title          "Second commit to MASTER" ;
+        prov:atTime             "2017-08-29T14:05:38.681"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-revision-12> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-branch-B1>
+        a                       rmo:Commit , rmo:BranchCommit ;
+        dc-terms:title          "Create a new branch B1" ;
+        prov:atTime             "2017-08-29T14:05:34.610" ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-branch-B1> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-2>
+        a                    rmo:Revision ;
+        rmo:addSet           <http://test.com/r43ples-dataset-complex-structure-addSet-2> ;
+        rmo:belongsTo        <http://test.com/r43ples-dataset-complex-structure-branch-B1> ;
+        rmo:deleteSet        <http://test.com/r43ples-dataset-complex-structure-deleteSet-2> ;
+        rmo:revisionNumber   "2" ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-1> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-11>
+        a                    rmo:Revision ;
+        rmo:addSet           <http://test.com/r43ples-dataset-complex-structure-addSet-11> ;
+        rmo:belongsTo        <http://test.com/r43ples-dataset-complex-structure-branch-B2> ;
+        rmo:deleteSet        <http://test.com/r43ples-dataset-complex-structure-deleteSet-11> ;
+        rmo:revisionNumber   "11" ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-10> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-6>
+        a                       rmo:RevisionCommit ;
+        dc-terms:title          "First commit to B2" ;
+        prov:atTime             "2017-08-29T14:05:36.862"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-revision-6> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-0>
+        a                       rmo:ReferenceCommit , rmo:RevisionCommit ;
+        dc-terms:title          "initial commit" ;
+        prov:atTime             "2017-08-29T14:05:34.278"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-master> , <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/user/r43ples> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-7>
+        a                    rmo:Revision ;
+        rmo:addSet           <http://test.com/r43ples-dataset-complex-structure-addSet-7> ;
+        rmo:belongsTo        <http://test.com/r43ples-dataset-complex-structure-branch-B2> ;
+        rmo:deleteSet        <http://test.com/r43ples-dataset-complex-structure-deleteSet-7> ;
+        rmo:revisionNumber   "7" ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-6> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-11>
+        a                       rmo:RevisionCommit ;
+        dc-terms:title          "Fourth commit to B2" ;
+        prov:atTime             "2017-08-29T14:05:38.502"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-revision-11> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-10> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-branch-B1X>
+        a                       rmo:Commit , rmo:BranchCommit ;
+        dc-terms:title          "Create a new branch B1X" ;
+        prov:atTime             "2017-08-29T14:05:35.889" ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-branch-B1X> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-2> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-1>
+        a                    rmo:Revision ;
+        rmo:addSet           <http://test.com/r43ples-dataset-complex-structure-addSet-1> ;
+        rmo:belongsTo        <http://test.com/r43ples-dataset-complex-structure-branch-B1> ;
+        rmo:deleteSet        <http://test.com/r43ples-dataset-complex-structure-deleteSet-1> ;
+        rmo:revisionNumber   "1" ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-0> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-10>
+        a                    rmo:Revision ;
+        rmo:addSet           <http://test.com/r43ples-dataset-complex-structure-addSet-10> ;
+        rmo:belongsTo        <http://test.com/r43ples-dataset-complex-structure-branch-B2> ;
+        rmo:deleteSet        <http://test.com/r43ples-dataset-complex-structure-deleteSet-10> ;
+        rmo:revisionNumber   "10" ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-7> .
+
+<http://test.com/r43ples-dataset-complex-structure-branch-B1X>
+        a                    rmo:Reference , rmo:Branch ;
+        rdfs:label           "B1X" ;
+        rmo:fullGraph        <http://test.com/r43ples-dataset-complex-structure-branch-B1X> ;
+        rmo:references       <http://test.com/r43ples-dataset-complex-structure-revision-4> ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-2> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-5>
+        a                       rmo:RevisionCommit ;
+        dc-terms:title          "Third commit to B1" ;
+        prov:atTime             "2017-08-29T14:05:36.672"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-revision-5> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-2> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-6>
+        a                    rmo:Revision ;
+        rmo:addSet           <http://test.com/r43ples-dataset-complex-structure-addSet-6> ;
+        rmo:belongsTo        <http://test.com/r43ples-dataset-complex-structure-branch-B2> ;
+        rmo:deleteSet        <http://test.com/r43ples-dataset-complex-structure-deleteSet-6> ;
+        rmo:revisionNumber   "6" ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-0> .
+
+<http://test.com/r43ples-dataset-complex-structure-branch-B2>
+        a                    rmo:Reference , rmo:Branch ;
+        rdfs:label           "B2" ;
+        rmo:fullGraph        <http://test.com/r43ples-dataset-complex-structure-branch-B2> ;
+        rmo:references       <http://test.com/r43ples-dataset-complex-structure-revision-11> ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-0> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-10>
+        a                       rmo:RevisionCommit ;
+        dc-terms:title          "Third commit to B2" ;
+        prov:atTime             "2017-08-29T14:05:38.332"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-revision-10> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-7> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-0>
+        a                   rmo:Revision ;
+        rmo:belongsTo       <http://test.com/r43ples-dataset-complex-structure-master> ;
+        rmo:revisionNumber  "0" .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-pick-1--master-13>
+        a                       rmo:PickCommit , rmo:Commit ;
+        rmo:usedSourceRevision  <http://test.com/r43ples-dataset-complex-structure-revision-1> ;
+        rmo:usedTargetBranch    <http://test.com/r43ples-dataset-complex-structure-master> ;
+        rmo:usedTargetRevision  <http://test.com/r43ples-dataset-complex-structure-revision-13> ;
+        dc-terms:title          "pick test" ;
+        prov:atTime             "2017-08-29T14:05:39.099"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-revision-14> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/test> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-4>
+        a                       rmo:RevisionCommit ;
+        dc-terms:title          "Second commit to B1X" ;
+        prov:atTime             "2017-08-29T14:05:36.309"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-revision-4> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-3> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-master>
+        a               rmo:Reference , rmo:Branch , rmo:Master ;
+        rdfs:label      "master" ;
+        rmo:fullGraph   <http://test.com/r43ples-dataset-complex-structure> ;
+        rmo:references  <http://test.com/r43ples-dataset-complex-structure-revision-14> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-5>
+        a                    rmo:Revision ;
+        rmo:addSet           <http://test.com/r43ples-dataset-complex-structure-addSet-5> ;
+        rmo:belongsTo        <http://test.com/r43ples-dataset-complex-structure-branch-B1> ;
+        rmo:deleteSet        <http://test.com/r43ples-dataset-complex-structure-deleteSet-5> ;
+        rmo:revisionNumber   "5" ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-2> .
+
+<http://test.com/r43ples-dataset-complex-structure-branch-B1>
+        a                    rmo:Reference , rmo:Branch ;
+        rdfs:label           "B1" ;
+        rmo:fullGraph        <http://test.com/r43ples-dataset-complex-structure-branch-B1> ;
+        rmo:references       <http://test.com/r43ples-dataset-complex-structure-revision-5> ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-0> .
+
+<http://test.com/r43ples-dataset-complex-structure-revision-14>
+        a                    rmo:Revision ;
+        rmo:belongsTo        <http://test.com/r43ples-dataset-complex-structure-master> ;
+        rmo:revisionNumber   "14" ;
+        prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-13> ;
+        prov:wasQuotedFrom   <http://test.com/r43ples-dataset-complex-structure-revision-1> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-9>
+        a                       rmo:RevisionCommit ;
+        dc-terms:title          "Second commit to B2X" ;
+        prov:atTime             "2017-08-29T14:05:38.073"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-revision-9> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-8> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-complex-structure-commit-3>
+        a                       rmo:RevisionCommit ;
+        dc-terms:title          "First commit to B1X" ;
+        prov:atTime             "2017-08-29T14:05:36.133"^^xsd:dateTime ;
+        prov:generated          <http://test.com/r43ples-dataset-complex-structure-revision-3> ;
+        prov:used               <http://test.com/r43ples-dataset-complex-structure-revision-2> ;
+        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/butler> .

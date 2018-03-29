@@ -43,10 +43,11 @@ public class TagDraft extends ReferenceDraft {
     protected Tag createInTripleStore() throws InternalErrorException {
         logger.info("Create new tag for graph " + getRevisionGraph().getGraphName() + ".");
 
-        addMetaInformation();
-
         // Create full graph
         getTripleStoreInterface().executeCreateGraph(getReferencedFullGraphURI());
+        FullGraph fullGraph = new FullGraph(getRevisionGraph(), this.getReferencedRevision(), this.getReferencedFullGraphURI());
+
+        addMetaInformation();
 
         return new Tag(getRevisionGraph(), getReferenceIdentifier(), getReferenceURI(), getReferencedFullGraphURI());
     }

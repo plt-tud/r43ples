@@ -54,7 +54,7 @@ public class SelectConstructAskQuery {
         while (m.find()) {
             String graphName = m.group("graph");
             String type = m.group("type");
-            String revisionNumber = m.group("revision").toLowerCase();
+            String revisionNumber = m.group("revision");
             String fullGraphUri;
 
             RevisionGraph graph = new RevisionGraph(graphName);

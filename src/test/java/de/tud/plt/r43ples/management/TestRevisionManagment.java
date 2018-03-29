@@ -10,6 +10,7 @@ import de.tud.plt.r43ples.existentobjects.*;
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -25,7 +26,7 @@ public class TestRevisionManagment {
 	
 	
     private static DataSetGenerationResult ds;
-    private static RevisionGraph graph;
+    private RevisionGraph graph;
 	private final String format = "application/sparql-results+xml";
     private final Endpoint ep = new Endpoint();
 	private String result;
@@ -37,17 +38,22 @@ public class TestRevisionManagment {
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
 		ds = SampleDataSet.createSampleDataset1();
+	}
+
+	@Before
+	public void setup() throws InternalErrorException {
+		ds = SampleDataSet.createSampleDataset1();
 		graph = new RevisionGraph(ds.graphName);
 	}
 	
-	private final String query_template = ""
+	private String query_template = ""
     		+ "SELECT ?s ?p ?o %n"
     		+ "WHERE { %n"
     		+ "  GRAPH <"+ds.graphName+"> REVISION \"%s\" {?s ?p ?o} %n"
 			+ "} ORDER BY ?s ?p ?o";
 	
 	
-	private final String query_template_2_triples_filter = "PREFIX : <http://test.com/> "
+	private String query_template_2_triples_filter = "PREFIX : <http://test.com/> "
 			+ "SELECT DISTINCT ?p1 ?p2 "
 			+ "WHERE {"
 			+ "  GRAPH <"+ ds.graphName + "> REVISION \"%s\" {"
@@ -97,7 +103,7 @@ public class TestRevisionManagment {
         
         query = "SELECT ?s ?p ?o "
         		+ "WHERE {"
-        		+ "	GRAPH <"+ds.graphName+"> REVISION \"MASTER\" {?s ?p ?o}"
+        		+ "	GRAPH <"+ds.graphName+"> REVISION \"master\" {?s ?p ?o}"
 				+ "} ORDER BY ?s ?p ?o";
         
         result = ep.sparql(format, query).getEntity().toString();
@@ -221,7 +227,7 @@ public class TestRevisionManagment {
 		RevisionGraph revisionGraph = new RevisionGraph(ds.graphName);
 
 		String expected, result;
-		BranchCommit referenceCommit = r43plesCore.createBranchCommit(revisionGraph, "v0.1", new Revision(revisionGraph, ds.revisions.get("master-3"), true), "test_user", "Version v0.1 published");
+		TagCommit tagCommit = r43plesCore.createTagCommit(revisionGraph, "v0.1", new Revision(revisionGraph, ds.revisions.get("master-3"), true), "test_user", "Version v0.1 published");
 
 		result = ep.sparql(format, String.format(query_template, ds.revisions.get("master-1"))).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev1.xml");

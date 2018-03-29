@@ -16,6 +16,7 @@ import de.tud.plt.r43ples.optimization.PathCalculationInterface;
 import org.apache.commons.configuration.ConfigurationException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ import static org.hamcrest.core.StringContains.containsString;
  * @author Markus Graube
  *
  */
+@Ignore
 public class MergeManagementTest {
 
 	/** The data set generation result. **/

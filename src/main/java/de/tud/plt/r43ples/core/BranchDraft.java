@@ -42,10 +42,13 @@ public class BranchDraft extends ReferenceDraft {
     protected Branch createInTripleStore() throws InternalErrorException {
         logger.info("Create new branch for graph " + getRevisionGraph().getGraphName() + ".");
 
-        addMetaInformation();
 
         // Create full graph
         getTripleStoreInterface().executeCreateGraph(getReferencedFullGraphURI());
+        // Create full graph for this branch
+        FullGraph fullGraph = new FullGraph(getRevisionGraph(), this.getReferencedRevision(), this.getReferencedFullGraphURI());
+
+        addMetaInformation();
 
         return new Branch(getRevisionGraph(), getReferenceIdentifier(), getReferenceURI(), getReferencedFullGraphURI());
     }

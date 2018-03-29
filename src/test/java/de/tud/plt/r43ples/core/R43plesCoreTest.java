@@ -10,12 +10,8 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runners.MethodSorters;
-import org.junit.FixMethodOrder;
 
 import java.util.LinkedList;
 
@@ -29,14 +25,18 @@ import java.util.LinkedList;
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class R43plesCoreTest extends R43plesTest {
 
-    private TripleStoreInterface tripleStoreInterface;
+    static TripleStoreInterface tripleStoreInterface;
 
     private R43plesCore core = new R43plesCore();
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUpBefore()  throws Exception {
         Config.readConfig("r43ples.test.conf");
-        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+        tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+    }
+
+    @Before
+    public void setUp() {
         tripleStoreInterface.dropAllGraphs();
     }
 
@@ -53,7 +53,7 @@ public class R43plesCoreTest extends R43plesTest {
         RevisionGraph rg = new RevisionGraph(graphName);
 
         String result = rg.getContentOfRevisionGraph("TURTLE");
-        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_initial.ttl");
+        String expected = ResourceManagement.getContentFromResource("core/R43plesCore/revisiongraph_initial.ttl");
 
         Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
         Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
@@ -83,7 +83,7 @@ public class R43plesCoreTest extends R43plesTest {
         RevisionGraph rg = new RevisionGraph("http://example.com/test");
 
         String result = rg.getContentOfRevisionGraph("TURTLE");
-        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_initial.ttl");
+        String expected = ResourceManagement.getContentFromResource("core/R43plesCore/revisiongraph_initial.ttl");
 
         Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
         Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
@@ -386,7 +386,7 @@ public class R43plesCoreTest extends R43plesTest {
         allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-revisions");
         allGraphs.add("http://example.com/test-addSet-0-1");
         allGraphs.add("http://example.com/test-develop");
-        assertListAll(allGraphs,tripleStoreInterface);
+        assertListAll(allGraphs, tripleStoreInterface);
         // R43ples revisions
         String expected_r43ples = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Branch/r43ples-revisions_branchcommit.ttl");
         assertContentOfGraph("http://eatld.et.tu-dresden.de/r43ples-revisions", expected_r43ples);
