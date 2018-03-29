@@ -37,14 +37,13 @@ public class SparqlRewriter {
 	private static final Logger logger = Logger.getLogger(SparqlRewriter.class);
 
 	private static final String rmo = "http://eatld.et.tu-dresden.de/rmo#";
-	private static final String prov = "http://www.w3.org/ns/prov#";
-
 	private static final Node rmo_Revision = NodeFactory.createURI(rmo + "Revision");
 	private static final Node rmo_deleteSet = NodeFactory.createURI(rmo + "deleteSet");
 	private static final Node rmo_addSet = NodeFactory.createURI(rmo + "addSet");
 	private static final Node rmo_fullGraph = NodeFactory.createURI(rmo + "fullGraph");
 	private static final Node rmo_references = NodeFactory.createURI(rmo + "references");
-	private static final Node prov_wasDerivedFrom = NodeFactory.createURI(prov + "wasDerivedFrom");
+	private static final Node rmo_wasDerivedFrom = NodeFactory.createURI(rmo + "wasDerivedFrom");
+	private static final Node rmo_hasChangeSet = NodeFactory.createURI(rmo + "hasChangeSet");
 
 
 
@@ -208,7 +207,9 @@ public class SparqlRewriter {
 			Node g_delete_set_full_graph = Var.alloc("g_delete_set_full_graph_" + statement_i);
 			Node g_add_set = Var.alloc("g_add_set_" + statement_i);
 			Node g_revisiongraph = NodeFactory.createURI(revisionGraph.getRevisionGraphUri());
-			
+
+			Var var_change_set_add = Var.alloc("change_set_add_" + statement_i);
+			Var var_change_set_del = Var.alloc("change_set_del_" + statement_i);
 			Var var_r_delete_set = Var.alloc("r_delete_set_" + statement_i);
 			Var var_r_add_set = Var.alloc("r_add_set_" + statement_i);
 
@@ -227,7 +228,8 @@ public class SparqlRewriter {
 
 			ElementGroup eg_delete_set = new ElementGroup();
 			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, RDF.type.asNode(), rmo_Revision));
-			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, rmo_deleteSet, g_delete_set_full_graph));
+			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, rmo_hasChangeSet, var_change_set_del));
+			eg_delete_set.addTriplePattern(new Triple(var_change_set_del, rmo_deleteSet, g_delete_set_full_graph));
 			eg_delete_set.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_delete_set),
 					expression_list_revision_path)));
 			eg_union.addElement(eg_delete_set);
@@ -235,11 +237,12 @@ public class SparqlRewriter {
 			
 			ElementGroup eg_revisiongraph2 = new ElementGroup();
 			ElementPathBlock ebp = new ElementPathBlock();	
-			ebp.addTriplePath(new TriplePath(var_r_delete_set, new P_ZeroOrMore1(new P_Link(prov_wasDerivedFrom)),
+			ebp.addTriplePath(new TriplePath(var_r_delete_set, new P_ZeroOrMore1(new P_Link(rmo_wasDerivedFrom)),
 					var_r_add_set));
 			eg_revisiongraph2.addElement(ebp);
 			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, RDF.type.asNode(), rmo_Revision));
-			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, rmo_addSet, g_add_set));
+			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, rmo_hasChangeSet, var_change_set_add));
+			eg_revisiongraph2.addTriplePattern(new Triple(var_change_set_add, rmo_addSet, g_add_set));
 			eg_revisiongraph2.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_add_set),
 					expression_list_revision_path)));			
 		
