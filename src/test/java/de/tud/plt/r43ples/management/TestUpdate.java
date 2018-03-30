@@ -88,21 +88,18 @@ public class TestUpdate extends R43plesTest {
 		String query = "SELECT ?s ?p ?o FROM <"+dsm.graphName+"> REVISION \"b2\"\n"
         		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
 		String result = ep.sparql(format, query).getEntity().toString();
-//        String expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2.xml");
-//        assertXMLEqual(expected, result);
-		String expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2.ttl");
-		//assertXMLEqual(expected, result);
-        assertIsomorphism(result, expected);
-        
+        String expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2.xml");
+        assertXMLEqual(expected, result);
+
 		// restructure commit to B2
 		logger.debug("Restructure commit to B2");
 		String query_restructure = String.format(""
 				+ "USER \"shensel\" %n"
 				+ "MESSAGE \"restructure commit to b2.\" %n"
-				+ "DELETE { GRAPH <%1$s> REVISION \"b2\" {"
+				+ "DELETE { GRAPH <%1$s> BRANCH \"b2\" {"
 				+ " <http://example.com/testS> <http://example.com/testP> ?o."
 				+ "} } %n"
-				+ "INSERT { GRAPH <%1$s> REVISION \"b2\" {"
+				+ "INSERT { GRAPH <%1$s> BRANCH \"b2\" {"
 				+ " <http://example.com/newTestS> <http://example.com/newTestP> ?o."
 				+ "} } %n"
 				+ "WHERE { GRAPH <%1$s> REVISION \"b2\" {"
@@ -110,7 +107,7 @@ public class TestUpdate extends R43plesTest {
 				+ "} }", 
 				dsm.graphName);
 		logger.debug("Execute query: \n" + query_restructure);
-		result = ep.sparql(format, query_restructure).toString();
+		ep.sparql(format, query_restructure).toString();
 		
 		result = ep.sparql(format, query).getEntity().toString();
 		logger.debug("Result: "+result);
@@ -129,13 +126,13 @@ public class TestUpdate extends R43plesTest {
 		String query_restructure = String.format(""
 				+ "USER \"shensel\" %n"
 				+ "MESSAGE \"restructure commit to b2.\" %n"
-				+ "INSERT { GRAPH <%1$s> REVISION \"b2\" {"
+				+ "INSERT { GRAPH <%1$s> BRANCH \"b2\" {"
 				+ " <http://example.com/newTestS> <http://example.com/newTestP> ?o."
 				+ "} } %n"
 				+ "WHERE { GRAPH <%1$s> REVISION \"b2\" {"
 				+ "	<http://example.com/testS> <http://example.com/testP> ?o"
 				+ "} };"
-				+ "DELETE { GRAPH <%1$s> REVISION \"b2\" {"
+				+ "DELETE { GRAPH <%1$s> BRANCH \"b2\" {"
 				+ " <http://example.com/testS> <http://example.com/testP> ?o."
 				+ "} } %n"
 				+ "WHERE { GRAPH <%1$s> REVISION \"b2\" {"

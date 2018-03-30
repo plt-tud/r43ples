@@ -110,7 +110,6 @@ public class R43plesTest {
 		Assert.assertTrue(check_isomorphism(model_result, model_expected));
 	}
 
-
 	/**
 	 * Checks if the content of a graph is isomorphic to the expected by using assertion.
 	 *
@@ -120,7 +119,6 @@ public class R43plesTest {
 	public void assertContentOfGraph(String graphURI, String expected) {
 		assertIsomorphism(RevisionManagementOriginal.getContentOfGraph(graphURI, "TURTLE"), expected);
 	}
-
 
 	/**
 	 * Checks the existence of all necessary graphs by using assertion.
@@ -140,6 +138,16 @@ public class R43plesTest {
 		if (!list.isEmpty()) {
 			Assert.fail("The following URIs can not be found in triple store: " + list.toArray().toString());
 		}
+	}
+
+	/**
+	 * Normalizes the line endings of a multi line string.
+	 *
+	 * @param s the string to normalize
+	 * @return the normalized string
+	 */
+	public String normalizeLineEndings(String s) {
+		return s.replace("\r\n", "\n").replace('\r', '\n');
 	}
 
 }

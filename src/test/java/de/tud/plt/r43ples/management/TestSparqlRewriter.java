@@ -1,8 +1,6 @@
-/**
- * 
- */
 package de.tud.plt.r43ples.management;
 
+import de.tud.plt.r43ples.R43plesTest;
 import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
 import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
@@ -16,7 +14,7 @@ import org.junit.Test;
  * @author Markus Graube
  *
  */
-public class TestSparqlRewriter {
+public class TestSparqlRewriter extends R43plesTest {
 
 	private static DataSetGenerationResult ds;
 	
@@ -44,7 +42,7 @@ public class TestSparqlRewriter {
 		String expected = String.format(
 				ResourceManagement.getContentFromResource("sparqlrewriter/rewritten-query1.rq"),
 				ds.revisions.get("master-5"), ds.revisions.get("master-4"), ds.revisions.get("master-3"));
-		Assert.assertEquals(expected, result);
+		Assert.assertEquals(normalizeLineEndings(expected), normalizeLineEndings(result));
 	}
 	
 	/**
@@ -67,7 +65,7 @@ public class TestSparqlRewriter {
 		String expected = String.format(
 				ResourceManagement.getContentFromResource("sparqlrewriter/rewritten-query2.rq"),
 				ds.revisions.get("master-5"), ds.revisions.get("master-4"), ds.revisions.get("master-3"));
-		Assert.assertEquals(expected, result);
+		Assert.assertEquals(normalizeLineEndings(expected), normalizeLineEndings(result));
 	}
 
 }
