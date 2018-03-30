@@ -127,7 +127,7 @@ public class Reference {
      * @throws InternalErrorException
      */
     private String calculateReferenceURI(String referenceIdentifier) throws InternalErrorException {
-        logger.info("Calculate the branch URI for current branch " + referenceIdentifier + ".");
+        logger.debug("Calculate the branch URI for current branch " + referenceIdentifier);
         String query = Config.prefixes + String.format(""
                 + "SELECT ?uri "
                 + "WHERE { GRAPH  <%s> {"
