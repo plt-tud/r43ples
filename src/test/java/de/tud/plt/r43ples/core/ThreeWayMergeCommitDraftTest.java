@@ -48,7 +48,7 @@ public class ThreeWayMergeCommitDraftTest extends R43plesTest {
 
         String result = RevisionManagementOriginal.getContentOfGraph(graphNameRevisionProgress, "TURTLE");
         String expected = ResourceManagement.getContentFromResource("dataset/dataset1/revision-progress-1-3.ttl");
-        Assert.assertEquals(expected, result);
+        assertIsomorphism(expected, result);
     }
 
     @Test
@@ -74,11 +74,11 @@ public class ThreeWayMergeCommitDraftTest extends R43plesTest {
 
         String resultFrom = RevisionManagementOriginal.getContentOfGraph(graphFrom, "TURTLE");
         String expectedFrom = ResourceManagement.getContentFromResource("dataset/dataset1/revision-progress-0-5.ttl");
-        Assert.assertTrue(this.check_isomorphism(expectedFrom, resultFrom));
+        assertIsomorphism(expectedFrom, resultFrom);
 
         String resultTo = RevisionManagementOriginal.getContentOfGraph(graphTo, "TURTLE");
         String expectedTo = ResourceManagement.getContentFromResource("dataset/dataset1/revision-progress-0-13.ttl");
-        Assert.assertEquals(expectedTo, resultTo);
+        assertIsomorphism(expectedTo, resultTo);
     }
 
 }
