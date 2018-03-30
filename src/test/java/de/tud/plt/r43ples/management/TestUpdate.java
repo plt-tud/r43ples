@@ -85,24 +85,27 @@ public class TestUpdate extends R43plesTest {
 	
 	@Test
 	public void testRestructuring() throws SAXException, IOException, InternalErrorException {
-		String query = "SELECT ?s ?p ?o FROM <"+dsm.graphName+"> REVISION \"B2\"\n"
+		String query = "SELECT ?s ?p ?o FROM <"+dsm.graphName+"> REVISION \"b2\"\n"
         		+ "WHERE {?s ?p ?o} ORDER BY ?s ?p ?o";
 		String result = ep.sparql(format, query).getEntity().toString();
-        String expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2.xml");
-        assertXMLEqual(expected, result);
+//        String expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2.xml");
+//        assertXMLEqual(expected, result);
+		String expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2.ttl");
+		//assertXMLEqual(expected, result);
+        assertIsomorphism(result, expected);
         
 		// restructure commit to B2
 		logger.debug("Restructure commit to B2");
 		String query_restructure = String.format(""
 				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"restructure commit to B2.\" %n"
-				+ "DELETE { GRAPH <%1$s> REVISION \"B2\" {"
+				+ "MESSAGE \"restructure commit to b2.\" %n"
+				+ "DELETE { GRAPH <%1$s> REVISION \"b2\" {"
 				+ " <http://example.com/testS> <http://example.com/testP> ?o."
 				+ "} } %n"
-				+ "INSERT { GRAPH <%1$s> REVISION \"B2\" {"
+				+ "INSERT { GRAPH <%1$s> REVISION \"b2\" {"
 				+ " <http://example.com/newTestS> <http://example.com/newTestP> ?o."
 				+ "} } %n"
-				+ "WHERE { GRAPH <%1$s> REVISION \"B2\" {"
+				+ "WHERE { GRAPH <%1$s> REVISION \"b2\" {"
 				+ "	<http://example.com/testS> <http://example.com/testP> ?o"
 				+ "} }", 
 				dsm.graphName);
@@ -117,32 +120,32 @@ public class TestUpdate extends R43plesTest {
 	
 	@Test
 	public void testRestructuringAlternative() throws SAXException, IOException, InternalErrorException {
-		String result = ep.sparql("text/turtle", createConstructQuery(dsm.graphName, "B2")).getEntity().toString();
+		String result = ep.sparql("text/turtle", createConstructQuery(dsm.graphName, "b2")).getEntity().toString();
 		String expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2.ttl");
 		assertTrue(check_isomorphism(result, "TURTLE", expected, "TURTLE"));
 
 		// restructure commit to B2 (change URI of subject and predicate)
-		logger.debug("Restructure commit to B2");
+		logger.debug("Restructure commit to b2");
 		String query_restructure = String.format(""
 				+ "USER \"shensel\" %n"
-				+ "MESSAGE \"restructure commit to B2.\" %n"
-				+ "INSERT { GRAPH <%1$s> REVISION \"B2\" {"
+				+ "MESSAGE \"restructure commit to b2.\" %n"
+				+ "INSERT { GRAPH <%1$s> REVISION \"b2\" {"
 				+ " <http://example.com/newTestS> <http://example.com/newTestP> ?o."
 				+ "} } %n"
-				+ "WHERE { GRAPH <%1$s> REVISION \"B2\" {"
+				+ "WHERE { GRAPH <%1$s> REVISION \"b2\" {"
 				+ "	<http://example.com/testS> <http://example.com/testP> ?o"
 				+ "} };"
-				+ "DELETE { GRAPH <%1$s> REVISION \"B2\" {"
+				+ "DELETE { GRAPH <%1$s> REVISION \"b2\" {"
 				+ " <http://example.com/testS> <http://example.com/testP> ?o."
 				+ "} } %n"
-				+ "WHERE { GRAPH <%1$s> REVISION \"B2\" {"
+				+ "WHERE { GRAPH <%1$s> REVISION \"b2\" {"
 				+ "	<http://example.com/testS> <http://example.com/testP> ?o"
 				+ "} }", 
 				dsm.graphName);
 		logger.debug("Execute query: \n" + query_restructure);
 		ep.sparql(format, query_restructure).toString();
 		
-		result = ep.sparql("text/turtle", createConstructQuery(dsm.graphName, "B2")).getEntity().toString();
+		result = ep.sparql("text/turtle", createConstructQuery(dsm.graphName, "b2")).getEntity().toString();
 		expected = ResourceManagement.getContentFromResource("dataset-merge/response-B2-restructured.ttl");
 		assertTrue(check_isomorphism(result, "TURTLE", expected, "TURTLE"));
 	}

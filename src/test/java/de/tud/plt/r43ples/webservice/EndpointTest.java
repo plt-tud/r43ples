@@ -34,7 +34,7 @@ public class EndpointTest extends R43plesTest {
     }
 
     @BeforeClass
-    public void setUpBeforeClass() throws Exception {
+    public static void setUpBeforeClass() throws Exception {
         Config.readConfig("r43ples.test.conf");
         ds1 = SampleDataSet.createSampleDataset1();
         ds2 = SampleDataSet.createSampleDataset2();
