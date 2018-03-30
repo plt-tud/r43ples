@@ -179,7 +179,7 @@ public class Endpoint {
 			@QueryParam("format") final String formatQuery, 
 			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
 			@HeaderParam("r43ples-revisiongraph") @DefaultValue("") final String revision_information,
-			@QueryParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
+			@QueryParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException, UnsupportedEncodingException {
 		String format;
 		try {
 			format = getFormat(formatQuery);
@@ -188,7 +188,7 @@ public class Endpoint {
 		}		
 		
 		logger.info("SPARQL GET query (format: "+format+", query: "+sparqlQuery +")");
-		return sparql(format, sparqlQuery, revision_information, query_rewriting);
+		return sparql(format, URLDecoder.decode(sparqlQuery, "UTF-8"), revision_information, query_rewriting);
 	}
 	
 	
