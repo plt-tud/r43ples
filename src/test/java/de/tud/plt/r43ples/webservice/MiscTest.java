@@ -83,13 +83,13 @@ public class MiscTest extends JerseyTest {
 	 */
 	@Test
 	public final void testGetRevisionGraph() {
-		String result = target("revisiongraph").queryParam("graph", dataset).queryParam("format", "text/turtle").request().get(String.class);
+		String result = target("revisiongraph").queryParam("graph", dataset.graphName).queryParam("format", "text/turtle").request().get(String.class);
 		Assert.assertThat(result, containsString("@prefix"));
 		
-		result = target("revisiongraph").queryParam("graph", dataset).queryParam("format", "table").request().get(String.class);
+		result = target("revisiongraph").queryParam("graph", dataset.graphName).queryParam("format", "table").request().get(String.class);
 		Assert.assertThat(result, containsString("<svg"));
 		
-		result = target("revisiongraph").queryParam("graph", dataset).queryParam("format", "graph").request().get(String.class);
+		result = target("revisiongraph").queryParam("graph", dataset.graphName).queryParam("format", "graph").request().get(String.class);
 		Assert.assertThat(result, containsString("<div id=\"visualisation\""));
 	}
 
@@ -99,10 +99,10 @@ public class MiscTest extends JerseyTest {
 	 */
 	@Test
 	public final void testGetContentOfGraph() {
-		String result = target("contentOfGraph").queryParam("graph", dataset).request().get(String.class);
+		String result = target("contentOfGraph").queryParam("graph", dataset.graphName).request().get(String.class);
 		Assert.assertThat(result, containsString("type"));
 		
-		result = target("contentOfGraph").queryParam("graph", dataset).queryParam("format", "text/turtle").request().get(String.class);
+		result = target("contentOfGraph").queryParam("graph", dataset.graphName).queryParam("format", "text/turtle").request().get(String.class);
 		Assert.assertThat(result, containsString("<http://"));
 	}
 	
