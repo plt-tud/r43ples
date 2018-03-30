@@ -33,7 +33,8 @@ public class MiscTest extends JerseyTest {
 
 	@Override
     protected Application configure() {
-        return new ResourceConfig(Misc.class);
+		set("jersey.config.test.container.port", "9996");
+		return new ResourceConfig(Misc.class);
     }
     
 	@BeforeClass

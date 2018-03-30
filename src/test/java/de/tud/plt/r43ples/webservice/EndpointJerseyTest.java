@@ -39,6 +39,7 @@ public class EndpointJerseyTest extends JerseyTest {
 	
     @Override
     protected Application configure() {
+		set("jersey.config.test.container.port", "9996");
         return new ResourceConfig(Endpoint.class, Misc.class, Merging.class);
     }
     

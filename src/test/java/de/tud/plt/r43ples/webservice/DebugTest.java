@@ -32,6 +32,7 @@ public class DebugTest extends JerseyTest {
 	
 	@Override
     protected Application configure() {
+		set("jersey.config.test.container.port", "9996");
         return new ResourceConfig(Debug.class);
     }
     
