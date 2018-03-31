@@ -176,7 +176,7 @@ public abstract class TripleStoreInterface {
 	
 	public abstract Iterator<String> getGraphs();
 
-	public abstract void dropAllGraphs();
+	public abstract void dropAllGraphsAndReInit();
 
 	
 }

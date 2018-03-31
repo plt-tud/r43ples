@@ -397,7 +397,7 @@ public class SampleDataSet {
 		String revisionB1_0 = commitB1_0.getGeneratedRevision().getRevisionIdentifier();
 
 		// Second commit to B1 - delete sub plant T4
-		DatasetGenerationManagement.executeDeleteWhereQuery(user, "Second commit to B1", graphName, revisionB1_0,
+		DatasetGenerationManagement.executeDeleteWhereQuery(user, "Second commit to B1", graphName, branchNameB1,
 				"<http://eatld.et.tu-dresden.de/batch/A3A5R07QZU> ?p ?o . \n");
 
 		// First commit to B2 - insert sub plant T4
@@ -405,7 +405,7 @@ public class SampleDataSet {
 		String revisionB2_0 = commitB2_0.getGeneratedRevision().getRevisionIdentifier();
 
 		// Second commit to B2 - delete armature V002
-		DatasetGenerationManagement.executeDeleteWhereQuery(user, "Second commit to B2", graphName,revisionB2_0,
+		DatasetGenerationManagement.executeDeleteWhereQuery(user, "Second commit to B2", graphName,branchNameB2,
 				"<http://eatld.et.tu-dresden.de/batch/A3A5R01TZU> ?p ?o . \n");
 
 		logger.info("Example graph <" + graphName +"> created.");

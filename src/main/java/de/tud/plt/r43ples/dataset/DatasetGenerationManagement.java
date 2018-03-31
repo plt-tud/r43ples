@@ -55,14 +55,12 @@ public class DatasetGenerationManagement {
 	 * @param revision the revision
 	 * @param triples the triples to insert
 	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws TemplateException 
 	 */
 	 public static void executeInsertQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
-				+ "INSERT DATA { GRAPH <%s> REVISION \"%s\" %n"
+				+ "INSERT DATA { GRAPH <%s> BRANCH \"%s\" %n"
 				+ "	{ %n"
 				+ "	  %s %n"
 				+ "	} %n"
@@ -85,7 +83,7 @@ public class DatasetGenerationManagement {
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
-				+ "DELETE DATA { GRAPH <%s> REVISION \"%s\" %n"
+				+ "DELETE DATA { GRAPH <%s> BRANCH \"%s\" %n"
 				+ "	{ %n"
 				+ "	  %s %n"
 				+ "	} %n"
@@ -108,12 +106,12 @@ public class DatasetGenerationManagement {
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
-				+ "DELETE { GRAPH <%s> REVISION \"%s\" %n"
+				+ "DELETE { GRAPH <%s> BRANCH \"%s\" %n"
 				+ "	{ %n"
 				+ "		%s %n"
 				+ "	} %n"
 				+ "}"
-				+ "WHERE { GRAPH <%s> REVISION \"%s\" %n"
+				+ "WHERE { GRAPH <%s> BRANCH \"%s\" %n"
 				+ "	{ %n"
 				+ "		%s %n"
 				+ "	} %n"
@@ -137,12 +135,12 @@ public class DatasetGenerationManagement {
 		String query = String.format(
 				  "USER \"%s\" %n"
 				+ "MESSAGE \"%s\" %n"
-				+ "INSERT DATA { GRAPH <%s> REVISION \"%s\" %n"
+				+ "INSERT DATA { GRAPH <%s> BRANCH \"%s\" %n"
 				+ "	{ %n"
 				+ "	  %s %n"
 				+ "	} %n"
 				+ "} ; %n"
-				+ "DELETE DATA { GRAPH <%s> REVISION \"%s\" %n"
+				+ "DELETE DATA { GRAPH <%s> BRANCH \"%s\" %n"
 				+ "	{ %n"
 				+ "	  %s %n"
 				+ "	} %n"

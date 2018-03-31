@@ -177,7 +177,7 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	}
 
 	@Override
-	public void dropAllGraphs() {
+	public void dropAllGraphsAndReInit() {
 		Iterator<String> list = getGraphs();
 		dataset.begin(ReadWrite.WRITE);
 		while(list.hasNext()) {
@@ -185,6 +185,7 @@ public class JenaTDBInterface extends TripleStoreInterface {
 		}
 		dataset.commit();
 		dataset.end();
+		init();
 	}
 	
 }

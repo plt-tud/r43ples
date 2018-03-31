@@ -37,7 +37,7 @@ public class R43plesCoreTest extends R43plesTest {
 
     @Before
     public void setUp() {
-        tripleStoreInterface.dropAllGraphs();
+        tripleStoreInterface.dropAllGraphsAndReInit();
     }
 
     @After
@@ -381,6 +381,7 @@ public class R43plesCoreTest extends R43plesTest {
         // Check all corresponding graphs
         // List all
         LinkedList<String> allGraphs = new LinkedList<>();
+        allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-sdd");
         allGraphs.add("http://example.com/test-revisiongraph");
         allGraphs.add("http://example.com/test");
         allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-revisions");
@@ -476,6 +477,7 @@ public class R43plesCoreTest extends R43plesTest {
         // Check all corresponding graphs
         // List all
         LinkedList<String> allGraphs = new LinkedList<>();
+        allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-sdd");
         allGraphs.add("http://example.com/test-revisiongraph");
         allGraphs.add("http://example.com/test");
         allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-revisions");
@@ -519,9 +521,10 @@ public class R43plesCoreTest extends R43plesTest {
         rg.purgeRevisionInformation();
     }
 
-    @Test
+    @Test @Ignore
     public void createThreeWayMergeCommit() {
         Assert.fail();
+        //TODO 3-Way-Merges are currently tested within merging/ThreeWayMergeTest
 //        Iterator<String> iterator = tripleStoreInterface.getGraphs();
 //        while (iterator.hasNext()) {
 //            System.out.println(iterator.next());

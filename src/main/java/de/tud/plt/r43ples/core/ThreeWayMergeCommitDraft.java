@@ -182,6 +182,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
         // Move branch to new revision
         moveBranchReference(getRevisionGraph().getRevisionGraphUri(), usedTargetBranch.getReferenceURI(), usedTargetRevision.getRevisionURI(), generatedRevision.getRevisionURI());
+        updateReferencedFullGraph(usedTargetBranch.getFullGraphURI(), generatedRevision.getChangeSets().get(0));
         // Update the target branch object
         usedTargetBranch = getRevisionGraph().getBranch(getBranchNameInto(), true);
 
@@ -366,14 +367,13 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
         String deletedTriplesB = getTripleStoreInterface().executeConstructQuery(queryRemovedTriplesB, FileUtils.langNTriple);
 
         // Create the merge revision and a change set
-        // TODO: perhaps addedTriplesA should be addedTriplesB; the same for deletedTriples
         RevisionDraft revisionDraft = new RevisionDraft(getRevisionManagement(), getRevisionGraph(), usedTargetBranch,
-                addedTriplesA, deletedTriplesA, false);
+                addedTriplesB, deletedTriplesB, false);
         Revision generatedRevision = revisionDraft.createInTripleStore();
 
         ChangeSetDraft changeSetDraftA = new ChangeSetDraft(getRevisionManagement(), getRevisionGraph(),
                 usedSourceBranch.getLeafRevision(), generatedRevision.getRevisionIdentifier(), usedSourceBranch.getReferenceURI(),
-                addedTriplesB, deletedTriplesB, false, false);
+                addedTriplesA, deletedTriplesA, false, false);
         ChangeSet changeSetA = changeSetDraftA.createInTripleStore();
 
         generatedRevision.addChangeSet(changeSetA);

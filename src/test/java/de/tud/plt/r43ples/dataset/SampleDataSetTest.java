@@ -10,6 +10,8 @@ import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -20,11 +22,15 @@ public class SampleDataSetTest extends R43plesTest {
 
     private final String queryTemplate = "CONSTRUCT {?s ?p ?o} WHERE { GRAPH <%s> REVISION \"%s\" {?s ?p ?o} }";
     private static R43plesCoreInterface r43plesCore;
+    /** The triple store interface. **/
+    private static TripleStoreInterface tripleStoreInterface;
 
     @BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		Config.readConfig("r43ples.test.conf");
         r43plesCore = R43plesCoreSingleton.getInstance();
+        tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+        tripleStoreInterface.dropAllGraphsAndReInit();
 	}
 
 	// TODO Add checks for the single revisions

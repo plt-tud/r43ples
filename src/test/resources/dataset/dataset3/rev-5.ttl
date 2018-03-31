@@ -1,10 +1,18 @@
-@prefix : <http://test.com/> .
+@prefix ex:    <http://example.com/> .
+@prefix test:  <http://test.com/> .
 
-:Adam :knows :Emma.
-:Adam :knows :Freddy.
-:Carlos :knows :Freddy.
-:Freddy :knows :Emma.
-:Stefan :knows :Paul.
-:Franz :knows :Paul.
-:Carlos :knows :Paul.
+test:Carlos  test:knows  test:Paul , test:Freddy .
 
+test:Heinrich  test:knows  test:Silvia .
+
+test:Franz  test:knows  test:Harry , test:Paul .
+
+test:Freddy  test:knows  test:Emma .
+
+test:Harry  test:knows  test:Waldtraut .
+
+test:Adam  test:knows  test:Freddy , test:Emma , test:Bob .
+
+test:Stefan  test:knows  test:Hans , test:Heinrich , test:Paul .
+
+test:Gertrude  test:knows  test:Kevin , test:Waldtraut .
