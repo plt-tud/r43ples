@@ -5,8 +5,15 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
+import de.tud.plt.r43ples.iohelper.ResourceManagement;
+import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.webservice.Endpoint;
 import org.apache.log4j.Logger;
+import org.junit.Assert;
+
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * This class provides the basic methods for test execution.
@@ -18,11 +25,10 @@ import org.apache.log4j.Logger;
 public class R43plesTest {
 
 	/** The logger. **/
-	private static Logger logger = Logger.getLogger(R43plesTest.class);
+	protected static Logger logger = Logger.getLogger(R43plesTest.class);
 	/** The endpoint. **/
 	protected final Endpoint ep = new Endpoint();
-		
-		
+
 	/**
      * Checks the isomorphism between two sets of triples - both in turtle serialization
      *
@@ -81,15 +87,67 @@ public class R43plesTest {
      */
     public Model removeTimeStampFromModel(Model model) {
         // Remove timestamp for test
-        Property provAtTime = model.getProperty("http://www.w3.org/ns/prov#atTime");
+        Property provAtTime = model.getProperty("http://eatld.et.tu-dresden.de/rmo#atTime");
         StmtIterator stmtIterator = model.listStatements(null, provAtTime, (RDFNode) null);
         model.remove(stmtIterator);
 
         return model;
     }
 
-	
-	
-	
-	
+	/**
+	 * Checks if the result and the expected graphs are isomorphic by using assertion.
+	 *
+	 * @param result the result graph as turtle
+	 * @param expected the expected graph as turtle
+	 */
+    public void assertIsomorphism(String result, String expected) {
+		Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
+		Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
+
+		this.removeTimeStampFromModel(model_result);
+		this.removeTimeStampFromModel(model_expected);
+
+		Assert.assertTrue(check_isomorphism(model_result, model_expected));
+	}
+
+	/**
+	 * Checks if the content of a graph is isomorphic to the expected by using assertion.
+	 *
+	 * @param graphURI the graph URI identifying the graph to check
+	 * @param expected the expected graph as turtle
+	 */
+	public void assertContentOfGraph(String graphURI, String expected) {
+		assertIsomorphism(RevisionManagementOriginal.getContentOfGraph(graphURI, "TURTLE"), expected);
+	}
+
+	/**
+	 * Checks the existence of all necessary graphs by using assertion.
+	 *
+	 * @param list the list of graph URIs
+	 */
+	public void assertListAll(LinkedList<String> list, TripleStoreInterface tripleStoreInterface) {
+		Iterator<String> iterator = tripleStoreInterface.getGraphs();
+		while (iterator.hasNext()) {
+			String next = iterator.next();
+			if (list.contains(next)) {
+				list.remove(next);
+			} else {
+				Assert.fail("The graph URI <" + next + "> is missing in the list of expected URIs.");
+			}
+		}
+		if (!list.isEmpty()) {
+			Assert.fail("The following URIs can not be found in triple store: " + list.toArray().toString());
+		}
+	}
+
+	/**
+	 * Normalizes the line endings of a multi line string.
+	 *
+	 * @param s the string to normalize
+	 * @return the normalized string
+	 */
+	public String normalizeLineEndings(String s) {
+		return s.replace("\r\n", "\n").replace('\r', '\n');
+	}
+
 }

@@ -3,12 +3,15 @@ package de.tud.plt.r43ples.core;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 
 /**
@@ -103,6 +106,46 @@ public class RevisionManagement {
     }
 
     /**
+     * Get a new full graph (named graph) URI.
+     *
+     * @param revisionGraph the revision graph
+     * @param referenceIdentifier the reference identifier
+     * @return the new full graph URI
+     * @throws InternalErrorException
+     */
+    protected String getNewFullGraphURI(RevisionGraph revisionGraph, String referenceIdentifier) throws InternalErrorException {
+        String fullGraphURI;
+        try {
+            fullGraphURI = revisionGraph.getGraphName() + "-" + URLEncoder.encode(referenceIdentifier, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            throw new InternalErrorException("The specified reference identifier could not be URL encoded.");
+        }
+
+        if (!checkNamedGraphExistence(fullGraphURI)) {
+            return fullGraphURI;
+        } else {
+            throw new InternalErrorException("The calculated full graph URI is already in use.");
+        }
+    }
+
+    /**
+     * Get a master full graph (named graph) URI.
+     *
+     * @param revisionGraph the revision graph
+     * @return the new full graph URI
+     * @throws InternalErrorException
+     */
+    protected String getMasterFullGraphURI(RevisionGraph revisionGraph) throws InternalErrorException {
+        String fullGraphURI = revisionGraph.getGraphName();
+        if (!checkNamedGraphExistence(fullGraphURI)) {
+            return fullGraphURI;
+        } else {
+            throw new InternalErrorException("The calculated full graph URI is already in use.");
+        }
+    }
+
+    /**
      * Get a new revision URI.
      *
      * @param revisionGraph      the corresponding revision graph
@@ -120,15 +163,44 @@ public class RevisionManagement {
     }
 
     /**
+     * Get a new change set URI.
+     *
+     * @param revisionGraph      the corresponding revision graph
+     * @param priorRevision      the prior revision
+     * @param newRevisionIdentifier the new revision identifier
+     * @return the new change set URI
+     * @throws InternalErrorException
+     */
+    protected String getNewChangeSetURI(RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier) throws InternalErrorException {
+        String changeSetURI;
+        if (priorRevision != null) {
+            changeSetURI = revisionGraph.getGraphName() + "-changeset-" + priorRevision.getRevisionIdentifier() + "-" + newRevisionIdentifier;
+        } else {
+            changeSetURI = revisionGraph.getGraphName() + "-changeset-" + newRevisionIdentifier;
+        }
+        if (!checkNamedGraphExistence(changeSetURI)) {
+            return changeSetURI;
+        } else {
+            throw new InternalErrorException("The calculated revision URI is already in use.");
+        }
+    }
+
+    /**
      * Get a new add set URI.
      *
      * @param revisionGraph      the corresponding revision graph
-     * @param revisionIdentifier the revision identifier of the corresponding revision
+     * @param priorRevision      the prior revision
+     * @param newRevisionIdentifier the new revision identifier
      * @return the new add set URI
      * @throws InternalErrorException
      */
-    protected String getNewAddSetURI(RevisionGraph revisionGraph, String revisionIdentifier) throws InternalErrorException {
-        String addSetURI = revisionGraph.getGraphName() + "-addSet-" + revisionIdentifier;
+    protected String getNewAddSetURI(RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier) throws InternalErrorException {
+        String addSetURI;
+        if (priorRevision != null) {
+            addSetURI = revisionGraph.getGraphName() + "-addSet-" + priorRevision.getRevisionIdentifier() + "-" + newRevisionIdentifier;
+        } else {
+            addSetURI = revisionGraph.getGraphName() + "-addSet-" + newRevisionIdentifier;
+        }
         if (!checkNamedGraphExistence(addSetURI)) {
             return addSetURI;
         } else {
@@ -140,12 +212,18 @@ public class RevisionManagement {
      * Get a new delete set URI.
      *
      * @param revisionGraph      the corresponding revision graph
-     * @param revisionIdentifier the revision identifier of the corresponding revision
+     * @param priorRevision      the prior revision
+     * @param newRevisionIdentifier the new revision identifier
      * @return the new delete set URI
      * @throws InternalErrorException
      */
-    protected String getNewDeleteSetURI(RevisionGraph revisionGraph, String revisionIdentifier) throws InternalErrorException {
-        String deleteSetURI = revisionGraph.getGraphName() + "-deleteSet-" + revisionIdentifier;
+    protected String getNewDeleteSetURI(RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier) throws InternalErrorException {
+        String deleteSetURI;
+        if (priorRevision != null) {
+            deleteSetURI = revisionGraph.getGraphName() + "-deleteSet-" + priorRevision.getRevisionIdentifier() + "-" + newRevisionIdentifier;
+        } else {
+            deleteSetURI = revisionGraph.getGraphName() + "-deleteSet-" + newRevisionIdentifier;
+        }
         if (!checkNamedGraphExistence(deleteSetURI)) {
             return deleteSetURI;
         } else {
@@ -162,12 +240,19 @@ public class RevisionManagement {
      * @throws InternalErrorException
      */
     protected String getNewBranchURI(RevisionGraph revisionGraph, String branchIdentifier) throws InternalErrorException {
-        String branchURI = revisionGraph.getGraphName() + "-branch-" + branchIdentifier;
+        String branchURI;
+        try {
+            branchURI = revisionGraph.getGraphName() + "-branch-" + URLEncoder.encode(branchIdentifier, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            throw new InternalErrorException("The specified branch identifier could not be URL encoded.");
+        }
+
         if (!checkNamedGraphExistence(branchURI)) {
             return branchURI;
         } else {
             throw new InternalErrorException("The calculated branch URI is already in use.");
-        }
+    }
     }
 
     /**
@@ -195,7 +280,14 @@ public class RevisionManagement {
      * @throws InternalErrorException
      */
     protected String getNewTagURI(RevisionGraph revisionGraph, String tagIdentifier) throws InternalErrorException {
-        String tagURI = revisionGraph.getGraphName() + "-tag-" + tagIdentifier;
+        String tagURI;
+        try {
+            tagURI = revisionGraph.getGraphName() + "-tag-" + URLEncoder.encode(tagIdentifier, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            throw new InternalErrorException("The specified tag identifier could not be URL encoded.");
+        }
+
         if (!checkNamedGraphExistence(tagURI)) {
             return tagURI;
         } else {
@@ -287,7 +379,14 @@ public class RevisionManagement {
      * @throws InternalErrorException
      */
     protected String getNewBranchCommitURI(RevisionGraph revisionGraph, String branchIdentifier) throws InternalErrorException {
-        String commitURI = revisionGraph.getGraphName() + "-commit-branch-" + branchIdentifier;
+        String commitURI;
+        try {
+            commitURI = revisionGraph.getGraphName() + "-commit-branch-" + URLEncoder.encode(branchIdentifier, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            throw new InternalErrorException("The specified branch identifier could not be URL encoded.");
+        }
+
         if (!checkNamedGraphExistence(commitURI)) {
             return commitURI;
         } else {
@@ -304,7 +403,14 @@ public class RevisionManagement {
      * @throws InternalErrorException
      */
     protected String getNewTagCommitURI(RevisionGraph revisionGraph, String tagIdentifier) throws InternalErrorException {
-        String commitURI = revisionGraph.getGraphName() + "-commit-tag-" + tagIdentifier;
+        String commitURI;
+        try {
+            commitURI = revisionGraph.getGraphName() + "-commit-tag-" + URLEncoder.encode(tagIdentifier, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            throw new InternalErrorException("The specified tag identifier could not be URL encoded.");
+        }
+
         if (!checkNamedGraphExistence(commitURI)) {
             return commitURI;
         } else {

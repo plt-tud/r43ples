@@ -9,6 +9,7 @@ import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.xml.sax.SAXException;
 
@@ -23,6 +24,7 @@ import static org.junit.Assert.assertTrue;
  * @author Xinyu Yang
  * @author Stephan Hensel
  */
+@Ignore
 public class FastForwardMergeTest extends R43plesTest {
 
 	/** The graph name. **/

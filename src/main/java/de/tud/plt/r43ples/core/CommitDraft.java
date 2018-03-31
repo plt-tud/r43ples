@@ -1,6 +1,7 @@
 package de.tud.plt.r43ples.core;
 
 import de.tud.plt.r43ples.exception.OutdatedException;
+import de.tud.plt.r43ples.existentobjects.ChangeSet;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
@@ -214,6 +215,23 @@ public class CommitDraft {
 						+ "INSERT DATA { GRAPH <%1$s> { <%2$s> rmo:references <%4$s>. } }",
 				revisionGraphURI, branchURI, revisionUriOld, revisionUriNew);
 		getTripleStoreInterface().executeUpdateQuery(query);
+	}
+
+	/**
+	 * Updates the referenced full graph by using the stripped add and delete sets.
+	 *
+	 * @param referencedFullGraphURI the referenced full graph URI
+	 * @param changeSet the change set
+	 */
+	protected void updateReferencedFullGraph(String referencedFullGraphURI, ChangeSet changeSet) {
+		// merge change sets into reference graph
+		// (copy add set to reference graph; remove delete set from reference graph)
+		tripleStoreInterface.executeUpdateQuery(String.format(
+				"INSERT { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }",
+				referencedFullGraphURI, changeSet.getAddSetURI()));
+		tripleStoreInterface.executeUpdateQuery(String.format(
+				"DELETE { GRAPH <%s> { ?s ?p ?o. } } WHERE { GRAPH <%s> { ?s ?p ?o. } }",
+				referencedFullGraphURI, changeSet.getDeleteSetURI()));
 	}
 
 }

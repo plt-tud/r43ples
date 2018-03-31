@@ -1,9 +1,8 @@
 package de.tud.plt.r43ples.core;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.existentobjects.Revision;
-import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.existentobjects.*;
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
@@ -19,31 +18,39 @@ public class RevisionDraft {
 
     /** The logger. **/
     private Logger logger = Logger.getLogger(RevisionDraft.class);
-    /** The revision identifier of the revision from which the new one should be derive from. **/
-    private String derivedFromRevisionIdentifier;
-    /** The derived from identifier. (The revision identifier of the revision or the reference identifier from which the new revision should be derive from.) **/
-    private String derivedFromIdentifier;
+
+    /** The branch were the new revision should be created **/
+    private Branch branch;
+    /** The revision from which the new one should be derive from. **/
+    private Revision derivedFromRevision;
+
     /** The revision identifier of the revision which should be created. **/
     private String newRevisionIdentifier;
     /** The revision URI. **/
     private String revisionURI;
-    /** The ADD set URI. */
-    private String addSetURI;
-    /** The DELETE set URI. */
-    private String deleteSetURI;
+
     /** The referenced full graph. **/
     private String referenceFullGraph;
     /** The add set as N-Triples. **/
     private String addSet;
     /** The delete set as N-Triples. **/
     private String deleteSet;
+    /** The add set URI. **/
+    private String addSetURI;
+    /** The delete set URI. **/
+    private String deleteSetURI;
 
-    /** The revision graph URI. */
-    private String revisionGraphURI;
     /** The corresponding revision graph. */
     private RevisionGraph revisionGraph;
     /** The current revision management instance. */
     private RevisionManagement revisionManagement;
+
+    /** The created change set. **/
+    private ChangeSet changeSet;
+    /** States if the add and delete sets were already stripped regarding the prior revision. **/
+    private boolean isStripped;
+    /** States if the the content of the add and delete sets will be specified by a following rewritten query (in that case add and delete set can be null but the corresponding graphs will be created anyway). **/
+    private boolean isSpecifiedByRewrittenQuery;
 
     // Dependencies
     /** The triple store interface to use. **/
@@ -55,64 +62,40 @@ public class RevisionDraft {
      *
      * @param revisionManagement the current revision management instance
      * @param revisionGraph the revision graph
-     * @param derivedFromIdentifier the revision identifier of the revision or the reference identifier from which the new revision should be derive from
+     * @param branch the branch were the new revision should be created
      * @param addSet the add set of the revision as N-Triples
      * @param deleteSet the delete set of the revision as N-Triples
+     * @param isStripped states if the add and delete sets were already stripped regarding the prior revision
      * @throws InternalErrorException
      */
-    public RevisionDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, String derivedFromIdentifier, String addSet, String deleteSet) throws InternalErrorException {
+    protected RevisionDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, Branch branch, String addSet, String deleteSet, boolean isStripped) throws InternalErrorException {
         // Dependencies
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 
         this.revisionManagement = revisionManagement;
         this.revisionGraph = revisionGraph;
-        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
-		this.derivedFromRevisionIdentifier = revisionGraph.getRevisionIdentifier(derivedFromIdentifier);
-		this.derivedFromIdentifier = derivedFromIdentifier;
+
+		this.branch = branch;
+        this.derivedFromRevision = revisionGraph.getRevision(branch);
+
      	this.newRevisionIdentifier = revisionGraph.getNextRevisionIdentifier();
-
      	this.revisionURI = this.revisionManagement.getNewRevisionURI(revisionGraph, newRevisionIdentifier);
-		this.addSetURI = this.revisionManagement.getNewAddSetURI(revisionGraph, newRevisionIdentifier);
-		this.deleteSetURI = this.revisionManagement.getNewDeleteSetURI(revisionGraph, newRevisionIdentifier);
 
-		this.referenceFullGraph = revisionGraph.getReferenceGraph(derivedFromIdentifier);
+		this.referenceFullGraph = branch.getFullGraphURI();
 
 		this.addSet = addSet;
 		this.deleteSet = deleteSet;
+
+        this.addSetURI = null;
+        this.deleteSetURI = null;
+
+		this.isStripped = isStripped;
+		this.isSpecifiedByRewrittenQuery = false;
 	}
 
-    /**
-     * The constructor. Add and delete sets must be generated by commit.
-     *
-     * @param revisionManagement the current revision management instance
-     * @param revisionGraph the revision graph
-     * @param derivedFromIdentifier the revision identifier of the revision or the reference identifier from which the new revision should be derive from
-     * @throws InternalErrorException
-     */
-    public RevisionDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, String derivedFromIdentifier) throws InternalErrorException {
-        // Dependencies
-        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
-
-        this.revisionManagement = revisionManagement;
-        this.revisionGraph = revisionGraph;
-        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
-        this.derivedFromRevisionIdentifier = revisionGraph.getRevisionIdentifier(derivedFromIdentifier);
-        this.derivedFromIdentifier = derivedFromIdentifier;
-        this.newRevisionIdentifier = revisionGraph.getNextRevisionIdentifier();
-
-        this.revisionURI = this.revisionManagement.getNewRevisionURI(revisionGraph, newRevisionIdentifier);
-        this.addSetURI = this.revisionManagement.getNewAddSetURI(revisionGraph, newRevisionIdentifier);
-        this.deleteSetURI = this.revisionManagement.getNewDeleteSetURI(revisionGraph, newRevisionIdentifier);
-
-        this.referenceFullGraph = revisionGraph.getReferenceGraph(derivedFromIdentifier);
-
-        this.addSet = null;
-        this.deleteSet = null;
-    }
 
     /**
-     * The constructor.
-     * Usage only for initial commit (there is no derived from revision identifier, initial revision identifier will be calculated).
+     * The constructor. Usage only for initial commit (there is no derived from revision/branch, initial revision identifier will be calculated).
      * Add and delete sets can be specified which are associated with this revision.
      *
      * @param revisionManagement the current revision management instance
@@ -121,88 +104,166 @@ public class RevisionDraft {
      * @param deleteSet the delete set of the revision as N-Triples
      * @throws InternalErrorException
      */
-    public RevisionDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, String addSet, String deleteSet) throws InternalErrorException {
+    protected RevisionDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, String addSet, String deleteSet) throws InternalErrorException {
         // Dependencies
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 
         this.revisionManagement = revisionManagement;
         this.revisionGraph = revisionGraph;
-        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
+
+        this.branch = null;
+        this.derivedFromRevision = null;
+
         this.newRevisionIdentifier = revisionGraph.getNextRevisionIdentifier();
-
         this.revisionURI = this.revisionManagement.getNewRevisionURI(revisionGraph, newRevisionIdentifier);
-        this.addSetURI = this.revisionManagement.getNewAddSetURI(revisionGraph, newRevisionIdentifier);
-        this.deleteSetURI = this.revisionManagement.getNewDeleteSetURI(revisionGraph, newRevisionIdentifier);
 
-        this.referenceFullGraph = revisionGraph.getGraphName();
+        this.referenceFullGraph = null;
 
         this.addSet = addSet;
         this.deleteSet = deleteSet;
+
+        this.addSetURI = null;
+        this.deleteSetURI = null;
+
+        this.isStripped = true;
+        this.isSpecifiedByRewrittenQuery = false;
+    }
+
+
+    /**
+     * The constructor. Add and delete sets must be generated by commit.
+     *
+     * @param revisionManagement the current revision management instance
+     * @param revisionGraph the revision graph
+     * @param branch the branch were the new revision should be created
+     * @throws InternalErrorException
+     */
+    protected RevisionDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, Branch branch) throws InternalErrorException {
+        // Dependencies
+        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+
+        this.revisionManagement = revisionManagement;
+        this.revisionGraph = revisionGraph;
+
+        this.branch = branch;
+        this.derivedFromRevision = revisionGraph.getRevision(branch);
+
+        this.newRevisionIdentifier = revisionGraph.getNextRevisionIdentifier();
+        this.revisionURI = this.revisionManagement.getNewRevisionURI(revisionGraph, newRevisionIdentifier);
+
+        this.referenceFullGraph = branch.getFullGraphURI();
+
+        this.addSet = null;
+        this.deleteSet = null;
+
+        this.addSetURI = null;
+        this.deleteSetURI = null;
+
+        this.isStripped = true;
+        this.isSpecifiedByRewrittenQuery = true;
+    }
+
+
+    /**
+     * The constructor. Add and delete set URIs can be specified which are associated with this revision.
+     *
+     * @param revisionManagement the current revision management instance
+     * @param revisionGraph the revision graph
+     * @param branch the branch were the new revision should be created
+     * @param addSetURI the add set URI of the revision
+     * @param deleteSetURI the delete set URI of the revision
+     * @throws InternalErrorException
+     */
+    protected RevisionDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, Branch branch, String addSetURI, String deleteSetURI) throws InternalErrorException {
+        // Dependencies
+        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+
+        this.revisionManagement = revisionManagement;
+        this.revisionGraph = revisionGraph;
+
+        this.branch = branch;
+        this.derivedFromRevision = revisionGraph.getRevision(branch);
+
+        this.newRevisionIdentifier = revisionGraph.getNextRevisionIdentifier();
+        this.revisionURI = this.revisionManagement.getNewRevisionURI(revisionGraph, newRevisionIdentifier);
+
+        this.referenceFullGraph = branch.getFullGraphURI();
+
+        this.addSet = null;
+        this.deleteSet = null;
+
+        this.addSetURI = addSetURI;
+        this.deleteSetURI = deleteSetURI;
+
+        this.isStripped = true;
+        this.isSpecifiedByRewrittenQuery = false;
+    }
+
+
+    /**
+     * Creates the revision draft with all meta data and named graphs in the triplestore.
+     * Creates change set and adds meta information.
+     *
+     * @return the created change set
+     */
+    protected Revision createInTripleStore() throws InternalErrorException {
+        logger.info("Create new revision for graph " + revisionGraph.getGraphName() + ".");
+
+        ChangeSetDraft changeSetDraft;
+
+        if ((addSetURI == null) && (deleteSetURI == null)) {
+            changeSetDraft = new ChangeSetDraft(revisionManagement, revisionGraph, derivedFromRevision, newRevisionIdentifier, referenceFullGraph, addSet, deleteSet, isStripped, isSpecifiedByRewrittenQuery);
+        } else {
+            changeSetDraft = new ChangeSetDraft(revisionManagement, revisionGraph, derivedFromRevision, newRevisionIdentifier, referenceFullGraph, addSetURI, deleteSetURI);
+        }
+        this.changeSet = changeSetDraft.createInTripleStore();
+
+        addMetaInformation();
+
+        return new Revision(revisionGraph, newRevisionIdentifier, revisionURI, changeSet, branch);
     }
 
     /**
-     * Creates the revision draft as a new revision in the triplestore and updates the referenced full graph.
-     * Does not update any meta data.
+     * Adds meta information of the created revision to the revision graph.
      *
-     * @return the created revision
+     * @throws InternalErrorException
      */
-    public Revision createRevisionInTripleStore() throws InternalErrorException {
-        logger.info("Create new revision for graph " + revisionGraph.getGraphName() + ".");
-
-        if (addSet!=null && !addSet.isEmpty()) {
-            // Update full graph of branch
-            RevisionManagementOriginal.executeINSERT(referenceFullGraph, addSet);
-
-            // Create new graph with addSet-newRevisionNumber
-            logger.debug("Create new graph with name " + addSetURI + ".");
-            tripleStoreInterface.executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n", addSetURI));
-            RevisionManagementOriginal.executeINSERT(addSetURI, addSet);
+    private void addMetaInformation() throws InternalErrorException {
+        // The derived from revision could be null because of the initial commit
+        String queryContent;
+        if (derivedFromRevision != null) {
+            queryContent = String.format(
+                    "<%s> a rmo:Revision, rmo:Entity ;"
+                            + "	rmo:revisionIdentifier \"%s\" ;"
+                            + "	rmo:wasDerivedFrom <%s> ;"
+                            + "	rmo:hasChangeSet <%s> .",
+                    revisionURI, newRevisionIdentifier, derivedFromRevision.getRevisionURI(), changeSet.getChangeSetURI());
+        } else {
+            queryContent = String.format(
+                    "<%s> a rmo:Revision, rmo:Entity ;"
+                            + "	rmo:revisionIdentifier \"%s\" ;"
+                            + "	rmo:hasChangeSet <%s> .",
+                    revisionURI, newRevisionIdentifier, changeSet.getChangeSetURI());
         }
+        String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisionGraph.getRevisionGraphUri(), queryContent);
 
-        if (deleteSet!=null && !deleteSet.isEmpty()) {
-            // Update full graph of branch
-            RevisionManagementOriginal.executeDELETE(referenceFullGraph, deleteSet);
-
-            // Create new graph with deleteSet-newRevisionNumber
-            logger.debug("Create new graph with name " + deleteSetURI + ".");
-            tripleStoreInterface.executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n", deleteSetURI));
-            RevisionManagementOriginal.executeINSERT(deleteSetURI, deleteSet);
-        }
-
-        return new Revision(revisionGraph, newRevisionIdentifier, revisionURI, addSetURI, deleteSetURI);
+        tripleStoreInterface.executeUpdateQuery(queryRevision);
     }
 
     /**
      * Checks if this revision draft is equal to another one.
      *
      * @param graphName the graph name
-     * @param revisionIdentifier the revision identifier
+     * @param branchIdentifier the branch identifier
      * @return true if the revision is equal
      * @throws InternalErrorException
      */
-    public boolean equals(final String graphName, final String revisionIdentifier) throws InternalErrorException{
+    public boolean equals(final String graphName, final String branchIdentifier) throws InternalErrorException{
 		RevisionGraph otherGraph = new RevisionGraph(graphName);
-		String otherRevisionNumber = otherGraph.getRevisionIdentifier(revisionIdentifier);
-		return ((this.revisionGraph.getGraphName().equals(graphName)) && (this.derivedFromRevisionIdentifier.equals(otherRevisionNumber)));
-	}
-
-    /**
-     * Get the add set URI.
-     *
-     * @return the add set URI
-     */
-    public String getAddSetURI() {
-        return addSetURI;
-    }
-
-    /**
-     * Get the delete set URI.
-     *
-     * @return the delete set URI
-     */
-    public String getDeleteSetURI() {
-        return deleteSetURI;
-    }
+		//String otherRevisionNumber = otherGraph.getRevisionIdentifier(revisionIdentifier);
+		return ((this.revisionGraph.getGraphName().equals(graphName)) && (this.getBranch().getReferenceIdentifier().equals(branchIdentifier)));
+        //(this.derivedFromRevision.getRevisionIdentifier().equals(otherRevisionNumber)));
+	} //TODO
 
     /**
      * Get the revision graph.
@@ -232,21 +293,21 @@ public class RevisionDraft {
     }
 
     /**
-     * Get the derived from revision identifier.
+     * Get the derived from revision.
      *
-     * @return the derived from revision identifier
+     * @return the derived from revision
      */
-    public String getDerivedFromRevisionIdentifier() {
-        return derivedFromRevisionIdentifier;
+    public Revision getDerivedFromRevision() {
+        return derivedFromRevision;
     }
 
     /**
-     * Get the derived from identifier. (The revision identifier of the revision or the reference identifier from which the new revision should be derive from.)
+     * Get the corresponding branch.
      *
-     * @return the derived from identifier
+     * @return the branch
      */
-    public String getDerivedFromIdentifier() {
-        return derivedFromIdentifier;
+    public Branch getBranch() {
+        return branch;
     }
 
     /**
@@ -256,6 +317,15 @@ public class RevisionDraft {
      */
     public String getReferenceFullGraph() {
         return referenceFullGraph;
+    }
+
+    /**
+     * Get the change set.
+     *
+     * @return the change set
+     */
+    public ChangeSet getChangeSet() {
+        return changeSet;
     }
 
 }

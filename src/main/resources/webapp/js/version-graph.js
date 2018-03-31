@@ -442,7 +442,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
                     if (value["http://eatld.et.tu-dresden.de/rmo#addSet"]){
                     	revisions[key].addSet = value["http://eatld.et.tu-dresden.de/rmo#addSet"][0].value;
                     }
-                    revisions[key].revisionNumber = value["http://eatld.et.tu-dresden.de/rmo#revisionNumber"][0].value;
+                    revisions[key].revisionNumber = value["http://eatld.et.tu-dresden.de/rmo#revisionIdentifier"][0].value;
                     revisions[key].belongsTo = value["http://eatld.et.tu-dresden.de/rmo#belongsTo"][0].value;
                     break;
                 // Falls Branch

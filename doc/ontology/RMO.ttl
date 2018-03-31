@@ -277,6 +277,13 @@ rmo:RevisionCommit rdf:type owl:Class ;
                    rdfs:subClassOf rmo:Commit ;
                    rdfs:label "Revision Commit"@de ,
                               "revision commit"@en .
+															
+															
+###  http://eatld.et.tu-dresden.de/rmo#RevertCommit
+rmo:RevertCommit rdf:type owl:Class ;
+                   rdfs:subClassOf rmo:Commit ;
+                   rdfs:label "Revert Commit"@de ,
+                              "revert commit"@en .
 
 
 ###  http://eatld.et.tu-dresden.de/rmo#Tag

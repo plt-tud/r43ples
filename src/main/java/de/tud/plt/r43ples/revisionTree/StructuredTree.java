@@ -60,10 +60,10 @@ public class StructuredTree {
 						"SELECT ?branch ?title ?commit%n"
 						+ "WHERE { GRAPH <%s> { %n"
 						+ "  ?branch a rmo:Branch;%n"
-						+ "     rdfs:label ?title;%n"
+						+ "     rmo:referenceIdentifier ?title;%n"
 						+ "     rmo:references ?rev."
 						+ "  ?commit a rmo:RevisionCommit;%n"
-						+ "     prov:generated ?rev.%n"
+						+ "     rmo:generated ?rev.%n"
 						+ "} }", revisionGraph);
 
 		ResultSet resultsBranches = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryBranches);
@@ -82,10 +82,10 @@ public class StructuredTree {
 						"SELECT ?tag ?title ?commit%n"
 						+ "WHERE { GRAPH <%s> {%n"
 						+ "?tag a rmo:Tag;%n"
-						+ "rdfs:label ?title;%n"
+						+ "rmo:referenceIdentifier ?title;%n"
 						+ "rmo:references ?rev."
 						+ "?commit a rmo:TagCommit;%n"
-						+ "prov:generated ?rev.%n"
+						+ "rmo:generated ?rev.%n"
 						+ "} }", revisionGraph);
 
 		ResultSet resultsTags = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryBranches);
@@ -119,16 +119,16 @@ public class StructuredTree {
 						"SELECT ?commit ?time ?prev ?next ?title ?authname ?branch%n"
 						+ "WHERE { GRAPH <%s> {%n"
 						+ "?commit a rmo:RevisionCommit;%n"
-						+ "dc-terms:title ?title;%n"
-						+ "prov:used ?reva;%n"
-						+ "prov:generated ?revb;%n"
-						+ "prov:atTime ?time;%n"
-						+ "prov:wasAssociatedWith ?author.%n"
+						+ "rmo:commitMessage ?title;%n"
+						+ "rmo:used ?reva;%n"
+						+ "rmo:generated ?revb;%n"
+						+ "rmo:atTime ?time;%n"
+						+ "rmo:wasAssociatedWith ?author.%n"
 						+ "OPTIONAL { ?author rdfs:label ?authname. }%n"
-						+ "?reva rmo:revisionNumber ?prev.%n"
-						+ "?revb rmo:revisionNumber ?next."
+						+ "?reva rmo:revisionIdentifier ?prev.%n"
+						+ "?revb rmo:revisionIdentifier ?next."
 						+ "OPTIONAL { ?revb rmo:belongsTo ?branch. }%n"
-						+ "} }",
+						+ "} }",//TODO belongsTo does not exist any more
 						revisionGraph);
 		
 		ResultSet resultsCommits = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryCommits);

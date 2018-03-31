@@ -4,7 +4,7 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import org.apache.log4j.Logger;
 
 /**
- * Provides information of an already existent commit.
+ * Provides information of an already existent update commit.
  *
  * @author Stephan Hensel
  */

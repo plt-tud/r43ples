@@ -105,7 +105,7 @@ public class RevisionGraph {
 						+ "ASK { GRAPH <%s> { " 
 						+ " ?rev a rmo:Revision. "
 						+ " ?ref a rmo:Reference; rmo:references ?rev ."
-						+ " { ?rev rmo:revisionNumber \"%s\"} UNION { ?ref rdfs:label \"%s\"} }} ",
+						+ " { ?rev rmo:revisionIdentifier \"%s\"} UNION { ?ref rmo:referenceIdentifier \"%s\"} }} ",
 						revisionGraph, identifier, identifier);
 		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
 	}
@@ -121,7 +121,7 @@ public class RevisionGraph {
 	public boolean hasReference(final String referenceName) {
 		String revisionGraph = this.getRevisionGraphUri();
 		String queryASK = Config.prefixes
-				+ String.format("ASK { GRAPH <%s> { ?ref a rmo:Reference; rdfs:label \"%s\".  }} ",
+				+ String.format("ASK WHERE { GRAPH <%s> { ?ref a rmo:Reference; rmo:referenceIdentifier \"%s\".  }} ",
 						revisionGraph, referenceName);
 		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
 	}
@@ -144,7 +144,7 @@ public class RevisionGraph {
 				+ "		rmo:references ?rev;" 
 				+ "		rmo:fullGraph ?graph."
 				+ " ?rev a rmo:Revision."
-				+ "	{?ref rdfs:label \"%s\"} UNION {?rev rmo:revisionNumber \"%s\"}" 
+				+ "	{?ref rmo:referenceIdentifier \"%s\"} UNION {?rev rmo:revisionIdentifier \"%s\"}"
 				+ "} }", revisionGraph, referenceIdentifier, referenceIdentifier);
 		this.logger.debug(query);
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
@@ -152,7 +152,7 @@ public class RevisionGraph {
 			QuerySolution qs = resultSet.next();
 			return qs.getResource("?graph").toString();
 		} else {
-			throw new InternalErrorException("No reference graph found for graph <"+graphName+"> and identifier \""+ referenceIdentifier+"\"");
+			throw new InternalErrorException("No reference graph found for graph <" + graphName + "> and identifier \"" + referenceIdentifier + "\"");
 		}
 	}
 	
@@ -167,15 +167,15 @@ public class RevisionGraph {
 
 		String revisionGraph = this.getRevisionGraphUri();
 		String queryString = Config.prefixes + String.format(""
-				+ "SELECT ?revisionNumber "
+				+ "SELECT ?revisionIdentifier "
 				+ "WHERE { GRAPH <%s> {"
 				+ "	?master a rmo:Master; rmo:references ?revision . "
-				+ " ?revision rmo:revisionNumber ?revisionNumber ."
+				+ " ?revision rmo:revisionIdentifier ?revisionIdentifier ."
 				+ "} }", revisionGraph);
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryString);
 		if (results.hasNext()){
 			QuerySolution qs = results.next();
-			return this.getRevision(qs.getLiteral("?revisionNumber").toString());
+			return this.getRevision(qs.getLiteral("?revisionIdentifier").toString());
 		}
 		else {
             throw new InternalErrorException("No master for graph <" + this.graphName + "> available");
@@ -197,7 +197,7 @@ public class RevisionGraph {
 				+ String.format(
 					"SELECT ?nr "
 					+ "WHERE { GRAPH <%s> {"
-					+ "	?rev a rmo:Revision; rmo:revisionNumber ?nr ."
+					+ "	?rev a rmo:Revision; rmo:revisionIdentifier ?nr ."
 					+ " } "
 					+ "}ORDER BY DESC(xsd:integer(?nr))", revisionGraph);
 		try {
@@ -277,7 +277,7 @@ public class RevisionGraph {
 					+ "FROM <%s> %n"
 					+ "WHERE { %n"
 					+ "	?branch a rmo:Branch ;"
-					+ "		rdfs:label ?label . "
+					+ "		rmo:referenceIdentifier ?label . "
 					+ "} %n"
 					+ "ORDER BY ?label", revisionGraph);
 			
@@ -307,7 +307,7 @@ public class RevisionGraph {
 						+ "WHERE { GRAPH <%s> {"
 						+ "	?ref a rmo:Branch; rmo:references ?rev."
 						+ " ?rev a rmo:Revision."
-						+ "	{?rev rmo:revisionNumber \"%s\".} UNION {?ref rdfs:label \"%s\" .}"
+						+ "	{?rev rmo:revisionIdentifier \"%s\".} UNION {?ref rmo:referenceIdentifier \"%s\" .}"
 						+ "} }",
 						revisionGraph, referenceIdentifier, referenceIdentifier);
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
@@ -349,8 +349,8 @@ public class RevisionGraph {
 		String query = Config.prefixes
 				+ String.format(
 						"SELECT ?rev WHERE { GRAPH <%s> {"
-							+ "{?rev a rmo:Revision; rmo:revisionNumber \"%s\" .}"
-							+ "UNION {?rev a rmo:Revision. ?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%s\" .}"
+							+ "{?rev a rmo:Revision; rmo:revisionIdentifier \"%s\" .}"
+							+ "UNION {?rev a rmo:Revision. ?ref a rmo:Reference; rmo:references ?rev; rmo:referenceIdentifier \"%s\" .}"
 							+ "} }", revisionGraph, revisionIdentifier, revisionIdentifier);
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
 		if (resultSet.hasNext()) {
@@ -380,7 +380,16 @@ public class RevisionGraph {
 		return new Revision(this, getRevisionUri(revisionIdentifier), false);
 	}
 
-
+    /**
+     * Get the revision object for a given branch
+     *
+     * @param branch the referencing branch
+     * @return Revision object
+     * @throws InternalErrorException
+     */
+    public Revision getRevision(Branch branch) throws InternalErrorException {
+        return new Revision(this, getRevisionUri(branch.getReferenceIdentifier()), false);
+    }
 
 	/**
 	 * Get the revision identifier while it is not necessary to know if the specified identifier parameter is a reference or the resulting revision identifier itself.
@@ -392,9 +401,9 @@ public class RevisionGraph {
 	public String getRevisionIdentifier(final String identifier) throws InternalErrorException {
 		String revisionGraph = this.getRevisionGraphUri();
 		String query = Config.prefixes + String.format(""
-				+ "SELECT ?revNumber WHERE { GRAPH <%s> {"
-				+ "	?rev a rmo:Revision; rmo:revisionNumber ?revNumber."
-				+ "	{?rev rmo:revisionNumber \"%s\".} UNION {?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%s\".}"
+				+ "SELECT ?revIdentifier WHERE { GRAPH <%s> {"
+				+ "	?rev a rmo:Revision; rmo:revisionIdentifier ?revIdentifier."
+				+ "	{?rev rmo:revisionIdentifier \"%s\".} UNION {?ref a rmo:Reference; rmo:references ?rev; rmo:referenceIdentifier \"%s\".}"
 				+ "} }", 
 				revisionGraph, identifier, identifier);
 		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
@@ -403,7 +412,7 @@ public class RevisionGraph {
 			if (resultSet.hasNext()) {
 				throw new InternalErrorException("Identifier not unique: " + identifier);
 			}
-			return qs.getLiteral("?revNumber").toString();
+			return qs.getLiteral("?revIdentifier").toString();
 		} else {
 			throw new InternalErrorException("No Revision or Reference found with identifier: "
 					+ identifier);
@@ -422,9 +431,9 @@ public class RevisionGraph {
 				+ String.format(""
 						+ "ASK {"
 						+ "	GRAPH <%1$s> { " 
-						+ " 	{ ?rev a rmo:Revision; rmo:revisionNumber \"%2$s\". }"
+						+ " 	{ ?rev a rmo:Revision; rmo:revisionIdentifier \"%2$s\". }"
 						+ "		UNION "
-						+ "		{?rev a rmo:Revision. ?ref a rmo:Reference; rmo:references ?rev; rdfs:label \"%2$s\" .}"
+						+ "		{?rev a rmo:Revision. ?ref a rmo:Reference; rmo:references ?rev; rmo:referenceIdentifier \"%2$s\" .}"
 						+ "} } ",
 						revisionGraph, revisionNumber);
 		return TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK);
@@ -485,6 +494,33 @@ public class RevisionGraph {
 				throw new InternalErrorException("Error in revision graph! Selected graph <" + this.graphName + "> has no default SDD referenced.");
 			}
 		}
+	}
+
+	/**
+	 * Get the commit by using the URI.
+	 *
+	 * @param commitURI the commit URI
+	 * @return the commit
+	 * @throws InternalErrorException
+	 */
+	public Commit getCommit(String commitURI) throws InternalErrorException {
+		throw new InternalErrorException("Not implemented.");
+		//TODO implement method
+//        logger.info("Get corresponding commit of revision " + revisionIdentifier + ".");
+//        String query = Config.prefixes + String.format(""
+//                + "SELECT ?com "
+//                + "WHERE { GRAPH  <%s> {"
+//                + "	?com a rmo:Commit; "
+//                + "	 prov:generated <%s>. "
+//                + "} }", revisionGraphURI, revisionURI);
+//        this.logger.debug(query);
+//        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
+//        if (resultSet.hasNext()) {
+//            QuerySolution qs = resultSet.next();
+//            return new Commit(revisionGraph, qs.getResource("?com").toString());
+//        } else {
+//            throw new InternalErrorException("No corresponding commit found for revision " + revisionIdentifier + ".");
+//        }
 	}
 
 }

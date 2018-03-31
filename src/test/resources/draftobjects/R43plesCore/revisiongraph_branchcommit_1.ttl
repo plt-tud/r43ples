@@ -1,0 +1,86 @@
+<http://example.com/test-branch-develop>
+        a       <http://eatld.et.tu-dresden.de/rmo#Reference> , <http://eatld.et.tu-dresden.de/rmo#Branch> , <http://eatld.et.tu-dresden.de/rmo#Entity> ;
+        <http://eatld.et.tu-dresden.de/rmo#fullGraph>
+                <http://example.com/test-develop> ;
+        <http://eatld.et.tu-dresden.de/rmo#referenceIdentifier>
+                "develop" ;
+        <http://eatld.et.tu-dresden.de/rmo#references>
+                <http://example.com/test-revision-1> .
+
+<http://example.com/test-commit-1>
+        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        <http://eatld.et.tu-dresden.de/rmo#atTime>
+                "2018-03-17T18:35:18.346"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://eatld.et.tu-dresden.de/rmo#commitMessage>
+                "update commit during test" ;
+        <http://eatld.et.tu-dresden.de/rmo#generated>
+                <http://example.com/test-revision-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#used>
+                <http://example.com/test-revision-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
+                <http://eatld.et.tu-dresden.de/persons/TestUser> .
+
+<http://example.com/test-changeset-0-1>
+        a       <http://eatld.et.tu-dresden.de/rmo#ChangeSet> ;
+        <http://eatld.et.tu-dresden.de/rmo#addSet>
+                <http://example.com/test-addSet-0-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#deleteSet>
+                <http://example.com/test-deleteSet-0-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#priorRevision>
+                <http://example.com/test-revision-0> .
+
+<http://example.com/test-revision-0>
+        a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://example.com/test-changeset-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
+                "0" .
+
+<http://example.com/test-changeset-0>
+        a       <http://eatld.et.tu-dresden.de/rmo#ChangeSet> ;
+        <http://eatld.et.tu-dresden.de/rmo#addSet>
+                <http://example.com/test-addSet-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#deleteSet>
+                <http://example.com/test-deleteSet-0> .
+
+<http://example.com/test-master>
+        a       <http://eatld.et.tu-dresden.de/rmo#Reference> , <http://eatld.et.tu-dresden.de/rmo#Branch> , <http://eatld.et.tu-dresden.de/rmo#Master> ;
+        <http://eatld.et.tu-dresden.de/rmo#fullGraph>
+                <http://example.com/test> ;
+        <http://eatld.et.tu-dresden.de/rmo#referenceIdentifier>
+                "master" ;
+        <http://eatld.et.tu-dresden.de/rmo#references>
+                <http://example.com/test-revision-1> .
+
+<http://example.com/test-revision-1>
+        a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://example.com/test-changeset-0-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
+                "1" ;
+        <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
+                <http://example.com/test-revision-0> .
+
+<http://example.com/test-commit-branch-develop>
+        a       <http://eatld.et.tu-dresden.de/rmo#ReferenceCommit> , <http://eatld.et.tu-dresden.de/rmo#BranchCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        <http://eatld.et.tu-dresden.de/rmo#atTime>
+                "2018-03-17T18:35:18.785" ;
+        <http://eatld.et.tu-dresden.de/rmo#commitMessage>
+                "branch commit during test" ;
+        <http://eatld.et.tu-dresden.de/rmo#generated>
+                <http://example.com/test-branch-develop> ;
+        <http://eatld.et.tu-dresden.de/rmo#used>
+                <http://example.com/test-revision-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
+                <http://eatld.et.tu-dresden.de/persons/TestUser> .
+
+<http://example.com/test-commit-0>
+        a       <http://eatld.et.tu-dresden.de/rmo#Commit> , <http://eatld.et.tu-dresden.de/rmo#InitialCommit> ;
+        <http://eatld.et.tu-dresden.de/rmo#atTime>
+                "2018-03-17T18:35:17.847"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://eatld.et.tu-dresden.de/rmo#commitMessage>
+                "initial commit during test" ;
+        <http://eatld.et.tu-dresden.de/rmo#generated>
+                <http://example.com/test-master> , <http://example.com/test-revision-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
+                <http://eatld.et.tu-dresden.de/persons/TestUser> .

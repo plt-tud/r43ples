@@ -175,5 +175,17 @@ public class JenaTDBInterface extends TripleStoreInterface {
 		dataset.end();
 		return list;
 	}
+
+	@Override
+	public void dropAllGraphsAndReInit() {
+		Iterator<String> list = getGraphs();
+		dataset.begin(ReadWrite.WRITE);
+		while(list.hasNext()) {
+			dataset.removeNamedModel(list.next());
+		}
+		dataset.commit();
+		dataset.end();
+		init();
+	}
 	
 }

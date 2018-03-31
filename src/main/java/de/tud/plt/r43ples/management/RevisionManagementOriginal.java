@@ -1,21 +1,29 @@
 
 package de.tud.plt.r43ples.management;
 
+import com.hp.hpl.jena.query.Dataset;
+import com.hp.hpl.jena.query.DatasetFactory;
+import com.hp.hpl.jena.query.QuerySolution;
+import com.hp.hpl.jena.query.ResultSet;
+import com.hp.hpl.jena.rdf.model.Model;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.ChangeSet;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
+import de.tud.plt.r43ples.optimization.ChangeSetPath;
+import de.tud.plt.r43ples.optimization.PathCalculationFabric;
+import de.tud.plt.r43ples.optimization.PathCalculationInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
+import org.apache.log4j.Logger;
+
+import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.LinkedList;
-
-import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
-import org.apache.log4j.Logger;
-
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-
-import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.existentobjects.Revision;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 /**
  * This class provides methods for interaction with graphs.
@@ -28,17 +36,105 @@ public class RevisionManagementOriginal {
 
 	/** The logger. **/
 	private static Logger logger = Logger.getLogger(RevisionManagementOriginal.class);
-	
 
 
+	/**
+	 * Generates Diffs between to revision a and revision b of a named graph.
+	 * Revision a is considered older than revision b (a -> b)
+	 * @param graphName name of graph
+	 * @param revAIdentifier identifier revision a
+	 * @param revBIdentifier identifier revision
+	 * @param fileFormat format of outputfile. possible options: nquads, trig
+	 * @return list of diffs
+	 */
+	public static String getDiffsBetweenStartAndTargetRevision(
+			final String graphName,
+			final String revAIdentifier,
+			final String revBIdentifier,
+			final String fileFormat) {
 
+		// create revision graph
+		RevisionGraph graph = new RevisionGraph(graphName);
+		PathCalculationInterface calculation = PathCalculationFabric.getInstance(graph);
 
+		// get revisions
+		Revision revA = null;
+		Revision revB = null;
 
+		try {
+			revA = new Revision(graph, revAIdentifier, true);
+		} catch (InternalErrorException e) {
+			e.printStackTrace();
+			return "Error finding revision A:\n" + e.getMessage();
+		}
 
-	
-	
+		try {
+			revB = new Revision(graph, revBIdentifier, true);
+		} catch (InternalErrorException e) {
+			e.printStackTrace();
+			return "Error finding revision B:\n" + e.getMessage();
+		}
 
-	
+		// get changeset path
+		ChangeSetPath path = null;
+		try {
+			path = calculation.getChangeSetsBetweenStartAndTargetRevision(revA, revB);
+		} catch (InternalErrorException e) {
+			e.printStackTrace();
+			return "Error creating changeset. Make sure revision a lies before revision b:\n" + e.getMessage();
+		}
+
+		// process changeset to get diffs
+
+		LinkedList<ChangeSet> changeSets = path.getRevisionPath();
+
+		// first changeset as base
+		// ! changeSets starts with last changeset (inverse)
+		ChangeSet oldCS = changeSets.get(changeSets.size() - 1);
+
+		Model oldAddModel = JenaModelManagement.readStringToJenaModel(oldCS.getAddSetContent(), "TURTLE");
+		Model oldDeleteModel = JenaModelManagement.readStringToJenaModel(oldCS.getDeleteSetContent(), "TURTLE");
+
+		// generate diff model (cross compare add and delete sets)
+		for (int i = changeSets.size() - 2; i >= 0; i--) {
+
+			ChangeSet newCS = changeSets.get(i);
+
+			Model addModel = JenaModelManagement.readStringToJenaModel(newCS.getAddSetContent(), "TURTLE");
+			Model deleteModel = JenaModelManagement.readStringToJenaModel(newCS.getDeleteSetContent(), "TURTLE");
+
+			// find neutralizing triples and delete them
+			Model neutralAdd = oldDeleteModel.intersection(addModel);
+			Model neutralDelete = oldAddModel.intersection(deleteModel);
+
+			Model test = oldDeleteModel.remove(neutralAdd);
+			addModel.remove(neutralAdd);
+			oldAddModel.remove(neutralDelete);
+			deleteModel.remove(neutralDelete);
+
+			// add remaining triples of new model to old model
+			oldDeleteModel.add(deleteModel);
+			oldAddModel.add(addModel);
+		}
+
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+		// create dataset from add and delete model for transmission
+		Dataset resultSet = DatasetFactory.create();
+		resultSet.addNamedModel("AddSet", oldAddModel);
+		resultSet.addNamedModel("DeleteSet", oldDeleteModel);
+
+		// create returnable result string
+		if (fileFormat.toLowerCase().contains("trig"))
+			RDFDataMgr.write(baos, resultSet, RDFFormat.TRIG_PRETTY);
+		else if (fileFormat.toLowerCase().contains("nquads"))
+			RDFDataMgr.write(baos, resultSet, RDFFormat.NQUADS_UTF8);
+		else {
+			return "unsupported file format";
+		}
+
+		return baos.toString();
+	}
 
 
 	/**
@@ -54,60 +150,6 @@ public class RevisionManagementOriginal {
 		String query = "ASK { GRAPH <" + graphName + "> {?s ?p ?o} }";
 		return TripleStoreInterfaceSingleton.get().executeAskQuery(query);
 	}
-
-	/**
-	 * Creates the whole revision from the add and delete sets of the
-	 * predecessors. Saved in graph tempGraphName.
-	 * 
-	 * @param graphName
-	 *            the graph name
-	 * @param revisionName
-	 *            revision number or revision name to build content for
-	 * @param tempGraphName
-	 *            the graph where the temporary graph is stored
-	 * @throws InternalErrorException 
-	 */
-	public static void generateFullGraphOfRevision(final String graphName, final String revisionName,
-			final String tempGraphName) throws InternalErrorException {
-		logger.info("Rebuild whole content of revision " + revisionName + " of graph <" + graphName
-				+ "> into temporary graph <" + tempGraphName + ">");
-		RevisionGraph graph = new RevisionGraph(graphName);
-		Revision revision = graph.getRevision(revisionName);
-
-		// Create temporary graph
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <" + tempGraphName + ">");
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery("CREATE GRAPH <" + tempGraphName + ">");
-
-		// Create path to revision
-
-		LinkedList<Revision> list = PathCalculationSingleton.getInstance().getPathToRevisionWithFullGraph(graph, revision)
-				.getRevisionPath();
-
-		// Copy branch to temporary graph
-		String number = list.removeLast().getRevisionIdentifier();
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(
-				"COPY GRAPH <" + graph.getReferenceGraph(number) + "> TO GRAPH <"
-						+ tempGraphName + ">");
-
-		while (!list.isEmpty()) {
-			// add- und delete-sets could be extracted from revision tree information
-			// hard coded variant is faster
-			String graph_removed = graphName + "-deleteSet-"+ number;
-			String graph_added   = graphName + "-addSet-"+ number;
-			// Add data to temporary graph
-			if (RevisionManagementOriginal.checkGraphExistence(graph_removed))
-				TripleStoreInterfaceSingleton.get().executeUpdateQuery("ADD GRAPH <" + graph_removed + "> TO GRAPH <" + tempGraphName + ">");
-			// Remove data from temporary graph (no opposite of SPARQL ADD available)
-			if (RevisionManagementOriginal.checkGraphExistence(graph_added))
-				TripleStoreInterfaceSingleton.get().executeUpdateQuery(  "DELETE { GRAPH <" + tempGraphName+ "> { ?s ?p ?o.} }"
-														+ "WHERE  { GRAPH <" + graph_added	+ "> { ?s ?p ?o.} }");
-			Revision first = list.removeLast();
-			if (first!=null)
-				number = first.getRevisionIdentifier();
-		}
-
-	}
-
 
 
 
@@ -201,7 +243,7 @@ public class RevisionManagementOriginal {
 	 * @return the constructed graph content as specified RDF serialization format
 	 */
 	public static String getContentOfGraph(final String graphName, final String format) {
-		String query = Config.prefixes + String.format(
+		String query = String.format(
 				  "CONSTRUCT {?s ?p ?o} %n"
 				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
 		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		

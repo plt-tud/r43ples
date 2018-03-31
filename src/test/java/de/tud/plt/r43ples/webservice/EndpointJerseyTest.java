@@ -39,6 +39,7 @@ public class EndpointJerseyTest extends JerseyTest {
 	
     @Override
     protected Application configure() {
+		set("jersey.config.test.container.port", "9996");
         return new ResourceConfig(Endpoint.class, Misc.class, Merging.class);
     }
     
@@ -52,9 +53,9 @@ public class EndpointJerseyTest extends JerseyTest {
 		query_union_b1_b2 = String.format(""
 				+ "SELECT DISTINCT ?s ?p ?o "
 				+ "WHERE { "
-				+ "  {GRAPH <%1$s> REVISION \"B1\" { ?s ?p ?o}}"
+				+ "  {GRAPH <%1$s> REVISION \"b1\" { ?s ?p ?o}}"
 				+ "  UNION "
-				+ "  {GRAPH <%1$s> REVISION \"B2\" { ?s ?p ?o}}"
+				+ "  {GRAPH <%1$s> REVISION \"b2\" { ?s ?p ?o}}"
 				+ "} ORDER BY ?s ?p ?o", dsm.graphName);
 	}
 	
@@ -67,7 +68,7 @@ public class EndpointJerseyTest extends JerseyTest {
 	@Test
 	public void testSelect() throws SAXException, IOException {
 		String query = String.format(""
-				+ "SELECT * FROM <%s> REVISION \"B2\" "
+				+ "SELECT * FROM <%s> REVISION \"b2\" "
 				+ "WHERE { ?s ?p ?o. }"
 				+ "ORDER BY ?s ?p ?o", dsm.graphName);
 		String result = target("sparql").queryParam("query", URLEncoder.encode(query, "UTF-8")).queryParam("format", format).request().get(String.class);
@@ -78,7 +79,7 @@ public class EndpointJerseyTest extends JerseyTest {
 	@Test
 	public void testSelectURIFragment() throws SAXException, IOException {
 		String query = String.format(""
-				+ "SELECT * FROM <%s?revision=B2>"
+				+ "SELECT * FROM <%s?revision=b2>"
 				+ "WHERE { ?s ?p ?o. }"
 				+ "ORDER BY ?s ?p ?o", dsm.graphName);
 		String result = target("sparql").queryParam("query", URLEncoder.encode(query, "UTF-8")).queryParam("format", format).request().get(String.class);
@@ -89,7 +90,7 @@ public class EndpointJerseyTest extends JerseyTest {
 	@Test
 	public void testPOSTDirect() throws SAXException, IOException {
 		String query = String.format(""
-				+ "SELECT * FROM <%s> REVISION \"B2\" "
+				+ "SELECT * FROM <%s> REVISION \"b2\" "
 				+ "WHERE { ?s ?p ?o. }"
 				+ "ORDER BY ?s ?p ?o", dsm.graphName);
 		Response response = target("sparql").request(format).post(Entity.entity(query, "application/sparql-query"));

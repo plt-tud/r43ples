@@ -5,16 +5,16 @@ import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.xml.sax.SAXException;
 
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -25,12 +25,15 @@ import static org.junit.Assert.assertTrue;
  * @author Xinyu Yang
  * @author Stephan Hensel
  */
+
 public class ThreeWayMergeTest extends R43plesTest {
 
 	/** The graph name. **/
 	private static String graphName;
 	/** The user. **/
 	private static String user = "jUnitUser";
+	/** The triple store interface. **/
+	private static TripleStoreInterface tripleStoreInterface;
 
 	
 	/**
@@ -43,18 +46,17 @@ public class ThreeWayMergeTest extends R43plesTest {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
+		tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+		tripleStoreInterface.dropAllGraphsAndReInit();
 	}
 	
 	
 	/**
 	 * Set up.
-	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 *  
-	
+	 * @throws InternalErrorException
 	 */
 	@Before
-	public void setUp() throws InternalErrorException, IOException {
+	public void setUp() throws InternalErrorException {
 		// Create the initial data set
 		graphName = SampleDataSet.createSampleDataSetMerging().graphName;
 	}
@@ -64,19 +66,17 @@ public class ThreeWayMergeTest extends R43plesTest {
 	/**
 	 * Test the created graph.
 	 * 
-	 * @throws SAXException 
-	 * @throws InternalErrorException 
-	 * @throws IOException 
+	 * @throws InternalErrorException
 	 */
 	@Test
-	public void testCreatedGraph() throws SAXException, InternalErrorException, IOException {
+	public void testCreatedGraph() throws InternalErrorException {
 		// Test branch B1
-		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "B1")).getEntity().toString();
+		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "b1")).getEntity().toString();
 		String expected1 = ResourceManagement.getContentFromResource("threeway/response-B1.ttl");
 		assertTrue(check_isomorphism(result1, "TURTLE", expected1, "TURTLE"));
 
 		// Test branch B2
-		String result3 = ep.sparql("text/turtle", createConstructQuery(graphName, "B2")).getEntity().toString();
+		String result3 = ep.sparql("text/turtle", createConstructQuery(graphName, "b2")).getEntity().toString();
 		String expected3 = ResourceManagement.getContentFromResource("threeway/response-B2.ttl");
 		assertTrue(check_isomorphism(result3, "TURTLE", expected3, "TURTLE"));
 
@@ -90,20 +90,17 @@ public class ThreeWayMergeTest extends R43plesTest {
 	/**
 	 * Test AUTO-MERGE.
 	 * 
-	 * @throws IOException 
-	 * @throws SAXException 
-	 * @throws InternalErrorException 
-	 *  
+	 * @throws InternalErrorException
 	 */
 	@Test
-	public void testAutoMerge() throws SAXException, IOException, InternalErrorException {
+	public void testAutoMerge() throws InternalErrorException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
 		// Merge B1 into B2
-		ep.sparql(createAutoMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
+		ep.sparql(createAutoMergeQuery(graphName, sdd, user, "Merge B1 into B2", "b1", "b2"));
 		// Test branch B1
-		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "B2")).getEntity().toString();
+		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "b2")).getEntity().toString();
 		String expected1 = ResourceManagement.getContentFromResource("threeway/auto/response-B1-into-B2.ttl");
 		assertTrue(check_isomorphism(result1, "TURTLE", expected1, "TURTLE"));
 		
@@ -113,28 +110,24 @@ public class ThreeWayMergeTest extends R43plesTest {
 	/**
 	 * Test common MERGE.
 	 * 
-	 * @throws IOException 
-	 * @throws SAXException 
-	 * @throws InternalErrorException 
-	 *  
+	 * @throws InternalErrorException
 	 */
 	@Test
-	public void testCommonMerge() throws IOException, SAXException, InternalErrorException {
+	public void testCommonMerge() throws InternalErrorException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
 		
 		// conflicts in merging, therefore no success
-		ep.sparql(createCommonMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2"));
-		
-		
+		ep.sparql(createCommonMergeQuery(graphName, sdd, user, "Merge B1 into B2", "b1", "b2"));
+
 		// Merge B1 into B2 (WITH)
 		String triples = "<http://example.com/testS> <http://example.com/testP> \"D\". \n";
 		
-		Response queryResult1 = ep.sparql(createMergeWithQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
+		Response queryResult1 = ep.sparql(createMergeWithQuery(graphName, sdd, user, "Merge B1 into B2", "b1", "b2", triples));
 		Assert.assertNull(queryResult1.getEntity());
 
 		// Test branch B2
-		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "B2")).getEntity().toString();
+		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "b2")).getEntity().toString();
 		String expected1 = ResourceManagement.getContentFromResource("threeway/common/response-B1-into-B2.ttl");
 		assertTrue(check_isomorphism(result1, "TURTLE", expected1, "TURTLE"));
 
@@ -144,13 +137,10 @@ public class ThreeWayMergeTest extends R43plesTest {
 	/**
 	 * Test MANUAL-MERGE.
 	 * 
-	 * @throws IOException 
-	 * @throws SAXException 
-	 * @throws InternalErrorException 
-	 *  
+	 * @throws InternalErrorException
 	 */
 	@Test
-	public void testManualMerge() throws IOException, SAXException, InternalErrorException {
+	public void testManualMerge() throws InternalErrorException {
 		// The SDD to use
 		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";		
 		
@@ -163,10 +153,10 @@ public class ThreeWayMergeTest extends R43plesTest {
 				+ "<http://example.com/testS> <http://example.com/testP> \"I\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP> \"J\". \n";
 		
-		ep.sparql(createManualMergeQuery(graphName, sdd, user, "Merge B1 into B2", "B1", "B2", triples));
+		ep.sparql(createManualMergeQuery(graphName, sdd, user, "Merge B1 into B2", "b1", "b2", triples));
 		
 		// Test branch B2
-		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "B2")).getEntity().toString();
+		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "b2")).getEntity().toString();
 		String expected1 = ResourceManagement.getContentFromResource("threeway/manual/response-B1-into-B2.ttl");
 		assertTrue(check_isomorphism(result1, "TURTLE", expected1, "TURTLE"));
 		

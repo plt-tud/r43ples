@@ -9,20 +9,25 @@
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix prov:  <http://www.w3.org/ns/prov#> .
 
+<http://example.com/test-changeset-0>
+        a              rmo:ChangeSet ;
+        rmo:addSet     <http://example.com/test-addSet-0> ;
+        rmo:deleteSet  <http://example.com/test-deleteSet-0> .
+
 <http://example.com/test-master>
-        a               rmo:Reference , rmo:Branch , rmo:Master ;
-        rdfs:label      "master" ;
-        rmo:fullGraph   <http://example.com/test> ;
-        rmo:references  <http://example.com/test-revision-0> .
+        a                        rmo:Reference , rmo:Branch , rmo:Master ;
+        rmo:fullGraph            <http://example.com/test> ;
+        rmo:referenceIdentifier  "master" ;
+        rmo:references           <http://example.com/test-revision-0> .
 
 <http://example.com/test-revision-0>
-        a                   rmo:Revision ;
-        rmo:belongsTo       <http://example.com/test-master> ;
-        rmo:revisionNumber  "0" .
+        a                       rmo:Entity , rmo:Revision ;
+        rmo:hasChangeSet        <http://example.com/test-changeset-0> ;
+        rmo:revisionIdentifier  "0" .
 
 <http://example.com/test-commit-0>
-        a                       rmo:ReferenceCommit , rmo:RevisionCommit ;
-        dc-terms:title          "initial commit" ;
-        prov:atTime             "2017-08-23T20:50:09.57"^^xsd:dateTime ;
-        prov:generated          <http://example.com/test-master> , <http://example.com/test-revision-0> ;
-        prov:wasAssociatedWith  <http://eatld.et.tu-dresden.de/user/r43ples> .
+        a                      rmo:Commit , rmo:InitialCommit ;
+        rmo:atTime             "2017-08-31T18:57:44.139"^^xsd:dateTime ;
+        rmo:commitMessage      "initial commit during test" ;
+        rmo:generated          <http://example.com/test-master> , <http://example.com/test-revision-0> ;
+        rmo:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/TestUser> .

@@ -6,11 +6,11 @@ import java.io.IOException;
 
 import de.tud.plt.r43ples.core.R43plesCoreInterface;
 import de.tud.plt.r43ples.core.R43plesCoreSingleton;
-import de.tud.plt.r43ples.existentobjects.ReferenceCommit;
-import de.tud.plt.r43ples.existentobjects.UpdateCommit;
+import de.tud.plt.r43ples.existentobjects.*;
 import org.apache.commons.configuration.ConfigurationException;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.xml.sax.SAXException;
@@ -19,7 +19,6 @@ import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
 import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
-import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.webservice.Endpoint;
 
 
@@ -27,7 +26,7 @@ public class TestRevisionManagment {
 	
 	
     private static DataSetGenerationResult ds;
-    private static RevisionGraph graph;
+    private RevisionGraph graph;
 	private final String format = "application/sparql-results+xml";
     private final Endpoint ep = new Endpoint();
 	private String result;
@@ -39,17 +38,22 @@ public class TestRevisionManagment {
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
 		ds = SampleDataSet.createSampleDataset1();
+	}
+
+	@Before
+	public void setup() throws InternalErrorException {
+		ds = SampleDataSet.createSampleDataset1();
 		graph = new RevisionGraph(ds.graphName);
 	}
 	
-	private final String query_template = ""
+	private String query_template = ""
     		+ "SELECT ?s ?p ?o %n"
     		+ "WHERE { %n"
     		+ "  GRAPH <"+ds.graphName+"> REVISION \"%s\" {?s ?p ?o} %n"
 			+ "} ORDER BY ?s ?p ?o";
 	
 	
-	private final String query_template_2_triples_filter = "PREFIX : <http://test.com/> "
+	private String query_template_2_triples_filter = "PREFIX : <http://test.com/> "
 			+ "SELECT DISTINCT ?p1 ?p2 "
 			+ "WHERE {"
 			+ "  GRAPH <"+ ds.graphName + "> REVISION \"%s\" {"
@@ -99,7 +103,7 @@ public class TestRevisionManagment {
         
         query = "SELECT ?s ?p ?o "
         		+ "WHERE {"
-        		+ "	GRAPH <"+ds.graphName+"> REVISION \"MASTER\" {?s ?p ?o}"
+        		+ "	GRAPH <"+ds.graphName+"> REVISION \"master\" {?s ?p ?o}"
 				+ "} ORDER BY ?s ?p ?o";
         
         result = ep.sparql(format, query).getEntity().toString();
@@ -220,8 +224,10 @@ public class TestRevisionManagment {
 	public void testTagging() throws InternalErrorException, SAXException, IOException {
 		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
 
+		RevisionGraph revisionGraph = new RevisionGraph(ds.graphName);
+
 		String expected, result;
-		ReferenceCommit referenceCommit = r43plesCore.createReferenceCommit(ds.graphName, "v0.1", ds.revisions.get("master-3"), "test_user", "Version v0.1 published", false);
+		TagCommit tagCommit = r43plesCore.createTagCommit(revisionGraph, "v0.1", new Revision(revisionGraph, ds.revisions.get("master-3"), true), "test_user", "Version v0.1 published");
 
 		result = ep.sparql(format, String.format(query_template, ds.revisions.get("master-1"))).getEntity().toString();
         expected = ResourceManagement.getContentFromResource("dataset1/response-test-rev1.xml");
@@ -240,7 +246,8 @@ public class TestRevisionManagment {
 	public void testBranching() throws InternalErrorException {
 		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
 
-		ReferenceCommit referenceCommit1 = r43plesCore.createReferenceCommit(ds.graphName, "testBranch", ds.revisions.get("master-2"), "test_user", "branching as junit test", true);
+		RevisionGraph revisionGraph = new RevisionGraph(ds.graphName);
+		BranchCommit referenceCommit1 = r43plesCore.createBranchCommit(revisionGraph, "testBranch", new Revision(revisionGraph, ds.revisions.get("master-2"), true), "test_user", "branching as junit test");
 
 		UpdateCommit commit1 = r43plesCore.createUpdateCommit(ds.graphName, "<a> <b> <c>", "", "test_user", "test_commitMessage", "testBranch");
 		String rev = commit1.getGeneratedRevision().getRevisionIdentifier();
@@ -248,17 +255,19 @@ public class TestRevisionManagment {
 		Assert.assertEquals(rev, revNumber);
 
 		UpdateCommit commit2 = r43plesCore.createUpdateCommit(ds.graphName, "<a> <b> <d>", "", "test_user", "test_commitMessage", "testBranch");
-		String rev2 = commit2.getGeneratedRevision().getRevisionIdentifier();
+		Revision revision2 = commit2.getGeneratedRevision();
+		String rev2 = revision2.getRevisionIdentifier();
 		String revNumber2 = graph.getRevisionIdentifier("testBranch");
 		Assert.assertEquals(rev2, revNumber2);
 
-		ReferenceCommit referenceCommit2 = r43plesCore.createReferenceCommit(ds.graphName, "testBranch2", rev2, "test_user", "branching as junit test", true);
+		BranchCommit referenceCommit2 = r43plesCore.createBranchCommit(revisionGraph, "testBranch2", revision2, "test_user", "branching as junit test");
 		UpdateCommit commit3 = r43plesCore.createUpdateCommit(ds.graphName, "<a> <b> <e>", "", "test_user", "test_commitMessage", "testBranch2");
-		String rev3 = commit3.getGeneratedRevision().getRevisionIdentifier();
+		Revision revision3 = commit3.getGeneratedRevision();
+		String rev3 = revision3.getRevisionIdentifier();
 		String revNumber3 = graph.getRevisionIdentifier("testBranch2");
 		Assert.assertEquals(rev3, revNumber3);
 
-		ReferenceCommit referenceCommit2a = r43plesCore.createReferenceCommit(ds.graphName, "testBranch2a", rev2, "test_user", "branching as junit test", true);
+		BranchCommit referenceCommit2a = r43plesCore.createBranchCommit(revisionGraph, "testBranch2a", revision2, "test_user", "branching as junit test");
 		UpdateCommit commit4 = r43plesCore.createUpdateCommit(ds.graphName, "<a> <b> <f>", "", "test_user", "test_commitMessage", "testBranch2a");
 		String rev4 = commit4.getGeneratedRevision().getRevisionIdentifier();
 		String revNumber4 = graph.getRevisionIdentifier("testBranch2a");

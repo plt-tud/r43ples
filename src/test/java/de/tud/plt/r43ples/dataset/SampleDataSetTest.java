@@ -10,6 +10,8 @@ import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -20,11 +22,15 @@ public class SampleDataSetTest extends R43plesTest {
 
     private final String queryTemplate = "CONSTRUCT {?s ?p ?o} WHERE { GRAPH <%s> REVISION \"%s\" {?s ?p ?o} }";
     private static R43plesCoreInterface r43plesCore;
+    /** The triple store interface. **/
+    private static TripleStoreInterface tripleStoreInterface;
 
     @BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		Config.readConfig("r43ples.test.conf");
         r43plesCore = R43plesCoreSingleton.getInstance();
+        tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+        tripleStoreInterface.dropAllGraphsAndReInit();
 	}
 
 	// TODO Add checks for the single revisions
@@ -42,13 +48,20 @@ public class SampleDataSetTest extends R43plesTest {
         Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_expected);
         this.removeTimeStampFromModel(model_result);
         this.removeTimeStampFromModel(model_expected);
+
         Assert.assertTrue(this.check_isomorphism(model_result, model_expected));
 
+        String query;
+        R43plesRequest request;
+        String result;
+        String expected;
+
+
         // Check revision 1
-        String query = String.format(queryTemplate, graph, "1");
-        R43plesRequest request = new R43plesRequest(query, "text/turtle");
-        String result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
-        String expected = ResourceManagement.getContentFromResource("dataset/dataset1/rev-1.ttl");
+        query = String.format(queryTemplate, graph, "1");
+        request = new R43plesRequest(query, "text/turtle");
+        result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
+        expected = ResourceManagement.getContentFromResource("dataset/dataset1/rev-1.ttl");
         Assert.assertTrue(this.check_isomorphism(result, expected));
 
         // Check revision 2
@@ -118,49 +131,43 @@ public class SampleDataSetTest extends R43plesTest {
         // Check revision graph
         RevisionGraph rg = new RevisionGraph(graph);
         String revisiongraph_turtle = rg.getContentOfRevisionGraph("TURTLE");
-//        Assert.assertEquals("", revisiongraph_turtle);
         String revisiongraph_expected = ResourceManagement.getContentFromResource("dataset/dataset3/revisiongraph.ttl");
-        Model model_result = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_turtle);
-        Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(revisiongraph_expected);
-        this.removeTimeStampFromModel(model_result);
-        this.removeTimeStampFromModel(model_expected);
-        //Assert.assertTrue(this.check_isomorphism(model_result, model_expected));
+        assertIsomorphism(revisiongraph_turtle, revisiongraph_expected);
 
         // Check revision 1
         String query = String.format(queryTemplate, graph, "1");
         R43plesRequest request = new R43plesRequest(query, "text/turtle");
         String result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
         String expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-1.ttl");
-        Assert.assertTrue(this.check_isomorphism(result, expected));
+        assertIsomorphism(result, expected);
 
         // Check revision 2
         query = String.format(queryTemplate, graph, "2");
         request = new R43plesRequest(query, "text/turtle");
         result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
         expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-2.ttl");
-        Assert.assertTrue(this.check_isomorphism(result, expected));
+        assertIsomorphism(result, expected);
 
         // Check revision 3
         query = String.format(queryTemplate, graph, "3");
         request = new R43plesRequest(query, "text/turtle");
         result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
         expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-3.ttl");
-        Assert.assertEquals("", result);
-        Assert.assertTrue(this.check_isomorphism(result, expected));
+        assertIsomorphism(result, expected);
 
         // Check revision 4
         query = String.format(queryTemplate, graph, "4");
         request = new R43plesRequest(query, "text/turtle");
         result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
         expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-4.ttl");
-        Assert.assertTrue(this.check_isomorphism(result, expected));
+        assertIsomorphism(result, expected);
 
         // Check revision 5
         query = String.format(queryTemplate, graph, "5");
         request = new R43plesRequest(query, "text/turtle");
         result = r43plesCore.getSparqlSelectConstructAskResponse(request, false);
         expected = ResourceManagement.getContentFromResource("dataset/dataset3/rev-5.ttl");
-        Assert.assertTrue(this.check_isomorphism(result, expected));
+        assertIsomorphism(result, expected);
 
     }
 

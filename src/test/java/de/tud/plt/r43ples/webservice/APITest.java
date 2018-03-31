@@ -21,9 +21,10 @@ import static org.hamcrest.core.StringContains.containsString;
 public class APITest extends JerseyTest {
 	
 	private static DataSetGenerationResult ds1;
-	
-    @Override
+
+	@Override
     protected Application configure() {
+		set("jersey.config.test.container.port", "9996");
         return new ResourceConfig(API.class);
     }
     

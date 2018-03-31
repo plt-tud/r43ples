@@ -3,16 +3,10 @@ package de.tud.plt.r43ples.core;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.Branch;
 import de.tud.plt.r43ples.existentobjects.FastForwardMergeCommit;
-import de.tud.plt.r43ples.existentobjects.Path;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.RevisionManagementOriginal;
-import de.tud.plt.r43ples.optimization.PathCalculationInterface;
-import de.tud.plt.r43ples.optimization.PathCalculationSingleton;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
-
-import java.util.Iterator;
 
 /**
  * Collection of information for creating a new fast forward merge commit.
@@ -23,10 +17,6 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
 
     /** The logger. **/
     private Logger logger = Logger.getLogger(FastForwardMergeCommitDraft.class);
-
-    //Dependencies
-    /** The path calculation interface to use. **/
-    private PathCalculationInterface pathCalculationInterface;
 
 
     /**
@@ -46,8 +36,6 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
      */
     protected FastForwardMergeCommitDraft(String graphName, String branchNameFrom, String branchNameInto, String user, String message, String sdd, String triples, MergeTypes type, boolean with) throws InternalErrorException {
         super(graphName, branchNameFrom, branchNameInto, user, message, sdd, MergeActions.MERGE, triples, type, with);
-        // Dependencies
-        this.pathCalculationInterface = PathCalculationSingleton.getInstance();
     }
 
     /**
@@ -66,7 +54,7 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
         Branch usedSourceBranch = getRevisionGraph().getBranch(getBranchNameFrom(), true);
         Branch usedTargetBranch = getRevisionGraph().getBranch(getBranchNameInto(), true);
 
-        fullGraphCopy(usedSourceBranch.getReferenceURI(), usedTargetBranch.getReferenceURI());
+        fullGraphCopy(usedSourceBranch.getFullGraphURI(), usedTargetBranch.getFullGraphURI());
 
         return addMetaInformation(usedSourceRevision, usedSourceBranch, usedTargetRevision, usedTargetBranch);
     }
@@ -91,10 +79,10 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
         // Create a new commit (activity)
         StringBuilder queryContent = new StringBuilder(1000);
         queryContent.append(String.format(
-                "<%s> a rmo:FastForwardMergeCommit, rmo:MergeCommit, rmo:Commit; "
-                        + "	prov:wasAssociatedWith <%s> ;"
-                        + "	dc-terms:title \"%s\" ;"
-                        + "	prov:atTime \"%s\"^^xsd:dateTime ; %n"
+                "<%s> a rmo:FastForwardMergeCommit, rmo:MergeCommit, rmo:BasicMergeCommit, rmo:Commit; "
+                        + "	rmo:wasAssociatedWith <%s> ;"
+                        + "	rmo:commitMessage \"%s\" ;"
+                        + "	rmo:atTime \"%s\"^^xsd:dateTime ; %n"
                         + " rmo:usedSourceRevision <%s> ;"
                         + " rmo:usedSourceBranch <%s> ;"
                         + " rmo:usedTargetRevision <%s> ;"
@@ -109,7 +97,6 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
 
         getTripleStoreInterface().executeUpdateQuery(query);
 
-        updateBelongsTo(usedTargetBranch.getReferenceURI(), getPathCalculationInterface().getPathBetweenStartAndTargetRevision(getRevisionGraph(), usedTargetRevision, usedSourceRevision));
         // Update the full graph of the target branch
         fullGraphCopy(getRevisionGraph().getFullGraphUri(usedSourceBranch.getReferenceURI()), getRevisionGraph().getFullGraphUri(usedTargetBranch.getReferenceURI()));
 
@@ -121,25 +108,6 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
         return new FastForwardMergeCommit(getRevisionGraph(), commitURI, getUser(), getTimeStamp(), getMessage(),
                 usedSourceRevision, usedSourceBranch, usedTargetRevision, usedTargetBranch, null,
                 null, false, null, null);
-    }
-
-    /**
-     * Adds a new belongs to property to all revision along the specified path.
-     *
-     * @param branchURI the branch URI
-     * @param path the path to update
-     * */
-    public void updateBelongsTo(String branchURI, Path path){
-
-        Iterator<Revision> revIte = path.getRevisionPath().iterator();
-        while(revIte.hasNext()) {
-            String revision = revIte.next().getRevisionURI();
-
-            String query = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> { <%s> rmo:belongsTo <%s>. } };%n",
-                    getRevisionGraph().getRevisionGraphUri(), revision, branchURI);
-
-            TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
-        }
     }
 
 }

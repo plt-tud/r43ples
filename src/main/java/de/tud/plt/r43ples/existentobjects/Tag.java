@@ -32,10 +32,11 @@ public class Tag extends Reference {
      * @param revisionGraph the revision graph
      * @param referenceIdentifier the reference identifier
      * @param referenceURI the reference URI
+     * @param fullGraphURI the full graph URI
      * @throws InternalErrorException
      */
-    public Tag(RevisionGraph revisionGraph, String referenceIdentifier, String referenceURI) throws InternalErrorException {
-        super(revisionGraph, referenceIdentifier, referenceURI);
+    public Tag(RevisionGraph revisionGraph, String referenceIdentifier, String referenceURI, String fullGraphURI) throws InternalErrorException {
+        super(revisionGraph, referenceIdentifier, referenceURI, fullGraphURI);
     }
 
 }

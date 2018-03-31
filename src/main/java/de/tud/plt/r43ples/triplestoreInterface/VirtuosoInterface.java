@@ -106,4 +106,13 @@ public class VirtuosoInterface extends TripleStoreInterface {
 		return vqe.execDescribe();
 	}
 
+	@Override
+	public void dropAllGraphsAndReInit() {
+		Iterator<String> list = getGraphs();
+		while(list.hasNext()) {
+			executeUpdateQuery("DROP SILENT GRAPH <" + list.next() + ">");
+		}
+		init();
+	}
+
 }

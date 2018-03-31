@@ -25,9 +25,7 @@ public class TripleStoreInterfaceSingleton {
 		if (triplestore!=null)
 			return triplestore;
 		else {
-			logger.info("Establishing connection to triplestore");
-			logger.info("type: " + Config.triplestore_type);
-			logger.info("url: " + Config.triplestore_url);
+			logger.debug("Establishing connection to triplestore (type: " + Config.triplestore_type + " - url: " + Config.triplestore_url + ")");
 			if (Config.triplestore_type.equals("tdb"))
 				triplestore = new JenaTDBInterface(Config.triplestore_url);
 			else if (Config.triplestore_type.equals("virtuoso"))

@@ -107,12 +107,24 @@ There are some additional keywords which extends SPARQL and can be used to contr
         WHERE {
         	GRAPH <graph> REVISION "23" {?s ?p ?o}
     	}
+    	
+        SELECT *
+        WHERE {
+            GRAPH <graph> REVISION "master" {?s ?p ?o}
+        }
 
 * Update query
 
         USER "mgraube" MESSAGE "test commit"
         INSERT {
-            GRAPH <test> REVISION "2" {
+            GRAPH <test> BRANCH "master" {
+                <a> <b> <c> .
+            }
+        }
+        
+        USER "mgraube" MESSAGE "test commit"
+        DELETE {
+            GRAPH <test> BRANCH "develop" {
                 <a> <b> <c> .
             }
         }
@@ -131,9 +143,27 @@ There are some additional keywords which extends SPARQL and can be used to contr
 
 * Merging
 
-		USER "mgraube"
-		MESSAGE "merge example"
-		MERGE GRAPH <test> BRANCH "branch-1" INTO "branch-2"
+		USER "Mister X."
+		MESSAGE "merge example for a common merge"
+		MERGE GRAPH <test> SDD <http://eatld.et.tu-dresden.de/r43ples-sdd> BRANCH "branch-1" INTO BRANCH "branch-2"
+		
+		USER "Mister X."
+        MESSAGE "merge example for automatica conflict resolution based upon specified SDD"
+        MERGE AUTO GRAPH <test> SDD <http://eatld.et.tu-dresden.de/r43ples-sdd>  BRANCH "branch-1" INTO BRANCH "branch-2"
+        
+        USER "Mister X."
+        MESSAGE "merge example for a common merge with conflict resolution in WITH part"
+        MERGE GRAPH <test> SDD <http://eatld.et.tu-dresden.de/r43ples-sdd>  BRANCH "branch-1" INTO BRANCH "branch-2" WITH {
+            <http://test.com/Carlos> <http://test.com/knows> <http://test.com/Danny> .
+            <http://test.com/Franz> <http://test.com/knows> <http://test.com/Silvia> .
+        }
+        
+        USER "Mister X."
+        MESSAGE "merge example for manual specification of merged revision content"
+        MERGE MANUAL GRAPH <test> SDD <http://eatld.et.tu-dresden.de/r43ples-sdd>  BRANCH "branch-1" INTO BRANCH "branch-2" WITH {
+            <http://test.com/Carlos> <http://test.com/knows> <http://test.com/Danny> .
+            <http://test.com/Franz> <http://test.com/knows> <http://test.com/Silvia> .
+        }
 		
 * Pick a revision into a branch
         

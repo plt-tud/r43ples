@@ -5,7 +5,6 @@ import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
@@ -43,7 +42,7 @@ public class R43plesCore implements R43plesCoreInterface {
     @Override
     public InitialCommit createInitialCommit(R43plesRequest request) throws InternalErrorException {
         InitialCommitDraft initialCommitDraft = new InitialCommitDraft(request);
-        return initialCommitDraft.createCommitInTripleStore();
+        return initialCommitDraft.createInTripleStore();
     }
 
     /**
@@ -60,7 +59,7 @@ public class R43plesCore implements R43plesCoreInterface {
     @Override
     public InitialCommit createInitialCommit(String graphName, String addSet, String deleteSet, String user, String message) throws InternalErrorException {
         InitialCommitDraft initialCommitDraft = new InitialCommitDraft(graphName, addSet, deleteSet, user, message);
-        return initialCommitDraft.createCommitInTripleStore();
+        return initialCommitDraft.createInTripleStore();
     }
 
     /**
@@ -73,7 +72,7 @@ public class R43plesCore implements R43plesCoreInterface {
     @Override
     public ArrayList<UpdateCommit> createUpdateCommit(R43plesRequest request) throws InternalErrorException {
         UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(request);
-        return updateCommitDraft.createCommitInTripleStore();
+        return updateCommitDraft.createInTripleStore();
     }
 
     /**
@@ -84,14 +83,45 @@ public class R43plesCore implements R43plesCoreInterface {
      * @param deleteSet the delete set as N-Triples
      * @param user the user
      * @param message the message
-     * @param derivedFromIdentifier the revision identifier of the revision or the reference identifier from which the new revision should be derive from
+     * @param branchIdentifier the branch identifier (new revision derive from leaf of branch)
      * @return the created update commit
      * @throws InternalErrorException
      */
     @Override
-    public UpdateCommit createUpdateCommit(String graphName, String addSet, String deleteSet, String user, String message, String derivedFromIdentifier) throws InternalErrorException {
-        UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(graphName, addSet, deleteSet, user, message, derivedFromIdentifier);
-        return updateCommitDraft.createCommitInTripleStore().get(0);
+    public UpdateCommit createUpdateCommit(String graphName, String addSet, String deleteSet, String user, String message, String branchIdentifier) throws InternalErrorException {
+        RevisionGraph revisionGraph = new RevisionGraph(graphName);
+        Branch branch = new Branch(revisionGraph, branchIdentifier, true);
+        UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(graphName, addSet, deleteSet, user, message, branch);
+        return updateCommitDraft.createInTripleStore().get(0);
+    }
+
+    /**
+     * Create a new revert commit. Reverts the last revision of specified branch.
+     *
+     * @param request the request received by R43ples
+     * @return the created revert commit
+     * @throws InternalErrorException
+     */
+    @Override
+    public RevertCommit createRevertCommit(R43plesRequest request) throws InternalErrorException {
+        RevertCommitDraft revertCommitDraft = new RevertCommitDraft(request);
+        return revertCommitDraft.createInTripleStore();
+    }
+
+    /**
+     * Create a new revert commit. Reverts the leaf revision of specified branch.
+     *
+     * @param revisionGraph the revision graph
+     * @param branch the branch (new revision derive from leaf of branch)
+     * @param user the user
+     * @param message the message
+     * @return the created revert commit
+     * @throws InternalErrorException
+     */
+    @Override
+    public RevertCommit createRevertCommit(RevisionGraph revisionGraph, Branch branch, String user, String message) throws InternalErrorException {
+        RevertCommitDraft revertCommitDraft = new RevertCommitDraft(revisionGraph, user, message, branch);
+        return revertCommitDraft.createInTripleStore();
     }
 
     /**
@@ -103,16 +133,16 @@ public class R43plesCore implements R43plesCoreInterface {
      */
     @Override
     public ReferenceCommit createReferenceCommit(R43plesRequest request) throws InternalErrorException {
-        ReferenceCreationCommitDraft referenceCreationCommitDraft = new ReferenceCreationCommitDraft(request);
-        return referenceCreationCommitDraft.createCommitInTripleStore();
+        ReferenceCommitDraft referenceCommitDraft = new ReferenceCommitDraft(request);
+        return referenceCommitDraft.createInTripleStore();
     }
 
     /**
      * Create a new reference commit.
      *
-     * @param graphName the graph name
+     * @param revisionGraph the revision graph
      * @param referenceName the reference name
-     * @param revisionIdentifier the revision identifier (the corresponding revision will be the current base for the reference)
+     * @param baseRevision the base revision (this revision will be the current base for the reference)
      * @param user the user
      * @param message the message
      * @param isBranch states if the created reference is a branch or a tag. (branch => true; tag => false)
@@ -120,9 +150,43 @@ public class R43plesCore implements R43plesCoreInterface {
      * @throws InternalErrorException
      */
     @Override
-    public ReferenceCommit createReferenceCommit(String graphName, String referenceName, String revisionIdentifier, String user, String message, boolean isBranch) throws InternalErrorException {
-        ReferenceCreationCommitDraft referenceCreationCommitDraft = new ReferenceCreationCommitDraft(graphName, referenceName, revisionIdentifier, user, message, isBranch);
-        return referenceCreationCommitDraft.createCommitInTripleStore();
+    public ReferenceCommit createReferenceCommit(RevisionGraph revisionGraph, String referenceName, Revision baseRevision, String user, String message, boolean isBranch) throws InternalErrorException {
+        ReferenceCommitDraft referenceCommitDraft = new ReferenceCommitDraft(revisionGraph, referenceName, baseRevision, user, message, isBranch);
+        return referenceCommitDraft.createInTripleStore();
+    }
+
+    /**
+     * Create a new branch commit.
+     *
+     * @param revisionGraph the revision graph
+     * @param referenceName the reference name
+     * @param baseRevision the base revision (this revision will be the current base for the reference)
+     * @param user the user
+     * @param message the message
+     * @return the created branch commit
+     * @throws InternalErrorException
+     */
+    @Override
+    public BranchCommit createBranchCommit(RevisionGraph revisionGraph, String referenceName, Revision baseRevision, String user, String message) throws InternalErrorException {
+        BranchCommitDraft branchCommitDraft = new BranchCommitDraft(revisionGraph, referenceName, baseRevision, user, message);
+        return branchCommitDraft.createInTripleStore();
+    }
+
+    /**
+     * Create a new tag commit.
+     *
+     * @param revisionGraph the revision graph
+     * @param referenceName the reference name
+     * @param baseRevision the base revision (this revision will be the current base for the reference)
+     * @param user the user
+     * @param message the message
+     * @return the created tag commit
+     * @throws InternalErrorException
+     */
+    @Override
+    public TagCommit createTagCommit(RevisionGraph revisionGraph, String referenceName, Revision baseRevision, String user, String message) throws InternalErrorException {
+        TagCommitDraft tagCommitDraft = new TagCommitDraft(revisionGraph, referenceName, baseRevision, user, message);
+        return tagCommitDraft.createInTripleStore();
     }
 
     /**
@@ -212,62 +276,10 @@ public class R43plesCore implements R43plesCoreInterface {
             result = TripleStoreInterfaceSingleton.get()
                     .executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + query_rewritten, request.format);
         } else {
-            result = getSparqlSelectConstructAskResponseClassic(request.query_sparql, request.format);
+            SelectConstructAskQuery selectConstructAskQuery = new SelectConstructAskQuery(request);
+            result = selectConstructAskQuery.performQuery();
         }
         return result;
-    }
-
-    /**
-     * Get the response of a SPARQL query (SELECT, CONSTRUCT, ASK). Classic way.
-     *
-     * @param query the query
-     * @param format the result format
-     * @return the query response
-     * @throws InternalErrorException
-     */
-    private String getSparqlSelectConstructAskResponseClassic(final String query, final String format)
-            throws InternalErrorException {
-        final Pattern patternSelectFromPart = Pattern.compile(
-                "(?<type>FROM|GRAPH)\\s*<(?<graph>[^>\\?]*)(\\?|>)(\\s*REVISION\\s*\"|revision=)(?<revision>([^\">]+))(>|\")",
-                Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
-
-        String queryM = query;
-
-        Matcher m = patternSelectFromPart.matcher(queryM);
-        while (m.find()) {
-            String graphName = m.group("graph");
-            String type = m.group("type");
-            String revisionNumber = m.group("revision").toLowerCase();
-            String newGraphName;
-
-            RevisionGraph graph = new RevisionGraph(graphName);
-
-            // if no revision number is declared use the MASTER as default
-            if (revisionNumber == null) {
-                revisionNumber = "master";
-            }
-            if (revisionNumber.equalsIgnoreCase("master")) {
-                // Respond with MASTER revision - nothing to be done - MASTER
-                // revisions are already created in the named graphs
-                newGraphName = graphName;
-            } else {
-                if (graph.hasBranch(revisionNumber)) {
-                    newGraphName = graph.getReferenceGraph(revisionNumber);
-                } else {
-                    // Respond with specified revision, therefore the revision
-                    // must be generated - saved in graph <graphName-revisionNumber>
-                    newGraphName = graphName + "-" + revisionNumber;
-                    RevisionManagementOriginal.generateFullGraphOfRevision(graphName, revisionNumber, newGraphName);
-                }
-            }
-
-            queryM = m.replaceFirst(type + " <" + newGraphName + ">");
-            m = patternSelectFromPart.matcher(queryM);
-
-        }
-        String response = TripleStoreInterfaceSingleton.get()
-                .executeSelectConstructAskQuery(Config.getUserDefinedSparqlPrefixes() + queryM, format);
-        return response;
     }
 
 }

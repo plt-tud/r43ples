@@ -32,16 +32,26 @@ public class SimplePathCalculationTest {
      */
     @Test
     public final void testPathToLeaf() throws InternalErrorException {
-        SimplePathCalculation pathCalc = new SimplePathCalculation();
-        
+
         RevisionGraph revisionGraph = new RevisionGraph(ds1.graphName);
         Revision revision = revisionGraph.getRevision("2");
-        Path test = pathCalc.getPathToRevisionWithFullGraph(revisionGraph, revision);
-        Assert.assertEquals(5, test.getRevisionPath().size());
+        SimplePathCalculation pathCalc = new SimplePathCalculation(revisionGraph);
+        Path test = pathCalc.getPathToRevisionWithFullGraph(revision);
+
+        Assert.assertEquals(4, test.getRevisionPath().size());
+        Assert.assertEquals("2", test.getRevisionPath().get(0).getRevisionIdentifier());
+        Assert.assertEquals("3", test.getRevisionPath().get(1).getRevisionIdentifier());
+        Assert.assertEquals("4", test.getRevisionPath().get(2).getRevisionIdentifier());
+        Assert.assertEquals("5", test.getRevisionPath().get(3).getRevisionIdentifier());
+
         
         RevisionGraph revisionGraph2 = new RevisionGraph(ds2.graphName);
         Revision revision2 = revisionGraph2.getRevision("1");
-        Path test2 = pathCalc.getPathToRevisionWithFullGraph(revisionGraph2, revision2);
-        Assert.assertEquals(4,test2.getRevisionPath().size());
+        SimplePathCalculation pathCalc2 = new SimplePathCalculation(revisionGraph2);
+        Path test2 = pathCalc2.getPathToRevisionWithFullGraph(revision2);
+        Assert.assertEquals(3, test2.getRevisionPath().size());
+        Assert.assertEquals("1", test2.getRevisionPath().get(0).getRevisionIdentifier());
+        Assert.assertEquals("2", test2.getRevisionPath().get(1).getRevisionIdentifier());
+        Assert.assertEquals("5", test2.getRevisionPath().get(2).getRevisionIdentifier());
     }
 }
