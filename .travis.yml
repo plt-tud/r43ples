@@ -36,7 +36,7 @@ after_success:
     
 
 before_deploy:
-    - mvn -site
+    - mvn -q site
     - ./.update-gh-pages.sh
     # http://stackoverflow.com/questions/25916249/deploying-a-maven-version-to-github-using-travis-ci
     - mvn package -DskipTests=true -DfinalName=r43ples-$TRAVIS_TAG

@@ -207,7 +207,7 @@ public class RevisionDraft {
      * @return the created change set
      */
     protected Revision createInTripleStore() throws InternalErrorException {
-        logger.info("Create new revision for graph " + revisionGraph.getGraphName() + ".");
+        logger.debug("Create new revision for graph " + revisionGraph.getGraphName() + ".");
 
         ChangeSetDraft changeSetDraft;
 

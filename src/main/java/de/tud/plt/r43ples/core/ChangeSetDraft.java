@@ -133,7 +133,7 @@ public class ChangeSetDraft {
      * @return the created change set
      */
     protected ChangeSet createInTripleStore() throws InternalErrorException {
-        logger.info("Create new change set for graph " + revisionGraph.getGraphName() + ".");
+        logger.debug("Create new change set for graph " + revisionGraph.getGraphName() + ".");
 
         createAddAndDeleteSetsInTripleStore();
         if (!isStripped) {
