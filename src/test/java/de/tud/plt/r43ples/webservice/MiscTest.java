@@ -3,9 +3,11 @@
  */
 package de.tud.plt.r43ples.webservice;
 
+import de.tud.plt.r43ples.R43plesTest;
 import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
 import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.commons.configuration.ConfigurationException;
@@ -84,8 +86,9 @@ public class MiscTest extends JerseyTest {
 	@Test
 	public final void testGetRevisionGraph() {
 		String result = target("revisiongraph").queryParam("graph", dataset.graphName).queryParam("format", "text/turtle").request().get(String.class);
-		Assert.assertThat(result, containsString("@prefix"));
-		
+		R43plesTest test = new R43plesTest();
+		test.assertIsomorphism(result, ResourceManagement.getContentFromResource("dataset/dataset-complex-structure-revisiongraph.ttl"));
+
 		result = target("revisiongraph").queryParam("graph", dataset.graphName).queryParam("format", "table").request().get(String.class);
 		Assert.assertThat(result, containsString("<svg"));
 		
