@@ -74,6 +74,23 @@ public class RevisionManagement {
     }
 
     /**
+     * Get revised graphs in R43ples.
+     *
+     * @param format
+     *            serialization of the response
+     * @return String containing the SPARQL response in specified format
+     */
+    public String getRevisedGraphsSparql(final String format) {
+        String sparqlQuery = Config.prefixes
+                + String.format(""
+                + "SELECT DISTINCT ?graph "
+                + "WHERE {"
+                + " GRAPH <%s> { ?graph a rmo:Graph. }"
+                + "} ORDER BY ?graph", Config.revision_graph);
+        return tripleStoreInterface.executeSelectQuery(sparqlQuery, format);
+    }
+
+    /**
      * Get all named graphs URIs by querying the main revision graph.
      *
      * @return the list of named graphs URIs

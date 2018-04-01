@@ -202,23 +202,6 @@ public class RevisionManagementOriginal {
 				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
 		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		
 	}
-
-	/**
-	 * Get revised graphs in R43ples.
-	 * 
-	 * @param format
-	 *            serialization of the response
-	 * @return String containing the SPARQL response in specified format
-	 */
-	public static String getRevisedGraphsSparql(final String format) {
-		String sparqlQuery = Config.prefixes
-				+ String.format("" 
-						+ "SELECT DISTINCT ?graph " 
-						+ "WHERE {"
-						+ " GRAPH <%s> { ?graph a rmo:Graph. }" 
-						+ "} ORDER BY ?graph", Config.revision_graph);
-		return TripleStoreInterfaceSingleton.get().executeSelectQuery(sparqlQuery, format);
-	}
 	
 	
 

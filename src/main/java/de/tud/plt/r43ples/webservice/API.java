@@ -11,6 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import de.tud.plt.r43ples.core.RevisionManagement;
 import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
 
@@ -35,7 +36,7 @@ public class API {
 		logger.info("Get Revised Graphs");
 		String format = (format_query != null) ? format_query : format_header;
 		logger.debug("format: " + format);
-		return RevisionManagementOriginal.getRevisedGraphsSparql(format);
+		return new RevisionManagement().getRevisedGraphsSparql(format);
 	}
 
 	@Path("getBranches")
