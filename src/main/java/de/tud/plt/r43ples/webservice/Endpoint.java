@@ -66,7 +66,9 @@ public class Endpoint {
 
 
 	static final MediaType TEXT_TURTLE_TYPE = new MediaType("text", "turtle");
+	static final String TEXT_TURTLE = "text/turtle";
 	static final MediaType APPLICATION_RDF_XML_TYPE = new MediaType("application", "rdf+xml");
+	static final String APPLICATION_RDF_XML = "application/rdf+xml";
 	static final MediaType APPLICATION_SPARQL_RESULTS_XML_TYPE = new MediaType("application", "sparql-results+xml");
 	
 	

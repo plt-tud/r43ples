@@ -8,6 +8,7 @@ import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
 
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 
 /**store the information of merge in commit model
@@ -38,7 +39,8 @@ public class MergeCommitModel {
 		this.branch2 = branch2;
 		this.strategy = strategy;
 		this.type = type;
-		this.oldRevisionGraph = RevisionManagementOriginal.getRevisionInformation(graphName, "application/json");
+		RevisionGraph graph = new RevisionGraph(graphName);
+		this.oldRevisionGraph = graph.getContentOfRevisionGraph("application/json");
 	}
 
 	public String getGraphName() {

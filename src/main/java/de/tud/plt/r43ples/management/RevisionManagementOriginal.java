@@ -187,37 +187,7 @@ public class RevisionManagementOriginal {
 
 		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(template, graphName, insert));
 	}
-	
 
-	
-
-	/**
-	 * Download complete revision information of R43ples from SPARQL endpoint.
-	 * Provide only information from specified graph if not null
-	 * 
-	 * @param graphName
-	 *            provide only information from specified graph (if not NULL)
-	 * @param format
-	 *            serialization of the RDF model
-	 * @return String containing the RDF model in the specified serialization
-	 */
-	public static String getRevisionInformation(final String graphName, final String format) {
-		String sparqlQuery;
-		
-		if (graphName.equals("")) {
-			sparqlQuery = Config.prefixes + String.format(""
-					+ "CONSTRUCT { ?s ?p ?o. }"
-					+ "WHERE { "
-					+ "	GRAPH <%s> { ?graph a rmo:Graph; rmo:hasRevisionGraph ?revisiongraph.}"
-					+ "	GRAPH ?revisionGraph {?s ?p ?o.}"
-					+ "}", Config.revision_graph);
-			return TripleStoreInterfaceSingleton.get().executeConstructQuery(sparqlQuery, format);
-		} else {
-			RevisionGraph graph = new RevisionGraph(graphName);
-			return graph.getContentOfRevisionGraph(format);
-		}
-		
-	}
 	
 	/**
 	 * Get the content of this revision graph by execution of CONSTRUCT.

@@ -12,10 +12,10 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Template;
 
@@ -29,8 +29,13 @@ import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.visualisation.VisualisationTable;
 import de.tud.plt.r43ples.visualisation.VisualisationGraph;
 
+import static de.tud.plt.r43ples.webservice.Endpoint.*;
+
 @Path("/")
 public class Misc {
+
+	@Context
+	private Request request;
 	
 	private final static Logger logger = Logger.getLogger(Misc.class);
 	
@@ -121,29 +126,43 @@ public class Misc {
 	/**
 	 * Provide revision information about R43ples system.
 	 * 
-	 * @param graph
-	 *            Provide only information about this graph (if not null)
+	 * @param graphName
+	 *            Provide only information about this graph
 	 * @return RDF model of revision information
 	 */
 	@Path("revisiongraph")
 	@GET
-	@Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
-			MediaType.APPLICATION_SVG_XML, "application/ld+json" })
+	@Produces({ TEXT_TURTLE, APPLICATION_RDF_XML, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
 	public final Response getRevisionGraph(@HeaderParam("Accept") final String format_header,
 			@QueryParam("format") final String format_query,
-			@QueryParam("graph") @DefaultValue("") final String graph) {
-		String format = (format_query != null) ? format_query : format_header;
-		logger.info("Get Revision Graph: " + graph + " (format: " + format+")");
-		
-		ResponseBuilder response = Response.ok();
-		if (format.equals("table")) {
-			response.type(MediaType.TEXT_HTML);
-			response.entity(VisualisationTable.getHtmlOutput(graph));
-		}  else if (format.equals("graph")) {
-			response.entity(VisualisationGraph.getHtmlOutput(graph));
+			@QueryParam("graph")  final String graphName) throws Exception {
+		String format = null;
+		if (format_query == null){
+			List<Variant> reqVariants = Variant.mediaTypes(TEXT_TURTLE_TYPE,
+					APPLICATION_RDF_XML_TYPE, MediaType.APPLICATION_JSON_TYPE).build();
+			Variant bestVariant = request.selectVariant(reqVariants);
+			if (bestVariant == null) {
+				throw new Exception("Requested datatype not available");
+			}
+			MediaType reqMediaType = bestVariant.getMediaType();
+			format = reqMediaType.toString();
 		}
 		else {
-			response.entity(RevisionManagementOriginal.getRevisionInformation(graph, format));
+			format = format_query;
+		}
+		logger.info("Get Revision Graph: " + graphName + " (format: " + format+")");
+		
+		ResponseBuilder response = Response.ok();
+		if ("table".equalsIgnoreCase(format)) {
+			response.type(MediaType.TEXT_HTML);
+			response.entity(VisualisationTable.getHtmlOutput(graphName));
+		}  else if ("graph".equalsIgnoreCase(format)) {
+			response.type(MediaType.TEXT_HTML);
+			response.entity(VisualisationGraph.getHtmlOutput(graphName));
+		}
+		else {
+			RevisionGraph graph = new RevisionGraph(graphName);
+			response.entity(graph.getContentOfRevisionGraph(format));
 			response.type(format);
 		}
 		return response.build();
