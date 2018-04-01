@@ -36,10 +36,58 @@ public class RevisionManagement {
     /**
      * The constructor.
      */
-    protected RevisionManagement() {
+    public RevisionManagement() {
         // Dependencies
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 
+    }
+
+    /**
+     * Get revised graphs in R43ples.
+     *
+     * @return result set
+     */
+    private ResultSet getRevisedGraphs() {
+        String sparqlQuery = Config.prefixes
+                + String.format(""
+                + "SELECT DISTINCT ?graph "
+                + "WHERE {"
+                + " GRAPH <%s> {  ?graph a rmo:Graph }"
+                + "} ORDER BY ?graph", Config.revision_graph);
+        return tripleStoreInterface.executeSelectQuery(sparqlQuery);
+    }
+
+
+    /**
+     * Get revised graphs in R43ples as list of string.
+     *
+     * @return list of strings containing the revised graphs of R43ples
+     */
+    public ArrayList<String> getRevisedGraphsList() {
+        ArrayList<String> list = new ArrayList<String>();
+        ResultSet results = getRevisedGraphs();
+        while (results.hasNext()) {
+            QuerySolution qs = results.next();
+            list.add(qs.getResource("graph").toString());
+        }
+        return list;
+    }
+
+    /**
+     * Get revised graphs in R43ples.
+     *
+     * @param format
+     *            serialization of the response
+     * @return String containing the SPARQL response in specified format
+     */
+    public String getRevisedGraphsSparql(final String format) {
+        String sparqlQuery = Config.prefixes
+                + String.format(""
+                + "SELECT DISTINCT ?graph "
+                + "WHERE {"
+                + " GRAPH <%s> { ?graph a rmo:Graph. }"
+                + "} ORDER BY ?graph", Config.revision_graph);
+        return tripleStoreInterface.executeSelectQuery(sparqlQuery, format);
     }
 
     /**

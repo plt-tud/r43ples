@@ -14,7 +14,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.core.RevisionManagement;
 import org.apache.log4j.Logger;
 
 import com.github.mustachejava.DefaultMustacheFactory;
@@ -38,7 +38,7 @@ public class Merging {
 	public final Response getMerging() {
 		logger.info("Merging - Start page");		
 		
-		List<String> graphList = RevisionManagementOriginal.getRevisedGraphsList();
+		List<String> graphList = new RevisionManagement().getRevisedGraphsList();
 		Map<String, Object> scope = new HashMap<String, Object>();
 	    scope.put("merging_active", true);
 		scope.put("graphList", graphList);

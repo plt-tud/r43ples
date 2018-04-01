@@ -202,55 +202,6 @@ public class RevisionManagementOriginal {
 				+ "WHERE { GRAPH <%s> {?s ?p ?o} }", graphName);
 		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		
 	}
-
-	/**
-	 * Get revised graphs in R43ples.
-	 * 
-	 * @param format
-	 *            serialization of the response
-	 * @return String containing the SPARQL response in specified format
-	 */
-	public static String getRevisedGraphsSparql(final String format) {
-		String sparqlQuery = Config.prefixes
-				+ String.format("" 
-						+ "SELECT DISTINCT ?graph " 
-						+ "WHERE {"
-						+ " GRAPH <%s> { ?graph a rmo:Graph. }" 
-						+ "} ORDER BY ?graph", Config.revision_graph);
-		return TripleStoreInterfaceSingleton.get().executeSelectQuery(sparqlQuery, format);
-	}
-	
-	
-	/**
-	 * Get revised graphs in R43ples.
-	 * 
-	 * @return result set
-	 */
-	public static ResultSet getRevisedGraphs() {
-		String sparqlQuery = Config.prefixes
-				+ String.format("" 
-						+ "SELECT DISTINCT ?graph " 
-						+ "WHERE {"
-						+ " GRAPH <%s> {  ?graph a rmo:Graph }" 
-						+ "} ORDER BY ?graph", Config.revision_graph);
-		return TripleStoreInterfaceSingleton.get().executeSelectQuery(sparqlQuery);
-	}
-	
-
-	/**
-	 * Get revised graphs in R43ples as list of string.
-	 * 
-	 * @return list of strings containing the revised graphs of R43ples
-	 */
-	public static ArrayList<String> getRevisedGraphsList() {
-		ArrayList<String> list = new ArrayList<String>();
-		ResultSet results = getRevisedGraphs();
-		while (results.hasNext()) {
-			QuerySolution qs = results.next();
-			list.add(qs.getResource("graph").toString());
-		}
-		return list;
-	}
 	
 	
 
