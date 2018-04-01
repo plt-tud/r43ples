@@ -286,60 +286,7 @@ public class RevisionManagementOriginal {
 			return personUri;
 		}
 	}
-	
 
-
-
-	
-
-	/**
-	 * Get the ADD set URI of a given revision URI.
-	 * 
-	 * @param revisionURI the revision URI
-	 * @param revisionGraph the revision graph
-	 * @return the ADD set URI, returns null when the revision URI does not exists or no ADD set is referenced by the revision URI
-	 */
-	public static String getAddSetURI(String revisionURI, String revisionGraph) {
-		String query = String.format(
-			  "SELECT ?addSetURI %n"
-			+ "WHERE { GRAPH <%s> {%n"
-			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#addSet> ?addSetURI . %n"
-			+ "} }", revisionGraph, revisionURI);
-		
-		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
-		
-		if (results.hasNext()) {
-			QuerySolution qs = results.next();
-			return qs.getResource("?addSetURI").toString();
-		} else {
-			return null;
-		}
-	}
-	
-	
-	/**
-	 * Get the DELETE set URI of a given revision URI.
-	 * 
-	 * @param revisionURI the revision URI
-	 * @param revisionGraph the revision graph
-	 * @return the DELETE set URI, returns null when the revision URI does not exists or no DELETE set is referenced by the revision URI
-	 */
-	public static String getDeleteSetURI(String revisionURI, String revisionGraph) {
-		String query = String.format(
-			  "SELECT ?deleteSetURI %n"
-		    + "WHERE { GRAPH <%s> {%n"
-			+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#deleteSet> ?deleteSetURI . %n"
-			+ "} }", revisionGraph, revisionURI);
-		
-		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
-		
-		if (results.hasNext()) {
-			QuerySolution qs = results.next();
-			return qs.getResource("?deleteSetURI").toString();
-		} else {
-			return null;
-		}
-	}
 		
 }
 
