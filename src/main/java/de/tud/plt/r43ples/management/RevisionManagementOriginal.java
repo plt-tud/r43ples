@@ -39,11 +39,11 @@ public class RevisionManagementOriginal {
 
 
 	/**
-	 * Generates Diffs between to revision a and revision b of a named graph.
+	 * Generates difference between revision a and revision b of a named graph.
 	 * Revision a is considered older than revision b (a -> b)
 	 * @param graphName name of graph
 	 * @param revAIdentifier identifier revision a
-	 * @param revBIdentifier identifier revision
+	 * @param revBIdentifier identifier revision b
 	 * @param fileFormat format of outputfile. possible options: nquads, trig
 	 * @return list of diffs
 	 */
@@ -135,22 +135,6 @@ public class RevisionManagementOriginal {
 
 		return baos.toString();
 	}
-
-
-	/**
-	 * Checks if graph exists in triple store. Works only when the graph is not
-	 * empty.
-	 * 
-	 * @param graphName
-	 *            the graph name
-	 * @return boolean value if specified graph exists and contains at least one
-	 *         triple elsewhere it will return false
-	 */
-	public static boolean checkGraphExistence(final String graphName){
-		String query = "ASK { GRAPH <" + graphName + "> {?s ?p ?o} }";
-		return TripleStoreInterfaceSingleton.get().executeAskQuery(query);
-	}
-
 
 
 	/**

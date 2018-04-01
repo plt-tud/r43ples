@@ -23,12 +23,12 @@ public abstract class TripleStoreInterface {
 	private static Logger logger = Logger.getLogger(TripleStoreInterface.class);
 	
 	protected void init() {
-		if (!RevisionManagementOriginal.checkGraphExistence(Config.revision_graph)){
+		if (!checkGraphExistence(Config.revision_graph)){
 			logger.debug("Create revision graph: "+ Config.revision_graph);
 			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
 	 	}
 		
-		if (!RevisionManagementOriginal.checkGraphExistence(Config.sdd_graph)){
+		if (!checkGraphExistence(Config.sdd_graph)){
 			// Insert default content into SDD graph
 			logger.info("Create sdd graph from " + Config.sdd_graph_defaultContent);
 			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
@@ -41,7 +41,21 @@ public abstract class TripleStoreInterface {
 	}
 	
 	protected abstract void close();
-		
+
+
+	/**
+	 * Checks if graph exists in triple store. Works only when the graph is not
+	 * empty.
+	 *
+	 * @param graphName
+	 *            the graph name
+	 * @return boolean value if specified graph exists and contains at least one
+	 *         triple elsewhere it will return false
+	 */
+	public boolean checkGraphExistence(final String graphName){
+		String query = "ASK { GRAPH <" + graphName + "> {?s ?p ?o} }";
+		return this.executeAskQuery(query);
+	}
 	
 	public String executeSelectConstructAskQuery(String sparqlQuery, String format) {
 		logger.debug("Query: " + sparqlQuery);
