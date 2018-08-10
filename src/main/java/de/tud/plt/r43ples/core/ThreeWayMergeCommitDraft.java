@@ -73,9 +73,9 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
         Revision commonRevision = this.getPathCalculationInterface().getCommonRevisionWithShortestPath(fromRevision, intoRevision);
 
         // Create the revision progress for from and into
-        String namedGraphUriFrom = getRevisionManagement().getTemporaryRevisionProgressFromURI(getRevisionGraph());
-        String namedGraphUriInto = getRevisionManagement().getTemporaryRevisionProgressIntoURI(getRevisionGraph());
-        String namedGraphUriDiff = getRevisionManagement().getTemporaryDifferenceModelURI(getRevisionGraph());
+        String namedGraphUriFrom = getUriCalculator().getTemporaryRevisionProgressFromURI(getRevisionGraph());
+        String namedGraphUriInto = getUriCalculator().getTemporaryRevisionProgressIntoURI(getRevisionGraph());
+        String namedGraphUriDiff = getUriCalculator().getTemporaryDifferenceModelURI(getRevisionGraph());
         String uriA = "http://eatld.et.tu-dresden.de/branch-from";
         String uriB = "http://eatld.et.tu-dresden.de/branch-into";
 
@@ -148,7 +148,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
      */
     private ThreeWayMergeCommit addMetaInformation(Revision generatedRevision, String namedGraphUriDiff, Revision commonRevision, Revision usedSourceRevision, Revision usedTargetRevision) throws InternalErrorException {
 
-        String commitURI = getRevisionManagement().getNewThreeWayMergeCommitURI(getRevisionGraph(), generatedRevision.getRevisionIdentifier());;
+        String commitURI = getUriCalculator().getNewThreeWayMergeCommitURI(getRevisionGraph(), generatedRevision.getRevisionIdentifier());;
 
         String personUri = Helper.getUserURI(getUser());
 
@@ -203,7 +203,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
     private Revision createMergedRevision(String graphNameDifferenceTripleModel, MergeQueryTypeEnum type, Revision usedSourceRevision) throws InternalErrorException {
 
         // Create an empty temporary graph which will contain the merged full content
-        String graphNameOfMerged = getRevisionManagement().getTemporaryMergedURI(getRevisionGraph());
+        String graphNameOfMerged = getUriCalculator().getTemporaryMergedURI(getRevisionGraph());
         getTripleStoreInterface().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameOfMerged));
         getTripleStoreInterface().executeCreateGraph(graphNameOfMerged);
 
@@ -367,11 +367,11 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
         String deletedTriplesB = getTripleStoreInterface().executeConstructQuery(queryRemovedTriplesB, FileUtils.langNTriple);
 
         // Create the merge revision and a change set
-        RevisionDraft revisionDraft = new RevisionDraft(getRevisionManagement(), getRevisionGraph(), usedTargetBranch,
+        RevisionDraft revisionDraft = new RevisionDraft(getUriCalculator(), getRevisionGraph(), usedTargetBranch,
                 addedTriplesB, deletedTriplesB, false);
         Revision generatedRevision = revisionDraft.createInTripleStore();
 
-        ChangeSetDraft changeSetDraftA = new ChangeSetDraft(getRevisionManagement(), getRevisionGraph(),
+        ChangeSetDraft changeSetDraftA = new ChangeSetDraft(getUriCalculator(), getRevisionGraph(),
                 usedSourceBranch.getLeafRevision(), generatedRevision.getRevisionIdentifier(), usedSourceBranch.getReferenceURI(),
                 addedTriplesA, deletedTriplesA, false, false);
         ChangeSet changeSetA = changeSetDraftA.createInTripleStore();

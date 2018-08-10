@@ -62,7 +62,7 @@ public class UpdateCommitDraft extends CommitDraft {
 	 */
 	protected UpdateCommitDraft(String graphName, String addSet, String deleteSet, String user, String message, Branch branch) throws InternalErrorException {
 		super(null);
-		this.revisionDraft = new RevisionDraft(getRevisionManagement(), new RevisionGraph(graphName), branch, addSet, deleteSet, false);
+		this.revisionDraft = new RevisionDraft(getUriCalculator(), new RevisionGraph(graphName), branch, addSet, deleteSet, false);
 		this.setUser(user);
 		this.setMessage(message);
 		this.isCreatedWithRequest = false;
@@ -145,9 +145,9 @@ public class UpdateCommitDraft extends CommitDraft {
 				}
 				if (d == null) {
 					RevisionGraph revisionGraph = new RevisionGraph(graphName);
-					d = new RevisionDraft(getRevisionManagement(), revisionGraph, revisionGraph.getBranch(branchIdentifier, true));
+					d = new RevisionDraft(getUriCalculator(), revisionGraph, revisionGraph.getBranch(branchIdentifier, true));
 					revList.add(d.createInTripleStore());
-					//d = null;//TODO new RevisionDraft(getRevisionManagement(), graph, revisionName);
+					//d = null;//TODO new RevisionDraft(getUriCalculator(), graph, revisionName);
 					revDraftList.add(d);
 				}
 				String graphClause = getStringEnclosedInBraces(updateClause, m2a.end());
@@ -244,7 +244,7 @@ public class UpdateCommitDraft extends CommitDraft {
 		String personUri = Helper.getUserURI(getUser());
 
 		String revisionUri = generatedRevision.getRevisionURI();
-		String commitUri = getRevisionManagement().getNewCommitURI(generatedRevision.getRevisionGraph(), generatedRevision.getRevisionIdentifier());
+		String commitUri = getUriCalculator().getNewCommitURI(generatedRevision.getRevisionGraph(), generatedRevision.getRevisionIdentifier());
 		String revUriOld = generatedRevision.getDerivedFromRevision().getRevisionURI();
 
 		// Create a new commit (activity)

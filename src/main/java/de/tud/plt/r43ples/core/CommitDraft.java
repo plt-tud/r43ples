@@ -45,8 +45,8 @@ public class CommitDraft {
 	private Date timeStamp;
 	/** RDF model string of revisoin information used to check if it is up to date (optional) */
 	private String revisionInformation;
-	/** The current revision management instance. */
-	private RevisionManagement revisionManagement;
+	/** The current URI calculator instance. */
+	private URICalculator uriCalculator;
 
 	// Dependencies
 	/** The triplestore interface to use. **/
@@ -64,7 +64,7 @@ public class CommitDraft {
 		// Dependencies
 		this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 
-		this.revisionManagement = new RevisionManagement();
+		this.uriCalculator = new URICalculator();
 
 		this.request = request;
 		if (request != null) {
@@ -191,12 +191,12 @@ public class CommitDraft {
 	}
 
 	/**
-	 * Get current revision management instance.
+	 * Get current URI calculator instance.
 	 *
-	 * @return the current revision management instance
+	 * @return the current URI calculator instance
 	 */
-	protected RevisionManagement getRevisionManagement() {
-		return revisionManagement;
+	protected URICalculator getUriCalculator() {
+		return uriCalculator;
 	}
 
 

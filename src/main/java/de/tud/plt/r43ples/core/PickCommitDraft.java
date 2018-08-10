@@ -132,7 +132,7 @@ public class PickCommitDraft extends CommitDraft {
      */
     protected PickCommit createCommitInTripleStore() throws InternalErrorException {
 
-        if (!getRevisionManagement().checkNamedGraphExistence(graphName)) {
+        if (!getUriCalculator().checkNamedGraphExistence(graphName)) {
             logger.warn("Graph <" + graphName + "> does not exist.");
             throw new InternalErrorException("Graph <" + graphName + "> does not exist.");
         }
@@ -155,7 +155,7 @@ public class PickCommitDraft extends CommitDraft {
             path = pathCalculationInterface.getPathBetweenStartAndTargetRevision(endRevision, startRevision);
         }
 
-        String commitURI = getRevisionManagement().getNewPickCommitURI(revisionGraph, startRevisionIdentifier, endRevisionIdentifier, targetBranchIdentifier, usedTargetRevision.getRevisionIdentifier());
+        String commitURI = getUriCalculator().getNewPickCommitURI(revisionGraph, startRevisionIdentifier, endRevisionIdentifier, targetBranchIdentifier, usedTargetRevision.getRevisionIdentifier());
 
         // Copy revisions
         Revision generatedRevision = null;
@@ -240,7 +240,7 @@ public class PickCommitDraft extends CommitDraft {
         String addSetContent = revisionToCopy.getChangeSet().getAddSetContent();
         String deleteSetContent = revisionToCopy.getChangeSet().getDeleteSetContent();
 
-        RevisionDraft revisionDraft = new RevisionDraft(getRevisionManagement(), revisionGraph, targetBranch, addSetContent, deleteSetContent, false);
+        RevisionDraft revisionDraft = new RevisionDraft(getUriCalculator(), revisionGraph, targetBranch, addSetContent, deleteSetContent, false);
         Revision generatedRevision = revisionDraft.createInTripleStore();
 
         // Create the corresponding meta data

@@ -46,8 +46,8 @@ public class InitialCommitDraft extends CommitDraft {
     public InitialCommitDraft(R43plesRequest request) throws InternalErrorException {
         super(request);
         String graphName = getGraphNameOfRequest();
-        this.revisionGraph = new RevisionGraph(graphName, getRevisionManagement().getNewRevisionGraphURI(graphName));
-        this.revisionDraft = new RevisionDraft(getRevisionManagement(), revisionGraph, null, null);
+        this.revisionGraph = new RevisionGraph(graphName, getUriCalculator().getNewRevisionGraphURI(graphName));
+        this.revisionDraft = new RevisionDraft(getUriCalculator(), revisionGraph, null, null);
         this.isCreatedWithRequest = true;
     }
 
@@ -66,8 +66,8 @@ public class InitialCommitDraft extends CommitDraft {
         super(null);
         this.setUser(user);
         this.setMessage(message);
-        this.revisionGraph = new RevisionGraph(graphName, getRevisionManagement().getNewRevisionGraphURI(graphName));
-        this.revisionDraft = new RevisionDraft(getRevisionManagement(), revisionGraph, addSet, deleteSet);
+        this.revisionGraph = new RevisionGraph(graphName, getUriCalculator().getNewRevisionGraphURI(graphName));
+        this.revisionDraft = new RevisionDraft(getUriCalculator(), revisionGraph, addSet, deleteSet);
         this.isCreatedWithRequest = false;
     }
 
@@ -78,10 +78,10 @@ public class InitialCommitDraft extends CommitDraft {
      * @throws InternalErrorException
      */
     protected InitialCommit createInTripleStore() throws InternalErrorException {
-        String commitUri = getRevisionManagement().getNewCommitURI(revisionDraft.getRevisionGraph(), revisionDraft.getNewRevisionIdentifier());
+        String commitUri = getUriCalculator().getNewCommitURI(revisionDraft.getRevisionGraph(), revisionDraft.getNewRevisionIdentifier());
 
         // Create graph
-        if (!getRevisionManagement().checkNamedGraphExistence(revisionDraft.getRevisionGraph().getGraphName())) {
+        if (!getUriCalculator().checkNamedGraphExistence(revisionDraft.getRevisionGraph().getGraphName())) {
             getTripleStoreInterface().executeCreateGraph(revisionDraft.getRevisionGraph().getGraphName());
         } else {
             throw new InternalErrorException("The calculated revision graph is already in use.");
@@ -89,7 +89,7 @@ public class InitialCommitDraft extends CommitDraft {
 
         Revision generatedRevision = revisionDraft.createInTripleStore();
 
-        MasterDraft masterDraft = new MasterDraft(getRevisionManagement(), revisionGraph, generatedRevision);
+        MasterDraft masterDraft = new MasterDraft(getUriCalculator(), revisionGraph, generatedRevision);
         Branch generatedBranch = masterDraft.createInTripleStore();
 
         updateReferencedFullGraph(generatedBranch.getFullGraphURI(), generatedRevision.getChangeSet());

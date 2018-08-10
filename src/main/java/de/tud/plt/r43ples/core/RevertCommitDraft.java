@@ -51,7 +51,7 @@ public class RevertCommitDraft extends CommitDraft {
 	 */
 	protected RevertCommitDraft(RevisionGraph revisionGraph, String user, String message, Branch branch) throws InternalErrorException {
 		super(null);
-		this.revisionDraft = new RevisionDraft(getRevisionManagement(), revisionGraph, branch, branch.getLeafRevision().getChangeSet().getDeleteSetURI(), branch.getLeafRevision().getChangeSet().getAddSetURI());
+		this.revisionDraft = new RevisionDraft(getUriCalculator(), revisionGraph, branch, branch.getLeafRevision().getChangeSet().getDeleteSetURI(), branch.getLeafRevision().getChangeSet().getAddSetURI());
 		this.setUser(user);
 		this.setMessage(message);
 	}
@@ -82,7 +82,7 @@ public class RevertCommitDraft extends CommitDraft {
 			throw new QueryErrorException("Error in query: " + getRequest().query_sparql);
 		}
 
-		return new RevisionDraft(getRevisionManagement(), revisionGraph, branch, branch.getLeafRevision().getChangeSet().getDeleteSetURI(), branch.getLeafRevision().getChangeSet().getAddSetURI());
+		return new RevisionDraft(getUriCalculator(), revisionGraph, branch, branch.getLeafRevision().getChangeSet().getDeleteSetURI(), branch.getLeafRevision().getChangeSet().getAddSetURI());
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class RevertCommitDraft extends CommitDraft {
 		String personUri = Helper.getUserURI(getUser());
 
 		String revisionUri = generatedRevision.getRevisionURI();
-		String commitUri = getRevisionManagement().getNewCommitURI(generatedRevision.getRevisionGraph(), generatedRevision.getRevisionIdentifier());
+		String commitUri = getUriCalculator().getNewCommitURI(generatedRevision.getRevisionGraph(), generatedRevision.getRevisionIdentifier());
 		String revUriOld = generatedRevision.getDerivedFromRevision().getRevisionURI();
 
 		// Create a new commit (activity)

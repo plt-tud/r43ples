@@ -22,13 +22,13 @@ public class MasterDraft extends ReferenceDraft {
     /**
      * The constructor.
      *
-     * @param revisionManagement the current revision management instance
+     * @param uriCalculator the current URI calculator instance
      * @param revisionGraph the revision graph
      * @param referencedRevision the referenced revision
      * @throws InternalErrorException
      */
-    protected MasterDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, Revision referencedRevision) throws InternalErrorException {
-        super(revisionManagement, revisionGraph, referencedRevision, "master", revisionManagement.getMasterFullGraphURI(revisionGraph), revisionManagement.getNewMasterURI(revisionGraph));
+    protected MasterDraft(URICalculator uriCalculator, RevisionGraph revisionGraph, Revision referencedRevision) throws InternalErrorException {
+        super(uriCalculator, revisionGraph, referencedRevision, "master", uriCalculator.getMasterFullGraphURI(revisionGraph), uriCalculator.getNewMasterURI(revisionGraph));
 	}
 
 

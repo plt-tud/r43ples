@@ -1,7 +1,6 @@
 package de.tud.plt.r43ples.core;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.existentobjects.Branch;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.existentobjects.Tag;
@@ -23,14 +22,14 @@ public class TagDraft extends ReferenceDraft {
     /**
      * The constructor.
      *
-     * @param revisionManagement the current revision management instance
+     * @param uriCalculator the current URI calculator instance
      * @param revisionGraph the revision graph
      * @param referencedRevision the referenced revision
      * @param referenceIdentifier the reference identifier
      * @throws InternalErrorException
      */
-    protected TagDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, Revision referencedRevision, String referenceIdentifier) throws InternalErrorException {
-        super(revisionManagement, revisionGraph, referencedRevision, referenceIdentifier, revisionManagement.getNewFullGraphURI(revisionGraph, referenceIdentifier), revisionManagement.getNewTagURI(revisionGraph, referenceIdentifier));
+    protected TagDraft(URICalculator uriCalculator, RevisionGraph revisionGraph, Revision referencedRevision, String referenceIdentifier) throws InternalErrorException {
+        super(uriCalculator, revisionGraph, referencedRevision, referenceIdentifier, uriCalculator.getNewFullGraphURI(revisionGraph, referenceIdentifier), uriCalculator.getNewTagURI(revisionGraph, referenceIdentifier));
 	}
 
 
@@ -55,9 +54,8 @@ public class TagDraft extends ReferenceDraft {
     /**
      * Adds meta information of the created revision to the revision graph.
      *
-     * @throws InternalErrorException
      */
-    private void addMetaInformation() throws InternalErrorException {
+    private void addMetaInformation() {
         String queryContent = String.format(
                     "<%s> a rmo:Tag, rmo:Reference, rmo:Entity ;"
                             + "	rmo:references <%s> ;"

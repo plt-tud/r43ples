@@ -22,14 +22,14 @@ public class BranchDraft extends ReferenceDraft {
     /**
      * The constructor.
      *
-     * @param revisionManagement the current revision management instance
+     * @param uriCalculator the current URI calculator instance
      * @param revisionGraph the revision graph
      * @param referencedRevision the referenced revision
      * @param referenceIdentifier the reference identifier
      * @throws InternalErrorException
      */
-    protected BranchDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, Revision referencedRevision, String referenceIdentifier) throws InternalErrorException {
-        super(revisionManagement, revisionGraph, referencedRevision, referenceIdentifier, revisionManagement.getNewFullGraphURI(revisionGraph, referenceIdentifier), revisionManagement.getNewBranchURI(revisionGraph, referenceIdentifier));
+    protected BranchDraft(URICalculator uriCalculator, RevisionGraph revisionGraph, Revision referencedRevision, String referenceIdentifier) throws InternalErrorException {
+        super(uriCalculator, revisionGraph, referencedRevision, referenceIdentifier, uriCalculator.getNewFullGraphURI(revisionGraph, referenceIdentifier), uriCalculator.getNewBranchURI(revisionGraph, referenceIdentifier));
 	}
 
 

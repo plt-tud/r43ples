@@ -47,7 +47,7 @@ public class TagCommitDraft extends ReferenceCommitDraft {
      * @return the created tag commit
      */
     protected TagCommit createInTripleStore() throws InternalErrorException {
-        String commitURI = getRevisionManagement().getNewTagCommitURI(getRevisionGraph(), getReferenceIdentifier());
+        String commitURI = getUriCalculator().getNewTagCommitURI(getRevisionGraph(), getReferenceIdentifier());
 
         // Check tag existence
         if (getRevisionGraph().hasReference(getReferenceIdentifier())) {
@@ -58,7 +58,7 @@ public class TagCommitDraft extends ReferenceCommitDraft {
                     + "' is for the graph '" + getRevisionGraph().getGraphName() + "' already in use.");
         }
 
-        TagDraft tagDraft = new TagDraft(getRevisionManagement(), getRevisionGraph(), getBaseRevision(), getReferenceIdentifier());
+        TagDraft tagDraft = new TagDraft(getUriCalculator(), getRevisionGraph(), getBaseRevision(), getReferenceIdentifier());
         Tag generatedTag = tagDraft.createInTripleStore();
 
         addMetaInformation(generatedTag.getReferenceURI(), commitURI);

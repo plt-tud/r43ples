@@ -42,8 +42,8 @@ public class ChangeSetDraft {
 
     /** The corresponding revision graph. */
     private RevisionGraph revisionGraph;
-    /** The current revision management instance. */
-    private RevisionManagement revisionManagement;
+    /** The current URI calculator instance. */
+    private URICalculator uriCalculator;
 
     /** States if the add and delete sets were already stripped regarding the prior revision. **/
     private boolean isStripped;
@@ -58,7 +58,7 @@ public class ChangeSetDraft {
     /**
      * The constructor. Add and delete sets can be specified which are associated with this revision.
      *
-     * @param revisionManagement the current revision management instance
+     * @param uriCalculator the current URI calculator instance
      * @param revisionGraph the revision graph
      * @param priorRevision the prior revision
      * @param newRevisionIdentifier the new revision identifier
@@ -69,20 +69,20 @@ public class ChangeSetDraft {
      * @param isSpecifiedByRewrittenQuery states if the the content of the add and delete sets will be specified by a following rewritten query (in that case add and delete set can be null but the corresponding graphs will be created anyway)
      * @throws InternalErrorException
      */
-    protected ChangeSetDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier, String referencedFullGraphURI, String addSet, String deleteSet, boolean isStripped, boolean isSpecifiedByRewrittenQuery) throws InternalErrorException {
+    protected ChangeSetDraft(URICalculator uriCalculator, RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier, String referencedFullGraphURI, String addSet, String deleteSet, boolean isStripped, boolean isSpecifiedByRewrittenQuery) throws InternalErrorException {
         // Dependencies
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 
-        this.revisionManagement = revisionManagement;
+        this.uriCalculator = uriCalculator;
         this.revisionGraph = revisionGraph;
 
         this.priorRevision = priorRevision;
         this.newRevisionIdentifier = newRevisionIdentifier;
         this.referencedFullGraphURI = referencedFullGraphURI;
 
-        this.changeSetURI = this.revisionManagement.getNewChangeSetURI(revisionGraph, priorRevision, newRevisionIdentifier);
-        this.addSetURI = this.revisionManagement.getNewAddSetURI(revisionGraph, priorRevision, newRevisionIdentifier);
-        this.deleteSetURI = this.revisionManagement.getNewDeleteSetURI(revisionGraph, priorRevision, newRevisionIdentifier);
+        this.changeSetURI = this.uriCalculator.getNewChangeSetURI(revisionGraph, priorRevision, newRevisionIdentifier);
+        this.addSetURI = this.uriCalculator.getNewAddSetURI(revisionGraph, priorRevision, newRevisionIdentifier);
+        this.deleteSetURI = this.uriCalculator.getNewDeleteSetURI(revisionGraph, priorRevision, newRevisionIdentifier);
 
         this.isStripped = isStripped;
         this.isSpecifiedByRewrittenQuery = isSpecifiedByRewrittenQuery;
@@ -94,7 +94,7 @@ public class ChangeSetDraft {
     /**
      * The constructor. Add and delete set URIs can be specified which are associated with this revision.
      *
-     * @param revisionManagement the current revision management instance
+     * @param uriCalculator the current URI calculator instance
      * @param revisionGraph the revision graph
      * @param priorRevision the prior revision
      * @param newRevisionIdentifier the new revision identifier
@@ -103,18 +103,18 @@ public class ChangeSetDraft {
      * @param deleteSetURI the delete set URI of the revision
      * @throws InternalErrorException
      */
-    protected ChangeSetDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier, String referencedFullGraphURI, String addSetURI, String deleteSetURI) throws InternalErrorException {
+    protected ChangeSetDraft(URICalculator uriCalculator, RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier, String referencedFullGraphURI, String addSetURI, String deleteSetURI) throws InternalErrorException {
         // Dependencies
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 
-        this.revisionManagement = revisionManagement;
+        this.uriCalculator = uriCalculator;
         this.revisionGraph = revisionGraph;
 
         this.priorRevision = priorRevision;
         this.newRevisionIdentifier = newRevisionIdentifier;
         this.referencedFullGraphURI = referencedFullGraphURI;
 
-        this.changeSetURI = this.revisionManagement.getNewChangeSetURI(revisionGraph, priorRevision, newRevisionIdentifier);
+        this.changeSetURI = this.uriCalculator.getNewChangeSetURI(revisionGraph, priorRevision, newRevisionIdentifier);
         this.addSetURI = addSetURI;
         this.deleteSetURI = deleteSetURI;
 

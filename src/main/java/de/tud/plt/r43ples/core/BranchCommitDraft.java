@@ -46,9 +46,9 @@ public class BranchCommitDraft extends ReferenceCommitDraft {
      * @return the created branch commit
      */
     protected BranchCommit createInTripleStore() throws InternalErrorException {
-        String commitURI = getRevisionManagement().getNewBranchCommitURI(getRevisionGraph(), getReferenceIdentifier());
+        String commitURI = getUriCalculator().getNewBranchCommitURI(getRevisionGraph(), getReferenceIdentifier());
 
-        BranchDraft branchDraft = new BranchDraft(getRevisionManagement(), getRevisionGraph(), getBaseRevision(), getReferenceIdentifier());
+        BranchDraft branchDraft = new BranchDraft(getUriCalculator(), getRevisionGraph(), getBaseRevision(), getReferenceIdentifier());
         Branch generatedBranch = branchDraft.createInTripleStore();
 
 

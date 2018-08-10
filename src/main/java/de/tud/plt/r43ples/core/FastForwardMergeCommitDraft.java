@@ -73,7 +73,7 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
      */
     private FastForwardMergeCommit addMetaInformation(Revision usedSourceRevision, Branch usedSourceBranch, Revision usedTargetRevision, Branch usedTargetBranch) throws InternalErrorException {
 
-        String commitURI = getRevisionManagement().getNewFastForwardMergeCommitURI(getRevisionGraph(), usedSourceRevision.getRevisionIdentifier(), usedTargetRevision.getRevisionIdentifier());
+        String commitURI = getUriCalculator().getNewFastForwardMergeCommitURI(getRevisionGraph(), usedSourceRevision.getRevisionIdentifier(), usedTargetRevision.getRevisionIdentifier());
         String personUri = Helper.getUserURI(getUser());
 
         // Create a new commit (activity)

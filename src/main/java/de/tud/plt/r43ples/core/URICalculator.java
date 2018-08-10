@@ -19,12 +19,12 @@ import java.util.ArrayList;
  *
  * @author Stephan Hensel
  */
-public class RevisionManagement {
+public class URICalculator {
 
     /**
      * The logger.
      **/
-    private Logger logger = Logger.getLogger(RevisionManagement.class);
+    private Logger logger = Logger.getLogger(URICalculator.class);
 
     // Dependencies
     /**
@@ -36,7 +36,7 @@ public class RevisionManagement {
     /**
      * The constructor.
      */
-    protected RevisionManagement() {
+    protected URICalculator() {
         // Dependencies
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 

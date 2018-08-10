@@ -30,8 +30,8 @@ public class ReferenceDraft {
 
     /** The corresponding revision graph. */
     private RevisionGraph revisionGraph;
-    /** The current revision management instance. */
-    private RevisionManagement revisionManagement;
+    /** The current URI calculator instance. */
+    private URICalculator uriCalculator;
 
     // Dependencies
     /** The triple store interface to use. **/
@@ -41,7 +41,7 @@ public class ReferenceDraft {
     /**
      * The constructor.
      *
-     * @param revisionManagement the current revision management instance
+     * @param uriCalculator the current URI calculator instance
      * @param revisionGraph the revision graph
      * @param referencedRevision the referenced revision
      * @param referenceIdentifier the reference identifier
@@ -49,11 +49,11 @@ public class ReferenceDraft {
      * @param referenceURI the reference URI
      * @throws InternalErrorException
      */
-    protected ReferenceDraft(RevisionManagement revisionManagement, RevisionGraph revisionGraph, Revision referencedRevision, String referenceIdentifier, String referencedFullGraphURI, String referenceURI) throws InternalErrorException {
+    protected ReferenceDraft(URICalculator uriCalculator, RevisionGraph revisionGraph, Revision referencedRevision, String referenceIdentifier, String referencedFullGraphURI, String referenceURI) throws InternalErrorException {
         // Dependencies
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 
-        this.revisionManagement = revisionManagement;
+        this.uriCalculator = uriCalculator;
         this.revisionGraph = revisionGraph;
 
         this.referencedRevision = referencedRevision;
@@ -109,12 +109,12 @@ public class ReferenceDraft {
     }
 
     /**
-     * Get the revision management.
+     * Get the URI calculator.
      *
-     * @return the revision management
+     * @return the URI calculator
      */
-    public RevisionManagement getRevisionManagement() {
-        return revisionManagement;
+    public URICalculator getUriCalculator() {
+        return uriCalculator;
     }
 
     /**

@@ -180,7 +180,7 @@ public class MergeCommitDraft extends CommitDraft {
             String revisionUriInto = getRevisionGraph().getRevisionUri(getBranchNameInto());
 
             // Check the named graph existence
-            if (!getRevisionManagement().checkNamedGraphExistence(getGraphName())) {
+            if (!getUriCalculator().checkNamedGraphExistence(getGraphName())) {
                 logger.warn("Graph <" + getGraphName() + "> does not exist.");
                 throw new InternalErrorException("Graph <" + getGraphName() + "> does not exist.");
             }
