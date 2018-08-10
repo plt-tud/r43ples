@@ -11,7 +11,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.iohelper.Helper;
 import org.apache.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
@@ -35,7 +35,7 @@ public class API {
 		logger.info("Get Revised Graphs");
 		String format = (format_query != null) ? format_query : format_header;
 		logger.debug("format: " + format);
-		return RevisionManagementOriginal.getRevisedGraphsSparql(format);
+		return Helper.getRevisedGraphsSparql(format);
 	}
 
 	@Path("getBranches")
@@ -73,7 +73,7 @@ public class API {
 
 		// check fileformat before wasting cpu
 		if (format.toLowerCase().contains("trig") || fileFormat.toLowerCase().contains("nquads")) {
-			return RevisionManagementOriginal.getDiffsBetweenStartAndTargetRevision(graphName, revA, revB, format);
+			return Helper.getDiffsBetweenStartAndTargetRevision(graphName, revA, revB, format);
 		} else {
 			return "Wrong file format. Use either \"nquads\" or \"trig\" !";
 		}

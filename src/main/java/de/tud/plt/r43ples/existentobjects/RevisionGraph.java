@@ -3,8 +3,8 @@ package de.tud.plt.r43ples.existentobjects;
 import com.hp.hpl.jena.query.QuerySolution;
 import com.hp.hpl.jena.query.ResultSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
@@ -18,7 +18,7 @@ import java.util.ArrayList;
 public class RevisionGraph {
 
 	/** The logger. **/
-	private Logger logger = Logger.getLogger(RevisionManagementOriginal.class);
+	private Logger logger = Logger.getLogger(Helper.class);
 
 	/** The URI of the named graph which R43ples manages. **/
 	private String graphName;
@@ -62,7 +62,7 @@ public class RevisionGraph {
 	 * @return the constructed graph content as specified RDF serialization format
 	 */
 	public String getContentOfRevisionGraph(final String format) {
-		return RevisionManagementOriginal.getContentOfGraph(this.getRevisionGraphUri(), format);
+		return Helper.getContentOfGraph(this.getRevisionGraphUri(), format);
 	}
 
 

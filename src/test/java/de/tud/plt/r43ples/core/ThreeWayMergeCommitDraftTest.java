@@ -9,12 +9,11 @@ import de.tud.plt.r43ples.dataset.DataSetGenerationResult;
 import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.optimization.ChangeSetPath;
 import de.tud.plt.r43ples.optimization.PathCalculationFabric;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -46,7 +45,7 @@ public class ThreeWayMergeCommitDraftTest extends R43plesTest {
 
         cd.createRevisionProgress(fullGraph, path, graphNameRevisionProgress, "http://test.com/rp");
 
-        String result = RevisionManagementOriginal.getContentOfGraph(graphNameRevisionProgress, "TURTLE");
+        String result = Helper.getContentOfGraph(graphNameRevisionProgress, "TURTLE");
         String expected = ResourceManagement.getContentFromResource("dataset/dataset1/revision-progress-1-3.ttl");
         assertIsomorphism(expected, result);
     }
@@ -72,11 +71,11 @@ public class ThreeWayMergeCommitDraftTest extends R43plesTest {
         String uriTo = "http://revision.into/entry";
         cd.createRevisionProgresses(pathFrom, graphFrom, uriFrom, pathTo, graphTo, uriTo, commonRevision);
 
-        String resultFrom = RevisionManagementOriginal.getContentOfGraph(graphFrom, "TURTLE");
+        String resultFrom = Helper.getContentOfGraph(graphFrom, "TURTLE");
         String expectedFrom = ResourceManagement.getContentFromResource("dataset/dataset1/revision-progress-0-5.ttl");
         assertIsomorphism(expectedFrom, resultFrom);
 
-        String resultTo = RevisionManagementOriginal.getContentOfGraph(graphTo, "TURTLE");
+        String resultTo = Helper.getContentOfGraph(graphTo, "TURTLE");
         String expectedTo = ResourceManagement.getContentFromResource("dataset/dataset1/revision-progress-0-13.ttl");
         assertIsomorphism(expectedTo, resultTo);
     }

@@ -1,11 +1,8 @@
 package de.tud.plt.r43ples.core;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.existentobjects.ChangeSet;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;

@@ -11,7 +11,7 @@ import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.iohelper.Helper;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -32,7 +32,7 @@ public class FullGraphTest extends R43plesTest {
         Revision rev3 = revisionGraph.getRevision("3");
         FullGraph full3 = new FullGraph(revisionGraph, rev3);
 
-        String result = RevisionManagementOriginal.getContentOfGraph(full3.getFullGraphUri(), "Turtle");
+        String result = Helper.getContentOfGraph(full3.getFullGraphUri(), "Turtle");
         String expected = ResourceManagement.getContentFromResource("dataset/dataset1/rev-3.ttl");
 
         Assert.assertTrue(this.check_isomorphism(result, expected));

@@ -16,6 +16,7 @@ import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.iohelper.Helper;
 import org.apache.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Template;
 
@@ -25,7 +26,6 @@ import com.github.mustachejava.MustacheFactory;
 
 import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.visualisation.VisualisationTable;
 import de.tud.plt.r43ples.visualisation.VisualisationGraph;
 
@@ -184,7 +184,7 @@ public class Misc {
 		String format = (format_query != null) ? format_query : format_header;
 		logger.debug("format: " + format);
 
-		String result = RevisionManagementOriginal.getContentOfGraph(graphName, format);
+		String result = Helper.getContentOfGraph(graphName, format);
 		ResponseBuilder response = Response.ok();
 		return response.entity(result).type(format).build();
 	}

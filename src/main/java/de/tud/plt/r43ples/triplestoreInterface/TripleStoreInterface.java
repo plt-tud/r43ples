@@ -4,7 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.iohelper.Helper;
 import org.apache.log4j.Logger;
 
 import com.hp.hpl.jena.query.ResultSet;
@@ -36,7 +36,7 @@ public abstract class TripleStoreInterface {
 			Model jena_model = JenaModelManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent);
 			String model = JenaModelManagement.convertJenaModelToNTriple(jena_model);
 			logger.debug("SDD model: " + model);	
-			RevisionManagementOriginal.executeINSERT(Config.sdd_graph, model);
+			Helper.executeINSERT(Config.sdd_graph, model);
 	 	}		
 	}
 	

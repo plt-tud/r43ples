@@ -5,8 +5,7 @@ import com.hp.hpl.jena.rdf.model.Property;
 import com.hp.hpl.jena.rdf.model.RDFNode;
 import com.hp.hpl.jena.rdf.model.StmtIterator;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
-import de.tud.plt.r43ples.iohelper.ResourceManagement;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.webservice.Endpoint;
 import org.apache.log4j.Logger;
@@ -117,7 +116,7 @@ public class R43plesTest {
 	 * @param expected the expected graph as turtle
 	 */
 	public void assertContentOfGraph(String graphURI, String expected) {
-		assertIsomorphism(RevisionManagementOriginal.getContentOfGraph(graphURI, "TURTLE"), expected);
+		assertIsomorphism(Helper.getContentOfGraph(graphURI, "TURTLE"), expected);
 	}
 
 	/**

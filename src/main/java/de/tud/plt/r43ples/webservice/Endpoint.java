@@ -25,6 +25,7 @@ import de.tud.plt.r43ples.core.R43plesCoreSingleton;
 import de.tud.plt.r43ples.existentobjects.InitialCommit;
 import de.tud.plt.r43ples.existentobjects.MergeCommit;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
+import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.management.*;
 import org.apache.log4j.Logger;
 
@@ -303,7 +304,7 @@ public class Endpoint {
 	    Mustache mustache = mf.compile("templates/endpoint.mustache");
 	    StringWriter sw = new StringWriter();
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
-	    htmlMap.put("graphList", RevisionManagementOriginal.getRevisedGraphsList());
+	    htmlMap.put("graphList", Helper.getRevisedGraphsList());
 	    htmlMap.put("endpoint_active", true);
 	    mustache.execute(sw, htmlMap);		
 		String content = sw.toString();

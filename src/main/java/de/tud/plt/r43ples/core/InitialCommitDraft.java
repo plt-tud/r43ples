@@ -8,7 +8,7 @@ import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
 
@@ -149,7 +149,7 @@ public class InitialCommitDraft extends CommitDraft {
                         + "	rmo:generated <%s>, <%s> ;"
                         + "	rmo:commitMessage \"%s\" ;"
                         + "	rmo:atTime \"%s\"^^xsd:dateTime .%n",
-                commitUri, RevisionManagementOriginal.getUserURI(getUser()), generatedRevision.getRevisionURI(), branchUri, getMessage(), getTimeStamp());
+                commitUri, Helper.getUserURI(getUser()), generatedRevision.getRevisionURI(), branchUri, getMessage(), getTimeStamp());
 
         String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisionGraph.getRevisionGraphUri(), queryContent);
 

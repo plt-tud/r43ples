@@ -5,7 +5,7 @@ import de.tud.plt.r43ples.existentobjects.Branch;
 import de.tud.plt.r43ples.existentobjects.FastForwardMergeCommit;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.iohelper.Helper;
 import org.apache.log4j.Logger;
 
 /**
@@ -74,7 +74,7 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
     private FastForwardMergeCommit addMetaInformation(Revision usedSourceRevision, Branch usedSourceBranch, Revision usedTargetRevision, Branch usedTargetBranch) throws InternalErrorException {
 
         String commitURI = getRevisionManagement().getNewFastForwardMergeCommitURI(getRevisionGraph(), usedSourceRevision.getRevisionIdentifier(), usedTargetRevision.getRevisionIdentifier());
-        String personUri = RevisionManagementOriginal.getUserURI(getUser());
+        String personUri = Helper.getUserURI(getUser());
 
         // Create a new commit (activity)
         StringBuilder queryContent = new StringBuilder(1000);

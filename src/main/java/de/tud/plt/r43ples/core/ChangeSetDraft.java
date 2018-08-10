@@ -2,11 +2,10 @@ package de.tud.plt.r43ples.core;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.ChangeSet;
-import de.tud.plt.r43ples.existentobjects.FastForwardMergeCommit;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.log4j.Logger;
@@ -152,14 +151,14 @@ public class ChangeSetDraft {
             // Create new named graph for add set
             logger.debug("Create new graph with name " + addSetURI + ".");
             tripleStoreInterface.executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n", addSetURI));
-            RevisionManagementOriginal.executeINSERT(addSetURI, addSet);
+            Helper.executeINSERT(addSetURI, addSet);
         }
 
         if (deleteSet!=null && !deleteSet.isEmpty()) {
             // Create new named graph for delete set
             logger.debug("Create new graph with name " + deleteSetURI + ".");
             tripleStoreInterface.executeUpdateQuery(String.format("CREATE SILENT GRAPH <%s>%n", deleteSetURI));
-            RevisionManagementOriginal.executeINSERT(deleteSetURI, deleteSet);
+            Helper.executeINSERT(deleteSetURI, deleteSet);
         }
 
         if (isSpecifiedByRewrittenQuery) {

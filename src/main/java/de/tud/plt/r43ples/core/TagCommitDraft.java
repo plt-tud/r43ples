@@ -6,8 +6,8 @@ import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.existentobjects.Tag;
 import de.tud.plt.r43ples.existentobjects.TagCommit;
+import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import org.apache.log4j.Logger;
 
 import java.util.regex.Pattern;
@@ -79,7 +79,7 @@ public class TagCommitDraft extends ReferenceCommitDraft {
         logger.info("Create new tag '" + getReferenceIdentifier() + "' for graph " + getRevisionGraph().getGraphName());
 
         // General variables
-        String personUri = RevisionManagementOriginal.getUserURI(getUser());
+        String personUri = Helper.getUserURI(getUser());
 
         // Create a new commit (activity)
         String queryContent = String.format(""

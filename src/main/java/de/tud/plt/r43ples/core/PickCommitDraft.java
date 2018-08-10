@@ -5,7 +5,7 @@ import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.optimization.PathCalculationFabric;
 import de.tud.plt.r43ples.optimization.PathCalculationInterface;
 import org.apache.log4j.Logger;
@@ -203,7 +203,7 @@ public class PickCommitDraft extends CommitDraft {
      */
     private PickCommit addMetaInformation(Revision usedTargetRevision, Branch usedTargetBranch, String commitURI, ArrayList<Revision> usedSourceRevisions, ArrayList<Revision> generatedRevisions) throws InternalErrorException {
 
-        String personUri = RevisionManagementOriginal.getUserURI(getUser());
+        String personUri = Helper.getUserURI(getUser());
 
         // Create a new commit (activity)
         StringBuilder queryContent = new StringBuilder(1000);

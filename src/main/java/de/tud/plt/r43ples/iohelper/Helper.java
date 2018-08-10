@@ -1,5 +1,4 @@
-
-package de.tud.plt.r43ples.management;
+package de.tud.plt.r43ples.iohelper;
 
 import com.hp.hpl.jena.query.Dataset;
 import com.hp.hpl.jena.query.DatasetFactory;
@@ -10,7 +9,7 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.ChangeSet;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import de.tud.plt.r43ples.iohelper.JenaModelManagement;
+import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.optimization.ChangeSetPath;
 import de.tud.plt.r43ples.optimization.PathCalculationFabric;
 import de.tud.plt.r43ples.optimization.PathCalculationInterface;
@@ -26,16 +25,16 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
- * This class provides methods for interaction with graphs.
+ * This class provides several helpful methods.
  * 
  * @author Stephan Hensel
  * @author Markus Graube
  * 
  */
-public class RevisionManagementOriginal {
+public class Helper {
 
 	/** The logger. **/
-	private static Logger logger = Logger.getLogger(RevisionManagementOriginal.class);
+	private static Logger logger = Logger.getLogger(Helper.class);
 
 
 	/**
@@ -287,6 +286,5 @@ public class RevisionManagementOriginal {
 		}
 	}
 
-		
 }
 

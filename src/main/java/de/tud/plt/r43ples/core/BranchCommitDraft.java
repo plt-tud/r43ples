@@ -6,7 +6,7 @@ import de.tud.plt.r43ples.existentobjects.BranchCommit;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
+import de.tud.plt.r43ples.iohelper.Helper;
 import org.apache.log4j.Logger;
 
 import java.util.regex.Pattern;
@@ -68,7 +68,7 @@ public class BranchCommitDraft extends ReferenceCommitDraft {
         logger.info("Create new branch '" + getReferenceIdentifier() + "' for graph " + getRevisionGraph().getGraphName());
 
         // General variables
-        String personUri = RevisionManagementOriginal.getUserURI(getUser());
+        String personUri = Helper.getUserURI(getUser());
 
         // Create a new commit (activity)
         String queryContent = String.format(""

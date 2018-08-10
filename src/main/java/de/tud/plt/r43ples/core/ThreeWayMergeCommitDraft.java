@@ -8,9 +8,9 @@ import de.tud.plt.r43ples.existentobjects.Branch;
 import de.tud.plt.r43ples.existentobjects.ChangeSet;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
+import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.RevisionManagementOriginal;
 import de.tud.plt.r43ples.mergingUI.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.mergingUI.SDDTripleStateEnum;
 import de.tud.plt.r43ples.optimization.ChangeSetPath;
@@ -120,7 +120,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
             if (getTripleStoreInterface().executeAskQuery(queryASK)) {
                 // Difference model contains conflicts
                 // Return the conflict model to the client
-                String conflictModel = RevisionManagementOriginal.getContentOfGraph(namedGraphUriDiff, "text/turtle");
+                String conflictModel = Helper.getContentOfGraph(namedGraphUriDiff, "text/turtle");
                 return new ThreeWayMergeCommit(getRevisionGraph(), null,null, null, null, fromRevision, null, intoRevision, null, null, null, true, conflictModel, namedGraphUriDiff);
             } else {
                 // Difference model contains no conflicts
@@ -150,7 +150,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
         String commitURI = getRevisionManagement().getNewThreeWayMergeCommitURI(getRevisionGraph(), generatedRevision.getRevisionIdentifier());;
 
-        String personUri = RevisionManagementOriginal.getUserURI(getUser());
+        String personUri = Helper.getUserURI(getUser());
 
         // Create a new commit (activity)
         StringBuilder queryContent = new StringBuilder(1000);
@@ -214,7 +214,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
         if (type.equals(MergeQueryTypeEnum.MANUAL)) {
             // Manual merge query
-            RevisionManagementOriginal.executeINSERT(graphNameOfMerged, getTriples());
+            Helper.executeINSERT(graphNameOfMerged, getTriples());
         } else {
             // Copy graph B to temporary merged graph
             String queryCopy = String.format("COPY <%s> TO <%s>", graphNameOfBranchB, graphNameOfMerged);
@@ -312,9 +312,9 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                 }
                 // Update the merged graph
                 // Insert triplesToAdd
-                RevisionManagementOriginal.executeINSERT(graphNameOfMerged, triplesToAdd);
+                Helper.executeINSERT(graphNameOfMerged, triplesToAdd);
                 // Delete triplesToDelete
-                RevisionManagementOriginal.executeDELETE(graphNameOfMerged, triplesToDelete);
+                Helper.executeDELETE(graphNameOfMerged, triplesToDelete);
             }
         }
 
