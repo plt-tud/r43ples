@@ -2,6 +2,7 @@ package de.tud.plt.r43ples.webservice;
 
 import java.io.StringWriter;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
+import de.tud.plt.r43ples.existentobjects.RevisionControl;
 import de.tud.plt.r43ples.iohelper.Helper;
 import org.apache.log4j.Logger;
 
@@ -38,7 +40,8 @@ public class Merging {
 	public final Response getMerging() {
 		logger.info("Merging - Start page");		
 		
-		List<String> graphList = Helper.getRevisedGraphsList();
+		List<String> graphList = new LinkedList<>();
+		graphList.addAll(new RevisionControl().getRevisedGraphs().keySet());
 		Map<String, Object> scope = new HashMap<String, Object>();
 	    scope.put("merging_active", true);
 		scope.put("graphList", graphList);
