@@ -142,7 +142,7 @@ public class RevisionGraph {
 				+ "WHERE { GRAPH  <%s> {" 
 				+ "	?ref a rmo:Reference; "
 				+ "		rmo:references ?rev;" 
-				+ "		rmo:fullGraph ?graph."
+				+ "		rmo:fullContent ?graph."
 				+ " ?rev a rmo:Revision."
 				+ "	{?ref rmo:referenceIdentifier \"%s\"} UNION {?rev rmo:revisionIdentifier \"%s\"}"
 				+ "} }", revisionGraph, referenceIdentifier, referenceIdentifier);
@@ -235,7 +235,7 @@ public class RevisionGraph {
 				+ "WHERE { GRAPH <%s> {"
 				+ " {?rev rmo:addSet ?graph}" 
 				+ " UNION {?rev rmo:deleteSet ?graph}"
-				+ " UNION {?ref rmo:fullGraph ?graph}"
+				+ " UNION {?ref rmo:fullContent ?graph}"
 				+ "} }", revisionGraph);
 				
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
@@ -450,7 +450,7 @@ public class RevisionGraph {
 		String query = String.format(
 				  "SELECT ?fullGraphURI %n"
 			    + "WHERE { GRAPH <%s> {%n"
-				+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#fullGraph> ?fullGraphURI . %n"
+				+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#fullContent> ?fullGraphURI . %n"
 				+ "} }", revisionGraph, branchURI);
 			
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);

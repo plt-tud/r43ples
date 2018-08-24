@@ -245,8 +245,7 @@ public class Revision {
             String query = Config.prefixes + String.format(""
                     + "SELECT ?changeSetURI "
                     + "WHERE { GRAPH  <%s> {"
-                    + "	<%s> a rmo:Revision; "
-                    + "	 rmo:hasChangeSet ?changeSetURI. "
+                    + "	?changeSetURI rmo:succeedingRevision <%s> . "
                     + "} }", revisionGraphURI, revisionURI);
             this.logger.debug(query);
             ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
@@ -316,20 +315,6 @@ public class Revision {
         } else {
             throw new InternalErrorException("No revision identifier found for revision URI " + revisionURI + ".");
         }
-    }
-
-    /**
-     * Get the content of a named graph as N-TRIPLES.
-     *
-     * @param namedGraphURI the named graph URI
-     * @return the content of the named graph as N-TRIPLES
-     */
-    private String getContentOfNamedGraphAsN3(String namedGraphURI) {
-        String query = Config.prefixes + String.format(
-                "CONSTRUCT {?s ?p ?o} %n"
-                        + "WHERE { GRAPH <%s> {?s ?p ?o} }", namedGraphURI);
-        String resultAsTurtle = tripleStoreInterface.executeConstructQuery(query, "TURTLE");
-        return JenaModelManagement.convertJenaModelToNTriple(JenaModelManagement.readStringToJenaModel(resultAsTurtle, "TURTLE"));
     }
 
 }

@@ -264,7 +264,7 @@ public class SimplePathCalculation implements PathCalculationInterface {
                         "		<%s> rmo:wasDerivedFrom* ?revision, ?nextRevision." +
                         "		?revision rmo:wasDerivedFrom* <%s>. " +
                         "       ?nextRevision rmo:wasDerivedFrom ?revision. " +
-                        "       ?nextRevision rmo:hasChangeSet ?changeSet. " +
+                        "       ?changeSet rmo:succeedingRevision ?nextRevision. " +
                         "       ?changeSet rmo:priorRevision ?revision; " +
                         "                  rmo:addSet    ?addSet ; " +
                         "                  rmo:deleteSet ?deleteSet . " +

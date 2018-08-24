@@ -1,33 +1,35 @@
-@prefix rpo:   <http://eatld.et.tu-dresden.de/rpo#> .
-@prefix sdd:   <http://eatld.et.tu-dresden.de/sdd#> .
-@prefix dc-terms: <http://purl.org/dc/terms/> .
-@prefix rmo:   <http://eatld.et.tu-dresden.de/rmo#> .
-@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix owl:   <http://www.w3.org/2002/07/owl#> .
-@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
-@prefix sddo:  <http://eatld.et.tu-dresden.de/sddo#> .
-@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix prov:  <http://www.w3.org/ns/prov#> .
-
 <http://example.com/test-changeset-0>
-        a              rmo:ChangeSet ;
-        rmo:addSet     <http://example.com/test-addSet-0> ;
-        rmo:deleteSet  <http://example.com/test-deleteSet-0> .
+        a       <http://eatld.et.tu-dresden.de/rmo#ChangeSet> ;
+        <http://eatld.et.tu-dresden.de/rmo#addSet>
+                <http://example.com/test-addSet-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#deleteSet>
+                <http://example.com/test-deleteSet-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://example.com/test-revision-0> .
 
 <http://example.com/test-master>
-        a                        rmo:Reference , rmo:Branch , rmo:Master ;
-        rmo:fullGraph            <http://example.com/test> ;
-        rmo:referenceIdentifier  "master" ;
-        rmo:references           <http://example.com/test-revision-0> .
+        a       <http://eatld.et.tu-dresden.de/rmo#Reference> , <http://eatld.et.tu-dresden.de/rmo#Branch> , <http://eatld.et.tu-dresden.de/rmo#Master> ;
+        <http://eatld.et.tu-dresden.de/rmo#fullContent>
+                <http://example.com/test> ;
+        <http://eatld.et.tu-dresden.de/rmo#referenceIdentifier>
+                "master" ;
+        <http://eatld.et.tu-dresden.de/rmo#references>
+                <http://example.com/test-revision-0> .
 
 <http://example.com/test-revision-0>
-        a                       rmo:Entity , rmo:Revision ;
-        rmo:hasChangeSet        <http://example.com/test-changeset-0> ;
-        rmo:revisionIdentifier  "0" .
+        a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
+        <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
+                "0" .
 
 <http://example.com/test-commit-0>
-        a                      rmo:Commit , rmo:InitialCommit ;
-        rmo:atTime             "2017-08-31T18:57:44.139"^^xsd:dateTime ;
-        rmo:commitMessage      "initial commit during test" ;
-        rmo:generated          <http://example.com/test-master> , <http://example.com/test-revision-0> ;
-        rmo:wasAssociatedWith  <http://eatld.et.tu-dresden.de/persons/TestUser> .
+        a       <http://eatld.et.tu-dresden.de/rmo#Commit> , <http://eatld.et.tu-dresden.de/rmo#InitialCommit> ;
+        <http://eatld.et.tu-dresden.de/rmo#commitMessage>
+                "initial commit during test" ;
+        <http://eatld.et.tu-dresden.de/rmo#generated>
+                <http://example.com/test-master> , <http://example.com/test-revision-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://example.com/test-changeset-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-23T18:42:00.721"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
+                <http://eatld.et.tu-dresden.de/persons/TestUser> .

@@ -75,7 +75,7 @@ public class TagCommitDraft extends ReferenceCommitDraft {
      * @param commitURI the commit URI
      * @throws InternalErrorException
      */
-    private void addMetaInformation(String referenceURI, String commitURI) throws InternalErrorException {
+    private void addMetaInformation(String referenceURI, String commitURI) {
         logger.info("Create new tag '" + getReferenceIdentifier() + "' for graph " + getRevisionGraph().getGraphName());
 
         // General variables
@@ -88,7 +88,7 @@ public class TagCommitDraft extends ReferenceCommitDraft {
                         + "	rmo:generated <%s> ;"
                         + " rmo:used <%s> ;"
                         + "	rmo:commitMessage \"%s\" ;"
-                        + "	rmo:atTime \"%s\" .%n",
+                        + "	rmo:timeStamp \"%s\" .%n",
                 commitURI, personUri, referenceURI, getBaseRevision().getRevisionURI(), getMessage(), getTimeStamp());
 
         // Execute queries

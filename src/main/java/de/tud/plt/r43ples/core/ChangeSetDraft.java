@@ -25,6 +25,8 @@ public class ChangeSetDraft {
     private Revision priorRevision;
     /** The new revision identifier. **/
     private String newRevisionIdentifier;
+    /** The new revision URI. **/
+    private String newRevisionURI;
     /** The referenced full graph URI. **/
     private String referencedFullGraphURI;
 
@@ -62,6 +64,7 @@ public class ChangeSetDraft {
      * @param revisionGraph the revision graph
      * @param priorRevision the prior revision
      * @param newRevisionIdentifier the new revision identifier
+     * @param newRevisionURI the new revision URI
      * @param referencedFullGraphURI the referenced full graph URI
      * @param addSet the add set of the revision as N-Triples
      * @param deleteSet the delete set of the revision as N-Triples
@@ -69,7 +72,7 @@ public class ChangeSetDraft {
      * @param isSpecifiedByRewrittenQuery states if the the content of the add and delete sets will be specified by a following rewritten query (in that case add and delete set can be null but the corresponding graphs will be created anyway)
      * @throws InternalErrorException
      */
-    protected ChangeSetDraft(URICalculator uriCalculator, RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier, String referencedFullGraphURI, String addSet, String deleteSet, boolean isStripped, boolean isSpecifiedByRewrittenQuery) throws InternalErrorException {
+    protected ChangeSetDraft(URICalculator uriCalculator, RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier, String newRevisionURI, String referencedFullGraphURI, String addSet, String deleteSet, boolean isStripped, boolean isSpecifiedByRewrittenQuery) throws InternalErrorException {
         // Dependencies
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 
@@ -78,6 +81,7 @@ public class ChangeSetDraft {
 
         this.priorRevision = priorRevision;
         this.newRevisionIdentifier = newRevisionIdentifier;
+        this.newRevisionURI = newRevisionURI;
         this.referencedFullGraphURI = referencedFullGraphURI;
 
         this.changeSetURI = this.uriCalculator.getNewChangeSetURI(revisionGraph, priorRevision, newRevisionIdentifier);
@@ -98,12 +102,13 @@ public class ChangeSetDraft {
      * @param revisionGraph the revision graph
      * @param priorRevision the prior revision
      * @param newRevisionIdentifier the new revision identifier
+     * @param newRevisionURI the new revision URI
      * @param referencedFullGraphURI the referenced full graph URI
      * @param addSetURI the add set URI of the revision
      * @param deleteSetURI the delete set URI of the revision
      * @throws InternalErrorException
      */
-    protected ChangeSetDraft(URICalculator uriCalculator, RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier, String referencedFullGraphURI, String addSetURI, String deleteSetURI) throws InternalErrorException {
+    protected ChangeSetDraft(URICalculator uriCalculator, RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier, String newRevisionURI, String referencedFullGraphURI, String addSetURI, String deleteSetURI) throws InternalErrorException {
         // Dependencies
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
 
@@ -112,6 +117,7 @@ public class ChangeSetDraft {
 
         this.priorRevision = priorRevision;
         this.newRevisionIdentifier = newRevisionIdentifier;
+        this.newRevisionURI = newRevisionURI;
         this.referencedFullGraphURI = referencedFullGraphURI;
 
         this.changeSetURI = this.uriCalculator.getNewChangeSetURI(revisionGraph, priorRevision, newRevisionIdentifier);
@@ -131,7 +137,7 @@ public class ChangeSetDraft {
      *
      * @return the created change set
      */
-    protected ChangeSet createInTripleStore() throws InternalErrorException {
+    protected ChangeSet createInTripleStore() {
         logger.debug("Create new change set for graph " + revisionGraph.getGraphName() + ".");
 
         createAddAndDeleteSetsInTripleStore();
@@ -146,7 +152,7 @@ public class ChangeSetDraft {
     /**
      * Creates the add and delete sets in the triplestore.
      */
-    private void createAddAndDeleteSetsInTripleStore() throws InternalErrorException {
+    private void createAddAndDeleteSetsInTripleStore() {
         if (addSet!=null && !addSet.isEmpty()) {
             // Create new named graph for add set
             logger.debug("Create new graph with name " + addSetURI + ".");
@@ -188,7 +194,7 @@ public class ChangeSetDraft {
      *
      * @throws InternalErrorException
      */
-    private void addMetaInformation() throws InternalErrorException {
+    private void addMetaInformation() {
         // The prior revision could be null because of the initial commit
         String queryContent;
         if (priorRevision != null) {
@@ -197,15 +203,17 @@ public class ChangeSetDraft {
                     "<%s> a rmo:ChangeSet;"
                             + "	rmo:addSet <%s> ;"
                             + "	rmo:deleteSet <%s> ;"
-                            + "	rmo:priorRevision <%s> .",
-                    changeSetURI, addSetURI, deleteSetURI, priorRevision.getRevisionURI());
+                            + "	rmo:priorRevision <%s> ;"
+                            + " rmo:succeedingRevision <%s> .",
+                    changeSetURI, addSetURI, deleteSetURI, priorRevision.getRevisionURI(), newRevisionURI);
         } else {
-            // Create new revision withou prior revision
+            // Create new revision without prior revision
             queryContent = String.format(
                     "<%s> a rmo:ChangeSet;"
                             + "	rmo:addSet <%s> ;"
-                            + "	rmo:deleteSet <%s> .",
-                    changeSetURI, addSetURI, deleteSetURI);
+                            + "	rmo:deleteSet <%s> ;"
+                            + " rmo:succeedingRevision <%s> .",
+                    changeSetURI, addSetURI, deleteSetURI, newRevisionURI);
         }
 
         String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisionGraph.getRevisionGraphUri(), queryContent);

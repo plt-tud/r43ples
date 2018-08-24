@@ -59,7 +59,7 @@ public class TagDraft extends ReferenceDraft {
         String queryContent = String.format(
                     "<%s> a rmo:Tag, rmo:Reference, rmo:Entity ;"
                             + "	rmo:references <%s> ;"
-                            + "	rmo:fullGraph <%s> ;"
+                            + "	rmo:fullContent <%s> ;"
                             + "	rmo:referenceIdentifier \"%s\" .",
                     getReferenceURI(), getReferencedRevision().getRevisionURI(), getReferencedFullGraphURI(), getReferenceIdentifier());
 

@@ -211,7 +211,7 @@ public class PickCommitDraft extends CommitDraft {
                 "<%s> a rmo:PickCommit, rmo:BasicMergeCommit, rmo:Commit; "
                         + "	rmo:wasAssociatedWith <%s> ;"
                         + "	rmo:commitMessage \"%s\" ;"
-                        + "	rmo:atTime \"%s\"^^xsd:dateTime ; %n"
+                        + "	rmo:timeStamp \"%s\"^^xsd:dateTime ; %n"
                         + " rmo:usedTargetRevision <%s> ;"
                         + " rmo:usedTargetBranch <%s> .",
                 commitURI, personUri, getMessage(), getTimeStamp(),
@@ -248,8 +248,9 @@ public class PickCommitDraft extends CommitDraft {
         queryContentInsert.append(String.format(
                 "<%1$s> rmo:wasQuotedFrom <%2$s> . "
                 + "<%3$s> prov:generated <%1$s> ; "
+                        + " rmo:hasChangeSet <%4$s> ;"
                         + " rmo:usedSourceRevision <%2$s> .",
-                generatedRevision.getRevisionURI(), revisionToCopy.getRevisionURI(), commitURI));
+                generatedRevision.getRevisionURI(), revisionToCopy.getRevisionURI(), commitURI, generatedRevision.getChangeSet().getChangeSetURI()));
 
         String query = Config.prefixes	+ String.format(""
                         + "INSERT DATA { GRAPH <%1$s> { %2$s } }",

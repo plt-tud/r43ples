@@ -175,7 +175,7 @@ public class Reference {
      * @return the full graph URI
      * @throws InternalErrorException
      */
-    public String getFullGraphURI() throws InternalErrorException {
+    public String getFullGraphURI() {
         if (fullGraphURI == null) {
             fullGraphURI = this.getRevisionGraph().getFullGraphUri(getReferenceURI());
         }

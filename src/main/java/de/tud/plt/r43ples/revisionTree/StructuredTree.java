@@ -122,7 +122,7 @@ public class StructuredTree {
 						+ "rmo:commitMessage ?title;%n"
 						+ "rmo:used ?reva;%n"
 						+ "rmo:generated ?revb;%n"
-						+ "rmo:atTime ?time;%n"
+						+ "rmo:timeStamp ?time;%n"
 						+ "rmo:wasAssociatedWith ?author.%n"
 						+ "OPTIONAL { ?author rdfs:label ?authname. }%n"
 						+ "?reva rmo:revisionIdentifier ?prev.%n"

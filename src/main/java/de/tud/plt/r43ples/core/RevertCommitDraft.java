@@ -118,10 +118,11 @@ public class RevertCommitDraft extends CommitDraft {
 				"<%s> a rmo:RevertCommit, rmo:Commit ; "
 						+ "	rmo:wasAssociatedWith <%s>;"
 						+ "	rmo:generated <%s>;"
+						+ " rmo:hasChangeSet <%s> ;"
 						+ "	rmo:commitMessage \"%s\";"
 						+ " rmo:used <%s> ;"
-						+ "	rmo:atTime \"%s\"^^xsd:dateTime. %n", commitUri,
-				personUri, revisionUri, getMessage(), revUriOld, getTimeStamp()));
+						+ "	rmo:timeStamp \"%s\"^^xsd:dateTime. %n", commitUri,
+				personUri, revisionUri, generatedRevision.getChangeSet().getChangeSetURI(), getMessage(), revUriOld, getTimeStamp()));
 
 		String query = Config.prefixes
 				+ String.format("INSERT DATA { GRAPH <%s> { %s } }", generatedRevision.getRevisionGraph().getRevisionGraphUri(),

@@ -203,6 +203,20 @@ public class Helper {
 	}
 
 	/**
+	 * Get the content of a named graph as N-TRIPLES.
+	 *
+	 * @param namedGraphURI the named graph URI
+	 * @return the content of the named graph as N-TRIPLES
+	 */
+	public static String getContentOfNamedGraphAsN3(String namedGraphURI) {
+		String query = Config.prefixes + String.format(
+				"CONSTRUCT {?s ?p ?o} %n"
+						+ "WHERE { GRAPH <%s> {?s ?p ?o} }", namedGraphURI);
+		String resultAsTurtle = TripleStoreInterfaceSingleton.get().executeConstructQuery(query, "TURTLE");
+		return JenaModelManagement.convertJenaModelToNTriple(JenaModelManagement.readStringToJenaModel(resultAsTurtle, "TURTLE"));
+	}
+
+	/**
 	 * Get revised graphs in R43ples.
 	 * 
 	 * @param format

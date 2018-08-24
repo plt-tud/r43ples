@@ -68,7 +68,7 @@ public class UpdateCommit extends Commit {
      * @return the used revision
      * @throws InternalErrorException
      */
-    public Revision getUsedRevision() throws InternalErrorException {
+    public Revision getUsedRevision() {
         //TODO Implement method - autogenerate the revision if necessary
         return usedRevision;
     }
@@ -79,7 +79,7 @@ public class UpdateCommit extends Commit {
      * @return the generated revision
      * @throws InternalErrorException
      */
-    public Revision getGeneratedRevision() throws InternalErrorException {
+    public Revision getGeneratedRevision() {
         //TODO Implement method - autogenerate the revision if necessary
         return generatedRevision;
     }

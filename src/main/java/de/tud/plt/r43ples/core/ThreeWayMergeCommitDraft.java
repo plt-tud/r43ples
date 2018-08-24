@@ -158,21 +158,23 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                 "<%s> a rmo:ThreeWayMergeCommit, rmo:MergeCommit, rmo:BasicMergeCommit, rmo:Commit; "
                         + "	rmo:wasAssociatedWith <%s> ;"
                         + "	rmo:commitMessage \"%s\" ;"
-                        + "	rmo:atTime \"%s\"^^xsd:dateTime ; %n"
+                        + "	rmo:timeStamp \"%s\"^^xsd:dateTime ; %n"
                         + " rmo:generated <%s> ;"
+                        + " rmo:hasChangeSet <%s> ;"
+                        + " rmo:hasChangeSet <%s> ;"
                         + " rmo:usedSourceRevision <%s> ;"
                         + " rmo:usedSourceBranch <%s> ;"
                         + " rmo:usedTargetRevision <%s> ;"
                         + " rmo:usedTargetBranch <%s> .",
                 commitURI, personUri, getMessage(), getTimeStamp(),
-                generatedRevision.getRevisionURI(), usedSourceRevision.getRevisionURI(), usedSourceBranch.getReferenceURI(),
+                generatedRevision.getRevisionURI(), generatedRevision.getChangeSets().get(0).getChangeSetURI(), generatedRevision.getChangeSets().get(1).getChangeSetURI(), usedSourceRevision.getRevisionURI(), usedSourceBranch.getReferenceURI(),
                 usedTargetRevision.getRevisionURI(), usedTargetBranch.getReferenceURI()));
 
         // Create revision meta data for additional change set
         queryContent.append(String.format(
-                "<%s> rmo:hasChangeSet <%s> ; %n"
-                        + "	rmo:wasDerivedFrom <%s> .",
-                generatedRevision.getRevisionURI(), generatedRevision.getChangeSets().get(1).getChangeSetURI(), usedSourceRevision.getRevisionURI()));
+                  "<%1$s> rmo:succeedingRevision <%2$s> . %n"
+                + "<%2$s> rmo:wasDerivedFrom <%3$s> .",
+                generatedRevision.getChangeSets().get(1).getChangeSetURI(), generatedRevision.getRevisionURI(), usedSourceRevision.getRevisionURI()));
 
         String query = Config.prefixes
                 + String.format("INSERT DATA { GRAPH <%s> { %s } }", getRevisionGraph().getRevisionGraphUri(),
@@ -372,7 +374,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
         Revision generatedRevision = revisionDraft.createInTripleStore();
 
         ChangeSetDraft changeSetDraftA = new ChangeSetDraft(getUriCalculator(), getRevisionGraph(),
-                usedSourceBranch.getLeafRevision(), generatedRevision.getRevisionIdentifier(), usedSourceBranch.getReferenceURI(),
+                usedSourceBranch.getLeafRevision(), generatedRevision.getRevisionIdentifier(), generatedRevision.getRevisionURI(), usedSourceBranch.getReferenceURI(),
                 addedTriplesA, deletedTriplesA, false, false);
         ChangeSet changeSetA = changeSetDraftA.createInTripleStore();
 

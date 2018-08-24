@@ -1,7 +1,5 @@
 <http://test.com/r43ples-dataset-complex-structure-revision-4>
         a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
-        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
-                <http://test.com/r43ples-dataset-complex-structure-changeset-3-4> ;
         <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
                 "4" ;
         <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
@@ -9,8 +7,6 @@
 
 <http://test.com/r43ples-dataset-complex-structure-revision-13>
         a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
-        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
-                <http://test.com/r43ples-dataset-complex-structure-changeset-12-13> ;
         <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
                 "13" ;
         <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
@@ -18,25 +14,27 @@
 
 <http://test.com/r43ples-dataset-complex-structure-commit-8>
         a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:10.037"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "First commit to B2X" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-revision-8> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-complex-structure-changeset-7-8> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:09.967"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-7> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
                 <http://eatld.et.tu-dresden.de/persons/butler> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-branch-B2X>
-        a       <http://eatld.et.tu-dresden.de/rmo#BranchCommit> , <http://eatld.et.tu-dresden.de/rmo#ReferenceCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:09.781" ;
+        a       <http://eatld.et.tu-dresden.de/rmo#ReferenceCommit> , <http://eatld.et.tu-dresden.de/rmo#BranchCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Create a new branch B2X" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-branch-B2X> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:09.700" ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-7> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -49,16 +47,20 @@
         <http://eatld.et.tu-dresden.de/rmo#deleteSet>
                 <http://test.com/r43ples-dataset-complex-structure-deleteSet-7-8> ;
         <http://eatld.et.tu-dresden.de/rmo#priorRevision>
-                <http://test.com/r43ples-dataset-complex-structure-revision-7> .
+                <http://test.com/r43ples-dataset-complex-structure-revision-7> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-complex-structure-revision-8> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-2>
         a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:05.863"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Second commit to B1" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-revision-2> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-complex-structure-changeset-1-2> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:05.658"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-1> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -66,7 +68,7 @@
 
 <http://test.com/r43ples-dataset-complex-structure-branch-B2X>
         a       <http://eatld.et.tu-dresden.de/rmo#Reference> , <http://eatld.et.tu-dresden.de/rmo#Branch> , <http://eatld.et.tu-dresden.de/rmo#Entity> ;
-        <http://eatld.et.tu-dresden.de/rmo#fullGraph>
+        <http://eatld.et.tu-dresden.de/rmo#fullContent>
                 <http://test.com/r43ples-dataset-complex-structure-B2X> ;
         <http://eatld.et.tu-dresden.de/rmo#referenceIdentifier>
                 "B2X" ;
@@ -75,8 +77,6 @@
 
 <http://test.com/r43ples-dataset-complex-structure-revision-9>
         a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
-        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
-                <http://test.com/r43ples-dataset-complex-structure-changeset-8-9> ;
         <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
                 "9" ;
         <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
@@ -89,7 +89,9 @@
         <http://eatld.et.tu-dresden.de/rmo#deleteSet>
                 <http://test.com/r43ples-dataset-complex-structure-deleteSet-2-3> ;
         <http://eatld.et.tu-dresden.de/rmo#priorRevision>
-                <http://test.com/r43ples-dataset-complex-structure-revision-2> .
+                <http://test.com/r43ples-dataset-complex-structure-revision-2> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-complex-structure-revision-3> .
 
 <http://test.com/r43ples-dataset-complex-structure-changeset-10-11>
         a       <http://eatld.et.tu-dresden.de/rmo#ChangeSet> ;
@@ -98,29 +100,33 @@
         <http://eatld.et.tu-dresden.de/rmo#deleteSet>
                 <http://test.com/r43ples-dataset-complex-structure-deleteSet-10-11> ;
         <http://eatld.et.tu-dresden.de/rmo#priorRevision>
-                <http://test.com/r43ples-dataset-complex-structure-revision-10> .
+                <http://test.com/r43ples-dataset-complex-structure-revision-10> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-complex-structure-revision-11> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-13>
         a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:13.314"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Third commit to MASTER" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-revision-13> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-complex-structure-changeset-12-13> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:13.379"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-12> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
                 <http://eatld.et.tu-dresden.de/persons/butler> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-branch-B2>
-        a       <http://eatld.et.tu-dresden.de/rmo#BranchCommit> , <http://eatld.et.tu-dresden.de/rmo#ReferenceCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:04.768" ;
+        a       <http://eatld.et.tu-dresden.de/rmo#ReferenceCommit> , <http://eatld.et.tu-dresden.de/rmo#BranchCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Create a new branch B2" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-branch-B2> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:04.705" ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -128,8 +134,6 @@
 
 <http://test.com/r43ples-dataset-complex-structure-revision-3>
         a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
-        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
-                <http://test.com/r43ples-dataset-complex-structure-changeset-2-3> ;
         <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
                 "3" ;
         <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
@@ -137,8 +141,6 @@
 
 <http://test.com/r43ples-dataset-complex-structure-revision-12>
         a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
-        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
-                <http://test.com/r43ples-dataset-complex-structure-changeset-0-12> ;
         <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
                 "12" ;
         <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
@@ -146,12 +148,14 @@
 
 <http://test.com/r43ples-dataset-complex-structure-commit-7>
         a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:09.27"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Second commit to B2" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-revision-7> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-complex-structure-changeset-6-7> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:09.199"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-6> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -159,7 +163,7 @@
 
 <http://test.com/r43ples-dataset-complex-structure-tag-v0.2>
         a       <http://eatld.et.tu-dresden.de/rmo#Tag> , <http://eatld.et.tu-dresden.de/rmo#Reference> , <http://eatld.et.tu-dresden.de/rmo#Entity> ;
-        <http://eatld.et.tu-dresden.de/rmo#fullGraph>
+        <http://eatld.et.tu-dresden.de/rmo#fullContent>
                 <http://test.com/r43ples-dataset-complex-structure-v0.2> ;
         <http://eatld.et.tu-dresden.de/rmo#referenceIdentifier>
                 "v0.2" ;
@@ -167,13 +171,13 @@
                 <http://test.com/r43ples-dataset-complex-structure-revision-8> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-tag-v0.2>
-        a       <http://eatld.et.tu-dresden.de/rmo#ReferenceCommit> , <http://eatld.et.tu-dresden.de/rmo#TagCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:10.446" ;
+        a       <http://eatld.et.tu-dresden.de/rmo#TagCommit> , <http://eatld.et.tu-dresden.de/rmo#ReferenceCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "tag version v0.2" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-tag-v0.2> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:10.446" ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-8> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -181,12 +185,14 @@
 
 <http://test.com/r43ples-dataset-complex-structure-commit-1>
         a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:05.172"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "First commit to B1" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-revision-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-complex-structure-changeset-0-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:05.048"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -199,12 +205,12 @@
         <http://eatld.et.tu-dresden.de/rmo#deleteSet>
                 <http://test.com/r43ples-dataset-complex-structure-deleteSet-6-7> ;
         <http://eatld.et.tu-dresden.de/rmo#priorRevision>
-                <http://test.com/r43ples-dataset-complex-structure-revision-6> .
+                <http://test.com/r43ples-dataset-complex-structure-revision-6> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-complex-structure-revision-7> .
 
 <http://test.com/r43ples-dataset-complex-structure-revision-8>
         a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
-        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
-                <http://test.com/r43ples-dataset-complex-structure-changeset-7-8> ;
         <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
                 "8" ;
         <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
@@ -212,12 +218,14 @@
 
 <http://test.com/r43ples-dataset-complex-structure-commit-12>
         a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:12.714"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Second commit to MASTER" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-revision-12> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-complex-structure-changeset-0-12> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:12.643"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -230,16 +238,18 @@
         <http://eatld.et.tu-dresden.de/rmo#deleteSet>
                 <http://test.com/r43ples-dataset-complex-structure-deleteSet-1-2> ;
         <http://eatld.et.tu-dresden.de/rmo#priorRevision>
-                <http://test.com/r43ples-dataset-complex-structure-revision-1> .
+                <http://test.com/r43ples-dataset-complex-structure-revision-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-complex-structure-revision-2> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-branch-B1>
-        a       <http://eatld.et.tu-dresden.de/rmo#BranchCommit> , <http://eatld.et.tu-dresden.de/rmo#ReferenceCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:04.461" ;
+        a       <http://eatld.et.tu-dresden.de/rmo#ReferenceCommit> , <http://eatld.et.tu-dresden.de/rmo#BranchCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Create a new branch B1" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-branch-B1> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:04.352" ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -247,8 +257,6 @@
 
 <http://test.com/r43ples-dataset-complex-structure-revision-2>
         a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
-        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
-                <http://test.com/r43ples-dataset-complex-structure-changeset-1-2> ;
         <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
                 "2" ;
         <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
@@ -256,8 +264,6 @@
 
 <http://test.com/r43ples-dataset-complex-structure-revision-11>
         a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
-        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
-                <http://test.com/r43ples-dataset-complex-structure-changeset-10-11> ;
         <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
                 "11" ;
         <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
@@ -270,16 +276,20 @@
         <http://eatld.et.tu-dresden.de/rmo#deleteSet>
                 <http://test.com/r43ples-dataset-complex-structure-deleteSet-7-10> ;
         <http://eatld.et.tu-dresden.de/rmo#priorRevision>
-                <http://test.com/r43ples-dataset-complex-structure-revision-7> .
+                <http://test.com/r43ples-dataset-complex-structure-revision-7> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-complex-structure-revision-10> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-6>
         a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:08.632"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "First commit to B2" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-revision-6> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-complex-structure-changeset-0-6> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:08.443"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -287,19 +297,19 @@
 
 <http://test.com/r43ples-dataset-complex-structure-commit-0>
         a       <http://eatld.et.tu-dresden.de/rmo#Commit> , <http://eatld.et.tu-dresden.de/rmo#InitialCommit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:03.763"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Initial commit" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-master> , <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-complex-structure-changeset-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:03.392"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
                 <http://eatld.et.tu-dresden.de/persons/butler> .
 
 <http://test.com/r43ples-dataset-complex-structure-revision-7>
         a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
-        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
-                <http://test.com/r43ples-dataset-complex-structure-changeset-6-7> ;
         <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
                 "7" ;
         <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
@@ -307,25 +317,27 @@
 
 <http://test.com/r43ples-dataset-complex-structure-commit-11>
         a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:12.184"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Fourth commit to B2" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-revision-11> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-complex-structure-changeset-10-11> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:12.055"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-10> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
                 <http://eatld.et.tu-dresden.de/persons/butler> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-branch-B1X>
-        a       <http://eatld.et.tu-dresden.de/rmo#BranchCommit> , <http://eatld.et.tu-dresden.de/rmo#ReferenceCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:06.596" ;
+        a       <http://eatld.et.tu-dresden.de/rmo#ReferenceCommit> , <http://eatld.et.tu-dresden.de/rmo#BranchCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Create a new branch B1X" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-branch-B1X> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:06.231" ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-2> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -333,8 +345,6 @@
 
 <http://test.com/r43ples-dataset-complex-structure-revision-1>
         a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
-        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
-                <http://test.com/r43ples-dataset-complex-structure-changeset-0-1> ;
         <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
                 "1" ;
         <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
@@ -342,8 +352,6 @@
 
 <http://test.com/r43ples-dataset-complex-structure-revision-10>
         a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
-        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
-                <http://test.com/r43ples-dataset-complex-structure-changeset-7-10> ;
         <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
                 "10" ;
         <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
@@ -356,7 +364,9 @@
         <http://eatld.et.tu-dresden.de/rmo#deleteSet>
                 <http://test.com/r43ples-dataset-complex-structure-deleteSet-0-1> ;
         <http://eatld.et.tu-dresden.de/rmo#priorRevision>
-                <http://test.com/r43ples-dataset-complex-structure-revision-0> .
+                <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-complex-structure-revision-1> .
 
 <http://test.com/r43ples-dataset-complex-structure-changeset-0-12>
         a       <http://eatld.et.tu-dresden.de/rmo#ChangeSet> ;
@@ -365,11 +375,13 @@
         <http://eatld.et.tu-dresden.de/rmo#deleteSet>
                 <http://test.com/r43ples-dataset-complex-structure-deleteSet-0-12> ;
         <http://eatld.et.tu-dresden.de/rmo#priorRevision>
-                <http://test.com/r43ples-dataset-complex-structure-revision-0> .
+                <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-complex-structure-revision-12> .
 
 <http://test.com/r43ples-dataset-complex-structure-branch-B1X>
         a       <http://eatld.et.tu-dresden.de/rmo#Reference> , <http://eatld.et.tu-dresden.de/rmo#Branch> , <http://eatld.et.tu-dresden.de/rmo#Entity> ;
-        <http://eatld.et.tu-dresden.de/rmo#fullGraph>
+        <http://eatld.et.tu-dresden.de/rmo#fullContent>
                 <http://test.com/r43ples-dataset-complex-structure-B1X> ;
         <http://eatld.et.tu-dresden.de/rmo#referenceIdentifier>
                 "B1X" ;
@@ -378,12 +390,14 @@
 
 <http://test.com/r43ples-dataset-complex-structure-commit-5>
         a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:08.155"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Third commit to B1" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-revision-5> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-complex-structure-changeset-2-5> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:07.698"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-2> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -396,12 +410,12 @@
         <http://eatld.et.tu-dresden.de/rmo#deleteSet>
                 <http://test.com/r43ples-dataset-complex-structure-deleteSet-12-13> ;
         <http://eatld.et.tu-dresden.de/rmo#priorRevision>
-                <http://test.com/r43ples-dataset-complex-structure-revision-12> .
+                <http://test.com/r43ples-dataset-complex-structure-revision-12> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-complex-structure-revision-13> .
 
 <http://test.com/r43ples-dataset-complex-structure-revision-6>
         a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
-        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
-                <http://test.com/r43ples-dataset-complex-structure-changeset-0-6> ;
         <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
                 "6" ;
         <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
@@ -409,7 +423,7 @@
 
 <http://test.com/r43ples-dataset-complex-structure-branch-B2>
         a       <http://eatld.et.tu-dresden.de/rmo#Reference> , <http://eatld.et.tu-dresden.de/rmo#Branch> , <http://eatld.et.tu-dresden.de/rmo#Entity> ;
-        <http://eatld.et.tu-dresden.de/rmo#fullGraph>
+        <http://eatld.et.tu-dresden.de/rmo#fullContent>
                 <http://test.com/r43ples-dataset-complex-structure-B2> ;
         <http://eatld.et.tu-dresden.de/rmo#referenceIdentifier>
                 "B2" ;
@@ -423,16 +437,20 @@
         <http://eatld.et.tu-dresden.de/rmo#deleteSet>
                 <http://test.com/r43ples-dataset-complex-structure-deleteSet-0-6> ;
         <http://eatld.et.tu-dresden.de/rmo#priorRevision>
-                <http://test.com/r43ples-dataset-complex-structure-revision-0> .
+                <http://test.com/r43ples-dataset-complex-structure-revision-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-complex-structure-revision-6> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-10>
         a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:11.523"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Third commit to B2" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-revision-10> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-complex-structure-changeset-7-10> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:11.479"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-7> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -440,19 +458,19 @@
 
 <http://test.com/r43ples-dataset-complex-structure-revision-0>
         a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
-        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
-                <http://test.com/r43ples-dataset-complex-structure-changeset-0> ;
         <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
                 "0" .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-4>
         a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:07.675"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Second commit to B1X" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-revision-4> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-complex-structure-changeset-3-4> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:07.161"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-3> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -460,7 +478,7 @@
 
 <http://test.com/r43ples-dataset-complex-structure-master>
         a       <http://eatld.et.tu-dresden.de/rmo#Reference> , <http://eatld.et.tu-dresden.de/rmo#Branch> , <http://eatld.et.tu-dresden.de/rmo#Master> ;
-        <http://eatld.et.tu-dresden.de/rmo#fullGraph>
+        <http://eatld.et.tu-dresden.de/rmo#fullContent>
                 <http://test.com/r43ples-dataset-complex-structure> ;
         <http://eatld.et.tu-dresden.de/rmo#referenceIdentifier>
                 "master" ;
@@ -474,12 +492,12 @@
         <http://eatld.et.tu-dresden.de/rmo#deleteSet>
                 <http://test.com/r43ples-dataset-complex-structure-deleteSet-2-5> ;
         <http://eatld.et.tu-dresden.de/rmo#priorRevision>
-                <http://test.com/r43ples-dataset-complex-structure-revision-2> .
+                <http://test.com/r43ples-dataset-complex-structure-revision-2> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-complex-structure-revision-5> .
 
 <http://test.com/r43ples-dataset-complex-structure-revision-5>
         a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
-        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
-                <http://test.com/r43ples-dataset-complex-structure-changeset-2-5> ;
         <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
                 "5" ;
         <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
@@ -487,7 +505,7 @@
 
 <http://test.com/r43ples-dataset-complex-structure-branch-B1>
         a       <http://eatld.et.tu-dresden.de/rmo#Reference> , <http://eatld.et.tu-dresden.de/rmo#Branch> , <http://eatld.et.tu-dresden.de/rmo#Entity> ;
-        <http://eatld.et.tu-dresden.de/rmo#fullGraph>
+        <http://eatld.et.tu-dresden.de/rmo#fullContent>
                 <http://test.com/r43ples-dataset-complex-structure-B1> ;
         <http://eatld.et.tu-dresden.de/rmo#referenceIdentifier>
                 "B1" ;
@@ -501,16 +519,20 @@
         <http://eatld.et.tu-dresden.de/rmo#deleteSet>
                 <http://test.com/r43ples-dataset-complex-structure-deleteSet-8-9> ;
         <http://eatld.et.tu-dresden.de/rmo#priorRevision>
-                <http://test.com/r43ples-dataset-complex-structure-revision-8> .
+                <http://test.com/r43ples-dataset-complex-structure-revision-8> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-complex-structure-revision-9> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-9>
         a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:10.977"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Second commit to B2X" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-revision-9> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-complex-structure-changeset-8-9> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:10.848"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-8> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -523,16 +545,20 @@
         <http://eatld.et.tu-dresden.de/rmo#deleteSet>
                 <http://test.com/r43ples-dataset-complex-structure-deleteSet-3-4> ;
         <http://eatld.et.tu-dresden.de/rmo#priorRevision>
-                <http://test.com/r43ples-dataset-complex-structure-revision-3> .
+                <http://test.com/r43ples-dataset-complex-structure-revision-3> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-complex-structure-revision-4> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-3>
         a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
-        <http://eatld.et.tu-dresden.de/rmo#atTime>
-                "2018-03-31T11:47:07.033"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "First commit to B1X" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
                 <http://test.com/r43ples-dataset-complex-structure-revision-3> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-complex-structure-changeset-2-3> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T11:31:06.644"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
         <http://eatld.et.tu-dresden.de/rmo#used>
                 <http://test.com/r43ples-dataset-complex-structure-revision-2> ;
         <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
@@ -543,4 +569,6 @@
         <http://eatld.et.tu-dresden.de/rmo#addSet>
                 <http://test.com/r43ples-dataset-complex-structure-addSet-0> ;
         <http://eatld.et.tu-dresden.de/rmo#deleteSet>
-                <http://test.com/r43ples-dataset-complex-structure-deleteSet-0> .
+                <http://test.com/r43ples-dataset-complex-structure-deleteSet-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-complex-structure-revision-0> .

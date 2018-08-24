@@ -40,11 +40,10 @@ public class SparqlRewriter {
 	private static final Node rmo_Revision = NodeFactory.createURI(rmo + "Revision");
 	private static final Node rmo_deleteSet = NodeFactory.createURI(rmo + "deleteSet");
 	private static final Node rmo_addSet = NodeFactory.createURI(rmo + "addSet");
-	private static final Node rmo_fullGraph = NodeFactory.createURI(rmo + "fullGraph");
+	private static final Node rmo_fullGraph = NodeFactory.createURI(rmo + "fullContent");
 	private static final Node rmo_references = NodeFactory.createURI(rmo + "references");
 	private static final Node rmo_wasDerivedFrom = NodeFactory.createURI(rmo + "wasDerivedFrom");
-	private static final Node rmo_hasChangeSet = NodeFactory.createURI(rmo + "hasChangeSet");
-
+	private static final Node rmo_succeedingRevision = NodeFactory.createURI(rmo + "succeedingRevision");
 
 
 	/** instance variables */
@@ -228,7 +227,7 @@ public class SparqlRewriter {
 
 			ElementGroup eg_delete_set = new ElementGroup();
 			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, RDF.type.asNode(), rmo_Revision));
-			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, rmo_hasChangeSet, var_change_set_del));
+			eg_delete_set.addTriplePattern(new Triple(var_change_set_del, rmo_succeedingRevision, var_r_delete_set));
 			eg_delete_set.addTriplePattern(new Triple(var_change_set_del, rmo_deleteSet, g_delete_set_full_graph));
 			eg_delete_set.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_delete_set),
 					expression_list_revision_path)));
@@ -241,7 +240,7 @@ public class SparqlRewriter {
 					var_r_add_set));
 			eg_revisiongraph2.addElement(ebp);
 			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, RDF.type.asNode(), rmo_Revision));
-			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, rmo_hasChangeSet, var_change_set_add));
+			eg_revisiongraph2.addTriplePattern(new Triple(var_change_set_add, rmo_succeedingRevision, var_r_add_set));
 			eg_revisiongraph2.addTriplePattern(new Triple(var_change_set_add, rmo_addSet, g_add_set));
 			eg_revisiongraph2.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_add_set),
 					expression_list_revision_path)));			

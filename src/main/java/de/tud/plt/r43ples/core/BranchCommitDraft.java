@@ -77,7 +77,7 @@ public class BranchCommitDraft extends ReferenceCommitDraft {
                         + "	rmo:generated <%s> ;"
                         + " rmo:used <%s> ;"
                         + "	rmo:commitMessage \"%s\" ;"
-                        + "	rmo:atTime \"%s\" .%n",
+                        + "	rmo:timeStamp \"%s\" .%n",
                 commitURI, personUri, referenceURI, getBaseRevision().getRevisionURI(), getMessage(), getTimeStamp());
 
         // Execute queries

@@ -129,9 +129,8 @@ public class InitialCommitDraft extends CommitDraft {
      * @param generatedRevision the generated revision
      * @param commitUri the commit URI
      * @param branchUri the branch URI
-     * @throws InternalErrorException
      */
-    private void addMetaInformation(Revision generatedRevision, String commitUri, String branchUri) throws InternalErrorException {
+    private void addMetaInformation(Revision generatedRevision, String commitUri, String branchUri) {
 
         String queryAddRevisionGraph = Config.prefixes + String.format(
                 "INSERT DATA { GRAPH <%1$s> {"
@@ -147,9 +146,10 @@ public class InitialCommitDraft extends CommitDraft {
                 "<%s> a rmo:InitialCommit, rmo:Commit; "
                         + "	rmo:wasAssociatedWith <%s> ;"
                         + "	rmo:generated <%s>, <%s> ;"
+                        + " rmo:hasChangeSet <%s> ;"
                         + "	rmo:commitMessage \"%s\" ;"
-                        + "	rmo:atTime \"%s\"^^xsd:dateTime .%n",
-                commitUri, Helper.getUserURI(getUser()), generatedRevision.getRevisionURI(), branchUri, getMessage(), getTimeStamp());
+                        + "	rmo:timeStamp \"%s\"^^xsd:dateTime .%n",
+                commitUri, Helper.getUserURI(getUser()), generatedRevision.getRevisionURI(), branchUri, generatedRevision.getChangeSet().getChangeSetURI(), getMessage(), getTimeStamp());
 
         String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisionGraph.getRevisionGraphUri(), queryContent);
 

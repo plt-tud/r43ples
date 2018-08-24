@@ -78,7 +78,7 @@ public class Commit {
                 + "WHERE { GRAPH  <%s> {"
                 + "	<%s> a rmo:Commit; "
                 + "	 rmo:commitMessage ?title; "
-                + "  rmo:atTime ?time; "
+                + "  rmo:timeStamp ?time; "
                 + "  rmo:wasAssociatedWith ?person. "
                 + "} }", revisionGraphURI, commitURI);
         this.logger.debug(query);

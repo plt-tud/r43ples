@@ -68,7 +68,7 @@ public class ReferenceCommit extends Commit {
      * @return the generated revision
      * @throws InternalErrorException
      */
-    public Revision getUsedRevision() throws InternalErrorException {
+    public Revision getUsedRevision() {
         //TODO Implement method - autogenerate the revision if necessary
         return usedRevision;
     }
@@ -79,7 +79,7 @@ public class ReferenceCommit extends Commit {
      * @return the generated reference
      * @throws InternalErrorException
      */
-    public Reference getGeneratedReference() throws InternalErrorException {
+    public Reference getGeneratedReference() {
         //TODO Implement method - autogenerate the revision if necessary
         return generatedReference;
     }

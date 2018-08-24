@@ -58,11 +58,11 @@ public class BranchDraft extends ReferenceDraft {
      *
      * @throws InternalErrorException
      */
-    private void addMetaInformation() throws InternalErrorException {
+    private void addMetaInformation() {
         String queryContent = String.format(
                     "<%s> a rmo:Branch, rmo:Reference, rmo:Entity ;"
                             + "	rmo:references <%s> ;"
-                            + "	rmo:fullGraph <%s> ;"
+                            + "	rmo:fullContent <%s> ;"
                             + "	rmo:referenceIdentifier \"%s\" .",
                     getReferenceURI(), getReferencedRevision().getRevisionURI(), getReferencedFullGraphURI(), getReferenceIdentifier());
 

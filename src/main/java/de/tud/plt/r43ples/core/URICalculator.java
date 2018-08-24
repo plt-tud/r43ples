@@ -62,7 +62,7 @@ public class URICalculator {
                 + "  GRAPH ?uriGraph {\n"
                 + "    { bind( ?uriGraph as ?uri) }\n"
                 + "    UNION\n"
-                + "    { ?ref rmo:fullGraph ?uri. }\n"
+                + "    { ?ref rmo:fullContent ?uri. }\n"
                 + "    UNION\n"
                 + "    { ?rev rmo:addSet ?uri. }\n"
                 + "    UNION\n"
