@@ -11,7 +11,8 @@ import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.optimization.ChangeSetPath;
 import de.tud.plt.r43ples.optimization.PathCalculationFabric;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.LinkedList;
 
@@ -25,7 +26,7 @@ public class FullGraph {
     /**
      * The logger.
      **/
-    private Logger logger = Logger.getLogger(FullGraph.class);
+    private Logger logger = LogManager.getLogger(FullGraph.class);
 
 
     /**

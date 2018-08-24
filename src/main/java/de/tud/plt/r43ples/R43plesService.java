@@ -5,7 +5,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
@@ -43,7 +44,7 @@ import de.tud.plt.r43ples.webservice.Misc;
 public class R43plesService {
 
 	/** The logger */
-	private static Logger logger = Logger.getLogger(R43plesService.class);
+	private static Logger logger = LogManager.getLogger(R43plesService.class);
 	/** The HTTP server. **/
 	private static HttpServer server;
 	

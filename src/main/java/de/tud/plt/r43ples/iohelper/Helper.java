@@ -1,10 +1,10 @@
 package de.tud.plt.r43ples.iohelper;
 
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.DatasetFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.DatasetFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.ChangeSet;
 import de.tud.plt.r43ples.existentobjects.Revision;
@@ -16,7 +16,8 @@ import de.tud.plt.r43ples.optimization.PathCalculationInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
@@ -34,7 +35,7 @@ import java.util.LinkedList;
 public class Helper {
 
 	/** The logger. **/
-	private static Logger logger = Logger.getLogger(Helper.class);
+	private static Logger logger = LogManager.getLogger(Helper.class);
 
 
 	/**

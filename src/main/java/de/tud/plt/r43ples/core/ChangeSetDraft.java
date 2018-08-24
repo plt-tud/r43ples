@@ -8,7 +8,8 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Collection of information for creating a new change set.
@@ -19,7 +20,7 @@ import org.apache.log4j.Logger;
 public class ChangeSetDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(ChangeSetDraft.class);
+    private Logger logger = LogManager.getLogger(ChangeSetDraft.class);
 
     /** The prior revision. **/
     private Revision priorRevision;

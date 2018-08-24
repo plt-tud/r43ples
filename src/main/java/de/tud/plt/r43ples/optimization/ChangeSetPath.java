@@ -7,7 +7,8 @@ package de.tud.plt.r43ples.optimization;
 import de.tud.plt.r43ples.existentobjects.ChangeSet;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.LinkedList;
 
@@ -16,7 +17,7 @@ public class ChangeSetPath {
     /**
      * The logger.
      **/
-    private Logger logger = Logger.getLogger(ChangeSetPath.class);
+    private Logger logger = LogManager.getLogger(ChangeSetPath.class);
 
     /**
      * The start revision.

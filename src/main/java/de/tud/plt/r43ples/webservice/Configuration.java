@@ -13,7 +13,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Template;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
@@ -28,7 +29,7 @@ public class Configuration {
 	
 	@Context UriInfo uriInfo;
 	
-	private final static Logger logger = Logger.getLogger(Configuration.class);
+	private final static Logger logger = LogManager.getLogger(Configuration.class);
 	
 	/**
 	 * Get all configuration variables of R43ples and the user defined namespaces

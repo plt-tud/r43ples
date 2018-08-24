@@ -3,8 +3,8 @@ package de.tud.plt.r43ples.mergingUI.ui;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
-import com.hp.hpl.jena.query.*;
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.Model;
 import de.tud.plt.r43ples.core.R43plesCoreInterface;
 import de.tud.plt.r43ples.core.R43plesCoreSingleton;
 import de.tud.plt.r43ples.exception.InternalErrorException;
@@ -13,7 +13,8 @@ import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.mergingUI.TripleObjectTypeEnum;
 import de.tud.plt.r43ples.mergingUI.management.ProcessManagement;
 import de.tud.plt.r43ples.mergingUI.model.structure.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -23,7 +24,7 @@ import java.util.Map;
 
 
 public class MergingControl {
-	private static Logger logger = Logger.getLogger(MergingControl.class);
+	private static Logger logger = LogManager.getLogger(MergingControl.class);
 	
 	private DifferenceModel differenceModel = new DifferenceModel();
 	

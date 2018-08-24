@@ -1,12 +1,13 @@
 package de.tud.plt.r43ples.core;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.util.FileUtils;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.util.FileUtils;
 import de.tud.plt.r43ples.exception.OutdatedException;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,7 +15,7 @@ import java.util.regex.Pattern;
 public class HeaderInformation {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(HeaderInformation.class);
+    private Logger logger = LogManager.getLogger(HeaderInformation.class);
 
 
     /** Creates an RDF description for the revision tree of the graphs specified in the given SPARQL query

@@ -7,7 +7,8 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.management.SparqlRewriter;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.regex.Matcher;
@@ -22,7 +23,7 @@ import java.util.regex.Pattern;
 public class R43plesCore implements R43plesCoreInterface {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(R43plesCore.class);
+    private Logger logger = LogManager.getLogger(R43plesCore.class);
 
 
     /**

@@ -9,7 +9,8 @@ import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -20,7 +21,7 @@ public class SelectConstructAskQuery {
     /**
      * The logger.
      **/
-    private Logger logger = Logger.getLogger(SelectConstructAskQuery.class);
+    private Logger logger = LogManager.getLogger(SelectConstructAskQuery.class);
     private String format;
 
     /**

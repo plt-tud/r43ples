@@ -6,7 +6,8 @@ import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,7 +20,7 @@ import java.util.regex.Pattern;
 public class RevertCommitDraft extends CommitDraft {
 
 	/** The logger. **/
-	private Logger logger = Logger.getLogger(RevertCommitDraft.class);
+	private Logger logger = LogManager.getLogger(RevertCommitDraft.class);
 
 	/** The pattern modifier. **/
 	private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;

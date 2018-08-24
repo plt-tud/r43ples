@@ -1,7 +1,8 @@
 package de.tud.plt.r43ples.existentobjects;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Provides information of an already existent reference commit.
@@ -11,7 +12,7 @@ import org.apache.log4j.Logger;
 public class ReferenceCommit extends Commit {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(ReferenceCommit.class);
+    private Logger logger = LogManager.getLogger(ReferenceCommit.class);
 
     /** The used revision. **/
     private Revision usedRevision;

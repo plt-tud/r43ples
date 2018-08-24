@@ -1,6 +1,6 @@
 package de.tud.plt.r43ples.exception;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Model;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 
 public class OutdatedException extends InternalErrorException{

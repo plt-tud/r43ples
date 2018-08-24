@@ -1,23 +1,24 @@
 package de.tud.plt.r43ples.management;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.sparql.core.TriplePath;
-import com.hp.hpl.jena.sparql.core.Var;
-import com.hp.hpl.jena.sparql.expr.*;
-import com.hp.hpl.jena.sparql.path.P_Link;
-import com.hp.hpl.jena.sparql.path.P_ZeroOrMore1;
-import com.hp.hpl.jena.sparql.syntax.*;
-import com.hp.hpl.jena.sparql.util.ExprUtils;
-import com.hp.hpl.jena.vocabulary.RDF;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.sparql.core.TriplePath;
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.expr.*;
+import org.apache.jena.sparql.path.P_Link;
+import org.apache.jena.sparql.path.P_ZeroOrMore1;
+import org.apache.jena.sparql.syntax.*;
+import org.apache.jena.sparql.util.ExprUtils;
+import org.apache.jena.vocabulary.RDF;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.optimization.PathCalculationFabric;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -34,7 +35,7 @@ import java.util.regex.Pattern;
 public class SparqlRewriter {
 
 	/** The logger. **/
-	private static final Logger logger = Logger.getLogger(SparqlRewriter.class);
+	private static final Logger logger = LogManager.getLogger(SparqlRewriter.class);
 
 	private static final String rmo = "http://eatld.et.tu-dresden.de/rmo#";
 	private static final Node rmo_Revision = NodeFactory.createURI(rmo + "Revision");

@@ -8,7 +8,8 @@ import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.optimization.PathCalculationFabric;
 import de.tud.plt.r43ples.optimization.PathCalculationInterface;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
 public class PickCommitDraft extends CommitDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(PickCommitDraft.class);
+    private Logger logger = LogManager.getLogger(PickCommitDraft.class);
 
     /** The pattern modifier. **/
     private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;

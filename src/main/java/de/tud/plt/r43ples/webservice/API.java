@@ -12,7 +12,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import de.tud.plt.r43ples.iohelper.Helper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
@@ -20,7 +21,7 @@ import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 @Path("api/")
 public class API {
 	
-	private final static Logger logger = Logger.getLogger(API.class);
+	private final static Logger logger = LogManager.getLogger(API.class);
 	
 	/**
 	 * Provide information about revised graphs

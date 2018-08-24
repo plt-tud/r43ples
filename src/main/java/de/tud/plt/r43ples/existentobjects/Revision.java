@@ -1,13 +1,14 @@
 package de.tud.plt.r43ples.existentobjects;
 
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 public class Revision {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(Revision.class);
+    private Logger logger = LogManager.getLogger(Revision.class);
 
     /** The revision identifier. */
     private String revisionIdentifier;

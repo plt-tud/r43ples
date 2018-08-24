@@ -1,7 +1,7 @@
 package de.tud.plt.r43ples.iohelper;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import de.tud.plt.r43ples.management.Config;
 
 import java.io.*;

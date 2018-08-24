@@ -30,13 +30,14 @@ import de.tud.plt.r43ples.existentobjects.RevisionControl;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.management.*;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
 import com.github.mustachejava.MustacheFactory;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.shared.NoWriterForLangException;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.shared.NoWriterForLangException;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
@@ -66,7 +67,7 @@ public class Endpoint {
 
 	
 	/** default logger for this class */
-	private final static Logger logger = Logger.getLogger(Endpoint.class);
+	private final static Logger logger = LogManager.getLogger(Endpoint.class);
 
 
 	static final MediaType TEXT_TURTLE_TYPE = new MediaType("text", "turtle");

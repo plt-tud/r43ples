@@ -17,7 +17,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.iohelper.Helper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.server.mvc.Template;
 
 import com.github.mustachejava.DefaultMustacheFactory;
@@ -37,7 +38,7 @@ public class Misc {
 	@Context
 	private Request request;
 	
-	private final static Logger logger = Logger.getLogger(Misc.class);
+	private final static Logger logger = LogManager.getLogger(Misc.class);
 	
 	/**
 	 * Landing page

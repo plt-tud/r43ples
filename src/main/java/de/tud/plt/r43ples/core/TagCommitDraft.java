@@ -8,7 +8,8 @@ import de.tud.plt.r43ples.existentobjects.Tag;
 import de.tud.plt.r43ples.existentobjects.TagCommit;
 import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.management.Config;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.regex.Pattern;
 
@@ -20,7 +21,7 @@ import java.util.regex.Pattern;
 public class TagCommitDraft extends ReferenceCommitDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(TagCommitDraft.class);
+    private Logger logger = LogManager.getLogger(TagCommitDraft.class);
 
     /** The pattern modifier. **/
     private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;

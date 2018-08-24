@@ -1,6 +1,7 @@
 package de.tud.plt.r43ples.existentobjects;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.LinkedList;
 
@@ -12,7 +13,7 @@ import java.util.LinkedList;
 public class Path {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(Path.class);
+    private Logger logger = LogManager.getLogger(Path.class);
 
     /** The start revision. */
     private Revision startRevision;

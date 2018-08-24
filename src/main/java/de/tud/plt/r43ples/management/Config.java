@@ -6,7 +6,8 @@ import java.util.Set;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
 * General configuration handling.
@@ -55,7 +56,7 @@ public class Config {
 	
 	
 	/** The logger. **/
-	private static Logger logger = Logger.getLogger(Config.class);	
+	private static Logger logger = LogManager.getLogger(Config.class);
 	
 	
 	/**

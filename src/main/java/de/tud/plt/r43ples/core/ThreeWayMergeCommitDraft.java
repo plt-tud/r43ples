@@ -1,8 +1,8 @@
 package de.tud.plt.r43ples.core;
 
-import com.hp.hpl.jena.query.*;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.util.FileUtils;
+import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.util.FileUtils;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.Branch;
 import de.tud.plt.r43ples.existentobjects.ChangeSet;
@@ -15,7 +15,8 @@ import de.tud.plt.r43ples.mergingUI.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.mergingUI.SDDTripleStateEnum;
 import de.tud.plt.r43ples.optimization.ChangeSetPath;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Collection of information for creating a new three way merge commit.
@@ -25,7 +26,7 @@ import org.apache.log4j.Logger;
 public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(ThreeWayMergeCommitDraft.class);
+    private Logger logger = LogManager.getLogger(ThreeWayMergeCommitDraft.class);
 
     /** The used source branch. **/
     private Branch usedSourceBranch;

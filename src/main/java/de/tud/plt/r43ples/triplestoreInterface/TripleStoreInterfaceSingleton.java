@@ -1,7 +1,8 @@
 package de.tud.plt.r43ples.triplestoreInterface;
 
 import de.tud.plt.r43ples.management.Config;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Singleton for getting a TripleStore object
@@ -13,7 +14,7 @@ public class TripleStoreInterfaceSingleton {
 	
 	private static TripleStoreInterface triplestore;
 	/** The logger */
-	private static Logger logger = Logger.getLogger(TripleStoreInterfaceSingleton.class);
+	private static Logger logger = LogManager.getLogger(TripleStoreInterface.class);
 
 
 	/** Returns interface according to Config

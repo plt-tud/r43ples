@@ -18,7 +18,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Variant;
 import javax.ws.rs.core.Response.ResponseBuilder;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -35,7 +36,7 @@ public class Debug {
 	@Context
 	private Request request;
 	
-	private final static Logger logger = Logger.getLogger(Debug.class);
+	private final static Logger logger = LogManager.getLogger(Debug.class);
 	
 	
 	@POST
