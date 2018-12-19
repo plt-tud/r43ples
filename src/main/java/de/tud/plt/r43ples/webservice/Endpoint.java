@@ -1,5 +1,27 @@
 package de.tud.plt.r43ples.webservice;
 
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
+import de.tud.plt.r43ples.core.HeaderInformation;
+import de.tud.plt.r43ples.core.R43plesCoreInterface;
+import de.tud.plt.r43ples.core.R43plesCoreSingleton;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.exception.QueryErrorException;
+import de.tud.plt.r43ples.existentobjects.InitialCommit;
+import de.tud.plt.r43ples.existentobjects.MergeCommit;
+import de.tud.plt.r43ples.existentobjects.RevisionControl;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
+import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.management.SparqlRewriter;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.shared.NoWriterForLangException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -10,38 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.core.Variant;
-
-import de.tud.plt.r43ples.core.HeaderInformation;
-import de.tud.plt.r43ples.core.R43plesCoreInterface;
-import de.tud.plt.r43ples.core.R43plesCoreSingleton;
-import de.tud.plt.r43ples.existentobjects.InitialCommit;
-import de.tud.plt.r43ples.existentobjects.MergeCommit;
-import de.tud.plt.r43ples.existentobjects.Revision;
-import de.tud.plt.r43ples.existentobjects.RevisionControl;
-import de.tud.plt.r43ples.iohelper.JenaModelManagement;
-import de.tud.plt.r43ples.iohelper.Helper;
-import de.tud.plt.r43ples.management.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.shared.NoWriterForLangException;
-
-import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.exception.QueryErrorException;
-import de.tud.plt.r43ples.mergingUI.ui.MergingControl;
 
 
 
@@ -69,20 +59,11 @@ public class Endpoint {
 	/** default logger for this class */
 	private final static Logger logger = LogManager.getLogger(Endpoint.class);
 
-
 	static final MediaType TEXT_TURTLE_TYPE = new MediaType("text", "turtle");
 	static final String TEXT_TURTLE = "text/turtle";
 	static final MediaType APPLICATION_RDF_XML_TYPE = new MediaType("application", "rdf+xml");
 	static final String APPLICATION_RDF_XML = "application/rdf+xml";
 	static final MediaType APPLICATION_SPARQL_RESULTS_XML_TYPE = new MediaType("application", "sparql-results+xml");
-	
-	
-	/**map for client and mergingControlMap
-	 * for each client there is a mergingControlMap**/
-	protected static HashMap<String, HashMap<String, MergingControl>> clientMap = new HashMap<String, HashMap<String, MergingControl>>();
-	
-	
-
 
 	/**
 	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).

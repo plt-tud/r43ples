@@ -11,8 +11,6 @@ import de.tud.plt.r43ples.existentobjects.ThreeWayMergeCommit;
 import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.mergingUI.MergeQueryTypeEnum;
-import de.tud.plt.r43ples.mergingUI.SDDTripleStateEnum;
 import de.tud.plt.r43ples.optimization.ChangeSetPath;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.logging.log4j.LogManager;

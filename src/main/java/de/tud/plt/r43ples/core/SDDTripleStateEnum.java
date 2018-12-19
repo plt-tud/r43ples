@@ -1,4 +1,4 @@
-package de.tud.plt.r43ples.mergingUI;
+package de.tud.plt.r43ples.core;
 
 /**
  * The SDD triple state.
