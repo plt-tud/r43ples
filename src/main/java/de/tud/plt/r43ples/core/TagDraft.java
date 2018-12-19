@@ -5,7 +5,8 @@ import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.existentobjects.Tag;
 import de.tud.plt.r43ples.management.Config;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Collection of information for creating a new tag.
@@ -16,7 +17,7 @@ import org.apache.log4j.Logger;
 public class TagDraft extends ReferenceDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(TagDraft.class);
+    private Logger logger = LogManager.getLogger(TagDraft.class);
 
 
     /**
@@ -59,7 +60,7 @@ public class TagDraft extends ReferenceDraft {
         String queryContent = String.format(
                     "<%s> a rmo:Tag, rmo:Reference, rmo:Entity ;"
                             + "	rmo:references <%s> ;"
-                            + "	rmo:fullGraph <%s> ;"
+                            + "	rmo:fullContent <%s> ;"
                             + "	rmo:referenceIdentifier \"%s\" .",
                     getReferenceURI(), getReferencedRevision().getRevisionURI(), getReferencedFullGraphURI(), getReferenceIdentifier());
 

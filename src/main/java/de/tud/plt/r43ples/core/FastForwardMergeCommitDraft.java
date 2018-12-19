@@ -6,7 +6,8 @@ import de.tud.plt.r43ples.existentobjects.FastForwardMergeCommit;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.iohelper.Helper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Collection of information for creating a new fast forward merge commit.
@@ -16,7 +17,7 @@ import org.apache.log4j.Logger;
 public class FastForwardMergeCommitDraft extends MergeCommitDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(FastForwardMergeCommitDraft.class);
+    private Logger logger = LogManager.getLogger(FastForwardMergeCommitDraft.class);
 
 
     /**
@@ -82,7 +83,7 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
                 "<%s> a rmo:FastForwardMergeCommit, rmo:MergeCommit, rmo:BasicMergeCommit, rmo:Commit; "
                         + "	rmo:wasAssociatedWith <%s> ;"
                         + "	rmo:commitMessage \"%s\" ;"
-                        + "	rmo:atTime \"%s\"^^xsd:dateTime ; %n"
+                        + "	rmo:timeStamp \"%s\"^^xsd:dateTime ; %n"
                         + " rmo:usedSourceRevision <%s> ;"
                         + " rmo:usedSourceBranch <%s> ;"
                         + " rmo:usedTargetRevision <%s> ;"

@@ -3,21 +3,22 @@ package de.tud.plt.r43ples.triplestoreInterface;
 import java.io.File;
 import java.util.Iterator;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import com.hp.hpl.jena.query.Dataset;
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.ReadWrite;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.tdb.TDBFactory;
-import com.hp.hpl.jena.update.GraphStore;
-import com.hp.hpl.jena.update.GraphStoreFactory;
-import com.hp.hpl.jena.update.UpdateExecutionFactory;
-import com.hp.hpl.jena.update.UpdateFactory;
-import com.hp.hpl.jena.update.UpdateProcessor;
-import com.hp.hpl.jena.update.UpdateRequest;
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.ReadWrite;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.update.GraphStore;
+import org.apache.jena.update.GraphStoreFactory;
+import org.apache.jena.update.UpdateExecutionFactory;
+import org.apache.jena.update.UpdateFactory;
+import org.apache.jena.update.UpdateProcessor;
+import org.apache.jena.update.UpdateRequest;
 
 
 /** 
@@ -32,7 +33,7 @@ public class JenaTDBInterface extends TripleStoreInterface {
 	/** The TDB dataset. **/
 	private static Dataset dataset;
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(JenaTDBInterface.class);
+	private static Logger logger = LogManager.getLogger(JenaTDBInterface.class);
 	
 
 	/**

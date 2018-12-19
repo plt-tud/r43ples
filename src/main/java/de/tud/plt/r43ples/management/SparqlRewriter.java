@@ -1,23 +1,24 @@
 package de.tud.plt.r43ples.management;
 
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.sparql.core.TriplePath;
-import com.hp.hpl.jena.sparql.core.Var;
-import com.hp.hpl.jena.sparql.expr.*;
-import com.hp.hpl.jena.sparql.path.P_Link;
-import com.hp.hpl.jena.sparql.path.P_ZeroOrMore1;
-import com.hp.hpl.jena.sparql.syntax.*;
-import com.hp.hpl.jena.sparql.util.ExprUtils;
-import com.hp.hpl.jena.vocabulary.RDF;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.sparql.core.TriplePath;
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.expr.*;
+import org.apache.jena.sparql.path.P_Link;
+import org.apache.jena.sparql.path.P_ZeroOrMore1;
+import org.apache.jena.sparql.syntax.*;
+import org.apache.jena.sparql.util.ExprUtils;
+import org.apache.jena.vocabulary.RDF;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.optimization.PathCalculationFabric;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -34,17 +35,16 @@ import java.util.regex.Pattern;
 public class SparqlRewriter {
 
 	/** The logger. **/
-	private static final Logger logger = Logger.getLogger(SparqlRewriter.class);
+	private static final Logger logger = LogManager.getLogger(SparqlRewriter.class);
 
 	private static final String rmo = "http://eatld.et.tu-dresden.de/rmo#";
 	private static final Node rmo_Revision = NodeFactory.createURI(rmo + "Revision");
 	private static final Node rmo_deleteSet = NodeFactory.createURI(rmo + "deleteSet");
 	private static final Node rmo_addSet = NodeFactory.createURI(rmo + "addSet");
-	private static final Node rmo_fullGraph = NodeFactory.createURI(rmo + "fullGraph");
+	private static final Node rmo_fullGraph = NodeFactory.createURI(rmo + "fullContent");
 	private static final Node rmo_references = NodeFactory.createURI(rmo + "references");
 	private static final Node rmo_wasDerivedFrom = NodeFactory.createURI(rmo + "wasDerivedFrom");
-	private static final Node rmo_hasChangeSet = NodeFactory.createURI(rmo + "hasChangeSet");
-
+	private static final Node rmo_succeedingRevision = NodeFactory.createURI(rmo + "succeedingRevision");
 
 
 	/** instance variables */
@@ -228,7 +228,7 @@ public class SparqlRewriter {
 
 			ElementGroup eg_delete_set = new ElementGroup();
 			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, RDF.type.asNode(), rmo_Revision));
-			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, rmo_hasChangeSet, var_change_set_del));
+			eg_delete_set.addTriplePattern(new Triple(var_change_set_del, rmo_succeedingRevision, var_r_delete_set));
 			eg_delete_set.addTriplePattern(new Triple(var_change_set_del, rmo_deleteSet, g_delete_set_full_graph));
 			eg_delete_set.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_delete_set),
 					expression_list_revision_path)));
@@ -241,7 +241,7 @@ public class SparqlRewriter {
 					var_r_add_set));
 			eg_revisiongraph2.addElement(ebp);
 			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, RDF.type.asNode(), rmo_Revision));
-			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, rmo_hasChangeSet, var_change_set_add));
+			eg_revisiongraph2.addTriplePattern(new Triple(var_change_set_add, rmo_succeedingRevision, var_r_add_set));
 			eg_revisiongraph2.addTriplePattern(new Triple(var_change_set_add, rmo_addSet, g_add_set));
 			eg_revisiongraph2.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_add_set),
 					expression_list_revision_path)));			

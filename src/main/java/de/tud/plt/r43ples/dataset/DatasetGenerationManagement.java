@@ -2,7 +2,8 @@ package de.tud.plt.r43ples.dataset;
 
 import javax.ws.rs.core.MediaType;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.webservice.Endpoint;
@@ -18,7 +19,7 @@ public class DatasetGenerationManagement {
 	// TODO Change this class to a template class which provides queries as strings, do not execute the queries
 
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(DatasetGenerationManagement.class);
+	private static Logger logger = LogManager.getLogger(DatasetGenerationManagement.class);
 	/** The endpoint. **/
 	private static Endpoint ep = new Endpoint();
 	

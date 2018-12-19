@@ -10,7 +10,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -19,7 +20,7 @@ import com.github.mustachejava.MustacheFactory;
 @Provider
 public class ExceptionMapper implements
 		javax.ws.rs.ext.ExceptionMapper<Throwable> {
-	private static Logger logger = Logger.getLogger(ExceptionMapper.class);
+	private static Logger logger = LogManager.getLogger(ExceptionMapper.class);
 	
 	@Context
 	HttpServletRequest request;

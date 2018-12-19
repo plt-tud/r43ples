@@ -17,7 +17,8 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 
 import de.tud.plt.r43ples.existentobjects.RevisionControl;
 import de.tud.plt.r43ples.iohelper.Helper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
@@ -31,7 +32,7 @@ import de.tud.plt.r43ples.mergingUI.ui.MergingControl;
 @Path("merging")
 public class Merging {
 	
-	private final static Logger logger = Logger.getLogger(Merging.class);	
+	private final static Logger logger = LogManager.getLogger(Merging.class);
 
 	/**
 	 * get merging HTML start page and input merging information

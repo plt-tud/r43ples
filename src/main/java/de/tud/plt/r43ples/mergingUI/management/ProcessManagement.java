@@ -8,13 +8,14 @@ import de.tud.plt.r43ples.mergingUI.TripleObjectTypeEnum;
 import de.tud.plt.r43ples.mergingUI.model.structure.DifferenceGroup;
 import de.tud.plt.r43ples.mergingUI.model.structure.HighLevelChangeTableModel;
 import de.tud.plt.r43ples.mergingUI.model.structure.Triple;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import com.hp.hpl.jena.query.QueryExecution;
-import com.hp.hpl.jena.query.QueryExecutionFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.mergingUI.ResolutionStateEnum;
@@ -30,7 +31,7 @@ import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 
 public class ProcessManagement {
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(ProcessManagement.class);
+	private static Logger logger = LogManager.getLogger(ProcessManagement.class);
 	
 	
 	/**

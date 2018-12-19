@@ -52,7 +52,7 @@
 <http://test.com/r43ples-dataset-complex-structure-branch-B2X>
         a                    rmo:Reference , rmo:Branch ;
         rdfs:label           "B2X" ;
-        rmo:fullGraph        <http://test.com/r43ples-dataset-complex-structure-branch-B2X> ;
+        rmo:fullContent        <http://test.com/r43ples-dataset-complex-structure-branch-B2X> ;
         rmo:references       <http://test.com/r43ples-dataset-complex-structure-revision-9> ;
         prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-7> .
 
@@ -107,7 +107,7 @@
 <http://test.com/r43ples-dataset-complex-structure-tag-v0.2>
         a                    rmo:Tag , rmo:Reference ;
         rdfs:label           "v0.2" ;
-        rmo:fullGraph        <http://test.com/r43ples-dataset-complex-structure-tag-v0.2> ;
+        rmo:fullContent        <http://test.com/r43ples-dataset-complex-structure-tag-v0.2> ;
         rmo:references       <http://test.com/r43ples-dataset-complex-structure-revision-8> ;
         prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-8> .
 
@@ -225,7 +225,7 @@
 <http://test.com/r43ples-dataset-complex-structure-branch-B1X>
         a                    rmo:Reference , rmo:Branch ;
         rdfs:label           "B1X" ;
-        rmo:fullGraph        <http://test.com/r43ples-dataset-complex-structure-branch-B1X> ;
+        rmo:fullContent        <http://test.com/r43ples-dataset-complex-structure-branch-B1X> ;
         rmo:references       <http://test.com/r43ples-dataset-complex-structure-revision-4> ;
         prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-2> .
 
@@ -248,7 +248,7 @@
 <http://test.com/r43ples-dataset-complex-structure-branch-B2>
         a                    rmo:Reference , rmo:Branch ;
         rdfs:label           "B2" ;
-        rmo:fullGraph        <http://test.com/r43ples-dataset-complex-structure-branch-B2> ;
+        rmo:fullContent        <http://test.com/r43ples-dataset-complex-structure-branch-B2> ;
         rmo:references       <http://test.com/r43ples-dataset-complex-structure-revision-11> ;
         prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-0> .
 
@@ -286,7 +286,7 @@
 <http://test.com/r43ples-dataset-complex-structure-master>
         a               rmo:Reference , rmo:Branch , rmo:Master ;
         rdfs:label      "master" ;
-        rmo:fullGraph   <http://test.com/r43ples-dataset-complex-structure> ;
+        rmo:fullContent   <http://test.com/r43ples-dataset-complex-structure> ;
         rmo:references  <http://test.com/r43ples-dataset-complex-structure-revision-14> .
 
 <http://test.com/r43ples-dataset-complex-structure-revision-5>
@@ -300,7 +300,7 @@
 <http://test.com/r43ples-dataset-complex-structure-branch-B1>
         a                    rmo:Reference , rmo:Branch ;
         rdfs:label           "B1" ;
-        rmo:fullGraph        <http://test.com/r43ples-dataset-complex-structure-branch-B1> ;
+        rmo:fullContent        <http://test.com/r43ples-dataset-complex-structure-branch-B1> ;
         rmo:references       <http://test.com/r43ples-dataset-complex-structure-revision-5> ;
         prov:wasDerivedFrom  <http://test.com/r43ples-dataset-complex-structure-revision-0> .
 

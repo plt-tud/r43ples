@@ -10,7 +10,8 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
 public class InitialCommitDraft extends CommitDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(InitialCommitDraft.class);
+    private Logger logger = LogManager.getLogger(InitialCommitDraft.class);
 
     /** The pattern modifier. **/
     private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
@@ -129,9 +130,8 @@ public class InitialCommitDraft extends CommitDraft {
      * @param generatedRevision the generated revision
      * @param commitUri the commit URI
      * @param branchUri the branch URI
-     * @throws InternalErrorException
      */
-    private void addMetaInformation(Revision generatedRevision, String commitUri, String branchUri) throws InternalErrorException {
+    private void addMetaInformation(Revision generatedRevision, String commitUri, String branchUri) {
 
         String queryAddRevisionGraph = Config.prefixes + String.format(
                 "INSERT DATA { GRAPH <%1$s> {"
@@ -147,9 +147,10 @@ public class InitialCommitDraft extends CommitDraft {
                 "<%s> a rmo:InitialCommit, rmo:Commit; "
                         + "	rmo:wasAssociatedWith <%s> ;"
                         + "	rmo:generated <%s>, <%s> ;"
+                        + " rmo:hasChangeSet <%s> ;"
                         + "	rmo:commitMessage \"%s\" ;"
-                        + "	rmo:atTime \"%s\"^^xsd:dateTime .%n",
-                commitUri, Helper.getUserURI(getUser()), generatedRevision.getRevisionURI(), branchUri, getMessage(), getTimeStamp());
+                        + "	rmo:timeStamp \"%s\"^^xsd:dateTime .%n",
+                commitUri, Helper.getUserURI(getUser()), generatedRevision.getRevisionURI(), branchUri, generatedRevision.getChangeSet().getChangeSetURI(), getMessage(), getTimeStamp());
 
         String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisionGraph.getRevisionGraphUri(), queryContent);
 

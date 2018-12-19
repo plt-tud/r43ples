@@ -6,7 +6,8 @@ import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,7 +20,7 @@ import java.util.regex.Pattern;
 public class RevertCommitDraft extends CommitDraft {
 
 	/** The logger. **/
-	private Logger logger = Logger.getLogger(RevertCommitDraft.class);
+	private Logger logger = LogManager.getLogger(RevertCommitDraft.class);
 
 	/** The pattern modifier. **/
 	private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
@@ -118,10 +119,11 @@ public class RevertCommitDraft extends CommitDraft {
 				"<%s> a rmo:RevertCommit, rmo:Commit ; "
 						+ "	rmo:wasAssociatedWith <%s>;"
 						+ "	rmo:generated <%s>;"
+						+ " rmo:hasChangeSet <%s> ;"
 						+ "	rmo:commitMessage \"%s\";"
 						+ " rmo:used <%s> ;"
-						+ "	rmo:atTime \"%s\"^^xsd:dateTime. %n", commitUri,
-				personUri, revisionUri, getMessage(), revUriOld, getTimeStamp()));
+						+ "	rmo:timeStamp \"%s\"^^xsd:dateTime. %n", commitUri,
+				personUri, revisionUri, generatedRevision.getChangeSet().getChangeSetURI(), getMessage(), revUriOld, getTimeStamp()));
 
 		String query = Config.prefixes
 				+ String.format("INSERT DATA { GRAPH <%s> { %s } }", generatedRevision.getRevisionGraph().getRevisionGraphUri(),

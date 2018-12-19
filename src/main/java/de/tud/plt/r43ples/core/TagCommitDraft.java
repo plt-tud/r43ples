@@ -8,7 +8,8 @@ import de.tud.plt.r43ples.existentobjects.Tag;
 import de.tud.plt.r43ples.existentobjects.TagCommit;
 import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.management.Config;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.regex.Pattern;
 
@@ -20,7 +21,7 @@ import java.util.regex.Pattern;
 public class TagCommitDraft extends ReferenceCommitDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(TagCommitDraft.class);
+    private Logger logger = LogManager.getLogger(TagCommitDraft.class);
 
     /** The pattern modifier. **/
     private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
@@ -75,7 +76,7 @@ public class TagCommitDraft extends ReferenceCommitDraft {
      * @param commitURI the commit URI
      * @throws InternalErrorException
      */
-    private void addMetaInformation(String referenceURI, String commitURI) throws InternalErrorException {
+    private void addMetaInformation(String referenceURI, String commitURI) {
         logger.info("Create new tag '" + getReferenceIdentifier() + "' for graph " + getRevisionGraph().getGraphName());
 
         // General variables
@@ -88,7 +89,7 @@ public class TagCommitDraft extends ReferenceCommitDraft {
                         + "	rmo:generated <%s> ;"
                         + " rmo:used <%s> ;"
                         + "	rmo:commitMessage \"%s\" ;"
-                        + "	rmo:atTime \"%s\" .%n",
+                        + "	rmo:timeStamp \"%s\" .%n",
                 commitURI, personUri, referenceURI, getBaseRevision().getRevisionURI(), getMessage(), getTimeStamp());
 
         // Execute queries

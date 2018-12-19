@@ -8,7 +8,8 @@ import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.optimization.PathCalculationFabric;
 import de.tud.plt.r43ples.optimization.PathCalculationInterface;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,7 +24,7 @@ import java.util.regex.Pattern;
 public class PickCommitDraft extends CommitDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(PickCommitDraft.class);
+    private Logger logger = LogManager.getLogger(PickCommitDraft.class);
 
     /** The pattern modifier. **/
     private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
@@ -211,7 +212,7 @@ public class PickCommitDraft extends CommitDraft {
                 "<%s> a rmo:PickCommit, rmo:BasicMergeCommit, rmo:Commit; "
                         + "	rmo:wasAssociatedWith <%s> ;"
                         + "	rmo:commitMessage \"%s\" ;"
-                        + "	rmo:atTime \"%s\"^^xsd:dateTime ; %n"
+                        + "	rmo:timeStamp \"%s\"^^xsd:dateTime ; %n"
                         + " rmo:usedTargetRevision <%s> ;"
                         + " rmo:usedTargetBranch <%s> .",
                 commitURI, personUri, getMessage(), getTimeStamp(),
@@ -248,8 +249,9 @@ public class PickCommitDraft extends CommitDraft {
         queryContentInsert.append(String.format(
                 "<%1$s> rmo:wasQuotedFrom <%2$s> . "
                 + "<%3$s> prov:generated <%1$s> ; "
+                        + " rmo:hasChangeSet <%4$s> ;"
                         + " rmo:usedSourceRevision <%2$s> .",
-                generatedRevision.getRevisionURI(), revisionToCopy.getRevisionURI(), commitURI));
+                generatedRevision.getRevisionURI(), revisionToCopy.getRevisionURI(), commitURI, generatedRevision.getChangeSet().getChangeSetURI()));
 
         String query = Config.prefixes	+ String.format(""
                         + "INSERT DATA { GRAPH <%1$s> { %2$s } }",

@@ -6,7 +6,8 @@ import de.tud.plt.r43ples.existentobjects.ReferenceCommit;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.R43plesRequest;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,7 +20,7 @@ import java.util.regex.Pattern;
 public class ReferenceCommitDraft extends CommitDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(ReferenceCommitDraft.class);
+    private Logger logger = LogManager.getLogger(ReferenceCommitDraft.class);
 
     /** The pattern modifier. **/
     private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;

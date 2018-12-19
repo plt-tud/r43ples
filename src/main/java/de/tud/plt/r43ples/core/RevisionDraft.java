@@ -5,7 +5,8 @@ import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Collection of information for creating a new revision
@@ -17,7 +18,7 @@ import org.apache.log4j.Logger;
 public class RevisionDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(RevisionDraft.class);
+    private Logger logger = LogManager.getLogger(RevisionDraft.class);
 
     /** The branch were the new revision should be created **/
     private Branch branch;
@@ -212,9 +213,9 @@ public class RevisionDraft {
         ChangeSetDraft changeSetDraft;
 
         if ((addSetURI == null) && (deleteSetURI == null)) {
-            changeSetDraft = new ChangeSetDraft(uriCalculator, revisionGraph, derivedFromRevision, newRevisionIdentifier, referenceFullGraph, addSet, deleteSet, isStripped, isSpecifiedByRewrittenQuery);
+            changeSetDraft = new ChangeSetDraft(uriCalculator, revisionGraph, derivedFromRevision, newRevisionIdentifier, revisionURI, referenceFullGraph, addSet, deleteSet, isStripped, isSpecifiedByRewrittenQuery);
         } else {
-            changeSetDraft = new ChangeSetDraft(uriCalculator, revisionGraph, derivedFromRevision, newRevisionIdentifier, referenceFullGraph, addSetURI, deleteSetURI);
+            changeSetDraft = new ChangeSetDraft(uriCalculator, revisionGraph, derivedFromRevision, newRevisionIdentifier, revisionURI, referenceFullGraph, addSetURI, deleteSetURI);
         }
         this.changeSet = changeSetDraft.createInTripleStore();
 
@@ -228,22 +229,20 @@ public class RevisionDraft {
      *
      * @throws InternalErrorException
      */
-    private void addMetaInformation() throws InternalErrorException {
+    private void addMetaInformation() {
         // The derived from revision could be null because of the initial commit
         String queryContent;
         if (derivedFromRevision != null) {
             queryContent = String.format(
                     "<%s> a rmo:Revision, rmo:Entity ;"
                             + "	rmo:revisionIdentifier \"%s\" ;"
-                            + "	rmo:wasDerivedFrom <%s> ;"
-                            + "	rmo:hasChangeSet <%s> .",
-                    revisionURI, newRevisionIdentifier, derivedFromRevision.getRevisionURI(), changeSet.getChangeSetURI());
+                            + "	rmo:wasDerivedFrom <%s> .",
+                    revisionURI, newRevisionIdentifier, derivedFromRevision.getRevisionURI());
         } else {
             queryContent = String.format(
                     "<%s> a rmo:Revision, rmo:Entity ;"
-                            + "	rmo:revisionIdentifier \"%s\" ;"
-                            + "	rmo:hasChangeSet <%s> .",
-                    revisionURI, newRevisionIdentifier, changeSet.getChangeSetURI());
+                            + "	rmo:revisionIdentifier \"%s\" .",
+                    revisionURI, newRevisionIdentifier);
         }
         String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisionGraph.getRevisionGraphUri(), queryContent);
 
@@ -258,7 +257,7 @@ public class RevisionDraft {
      * @return true if the revision is equal
      * @throws InternalErrorException
      */
-    public boolean equals(final String graphName, final String branchIdentifier) throws InternalErrorException{
+    public boolean equals(final String graphName, final String branchIdentifier) {
 		RevisionGraph otherGraph = new RevisionGraph(graphName);
 		//String otherRevisionNumber = otherGraph.getRevisionIdentifier(revisionIdentifier);
 		return ((this.revisionGraph.getGraphName().equals(graphName)) && (this.getBranch().getReferenceIdentifier().equals(branchIdentifier)));

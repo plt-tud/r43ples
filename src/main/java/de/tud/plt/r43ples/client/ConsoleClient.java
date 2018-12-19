@@ -11,7 +11,8 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.io.FileUtils;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +20,7 @@ import java.io.IOException;
 
 public class ConsoleClient {
 
-    private static Logger logger = Logger.getLogger(ConsoleClient.class);
+    private static Logger logger = LogManager.getLogger(ConsoleClient.class);
 
     public static void main(String[] args) throws ConfigurationException, IOException, InternalErrorException {
 

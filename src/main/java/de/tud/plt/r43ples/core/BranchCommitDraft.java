@@ -7,7 +7,8 @@ import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.iohelper.Helper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.regex.Pattern;
 
@@ -19,7 +20,7 @@ import java.util.regex.Pattern;
 public class BranchCommitDraft extends ReferenceCommitDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(BranchCommitDraft.class);
+    private Logger logger = LogManager.getLogger(BranchCommitDraft.class);
 
     /** The pattern modifier. **/
     private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
@@ -77,7 +78,7 @@ public class BranchCommitDraft extends ReferenceCommitDraft {
                         + "	rmo:generated <%s> ;"
                         + " rmo:used <%s> ;"
                         + "	rmo:commitMessage \"%s\" ;"
-                        + "	rmo:atTime \"%s\" .%n",
+                        + "	rmo:timeStamp \"%s\" .%n",
                 commitURI, personUri, referenceURI, getBaseRevision().getRevisionURI(), getMessage(), getTimeStamp());
 
         // Execute queries

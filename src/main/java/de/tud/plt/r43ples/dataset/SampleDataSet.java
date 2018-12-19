@@ -6,7 +6,8 @@ import de.tud.plt.r43ples.core.R43plesCoreSingleton;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Creates different sample data sets.
@@ -18,7 +19,7 @@ import org.apache.log4j.Logger;
 public class SampleDataSet {
 
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(SampleDataSet.class);
+	private static Logger logger = LogManager.getLogger(SampleDataSet.class);
 	
 	/** The user. **/
 	private static final String user = "butler";

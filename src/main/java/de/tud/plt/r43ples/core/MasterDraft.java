@@ -5,7 +5,8 @@ import de.tud.plt.r43ples.existentobjects.Branch;
 import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.Config;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Collection of information for creating a new master branch.
@@ -16,7 +17,7 @@ import org.apache.log4j.Logger;
 public class MasterDraft extends ReferenceDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(MasterDraft.class);
+    private Logger logger = LogManager.getLogger(MasterDraft.class);
 
 
     /**
@@ -54,11 +55,11 @@ public class MasterDraft extends ReferenceDraft {
      *
      * @throws InternalErrorException
      */
-    private void addMetaInformation() throws InternalErrorException {
+    private void addMetaInformation() {
         String queryContent = String.format(
                     "<%s> a rmo:Master, rmo:Branch, rmo:Reference ;"
                             + "	rmo:references <%s> ;"
-                            + "	rmo:fullGraph <%s> ;"
+                            + "	rmo:fullContent <%s> ;"
                             + "	rmo:referenceIdentifier \"%s\" .",
                     getReferenceURI(), getReferencedRevision().getRevisionURI(), getReferencedFullGraphURI(), getReferenceIdentifier());
 

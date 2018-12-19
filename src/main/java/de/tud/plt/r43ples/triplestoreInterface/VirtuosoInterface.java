@@ -1,10 +1,11 @@
 package de.tud.plt.r43ples.triplestoreInterface;
 
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.rdf.model.Model;
-import org.apache.log4j.Logger;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import virtuoso.jena.driver.*;
 
 import java.util.ArrayList;
@@ -23,72 +24,75 @@ import java.util.List;
 public class VirtuosoInterface extends TripleStoreInterface {
 	
 	/** The logger. **/
-	private static Logger logger = Logger.getLogger(VirtuosoInterface.class);
+	private static Logger logger = LogManager.getLogger(VirtuosoInterface.class);
 
 	private VirtGraph set;
 	
 	public VirtuosoInterface(String virtuoso_url, String virtuoso_user, String virtuoso_password) {
 		
-		set = new VirtGraph (virtuoso_url, virtuoso_user, virtuoso_password);
+//		set = new VirtGraph (virtuoso_url, virtuoso_user, virtuoso_password);
 	}
 
 	@Override
 	public void close() {
-		set.close();
-		set = null;
+//		set.close();
+//		set = null;
 	}
 
 
 	@Override
 	public ResultSet executeSelectQuery(String selectQueryString) {
-		Query query =  QueryFactory.create(selectQueryString);
-		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(query, set);
-		ResultSet result = vqe.execSelect();
-		vqe.close();
-		return result;
+//		Query query =  QueryFactory.create(selectQueryString);
+//		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(query, set);
+//		ResultSet result = vqe.execSelect();
+//		vqe.close();
+//		return result;
+		return null;
 	}
 
 	@Override
 	public Model executeConstructQuery(String constructQueryString) {
-		Query query =  QueryFactory.create(constructQueryString);
-		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(query,  set);
-		Model result = vqe.execConstruct();
-		vqe.close();
-		return result;
+//		Query query =  QueryFactory.create(constructQueryString);
+//		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(query,  set);
+//		Model result = vqe.execConstruct();
+//		vqe.close();
+//		return result;
+		return null;
 	}
 
 
 	@Override
 	public boolean executeAskQuery(String askQueryString) {
-		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(askQueryString, set);
-		boolean result = vqe.execAsk();
-		vqe.close();
-		return result;
+//		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(askQueryString, set);
+//		boolean result = vqe.execAsk();
+//		vqe.close();
+//		return result;
+		return false;
 	}
 
 	@Override
 	public void executeUpdateQuery(String updateQueryString) {
-		logger.debug(updateQueryString);
-		VirtuosoUpdateRequest vqe = VirtuosoUpdateFactory.create(updateQueryString, set);
-		try {
-			vqe.exec();
-		}
-		catch (Exception e) {
-			logger.error(e);
-			throw e;
-		}
+//		logger.debug(updateQueryString);
+//		VirtuosoUpdateRequest vqe = VirtuosoUpdateFactory.create(updateQueryString, set);
+//		try {
+//			vqe.exec();
+//		}
+//		catch (Exception e) {
+//			logger.error(e);
+//			throw e;
+//		}
 	}
 
 	@Override
 	public void executeCreateGraph(String graph) {
-		VirtuosoUpdateRequest vqe = VirtuosoUpdateFactory.create("CREATE GRAPH <"+graph+">", set);
-		try {
-			vqe.exec();
-		}
-		catch (Exception e) {
-			logger.error(e);
-			throw e;
-		}
+//		VirtuosoUpdateRequest vqe = VirtuosoUpdateFactory.create("CREATE GRAPH <"+graph+">", set);
+//		try {
+//			vqe.exec();
+//		}
+//		catch (Exception e) {
+//			logger.error(e);
+//			throw e;
+//		}
 	}
 
 	@Override
@@ -102,8 +106,9 @@ public class VirtuosoInterface extends TripleStoreInterface {
 
 	@Override
 	public Model executeDescribeQuery(String describeQueryString) {
-		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(describeQueryString, set);
-		return vqe.execDescribe();
+//		VirtuosoQueryExecution vqe = VirtuosoQueryExecutionFactory.create(describeQueryString, set);
+//		return vqe.execDescribe();
+		return null;
 	}
 
 	@Override

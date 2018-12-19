@@ -1,7 +1,8 @@
 package de.tud.plt.r43ples.existentobjects;
 
 import de.tud.plt.r43ples.exception.InternalErrorException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Provides information of an already existent initial commit.
@@ -11,7 +12,7 @@ import org.apache.log4j.Logger;
 public class InitialCommit extends Commit {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(InitialCommit.class);
+    private Logger logger = LogManager.getLogger(InitialCommit.class);
 
     /** The generated revision. **/
     private Revision generatedRevision;

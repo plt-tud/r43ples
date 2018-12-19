@@ -1,13 +1,14 @@
 package de.tud.plt.r43ples.existentobjects;
 
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 
@@ -19,7 +20,7 @@ import java.util.ArrayList;
 public class Revision {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(Revision.class);
+    private Logger logger = LogManager.getLogger(Revision.class);
 
     /** The revision identifier. */
     private String revisionIdentifier;
@@ -245,8 +246,7 @@ public class Revision {
             String query = Config.prefixes + String.format(""
                     + "SELECT ?changeSetURI "
                     + "WHERE { GRAPH  <%s> {"
-                    + "	<%s> a rmo:Revision; "
-                    + "	 rmo:hasChangeSet ?changeSetURI. "
+                    + "	?changeSetURI rmo:succeedingRevision <%s> . "
                     + "} }", revisionGraphURI, revisionURI);
             this.logger.debug(query);
             ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
@@ -316,20 +316,6 @@ public class Revision {
         } else {
             throw new InternalErrorException("No revision identifier found for revision URI " + revisionURI + ".");
         }
-    }
-
-    /**
-     * Get the content of a named graph as N-TRIPLES.
-     *
-     * @param namedGraphURI the named graph URI
-     * @return the content of the named graph as N-TRIPLES
-     */
-    private String getContentOfNamedGraphAsN3(String namedGraphURI) {
-        String query = Config.prefixes + String.format(
-                "CONSTRUCT {?s ?p ?o} %n"
-                        + "WHERE { GRAPH <%s> {?s ?p ?o} }", namedGraphURI);
-        String resultAsTurtle = tripleStoreInterface.executeConstructQuery(query, "TURTLE");
-        return JenaModelManagement.convertJenaModelToNTriple(JenaModelManagement.readStringToJenaModel(resultAsTurtle, "TURTLE"));
     }
 
 }

@@ -1,12 +1,13 @@
 package de.tud.plt.r43ples.existentobjects;
 
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 
@@ -18,7 +19,7 @@ import java.util.ArrayList;
 public class RevisionGraph {
 
 	/** The logger. **/
-	private Logger logger = Logger.getLogger(Helper.class);
+	private Logger logger = LogManager.getLogger(RevisionGraph.class);
 
 	/** The URI of the named graph which R43ples manages. **/
 	private String graphName;
@@ -142,7 +143,7 @@ public class RevisionGraph {
 				+ "WHERE { GRAPH  <%s> {" 
 				+ "	?ref a rmo:Reference; "
 				+ "		rmo:references ?rev;" 
-				+ "		rmo:fullGraph ?graph."
+				+ "		rmo:fullContent ?graph."
 				+ " ?rev a rmo:Revision."
 				+ "	{?ref rmo:referenceIdentifier \"%s\"} UNION {?rev rmo:revisionIdentifier \"%s\"}"
 				+ "} }", revisionGraph, referenceIdentifier, referenceIdentifier);
@@ -227,39 +228,41 @@ public class RevisionGraph {
 	 */
 	public void purgeRevisionInformation() {
 		logger.info("Purge revision information of graph " + graphName);
-		// Drop all full graphs as well as add and delete sets which are related
-		// to specified graph
+		// Drop all full graphs as well as add and delete sets which are related to specified graph
+		// If the revision graph is null there is nothing to delete
 		String revisionGraph = this.getRevisionGraphUri();
-		String query = Config.prefixes	+ String.format(""
-				+ "SELECT DISTINCT ?graph "
-				+ "WHERE { GRAPH <%s> {"
-				+ " {?rev rmo:addSet ?graph}" 
-				+ " UNION {?rev rmo:deleteSet ?graph}"
-				+ " UNION {?ref rmo:fullGraph ?graph}"
-				+ "} }", revisionGraph);
-				
-		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
-		while (results.hasNext()) {
-			QuerySolution qs = results.next();
-			if (qs.get("?graph").isResource()) {
-					String graph = qs.getResource("graph").toString();
-					TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <" + graph + ">");
-					logger.debug("Graph deleted: " + graph);
+		if (revisionGraph != null) {
+			String query = Config.prefixes	+ String.format(""
+					+ "SELECT DISTINCT ?graph "
+					+ "WHERE { GRAPH <%s> {"
+					+ " {?rev rmo:addSet ?graph}"
+					+ " UNION {?rev rmo:deleteSet ?graph}"
+					+ " UNION {?ref rmo:fullContent ?graph}"
+					+ "} }", revisionGraph);
+
+			ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);
+			while (results.hasNext()) {
+				QuerySolution qs = results.next();
+				if (qs.get("?graph").isResource()) {
+						String graph = qs.getResource("graph").toString();
+						TripleStoreInterfaceSingleton.get().executeUpdateQuery("DROP SILENT GRAPH <" + graph + ">");
+						logger.debug("Graph deleted: " + graph);
+				}
 			}
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", revisionGraph));
+
+			// Remove information from revision graph
+			String queryDelete = Config.prefixes + String.format(
+							"DELETE { "
+							+ "GRAPH <%s> {	<%s> ?p ?o.}"
+							+ "}"
+							+ "WHERE {"
+							+ "	GRAPH <%s> { <%s> a rmo:Graph; ?p ?o.}"
+							+ "}"
+							, Config.revision_graph, graphName, Config.revision_graph, graphName);
+
+			TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryDelete);
 		}
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", revisionGraph));
-		
-		// Remove information from revision graph
-		String queryDelete = Config.prefixes + String.format(
-					   	"DELETE { "
-						+ "GRAPH <%s> {	<%s> ?p ?o.}"
-						+ "}" 
-						+ "WHERE {"
-						+ "	GRAPH <%s> { <%s> a rmo:Graph; ?p ?o.}" 
-						+ "}"
-						, Config.revision_graph, graphName, Config.revision_graph, graphName);
-		
-		TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryDelete);
 	}
 	
 	/**
@@ -450,7 +453,7 @@ public class RevisionGraph {
 		String query = String.format(
 				  "SELECT ?fullGraphURI %n"
 			    + "WHERE { GRAPH <%s> {%n"
-				+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#fullGraph> ?fullGraphURI . %n"
+				+ "	<%s> <http://eatld.et.tu-dresden.de/rmo#fullContent> ?fullGraphURI . %n"
 				+ "} }", revisionGraph, branchURI);
 			
 		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);

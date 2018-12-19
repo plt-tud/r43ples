@@ -5,13 +5,14 @@ import java.util.Iterator;
 import java.util.regex.Pattern;
 
 import de.tud.plt.r43ples.iohelper.Helper;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFormatter;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.shared.NoWriterForLangException;
-import com.hp.hpl.jena.sparql.resultset.ResultsFormat;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.shared.NoWriterForLangException;
+import org.apache.jena.sparql.resultset.ResultsFormat;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
@@ -20,7 +21,7 @@ import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 public abstract class TripleStoreInterface {
 	
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(TripleStoreInterface.class);
+	private static Logger logger = LogManager.getLogger(TripleStoreInterface.class);
 	
 	protected void init() {
 		if (!checkGraphExistence(Config.revision_graph)){

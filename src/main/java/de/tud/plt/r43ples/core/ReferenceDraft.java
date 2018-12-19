@@ -5,7 +5,8 @@ import de.tud.plt.r43ples.existentobjects.Revision;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Collection of information for creating a new reference.
@@ -16,7 +17,7 @@ import org.apache.log4j.Logger;
 public class ReferenceDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(ReferenceDraft.class);
+    private Logger logger = LogManager.getLogger(ReferenceDraft.class);
 
     /** The referenced revision. **/
     private Revision referencedRevision;

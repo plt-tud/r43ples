@@ -1,6 +1,6 @@
 package de.tud.plt.r43ples.core;
 
-import com.hp.hpl.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Model;
 import de.tud.plt.r43ples.R43plesTest;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.*;

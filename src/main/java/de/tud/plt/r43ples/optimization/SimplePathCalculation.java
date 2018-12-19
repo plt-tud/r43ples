@@ -1,15 +1,16 @@
 package de.tud.plt.r43ples.optimization;
 
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFactory;
-import com.hp.hpl.jena.query.ResultSetRewindable;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFactory;
+import org.apache.jena.query.ResultSetRewindable;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +24,7 @@ import java.util.HashMap;
 public class SimplePathCalculation implements PathCalculationInterface {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(SimplePathCalculation.class);
+    private Logger logger = LogManager.getLogger(SimplePathCalculation.class);
 
     // Dependencies
     /** The triple store interface to use. **/
@@ -264,7 +265,7 @@ public class SimplePathCalculation implements PathCalculationInterface {
                         "		<%s> rmo:wasDerivedFrom* ?revision, ?nextRevision." +
                         "		?revision rmo:wasDerivedFrom* <%s>. " +
                         "       ?nextRevision rmo:wasDerivedFrom ?revision. " +
-                        "       ?nextRevision rmo:hasChangeSet ?changeSet. " +
+                        "       ?changeSet rmo:succeedingRevision ?nextRevision. " +
                         "       ?changeSet rmo:priorRevision ?revision; " +
                         "                  rmo:addSet    ?addSet ; " +
                         "                  rmo:deleteSet ?deleteSet . " +

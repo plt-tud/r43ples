@@ -1,8 +1,8 @@
 package de.tud.plt.r43ples.core;
 
-import com.hp.hpl.jena.query.*;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.util.FileUtils;
+import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.util.FileUtils;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.Branch;
 import de.tud.plt.r43ples.existentobjects.ChangeSet;
@@ -15,7 +15,8 @@ import de.tud.plt.r43ples.mergingUI.MergeQueryTypeEnum;
 import de.tud.plt.r43ples.mergingUI.SDDTripleStateEnum;
 import de.tud.plt.r43ples.optimization.ChangeSetPath;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Collection of information for creating a new three way merge commit.
@@ -25,7 +26,7 @@ import org.apache.log4j.Logger;
 public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(ThreeWayMergeCommitDraft.class);
+    private Logger logger = LogManager.getLogger(ThreeWayMergeCommitDraft.class);
 
     /** The used source branch. **/
     private Branch usedSourceBranch;
@@ -158,21 +159,23 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                 "<%s> a rmo:ThreeWayMergeCommit, rmo:MergeCommit, rmo:BasicMergeCommit, rmo:Commit; "
                         + "	rmo:wasAssociatedWith <%s> ;"
                         + "	rmo:commitMessage \"%s\" ;"
-                        + "	rmo:atTime \"%s\"^^xsd:dateTime ; %n"
+                        + "	rmo:timeStamp \"%s\"^^xsd:dateTime ; %n"
                         + " rmo:generated <%s> ;"
+                        + " rmo:hasChangeSet <%s> ;"
+                        + " rmo:hasChangeSet <%s> ;"
                         + " rmo:usedSourceRevision <%s> ;"
                         + " rmo:usedSourceBranch <%s> ;"
                         + " rmo:usedTargetRevision <%s> ;"
                         + " rmo:usedTargetBranch <%s> .",
                 commitURI, personUri, getMessage(), getTimeStamp(),
-                generatedRevision.getRevisionURI(), usedSourceRevision.getRevisionURI(), usedSourceBranch.getReferenceURI(),
+                generatedRevision.getRevisionURI(), generatedRevision.getChangeSets().get(0).getChangeSetURI(), generatedRevision.getChangeSets().get(1).getChangeSetURI(), usedSourceRevision.getRevisionURI(), usedSourceBranch.getReferenceURI(),
                 usedTargetRevision.getRevisionURI(), usedTargetBranch.getReferenceURI()));
 
         // Create revision meta data for additional change set
         queryContent.append(String.format(
-                "<%s> rmo:hasChangeSet <%s> ; %n"
-                        + "	rmo:wasDerivedFrom <%s> .",
-                generatedRevision.getRevisionURI(), generatedRevision.getChangeSets().get(1).getChangeSetURI(), usedSourceRevision.getRevisionURI()));
+                  "<%1$s> rmo:succeedingRevision <%2$s> . %n"
+                + "<%2$s> rmo:wasDerivedFrom <%3$s> .",
+                generatedRevision.getChangeSets().get(1).getChangeSetURI(), generatedRevision.getRevisionURI(), usedSourceRevision.getRevisionURI()));
 
         String query = Config.prefixes
                 + String.format("INSERT DATA { GRAPH <%s> { %s } }", getRevisionGraph().getRevisionGraphUri(),
@@ -372,7 +375,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
         Revision generatedRevision = revisionDraft.createInTripleStore();
 
         ChangeSetDraft changeSetDraftA = new ChangeSetDraft(getUriCalculator(), getRevisionGraph(),
-                usedSourceBranch.getLeafRevision(), generatedRevision.getRevisionIdentifier(), usedSourceBranch.getReferenceURI(),
+                usedSourceBranch.getLeafRevision(), generatedRevision.getRevisionIdentifier(), generatedRevision.getRevisionURI(), usedSourceBranch.getReferenceURI(),
                 addedTriplesA, deletedTriplesA, false, false);
         ChangeSet changeSetA = changeSetDraftA.createInTripleStore();
 

@@ -9,7 +9,8 @@ import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.optimization.PathCalculationFabric;
 import de.tud.plt.r43ples.optimization.PathCalculationInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,7 +23,7 @@ import java.util.regex.Pattern;
 public class MergeCommitDraft extends CommitDraft {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(MergeCommitDraft.class);
+    private Logger logger = LogManager.getLogger(MergeCommitDraft.class);
 
     /** The pattern modifier. **/
     private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;

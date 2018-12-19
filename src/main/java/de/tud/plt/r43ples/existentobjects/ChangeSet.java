@@ -1,13 +1,15 @@
 package de.tud.plt.r43ples.existentobjects;
 
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Provides information of an already existent change set.
@@ -17,14 +19,12 @@ import org.apache.log4j.Logger;
 public class ChangeSet {
 
     /** The logger. **/
-    private Logger logger = Logger.getLogger(ChangeSet.class);
+    private Logger logger = LogManager.getLogger(ChangeSet.class);
 
     /** The prior revision. **/
     private Revision priorRevision;
-    /**
-     * The succesor revision.
-     **/
-    private Revision succesorRevision;
+    /** The succeeding revision. **/
+    private Revision succeedingRevision;
 
     /** The ADD set URI. */
     private String addSetURI;
@@ -93,33 +93,48 @@ public class ChangeSet {
      * @return the prior revision
      */
     public Revision getPriorRevision() {
-        //TODO calculate if empty
-        return priorRevision;
-    }
-
-    /**
-     * Get the successor revision.
-     *
-     * @return the successor revision
-     */
-    public Revision getSuccessorRevision() {
-        if (this.succesorRevision == null) {
+        if (this.priorRevision == null) {
             String query = Config.prefixes + String.format(
-                    "SELECT ?successor %n" +
-                            "WHERE { GRAPH <%s> {?successor rmo:hasChangeSet <%s> .} }"
+                    "SELECT ?priorRevision %n" +
+                            "WHERE { GRAPH <%s> {<%s> rmo:priorRevision ?priorRevision .} }"
                     , this.revisionGraph.getRevisionGraphUri(), this.changeSetURI);
             ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
 
             if (resultSet.hasNext()) {
                 QuerySolution qs = resultSet.next();
                 try {
-                    this.succesorRevision = new Revision(this.revisionGraph, qs.getResource("?successor").toString(), false);
+                    this.priorRevision = new Revision(this.revisionGraph, qs.getResource("?priorRevision").toString(), false);
                 } catch (InternalErrorException e) {
                     e.printStackTrace();
                 }
             }
         }
-        return this.succesorRevision;
+        return this.succeedingRevision;
+    }
+
+    /**
+     * Get the succeeding revision.
+     *
+     * @return the succeeding revision
+     */
+    public Revision getSucceedingRevision() {
+        if (this.succeedingRevision == null) {
+            String query = Config.prefixes + String.format(
+                    "SELECT ?succeedingRevision %n" +
+                            "WHERE { GRAPH <%s> {<%s> rmo:succeedingRevision ?succeedingRevision .} }"
+                    , this.revisionGraph.getRevisionGraphUri(), this.changeSetURI);
+            ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
+
+            if (resultSet.hasNext()) {
+                QuerySolution qs = resultSet.next();
+                try {
+                    this.succeedingRevision = new Revision(this.revisionGraph, qs.getResource("?succeedingRevision").toString(), false);
+                } catch (InternalErrorException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return this.succeedingRevision;
     }
 
     /**
@@ -198,7 +213,7 @@ public class ChangeSet {
     public String getAddSetContent() {
         if (addSetContent == null) {
             // Calculate the ADD set content
-            this.addSetContent = getContentOfNamedGraphAsN3(this.addSetURI);
+            this.addSetContent = Helper.getContentOfNamedGraphAsN3(this.addSetURI);
         }
         return addSetContent;
     }
@@ -211,23 +226,9 @@ public class ChangeSet {
     public String getDeleteSetContent() {
         if (deleteSetContent == null) {
             // Calculate the ADD set content
-            this.deleteSetContent = getContentOfNamedGraphAsN3(this.deleteSetURI);
+            this.deleteSetContent = Helper.getContentOfNamedGraphAsN3(this.deleteSetURI);
         }
         return deleteSetContent;
-    }
-
-    /**
-     * Get the content of a named graph as N-TRIPLES.
-     *
-     * @param namedGraphURI the named graph URI
-     * @return the content of the named graph as N-TRIPLES
-     */
-    private String getContentOfNamedGraphAsN3(String namedGraphURI) {
-        String query = Config.prefixes + String.format(
-                "CONSTRUCT {?s ?p ?o} %n"
-                        + "WHERE { GRAPH <%s> {?s ?p ?o} }", namedGraphURI);
-        String resultAsTurtle = tripleStoreInterface.executeConstructQuery(query, "TURTLE");
-        return JenaModelManagement.convertJenaModelToNTriple(JenaModelManagement.readStringToJenaModel(resultAsTurtle, "TURTLE"));
     }
 
 }

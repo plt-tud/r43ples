@@ -12,7 +12,8 @@ import javax.ws.rs.core.Response;
 
 import de.tud.plt.r43ples.R43plesTest;
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Assert;
 import org.junit.Before;
@@ -29,7 +30,7 @@ import de.tud.plt.r43ples.webservice.Endpoint;
 public class TestUpdate extends R43plesTest {
 	
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(TestUpdate.class);
+	private static Logger logger = LogManager.getLogger(TestUpdate.class);
 	
 	private DataSetGenerationResult dsm;
 	private static DataSetGenerationResult ds1;

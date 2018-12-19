@@ -9,10 +9,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
@@ -24,7 +25,7 @@ public class StructuredTree {
 	private List<Commit> commits;
 
 	private static Map<Commit, String> commit_branch_tmp;
-	private static Logger logger = Logger.getLogger(StructuredTree.class);
+	private static Logger logger = LogManager.getLogger(StructuredTree.class);
 
 	private StructuredTree() {
 		commits = new LinkedList<Commit>();
@@ -122,7 +123,7 @@ public class StructuredTree {
 						+ "rmo:commitMessage ?title;%n"
 						+ "rmo:used ?reva;%n"
 						+ "rmo:generated ?revb;%n"
-						+ "rmo:atTime ?time;%n"
+						+ "rmo:timeStamp ?time;%n"
 						+ "rmo:wasAssociatedWith ?author.%n"
 						+ "OPTIONAL { ?author rdfs:label ?authname. }%n"
 						+ "?reva rmo:revisionIdentifier ?prev.%n"

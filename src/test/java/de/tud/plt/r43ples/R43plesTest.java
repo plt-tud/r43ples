@@ -1,14 +1,15 @@
 package de.tud.plt.r43ples;
 
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.RDFNode;
-import com.hp.hpl.jena.rdf.model.StmtIterator;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.StmtIterator;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.webservice.Endpoint;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Assert;
 
 import java.util.Iterator;
@@ -24,7 +25,7 @@ import java.util.LinkedList;
 public class R43plesTest {
 
 	/** The logger. **/
-	protected static Logger logger = Logger.getLogger(R43plesTest.class);
+	protected static Logger logger = LogManager.getLogger(R43plesTest.class);
 	/** The endpoint. **/
 	protected final Endpoint ep = new Endpoint();
 
@@ -86,7 +87,7 @@ public class R43plesTest {
      */
     public Model removeTimeStampFromModel(Model model) {
         // Remove timestamp for test
-        Property provAtTime = model.getProperty("http://eatld.et.tu-dresden.de/rmo#atTime");
+        Property provAtTime = model.getProperty("http://eatld.et.tu-dresden.de/rmo#timeStamp");
         StmtIterator stmtIterator = model.listStatements(null, provAtTime, (RDFNode) null);
         model.remove(stmtIterator);
 
