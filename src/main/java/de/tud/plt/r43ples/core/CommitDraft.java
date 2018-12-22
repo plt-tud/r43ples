@@ -44,7 +44,7 @@ public class CommitDraft {
 	private String message;
 	/** The time stamp of the commit. **/
 	private Date timeStamp;
-	/** RDF model string of revisoin information used to check if it is up to date (optional) */
+	/** RDF model string of revision information used to check if it is up to date (optional) */
 	private String revisionInformation;
 	/** The current URI calculator instance. */
 	private URICalculator uriCalculator;

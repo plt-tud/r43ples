@@ -165,6 +165,15 @@ public interface R43plesCoreInterface {
      */
     PickCommit createPickCommit(R43plesRequest request) throws InternalErrorException;
 
+    /**
+     * Aggregate atomic changes to high level ones.
+     *
+     * @param request the request received by R43ples
+     * @return the aggregated high level changes
+     * @throws InternalErrorException
+     */
+    HighLevelChanges aggregate(R43plesRequest request) throws InternalErrorException;
+
     // TODO Create objects for drop and select
     /**
      * Drop graph query. This query will delete the whole graph and all corresponding revision information.

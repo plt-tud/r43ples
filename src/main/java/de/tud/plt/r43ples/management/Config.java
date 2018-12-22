@@ -27,8 +27,7 @@ public class Config {
 	public static String triplestore_url;
 	public static String triplestore_user;
 	public static String triplestore_password;
-	
-	
+
 	// Service settings
 	/** The service host. **/
 	public static String service_host;
@@ -50,8 +49,11 @@ public class Config {
 	public static String sdd_graph;
 	/** The path to the SDD graph default content. **/
 	public static String sdd_graph_defaultContent;
-	
-	
+	/** The rules graph URI. **/
+	public static String rules_graph;
+	/** The path to the rules graph default content. **/
+	public static String rules_graph_defaultContent;
+
 	public static HashMap<String, String> user_defined_prefixes = new HashMap<String, String>();
 	
 	
@@ -65,7 +67,7 @@ public class Config {
 	* @param configFilePath path to configuration file
 	* @throws ConfigurationException
 	*/
-	public static void readConfig(final String configFilePath) throws ConfigurationException{
+	public static void readConfig(final String configFilePath) {
 		PropertiesConfiguration config;
 		try {
 			config = new PropertiesConfiguration(configFilePath);
@@ -86,6 +88,9 @@ public class Config {
 			
 			sdd_graph = config.getString("sdd.graph");
 			sdd_graph_defaultContent = config.getString("sdd.graph.defaultContent");
+
+			rules_graph = config.getString("rules.graph.defaultContent");
+			rules_graph_defaultContent = config.getString("rules.graph.defaultContent");
 			
 			Iterator<String> it = config.getKeys("prefix");
 			while ( it.hasNext()) {

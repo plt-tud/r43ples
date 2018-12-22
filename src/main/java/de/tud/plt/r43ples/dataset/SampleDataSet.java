@@ -657,5 +657,50 @@ public class SampleDataSet {
 		logger.info("Example graph <" + graphName +"> created.");
 		return result;
 	}
+
+
+	/**
+	 * Create an example graph containing a rename class.
+	 *
+	 * @throws InternalErrorException
+	 */
+	public static DataSetGenerationResult createSampleDataSetHLCAggregation() throws InternalErrorException {
+		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
+
+		DataSetGenerationResult result = new DataSetGenerationResult();
+		String graphName = "http://test.com/r43ples-dataset-hlc-aggregation";
+		result.graphName = graphName;
+		String masterBranch = "master";
+
+		RevisionGraph graph = new RevisionGraph(graphName);
+
+		//delete the old graph
+		graph.purgeRevisionInformation();
+
+		InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, null, null, user, "Create graph");
+		String revision0 = initialCommit.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("master-0", revision0);
+
+		// Initial commit
+		String triples = "<http://example.com/house> a <http://www.w3.org/2000/01/rdf-schema#Class>. \n"
+				+ "<http://example.com/house> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://example.com/building>. \n"
+				+ "<http://example.com/building> a <http://www.w3.org/2000/01/rdf-schema#Class>. \n";
+		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, triples, null, user, "Initial commit", "master");
+		String revision1 = commit1.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("master-1", revision1);
+
+		// Commit to master
+		String triplesInsert = "<http://example.com/myhouse> a <http://www.w3.org/2000/01/rdf-schema#Class>. \n"
+				+ "<http://example.com/myhouse> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://example.com/building>. \n"
+				+ "<http://example.com/myhouse> <http://example.com/hasDoor> \"BigDoor\". \n";
+		String triplesDelete = "<http://example.com/house> a <http://www.w3.org/2000/01/rdf-schema#Class>. \n"
+				+ "<http://example.com/house> <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://example.com/building>. \n";
+		UpdateCommit commit2 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user, "Rename class", masterBranch);
+		String revision2 = commit2.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("master-2", revision2);
+
+		logger.info("Example graph <" + graphName +"> created.");
+		return result;
+	}
 	
 }
