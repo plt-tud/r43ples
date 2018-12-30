@@ -34,10 +34,15 @@ public abstract class TripleStoreInterface {
 			logger.info("Create sdd graph from " + Config.sdd_graph_defaultContent);
 			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
 			
-			Model jena_model = JenaModelManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent);
-			String model = JenaModelManagement.convertJenaModelToNTriple(jena_model);
-			logger.debug("SDD model: " + model);	
-			Helper.executeINSERT(Config.sdd_graph, model);
+			Model jena_model_sdd = JenaModelManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent);
+			String model_sdd = JenaModelManagement.convertJenaModelToNTriple(jena_model_sdd);
+			logger.debug("SDD model: " + model_sdd);
+			Helper.executeINSERT(Config.sdd_graph, model_sdd);
+
+			Model jena_model_rules = JenaModelManagement.readTurtleFileToJenaModel(Config.rules_graph_defaultContent);
+			String model_rules = JenaModelManagement.convertJenaModelToNTriple(jena_model_rules);
+			logger.debug("Rules model: " + model_rules);
+			Helper.executeINSERT(Config.rules_graph, model_rules);
 	 	}		
 	}
 	
@@ -71,12 +76,12 @@ public abstract class TripleStoreInterface {
 				"CONSTRUCT.*WHERE\\s*\\{(?<where>.*)\\}", 
 				patternModifier);
 		String result;
-		if (patternSelectQuery.matcher(sparqlQuery).find())
-			result = executeSelectQuery(sparqlQuery, format);
+		if (patternConstructQuery.matcher(sparqlQuery).find())
+			result = executeConstructQuery(sparqlQuery, format);
 		else if (patternAskQuery.matcher(sparqlQuery).find())
 			result = executeAskQuery(sparqlQuery)?"true":"false";
-		else if (patternConstructQuery.matcher(sparqlQuery).find())
-			result = executeConstructQuery(sparqlQuery, format);
+		else if (patternSelectQuery.matcher(sparqlQuery).find())
+			result = executeSelectQuery(sparqlQuery, format);
 		else
 			result = executeSelectQuery(sparqlQuery, format);
 		logger.debug("Response: " + result);
