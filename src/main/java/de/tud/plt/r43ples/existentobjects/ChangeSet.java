@@ -109,7 +109,7 @@ public class ChangeSet {
                 }
             }
         }
-        return this.succeedingRevision;
+        return this.priorRevision;
     }
 
     /**
