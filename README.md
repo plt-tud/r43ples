@@ -174,6 +174,10 @@ There are some additional keywords which extends SPARQL and can be used to contr
         USER "Mister X."
         MESSAGE "pick multiple revisions example"
         PICK GRAPH <test> REVISION "56" TO REVISION "62" INTO BRANCH "develop"
+        
+* Aggregate atomic changes to high level ones
+        
+        AGG GRAPH <test> REVISION "1" TO REVISION "2"
 
 
 #### Query Rewriting option
@@ -253,5 +257,6 @@ Following libraries are used in R43ples:
 * [jQuery](http://jquery.com/) as JavaScript framework
 * [Bootstrap](http://getbootstrap.com/) as HTML, CSS and JS framework
 * [Mustache](https://mustache.github.io/) as template engine
+* [SpinRDF](https://github.com/spinrdf/spinrdf) as SPIN engine
 
  

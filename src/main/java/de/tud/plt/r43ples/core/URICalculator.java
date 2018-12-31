@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * Provides access to the basic revision graph which stores all references to sub revision graphs.
@@ -485,6 +486,24 @@ public class URICalculator {
         } else {
             throw new InternalErrorException("The calculated temporary URI is already in use.");
         }
+    }
+
+    /**
+     * Get a new random URI which is unique within a specific revision graph.
+     *
+     * @param revisionGraph the revision graph
+     * @return the random URI
+     */
+    protected String getRandomURI(RevisionGraph revisionGraph) {
+        boolean searchURI = true;
+        String tempURI = null;
+        while (searchURI) {
+            String uuid = UUID.randomUUID().toString();
+            tempURI = revisionGraph.getGraphName() + "-" + uuid;
+            String queryAskSubject = String.format("ASK FROM <%s> {<%s> ?p ?o} %n", revisionGraph.getRevisionGraphUri(), tempURI);
+            searchURI = tripleStoreInterface.executeAskQuery(queryAskSubject);
+        }
+        return tempURI;
     }
 
 }

@@ -89,7 +89,7 @@ public class Config {
 			sdd_graph = config.getString("sdd.graph");
 			sdd_graph_defaultContent = config.getString("sdd.graph.defaultContent");
 
-			rules_graph = config.getString("rules.graph.defaultContent");
+			rules_graph = config.getString("rules.graph");
 			rules_graph_defaultContent = config.getString("rules.graph.defaultContent");
 			
 			Iterator<String> it = config.getKeys("prefix");
@@ -130,6 +130,10 @@ public class Config {
 			+ "PREFIX rpo: <http://eatld.et.tu-dresden.de/rpo#> \n"
 			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
 			+ "PREFIX rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n"
-			+ "PREFIX owl:	<http://www.w3.org/2002/07/owl#> \n";
+			+ "PREFIX owl:	<http://www.w3.org/2002/07/owl#> \n"
+			+ "PREFIX aero: <http://eatld.et.tu-dresden.de/aero#> \n"
+			+ "PREFIX rules: <http://eatld.et.tu-dresden.de/rules#> \n"
+			+ "PREFIX sp: <http://spinrdf.org/sp#> \n";
+			//+ "PREFIX spin: <http://spinrdf.org/spin#> \n"; // Currently not used within queries
 
 }
