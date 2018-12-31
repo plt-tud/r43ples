@@ -382,6 +382,7 @@ public class R43plesCoreTest extends R43plesTest {
         // List all
         LinkedList<String> allGraphs = new LinkedList<>();
         allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-sdd");
+        allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-rules");
         allGraphs.add("http://example.com/test-revisiongraph");
         allGraphs.add("http://example.com/test");
         allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-revisions");
@@ -478,6 +479,7 @@ public class R43plesCoreTest extends R43plesTest {
         // List all
         LinkedList<String> allGraphs = new LinkedList<>();
         allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-sdd");
+        allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-rules");
         allGraphs.add("http://example.com/test-revisiongraph");
         allGraphs.add("http://example.com/test");
         allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-revisions");
