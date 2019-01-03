@@ -161,14 +161,13 @@ public class Aggregation {
         String semanticChangeURI = uriCalculator.getRandomURI(revisionGraph);
         String additionsURI = uriCalculator.getRandomURI(revisionGraph);
         String deletionsURI = uriCalculator.getRandomURI(revisionGraph);
-        String variablesURI = uriCalculator.getRandomURI(revisionGraph);
 
         StringBuilder sb = new StringBuilder();
         sb.append(String.format(
                 "<%s> a rmo:SemanticChange ; %n"
                         + "	rmo:additions <%s> ; %n"
                         + "	rmo:deletions <%s> ; %n"
-                        + "	rmo:usedRule <%s> . %n",
+                        + "	aero:usedRule <%s> . %n",
                 semanticChangeURI, additionsURI, deletionsURI, aggRuleURI));
 
         // Variable meta data
@@ -192,7 +191,7 @@ public class Aggregation {
                         + "	sp:varName \"%s\" ; %n"
                         + "	aero:value %s ; %n"
                         + "	aero:spinResource <%s> . %n",
-                variablesURI, sparqlVariableURI, sparqlVariableURI, varName, value, variableMap.get(varName)));
+                semanticChangeURI, sparqlVariableURI, sparqlVariableURI, varName, value, variableMap.get(varName)));
 
         }
 
