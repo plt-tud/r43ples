@@ -24,6 +24,43 @@ rules:my-ruleset a aero:RuleSet;
 # Rename class
 ###########################################################
 
+#PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+#PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+#SELECT ?a ?b ?resource
+#WHERE {
+#	{
+#		SELECT ?a ?b ?resource
+#		WHERE {
+#			GRAPH <http://NAMEDGRAPH#ADDSET-1-2> {   # Example: <http://NAMEDGRAPH#ADDSET-1-2> will be replaced with <http://test.com/r43ples-dataset-hlc-aggregation-addSet-1-2>
+#				?b a rdfs:Class.
+#				?b rdfs:subClassOf ?resource.
+#			}
+#		}
+#	}
+#	{
+#		SELECT ?a ?b ?resource
+#		WHERE {
+#			GRAPH <http://NAMEDGRAPH#DELETESET-1-2> {   # Example: <http://NAMEDGRAPH#DELETESET-1-2> will be replaced with <http://test.com/r43ples-dataset-hlc-aggregation-deleteSet-1-2>
+#				?a a rdfs:Class.
+#				?a rdfs:subClassOf ?resource.
+#			}
+#		}
+#	}
+#	MINUS
+#	{
+#		SELECT ?a ?b
+#		WHERE {
+#			GRAPH <http://NAMEDGRAPH#rev1> {  # Example: <http://NAMEDGRAPH#rev1> will replaced with <http://test.com/r43ples-dataset-hlc-aggregation> REVISION "1"
+#				?b ?s1 ?o1.
+#			}
+#			GRAPH <http://NAMEDGRAPH#rev2> {  # Example: <http://NAMEDGRAPH#rev2> will replaced with <http://test.com/r43ples-dataset-hlc-aggregation> REVISION "2"
+#				?a ?s2 ?o2.
+#			}
+#		}
+#	}
+#}
+
+
 <http://eatld.et.tu-dresden.de/rules#instances/rename-class/definition> a aero:HLCAggRule, aero:HeuristicRule;
     rdfs:label "Rename class"@en ;
     rdfs:comment "Detects a class renaming."@en ;
