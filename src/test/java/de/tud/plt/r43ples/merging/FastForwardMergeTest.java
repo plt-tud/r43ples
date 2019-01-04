@@ -5,15 +5,12 @@ import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.Config;
-import org.apache.commons.configuration.ConfigurationException;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -30,6 +27,8 @@ public class FastForwardMergeTest extends R43plesTest {
 	private static String graphName;
 	/** The user. **/
 	private static String user = "jUnitUser";
+	/** The triple store interface. **/
+	private static TripleStoreInterface tripleStoreInterface;
 
 	
 	/**
@@ -41,6 +40,8 @@ public class FastForwardMergeTest extends R43plesTest {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
+		tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+		tripleStoreInterface.dropAllGraphsAndReInit();
 	}
 	
 	
@@ -111,6 +112,5 @@ public class FastForwardMergeTest extends R43plesTest {
 							+ "MESSAGE \"%s\" %n"
 							+ "MERGE GRAPH <%s> BRANCH \"%s\" INTO BRANCH \"%s\"", user, commitMessage, graphName, branchNameA, branchNameB);
 	}
-
 
 }
