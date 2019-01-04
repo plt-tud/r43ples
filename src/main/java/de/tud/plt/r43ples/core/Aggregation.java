@@ -256,7 +256,7 @@ public class Aggregation {
             String statementURI = uriCalculator.getRandomURI(revisionGraph);
             sb.append(String.format(
                 "<%s> rmo:statements <%s> . %n" +
-                "<%s> a rmo:Statement ; %n"
+                "<%s> a rdf:Statement ; %n"
                         + " rdf:subject <%s> ; %n"
                         + " rdf:predicate <%s> ; %n"
                         + " rdf:object <%s> . %n",
@@ -273,7 +273,7 @@ public class Aggregation {
             String statementURI = uriCalculator.getRandomURI(revisionGraph);
             sb.append(String.format(
                     "<%s> rmo:statements <%s> . %n" +
-                            "<%s> a rmo:Statement ; %n"
+                            "<%s> a rdf:Statement ; %n"
                             + " rdf:subject <%s> ; %n"
                             + " rdf:predicate <%s> ; %n"
                             + " rdf:object <%s> . %n",

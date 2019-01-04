@@ -31,6 +31,26 @@
 #################################################################
 
 
+###  http://eatld.et.tu-dresden.de/rmo#additions
+
+rmo:additions rdf:type owl:ObjectProperty ;
+              
+              rdfs:domain rmo:SemanticChange ;
+              
+              rdfs:range rmo:Set .
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#deletions
+
+rmo:deletions rdf:type owl:ObjectProperty ;
+              
+              rdfs:domain rmo:SemanticChange ;
+              
+              rdfs:range rmo:Set .
+
+
+
 ###  http://eatld.et.tu-dresden.de/rmo#generated
 
 rmo:generated rdf:type owl:ObjectProperty ;
@@ -42,7 +62,7 @@ rmo:generated rdf:type owl:ObjectProperty ;
               rdfs:subPropertyOf prov:generated .
 
 
-							
+
 ###  http://eatld.et.tu-dresden.de/rmo#hasChangeSet
 
 rmo:hasChangeSet rdf:type owl:ObjectProperty ;
@@ -52,18 +72,16 @@ rmo:hasChangeSet rdf:type owl:ObjectProperty ;
                  rdfs:domain rmo:Commit ;
                  
                  owl:inverseOf prov:hadActivity .
-								 
-							
 
-###  http://eatld.et.tu-dresden.de/rmo#succeedingRevision
 
-rmo:succeedingRevision rdf:type owl:ObjectProperty ;
-                 
-                 rdfs:range rmo:Revision ;
-                 
-                 rdfs:domain rmo:ChangeSet ;
-                 
-                 owl:inverseOf prov:qualifiedDerivation .
+
+###  http://eatld.et.tu-dresden.de/rmo#inverts
+
+rmo:inverts rdf:type owl:ObjectProperty ;
+            
+            rdfs:domain rmo:SemanticChange ;
+            
+            rdfs:range rmo:SemanticChange .
 
 
 
@@ -92,6 +110,38 @@ rmo:references rdf:type owl:ObjectProperty ;
                rdfs:domain rmo:Reference ;
                
                rdfs:range rmo:Revision .
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#semanticChanges
+
+rmo:semanticChanges rdf:type owl:ObjectProperty ;
+                    
+                    rdfs:domain rmo:ChangeSet ;
+                    
+                    rdfs:range rmo:SemanticChange .
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#statements
+
+rmo:statements rdf:type owl:ObjectProperty ;
+               
+               rdfs:domain rmo:Set ;
+               
+               rdfs:range rdf:Statement .
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#succeedingRevision
+
+rmo:succeedingRevision rdf:type owl:ObjectProperty ;
+                       
+                       rdfs:domain rmo:ChangeSet ;
+                       
+                       rdfs:range rmo:Revision ;
+                       
+                       owl:inverseOf prov:qualifiedDerivation .
 
 
 
@@ -192,7 +242,6 @@ rmo:wasQuotedFrom rdf:type owl:ObjectProperty ;
                   rdfs:domain rmo:Revision ;
                   
                   rdfs:subPropertyOf prov:wasQuotedFrom .
-
 
 
 
@@ -482,6 +531,22 @@ rmo:RevisionCommit rdf:type owl:Class ;
                               "revision commit"@en ;
                    
                    rdfs:subClassOf rmo:Commit .
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#SemanticChange
+
+rmo:SemanticChange rdf:type owl:Class ;
+                   
+                   rdfs:subClassOf owl:Thing .
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#Set
+
+rmo:Set rdf:type owl:Class ;
+        
+        rdfs:subClassOf owl:Thing .
 
 
 
