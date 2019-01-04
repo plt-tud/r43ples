@@ -25,7 +25,7 @@ public class SelectConstructAskQuery {
     private String format;
 
     /**
-     * Initializes query of a standard R43plesL query (SELECT, CONSTRUCT, ASK). Classic way.
+     * Initializes query of a standard R43ples query (SELECT, CONSTRUCT, ASK). Classic way.
      *
      * @param request the request received by R43ples
      * @return the query response

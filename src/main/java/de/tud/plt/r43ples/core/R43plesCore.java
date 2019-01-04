@@ -237,6 +237,19 @@ public class R43plesCore implements R43plesCoreInterface {
     }
 
     /**
+     * Aggregate atomic changes to high level ones.
+     *
+     * @param request the request received by R43ples
+     * @return the aggregated high level changes
+     * @throws InternalErrorException
+     */
+    @Override
+    public HighLevelChanges aggregate(R43plesRequest request) throws InternalErrorException {
+        Aggregation aggregation = new Aggregation(request);
+        return aggregation.aggregate();
+    }
+
+    /**
      * Drop graph query. This query will delete the whole graph and all corresponding revision information.
      *
      * @param query the query

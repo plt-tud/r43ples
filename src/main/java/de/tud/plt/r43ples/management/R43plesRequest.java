@@ -44,6 +44,10 @@ public class R43plesRequest {
 	private final Pattern patternPickQuery =  Pattern.compile(
 			"PICK\\s*GRAPH\\s*<([^>]*?)>\\s*REVISION\\s*\"([^\"]*?)\"\\s*(TO\\s*REVISION\\s*\"([^\"]*?)\"\\s*)?INTO\\s*BRANCH\\s*\"([^\"]*?)\"",
 			patternModifier);
+	/** Pattern for AGG queries. **/
+	private final Pattern patternAggQuery =  Pattern.compile(
+			"AGG\\s*GRAPH\\s*<([^>]*?)>\\s*REVISION\\s*\"([^\"]*?)\"\\s*TO\\s*REVISION\\s*\"([^\"]*?)\"",
+			patternModifier);
 	
 	/** The original query received by R43ples. **/
 	public final String query_r43ples;
@@ -152,6 +156,15 @@ public class R43plesRequest {
 	 */
 	public boolean isPickQuery() {
 		return patternPickQuery.matcher(query_sparql).find();
+	}
+
+	/**
+	 * Test if the SPARQL query is a AGG query.
+	 *
+	 * @return true if the query is a AGG query.
+	 */
+	public boolean isAggQuery() {
+		return patternAggQuery.matcher(query_sparql).find();
 	}
 
 }

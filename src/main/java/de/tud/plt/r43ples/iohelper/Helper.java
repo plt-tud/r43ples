@@ -1,10 +1,5 @@
 package de.tud.plt.r43ples.iohelper;
 
-import org.apache.jena.query.Dataset;
-import org.apache.jena.query.DatasetFactory;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.rdf.model.Model;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.existentobjects.ChangeSet;
 import de.tud.plt.r43ples.existentobjects.Revision;
@@ -14,15 +9,25 @@ import de.tud.plt.r43ples.optimization.ChangeSetPath;
 import de.tud.plt.r43ples.optimization.PathCalculationFabric;
 import de.tud.plt.r43ples.optimization.PathCalculationInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.util.FileUtils;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.topbraid.spin.arq.ARQFactory;
+import org.topbraid.spin.model.SPINFactory;
+import org.topbraid.spin.vocabulary.SP;
 
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 /**
@@ -265,6 +270,193 @@ public class Helper {
 			TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
 			return personUri;
 		}
+	}
+
+
+	/**
+	 * Get a SPARQL query in human readable syntax from SPIN.
+	 *
+	 * @param spinQueryN3 the SPIN content as N3
+	 * @param resourceURI the resource URI of the SELECT query to search for
+	 * @return the SPARQL query in human readable syntax
+	 */
+	public static String getSparqlQueryFromSpin(String spinQueryN3, String resourceURI) {
+
+		Model model = JenaModelManagement.readNTripleStringToJenaModel(spinQueryN3);
+
+		StmtIterator it = model.listStatements(null, RDF.type, SP.Select);
+		while(it.hasNext()) {
+			Resource rsrc = it.next().getSubject();
+			if (rsrc.toString().equals(resourceURI)) {
+				org.topbraid.spin.model.Query newQuery = SPINFactory.asQuery(rsrc);
+				return ARQFactory.get().createQuery(newQuery).toString();
+			}
+		}
+
+		return null;
+
+	}
+
+	/**
+	 * Get a map of SPARQL variables and there URIs in SPIN.
+	 *
+	 * @param spinQueryN3 the SPIN content as N3
+	 * @param resourceURI the resource URI of the SELECT query to search for
+	 * @return the map
+	 */
+	public static HashMap<String,String> getVariableMapFromSpin(String spinQueryN3, String resourceURI) {
+
+		HashMap<String,String> resultMap = new HashMap<>();
+
+		Model model = JenaModelManagement.readNTripleStringToJenaModel(spinQueryN3);
+
+		// Create SELECT query to query further resources from current URI
+		String selectQuery = String.format(
+				  "SELECT ?variables %n"
+				+ "WHERE { %n"
+				+ "	 <%s> <http://spinrdf.org/sp#resultVariables> ?variables . %n"
+				+ "} %n", resourceURI);
+
+		Query qry = QueryFactory.create(selectQuery);
+		QueryExecution qe = QueryExecutionFactory.create(qry, model);
+		ResultSet resultSet = qe.execSelect();
+		while (resultSet.hasNext()) {
+			QuerySolution qs = resultSet.next();
+			Resource resource;
+			try {
+				resource = qs.getResource("?variables");
+			} catch (Exception e) {
+				resource = null;
+			}
+
+			if (resource != null) {
+				String startURI = resource.toString();
+				resultMap = calculateVariableMapFromSpin(model, startURI);
+			}
+		}
+
+		return resultMap;
+
+	}
+
+	/**
+	 * Get a map of SPARQL variables and there URIs in SPIN.
+	 *
+	 * @param model the jena model
+	 * @param startURI the resource URI of the SELECT query to search for
+	 * @return the map
+	 */
+	private static HashMap<String,String> calculateVariableMapFromSpin(Model model, String startURI) {
+
+		HashMap<String, String> resultMap = new HashMap<>();
+
+		// Get first of given resource
+		String selectQuery = String.format(
+				"SELECT ?first ?rest ?varName %n"
+						+ "WHERE { %n"
+						+ "	 <%s> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> ?first . %n"
+						+ "	 ?first <http://spinrdf.org/sp#varName> ?varName . %n"
+						+ "	 <%s> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> ?rest . %n"
+						+ "} %n", startURI, startURI);
+
+		Query qry = QueryFactory.create(selectQuery);
+		QueryExecution qe = QueryExecutionFactory.create(qry, model);
+		ResultSet resultSet = qe.execSelect();
+		while (resultSet.hasNext()) {
+			QuerySolution qs = resultSet.next();
+			Resource resourceFirst = qs.getResource("?first");
+			Literal literalVarName = qs.getLiteral("?varName");
+			Resource resourceRest = qs.getResource("?rest");
+
+			if ((resourceFirst != null) && (literalVarName != null)) {
+				resultMap.put(literalVarName.toString(), resourceFirst.toString());
+			}
+			// Get rest
+			if (resourceRest != null) {
+				if (!resourceRest.toString().equals("http://www.w3.org/1999/02/22-rdf-syntax-ns#nil")) {
+					resultMap.putAll(calculateVariableMapFromSpin(model, resourceRest.toString()));
+				}
+			}
+		}
+
+		return resultMap;
+	}
+
+	/**
+	 * Get all related elements to a start URI.
+	 *
+	 * @param graph the graph to search in
+	 * @param startURI the start URI
+	 * @return the related elements
+	 */
+	public static String getAllRelatedElementsToURI(String graph, String startURI) {
+
+		LinkedList<String> elements = calculateListOfURIsRelatedToStartURI(graph, startURI);
+
+		String constructQueryTemplate =
+				"CONSTRUCT {?s ?p ?o} %n"
+						+ "WHERE { GRAPH <%s> { %n"
+						+ " ?s ?p ?o . %n"
+						+ "}"
+						+ "FILTER (?s = <%s>) "
+						+ "} %n";
+
+		StringBuilder sb = new StringBuilder();
+
+		// Iterate through the detected URIs and make construct queries
+		for (String currentURI : elements) {
+			String constructQuery = String.format(constructQueryTemplate, graph, currentURI);
+			sb.append(TripleStoreInterfaceSingleton.get().executeConstructQuery(constructQuery, FileUtils.langNTriple));
+		}
+
+		return sb.toString();
+
+	}
+
+	/**
+	 * Calculates a list of URIs related to a given start URI.
+	 *
+	 * @param graph the graph to search in
+	 * @param startURI the start URI
+	 * @return the list of related URIs
+	 */
+	private static LinkedList<String> calculateListOfURIsRelatedToStartURI(String graph, String startURI) {
+
+		LinkedList<String> elements = new LinkedList<>();
+
+		String selectQueryTemplate =
+				"SELECT ?p ?o %n"
+						+ "WHERE { GRAPH <%s> { %n"
+						+ "	<%s> ?p ?o . %n"
+						+ "} } %n";
+
+		// Add the current URI to the list of already processed URIs
+		elements.add(startURI);
+
+		// Create SELECT query to query further resources from current URI
+		String selectQuery = String.format(selectQueryTemplate, graph, startURI);
+
+		// Iterate over results
+		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(selectQuery);
+		while (resultSet.hasNext()) {
+			QuerySolution qs = resultSet.next();
+			Resource resource;
+			try {
+				resource = qs.getResource("?o");
+			} catch (Exception e) {
+				resource = null;
+			}
+
+			if (resource != null) {
+				String resourceString = resource.toString();
+				if (!elements.contains(resourceString)) {
+					elements.addAll(calculateListOfURIsRelatedToStartURI(graph, resourceString));
+				}
+			}
+		}
+
+		return elements;
+
 	}
 
 }

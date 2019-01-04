@@ -27,8 +27,7 @@ public class Config {
 	public static String triplestore_url;
 	public static String triplestore_user;
 	public static String triplestore_password;
-	
-	
+
 	// Service settings
 	/** The service host. **/
 	public static String service_host;
@@ -50,8 +49,11 @@ public class Config {
 	public static String sdd_graph;
 	/** The path to the SDD graph default content. **/
 	public static String sdd_graph_defaultContent;
-	
-	
+	/** The rules graph URI. **/
+	public static String rules_graph;
+	/** The path to the rules graph default content. **/
+	public static String rules_graph_defaultContent;
+
 	public static HashMap<String, String> user_defined_prefixes = new HashMap<String, String>();
 	
 	
@@ -65,7 +67,7 @@ public class Config {
 	* @param configFilePath path to configuration file
 	* @throws ConfigurationException
 	*/
-	public static void readConfig(final String configFilePath) throws ConfigurationException{
+	public static void readConfig(final String configFilePath) {
 		PropertiesConfiguration config;
 		try {
 			config = new PropertiesConfiguration(configFilePath);
@@ -86,6 +88,9 @@ public class Config {
 			
 			sdd_graph = config.getString("sdd.graph");
 			sdd_graph_defaultContent = config.getString("sdd.graph.defaultContent");
+
+			rules_graph = config.getString("rules.graph");
+			rules_graph_defaultContent = config.getString("rules.graph.defaultContent");
 			
 			Iterator<String> it = config.getKeys("prefix");
 			while ( it.hasNext()) {
@@ -125,6 +130,10 @@ public class Config {
 			+ "PREFIX rpo: <http://eatld.et.tu-dresden.de/rpo#> \n"
 			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
 			+ "PREFIX rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n"
-			+ "PREFIX owl:	<http://www.w3.org/2002/07/owl#> \n";
+			+ "PREFIX owl:	<http://www.w3.org/2002/07/owl#> \n"
+			+ "PREFIX aero: <http://eatld.et.tu-dresden.de/aero#> \n"
+			+ "PREFIX rules: <http://eatld.et.tu-dresden.de/rules#> \n"
+			+ "PREFIX sp: <http://spinrdf.org/sp#> \n";
+			//+ "PREFIX spin: <http://spinrdf.org/spin#> \n"; // Currently not used within queries
 
 }

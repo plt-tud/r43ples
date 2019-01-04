@@ -379,6 +379,11 @@ public class Endpoint {
 			r43plesCore.createPickCommit(request);
 			result = "Revision(s) successfully picked";
 		}
+		else if (request.isAggQuery()) {
+			logger.info("Aggregation query detected");
+			r43plesCore.aggregate(request);
+			result = "Atomic changes successfully aggregated to high level ones";
+		}
 		else
 			throw new QueryErrorException("No R43ples query detected");
 

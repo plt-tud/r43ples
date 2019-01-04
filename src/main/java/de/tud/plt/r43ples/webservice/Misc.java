@@ -112,6 +112,9 @@ public class Misc {
 		if (graph.equals("rebase") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetRebase());
 		}
+		if (graph.equals("hlc-aggregation") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataSetHLCAggregation().graphName);
+		}
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
 	    htmlMap.put("graphs", graphs);
 	    

@@ -35,6 +35,12 @@
 			<id>repo</id>
 			<url>file://${project.basedir}/repo</url>
 		</repository>
+
+		<repository>
+			<id>org.topbraid</id>
+			<url>http://topquadrant.com/repository/spin</url>
+		</repository>
+
 	</repositories>
 
 
@@ -159,6 +165,14 @@
 			<version>2.27</version>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.topbraid/spin -->
+		<dependency>
+			<groupId>org.topbraid</groupId>
+			<artifactId>spin</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<pluginRepositories>
