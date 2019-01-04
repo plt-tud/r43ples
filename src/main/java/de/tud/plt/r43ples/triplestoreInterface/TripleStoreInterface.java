@@ -29,15 +29,15 @@ public abstract class TripleStoreInterface {
 			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
 	 	}
 		
-		if (!checkGraphExistence(Config.sdd_graph)) {
+		if (!checkGraphExistence(Config.sdg_graph)) {
 			// Insert default content into SDD graph
-			logger.info("Create sdd graph from " + Config.sdd_graph_defaultContent);
-			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.sdd_graph + ">");
+			logger.info("Create sdg graph from " + Config.sdg_graph_defaultContent);
+			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.sdg_graph + ">");
 
-			Model jena_model_sdd = JenaModelManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent);
-			String model_sdd = JenaModelManagement.convertJenaModelToNTriple(jena_model_sdd);
-			logger.debug("SDD model: " + model_sdd);
-			Helper.executeINSERT(Config.sdd_graph, model_sdd);
+			Model jena_model_sdg = JenaModelManagement.readTurtleFileToJenaModel(Config.sdg_graph_defaultContent);
+			String model_sdg = JenaModelManagement.convertJenaModelToNTriple(jena_model_sdg);
+			logger.debug("SDG model: " + model_sdg);
+			Helper.executeINSERT(Config.sdg_graph, model_sdg);
 		}
 
 		if (!checkGraphExistence(Config.rules_graph)){

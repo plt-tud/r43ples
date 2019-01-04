@@ -467,35 +467,27 @@ public class RevisionGraph {
 	}
 	
 	
-	/** Get SDD for this named graph
+	/**
+	 * Get SDG of this named graph.
 	 * 
-	 * @param sdd
-	 * @return specified SDD if not null otherwise the default SDD for the specified graph
-	 * @throws InternalErrorException
+	 * @return specified SDG if not null otherwise the default SDG for the specified graph
+	 * @throws InternalErrorException When revision graph has no default SDG
 	 */
-	public String getSDD(String sdd)
-			throws InternalErrorException {
-		if (sdd != null && !sdd.equals("")) {
-			return sdd;
+	public String getSDG() throws InternalErrorException {
+		// Query the referenced default SDG
+		String querySDG = String.format(Config.prefixes
+				+ "SELECT ?defaultSDG %n"
+				+ "WHERE { GRAPH <%s> {	%n"
+				+ "	<%s> a rmo:Graph ;%n"
+				+ "		mmo:hasDefaultSDG ?defaultSDG . %n"
+				+ "} }", Config.revision_graph, this.graphName);
+
+		ResultSet resultSetSDG = TripleStoreInterfaceSingleton.get().executeSelectQuery(querySDG);
+		if (resultSetSDG.hasNext()) {
+			QuerySolution qs = resultSetSDG.next();
+			return qs.getResource("?defaultSDG").toString();
 		} else {
-			// Default SDD
-			// Query the referenced SDD
-			String querySDD = String.format(
-					  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
-					+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> %n"
-					+ "SELECT ?defaultSDD %n"
-					+ "WHERE { GRAPH <%s> {	%n"
-					+ "	<%s> a rmo:Graph ;%n"
-					+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
-					+ "} }", Config.revision_graph, this.graphName);
-			
-			ResultSet resultSetSDD = TripleStoreInterfaceSingleton.get().executeSelectQuery(querySDD);
-			if (resultSetSDD.hasNext()) {
-				QuerySolution qs = resultSetSDD.next();
-				return qs.getResource("?defaultSDD").toString();
-			} else {
-				throw new InternalErrorException("Error in revision graph! Selected graph <" + this.graphName + "> has no default SDD referenced.");
-			}
+			throw new InternalErrorException("Error in revision graph! Selected graph <" + this.graphName + "> has no default SDG referenced.");
 		}
 	}
 

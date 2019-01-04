@@ -45,7 +45,7 @@ public class Configuration {
 	    htmlMap.put("revisionGraph", Config.revision_graph);
 	    htmlMap.put("triplestore_type", Config.triplestore_type);
 	    htmlMap.put("triplestore_url", Config.triplestore_url);
-	    htmlMap.put("sdd_graph", Config.sdd_graph);
+	    htmlMap.put("sdg_graph", Config.sdg_graph);
 	    htmlMap.put("namespaces", Config.user_defined_prefixes.entrySet());
 	    htmlMap.put("configuration_active", true);
 		return htmlMap;

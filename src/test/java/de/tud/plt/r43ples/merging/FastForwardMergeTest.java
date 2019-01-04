@@ -104,7 +104,6 @@ public class FastForwardMergeTest extends R43plesTest {
 	 * Create Fast Forward-MERGE query.
 	 * 
 	 * @param graphName the graph name
-	 * @param sdd the SDD
 	 * @param user the user
 	 * @param commitMessage the commit message
 	 * @param branchNameA the branch name A

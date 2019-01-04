@@ -1,5 +1,5 @@
-<http://test.com/rp>  a  <http://eatld.et.tu-dresden.de/rpo#RevisionProgress> ;
-        <http://eatld.et.tu-dresden.de/rpo#added>
+<http://test.com/rp>  a  <http://eatld.et.tu-dresden.de/mmo#RevisionProgress> ;
+        <http://eatld.et.tu-dresden.de/mmo#Added>
                 [ <http://www.w3.org/1999/02/22-rdf-syntax-ns#object>
                           "G" ;
                   <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate>
@@ -9,7 +9,7 @@
                   <http://eatld.et.tu-dresden.de/rmo#references>
                           <http://test.com/r43ples-dataset-complex-structure-changeset-1-2>
                 ] ;
-        <http://eatld.et.tu-dresden.de/rpo#original>
+        <http://eatld.et.tu-dresden.de/mmo#Original>
                 [ <http://www.w3.org/1999/02/22-rdf-syntax-ns#object>
                           "E" ;
                   <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate>
@@ -19,7 +19,7 @@
                   <http://eatld.et.tu-dresden.de/rmo#references>
                           <http://test.com/r43ples-dataset-complex-structure-revision-1>
                 ] ;
-        <http://eatld.et.tu-dresden.de/rpo#original>
+        <http://eatld.et.tu-dresden.de/mmo#Original>
                 [ <http://www.w3.org/1999/02/22-rdf-syntax-ns#object>
                           "C" ;
                   <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate>
@@ -29,7 +29,7 @@
                   <http://eatld.et.tu-dresden.de/rmo#references>
                           <http://test.com/r43ples-dataset-complex-structure-revision-1>
                 ] ;
-        <http://eatld.et.tu-dresden.de/rpo#removed>
+        <http://eatld.et.tu-dresden.de/mmo#Deleted>
                 [ <http://www.w3.org/1999/02/22-rdf-syntax-ns#object>
                           "B" ;
                   <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate>
@@ -39,7 +39,7 @@
                   <http://eatld.et.tu-dresden.de/rmo#references>
                           <http://test.com/r43ples-dataset-complex-structure-changeset-2-3>
                 ] ;
-        <http://eatld.et.tu-dresden.de/rpo#removed>
+        <http://eatld.et.tu-dresden.de/mmo#Deleted>
                 [ <http://www.w3.org/1999/02/22-rdf-syntax-ns#object>
                           "D" ;
                   <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate>

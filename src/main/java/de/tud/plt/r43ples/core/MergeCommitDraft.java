@@ -29,7 +29,7 @@ public class MergeCommitDraft extends CommitDraft {
     private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
     /** The merge query pattern. **/
     private final Pattern patternMergeQuery = Pattern.compile(
-            "(?<action>MERGE)\\s*(?<type>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(SDD\\s*<(?<sdd>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameFrom>[^\"]*?)\"\\s*INTO\\s*BRANCH\\s*\"(?<branchNameInto>[^\"]*?)\"(?<with>\\s*WITH\\s*\\{(?<triples>.*)\\})?",
+            "(?<action>MERGE)\\s*(?<type>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*BRANCH\\s*\"(?<branchNameFrom>[^\"]*?)\"\\s*INTO\\s*BRANCH\\s*\"(?<branchNameInto>[^\"]*?)\"(?<with>\\s*WITH\\s*\\{(?<triples>.*)\\})?",
             patternModifier);
 
     /** The triples of the query WITH part. **/
@@ -38,8 +38,6 @@ public class MergeCommitDraft extends CommitDraft {
     private String branchNameFrom;
     /** The branch name (into). **/
     private String branchNameInto;
-    /** The SDD URI to use. **/
-    private String sdd;
     /** The graph name **/
     private String graphName;
     /** The revision graph. **/
@@ -82,14 +80,13 @@ public class MergeCommitDraft extends CommitDraft {
      * @param branchNameInto the branch name (into)
      * @param user the user
      * @param message the message
-     * @param sdd the SDD URI to use
      * @param action the query action (MERGE, REBASE, MERGE FF)
      * @param triples the triples of the query WITH part
      * @param type the query type (FORCE, AUTO, MANUAL)
      * @param with states if the WITH part is available
      * @throws InternalErrorException
      */
-    protected MergeCommitDraft(String graphName, String branchNameFrom, String branchNameInto, String user, String message, String sdd, MergeActions action, String triples, MergeTypes type, boolean with) throws InternalErrorException {
+    protected MergeCommitDraft(String graphName, String branchNameFrom, String branchNameInto, String user, String message, MergeActions action, String triples, MergeTypes type, boolean with) throws InternalErrorException {
         super(null);
 
         this.setUser(user);
@@ -99,7 +96,6 @@ public class MergeCommitDraft extends CommitDraft {
         this.revisionGraph = new RevisionGraph(graphName);
         this.branchNameFrom = branchNameFrom;
         this.branchNameInto = branchNameInto;
-        this.sdd = sdd;
         this.action = action;
         this.triples = triples;
         this.type = type;
@@ -149,7 +145,6 @@ public class MergeCommitDraft extends CommitDraft {
 
             graphName = m.group("graph");
             revisionGraph = new RevisionGraph(graphName);
-            sdd = m.group("sdd");
             branchNameFrom = m.group("branchNameFrom");
             branchNameInto = m.group("branchNameInto");
             with = m.group("with") != null;
@@ -157,7 +152,6 @@ public class MergeCommitDraft extends CommitDraft {
 
             logger.debug("type: " + type);
             logger.debug("graph: " + graphName);
-            logger.debug("sdd: " + sdd);
             logger.debug("branchNameFrom: " + branchNameFrom);
             logger.debug("branchNameInto: " + branchNameInto);
             logger.debug("with: " + with);
@@ -204,10 +198,10 @@ public class MergeCommitDraft extends CommitDraft {
                             + " }} ",
                     revisionGraphURI, revisionUriFrom, revisionUriInto);
             if (!getTripleStoreInterface().executeAskQuery(query)) {
-                ThreeWayMergeCommitDraft threeWayMergeCommit = new ThreeWayMergeCommitDraft(graphName, branchNameFrom, branchNameInto, getUser(), getMessage(), sdd, triples, type, with);
+                ThreeWayMergeCommitDraft threeWayMergeCommit = new ThreeWayMergeCommitDraft(graphName, branchNameFrom, branchNameInto, getUser(), getMessage(), triples, type, with);
                 return threeWayMergeCommit.createCommitInTripleStore();
             } else {
-                FastForwardMergeCommitDraft fastForwardMergeCommitDraft = new FastForwardMergeCommitDraft(graphName, branchNameFrom, branchNameInto, getUser(), getMessage(), sdd, triples, type, with);
+                FastForwardMergeCommitDraft fastForwardMergeCommitDraft = new FastForwardMergeCommitDraft(graphName, branchNameFrom, branchNameInto, getUser(), getMessage(), triples, type, with);
                 return fastForwardMergeCommitDraft.createCommitInTripleStore();
             }
         } else {
@@ -240,15 +234,6 @@ public class MergeCommitDraft extends CommitDraft {
      */
     protected String getBranchNameInto() {
         return branchNameInto;
-    }
-
-    /**
-     * Get the SDD URI to use.
-     *
-     * @return the SDD URI to use
-     */
-    protected String getSdd() {
-        return sdd;
     }
 
     /**
@@ -311,7 +296,7 @@ public class MergeCommitDraft extends CommitDraft {
      * @param targetGraphURI the URI of the target graph
      * */
     protected void fullGraphCopy(String sourceGraphURI, String targetGraphURI) {
-        TripleStoreInterfaceSingleton.get().executeUpdateQuery(
+        getTripleStoreInterface().executeUpdateQuery(
                 "COPY GRAPH <" + sourceGraphURI + "> TO GRAPH <"+ targetGraphURI + ">");
     }
 
