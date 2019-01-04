@@ -24,7 +24,6 @@ import static org.junit.Assert.assertTrue;
  * @author Xinyu Yang
  * @author Stephan Hensel
  */
-@Ignore
 public class FastForwardMergeTest extends R43plesTest {
 
 	/** The graph name. **/
@@ -35,11 +34,10 @@ public class FastForwardMergeTest extends R43plesTest {
 	
 	/**
 	 * Initialize TestClass
-	 * 
-	 * @throws ConfigurationException
+	 *
 	 */
 	@BeforeClass
-	public static void setUpBeforeClass() throws ConfigurationException {
+	public static void setUpBeforeClass() {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
@@ -61,14 +59,12 @@ public class FastForwardMergeTest extends R43plesTest {
 	/**
 	 * Test FastForward Merge.
 	 * 
-	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws SAXException 
+	 * @throws InternalErrorException
 	 */
 	@Test
-	public void testFastForwardMerge() throws InternalErrorException, SAXException, IOException {
+	public void testFastForwardMerge() throws InternalErrorException {
 		// Test branch B1
-		String result_b1 = ep.sparql("text/turtle", createConstructQuery(graphName, "B1")).getEntity().toString();
+		String result_b1 = ep.sparql("text/turtle", createConstructQuery(graphName, "b1")).getEntity().toString();
 		String expected_b1 = ResourceManagement.getContentFromResource("threeway/response-B1.ttl");
 		assertTrue(check_isomorphism(result_b1, "TURTLE", expected_b1, "TURTLE"));
 
@@ -78,7 +74,7 @@ public class FastForwardMergeTest extends R43plesTest {
 		assertTrue(check_isomorphism(result_master, "TURTLE", expected_master, "TURTLE"));
 
 		// Test fast forward
-		ep.sparql("text/turtle", createFastForwardMergeQuery(graphName, user, "Merge B1 into Master", "B1", "master"));
+		ep.sparql("text/turtle", createFastForwardMergeQuery(graphName, user, "Merge b1 into master", "b1", "master"));
 		result_master = ep.sparql("text/turtle", createConstructQuery(graphName, "master")).getEntity().toString();
 		assertTrue(check_isomorphism(result_master, "TURTLE", expected_b1, "TURTLE"));
 	}

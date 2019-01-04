@@ -527,11 +527,6 @@ public class R43plesCoreTest extends R43plesTest {
     public void createThreeWayMergeCommit() {
         Assert.fail();
         //TODO 3-Way-Merges are currently tested within merging/ThreeWayMergeTest
-//        Iterator<String> iterator = tripleStoreInterface.getGraphs();
-//        while (iterator.hasNext()) {
-//            System.out.println(iterator.next());
-//
-//        }
     }
 
 }

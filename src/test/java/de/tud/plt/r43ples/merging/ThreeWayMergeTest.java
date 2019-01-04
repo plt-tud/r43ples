@@ -38,11 +38,10 @@ public class ThreeWayMergeTest extends R43plesTest {
 	
 	/**
 	 * Initialize TestClass
-	 * 
-	 * @throws ConfigurationException
+	 *
 	 */
 	@BeforeClass
-	public static void setUpBeforeClass() throws ConfigurationException {
+	public static void setUpBeforeClass() {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
@@ -53,6 +52,7 @@ public class ThreeWayMergeTest extends R43plesTest {
 	
 	/**
 	 * Set up.
+	 *
 	 * @throws InternalErrorException
 	 */
 	@Before
@@ -111,9 +111,6 @@ public class ThreeWayMergeTest extends R43plesTest {
 	 */
 	@Test
 	public void testCommonMerge() throws InternalErrorException {
-		// The SDD to use
-		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
-		
 		// conflicts in merging, therefore no success
 		ep.sparql(createCommonMergeQuery(graphName, user, "Merge B1 into B2", "b1", "b2"));
 

@@ -13,24 +13,25 @@ import de.tud.plt.r43ples.existentobjects.RevisionGraph;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.optimization.PathCalculationFabric;
 import de.tud.plt.r43ples.optimization.PathCalculationInterface;
-import org.apache.commons.configuration.ConfigurationException;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedList;
 
 import static org.hamcrest.core.StringContains.containsString;
 
 
 /**
+ * Tests the path calculation interface.
+ *
  * @author Markus Graube
+ * @author Stephan Hensel
  *
  */
-@Ignore
-public class MergeManagementTest {
+
+public class PathCalculationInterfaceTest {
 
 	/** The data set generation result. **/
 	private static DataSetGenerationResult ds;
@@ -43,12 +44,12 @@ public class MergeManagementTest {
 	
 	
 	/**
-	 * @throws ConfigurationException 
-	 * @throws InternalErrorException 
-	 * @throws IOException 
+	 * Set up.
+	 *
+	 * @throws InternalErrorException
 	 */
 	@BeforeClass
-	public static void setUpBeforeClass() throws ConfigurationException, InternalErrorException, IOException {
+	public static void setUpBeforeClass() throws InternalErrorException {
 		Config.readConfig("r43ples.test.conf");
 		ds = SampleDataSet.createSampleDataSetMerging();
         revisionGraph = new RevisionGraph(ds.graphName);
@@ -77,12 +78,11 @@ public class MergeManagementTest {
                 new Revision(revisionGraph, ds.graphName + "-revision-" + ds.revisions.get("master-0"), false),
                 new Revision(revisionGraph, ds.graphName + "-revision-" + ds.revisions.get("b2-1"), false));
         LinkedList<String> expected = new LinkedList<>();
-        // TODO Create method which can compare LinkedList<String> with Path
 		expected.add(ds.graphName+"-revision-"+ds.revisions.get("master-0"));
 		expected.add(ds.graphName+"-revision-"+ds.revisions.get("master-1"));
 		expected.add(ds.graphName+"-revision-"+ds.revisions.get("b2-0"));
 		expected.add(ds.graphName+"-revision-"+ds.revisions.get("b2-1"));
-		Assert.assertEquals(expected, path);
+		Assert.assertTrue(compareLinkedListToPath(expected, path));
     }
 
 
@@ -95,11 +95,10 @@ public class MergeManagementTest {
                 new Revision(revisionGraph, ds.graphName + "-revision-" + ds.revisions.get("master-1"), false),
                 new Revision(revisionGraph, ds.graphName + "-revision-" + ds.revisions.get("b1-1"), false));
         LinkedList<String> expected = new LinkedList<>();
-		// TODO Create method which can compare LinkedList<String> with Path
 		expected.add(ds.graphName+"-revision-"+ds.revisions.get("master-1"));
 		expected.add(ds.graphName+"-revision-"+ds.revisions.get("b1-0"));
 		expected.add(ds.graphName+"-revision-"+ds.revisions.get("b1-1"));
-		Assert.assertEquals(expected, path);
+		Assert.assertTrue(compareLinkedListToPath(expected, path));
 	}
 
 
@@ -112,6 +111,27 @@ public class MergeManagementTest {
 		HeaderInformation hi = new HeaderInformation();
 		String result = hi.getResponseHeaderFromQuery(sparql);
 		Assert.assertThat(result, containsString("Master"));
+	}
+
+
+	/**
+	 * Compares a linked list with revision URIs to a given path.
+	 *
+	 * @param linkedList the linked list of revision URIs
+	 * @param path the path object
+	 * @return true if equal
+	 */
+	private boolean compareLinkedListToPath(LinkedList<String> linkedList, Path path) {
+		Iterator<String> iteList = linkedList.iterator();
+		for (Revision revision : path.getRevisionPath()) {
+			if (iteList.hasNext()) {
+				String listElement = iteList.next();
+				if (!listElement.equals(revision.getRevisionURI())) return false;
+			} else {
+				return false;
+			}
+		}
+		return true;
 	}
 
 }
