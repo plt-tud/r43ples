@@ -34,7 +34,7 @@ public class ThreeWayMergeCommitDraftTest extends R43plesTest {
         ThreeWayMergeCommitDraft cd = new ThreeWayMergeCommitDraft(ds.graphName,
                 "B1", "master",
                 "butler", "test",
-                null, null, MergeTypes.AUTO, false);
+                null, MergeTypes.AUTO, false);
 
         Revision startRevision = revisionGraph.getRevision("1");
         Revision endRevision = revisionGraph.getRevision("3");
@@ -55,7 +55,7 @@ public class ThreeWayMergeCommitDraftTest extends R43plesTest {
         ThreeWayMergeCommitDraft cd = new ThreeWayMergeCommitDraft(ds.graphName,
                 "B1", "master",
                 "butler", "test",
-                null, null, MergeTypes.AUTO, false);
+                null, MergeTypes.AUTO, false);
 
 
         Revision commonRevision = revisionGraph.getRevision("0");

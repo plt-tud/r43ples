@@ -38,11 +38,10 @@ public class ThreeWayMergeTest extends R43plesTest {
 	
 	/**
 	 * Initialize TestClass
-	 * 
-	 * @throws ConfigurationException
+	 *
 	 */
 	@BeforeClass
-	public static void setUpBeforeClass() throws ConfigurationException {
+	public static void setUpBeforeClass() {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
@@ -53,6 +52,7 @@ public class ThreeWayMergeTest extends R43plesTest {
 	
 	/**
 	 * Set up.
+	 *
 	 * @throws InternalErrorException
 	 */
 	@Before
@@ -94,11 +94,8 @@ public class ThreeWayMergeTest extends R43plesTest {
 	 */
 	@Test
 	public void testAutoMerge() throws InternalErrorException {
-		// The SDD to use
-		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
-		
 		// Merge B1 into B2
-		ep.sparql(createAutoMergeQuery(graphName, sdd, user, "Merge B1 into B2", "b1", "b2"));
+		ep.sparql(createAutoMergeQuery(graphName, user, "Merge B1 into B2", "b1", "b2"));
 		// Test branch B1
 		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "b2")).getEntity().toString();
 		String expected1 = ResourceManagement.getContentFromResource("threeway/auto/response-B1-into-B2.ttl");
@@ -114,16 +111,13 @@ public class ThreeWayMergeTest extends R43plesTest {
 	 */
 	@Test
 	public void testCommonMerge() throws InternalErrorException {
-		// The SDD to use
-		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";
-		
 		// conflicts in merging, therefore no success
-		ep.sparql(createCommonMergeQuery(graphName, sdd, user, "Merge B1 into B2", "b1", "b2"));
+		ep.sparql(createCommonMergeQuery(graphName, user, "Merge B1 into B2", "b1", "b2"));
 
 		// Merge B1 into B2 (WITH)
 		String triples = "<http://example.com/testS> <http://example.com/testP> \"D\". \n";
 		
-		Response queryResult1 = ep.sparql(createMergeWithQuery(graphName, sdd, user, "Merge B1 into B2", "b1", "b2", triples));
+		Response queryResult1 = ep.sparql(createMergeWithQuery(graphName, user, "Merge B1 into B2", "b1", "b2", triples));
 		Assert.assertNull(queryResult1.getEntity());
 
 		// Test branch B2
@@ -141,9 +135,6 @@ public class ThreeWayMergeTest extends R43plesTest {
 	 */
 	@Test
 	public void testManualMerge() throws InternalErrorException {
-		// The SDD to use
-		String sdd = "http://eatld.et.tu-dresden.de/sdd#defaultSDD";		
-		
 		// Merge B1 into B2
 		String triples = "<http://example.com/testS> <http://example.com/testP> \"C\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP> \"A\". \n"
@@ -153,7 +144,7 @@ public class ThreeWayMergeTest extends R43plesTest {
 				+ "<http://example.com/testS> <http://example.com/testP> \"I\". \n"
 				+ "<http://example.com/testS> <http://example.com/testP> \"J\". \n";
 		
-		ep.sparql(createManualMergeQuery(graphName, sdd, user, "Merge B1 into B2", "b1", "b2", triples));
+		ep.sparql(createManualMergeQuery(graphName, user, "Merge B1 into B2", "b1", "b2", triples));
 		
 		// Test branch B2
 		String result1 = ep.sparql("text/turtle", createConstructQuery(graphName, "b2")).getEntity().toString();
@@ -183,17 +174,16 @@ public class ThreeWayMergeTest extends R43plesTest {
 	 * Create AUTO-MERGE query.
 	 * 
 	 * @param graphName the graph name
-	 * @param sdd the SDD
 	 * @param user the user
 	 * @param commitMessage the commit message
 	 * @param branchNameA the branch name A
 	 * @param branchNameB the branch name B
 	 * @return the query
 	 */
-	private String createAutoMergeQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB) {
+	private String createAutoMergeQuery(String graphName, String user, String commitMessage, String branchNameA, String branchNameB) {
 		return String.format( "USER \"%s\" %n"
 							+ "MESSAGE \"%s\" %n"
-							+ "MERGE AUTO GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO BRANCH \"%s\"", user, commitMessage, graphName, sdd, branchNameA, branchNameB);
+							+ "MERGE AUTO GRAPH <%s> BRANCH \"%s\" INTO BRANCH \"%s\"", user, commitMessage, graphName, branchNameA, branchNameB);
 	}
 	
 	
@@ -201,17 +191,16 @@ public class ThreeWayMergeTest extends R43plesTest {
 	 * Create common MERGE query.
 	 * 
 	 * @param graphName the graph name
-	 * @param sdd the SDD
 	 * @param user the user
 	 * @param commitMessage the commit message
 	 * @param branchNameA the branch name A
 	 * @param branchNameB the branch name B
 	 * @return the query
 	 */
-	private String createCommonMergeQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB) {
+	private String createCommonMergeQuery(String graphName, String user, String commitMessage, String branchNameA, String branchNameB) {
 		return String.format( "USER \"%s\" %n"
 							+ "MESSAGE \"%s\" %n"
-							+ "MERGE GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO BRANCH \"%s\"", user, commitMessage, graphName, sdd, branchNameA, branchNameB);
+							+ "MERGE GRAPH <%s> BRANCH \"%s\" INTO BRANCH \"%s\"", user, commitMessage, graphName, branchNameA, branchNameB);
 	}
 
 	
@@ -219,7 +208,6 @@ public class ThreeWayMergeTest extends R43plesTest {
 	 * Create MERGE-WITH query.
 	 * 
 	 * @param graphName the graph name
-	 * @param sdd the SDD
 	 * @param user the user
 	 * @param commitMessage the commit message
 	 * @param branchNameA the branch name A
@@ -227,12 +215,12 @@ public class ThreeWayMergeTest extends R43plesTest {
 	 * @param triples the triples which should be in the WITH part as N-Triples
 	 * @return the query
 	 */
-	private String createMergeWithQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB, String triples) {
+	private String createMergeWithQuery(String graphName, String user, String commitMessage, String branchNameA, String branchNameB, String triples) {
 		return String.format( "USER \"%s\" %n"
 							+ "MESSAGE \"%s\" %n"
-							+ "MERGE GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO BRANCH \"%s\" WITH { %n"
+							+ "MERGE GRAPH <%s> BRANCH \"%s\" INTO BRANCH \"%s\" WITH { %n"
 							+ "	%s %n"
-							+ "}", user, commitMessage, graphName, sdd, branchNameA, branchNameB, triples);
+							+ "}", user, commitMessage, graphName, branchNameA, branchNameB, triples);
 	}
 	
 	
@@ -240,7 +228,6 @@ public class ThreeWayMergeTest extends R43plesTest {
 	 * Create MANUAL-MERGE query.
 	 * 
 	 * @param graphName the graph name
-	 * @param sdd the SDD
 	 * @param user the user
 	 * @param commitMessage the commit message
 	 * @param branchNameA the branch name A
@@ -248,12 +235,12 @@ public class ThreeWayMergeTest extends R43plesTest {
 	 * @param triples the triples which should be in the WITH part as N-Triples
 	 * @return the query
 	 */
-	private String createManualMergeQuery(String graphName, String sdd, String user, String commitMessage, String branchNameA, String branchNameB, String triples) {
+	private String createManualMergeQuery(String graphName, String user, String commitMessage, String branchNameA, String branchNameB, String triples) {
 		return String.format( "USER \"%s\" %n"
 							+ "MESSAGE \"%s\" %n"
-							+ "MERGE MANUAL GRAPH <%s> SDD <%s> BRANCH \"%s\" INTO BRANCH \"%s\" WITH { %n"
+							+ "MERGE MANUAL GRAPH <%s> BRANCH \"%s\" INTO BRANCH \"%s\" WITH { %n"
 							+ "	%s %n"
-							+ "}", user, commitMessage, graphName, sdd, branchNameA, branchNameB, triples);
+							+ "}", user, commitMessage, graphName, branchNameA, branchNameB, triples);
 	}
 
 }

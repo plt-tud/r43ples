@@ -381,7 +381,7 @@ public class R43plesCoreTest extends R43plesTest {
         // Check all corresponding graphs
         // List all
         LinkedList<String> allGraphs = new LinkedList<>();
-        allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-sdd");
+        allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-sdg");
         allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-rules");
         allGraphs.add("http://example.com/test-revisiongraph");
         allGraphs.add("http://example.com/test");
@@ -478,7 +478,7 @@ public class R43plesCoreTest extends R43plesTest {
         // Check all corresponding graphs
         // List all
         LinkedList<String> allGraphs = new LinkedList<>();
-        allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-sdd");
+        allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-sdg");
         allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-rules");
         allGraphs.add("http://example.com/test-revisiongraph");
         allGraphs.add("http://example.com/test");
@@ -527,11 +527,6 @@ public class R43plesCoreTest extends R43plesTest {
     public void createThreeWayMergeCommit() {
         Assert.fail();
         //TODO 3-Way-Merges are currently tested within merging/ThreeWayMergeTest
-//        Iterator<String> iterator = tripleStoreInterface.getGraphs();
-//        while (iterator.hasNext()) {
-//            System.out.println(iterator.next());
-//
-//        }
     }
 
 }

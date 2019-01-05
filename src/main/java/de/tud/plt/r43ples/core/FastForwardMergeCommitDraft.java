@@ -29,14 +29,13 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
      * @param branchNameInto the branch name (into)
      * @param user the user
      * @param message the message
-     * @param sdd the SDD URI to use
      * @param triples the triples of the query WITH part
      * @param type the query type (FORCE, AUTO, MANUAL)
      * @param with states if the WITH part is available
      * @throws InternalErrorException
      */
-    protected FastForwardMergeCommitDraft(String graphName, String branchNameFrom, String branchNameInto, String user, String message, String sdd, String triples, MergeTypes type, boolean with) throws InternalErrorException {
-        super(graphName, branchNameFrom, branchNameInto, user, message, sdd, MergeActions.MERGE, triples, type, with);
+    protected FastForwardMergeCommitDraft(String graphName, String branchNameFrom, String branchNameInto, String user, String message, String triples, MergeTypes type, boolean with) throws InternalErrorException {
+        super(graphName, branchNameFrom, branchNameInto, user, message, MergeActions.MERGE, triples, type, with);
     }
 
     /**
@@ -78,8 +77,7 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
         String personUri = Helper.getUserURI(getUser());
 
         // Create a new commit (activity)
-        StringBuilder queryContent = new StringBuilder(1000);
-        queryContent.append(String.format(
+        String queryContent = String.format(
                 "<%s> a rmo:FastForwardMergeCommit, rmo:MergeCommit, rmo:BasicMergeCommit, rmo:Commit; "
                         + "	rmo:wasAssociatedWith <%s> ;"
                         + "	rmo:commitMessage \"%s\" ;"
@@ -90,11 +88,10 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
                         + " rmo:usedTargetBranch <%s> .",
                 commitURI, personUri, getMessage(), getTimeStamp(),
                 usedSourceRevision.getRevisionURI(), usedSourceBranch.getReferenceURI(),
-                usedTargetRevision.getRevisionURI(), usedTargetBranch.getReferenceURI()));
-
+                usedTargetRevision.getRevisionURI(), usedTargetBranch.getReferenceURI());
         String query = Config.prefixes
                 + String.format("INSERT DATA { GRAPH <%s> { %s } }", getRevisionGraph().getRevisionGraphUri(),
-                queryContent.toString());
+                queryContent);
 
         getTripleStoreInterface().executeUpdateQuery(query);
 

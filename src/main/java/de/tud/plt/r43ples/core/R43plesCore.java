@@ -211,7 +211,6 @@ public class R43plesCore implements R43plesCoreInterface {
      * @param branchNameInto the branch name (into)
      * @param user the user
      * @param message the message
-     * @param sdd the SDD URI to use
      * @param triples the triples of the query WITH part
      * @param type the query type (FORCE, AUTO, MANUAL)
      * @param with states if the WITH part is available
@@ -219,7 +218,7 @@ public class R43plesCore implements R43plesCoreInterface {
      */
     @Override
     public ThreeWayMergeCommit createThreeWayMergeCommit(String graphName, String branchNameFrom, String branchNameInto, String user, String message, String sdd, String triples, MergeTypes type, boolean with) throws InternalErrorException {
-        ThreeWayMergeCommitDraft threeWayMergeCommit = new ThreeWayMergeCommitDraft(graphName, branchNameFrom, branchNameInto, user, message, sdd, triples, type, with);
+        ThreeWayMergeCommitDraft threeWayMergeCommit = new ThreeWayMergeCommitDraft(graphName, branchNameFrom, branchNameInto, user, message, triples, type, with);
         return threeWayMergeCommit.createCommitInTripleStore();
     }
 

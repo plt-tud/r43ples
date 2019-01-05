@@ -5,15 +5,12 @@ import de.tud.plt.r43ples.dataset.SampleDataSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.iohelper.ResourceManagement;
 import de.tud.plt.r43ples.management.Config;
-import org.apache.commons.configuration.ConfigurationException;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.xml.sax.SAXException;
-
-import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -24,25 +21,27 @@ import static org.junit.Assert.assertTrue;
  * @author Xinyu Yang
  * @author Stephan Hensel
  */
-@Ignore
 public class FastForwardMergeTest extends R43plesTest {
 
 	/** The graph name. **/
 	private static String graphName;
 	/** The user. **/
 	private static String user = "jUnitUser";
+	/** The triple store interface. **/
+	private static TripleStoreInterface tripleStoreInterface;
 
 	
 	/**
 	 * Initialize TestClass
-	 * 
-	 * @throws ConfigurationException
+	 *
 	 */
 	@BeforeClass
-	public static void setUpBeforeClass() throws ConfigurationException {
+	public static void setUpBeforeClass() {
 		XMLUnit.setIgnoreWhitespace(true);
 		XMLUnit.setNormalize(true);
 		Config.readConfig("r43ples.test.conf");
+		tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+		tripleStoreInterface.dropAllGraphsAndReInit();
 	}
 	
 	
@@ -61,14 +60,12 @@ public class FastForwardMergeTest extends R43plesTest {
 	/**
 	 * Test FastForward Merge.
 	 * 
-	 * @throws InternalErrorException 
-	 * @throws IOException 
-	 * @throws SAXException 
+	 * @throws InternalErrorException
 	 */
 	@Test
-	public void testFastForwardMerge() throws InternalErrorException, SAXException, IOException {
+	public void testFastForwardMerge() throws InternalErrorException {
 		// Test branch B1
-		String result_b1 = ep.sparql("text/turtle", createConstructQuery(graphName, "B1")).getEntity().toString();
+		String result_b1 = ep.sparql("text/turtle", createConstructQuery(graphName, "b1")).getEntity().toString();
 		String expected_b1 = ResourceManagement.getContentFromResource("threeway/response-B1.ttl");
 		assertTrue(check_isomorphism(result_b1, "TURTLE", expected_b1, "TURTLE"));
 
@@ -78,7 +75,7 @@ public class FastForwardMergeTest extends R43plesTest {
 		assertTrue(check_isomorphism(result_master, "TURTLE", expected_master, "TURTLE"));
 
 		// Test fast forward
-		ep.sparql("text/turtle", createFastForwardMergeQuery(graphName, user, "Merge B1 into Master", "B1", "master"));
+		ep.sparql("text/turtle", createFastForwardMergeQuery(graphName, user, "Merge b1 into master", "b1", "master"));
 		result_master = ep.sparql("text/turtle", createConstructQuery(graphName, "master")).getEntity().toString();
 		assertTrue(check_isomorphism(result_master, "TURTLE", expected_b1, "TURTLE"));
 	}
@@ -104,7 +101,6 @@ public class FastForwardMergeTest extends R43plesTest {
 	 * Create Fast Forward-MERGE query.
 	 * 
 	 * @param graphName the graph name
-	 * @param sdd the SDD
 	 * @param user the user
 	 * @param commitMessage the commit message
 	 * @param branchNameA the branch name A
@@ -116,6 +112,5 @@ public class FastForwardMergeTest extends R43plesTest {
 							+ "MESSAGE \"%s\" %n"
 							+ "MERGE GRAPH <%s> BRANCH \"%s\" INTO BRANCH \"%s\"", user, commitMessage, graphName, branchNameA, branchNameB);
 	}
-
 
 }

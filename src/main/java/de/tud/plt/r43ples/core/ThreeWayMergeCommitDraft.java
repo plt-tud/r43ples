@@ -41,14 +41,13 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
      * @param branchNameInto the branch name (into)
      * @param user the user
      * @param message the message
-     * @param sdd the SDD URI to use
      * @param triples the triples of the query WITH part
      * @param type the query type (FORCE, AUTO, MANUAL)
      * @param with states if the WITH part is available
      * @throws InternalErrorException
      */
-    protected ThreeWayMergeCommitDraft(String graphName, String branchNameFrom, String branchNameInto, String user, String message, String sdd, String triples, MergeTypes type, boolean with) throws InternalErrorException {
-        super(graphName, branchNameFrom, branchNameInto, user, message, sdd, MergeActions.MERGE, triples, type, with);
+    protected ThreeWayMergeCommitDraft(String graphName, String branchNameFrom, String branchNameInto, String user, String message, String triples, MergeTypes type, boolean with) throws InternalErrorException {
+        super(graphName, branchNameFrom, branchNameInto, user, message, MergeActions.MERGE, triples, type, with);
         this.usedSourceBranch = getRevisionGraph().getBranch(getBranchNameFrom(), true);
         this.usedTargetBranch = getRevisionGraph().getBranch(getBranchNameInto(), true);
     }
@@ -65,8 +64,8 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
         Revision intoRevision = this.usedTargetBranch.getLeafRevision();
 
-        // Differ between MERGE query with specified SDD and without SDD
-        String usedSDDURI = getRevisionGraph().getSDD(getSdd());
+        // Get the default SDG URI of the revision graph
+        String usedSDDURI = getRevisionGraph().getSDG();
 
         // Get the common revision with shortest path
         Revision commonRevision = this.getPathCalculationInterface().getCommonRevisionWithShortestPath(fromRevision, intoRevision);
@@ -114,7 +113,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
             logger.debug("MERGE query detected");
             // Check if difference model contains conflicts
             String queryASK = String.format("ASK { %n" + "	GRAPH <%s> { %n"
-                    + " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
+                    + " 	?ref <http://eatld.et.tu-dresden.de/mmo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
                     + "	} %n" + "}", namedGraphUriDiff);
             if (getTripleStoreInterface().executeAskQuery(queryASK)) {
                 // Difference model contains conflicts
@@ -221,7 +220,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
             String queryCopy = String.format("COPY <%s> TO <%s>", graphNameOfBranchB, graphNameOfMerged);
             getTripleStoreInterface().executeUpdateQuery(queryCopy);
 
-            // Get the triples from branch A which should be added to/removed from the merged revision
+            // Get the triples from branch A which should be added to/deleted from the merged revision
             String triplesToAdd = "";
             String triplesToDelete = "";
 
@@ -229,11 +228,11 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
             String queryDifferenceGroup = Config.prefixes + String.format(
                     "SELECT ?differenceCombinationURI ?automaticResolutionState ?tripleStateA ?tripleStateB ?conflict %n"
                             + "WHERE { GRAPH <%s> { %n"
-                            + "	?differenceCombinationURI a rpo:DifferenceGroup ; %n"
-                            + "		sddo:automaticResolutionState ?automaticResolutionState ; %n"
-                            + "		sddo:hasTripleStateA ?tripleStateA ; %n"
-                            + "		sddo:hasTripleStateB ?tripleStateB ; %n"
-                            + "		sddo:isConflicting ?conflict . %n"
+                            + "	?differenceCombinationURI a mmo:DifferenceGroup ; %n"
+                            + "		mmo:automaticResolutionState ?automaticResolutionState ; %n"
+                            + "		mmo:hasTripleStateA ?tripleStateA ; %n"
+                            + "		mmo:hasTripleStateB ?tripleStateB ; %n"
+                            + "		mmo:isConflicting ?conflict . %n"
                             + "} }", graphNameDifferenceTripleModel);
 
             // Iterate over all difference groups
@@ -252,10 +251,10 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                 String queryDifference = Config.prefixes + String.format(
                         "SELECT ?s ?p ?o %n"
                                 + "WHERE { GRAPH <%s> { %n"
-                                + "	<%s> a rpo:DifferenceGroup ; %n"
-                                + "		rpo:hasDifference ?blankDifference . %n"
-                                + "	?blankDifference a rpo:Difference ; %n"
-                                + "		rpo:hasTriple ?triple . %n"
+                                + "	<%s> a mmo:DifferenceGroup ; %n"
+                                + "		mmo:hasDifference ?blankDifference . %n"
+                                + "	?blankDifference a mmo:Difference ; %n"
+                                + "		mmo:hasTriple ?triple . %n"
                                 + "	?triple rdf:subject ?s . %n"
                                 + "	?triple rdf:predicate ?p . %n"
                                 + "	?triple rdf:object ?o . %n"
@@ -281,7 +280,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                             type.equals(MergeQueryTypeEnum.COMMON) ||
                             (type.equals(MergeQueryTypeEnum.WITH) && !currentDifferencGroupConflict) ) {
                         // MERGE AUTO or common MERGE query
-                        if (currentDifferencGroupAutomaticResolutionState.equals(SDDTripleStateEnum.ADDED.getSddRepresentation())) {
+                        if (currentDifferencGroupAutomaticResolutionState.equals(MergeTripleStateEnum.ADDED.getSdRepresentation())) {
                             // Triple should be added
                             triplesToAdd += subject + " " + predicate + " " + object + " . \n";
                         } else {
@@ -344,8 +343,8 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
         String addedTriplesB = getTripleStoreInterface().executeConstructQuery(queryAddedTriplesB, FileUtils.langNTriple);
 
-        // Get all removed triples for both changesets
-        String queryRemovedTriplesA = String.format(
+        // Get all deleted triples for both changesets
+        String queryDeletedTriplesA = String.format(
                 "CONSTRUCT {?s ?p ?o} %n"
                         + "WHERE { %n"
                         + "	GRAPH <%s> { ?s ?p ?o } %n"
@@ -354,9 +353,9 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                         + "	} %n"
                         + "}", graphNameOfBranchA, graphNameOfMerged);
 
-        String deletedTriplesA = getTripleStoreInterface().executeConstructQuery(queryRemovedTriplesA, FileUtils.langNTriple);
+        String deletedTriplesA = getTripleStoreInterface().executeConstructQuery(queryDeletedTriplesA, FileUtils.langNTriple);
 
-        String queryRemovedTriplesB = String.format(
+        String queryDeletedTriplesB = String.format(
                 "CONSTRUCT {?s ?p ?o} %n"
                         + "WHERE { %n"
                         + "	GRAPH <%s> { ?s ?p ?o } %n"
@@ -365,7 +364,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                         + "	} %n"
                         + "}", graphNameOfBranchB, graphNameOfMerged);
 
-        String deletedTriplesB = getTripleStoreInterface().executeConstructQuery(queryRemovedTriplesB, FileUtils.langNTriple);
+        String deletedTriplesB = getTripleStoreInterface().executeConstructQuery(queryDeletedTriplesB, FileUtils.langNTriple);
 
         // Create the merge revision and a change set
         RevisionDraft revisionDraft = new RevisionDraft(getUriCalculator(), getRevisionGraph(), usedTargetBranch,
@@ -433,8 +432,8 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
         logger.info("Create the initial content.");
         String queryInitial = Config.prefixes + String.format(
                 "INSERT { GRAPH <%s> { %n"
-                        + "	<%s> a rpo:RevisionProgress; %n"
-                        + "		rpo:original [ %n"
+                        + "	<%s> a mmo:RevisionProgress; %n"
+                        + "		mmo:Original [ %n"
                         + "			rdf:subject ?s ; %n"
                         + "			rdf:predicate ?p ; %n"
                         + "			rdf:object ?o ; %n"
@@ -463,7 +462,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                 // Delete old entries (original)
                 String queryRevision = Config.prefixes + String.format(
                         "DELETE { GRAPH <%s> { %n"
-                                + "	<%s> rpo:original ?blank . %n"
+                                + "	<%s> mmo:Original ?blank . %n"
                                 + "	?blank rdf:subject ?s . %n"
                                 + "	?blank rdf:predicate ?p . %n"
                                 + "	?blank rdf:object ?o . %n"
@@ -471,7 +470,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                                 + "} } %n"
                                 + "WHERE { "
                                 + "		GRAPH <%s> { %n"
-                                + "			<%s> rpo:original ?blank . %n"
+                                + "			<%s> mmo:Original ?blank . %n"
                                 + "			?blank rdf:subject ?s . %n"
                                 + "			?blank rdf:predicate ?p . %n"
                                 + "			?blank rdf:object ?o . %n"
@@ -487,7 +486,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                 // Delete old entries (added)
                 queryRevision += String.format(
                         "DELETE { GRAPH <%s> { %n"
-                                + "	<%s> rpo:added ?blank . %n"
+                                + "	<%s> mmo:Added ?blank . %n"
                                 + "	?blank rdf:subject ?s . %n"
                                 + "	?blank rdf:predicate ?p . %n"
                                 + "	?blank rdf:object ?o . %n"
@@ -495,7 +494,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                                 + "} } %n"
                                 + "WHERE { "
                                 + "		GRAPH <%s> { %n"
-                                + "			<%s> rpo:added ?blank . %n"
+                                + "			<%s> mmo:Added ?blank . %n"
                                 + "			?blank rdf:subject ?s . %n"
                                 + "			?blank rdf:predicate ?p . %n"
                                 + "			?blank rdf:object ?o . %n"
@@ -508,10 +507,10 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
                 queryRevision += "\n";
 
-                // Delete old entries (removed)
+                // Delete old entries (deleted)
                 queryRevision += String.format(
                         "DELETE { GRAPH <%s> { %n"
-                                + "	<%s> rpo:removed ?blank . %n"
+                                + "	<%s> mmo:Deleted ?blank . %n"
                                 + "	?blank rdf:subject ?s . %n"
                                 + "	?blank rdf:predicate ?p . %n"
                                 + "	?blank rdf:object ?o . %n"
@@ -519,7 +518,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                                 + "} } %n"
                                 + "WHERE { "
                                 + "		GRAPH <%s> { %n"
-                                + "			<%s> rpo:removed ?blank . %n"
+                                + "			<%s> mmo:Deleted ?blank . %n"
                                 + "			?blank rdf:subject ?s . %n"
                                 + "			?blank rdf:predicate ?p . %n"
                                 + "			?blank rdf:object ?o . %n"
@@ -535,8 +534,8 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                 // Insert new entries (added)
                 queryRevision += String.format(
                         "INSERT { GRAPH <%s> {%n"
-                                + "	<%s> a rpo:RevisionProgress; %n"
-                                + "		rpo:added [ %n"
+                                + "	<%s> a mmo:RevisionProgress; %n"
+                                + "		mmo:Added [ %n"
                                 + "			rdf:subject ?s ; %n"
                                 + "			rdf:predicate ?p ; %n"
                                 + "			rdf:object ?o ; %n"
@@ -554,7 +553,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                 // Delete old entries (original)
                 queryRevision += String.format(
                         "DELETE { GRAPH <%s> { %n"
-                                + "	<%s> rpo:original ?blank . %n"
+                                + "	<%s> mmo:Original ?blank . %n"
                                 + "	?blank rdf:subject ?s . %n"
                                 + "	?blank rdf:predicate ?p . %n"
                                 + "	?blank rdf:object ?o . %n"
@@ -562,7 +561,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                                 + "} } %n"
                                 + "WHERE { "
                                 + "		GRAPH <%s> { %n"
-                                + "			<%s> rpo:original ?blank . %n"
+                                + "			<%s> mmo:Original ?blank . %n"
                                 + "			?blank rdf:subject ?s . %n"
                                 + "			?blank rdf:predicate ?p . %n"
                                 + "			?blank rdf:object ?o . %n"
@@ -578,7 +577,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                 // Delete old entries (added)
                 queryRevision += String.format(
                         "DELETE { GRAPH <%s> { %n"
-                                + "	<%s> rpo:added ?blank . %n"
+                                + "	<%s> mmo:Added ?blank . %n"
                                 + "	?blank rdf:subject ?s . %n"
                                 + "	?blank rdf:predicate ?p . %n"
                                 + "	?blank rdf:object ?o . %n"
@@ -586,7 +585,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                                 + "} } %n"
                                 + "WHERE { "
                                 + "		GRAPH <%s> { %n"
-                                + "			<%s> rpo:added ?blank . %n"
+                                + "			<%s> mmo:Added ?blank . %n"
                                 + "			?blank rdf:subject ?s . %n"
                                 + "			?blank rdf:predicate ?p . %n"
                                 + "			?blank rdf:object ?o . %n"
@@ -599,10 +598,10 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
                 queryRevision += "\n";
 
-                // Delete old entries (removed)
+                // Delete old entries (deleted)
                 queryRevision += String.format(
                         "DELETE { GRAPH <%s> { %n"
-                                + "	<%s> rpo:removed ?blank . %n"
+                                + "	<%s> mmo:Deleted ?blank . %n"
                                 + "	?blank rdf:subject ?s . %n"
                                 + "	?blank rdf:predicate ?p . %n"
                                 + "	?blank rdf:object ?o . %n"
@@ -610,7 +609,7 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
                                 + "} } %n"
                                 + "WHERE { "
                                 + "		GRAPH <%s> { %n"
-                                + "			<%s> rpo:removed ?blank . %n"
+                                + "			<%s> mmo:Deleted ?blank . %n"
                                 + "			?blank rdf:subject ?s . %n"
                                 + "			?blank rdf:predicate ?p . %n"
                                 + "			?blank rdf:object ?o . %n"
@@ -623,11 +622,11 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
                 queryRevision += "\n";
 
-                // Insert new entries (removed)
+                // Insert new entries (deleted)
                 queryRevision += String.format(
                         "INSERT { GRAPH <%s> { %n"
-                                + "	<%s> a rpo:RevisionProgress; %n"
-                                + "		rpo:removed [ %n"
+                                + "	<%s> a mmo:RevisionProgress; %n"
+                                + "		mmo:Deleted [ %n"
                                 + "			rdf:subject ?s ; %n"
                                 + "			rdf:predicate ?p ; %n"
                                 + "			rdf:object ?o ; %n"
@@ -657,9 +656,9 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
      * @param uriA the URI of the revision progress of branch A
      * @param graphNameRevisionProgressB the graph name of the revision progress of branch B
      * @param uriB the URI of the revision progress of branch B
-     * @param uriSDD the URI of the SDD to use
+     * @param uriSDG the URI of the SDG to use
      */
-    private void createDifferenceTripleModel(String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDD) {
+    private void createDifferenceTripleModel(String graphNameDifferenceTripleModel, String graphNameRevisionProgressA, String uriA, String graphNameRevisionProgressB, String uriB, String uriSDG) {
 
         logger.info("Create the difference triple model");
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format("DROP SILENT GRAPH <%s>", graphNameDifferenceTripleModel));
@@ -707,19 +706,18 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
         // Get all structural definitions which are generating differences
         String queryDifferingSD = String.format(
-                "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
-                        + "PREFIX sdd:  <http://eatld.et.tu-dresden.de/sdd#> %n"
+                "PREFIX mmo: <http://eatld.et.tu-dresden.de/mmo#> %n"
                         + "PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#> %n"
                         + "SELECT ?combinationURI ?tripleStateA ?tripleStateB ?conflict ?automaticResolutionState %n"
                         + "WHERE { GRAPH <%s> { %n"
-                        + "	<%s> a sddo:StructuralDefinitionGroup ;"
-                        + "		sddo:hasStructuralDefinition ?combinationURI ."
-                        + "	?combinationURI a sddo:StructuralDefinition ; %n"
-                        + "		sddo:hasTripleStateA ?tripleStateA ; %n"
-                        + "		sddo:hasTripleStateB ?tripleStateB ; %n"
-                        + "		sddo:isConflicting ?conflict ; %n"
-                        + "		sddo:automaticResolutionState ?automaticResolutionState . %n"
-                        + "} } %n", Config.sdd_graph, uriSDD);
+                        + "	<%s> a mmo:StructuralDefinitionGroup ;"
+                        + "		mmo:hasStructuralDefinition ?combinationURI ."
+                        + "	?combinationURI a mmo:StructuralDefinition ; %n"
+                        + "		mmo:hasTripleStateA ?tripleStateA ; %n"
+                        + "		mmo:hasTripleStateB ?tripleStateB ; %n"
+                        + "		mmo:isConflicting ?conflict ; %n"
+                        + "		mmo:automaticResolutionState ?automaticResolutionState . %n"
+                        + "} } %n", Config.sdg_graph, uriSDG);
 
         // Iterate over all differing combination URIs
         ResultSet resultSetDifferences = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryDifferingSD);
@@ -744,38 +742,38 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
             String sparqlQueryRevisionB = null;
 
             // A
-            if (currentTripleStateA.equals(SDDTripleStateEnum.ADDED.getSddRepresentation())) {
+            if (currentTripleStateA.equals(MergeTripleStateEnum.ADDED.getSdRepresentation())) {
                 // In revision A the triple was added
                 querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
-                sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleStateEnum.ADDED.getRpoRepresentation());
-            } else if (currentTripleStateA.equals(SDDTripleStateEnum.DELETED.getSddRepresentation())) {
+                sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, MergeTripleStateEnum.ADDED.getDgRepresentation());
+            } else if (currentTripleStateA.equals(MergeTripleStateEnum.DELETED.getSdRepresentation())) {
                 // In revision A the triple was deleted
                 querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
-                sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleStateEnum.DELETED.getRpoRepresentation());
-            } else if (currentTripleStateA.equals(SDDTripleStateEnum.ORIGINAL.getSddRepresentation())) {
+                sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, MergeTripleStateEnum.DELETED.getDgRepresentation());
+            } else if (currentTripleStateA.equals(MergeTripleStateEnum.ORIGINAL.getSdRepresentation())) {
                 // In revision A the triple is original
                 querySelectPart = String.format(querySelectPart, "?revisionA", "%s");
-                sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, SDDTripleStateEnum.ORIGINAL.getRpoRepresentation());
-            } else if (currentTripleStateA.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
+                sparqlQueryRevisionA = String.format(sparqlTemplateRevisionA, MergeTripleStateEnum.ORIGINAL.getDgRepresentation());
+            } else if (currentTripleStateA.equals(MergeTripleStateEnum.NOTINCLUDED.getSdRepresentation())) {
                 // In revision A the triple is not included
                 querySelectPart = String.format(querySelectPart, "", "%s");
                 sparqlQueryRevisionA = sparqlTemplateNotExistsRevisionA;
             }
 
             // B
-            if (currentTripleStateB.equals(SDDTripleStateEnum.ADDED.getSddRepresentation())) {
+            if (currentTripleStateB.equals(MergeTripleStateEnum.ADDED.getSdRepresentation())) {
                 // In revision B the triple was added
                 querySelectPart = String.format(querySelectPart, "?revisionB");
-                sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleStateEnum.ADDED.getRpoRepresentation());
-            } else if (currentTripleStateB.equals(SDDTripleStateEnum.DELETED.getSddRepresentation())) {
+                sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, MergeTripleStateEnum.ADDED.getDgRepresentation());
+            } else if (currentTripleStateB.equals(MergeTripleStateEnum.DELETED.getSdRepresentation())) {
                 // In revision B the triple was deleted
                 querySelectPart = String.format(querySelectPart, "?revisionB");
-                sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleStateEnum.DELETED.getRpoRepresentation());
-            } else if (currentTripleStateB.equals(SDDTripleStateEnum.ORIGINAL.getSddRepresentation())) {
+                sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, MergeTripleStateEnum.DELETED.getDgRepresentation());
+            } else if (currentTripleStateB.equals(MergeTripleStateEnum.ORIGINAL.getSdRepresentation())) {
                 // In revision B the triple is original
                 querySelectPart = String.format(querySelectPart, "?revisionB");
-                sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, SDDTripleStateEnum.ORIGINAL.getRpoRepresentation());
-            } else if (currentTripleStateB.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
+                sparqlQueryRevisionB = String.format(sparqlTemplateRevisionB, MergeTripleStateEnum.ORIGINAL.getDgRepresentation());
+            } else if (currentTripleStateB.equals(MergeTripleStateEnum.NOTINCLUDED.getSdRepresentation())) {
                 // In revision B the triple is not included
                 querySelectPart = String.format(querySelectPart, "");
                 sparqlQueryRevisionB = sparqlTemplateNotExistsRevisionB;
@@ -808,29 +806,29 @@ public class ThreeWayMergeCommitDraft extends MergeCommitDraft {
 
                 // Create the references A and B part of the query
                 String referencesAB = ". %n";
-                if (!currentTripleStateA.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation()) && !currentTripleStateB.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
+                if (!currentTripleStateA.equals(MergeTripleStateEnum.NOTINCLUDED.getSdRepresentation()) && !currentTripleStateB.equals(MergeTripleStateEnum.NOTINCLUDED.getSdRepresentation())) {
                     referencesAB = String.format(
-                            "			rpo:referencesA <%s> ; %n"
-                                    + "			rpo:referencesB <%s> %n", qsQuery.getResource("?revisionA").toString(),
+                            "			mmo:referencesA <%s> ; %n"
+                                    + "			mmo:referencesB <%s> %n", qsQuery.getResource("?revisionA").toString(),
                             qsQuery.getResource("?revisionB").toString());
-                } else if (currentTripleStateA.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation()) && !currentTripleStateB.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
+                } else if (currentTripleStateA.equals(MergeTripleStateEnum.NOTINCLUDED.getSdRepresentation()) && !currentTripleStateB.equals(MergeTripleStateEnum.NOTINCLUDED.getSdRepresentation())) {
                     referencesAB = String.format(
-                            "			rpo:referencesB <%s> %n", qsQuery.getResource("?revisionB").toString());
-                } else if (!currentTripleStateA.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation()) && currentTripleStateB.equals(SDDTripleStateEnum.NOTINCLUDED.getSddRepresentation())) {
+                            "			mmo:referencesB <%s> %n", qsQuery.getResource("?revisionB").toString());
+                } else if (!currentTripleStateA.equals(MergeTripleStateEnum.NOTINCLUDED.getSdRepresentation()) && currentTripleStateB.equals(MergeTripleStateEnum.NOTINCLUDED.getSdRepresentation())) {
                     referencesAB = String.format(
-                            "			rpo:referencesA <%s> %n", qsQuery.getResource("?revisionA").toString());
+                            "			mmo:referencesA <%s> %n", qsQuery.getResource("?revisionA").toString());
                 }
 
                 String queryTriple = Config.prefixes + String.format(
                         "INSERT DATA { GRAPH <%s> {%n"
-                                + "	<%s> a rpo:DifferenceGroup ; %n"
-                                + "	sddo:hasTripleStateA <%s> ; %n"
-                                + "	sddo:hasTripleStateB <%s> ; %n"
-                                + "	sddo:isConflicting %s ; %n"
-                                + "	sddo:automaticResolutionState <%s> ; %n"
-                                + "	rpo:hasDifference [ %n"
-                                + "		a rpo:Difference ; %n"
-                                + "			rpo:hasTriple [ %n"
+                                + "	<%s> a mmo:DifferenceGroup ; %n"
+                                + "	mmo:hasTripleStateA <%s> ; %n"
+                                + "	mmo:hasTripleStateB <%s> ; %n"
+                                + "	mmo:isConflicting %s ; %n"
+                                + "	mmo:automaticResolutionState <%s> ; %n"
+                                + "	mmo:hasDifference [ %n"
+                                + "		a mmo:Difference ; %n"
+                                + "			mmo:hasTriple [ %n"
                                 + "				rdf:subject <%s> ; %n"
                                 + "				rdf:predicate <%s> ; %n"
                                 + "				rdf:object %s %n"

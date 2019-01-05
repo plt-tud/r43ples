@@ -63,7 +63,11 @@ There is a configuration file named *resources/r43ples.conf*. The most important
 * *triplestore.user* - user of attached triplestore if necessary
 * *triplestore.password* - password of attached triplestore if necessary
 * *revision.graph* - named graph which is used by R43ples to store revision graph information
-* *sdd.graph* - named graph for storing the SDD
+* *sdg.graph* - named graph for storing the SDG
+* *sdg.graph.defaultContent* - default content of SDG which should be stored within named graph (sdg.graph)
+* *sdg.graph.defaultSDG* -  Structural Definition Group within the named graph (sdg.graph) which should be associated with new graphs under revision control (mmo:hasDefaultSDG)
+* *rules.graph* - named graph for storing the high level change aggregation and co-evolution rules
+* *rules.graph.defaultContent* - default content of rules
 * *service.host* - host which provides R43ples
 * *service.port* - port which should provide R43ples
 * *service.path* - path of host which should provide R43ples
@@ -145,22 +149,22 @@ There are some additional keywords which extends SPARQL and can be used to contr
 
 		USER "Mister X."
 		MESSAGE "merge example for a common merge"
-		MERGE GRAPH <test> SDD <http://eatld.et.tu-dresden.de/r43ples-sdd> BRANCH "branch-1" INTO BRANCH "branch-2"
+		MERGE GRAPH <test> BRANCH "branch-1" INTO BRANCH "branch-2"
 		
 		USER "Mister X."
         MESSAGE "merge example for automatica conflict resolution based upon specified SDD"
-        MERGE AUTO GRAPH <test> SDD <http://eatld.et.tu-dresden.de/r43ples-sdd>  BRANCH "branch-1" INTO BRANCH "branch-2"
+        MERGE AUTO GRAPH <test> BRANCH "branch-1" INTO BRANCH "branch-2"
         
         USER "Mister X."
         MESSAGE "merge example for a common merge with conflict resolution in WITH part"
-        MERGE GRAPH <test> SDD <http://eatld.et.tu-dresden.de/r43ples-sdd>  BRANCH "branch-1" INTO BRANCH "branch-2" WITH {
+        MERGE GRAPH <test> BRANCH "branch-1" INTO BRANCH "branch-2" WITH {
             <http://test.com/Carlos> <http://test.com/knows> <http://test.com/Danny> .
             <http://test.com/Franz> <http://test.com/knows> <http://test.com/Silvia> .
         }
         
         USER "Mister X."
         MESSAGE "merge example for manual specification of merged revision content"
-        MERGE MANUAL GRAPH <test> SDD <http://eatld.et.tu-dresden.de/r43ples-sdd>  BRANCH "branch-1" INTO BRANCH "branch-2" WITH {
+        MERGE MANUAL GRAPH <test> BRANCH "branch-1" INTO BRANCH "branch-2" WITH {
             <http://test.com/Carlos> <http://test.com/knows> <http://test.com/Danny> .
             <http://test.com/Franz> <http://test.com/knows> <http://test.com/Silvia> .
         }

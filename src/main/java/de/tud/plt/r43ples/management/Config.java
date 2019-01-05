@@ -45,10 +45,13 @@ public class Config {
 	// Internal r43ples settings
 	/** The r43ples revision graph **/
 	public static String revision_graph;
-	/** The SDD graph URI. **/
-	public static String sdd_graph;
-	/** The path to the SDD graph default content. **/
-	public static String sdd_graph_defaultContent;
+	/** The SDG graph URI. **/
+	public static String sdg_graph;
+	/** The path to the SDG graph default content. **/
+	public static String sdg_graph_defaultContent;
+	/** Structural Definition Group within the Named Graph (sdg.graph) which should be associated with new graphs under revision control (mmo:hasDefaultSDG). **/
+	public static String sdg_graph_defaultSDG;
+
 	/** The rules graph URI. **/
 	public static String rules_graph;
 	/** The path to the rules graph default content. **/
@@ -86,8 +89,9 @@ public class Config {
 			
 			revision_graph = config.getString("revision.graph");
 			
-			sdd_graph = config.getString("sdd.graph");
-			sdd_graph_defaultContent = config.getString("sdd.graph.defaultContent");
+			sdg_graph = config.getString("sdg.graph");
+			sdg_graph_defaultContent = config.getString("sdg.graph.defaultContent");
+			sdg_graph_defaultSDG = config.getString("sdg.graph.defaultSDG");
 
 			rules_graph = config.getString("rules.graph");
 			rules_graph_defaultContent = config.getString("rules.graph.defaultContent");
@@ -125,9 +129,9 @@ public class Config {
 			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
 			+ "PREFIX dc-terms:	<http://purl.org/dc/terms/> \n"
 			+ "PREFIX xsd:	<http://www.w3.org/2001/XMLSchema#> \n"
-			+ "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> \n"
-			+ "PREFIX sdd:	<http://eatld.et.tu-dresden.de/sdd#> \n"
-			+ "PREFIX rpo: <http://eatld.et.tu-dresden.de/rpo#> \n"
+			+ "PREFIX mmo: <http://eatld.et.tu-dresden.de/mmo#> \n"
+			//+ "PREFIX sdd:	<http://eatld.et.tu-dresden.de/sdd#> \n"
+			//+ "PREFIX rpo: <http://eatld.et.tu-dresden.de/rpo#> \n"
 			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
 			+ "PREFIX rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n"
 			+ "PREFIX owl:	<http://www.w3.org/2002/07/owl#> \n"

@@ -137,9 +137,9 @@ public class InitialCommitDraft extends CommitDraft {
                 "INSERT DATA { GRAPH <%1$s> {"
                         + "  <%2$s> a rmo:Graph, rmo:Entity ;"
                         + "    rmo:hasRevisionGraph <%3$s>;"
-                        + "    sddo:hasDefaultSDD sdd:defaultSDD."
+                        + "    mmo:hasDefaultSDG <%4$s>."
                         + "} }",
-                Config.revision_graph, revisionGraph.getGraphName(), revisionGraph.getRevisionGraphUri());
+                Config.revision_graph, revisionGraph.getGraphName(), revisionGraph.getRevisionGraphUri(), Config.sdg_graph_defaultSDG);
         TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryAddRevisionGraph);
 
         // Create new revision
