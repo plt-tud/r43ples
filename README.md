@@ -179,9 +179,13 @@ There are some additional keywords which extends SPARQL and can be used to contr
         MESSAGE "pick multiple revisions example"
         PICK GRAPH <test> REVISION "56" TO REVISION "62" INTO BRANCH "develop"
         
-* Aggregate atomic changes to high level ones
+* Aggregate atomic changes to high level ones (semantic changes)
         
         AGG GRAPH <test> REVISION "1" TO REVISION "2"
+        
+* Coevolve semantic changes to dependent revised graphs
+        
+        COEVO GRAPH <test> REVISION "1" TO REVISION "2"
 
 
 #### Query Rewriting option

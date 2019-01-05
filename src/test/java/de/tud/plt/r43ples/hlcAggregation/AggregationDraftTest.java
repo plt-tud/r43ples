@@ -25,7 +25,7 @@ import static org.junit.Assert.assertTrue;
  * @author Stephan Hensel
  */
 
-public class AggregationTest extends R43plesTest {
+public class AggregationDraftTest extends R43plesTest {
 
 	/** The graph name. **/
 	private static String graphName;

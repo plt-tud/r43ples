@@ -3,8 +3,8 @@ package de.tud.plt.r43ples.core;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.existentobjects.ChangeSet;
-import de.tud.plt.r43ples.existentobjects.HighLevelChanges;
 import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.existentobjects.SemanticChange;
 import de.tud.plt.r43ples.iohelper.Helper;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,7 +37,7 @@ import java.util.regex.Pattern;
  *
  * @author Stephan Hensel
  */
-public class Aggregation {
+public class AggregationDraft {
 
     /** The logger. **/
     private Logger logger = LogManager.getLogger(SelectConstructAskQuery.class);
@@ -74,10 +75,9 @@ public class Aggregation {
      * The constructor.
      *
      * @param request the request received by R43ples
-     * @return the query response
      * @throws InternalErrorException
      */
-    protected Aggregation(R43plesRequest request) throws InternalErrorException {
+    protected AggregationDraft(R43plesRequest request) throws InternalErrorException {
         // Dependencies
         this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
         this.uriCalculator = new URICalculator();
@@ -87,12 +87,35 @@ public class Aggregation {
         this.extractRequestInformation();
     }
 
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param changeSetStartToEnd the change set between start and end revision
+     */
+    protected AggregationDraft(RevisionGraph revisionGraph, ChangeSet changeSetStartToEnd) {
+        // Dependencies
+        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();
+        this.uriCalculator = new URICalculator();
+
+        this.revisionGraph = revisionGraph;
+        this.graphName = revisionGraph.getGraphName();
+        this.changeSetStartToEnd = changeSetStartToEnd;
+        this.startRevisionIdentifier = changeSetStartToEnd.getPriorRevision().getRevisionIdentifier();
+        this.endRevisionIdentifier = changeSetStartToEnd.getSucceedingRevision().getRevisionIdentifier();
+    }
+
     /**
      * Triggers the aggregation process and writes meta information into revision graph.
      *
+     * @return the list of created semantic changes
      * @throws InternalErrorException
      */
-    protected HighLevelChanges aggregate() throws InternalErrorException {
+    protected LinkedList<SemanticChange> aggregate() throws InternalErrorException {
+
+        // New linked list to store all created semantic changes
+        LinkedList<SemanticChange> semanticChangesLinkedList = new LinkedList<>();
 
         // Get all available aggregation rules
         String queryAggRules = String.format(
@@ -140,12 +163,12 @@ public class Aggregation {
 
             while (resultSet.hasNext()) {
                 QuerySolution qsResult = resultSet.next();
-                addMetaInformation(aggRuleURI, spinQueryN3, spinURI, qsResult);
+                semanticChangesLinkedList.add(addMetaInformation(aggRuleURI, spinQueryN3, spinURI, qsResult));
             }
 
         }
 
-        return null;
+        return semanticChangesLinkedList;
     }
 
     /**
@@ -155,8 +178,11 @@ public class Aggregation {
      * @param spinQueryN3 the SPIN query as N3
      * @param spinURI the URI of the SPIN query
      * @param qsResult the query result after execution of the SPIN query
+     *
+     * @return the created semantic change
+     * @throws InternalErrorException
      */
-    private void addMetaInformation(String aggRuleURI, String spinQueryN3, String spinURI, QuerySolution qsResult) {
+    private SemanticChange addMetaInformation(String aggRuleURI, String spinQueryN3, String spinURI, QuerySolution qsResult) throws InternalErrorException {
         // Basic meta data
         String semanticChangeURI = uriCalculator.getRandomURI(revisionGraph);
         String additionsURI = uriCalculator.getRandomURI(revisionGraph);
@@ -283,6 +309,8 @@ public class Aggregation {
         String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisionGraph.getRevisionGraphUri(), sb.toString());
 
         tripleStoreInterface.executeUpdateQuery(queryRevision);
+
+        return new SemanticChange(revisionGraph, semanticChangeURI);
 
     }
 

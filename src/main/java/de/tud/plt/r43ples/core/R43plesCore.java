@@ -11,6 +11,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -243,9 +244,22 @@ public class R43plesCore implements R43plesCoreInterface {
      * @throws InternalErrorException
      */
     @Override
-    public HighLevelChanges aggregate(R43plesRequest request) throws InternalErrorException {
-        Aggregation aggregation = new Aggregation(request);
-        return aggregation.aggregate();
+    public LinkedList<SemanticChange> aggregate(R43plesRequest request) throws InternalErrorException {
+        AggregationDraft aggregationDraft = new AggregationDraft(request);
+        return aggregationDraft.aggregate();
+    }
+
+    /**
+     * Coevolve revised graphs via detected semantic changes.
+     *
+     * @param request the request received by R43ples
+     * @return the coevolutions
+     * @throws InternalErrorException
+     */
+    @Override
+    public LinkedList<CoEvolution> coevolveAll(R43plesRequest request) throws InternalErrorException {
+        CoEvolutionDraft coevolutionDraft = new CoEvolutionDraft(request);
+        return coevolutionDraft.coevolveAll();
     }
 
     /**

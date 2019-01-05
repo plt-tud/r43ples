@@ -384,6 +384,11 @@ public class Endpoint {
 			r43plesCore.aggregate(request);
 			result = "Atomic changes successfully aggregated to high level ones";
 		}
+		else if (request.isCoEvoQuery()) {
+			logger.info("Coevolution query detected");
+			r43plesCore.coevolveAll(request);
+			result = "Semantic changes successfully coevolved";
+		}
 		else
 			throw new QueryErrorException("No R43ples query detected");
 

@@ -6,6 +6,7 @@ import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.management.R43plesRequest;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * This interface provides methods to access the core functions of R43ples.
@@ -172,7 +173,16 @@ public interface R43plesCoreInterface {
      * @return the aggregated high level changes
      * @throws InternalErrorException
      */
-    HighLevelChanges aggregate(R43plesRequest request) throws InternalErrorException;
+    LinkedList<SemanticChange> aggregate(R43plesRequest request) throws InternalErrorException;
+
+    /**
+     * Coevolve revised graphs via detected semantic changes.
+     *
+     * @param request the request received by R43ples
+     * @return the coevolutions
+     * @throws InternalErrorException
+     */
+    LinkedList<CoEvolution> coevolveAll(R43plesRequest request) throws InternalErrorException;
 
     // TODO Create objects for drop and select
     /**

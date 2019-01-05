@@ -230,8 +230,8 @@ aero:HeurisitcRule)</y:NodeLabel>
           <y:Geometry height="40.04824454472009" width="163.552734375" x="472.8196022230811" y="1364.6617377761343"/>
           <y:Fill hasColor="false" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="3.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="33.40234375" modelName="internal" modelPosition="c" textColor="#000000" visible="true" width="90.689453125" x="36.431640625" y="3.322950397360046">statement:add1
-(rmo:Statement)</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="33.40234375" modelName="internal" modelPosition="c" textColor="#000000" visible="true" width="86.72265625" x="38.4150390625" y="3.322950397360046">statement:add1
+(rdf:Statement)</y:NodeLabel>
           <y:Shape type="ellipse"/>
         </y:ShapeNode>
       </data>
