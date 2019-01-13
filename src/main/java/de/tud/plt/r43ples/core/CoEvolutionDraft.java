@@ -4,7 +4,6 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.iohelper.Helper;
-import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
@@ -12,17 +11,11 @@ import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.webservice.Endpoint;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.ResultSetFactory;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -95,12 +88,22 @@ public class CoEvolutionDraft {
      */
     protected LinkedList<CoEvolution> coevolveAll() throws InternalErrorException {
 
-        //TODO Extend the rule set and the semantic description of it within rules.ttl and AERO
+        // Stores all meta information of the evolution, has to be integrated into a SPARQL UPDATE query if all data is collected
+        StringBuilder metaInformationN3 = new StringBuilder();
+        String evolutionURI = uriCalculator.getRandomURI(Config.evolution_graph);
+
+        metaInformationN3.append(String.format(
+                "<%1$s> a rmo:Evolution. %n" +
+                "<%1$s> rmo:startRevision <%2$s>. %n" +
+                "<%1$s> rmo:endRevision <%3$s>. %n" +
+                "<%1$s> rmo:usedSourceRevisionGraph <%4$s>. %n",
+                evolutionURI, revisionGraph.getRevision(startRevisionIdentifier).getRevisionURI(),
+                revisionGraph.getRevision(endRevisionIdentifier).getRevisionURI(), revisionGraph.getRevisionGraphUri()));
 
         // Get associated semantic changes with specified change set
         LinkedList<SemanticChange> semanticChanges = changeSetStartToEnd.getSemanticChangesList();
 
-        // Check of semantic changes are not generated
+        // Check if semantic changes are not generated
         if ((semanticChanges == null) || (semanticChanges.isEmpty())) {
             // Aggregate
             AggregationDraft aggregationDraft = new AggregationDraft(revisionGraph, changeSetStartToEnd);
@@ -110,210 +113,136 @@ public class CoEvolutionDraft {
             }
         }
 
+        // Coevolution rule list
+        LinkedList<CoEvoRule> coevolutionRules = new LinkedList<>();
+
+        // Iterate through all available semantic changes and store results within the coevolution rule list
+        for (SemanticChange semanticChange : semanticChanges) {
+            // Get the rule of the semantic change and check if a coevolution part is specified
+            CoEvoRule coEvoRule = new CoEvoRule(semanticChange);
+            coevolutionRules.add(coEvoRule);
+            metaInformationN3.append(String.format("<%s> rmo:associatedSemanticChange <%s>. %n", evolutionURI, semanticChange.getSemanticChangeURI()));
+        }
 
         // Get all graphs within the repository
         HashMap<String, RevisionGraph> revisedGraphs = new RevisionControl().getRevisedGraphs();
 
         // Iterate through the revised graphs and search for dependencies (Check the master branch of each revised graph if there is a dependency)
-        // TODO
-        // Iterate through all available semantic changes and apply the corresponding coevolution match part of the rule
-        // TODO
-        // Create new revisions when a coevolution can be executed
-        // TODO
-        // Create the meta information within the revision graph and the evolutions graph
-        // TODO
-        // TODO Extend Config with coevolution graph name
+        for (String graphName : revisedGraphs.keySet()) {
+            RevisionGraph revisionGraph = revisedGraphs.get(graphName);
 
-//        // Get all available aggregation rules
-//        String queryAggRules = String.format(
-//                Config.prefixes
-//                        + "SELECT ?aggrule %n"
-//                        + "WHERE { GRAPH <%s> { %n"
-//                        + "	?aggrule a aero:HLCAggRule . %n"
-//                        + "} } %n", Config.rules_graph);
-//
-//        // Iterate over available aggregation rules
-//        ResultSet resultSetAggRules = tripleStoreInterface.executeSelectQuery(queryAggRules);
-//        while (resultSetAggRules.hasNext()) {
-//            QuerySolution qs = resultSetAggRules.next();
-//
-//            String aggRuleURI = qs.getResource("?aggrule").toString();
-//
-//            // Get the SPIN query
-//            String querySpinQuery = String.format(
-//                    Config.prefixes
-//                            + "SELECT ?query %n"
-//                            + "WHERE { GRAPH <%s> { %n"
-//                            + "	<%s> a aero:HLCAggRule ; %n"
-//                            + "      aero:spinQuery ?query ."
-//                            + "} } %n", Config.rules_graph, aggRuleURI);
-//            ResultSet resultSetSpinRule = tripleStoreInterface.executeSelectQuery(querySpinQuery);
-//            String spinURI = null;
-//            while (resultSetSpinRule.hasNext()) {
-//                QuerySolution qsSpin = resultSetSpinRule.next();
-//                spinURI = qsSpin.getResource("?query").toString();
-//            }
-//            String spinQueryN3 = Helper.getAllRelatedElementsToURI(Config.rules_graph, spinURI);
-//
-//            // Create the SPARQL query
-//            String sparqlAggQuery = Helper.getSparqlQueryFromSpin(spinQueryN3, spinURI);
-//
-//            // Replace placeholder with current request information
-//            sparqlAggQuery = sparqlAggQuery.replace("<http://NAMEDGRAPH#ADDSET-1-2>", "<" + changeSetStartToEnd.getAddSetURI() + ">");
-//            sparqlAggQuery = sparqlAggQuery.replace("<http://NAMEDGRAPH#DELETESET-1-2>", "<" + changeSetStartToEnd.getDeleteSetURI() + ">");
-//            sparqlAggQuery = sparqlAggQuery.replace("<http://NAMEDGRAPH#rev1>", "<" + graphName + "> REVISION \"" + startRevisionIdentifier + "\"");
-//            sparqlAggQuery = sparqlAggQuery.replace("<http://NAMEDGRAPH#rev2>", "<" + graphName + "> REVISION \"" + endRevisionIdentifier + "\"");
-//
-//            String sparqlResult = ep.sparql(sparqlAggQuery).getEntity().toString();
-//
-//            ResultSet resultSet = ResultSetFactory.fromXML(new ByteArrayInputStream(sparqlResult.getBytes()));
-//
-//            while (resultSet.hasNext()) {
-//                QuerySolution qsResult = resultSet.next();
-//                addMetaInformation(aggRuleURI, spinQueryN3, spinURI, qsResult);
-//            }
-//
-//        }
+            // URI of the coevolution of the current revision graph
+            String coevolutionURI = uriCalculator.getRandomURI(Config.evolution_graph);
+            metaInformationN3.append(String.format(
+                    "<%1$s> rmo:usedTargetRevisionGraph <%2$s>. %n" +
+                    "<%1$s> rmo:usedTargetBranch <%3$s>. %n",
+                    coevolutionURI, revisionGraph.getRevisionGraphUri(), revisionGraph.getBranchUri("master")));
 
+            // Create temporary named graphs for add and delete
+            String tempAddSetURI = uriCalculator.getRandomNamedGraphURI(graphName);
+            String tempDeleteSetURI = uriCalculator.getRandomNamedGraphURI(graphName);
+
+            tripleStoreInterface.executeCreateGraph(tempAddSetURI);
+            tripleStoreInterface.executeCreateGraph(tempDeleteSetURI);
+
+            // Iterate through all available semantic changes and apply the corresponding coevolution match part of the rule
+            for (CoEvoRule coEvoRule : coevolutionRules) {
+
+                String matchQuery = coEvoRule.getDependencyMatchingQuery().replaceAll("<http://NAMEDGRAPH#master>", "<" + graphName + ">");
+                ResultSet resultSetMatchings = tripleStoreInterface.executeSelectQuery(matchQuery);
+
+                // If the result set is not equal to null a coevolution can be executed
+                // URI of the coevolution of the current revision graph
+                String appliedCoevolutionURI = uriCalculator.getRandomURI(Config.evolution_graph);
+                metaInformationN3.append(String.format(
+                        "<%1$s> rmo:appliedCoEvolutionRule <%2$s>. %n" +
+                        "<%2$s> a rmo:AppliedCoEvolutionRule. %n" +
+                        "<%2$s> rmo:usedRule <%3$s>. %n",
+                        coevolutionURI, appliedCoevolutionURI, coEvoRule.getSemanticChange().getUsedRuleURI()));
+
+                // Maybe there are multiple matches within one graph
+                while (resultSetMatchings.hasNext()) {
+                    QuerySolution qsMatching = resultSetMatchings.next();
+
+                    String sparqlVariableGroupURI = uriCalculator.getRandomURI(Config.evolution_graph);
+                    metaInformationN3.append(String.format(
+                            "<%1$s> rmo:hasVariableGroup <%2$s>. %n" +
+                            "<%2$s> a aero:SPARQLVariableGroup. %n",
+                            appliedCoevolutionURI, sparqlVariableGroupURI));
+
+                    // Create a list of SPARQL variables and the results regarding the current revision graph
+                    LinkedList<SparqlVariable> sparqlVariablesListCurrentRevisionGraph = new LinkedList<>();
+
+                    String addSetInsertQuery = coEvoRule.getAddSetInsertQuery();
+                    addSetInsertQuery = addSetInsertQuery.replaceAll("<http://NAMEDGRAPH#master>", "<" + graphName + ">");
+                    addSetInsertQuery = addSetInsertQuery.replaceAll("<http://NAMEDGRAPH#ADDSET-NEW>", "<" + tempAddSetURI + ">");
+                    String deleteSetInsertQuery = coEvoRule.getDeleteSetInsertQuery();
+                    deleteSetInsertQuery = deleteSetInsertQuery.replaceAll("<http://NAMEDGRAPH#master>", "<" + graphName + ">");
+                    deleteSetInsertQuery = deleteSetInsertQuery.replaceAll("<http://NAMEDGRAPH#DELETESET-NEW>", "<" + tempDeleteSetURI + ">");
+
+                    for (SparqlVariable genericSparqlVariable : coEvoRule.getSparqlVariablesList()) {
+                        String value;
+                        String valueMetaInfo;
+                        boolean isResource;
+                        try {
+                            value = qsMatching.getResource("?" + genericSparqlVariable.getVariableName()).toString();
+                            valueMetaInfo = "<" + value + ">";
+                            isResource = true;
+                        } catch (Exception e) {
+                            value = qsMatching.getLiteral("?" + genericSparqlVariable.getVariableName()).toString();
+                            valueMetaInfo = "\"" + value + "\"";
+                            isResource = false;
+                        }
+                        SparqlVariable specificSparqlVariable = new SparqlVariable(revisionGraph, null, genericSparqlVariable.getVariableName(), genericSparqlVariable.getSpinResourceURI(), value, isResource);
+                        sparqlVariablesListCurrentRevisionGraph.add(specificSparqlVariable);
+
+                        addSetInsertQuery = addSetInsertQuery.replaceAll("\\?" + genericSparqlVariable.getVariableName(), valueMetaInfo);
+                        deleteSetInsertQuery = deleteSetInsertQuery.replaceAll("\\?" + genericSparqlVariable.getVariableName(), valueMetaInfo);
+
+                        tripleStoreInterface.executeUpdateQuery(addSetInsertQuery);
+                        tripleStoreInterface.executeUpdateQuery(deleteSetInsertQuery);
+
+                        String sparqlVariableURI = uriCalculator.getRandomURI(Config.evolution_graph);
+                        metaInformationN3.append(String.format(
+                                "<%1$s> rmo:hasVariables <%2$s>. %n" +
+                                "<%2$s> a aero:SPARQLVariable. %n" +
+                                "<%2$s> sp:varName \"%3$s\". %n" +
+                                "<%2$s> aero:value %4$s. %n" +
+                                "<%2$s> aero:spinResource <%5$s>. %n",
+                                sparqlVariableGroupURI, sparqlVariableURI, genericSparqlVariable.getVariableName(), valueMetaInfo, genericSparqlVariable.getSpinResourceURI()));
+
+                    }
+                }
+
+            }
+
+            String addSetN3 = Helper.getContentOfNamedGraphAsN3(tempAddSetURI);
+            String deleteSetN3 = Helper.getContentOfNamedGraphAsN3(tempDeleteSetURI);
+
+            // Create a new update commit with the specified add and delete sets from temporary graphs for the current revision graph
+            Branch branch = new Branch(revisionGraph, "master", true);
+            // TODO user and commit message
+            UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(graphName, addSetN3, deleteSetN3, "TEST", "TEST", branch);
+            UpdateCommit updateCommit = updateCommitDraft.createInTripleStore().get(0);
+
+            tripleStoreInterface.executeUpdateQuery("DROP SILENT GRAPH <" + tempAddSetURI + ">");
+            tripleStoreInterface.executeUpdateQuery("DROP SILENT GRAPH <" + tempDeleteSetURI + ">");
+
+            // Create the generated revision
+            metaInformationN3.append(String.format(
+                    "<%1$s> rmo:generated <%2$s>. %n",
+                    coevolutionURI, updateCommit.getGeneratedRevision().getRevisionURI()));
+        }
+
+        // Write meta data into evolution graph
+        String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", Config.evolution_graph, metaInformationN3.toString());
+        tripleStoreInterface.executeUpdateQuery(queryRevision);
+
+
+        //TODO Extend the rule set and the semantic description of it within rules.ttl and AERO
+
+        // TODO Create a new CoEvoObject which is returned
         return null;
-    }
-
-    /**
-     * Adds meta information of aggregation to the revision graph.
-     *
-     * @param aggRuleURI the aggregation rule URI
-     * @param spinQueryN3 the SPIN query as N3
-     * @param spinURI the URI of the SPIN query
-     * @param qsResult the query result after execution of the SPIN query
-     */
-    private void addMetaInformation(String aggRuleURI, String spinQueryN3, String spinURI, QuerySolution qsResult) {
-//        // Basic meta data
-//        String semanticChangeURI = uriCalculator.getRandomURI(revisionGraph);
-//        String additionsURI = uriCalculator.getRandomURI(revisionGraph);
-//        String deletionsURI = uriCalculator.getRandomURI(revisionGraph);
-//
-//        StringBuilder sb = new StringBuilder();
-//        sb.append(String.format(
-//                "<%s> a rmo:SemanticChange ; %n"
-//                        + "	rmo:additions <%s> ; %n"
-//                        + "	rmo:deletions <%s> ; %n"
-//                        + "	aero:usedRule <%s> . %n",
-//                semanticChangeURI, additionsURI, deletionsURI, aggRuleURI));
-//
-//        // Variable meta data
-//        HashMap<String,String> variableMap = Helper.getVariableMapFromSpin(spinQueryN3, spinURI);
-//        HashMap<String,String> variableResultMap = new HashMap<>();
-//
-//        Iterator ite = qsResult.varNames();
-//        while (ite.hasNext()) {
-//            String sparqlVariableURI = uriCalculator.getRandomURI(revisionGraph);
-//            String varName = ite.next().toString();
-//            String value;
-//            try {
-//                value = "<" + qsResult.getResource("?" + varName).toString() + ">";
-//            } catch (Exception e) {
-//                value = "\"" + qsResult.getLiteral("?" + varName).toString() + "\"";
-//            }
-//            variableResultMap.put(varName,value);
-//            sb.append(String.format(
-//                "<%s> aero:hasVariables <%s> . %n" +
-//                "<%s> a aero:SPARQLVariable ; %n"
-//                        + "	sp:varName \"%s\" ; %n"
-//                        + "	aero:value %s ; %n"
-//                        + "	aero:spinResource <%s> . %n",
-//                semanticChangeURI, sparqlVariableURI, sparqlVariableURI, varName, value, variableMap.get(varName)));
-//
-//        }
-//
-//        // TRIG data - Get additions and deletions and store them as TRIG
-//
-//        // Get the additions and deletions SPIN queries
-//        String queryAddDelSpinQueries = String.format(
-//                Config.prefixes
-//                        + "SELECT ?queryAdd ?queryDel %n"
-//                        + "WHERE { GRAPH <%s> { %n"
-//                        + "	<%s> a aero:HLCAggRule ; %n"
-//                        + "      aero:addSetDetectionQuery ?subQueryAdd ; %n"
-//                        + "      aero:deleteSetDetectionQuery ?subQueryDel . %n"
-//                        + " ?subQueryAdd <http://spinrdf.org/sp#query> ?queryAdd. %n"
-//                        + " ?subQueryDel <http://spinrdf.org/sp#query> ?queryDel. %n"
-//                        + "} } %n", Config.rules_graph, aggRuleURI);
-//        ResultSet resultSetAddDelQueries = tripleStoreInterface.executeSelectQuery(queryAddDelSpinQueries);
-//        String spinAddURI = null;
-//        String spinDelURI = null;
-//        while (resultSetAddDelQueries.hasNext()) {
-//            QuerySolution qsSpin = resultSetAddDelQueries.next();
-//            spinAddURI = qsSpin.getResource("?queryAdd").toString();
-//            spinDelURI = qsSpin.getResource("?queryDel").toString();
-//        }
-//
-//        String sparqlAddQuery = Helper.getSparqlQueryFromSpin(spinQueryN3, spinAddURI);
-//        String sparqlDelQuery = Helper.getSparqlQueryFromSpin(spinQueryN3, spinDelURI);
-//
-//        // Get the WHERE part of the queries and replace the variables with query results to get the involved triples
-//        Pattern patternWherePart = Pattern.compile(
-//                "(?s:.)*WHERE\\s*\\{\\s*GRAPH(?s:.)*\\{(?<where>(?s:.)*)?\\}\\s*\\}",
-//                patternModifier);
-//
-//        assert sparqlAddQuery != null;
-//        Matcher mAdd = patternWherePart.matcher(sparqlAddQuery);
-//        assert sparqlDelQuery != null;
-//        Matcher mDel = patternWherePart.matcher(sparqlDelQuery);
-//
-//        mAdd.find();
-//        mDel.find();
-//
-//        String triplesAdd = mAdd.group("where").trim();
-//        String triplesDel = mDel.group("where").trim();
-//
-//        if (!triplesAdd.endsWith("."))
-//            triplesAdd = triplesAdd.concat(".");
-//        if (!triplesDel.endsWith("."))
-//            triplesDel = triplesDel.concat(".");
-//
-//        for (String currentKey : variableResultMap.keySet()) {
-//            triplesAdd = triplesAdd.replaceAll("\\?" + currentKey, variableResultMap.get(currentKey));
-//            triplesDel = triplesDel.replaceAll("\\?" + currentKey, variableResultMap.get(currentKey));
-//        }
-//
-//        Model modelAdd = JenaModelManagement.readTurtleStringToJenaModel(triplesAdd);
-//
-//        sb.append(String.format("<%s> a rmo:Set . %n", additionsURI));
-//
-//        StmtIterator iteStmtAdd = modelAdd.listStatements();
-//        while (iteStmtAdd.hasNext()) {
-//            Statement statement = iteStmtAdd.next();
-//            String statementURI = uriCalculator.getRandomURI(revisionGraph);
-//            sb.append(String.format(
-//                "<%s> rmo:statements <%s> . %n" +
-//                "<%s> a rdf:Statement ; %n"
-//                        + " rdf:subject <%s> ; %n"
-//                        + " rdf:predicate <%s> ; %n"
-//                        + " rdf:object <%s> . %n",
-//                additionsURI, statementURI, statementURI, statement.getSubject().toString(), statement.getPredicate(), statement.getObject()));
-//        }
-//
-//        Model modelDel = JenaModelManagement.readTurtleStringToJenaModel(triplesDel);
-//
-//        sb.append(String.format("<%s> a rmo:Set . %n", deletionsURI));
-//
-//        StmtIterator iteStmtDel = modelDel.listStatements();
-//        while (iteStmtDel.hasNext()) {
-//            Statement statement = iteStmtDel.next();
-//            String statementURI = uriCalculator.getRandomURI(revisionGraph);
-//            sb.append(String.format(
-//                    "<%s> rmo:statements <%s> . %n" +
-//                            "<%s> a rdf:Statement ; %n"
-//                            + " rdf:subject <%s> ; %n"
-//                            + " rdf:predicate <%s> ; %n"
-//                            + " rdf:object <%s> . %n",
-//                    deletionsURI, statementURI, statementURI, statement.getSubject().toString(), statement.getPredicate(), statement.getObject()));
-//        }
-//
-//        String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", revisionGraph.getRevisionGraphUri(), sb.toString());
-//
-//        tripleStoreInterface.executeUpdateQuery(queryRevision);
-
     }
 
     /**

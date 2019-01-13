@@ -62,7 +62,10 @@ public class SparqlVariable {
      */
     public SparqlVariable(RevisionGraph revisionGraph, String sparqlVariableURI, String variableName, String spinResourceURI, String value, boolean isResource) {
         this.revisionGraph = revisionGraph;
-        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
+        // Null check is necessary because this constructor is also used with an empty revision graph as a temporary object
+        if (this.revisionGraph != null) {
+            this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();
+        }
         this.sparqlVariableURI = sparqlVariableURI;
         this.variableName = variableName;
         this.spinResourceURI = spinResourceURI;

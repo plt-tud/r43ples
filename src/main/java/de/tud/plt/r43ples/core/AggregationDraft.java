@@ -149,7 +149,7 @@ public class AggregationDraft {
             String spinQueryN3 = Helper.getAllRelatedElementsToURI(Config.rules_graph, spinURI);
 
             // Create the SPARQL query
-            String sparqlAggQuery = Helper.getSparqlQueryFromSpin(spinQueryN3, spinURI);
+            String sparqlAggQuery = Helper.getSparqlSelectQueryFromSpin(spinQueryN3, spinURI);
 
             // Replace placeholder with current request information
             sparqlAggQuery = sparqlAggQuery.replace("<http://NAMEDGRAPH#ADDSET-1-2>", "<" + changeSetStartToEnd.getAddSetURI() + ">");
@@ -243,8 +243,8 @@ public class AggregationDraft {
             spinDelURI = qsSpin.getResource("?queryDel").toString();
         }
 
-        String sparqlAddQuery = Helper.getSparqlQueryFromSpin(spinQueryN3, spinAddURI);
-        String sparqlDelQuery = Helper.getSparqlQueryFromSpin(spinQueryN3, spinDelURI);
+        String sparqlAddQuery = Helper.getSparqlSelectQueryFromSpin(spinQueryN3, spinAddURI);
+        String sparqlDelQuery = Helper.getSparqlSelectQueryFromSpin(spinQueryN3, spinDelURI);
 
         // Get the WHERE part of the queries and replace the variables with query results to get the involved triples
         Pattern patternWherePart = Pattern.compile(

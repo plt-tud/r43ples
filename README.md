@@ -63,6 +63,7 @@ There is a configuration file named *resources/r43ples.conf*. The most important
 * *triplestore.user* - user of attached triplestore if necessary
 * *triplestore.password* - password of attached triplestore if necessary
 * *revision.graph* - named graph which is used by R43ples to store revision graph information
+* *evolution.graph* - named graph which is used by R43ples to store all information regarding evolutions
 * *sdg.graph* - named graph for storing the SDG
 * *sdg.graph.defaultContent* - default content of SDG which should be stored within named graph (sdg.graph)
 * *sdg.graph.defaultSDG* -  Structural Definition Group within the named graph (sdg.graph) which should be associated with new graphs under revision control (mmo:hasDefaultSDG)

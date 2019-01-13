@@ -43,8 +43,11 @@ public class Config {
 	public static String ssl_password;
 	
 	// Internal r43ples settings
-	/** The r43ples revision graph **/
+	/** The r43ples revision graph. **/
 	public static String revision_graph;
+	/** The r43ples evolution graph. **/
+	public static String evolution_graph;
+
 	/** The SDG graph URI. **/
 	public static String sdg_graph;
 	/** The path to the SDG graph default content. **/
@@ -88,6 +91,7 @@ public class Config {
 			ssl_password = config.getString("ssl.password");
 			
 			revision_graph = config.getString("revision.graph");
+			evolution_graph = config.getString("evolution.graph");
 			
 			sdg_graph = config.getString("sdg.graph");
 			sdg_graph_defaultContent = config.getString("sdg.graph.defaultContent");

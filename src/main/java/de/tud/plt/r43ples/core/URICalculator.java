@@ -506,4 +506,39 @@ public class URICalculator {
         return tempURI;
     }
 
+    /**
+     * Get a new random URI which is unique within a specific named graph.
+     *
+     * @param namedGraphURI the named graph URI
+     * @return the random URI
+     */
+    protected String getRandomURI(String namedGraphURI) {
+        boolean searchURI = true;
+        String tempURI = null;
+        while (searchURI) {
+            String uuid = UUID.randomUUID().toString();
+            tempURI = namedGraphURI + "-" + uuid;
+            String queryAskSubject = String.format("ASK FROM <%s> {<%s> ?p ?o} %n", namedGraphURI, tempURI);
+            searchURI = tripleStoreInterface.executeAskQuery(queryAskSubject);
+        }
+        return tempURI;
+    }
+
+    /**
+     * Get a random named graph URI which is unique within the triple store.
+     *
+     * @param baseURI the base URI which will be extended with UUID
+     * @return the new random named graph URI
+     */
+    protected String getRandomNamedGraphURI(String baseURI) {
+        boolean searchURI = true;
+        String tempURI = null;
+        while (searchURI) {
+            String uuid = UUID.randomUUID().toString();
+            tempURI = baseURI + "-" + uuid;
+            searchURI = checkNamedGraphExistence(tempURI);
+        }
+        return tempURI;
+    }
+
 }
