@@ -134,9 +134,11 @@ public class CoEvolutionDraft {
             // URI of the coevolution of the current revision graph
             String coevolutionURI = uriCalculator.getRandomURI(Config.evolution_graph);
             metaInformationN3.append(String.format(
-                    "<%1$s> rmo:usedTargetRevisionGraph <%2$s>. %n" +
-                    "<%1$s> rmo:usedTargetBranch <%3$s>. %n",
-                    coevolutionURI, revisionGraph.getRevisionGraphUri(), revisionGraph.getBranchUri("master")));
+                    "<%1$s> rmo:performedCoEvolution <%2$s>. %n" +
+                    "<%2$s> a rmo:CoEvolution. %n" +
+                    "<%2$s> rmo:usedTargetRevisionGraph <%3$s>. %n" +
+                    "<%2$s> rmo:usedTargetBranch <%4$s>. %n",
+                    evolutionURI, coevolutionURI, revisionGraph.getRevisionGraphUri(), revisionGraph.getBranchUri("master")));
 
             // Create temporary named graphs for add and delete
             String tempAddSetURI = uriCalculator.getRandomNamedGraphURI(graphName);
@@ -155,9 +157,9 @@ public class CoEvolutionDraft {
                 // URI of the coevolution of the current revision graph
                 String appliedCoevolutionURI = uriCalculator.getRandomURI(Config.evolution_graph);
                 metaInformationN3.append(String.format(
-                        "<%1$s> rmo:appliedCoEvolutionRule <%2$s>. %n" +
-                        "<%2$s> a rmo:AppliedCoEvolutionRule. %n" +
-                        "<%2$s> rmo:usedRule <%3$s>. %n",
+                        "<%1$s> aero:appliedCoEvolutionRule <%2$s>. %n" +
+                        "<%2$s> a aero:AppliedCoEvolutionRule. %n" +
+                        "<%2$s> aero:usedRule <%3$s>. %n",
                         coevolutionURI, appliedCoevolutionURI, coEvoRule.getSemanticChange().getUsedRuleURI()));
 
                 // Maybe there are multiple matches within one graph
@@ -166,7 +168,7 @@ public class CoEvolutionDraft {
 
                     String sparqlVariableGroupURI = uriCalculator.getRandomURI(Config.evolution_graph);
                     metaInformationN3.append(String.format(
-                            "<%1$s> rmo:hasVariableGroup <%2$s>. %n" +
+                            "<%1$s> aero:hasVariableGroup <%2$s>. %n" +
                             "<%2$s> a aero:SPARQLVariableGroup. %n",
                             appliedCoevolutionURI, sparqlVariableGroupURI));
 
@@ -204,7 +206,7 @@ public class CoEvolutionDraft {
 
                         String sparqlVariableURI = uriCalculator.getRandomURI(Config.evolution_graph);
                         metaInformationN3.append(String.format(
-                                "<%1$s> rmo:hasVariables <%2$s>. %n" +
+                                "<%1$s> aero:hasVariables <%2$s>. %n" +
                                 "<%2$s> a aero:SPARQLVariable. %n" +
                                 "<%2$s> sp:varName \"%3$s\". %n" +
                                 "<%2$s> aero:value %4$s. %n" +
