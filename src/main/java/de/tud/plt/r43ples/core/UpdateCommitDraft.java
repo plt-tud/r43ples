@@ -251,7 +251,7 @@ public class UpdateCommitDraft extends CommitDraft {
 		// Create a new commit (activity)
 		StringBuilder queryContent = new StringBuilder(1000);
 		queryContent.append(String.format(
-				"<%s> a rmo:RevisionCommit, rmo:Commit ; "
+				"<%s> a rmo:UpdateCommit, rmo:Commit ; "
 						+ "	rmo:wasAssociatedWith <%s>;"
 						+ "	rmo:generated <%s>;"
 						+ " rmo:hasChangeSet <%s> ;"

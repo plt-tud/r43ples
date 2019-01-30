@@ -121,7 +121,7 @@ public class R43plesCoreTest extends R43plesTest {
         core.createUpdateCommit(graphName, addSet1, null, "TestUser", "update commit during test", initialCommit.getGeneratedBranch().getReferenceIdentifier());
 
         String result = rg.getContentOfRevisionGraph("TURTLE");
-        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_revisioncommit_1.ttl");
+        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_updatecommit_1.ttl");
 
         Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
         Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);
@@ -158,7 +158,7 @@ public class R43plesCoreTest extends R43plesTest {
         core.createUpdateCommit(req);
 
         String result = rg.getContentOfRevisionGraph("TURTLE");
-        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_revisioncommit_1.ttl");
+        String expected = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/revisiongraph_updatecommit_1.ttl");
 
         Model model_result = JenaModelManagement.readTurtleStringToJenaModel(result);
         Model model_expected = JenaModelManagement.readTurtleStringToJenaModel(expected);

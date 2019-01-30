@@ -351,7 +351,7 @@ rmo:wasQuotedFrom : rmo:Revision</y:AttributeLabel>
               <y:Geometry height="32.62215200000014" width="137.75" x="549.4686196625613" y="256.02278399999886"/>
               <y:Fill hasColor="false" transparent="false"/>
               <y:BorderStyle color="#000000" type="line" width="1.0"/>
-              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" modelName="custom" textColor="#000000" visible="true" width="135.4599609375" x="1.14501953125" y="3.0">rmo:RevisionCommit<y:LabelModel>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="13" fontStyle="bold" hasBackgroundColor="false" hasLineColor="false" height="19.92626953125" modelName="custom" textColor="#000000" visible="true" width="125.33544921875" x="6.207275390625" y="3.0">rmo:UpdateCommit<y:LabelModel>
                   <y:SmartNodeLabelModel distance="4.0"/>
                 </y:LabelModel>
                 <y:ModelParameter>

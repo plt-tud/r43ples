@@ -523,12 +523,12 @@ rmo:Revision rdf:type owl:Class ;
 
 
 
-###  http://eatld.et.tu-dresden.de/rmo#RevisionCommit
+###  http://eatld.et.tu-dresden.de/rmo#UpdateCommit
 
-rmo:RevisionCommit rdf:type owl:Class ;
+rmo:UpdateCommit rdf:type owl:Class ;
                    
-                   rdfs:label "Revision Commit"@de ,
-                              "revision commit"@en ;
+                   rdfs:label "Update Commit"@de ,
+                              "update commit"@en ;
                    
                    rdfs:subClassOf rmo:Commit .
 
