@@ -253,11 +253,11 @@ public class R43plesCore implements R43plesCoreInterface {
      * Coevolve revised graphs via detected semantic changes.
      *
      * @param request the request received by R43ples
-     * @return the coevolutions
+     * @return the evolution object containing all performed coevolutions
      * @throws InternalErrorException
      */
     @Override
-    public LinkedList<CoEvolution> coevolveAll(R43plesRequest request) throws InternalErrorException {
+    public Evolution coevolveAll(R43plesRequest request) throws InternalErrorException {
         CoEvolutionDraft coevolutionDraft = new CoEvolutionDraft(request);
         return coevolutionDraft.coevolveAll();
     }

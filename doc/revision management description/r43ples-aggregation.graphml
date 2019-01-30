@@ -191,7 +191,7 @@ aero:HeurisitcRule)</y:NodeLabel>
           <y:Geometry height="40.04824454472009" width="163.552734375" x="286.24450073438544" y="1306.6473927464976"/>
           <y:Fill hasColor="false" transparent="false"/>
           <y:BorderStyle color="#000000" type="line" width="3.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="internal" modelPosition="c" textColor="#000000" visible="true" width="107.37109375" x="28.0908203125" y="10.673536334860046">spinresourcer:var-a</y:NodeLabel>
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="18.701171875" modelName="internal" modelPosition="c" textColor="#000000" visible="true" width="103.375" x="30.0888671875" y="10.673536334860046">spinresource:var-a</y:NodeLabel>
           <y:Shape type="ellipse"/>
         </y:ShapeNode>
       </data>

@@ -18,7 +18,7 @@ import java.util.LinkedList;
 public class SemanticChange {
 
     /** The logger. **/
-    private Logger logger = LogManager.getLogger(Commit.class);
+    private Logger logger = LogManager.getLogger(SemanticChange.class);
 
     /** The semantic change URI. */
     private String semanticChangeURI;
@@ -74,7 +74,7 @@ public class SemanticChange {
     }
 
     /**
-     * Calculate additional information of the current commit and store this information to local variables.
+     * Calculate additional information of the current semantic change and store this information to local variables.
      *
      * @throws InternalErrorException
      */

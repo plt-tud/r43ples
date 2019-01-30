@@ -179,10 +179,10 @@ public interface R43plesCoreInterface {
      * Coevolve revised graphs via detected semantic changes.
      *
      * @param request the request received by R43ples
-     * @return the coevolutions
+     * @return the evolution object containing all performed coevolutions
      * @throws InternalErrorException
      */
-    LinkedList<CoEvolution> coevolveAll(R43plesRequest request) throws InternalErrorException;
+    Evolution coevolveAll(R43plesRequest request) throws InternalErrorException;
 
     // TODO Create objects for drop and select
     /**

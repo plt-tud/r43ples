@@ -74,6 +74,19 @@ public class SparqlVariable {
     }
 
     /**
+     * The constructor. Used for the coevolution
+     *
+     * @param sparqlVariableURI the SPARQL variable URI
+     * @throws InternalErrorException
+     */
+    public SparqlVariable(String sparqlVariableURI) throws InternalErrorException {
+        this.revisionGraphURI = Config.evolution_graph;
+        this.sparqlVariableURI = sparqlVariableURI;
+
+        retrieveAdditionalInformation();
+    }
+
+    /**
      * Calculate additional information of the current SPARQL variable and store this information to local variables.
      *
      * @throws InternalErrorException

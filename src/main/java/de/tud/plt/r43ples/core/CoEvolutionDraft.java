@@ -83,10 +83,10 @@ public class CoEvolutionDraft {
     /**
      * Triggers the coevolution process and writes meta information into revision graph and the coevolution graph.
      *
-     * @return the list of coevolutions
+     * @return the evolution object containing all performed coevolutions
      * @throws InternalErrorException
      */
-    protected LinkedList<CoEvolution> coevolveAll() throws InternalErrorException {
+    protected Evolution coevolveAll() throws InternalErrorException {
 
         // Stores all meta information of the evolution, has to be integrated into a SPARQL UPDATE query if all data is collected
         StringBuilder metaInformationN3 = new StringBuilder();
@@ -98,7 +98,7 @@ public class CoEvolutionDraft {
                 "<%1$s> rmo:endRevision <%3$s>. %n" +
                 "<%1$s> rmo:usedSourceRevisionGraph <%4$s>. %n",
                 evolutionURI, revisionGraph.getRevision(startRevisionIdentifier).getRevisionURI(),
-                revisionGraph.getRevision(endRevisionIdentifier).getRevisionURI(), revisionGraph.getRevisionGraphUri()));
+                revisionGraph.getRevision(endRevisionIdentifier).getRevisionURI(), revisionGraph.getGraphName()));
 
         // Get associated semantic changes with specified change set
         LinkedList<SemanticChange> semanticChanges = changeSetStartToEnd.getSemanticChangesList();
@@ -126,6 +126,8 @@ public class CoEvolutionDraft {
 
         // Get all graphs within the repository
         HashMap<String, RevisionGraph> revisedGraphs = new RevisionControl().getRevisedGraphs();
+        // Remove the graph which should be coevolved
+        revisedGraphs.remove(this.revisionGraph.getGraphName());
 
         // Iterate through the revised graphs and search for dependencies (Check the master branch of each revised graph if there is a dependency)
         for (String graphName : revisedGraphs.keySet()) {
@@ -138,7 +140,7 @@ public class CoEvolutionDraft {
                     "<%2$s> a rmo:CoEvolution. %n" +
                     "<%2$s> rmo:usedTargetRevisionGraph <%3$s>. %n" +
                     "<%2$s> rmo:usedTargetBranch <%4$s>. %n",
-                    evolutionURI, coevolutionURI, revisionGraph.getRevisionGraphUri(), revisionGraph.getBranchUri("master")));
+                    evolutionURI, coevolutionURI, revisionGraph.getGraphName(), revisionGraph.getBranchUri("master")));
 
             // Create temporary named graphs for add and delete
             String tempAddSetURI = uriCalculator.getRandomNamedGraphURI(graphName);
@@ -159,8 +161,9 @@ public class CoEvolutionDraft {
                 metaInformationN3.append(String.format(
                         "<%1$s> aero:appliedCoEvolutionRule <%2$s>. %n" +
                         "<%2$s> a aero:AppliedCoEvolutionRule. %n" +
-                        "<%2$s> aero:usedRule <%3$s>. %n",
-                        coevolutionURI, appliedCoevolutionURI, coEvoRule.getSemanticChange().getUsedRuleURI()));
+                        "<%2$s> aero:usedRule <%3$s>. %n" +
+                        "<%2$s> aero:usedSemanticChange <%4$s>. %n",
+                        coevolutionURI, appliedCoevolutionURI, coEvoRule.getSemanticChange().getUsedRuleURI(), coEvoRule.getSemanticChange().getSemanticChangeURI()));
 
                 // Maybe there are multiple matches within one graph
                 while (resultSetMatchings.hasNext()) {
@@ -240,11 +243,9 @@ public class CoEvolutionDraft {
         String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", Config.evolution_graph, metaInformationN3.toString());
         tripleStoreInterface.executeUpdateQuery(queryRevision);
 
-
         //TODO Extend the rule set and the semantic description of it within rules.ttl and AERO
 
-        // TODO Create a new CoEvoObject which is returned
-        return null;
+        return new Evolution(evolutionURI);
     }
 
     /**
