@@ -68,8 +68,8 @@ public class AppliedCoEvolutionRule {
         if (resultSet.hasNext()) {
             QuerySolution qs = resultSet.next();
             RevisionGraph usedSourceRevisionGraph = new RevisionGraph(qs.getResource("?sourceRevisionGraph").toString());
-            SemanticChange semanticChange = new SemanticChange(usedSourceRevisionGraph, qs.getResource("?usedSemanticChangeURI").toString());
-            usedRule = new CoEvoRule(semanticChange);
+            usedSemanticChange = new SemanticChange(usedSourceRevisionGraph, qs.getResource("?usedSemanticChangeURI").toString());
+            usedRule = new CoEvoRule(usedSemanticChange);
         } else {
             throw new InternalErrorException("No additional information found for applied coevolution rule URI " + appliedCoEvolutionRuleURI + ".");
         }
