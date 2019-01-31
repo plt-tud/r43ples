@@ -186,6 +186,8 @@ There are some additional keywords which extends SPARQL and can be used to contr
         
 * Coevolve semantic changes to dependent revised graphs
         
+        USER "Mister X."
+        MESSAGE "Coevolution example"
         COEVO GRAPH <test> REVISION "1" TO REVISION "2"
 
 

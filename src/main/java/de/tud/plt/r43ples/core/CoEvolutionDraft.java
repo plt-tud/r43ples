@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 /**
  * Coevolve all dependent graphs based upon aggregated atomic changes. Uses the coevolution rules provided which are associated with the HLC aggregation.
- * Example query: COEVO GRAPH <http://test.com/r43ples-dataset-hlc-aggregation> REVISION "1" TO REVISION "2"
+ * Example query: USER "Bob" MESSAGE "test coevolution" COEVO GRAPH <http://test.com/r43ples-dataset-hlc-aggregation> REVISION "1" TO REVISION "2"
  * Currently the implementation only works if the end revision is the direct succeeding revision of the start revision.
  * Dependent graphs currently only identified on their master branch. The result of the coevolution is currently always committed to the master branch.
  *
@@ -43,6 +43,10 @@ public class CoEvolutionDraft {
 
     /** The corresponding R43ples request. **/
     private R43plesRequest request;
+    /** The associated user name of the commit. **/
+    private String user;
+    /** The message of the commit. **/
+    private String message;
     /** The start revision identifier. **/
     private String startRevisionIdentifier;
     /** The end revision identifier. **/
@@ -226,8 +230,8 @@ public class CoEvolutionDraft {
 
             // Create a new update commit with the specified add and delete sets from temporary graphs for the current revision graph
             Branch branch = new Branch(revisionGraph, "master", true);
-            // TODO user and commit message
-            UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(graphName, addSetN3, deleteSetN3, "TEST", "TEST", branch);
+
+            UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(graphName, addSetN3, deleteSetN3, user, message, branch);
             UpdateCommit updateCommit = updateCommitDraft.createInTripleStore().get(0);
 
             tripleStoreInterface.executeUpdateQuery("DROP SILENT GRAPH <" + tempAddSetURI + ">");
@@ -243,8 +247,6 @@ public class CoEvolutionDraft {
         String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", Config.evolution_graph, metaInformationN3.toString());
         tripleStoreInterface.executeUpdateQuery(queryRevision);
 
-        //TODO Extend the rule set and the semantic description of it within rules.ttl and AERO
-
         return new Evolution(evolutionURI);
     }
 
@@ -254,6 +256,12 @@ public class CoEvolutionDraft {
      * @throws InternalErrorException
      */
     private void extractRequestInformation() throws InternalErrorException {
+
+        // Reuse a CommitDraft to extract the user and the commit message
+        CommitDraft commitDraft = new CommitDraft(this.request);
+        this.user = commitDraft.getUser();
+        this.message = commitDraft.getMessage();
+
         Matcher m = patternAggQuery.matcher(this.request.query_sparql);
 
         boolean foundEntry = false;
