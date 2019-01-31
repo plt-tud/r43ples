@@ -144,4 +144,21 @@ public class Config {
 			+ "PREFIX sp: <http://spinrdf.org/sp#> \n";
 			//+ "PREFIX spin: <http://spinrdf.org/spin#> \n"; // Currently not used within queries
 
+	/** The Turtle prefixes **/
+	public static final String turtle_prefixes =
+			  "@prefix rmo:	<http://eatld.et.tu-dresden.de/rmo#> . \n"
+			+ "@prefix prov: <http://www.w3.org/ns/prov#> . \n"
+			+ "@prefix dc-terms:	<http://purl.org/dc/terms/> . \n"
+			+ "@prefix xsd:	<http://www.w3.org/2001/XMLSchema#> . \n"
+			+ "@prefix mmo: <http://eatld.et.tu-dresden.de/mmo#> . \n"
+			//+ "@prefix sdd:	<http://eatld.et.tu-dresden.de/sdd#> . \n"
+			//+ "@prefix rpo: <http://eatld.et.tu-dresden.de/rpo#> . \n"
+			+ "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n"
+			+ "@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n"
+			+ "@prefix owl:	<http://www.w3.org/2002/07/owl#> . \n"
+			+ "@prefix aero: <http://eatld.et.tu-dresden.de/aero#> . \n"
+			+ "@prefix rules: <http://eatld.et.tu-dresden.de/rules#> . \n"
+			+ "@prefix sp: <http://spinrdf.org/sp#> . \n";
+	//+ "@prefix spin: <http://spinrdf.org/spin#> . \n"; // Currently not used within queries
+
 }

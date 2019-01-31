@@ -4,6 +4,7 @@ import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
 import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.iohelper.Helper;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
@@ -93,10 +94,10 @@ public class CoEvolutionDraft {
     protected Evolution coevolveAll() throws InternalErrorException {
 
         // Stores all meta information of the evolution, has to be integrated into a SPARQL UPDATE query if all data is collected
-        StringBuilder metaInformationN3 = new StringBuilder();
+        StringBuilder metaInformationTurtle = new StringBuilder();
         String evolutionURI = uriCalculator.getRandomURI(Config.evolution_graph);
 
-        metaInformationN3.append(String.format(
+        metaInformationTurtle.append(String.format(
                 "<%1$s> a rmo:Evolution. %n" +
                 "<%1$s> rmo:startRevision <%2$s>. %n" +
                 "<%1$s> rmo:endRevision <%3$s>. %n" +
@@ -125,13 +126,14 @@ public class CoEvolutionDraft {
             // Get the rule of the semantic change and check if a coevolution part is specified
             CoEvoRule coEvoRule = new CoEvoRule(semanticChange);
             coevolutionRules.add(coEvoRule);
-            metaInformationN3.append(String.format("<%s> rmo:associatedSemanticChange <%s>. %n", evolutionURI, semanticChange.getSemanticChangeURI()));
+            metaInformationTurtle.append(String.format("<%s> rmo:associatedSemanticChange <%s>. %n", evolutionURI, semanticChange.getSemanticChangeURI()));
         }
 
         // Get all graphs within the repository
         HashMap<String, RevisionGraph> revisedGraphs = new RevisionControl().getRevisedGraphs();
-        // Remove the graph which should be coevolved
+        // Remove the graph which should be coevolved and the coevolution graph itself
         revisedGraphs.remove(this.revisionGraph.getGraphName());
+        revisedGraphs.remove(Config.evolution_graph);
 
         // Iterate through the revised graphs and search for dependencies (Check the master branch of each revised graph if there is a dependency)
         for (String graphName : revisedGraphs.keySet()) {
@@ -139,7 +141,7 @@ public class CoEvolutionDraft {
 
             // URI of the coevolution of the current revision graph
             String coevolutionURI = uriCalculator.getRandomURI(Config.evolution_graph);
-            metaInformationN3.append(String.format(
+            metaInformationTurtle.append(String.format(
                     "<%1$s> rmo:performedCoEvolution <%2$s>. %n" +
                     "<%2$s> a rmo:CoEvolution. %n" +
                     "<%2$s> rmo:usedTargetRevisionGraph <%3$s>. %n" +
@@ -162,7 +164,7 @@ public class CoEvolutionDraft {
                 // If the result set is not equal to null a coevolution can be executed
                 // URI of the coevolution of the current revision graph
                 String appliedCoevolutionURI = uriCalculator.getRandomURI(Config.evolution_graph);
-                metaInformationN3.append(String.format(
+                metaInformationTurtle.append(String.format(
                         "<%1$s> aero:appliedCoEvolutionRule <%2$s>. %n" +
                         "<%2$s> a aero:AppliedCoEvolutionRule. %n" +
                         "<%2$s> aero:usedRule <%3$s>. %n" +
@@ -174,7 +176,7 @@ public class CoEvolutionDraft {
                     QuerySolution qsMatching = resultSetMatchings.next();
 
                     String sparqlVariableGroupURI = uriCalculator.getRandomURI(Config.evolution_graph);
-                    metaInformationN3.append(String.format(
+                    metaInformationTurtle.append(String.format(
                             "<%1$s> aero:hasVariableGroup <%2$s>. %n" +
                             "<%2$s> a aero:SPARQLVariableGroup. %n",
                             appliedCoevolutionURI, sparqlVariableGroupURI));
@@ -212,7 +214,7 @@ public class CoEvolutionDraft {
                         tripleStoreInterface.executeUpdateQuery(deleteSetInsertQuery);
 
                         String sparqlVariableURI = uriCalculator.getRandomURI(Config.evolution_graph);
-                        metaInformationN3.append(String.format(
+                        metaInformationTurtle.append(String.format(
                                 "<%1$s> aero:hasVariables <%2$s>. %n" +
                                 "<%2$s> a aero:SPARQLVariable. %n" +
                                 "<%2$s> sp:varName \"%3$s\". %n" +
@@ -238,14 +240,14 @@ public class CoEvolutionDraft {
             tripleStoreInterface.executeUpdateQuery("DROP SILENT GRAPH <" + tempDeleteSetURI + ">");
 
             // Create the generated revision
-            metaInformationN3.append(String.format(
+            metaInformationTurtle.append(String.format(
                     "<%1$s> rmo:generated <%2$s>. %n",
                     coevolutionURI, updateCommit.getGeneratedRevision().getRevisionURI()));
         }
 
-        // Write meta data into evolution graph
-        String queryRevision = Config.prefixes + String.format("INSERT DATA { GRAPH <%s> {%s} }", Config.evolution_graph, metaInformationN3.toString());
-        tripleStoreInterface.executeUpdateQuery(queryRevision);
+        // Create a new commit within the coevolution revision graph
+        String metaInformationN3 = JenaModelManagement.convertTurtleToNTriple(Config.turtle_prefixes + metaInformationTurtle.toString());
+        R43plesCoreSingleton.getInstance().createUpdateCommit(Config.evolution_graph, metaInformationN3, null, user, message, "master");
 
         return new Evolution(evolutionURI);
     }

@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
+import de.tud.plt.r43ples.core.R43plesCoreSingleton;
+import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.iohelper.Helper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,7 +29,20 @@ public abstract class TripleStoreInterface {
 		if (!checkGraphExistence(Config.revision_graph)){
 			logger.debug("Create revision graph: "+ Config.revision_graph);
 			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
-	 	}
+			// Create the evolution revision graph
+			try {
+				R43plesCoreSingleton.getInstance().createInitialCommit(Config.evolution_graph, null, null, "R43ples", "Evolution graph created by R43ples");
+				// Add the coevolution revision graph type to the created revision graph
+                String query = Config.prefixes + String.format(
+                        "INSERT DATA { GRAPH <%1$s> {"
+                                + "  <%2$s> a rmo:CoEvolutionRevisionGraph ."
+                                + "} }",
+                        Config.revision_graph, Config.evolution_graph);
+                TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
+			} catch (InternalErrorException e) {
+				e.printStackTrace();
+			}
+		}
 		
 		if (!checkGraphExistence(Config.sdg_graph)) {
 			// Insert default content into SDD graph
