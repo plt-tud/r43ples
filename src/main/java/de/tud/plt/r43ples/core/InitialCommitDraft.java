@@ -97,7 +97,7 @@ public class InitialCommitDraft extends CommitDraft {
 
         addMetaInformation(generatedRevision, commitUri, generatedBranch.getReferenceURI());
 
-        return new InitialCommit(revisionDraft.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), generatedRevision, generatedBranch);
+        return new InitialCommit(revisionDraft.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), generatedRevision, generatedBranch, generatedRevision.getChangeSet());
     }
 
     /**

@@ -209,12 +209,12 @@ public class PickCommitDraft extends CommitDraft {
         // Create a new commit (activity)
         StringBuilder queryContent = new StringBuilder(1000);
         queryContent.append(String.format(
-                "<%s> a rmo:PickCommit, rmo:BasicMergeCommit, rmo:Commit; "
-                        + "	rmo:wasAssociatedWith <%s> ;"
-                        + "	rmo:commitMessage \"%s\" ;"
+                "<%s> a rmo:PickCommit, rmo:MergeCommit, rmo:Commit; %n"
+                        + "	rmo:wasAssociatedWith <%s> ; %n"
+                        + "	rmo:commitMessage \"%s\" ; %n"
                         + "	rmo:timeStamp \"%s\"^^xsd:dateTime ; %n"
-                        + " rmo:usedTargetRevision <%s> ;"
-                        + " rmo:usedTargetBranch <%s> .",
+                        + " rmo:usedTargetRevision <%s> ; %n"
+                        + " rmo:usedTargetBranch <%s> ; %n",
                 commitURI, personUri, getMessage(), getTimeStamp(),
                 usedTargetRevision.getRevisionURI(), usedTargetBranch.getReferenceURI()));
 

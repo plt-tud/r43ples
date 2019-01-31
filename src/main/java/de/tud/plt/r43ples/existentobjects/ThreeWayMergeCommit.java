@@ -14,6 +14,21 @@ public class ThreeWayMergeCommit extends MergeCommit {
     /** The logger. **/
     private Logger logger = LogManager.getLogger(ThreeWayMergeCommit.class);
 
+    /** The used source branch. **/
+    private Branch usedSourceBranch;
+    /** The used source revision. **/
+    private Revision usedSourceRevision;
+
+    /** The generated revision. */
+    private Revision generatedRevision;
+    /** The common revision. **/
+    private Revision commonRevision;
+    /** Identifies if there is a conflict. **/
+    private boolean hasConflict;
+    /** The conflict model as TURTLE. **/
+    private String conflictModel;
+    /** The URI of the difference model graph. **/
+    private String differenceModelURI;
 
     /**
      * The constructor.
@@ -35,7 +50,6 @@ public class ThreeWayMergeCommit extends MergeCommit {
      * @param timeStamp the time stamp
      * @param message the message
      * @param usedSourceRevision the used source revision
-     * @param usedSourceBranch the used source branch
      * @param usedTargetRevision the used target revision
      * @param usedTargetBranch the used target branch
      * @param generatedRevision the generated revision
@@ -48,8 +62,77 @@ public class ThreeWayMergeCommit extends MergeCommit {
     public ThreeWayMergeCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message,
                        Revision usedSourceRevision, Branch usedSourceBranch, Revision usedTargetRevision, Branch usedTargetBranch, Revision generatedRevision,
                        Revision commonRevision, boolean hasConflict, String conflictModel, String differenceModelURI) throws InternalErrorException {
-        super(revisionGraph, commitURI, user, timeStamp, message, usedSourceRevision, usedSourceBranch, usedTargetRevision, usedTargetBranch, generatedRevision,
-                commonRevision, hasConflict, conflictModel, differenceModelURI);
+        super(revisionGraph, commitURI, user, timeStamp, message, usedTargetRevision, usedTargetBranch);
+        this.usedSourceBranch = usedSourceBranch;
+        this.usedSourceRevision = usedSourceRevision;
+        this.generatedRevision = generatedRevision;
+        this.commonRevision = commonRevision;
+        this.hasConflict = hasConflict;
+        this.conflictModel = conflictModel;
+        this.differenceModelURI = differenceModelURI;
+    }
+
+    /**
+     * Get the used source branch.
+     *
+     * @return the used source branch
+     */
+    public Branch getUsedSourceBranch() {
+        return usedSourceBranch;
+    }
+
+    /**
+     * Get the used source revision.
+     *
+     * @return the used source revision
+     */
+    public Revision getUsedSourceRevision() {
+        return usedSourceRevision;
+    }
+
+    /**
+     * Get the generated revision.
+     *
+     * @return the generated revision
+     */
+    public Revision getGeneratedRevision() {
+        return generatedRevision;
+    }
+
+    /**
+     * Get the common revision.
+     *
+     * @return the common revision
+     */
+    public Revision getCommonRevision() {
+        return commonRevision;
+    }
+
+    /**
+     * Identifies if there is a conflict.
+     *
+     * @return the boolean which identifies if there is a conflict
+     */
+    public boolean isHasConflict() {
+        return hasConflict;
+    }
+
+    /**
+     * Get the conflict model as TURTLE.
+     *
+     * @return the conflict model as TURTLE
+     */
+    public String getConflictModel() {
+        return conflictModel;
+    }
+
+    /**
+     * Get the URI of the difference model graph.
+     *
+     * @return the URI of the difference model graph
+     */
+    public String getDifferenceModelURI() {
+        return differenceModelURI;
     }
 
 }

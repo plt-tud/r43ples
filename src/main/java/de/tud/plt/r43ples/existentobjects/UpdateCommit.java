@@ -18,6 +18,8 @@ public class UpdateCommit extends Commit {
     private Revision usedRevision;
     /** The generated revision. */
     private Revision generatedRevision;
+    /** The associated change set. **/
+    private ChangeSet changeSet;
 
 
     /**
@@ -55,12 +57,14 @@ public class UpdateCommit extends Commit {
      * @param message the message
      * @param usedRevision the used revision
      * @param generatedRevision the generated revision
+     * @param changeSet the associated change set
      * @throws InternalErrorException
      */
-    public UpdateCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message, Revision usedRevision, Revision generatedRevision) throws InternalErrorException {
+    public UpdateCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message, Revision usedRevision, Revision generatedRevision, ChangeSet changeSet) throws InternalErrorException {
         super(revisionGraph, commitURI, user, timeStamp, message);
         this.usedRevision = usedRevision;
         this.generatedRevision = generatedRevision;
+        this.changeSet = changeSet;
     }
 
     /**
@@ -84,4 +88,15 @@ public class UpdateCommit extends Commit {
         //TODO Implement method - autogenerate the revision if necessary
         return generatedRevision;
     }
+
+    /**
+     * Get the associated change set.
+     *
+     * @return the associated change set
+     */
+    public ChangeSet getChangeSet() {
+        //TODO Implement method - autogenerate if necessary
+        return changeSet;
+    }
+
 }
