@@ -257,7 +257,7 @@ public class RevisionGraph {
 							+ "GRAPH <%s> {	<%s> ?p ?o.}"
 							+ "}"
 							+ "WHERE {"
-							+ "	GRAPH <%s> { <%s> a rmo:Graph; ?p ?o.}"
+							+ "	GRAPH <%s> { <%s> a rmo:RevisionGraph; ?p ?o.}"
 							+ "}"
 							, Config.revision_graph, graphName, Config.revision_graph, graphName);
 
@@ -478,7 +478,7 @@ public class RevisionGraph {
 		String querySDG = String.format(Config.prefixes
 				+ "SELECT ?defaultSDG %n"
 				+ "WHERE { GRAPH <%s> {	%n"
-				+ "	<%s> a rmo:Graph ;%n"
+				+ "	<%s> a rmo:RevisionGraph ;%n"
 				+ "		mmo:hasDefaultSDG ?defaultSDG . %n"
 				+ "} }", Config.revision_graph, this.graphName);
 

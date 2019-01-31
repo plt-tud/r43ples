@@ -16,59 +16,6 @@
 
 #################################################################
 #
-#    Annotation properties
-#
-#################################################################
-
-
-mmo:automaticResolutionState rdf:type owl:AnnotationProperty ;
-                             
-                             rdfs:domain mmo:StructuralDefinition .
-
-
-
-mmo:referencesB rdf:type owl:AnnotationProperty .
-
-
-
-mmo:referencesA rdf:type owl:AnnotationProperty .
-
-
-
-mmo:hasTripleStateA rdf:type owl:AnnotationProperty ;
-                    
-                    rdfs:domain mmo:StructuralDefinition .
-
-
-
-mmo:hasTripleStateB rdf:type owl:AnnotationProperty ;
-                    
-                    rdfs:domain mmo:StructuralDefinition .
-
-
-
-mmo:hasDefaultSDG rdf:type owl:AnnotationProperty ;
-                  
-                  rdfs:domain rmo:Graph .
-
-
-
-mmo:isConflicting rdf:type owl:AnnotationProperty ;
-                  
-                  rdfs:domain mmo:StructuralDefinition .
-
-
-
-mmo:hasStructuralDefinition rdf:type owl:AnnotationProperty ;
-                            
-                            rdfs:range mmo:StructuralDefinition .
-
-
-
-
-
-#################################################################
-#
 #    Object Properties
 #
 #################################################################

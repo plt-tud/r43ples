@@ -58,7 +58,7 @@ public class URICalculator {
                 + "SELECT DISTINCT ?uri\n"
                 + "WHERE {\n"
                 + "  GRAPH <%s> {\n"
-                + "    ?graph a rmo:Graph;\n"
+                + "    ?graph a rmo:RevisionGraph;\n"
                 + "      rmo:hasRevisionGraph ?uriGraph.\n"
                 + "  }\n"
                 + "  GRAPH ?uriGraph {\n"

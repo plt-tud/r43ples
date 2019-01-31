@@ -135,7 +135,7 @@ public class InitialCommitDraft extends CommitDraft {
 
         String queryAddRevisionGraph = Config.prefixes + String.format(
                 "INSERT DATA { GRAPH <%1$s> {"
-                        + "  <%2$s> a rmo:Graph, rmo:Entity ;"
+                        + "  <%2$s> a rmo:RevisionGraph, rmo:Entity ;"
                         + "    rmo:hasRevisionGraph <%3$s>;"
                         + "    mmo:hasDefaultSDG <%4$s>."
                         + "} }",

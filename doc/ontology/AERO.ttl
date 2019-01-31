@@ -19,45 +19,6 @@
 
 #################################################################
 #
-#    Annotation properties
-#
-#################################################################
-
-
-:addSetDetectionQuery rdf:type owl:AnnotationProperty .
-
-
-
-:conditionQuery rdf:type owl:AnnotationProperty .
-
-
-
-:usedRule rdf:type owl:AnnotationProperty .
-
-
-
-rdfs:label rdfs:domain :Rule ,
-                       :RuleSet .
-
-
-
-:spinQuery rdf:type owl:AnnotationProperty .
-
-
-
-:deleteSetDetectionQuery rdf:type owl:AnnotationProperty .
-
-
-
-rdfs:comment rdfs:domain :Rule ,
-                         :RuleSet .
-
-
-
-
-
-#################################################################
-#
 #    Object Properties
 #
 #################################################################
