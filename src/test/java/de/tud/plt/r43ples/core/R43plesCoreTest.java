@@ -388,7 +388,7 @@ public class R43plesCoreTest extends R43plesTest {
         allGraphs.add("http://eatld.et.tu-dresden.de/r43ples-revisions");
         allGraphs.add("http://example.com/test-addSet-0-1");
         allGraphs.add("http://example.com/test-develop");
-        allGraphs.add(Config.evolution_graph);
+        allGraphs.add(Config.evolution_graph + "-revisiongraph");
         assertListAll(allGraphs, tripleStoreInterface);
         // R43ples revisions
         String expected_r43ples = ResourceManagement.getContentFromResource("draftobjects/R43plesCore/Branch/r43ples-revisions_branchcommit.ttl");
@@ -490,7 +490,7 @@ public class R43plesCoreTest extends R43plesTest {
         allGraphs.add("http://example.com/test-deleteSet-1-2");
         allGraphs.add("http://example.com/test-addSet-2-3");
         allGraphs.add("http://example.com/test-deleteSet-2-3");
-        allGraphs.add(Config.evolution_graph);
+        allGraphs.add(Config.evolution_graph + "-revisiongraph");
 
         assertListAll(allGraphs,tripleStoreInterface);
         // R43ples revisions
