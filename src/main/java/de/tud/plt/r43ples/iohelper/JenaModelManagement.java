@@ -118,4 +118,14 @@ public class JenaModelManagement {
         return convertJenaModelToString(model, "TURTLE");
     }
 
+	/**
+	 * Converts Turtle serialization to N-Triple serialization.
+	 *
+	 * @param triples the triples in turtle serialization
+	 * @return the string which contains the N-Triples
+	 */
+	public static String convertTurtleToNTriple(String triples) {
+		return convertJenaModelToNTriple(readTurtleStringToJenaModel(triples));
+	}
+
 }

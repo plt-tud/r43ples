@@ -1,17 +1,17 @@
-@prefix swrl: <http://www.w3.org/2003/11/swrl#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rmo: <http://eatld.et.tu-dresden.de/rmo#> .
+@prefix mmo: <http://eatld.et.tu-dresden.de/mmo#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix swrlb: <http://www.w3.org/2003/11/swrlb#> .
 @prefix : <http://eatld.et.tu-dresden.de/mmo#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix owl2: <http://www.w3.org/2006/12/owl2#> .
-@prefix swrlx: <http://www.w3.org/2003/11/swrlx#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
 @base <http://eatld.et.tu-dresden.de/mmo> .
 
-<http://eatld.et.tu-dresden.de/mmo> rdf:type owl:Ontology .
+<http://eatld.et.tu-dresden.de/mmo> rdf:type owl:Ontology ;
+                                    
+                                    owl:imports <http://eatld.et.tu-dresden.de/rmo> .
 
 
 #################################################################
@@ -23,138 +23,137 @@
 
 ###  http://eatld.et.tu-dresden.de/mmo#added
 
-:added rdf:type owl:ObjectProperty ;
-       
-       rdfs:domain :RevisionProgress ;
-       
-       rdfs:range :Statement .
+mmo:added rdf:type owl:ObjectProperty ;
+          
+          rdfs:domain mmo:RevisionProgress ;
+          
+          rdfs:range mmo:Statement .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#automaticResolutionState
 
-:automaticResolutionState rdf:type owl:ObjectProperty ;
-                          
-                          rdfs:range :Added ,
-                                     :Deleted ;
-                          
-                          rdfs:domain :StructuralDefinition .
+mmo:automaticResolutionState rdf:type owl:ObjectProperty ;
+                             
+                             rdfs:range mmo:Added ,
+                                        mmo:Deleted ;
+                             
+                             rdfs:domain mmo:StructuralDefinition .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#deleted
 
-:deleted rdf:type owl:ObjectProperty ;
-         
-         rdfs:domain :RevisionProgress ;
-         
-         rdfs:range :Statement .
+mmo:deleted rdf:type owl:ObjectProperty ;
+            
+            rdfs:domain mmo:RevisionProgress ;
+            
+            rdfs:range mmo:Statement .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#hasDefaultSDG
 
-:hasDefaultSDG rdf:type owl:ObjectProperty ;
-               
-               rdfs:range :StructuralDefinitionGroup ;
-               
-               rdfs:domain rmo:Graph .
+mmo:hasDefaultSDG rdf:type owl:ObjectProperty ;
+                  
+                  rdfs:range mmo:StructuralDefinitionGroup ;
+                  
+                  rdfs:domain rmo:RevisionGraph .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#hasDifference
 
-:hasDifference rdf:type owl:ObjectProperty ;
-               
-               rdfs:range :Difference ;
-               
-               rdfs:domain :DifferenceGroup .
+mmo:hasDifference rdf:type owl:ObjectProperty ;
+                  
+                  rdfs:range mmo:Difference ;
+                  
+                  rdfs:domain mmo:DifferenceGroup .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#hasStructuralDefinition
 
-:hasStructuralDefinition rdf:type owl:ObjectProperty ;
-                         
-                         rdfs:range :StructuralDefinition ;
-                         
-                         rdfs:domain :StructuralDefinitionGroup .
+mmo:hasStructuralDefinition rdf:type owl:ObjectProperty ;
+                            
+                            rdfs:range mmo:StructuralDefinition ;
+                            
+                            rdfs:domain mmo:StructuralDefinitionGroup .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#hasTriple
 
-:hasTriple rdf:type owl:ObjectProperty ;
-           
-           rdfs:domain :Difference ;
-           
-           rdfs:range rdf:Statement .
+mmo:hasTriple rdf:type owl:ObjectProperty ;
+              
+              rdfs:domain mmo:Difference ;
+              
+              rdfs:range rdf:Statement .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#hasTripleStateA
 
-:hasTripleStateA rdf:type owl:ObjectProperty ;
-                 
-                 rdfs:domain :DifferenceGroup ,
-                             :StructuralDefinition ;
-                 
-                 rdfs:range :TripleState .
+mmo:hasTripleStateA rdf:type owl:ObjectProperty ;
+                    
+                    rdfs:domain mmo:DifferenceGroup ,
+                                mmo:StructuralDefinition ;
+                    
+                    rdfs:range mmo:TripleState .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#hasTripleStateB
 
-:hasTripleStateB rdf:type owl:ObjectProperty ;
-                 
-                 rdfs:domain :DifferenceGroup ,
-                             :StructuralDefinition ;
-                 
-                 rdfs:range :TripleState .
+mmo:hasTripleStateB rdf:type owl:ObjectProperty ;
+                    
+                    rdfs:domain mmo:DifferenceGroup ;
+                    
+                    rdfs:range mmo:TripleState .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#notIncluded
 
-:notIncluded rdf:type owl:ObjectProperty ;
-             
-             rdfs:domain :RevisionProgress ;
-             
-             rdfs:range :Statement .
+mmo:notIncluded rdf:type owl:ObjectProperty ;
+                
+                rdfs:domain mmo:RevisionProgress ;
+                
+                rdfs:range mmo:Statement .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#original
 
-:original rdf:type owl:ObjectProperty ;
-          
-          rdfs:domain :RevisionProgress ;
-          
-          rdfs:range :Statement .
+mmo:original rdf:type owl:ObjectProperty ;
+             
+             rdfs:domain mmo:RevisionProgress ;
+             
+             rdfs:range mmo:Statement .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#referencesA
 
-:referencesA rdf:type owl:ObjectProperty ;
-             
-             rdfs:domain :Difference ;
-             
-             rdfs:range rmo:Revision ;
-             
-             rdfs:subPropertyOf rmo:references .
+mmo:referencesA rdf:type owl:ObjectProperty ;
+                
+                rdfs:domain mmo:Difference ;
+                
+                rdfs:range rmo:Revision ;
+                
+                rdfs:subPropertyOf rmo:references .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#referencesB
 
-:referencesB rdf:type owl:ObjectProperty ;
-             
-             rdfs:domain :Difference ;
-             
-             rdfs:range rmo:Revision ;
-             
-             rdfs:subPropertyOf rmo:references .
+mmo:referencesB rdf:type owl:ObjectProperty ;
+                
+                rdfs:domain mmo:Difference ;
+                
+                rdfs:range rmo:Revision ;
+                
+                rdfs:subPropertyOf rmo:references .
 
 
 
@@ -162,7 +161,7 @@
 
 rmo:references rdf:type owl:ObjectProperty ;
                
-               rdfs:domain :Statement .
+               rdfs:domain mmo:Statement .
 
 
 
@@ -177,11 +176,11 @@ rmo:references rdf:type owl:ObjectProperty ;
 
 ###  http://eatld.et.tu-dresden.de/mmo#isConflicting
 
-:isConflicting rdf:type owl:DatatypeProperty ;
-               
-               rdfs:domain :StructuralDefinition ;
-               
-               rdfs:range xsd:boolean .
+mmo:isConflicting rdf:type owl:DatatypeProperty ;
+                  
+                  rdfs:domain mmo:StructuralDefinition ;
+                  
+                  rdfs:range xsd:boolean .
 
 
 
@@ -196,79 +195,87 @@ rmo:references rdf:type owl:ObjectProperty ;
 
 ###  http://eatld.et.tu-dresden.de/mmo#Added
 
-:Added rdf:type owl:Class ;
-       
-       rdfs:subClassOf :TripleState .
+mmo:Added rdf:type owl:Class ;
+          
+          rdfs:subClassOf mmo:TripleState .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#Deleted
 
-:Deleted rdf:type owl:Class ;
-         
-         rdfs:subClassOf :TripleState .
+mmo:Deleted rdf:type owl:Class ;
+            
+            rdfs:subClassOf mmo:TripleState .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#Difference
 
-:Difference rdf:type owl:Class ;
-            
-            rdfs:subClassOf owl:Thing .
+mmo:Difference rdf:type owl:Class ;
+               
+               rdfs:subClassOf owl:Thing .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#DifferenceGroup
 
-:DifferenceGroup rdf:type owl:Class ;
-                 
-                 rdfs:subClassOf owl:Thing .
+mmo:DifferenceGroup rdf:type owl:Class ;
+                    
+                    rdfs:subClassOf owl:Thing .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#NotIncluded
 
-:NotIncluded rdf:type owl:Class ;
-             
-             rdfs:subClassOf :TripleState .
+mmo:NotIncluded rdf:type owl:Class ;
+                
+                rdfs:subClassOf mmo:TripleState .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#Original
 
-:Original rdf:type owl:Class ;
-          
-          rdfs:subClassOf :TripleState .
+mmo:Original rdf:type owl:Class ;
+             
+             rdfs:subClassOf mmo:TripleState .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#RevisionProgress
 
-:RevisionProgress rdf:type owl:Class .
+mmo:RevisionProgress rdf:type owl:Class .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#Statement
 
-:Statement rdf:type owl:Class ;
-           
-           rdfs:subClassOf rdf:Statement .
+mmo:Statement rdf:type owl:Class ;
+              
+              rdfs:subClassOf rdf:Statement .
+
+
+
+###  http://eatld.et.tu-dresden.de/mmo#StructuralDefinition
+
+mmo:StructuralDefinition rdf:type owl:Class ;
+                         
+                         rdfs:subClassOf owl:Thing .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#StructuralDefinitionGroup
 
-:StructuralDefinitionGroup rdf:type owl:Class ;
-                           
-                           rdfs:subClassOf owl:Thing .
+mmo:StructuralDefinitionGroup rdf:type owl:Class ;
+                              
+                              rdfs:subClassOf owl:Thing .
 
 
 
 ###  http://eatld.et.tu-dresden.de/mmo#TripleState
 
-:TripleState rdf:type owl:Class ;
-             
-             rdfs:subClassOf owl:Thing .
+mmo:TripleState rdf:type owl:Class ;
+                
+                rdfs:subClassOf owl:Thing .
 
 
 

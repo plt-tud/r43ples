@@ -48,6 +48,10 @@ public class R43plesRequest {
 	private final Pattern patternAggQuery =  Pattern.compile(
 			"AGG\\s*GRAPH\\s*<([^>]*?)>\\s*REVISION\\s*\"([^\"]*?)\"\\s*TO\\s*REVISION\\s*\"([^\"]*?)\"",
 			patternModifier);
+	/** Pattern for COEVO queries. **/
+	private final Pattern patternCoEvoQuery =  Pattern.compile(
+			"COEVO\\s*GRAPH\\s*<([^>]*?)>\\s*REVISION\\s*\"([^\"]*?)\"\\s*TO\\s*REVISION\\s*\"([^\"]*?)\"",
+			patternModifier);
 	
 	/** The original query received by R43ples. **/
 	public final String query_r43ples;
@@ -165,6 +169,15 @@ public class R43plesRequest {
 	 */
 	public boolean isAggQuery() {
 		return patternAggQuery.matcher(query_sparql).find();
+	}
+
+	/**
+	 * Test if the SPARQL query is a COEVO query.
+	 *
+	 * @return true if the query is a COEVO query.
+	 */
+	public boolean isCoEvoQuery() {
+		return patternCoEvoQuery.matcher(query_sparql).find();
 	}
 
 }

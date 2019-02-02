@@ -8,9 +8,7 @@ import de.tud.plt.r43ples.core.R43plesCoreInterface;
 import de.tud.plt.r43ples.core.R43plesCoreSingleton;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.exception.QueryErrorException;
-import de.tud.plt.r43ples.existentobjects.InitialCommit;
-import de.tud.plt.r43ples.existentobjects.MergeCommit;
-import de.tud.plt.r43ples.existentobjects.RevisionControl;
+import de.tud.plt.r43ples.existentobjects.*;
 import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.R43plesRequest;
 import de.tud.plt.r43ples.management.SparqlRewriter;
@@ -20,6 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.ws.rs.*;
+import javax.ws.rs.Path;
 import javax.ws.rs.core.*;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import java.io.ByteArrayOutputStream;
@@ -384,6 +383,11 @@ public class Endpoint {
 			r43plesCore.aggregate(request);
 			result = "Atomic changes successfully aggregated to high level ones";
 		}
+		else if (request.isCoEvoQuery()) {
+			logger.info("Coevolution query detected");
+			r43plesCore.coevolveAll(request);
+			result = "Semantic changes successfully coevolved";
+		}
 		else
 			throw new QueryErrorException("No R43ples query detected");
 
@@ -465,10 +469,21 @@ public class Endpoint {
 	private Response getMergeResponse(MergeCommit commit, R43plesRequest request) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
 
-		if (commit.isHasConflict()) {
-			responseBuilder = Response.status(Response.Status.CONFLICT);
-			responseBuilder.entity(commit.getConflictModel());
+		Revision usedSourceRevision;
+
+		if (commit.getClass().equals(ThreeWayMergeCommit.class)) {
+			ThreeWayMergeCommit threeWayMergeCommit = (ThreeWayMergeCommit) commit;
+			if (threeWayMergeCommit.isHasConflict()) {
+				responseBuilder = Response.status(Response.Status.CONFLICT);
+				responseBuilder.entity(threeWayMergeCommit.getConflictModel());
+			}
+			usedSourceRevision = threeWayMergeCommit.getUsedSourceRevision();
+		} else {
+			FastForwardMergeCommit fastForwardMergeCommit = (FastForwardMergeCommit) commit;
+			usedSourceRevision = fastForwardMergeCommit.getUsedSourceRevision();
 		}
+
+
 		String graphNameHeader;
 		try {
 			graphNameHeader = URLEncoder.encode(commit.getRevisionGraph().getGraphName(), "UTF-8");
@@ -476,9 +491,9 @@ public class Endpoint {
 			e.printStackTrace();
 			graphNameHeader = commit.getRevisionGraph().getGraphName();
 		}
-		
+
 		// Return the revision identifiers which were used (convert tag or branch identifier to revision identifier)
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-From", commit.getUsedSourceRevision().getRevisionIdentifier());
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-From", usedSourceRevision.getRevisionIdentifier());
 		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-Into", commit.getUsedTargetRevision().getRevisionIdentifier());
 
 		HeaderInformation hi = new HeaderInformation();

@@ -14,6 +14,11 @@ public class FastForwardMergeCommit extends MergeCommit {
     /** The logger. **/
     private Logger logger = LogManager.getLogger(FastForwardMergeCommit.class);
 
+    /** The used source branch. **/
+    private Branch usedSourceBranch;
+    /** The used source revision. **/
+    private Revision usedSourceRevision;
+
 
     /**
      * The constructor.
@@ -38,18 +43,31 @@ public class FastForwardMergeCommit extends MergeCommit {
      * @param usedSourceBranch the used source branch
      * @param usedTargetRevision the used target revision
      * @param usedTargetBranch the used target branch
-     * @param generatedRevision the generated revision
-     * @param commonRevision the common revision
-     * @param hasConflict identifies if there is a conflict
-     * @param conflictModel the conflict model as TURTLE
-     * @param differenceModelURI the URI of the difference model graph
      * @throws InternalErrorException
      */
     public FastForwardMergeCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message,
-                                  Revision usedSourceRevision, Branch usedSourceBranch, Revision usedTargetRevision, Branch usedTargetBranch, Revision generatedRevision,
-                                  Revision commonRevision, boolean hasConflict, String conflictModel, String differenceModelURI) throws InternalErrorException {
-        super(revisionGraph, commitURI, user, timeStamp, message, usedSourceRevision, usedSourceBranch, usedTargetRevision, usedTargetBranch, generatedRevision,
-                commonRevision, hasConflict, conflictModel, differenceModelURI);
+                                  Revision usedSourceRevision, Branch usedSourceBranch, Revision usedTargetRevision, Branch usedTargetBranch) throws InternalErrorException {
+        super(revisionGraph, commitURI, user, timeStamp, message, usedTargetRevision, usedTargetBranch);
+        this.usedSourceBranch = usedSourceBranch;
+        this.usedSourceRevision = usedSourceRevision;
+    }
+
+    /**
+     * Get the used source branch.
+     *
+     * @return the used source branch
+     */
+    public Branch getUsedSourceBranch() {
+        return usedSourceBranch;
+    }
+
+    /**
+     * Get the used source revision.
+     *
+     * @return the used source revision
+     */
+    public Revision getUsedSourceRevision() {
+        return usedSourceRevision;
     }
 
 }

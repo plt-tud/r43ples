@@ -251,7 +251,7 @@ public class UpdateCommitDraft extends CommitDraft {
 		// Create a new commit (activity)
 		StringBuilder queryContent = new StringBuilder(1000);
 		queryContent.append(String.format(
-				"<%s> a rmo:RevisionCommit, rmo:Commit ; "
+				"<%s> a rmo:UpdateCommit, rmo:Commit ; "
 						+ "	rmo:wasAssociatedWith <%s>;"
 						+ "	rmo:generated <%s>;"
 						+ " rmo:hasChangeSet <%s> ;"
@@ -269,7 +269,7 @@ public class UpdateCommitDraft extends CommitDraft {
 		// Move branch to new revision
 		moveBranchReference(generatedRevision.getRevisionGraph().getRevisionGraphUri(), generatedRevision.getAssociatedBranch().getReferenceURI(), generatedRevision.getDerivedFromRevision().getRevisionURI(), revisionUri);
 
-		return new UpdateCommit(generatedRevision.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), generatedRevision.getDerivedFromRevision(), generatedRevision);
+		return new UpdateCommit(generatedRevision.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), generatedRevision.getDerivedFromRevision(), generatedRevision, generatedRevision.getChangeSet());
 	}
 
 	/**

@@ -104,8 +104,7 @@ public class FastForwardMergeCommitDraft extends MergeCommitDraft {
         usedTargetBranch = getRevisionGraph().getBranch(getBranchNameInto(), true);
 
         return new FastForwardMergeCommit(getRevisionGraph(), commitURI, getUser(), getTimeStamp(), getMessage(),
-                usedSourceRevision, usedSourceBranch, usedTargetRevision, usedTargetBranch, null,
-                null, false, null, null);
+                usedSourceRevision, usedSourceBranch, usedTargetRevision, usedTargetBranch);
     }
 
 }

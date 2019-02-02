@@ -15,7 +15,7 @@
                 <http://test.com/r43ples-dataset-1-revision-5> .
 
 <http://test.com/r43ples-dataset-1-commit-5>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "test commit message 5" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -57,7 +57,7 @@
                 <http://test.com/r43ples-dataset-1-revision-1> .
 
 <http://test.com/r43ples-dataset-1-commit-4>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "test commit message 4" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -90,7 +90,7 @@
                 <http://test.com/r43ples-dataset-1-revision-3> .
 
 <http://test.com/r43ples-dataset-1-commit-3>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "test commit message 3" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -112,7 +112,7 @@
                 <http://test.com/r43ples-dataset-1-revision-2> .
 
 <http://test.com/r43ples-dataset-1-commit-2>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "test commit message 2" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -154,7 +154,7 @@
                 <http://test.com/r43ples-dataset-1-revision-5> .
 
 <http://test.com/r43ples-dataset-1-commit-1>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "test commit message 1" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>

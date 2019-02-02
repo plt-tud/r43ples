@@ -33,7 +33,7 @@ public class RevisionControl {
                 + String.format(""
                 + "SELECT DISTINCT ?graph "
                 + "WHERE {"
-                + " GRAPH <%s> {  ?graph a rmo:Graph }"
+                + " GRAPH <%s> {  ?graph a rmo:RevisionGraph }"
                 + "} ORDER BY ?graph", Config.revision_graph);
         ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(sparqlQuery);
         while (results.hasNext()) {

@@ -12,7 +12,7 @@
                 <http://eatld.et.tu-dresden.de/persons/TestUser> .
 
 <http://example.com/test-commit-1>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "update commit during test" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>

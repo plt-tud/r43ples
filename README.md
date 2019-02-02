@@ -63,6 +63,7 @@ There is a configuration file named *resources/r43ples.conf*. The most important
 * *triplestore.user* - user of attached triplestore if necessary
 * *triplestore.password* - password of attached triplestore if necessary
 * *revision.graph* - named graph which is used by R43ples to store revision graph information
+* *evolution.graph* - named graph which is used by R43ples to store all information regarding evolutions
 * *sdg.graph* - named graph for storing the SDG
 * *sdg.graph.defaultContent* - default content of SDG which should be stored within named graph (sdg.graph)
 * *sdg.graph.defaultSDG* -  Structural Definition Group within the named graph (sdg.graph) which should be associated with new graphs under revision control (mmo:hasDefaultSDG)
@@ -179,9 +180,15 @@ There are some additional keywords which extends SPARQL and can be used to contr
         MESSAGE "pick multiple revisions example"
         PICK GRAPH <test> REVISION "56" TO REVISION "62" INTO BRANCH "develop"
         
-* Aggregate atomic changes to high level ones
+* Aggregate atomic changes to high level ones (semantic changes)
         
         AGG GRAPH <test> REVISION "1" TO REVISION "2"
+        
+* Coevolve semantic changes to dependent revised graphs
+        
+        USER "Mister X."
+        MESSAGE "Coevolution example"
+        COEVO GRAPH <test> REVISION "1" TO REVISION "2"
 
 
 #### Query Rewriting option
