@@ -23,7 +23,7 @@ A running test server should be available under [http://eatld.et.tu-dresden.de:9
 
 ## Getting Started
 ### Dependencies
-* JDK 1.7
+* JDK 1.8
 * Maven
 
 	sudo apt-get install maven default-jdk
