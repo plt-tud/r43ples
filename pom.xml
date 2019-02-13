@@ -6,7 +6,7 @@
 	<groupId>de.tud.plt</groupId>
 	<artifactId>r43ples</artifactId>
 	<packaging>jar</packaging>
-	<version>0.8.8</version>
+	<version>1.0.0</version>
 	<name>r43ples</name>
 	
 	<url>http://plt-tud.github.io/r43ples/</url>
