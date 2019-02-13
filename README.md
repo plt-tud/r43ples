@@ -23,7 +23,7 @@ A running test server should be available under [http://eatld.et.tu-dresden.de:9
 
 ## Getting Started
 ### Dependencies
-* JDK 1.7
+* JDK 1.8
 * Maven
 
 	sudo apt-get install maven default-jdk
@@ -233,10 +233,10 @@ All information about the revision history of all named graphs is stored in the 
 Here, the Revision Management Ontology (RMO) is used to model revisions, branches and tags. Furthermore commits are stored which connect each revision, tag and branch with its prior revision.
 
 The RMO is derived from the PROV ontology:
-![RMO example](./doc/ontology/RMO.png)
+![RMO example](./doc/ontology/RMO_UML.png)
 
 An exemplary revision graph is shown here:
-![RMO example](./doc/ontology/RMO_example.png)
+![RMO example](./doc/revision management description/r43ples-creategraph.png)
 
 
 
