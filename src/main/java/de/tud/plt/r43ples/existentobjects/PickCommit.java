@@ -11,17 +11,13 @@ import java.util.ArrayList;
  *
  * @author Stephan Hensel
  */
-public class PickCommit extends Commit {
+public class PickCommit extends MergeCommit {
 
     /** The logger. **/
     private Logger logger = LogManager.getLogger(PickCommit.class);
 
     /** The used source revisions. **/
     private ArrayList<Revision> usedSourceRevisions;
-    /** The used target revision. **/
-    private Revision usedTargetRevision;
-    /** The used target branch. **/
-    private Branch usedTargetBranch;
     /** The generated revisions. **/
     private ArrayList<Revision> generatedRevisions;
 
@@ -51,10 +47,8 @@ public class PickCommit extends Commit {
      */
     public PickCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message,
                       ArrayList<Revision> usedSourceRevisions, Revision usedTargetRevision, Branch usedTargetBranch, ArrayList<Revision> generatedRevisions) throws InternalErrorException {
-        super(revisionGraph, commitURI, user, timeStamp, message);
+        super(revisionGraph, commitURI, user, timeStamp, message, usedTargetRevision, usedTargetBranch);
         this.usedSourceRevisions = usedSourceRevisions;
-        this.usedTargetRevision = usedTargetRevision;
-        this.usedTargetBranch = usedTargetBranch;
         this.generatedRevisions = generatedRevisions;
     }
 
@@ -65,24 +59,6 @@ public class PickCommit extends Commit {
      */
     public ArrayList<Revision> getUsedSourceRevisions() {
         return usedSourceRevisions;
-    }
-
-    /**
-     * Get the used target revision.
-     *
-     * @return the used target revision
-     */
-    public Revision getUsedTargetRevision() {
-        return usedTargetRevision;
-    }
-
-    /**
-     * Get the used target branch.
-     *
-     * @return the used target branch
-     */
-    public Branch getUsedTargetBranch() {
-        return usedTargetBranch;
     }
 
     /**

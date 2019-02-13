@@ -43,8 +43,11 @@ public class Config {
 	public static String ssl_password;
 	
 	// Internal r43ples settings
-	/** The r43ples revision graph **/
+	/** The r43ples revision graph. **/
 	public static String revision_graph;
+	/** The r43ples evolution graph. **/
+	public static String evolution_graph;
+
 	/** The SDG graph URI. **/
 	public static String sdg_graph;
 	/** The path to the SDG graph default content. **/
@@ -88,6 +91,7 @@ public class Config {
 			ssl_password = config.getString("ssl.password");
 			
 			revision_graph = config.getString("revision.graph");
+			evolution_graph = config.getString("evolution.graph");
 			
 			sdg_graph = config.getString("sdg.graph");
 			sdg_graph_defaultContent = config.getString("sdg.graph.defaultContent");
@@ -139,5 +143,22 @@ public class Config {
 			+ "PREFIX rules: <http://eatld.et.tu-dresden.de/rules#> \n"
 			+ "PREFIX sp: <http://spinrdf.org/sp#> \n";
 			//+ "PREFIX spin: <http://spinrdf.org/spin#> \n"; // Currently not used within queries
+
+	/** The Turtle prefixes **/
+	public static final String turtle_prefixes =
+			  "@prefix rmo:	<http://eatld.et.tu-dresden.de/rmo#> . \n"
+			+ "@prefix prov: <http://www.w3.org/ns/prov#> . \n"
+			+ "@prefix dc-terms:	<http://purl.org/dc/terms/> . \n"
+			+ "@prefix xsd:	<http://www.w3.org/2001/XMLSchema#> . \n"
+			+ "@prefix mmo: <http://eatld.et.tu-dresden.de/mmo#> . \n"
+			//+ "@prefix sdd:	<http://eatld.et.tu-dresden.de/sdd#> . \n"
+			//+ "@prefix rpo: <http://eatld.et.tu-dresden.de/rpo#> . \n"
+			+ "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n"
+			+ "@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n"
+			+ "@prefix owl:	<http://www.w3.org/2002/07/owl#> . \n"
+			+ "@prefix aero: <http://eatld.et.tu-dresden.de/aero#> . \n"
+			+ "@prefix rules: <http://eatld.et.tu-dresden.de/rules#> . \n"
+			+ "@prefix sp: <http://spinrdf.org/sp#> . \n";
+	//+ "@prefix spin: <http://spinrdf.org/spin#> . \n"; // Currently not used within queries
 
 }

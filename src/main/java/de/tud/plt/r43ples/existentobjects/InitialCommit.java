@@ -18,6 +18,8 @@ public class InitialCommit extends Commit {
     private Revision generatedRevision;
     /** The generated branch. */
     private Branch generatedBranch;
+    /** The associated change set. **/
+    private ChangeSet changeSet;
 
 
     /**
@@ -55,12 +57,14 @@ public class InitialCommit extends Commit {
      * @param message the message
      * @param generatedRevision the generated revision
      * @param generatedBranch the generated branch
+     * @param changeSet the associated change set
      * @throws InternalErrorException
      */
-    public InitialCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message, Revision generatedRevision, Branch generatedBranch) throws InternalErrorException {
+    public InitialCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message, Revision generatedRevision, Branch generatedBranch, ChangeSet changeSet) throws InternalErrorException {
         super(revisionGraph, commitURI, user, timeStamp, message);
         this.generatedRevision = generatedRevision;
         this.generatedBranch = generatedBranch;
+        this.changeSet = changeSet;
     }
 
     /**
@@ -84,4 +88,15 @@ public class InitialCommit extends Commit {
         //TODO Implement method - autogenerate the revision if necessary
         return generatedBranch;
     }
+
+    /**
+     * Get the associated change set.
+     *
+     * @return the associated change set
+     */
+    public ChangeSet getChangeSet() {
+        //TODO Implement method - autogenerate if necessary
+        return changeSet;
+    }
+
 }

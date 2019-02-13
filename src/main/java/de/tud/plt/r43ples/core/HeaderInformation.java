@@ -56,7 +56,7 @@ public class HeaderInformation {
                         + "} %n"
                         + "WHERE {"
                         + " GRAPH <%s> {"
-                        + "   ?graph a rmo:Graph; rmo:hasRevisionGraph ?revisionGraph."
+                        + "   ?graph a rmo:RevisionGraph; rmo:hasRevisionGraph ?revisionGraph."
                         + "   FILTER (?graph IN (%s))"
                         + " }"
                         + " GRAPH ?revisionGraph { "

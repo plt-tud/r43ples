@@ -16,6 +16,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.update.UpdateFactory;
 import org.apache.jena.util.FileUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
@@ -234,7 +235,7 @@ public class Helper {
 				+ String.format("" 
 						+ "SELECT DISTINCT ?graph " 
 						+ "WHERE {"
-						+ " GRAPH <%s> { ?graph a rmo:Graph. }" 
+						+ " GRAPH <%s> { ?graph a rmo:RevisionGraph. }"
 						+ "} ORDER BY ?graph", Config.revision_graph);
 		return TripleStoreInterfaceSingleton.get().executeSelectQuery(sparqlQuery, format);
 	}
@@ -274,13 +275,13 @@ public class Helper {
 
 
 	/**
-	 * Get a SPARQL query in human readable syntax from SPIN.
+	 * Get a SPARQL SELECT query in human readable syntax from SPIN.
 	 *
 	 * @param spinQueryN3 the SPIN content as N3
 	 * @param resourceURI the resource URI of the SELECT query to search for
 	 * @return the SPARQL query in human readable syntax
 	 */
-	public static String getSparqlQueryFromSpin(String spinQueryN3, String resourceURI) {
+	public static String getSparqlSelectQueryFromSpin(String spinQueryN3, String resourceURI) {
 
 		Model model = JenaModelManagement.readNTripleStringToJenaModel(spinQueryN3);
 
@@ -290,6 +291,30 @@ public class Helper {
 			if (rsrc.toString().equals(resourceURI)) {
 				org.topbraid.spin.model.Query newQuery = SPINFactory.asQuery(rsrc);
 				return ARQFactory.get().createQuery(newQuery).toString();
+			}
+		}
+
+		return null;
+
+	}
+
+	/**
+	 * Get a SPARQL UPDATE query in human readable syntax from SPIN.
+	 *
+	 * @param spinQueryN3 the SPIN content as N3
+	 * @param resourceURI the resource URI of the UPDATE query to search for
+	 * @return the SPARQL query in human readable syntax
+	 */
+	public static String getSparqlUpdateQueryFromSpin(String spinQueryN3, String resourceURI) {
+
+		Model model = JenaModelManagement.readNTripleStringToJenaModel(spinQueryN3);
+
+		StmtIterator it = model.listStatements(null, RDF.type, SP.Modify);
+		while(it.hasNext()) {
+			Resource rsrc = it.next().getSubject();
+			if (rsrc.toString().equals(resourceURI)) {
+				org.topbraid.spin.model.update.Update newQuery = SPINFactory.asUpdate(rsrc);
+				return newQuery.toString();
 			}
 		}
 

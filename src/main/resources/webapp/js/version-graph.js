@@ -408,7 +408,7 @@ function drawGraph(div_selector, _JSON, _showTags) {
             for (var i = 0; i < types.length; i++) {
                 switch (types[i].value) {
              // Falls Commit
-                case "http://eatld.et.tu-dresden.de/rmo#RevisionCommit":
+                case "http://eatld.et.tu-dresden.de/rmo#UpdateCommit":
                     commits[key] = {};
                     commits[key].generated = [];
                     commits[key].title = value["http://purl.org/dc/terms/title"][0].value;

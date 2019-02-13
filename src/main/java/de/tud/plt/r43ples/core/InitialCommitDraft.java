@@ -97,7 +97,7 @@ public class InitialCommitDraft extends CommitDraft {
 
         addMetaInformation(generatedRevision, commitUri, generatedBranch.getReferenceURI());
 
-        return new InitialCommit(revisionDraft.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), generatedRevision, generatedBranch);
+        return new InitialCommit(revisionDraft.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), generatedRevision, generatedBranch, generatedRevision.getChangeSet());
     }
 
     /**
@@ -135,7 +135,7 @@ public class InitialCommitDraft extends CommitDraft {
 
         String queryAddRevisionGraph = Config.prefixes + String.format(
                 "INSERT DATA { GRAPH <%1$s> {"
-                        + "  <%2$s> a rmo:Graph, rmo:Entity ;"
+                        + "  <%2$s> a rmo:RevisionGraph, rmo:Entity ;"
                         + "    rmo:hasRevisionGraph <%3$s>;"
                         + "    mmo:hasDefaultSDG <%4$s>."
                         + "} }",

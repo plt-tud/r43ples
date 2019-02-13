@@ -49,8 +49,8 @@
               <y:Geometry height="41.9375" width="181.455078125" x="-62.66846175766064" y="593.2073500492"/>
               <y:Fill hasColor="false" transparent="false"/>
               <y:BorderStyle color="#000000" type="line" width="3.0"/>
-              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="33.40234375" modelName="internal" modelPosition="c" textColor="#000000" visible="true" width="69.34375" x="56.0556640625" y="4.267578125">graph:test
-(rmo:Graph)</y:NodeLabel>
+              <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Dialog" fontSize="12" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="33.40234375" modelName="internal" modelPosition="c" textColor="#000000" visible="true" width="115.36328125" x="33.0458984375" y="4.267578125">graph:test
+(rmo:RevisionGraph)</y:NodeLabel>
               <y:Shape type="ellipse"/>
             </y:ShapeNode>
           </data>

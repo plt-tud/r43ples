@@ -17,15 +17,6 @@
 
 #################################################################
 #
-#    Annotation properties
-#
-#################################################################
-
-
-
-
-#################################################################
-#
 #    Object Properties
 #
 #################################################################
@@ -41,6 +32,16 @@ rmo:additions rdf:type owl:ObjectProperty ;
 
 
 
+###  http://eatld.et.tu-dresden.de/rmo#associatedSemanticChange
+
+rmo:associatedSemanticChange rdf:type owl:ObjectProperty ;
+                             
+                             rdfs:domain rmo:Evolution ;
+                             
+                             rdfs:range rmo:SemanticChange .
+
+
+
 ###  http://eatld.et.tu-dresden.de/rmo#deletions
 
 rmo:deletions rdf:type owl:ObjectProperty ;
@@ -51,13 +52,33 @@ rmo:deletions rdf:type owl:ObjectProperty ;
 
 
 
+###  http://eatld.et.tu-dresden.de/rmo#endRevision
+
+rmo:endRevision rdf:type owl:ObjectProperty ;
+                
+                rdfs:domain rmo:Evolution ;
+                
+                rdfs:range rmo:Revision .
+
+
+
 ###  http://eatld.et.tu-dresden.de/rmo#generated
 
 rmo:generated rdf:type owl:ObjectProperty ;
               
-              rdfs:domain rmo:Commit ;
+              rdfs:domain rmo:CoEvolution ,
+                          rmo:InitialCommit ,
+                          rmo:PickCommit ;
               
-              rdfs:range rmo:Entity ;
+              rdfs:range rmo:Reference ;
+              
+              rdfs:domain rmo:ReferenceCommit ,
+                          rmo:RevertCommit ;
+              
+              rdfs:range rmo:Revision ;
+              
+              rdfs:domain rmo:ThreeWayMergeCommit ,
+                          rmo:UpdateCommit ;
               
               rdfs:subPropertyOf prov:generated .
 
@@ -69,7 +90,11 @@ rmo:hasChangeSet rdf:type owl:ObjectProperty ;
                  
                  rdfs:range rmo:ChangeSet ;
                  
-                 rdfs:domain rmo:Commit ;
+                 rdfs:domain rmo:InitialCommit ,
+                             rmo:PickCommit ,
+                             rmo:RevertCommit ,
+                             rmo:ThreeWayMergeCommit ,
+                             rmo:UpdateCommit ;
                  
                  owl:inverseOf prov:hadActivity .
 
@@ -82,6 +107,16 @@ rmo:inverts rdf:type owl:ObjectProperty ;
             rdfs:domain rmo:SemanticChange ;
             
             rdfs:range rmo:SemanticChange .
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#performedCoEvolution
+
+rmo:performedCoEvolution rdf:type owl:ObjectProperty ;
+                         
+                         rdfs:range rmo:CoEvolution ;
+                         
+                         rdfs:domain rmo:Evolution .
 
 
 
@@ -123,6 +158,16 @@ rmo:semanticChanges rdf:type owl:ObjectProperty ;
 
 
 
+###  http://eatld.et.tu-dresden.de/rmo#startRevision
+
+rmo:startRevision rdf:type owl:ObjectProperty ;
+                  
+                  rdfs:domain rmo:Evolution ;
+                  
+                  rdfs:range rmo:Revision .
+
+
+
 ###  http://eatld.et.tu-dresden.de/rmo#statements
 
 rmo:statements rdf:type owl:ObjectProperty ;
@@ -149,11 +194,26 @@ rmo:succeedingRevision rdf:type owl:ObjectProperty ;
 
 rmo:used rdf:type owl:ObjectProperty ;
          
-         rdfs:domain rmo:Commit ;
+         rdfs:domain rmo:ReferenceCommit ,
+                     rmo:RevertCommit ;
          
-         rdfs:range rmo:Entity ;
+         rdfs:range rmo:Revision ;
+         
+         rdfs:domain rmo:UpdateCommit ;
          
          rdfs:subPropertyOf prov:used .
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#usedConnectionsRevisionGraph
+
+rmo:usedConnectionsRevisionGraph rdf:type owl:ObjectProperty ;
+                                 
+                                 rdfs:domain rmo:CoEvolution ;
+                                 
+                                 rdfs:range rmo:ConnectionsRevisionGraph ;
+                                 
+                                 rdfs:subPropertyOf rmo:used .
 
 
 
@@ -163,8 +223,8 @@ rmo:usedSourceBranch rdf:type owl:ObjectProperty ;
                      
                      rdfs:range rmo:Branch ;
                      
-                     rdfs:domain rmo:MergeCommit ,
-                                 rmo:PickCommit ;
+                     rdfs:domain rmo:FastForwardCommit ,
+                                 rmo:ThreeWayMergeCommit ;
                      
                      rdfs:subPropertyOf rmo:used .
 
@@ -174,12 +234,26 @@ rmo:usedSourceBranch rdf:type owl:ObjectProperty ;
 
 rmo:usedSourceRevision rdf:type owl:ObjectProperty ;
                        
-                       rdfs:domain rmo:MergeCommit ,
+                       rdfs:domain rmo:FastForwardCommit ,
                                    rmo:PickCommit ;
                        
                        rdfs:range rmo:Revision ;
                        
+                       rdfs:domain rmo:ThreeWayMergeCommit ;
+                       
                        rdfs:subPropertyOf rmo:used .
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#usedSourceRevisionGraph
+
+rmo:usedSourceRevisionGraph rdf:type owl:ObjectProperty ;
+                            
+                            rdfs:domain rmo:Evolution ;
+                            
+                            rdfs:range rmo:RevisionGraph ;
+                            
+                            rdfs:subPropertyOf rmo:used .
 
 
 
@@ -189,8 +263,7 @@ rmo:usedTargetBranch rdf:type owl:ObjectProperty ;
                      
                      rdfs:range rmo:Branch ;
                      
-                     rdfs:domain rmo:MergeCommit ,
-                                 rmo:PickCommit ;
+                     rdfs:domain rmo:MergeCommit ;
                      
                      rdfs:subPropertyOf rmo:used .
 
@@ -200,12 +273,23 @@ rmo:usedTargetBranch rdf:type owl:ObjectProperty ;
 
 rmo:usedTargetRevision rdf:type owl:ObjectProperty ;
                        
-                       rdfs:domain rmo:MergeCommit ,
-                                   rmo:PickCommit ;
+                       rdfs:domain rmo:MergeCommit ;
                        
                        rdfs:range rmo:Revision ;
                        
                        rdfs:subPropertyOf rmo:used .
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#usedTargetRevisionGraph
+
+rmo:usedTargetRevisionGraph rdf:type owl:ObjectProperty ;
+                            
+                            rdfs:domain rmo:CoEvolution ;
+                            
+                            rdfs:range rmo:RevisionGraph ;
+                            
+                            rdfs:subPropertyOf rmo:used .
 
 
 
@@ -242,6 +326,19 @@ rmo:wasQuotedFrom rdf:type owl:ObjectProperty ;
                   rdfs:domain rmo:Revision ;
                   
                   rdfs:subPropertyOf prov:wasQuotedFrom .
+
+
+
+###  http://www.w3.org/ns/prov#hadActivity
+
+prov:hadActivity rdf:type owl:ObjectProperty .
+
+
+
+###  http://www.w3.org/ns/prov#qualifiedDerivation
+
+prov:qualifiedDerivation rdf:type owl:ObjectProperty .
+
 
 
 
@@ -315,7 +412,7 @@ rmo:fullContent rdf:type owl:DatatypeProperty ;
 
 rmo:hasRevisionGraph rdf:type owl:DatatypeProperty ;
                      
-                     rdfs:domain rmo:Graph ;
+                     rdfs:domain rmo:RevisionGraph ;
                      
                      rdfs:range xsd:anyURI .
 
@@ -350,6 +447,10 @@ rmo:revisionIdentifier rdf:type owl:DatatypeProperty ;
 ###  http://eatld.et.tu-dresden.de/rmo#timeStamp
 
 rmo:timeStamp rdf:type owl:DatatypeProperty ;
+              
+              rdfs:domain rmo:Commit ;
+              
+              rdfs:range xsd:dateTime ;
               
               rdfs:subPropertyOf prov:atTime .
 
@@ -397,6 +498,22 @@ rmo:ChangeSet rdf:type owl:Class ;
 
 
 
+###  http://eatld.et.tu-dresden.de/rmo#CoEvolution
+
+rmo:CoEvolution rdf:type owl:Class ;
+                
+                rdfs:subClassOf owl:Thing .
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#CoEvolutionRevisionGraph
+
+rmo:CoEvolutionRevisionGraph rdf:type owl:Class ;
+                             
+                             rdfs:subClassOf rmo:RevisionGraph .
+
+
+
 ###  http://eatld.et.tu-dresden.de/rmo#Commit
 
 rmo:Commit rdf:type owl:Class ;
@@ -408,11 +525,27 @@ rmo:Commit rdf:type owl:Class ;
 
 
 
+###  http://eatld.et.tu-dresden.de/rmo#ConnectionsRevisionGraph
+
+rmo:ConnectionsRevisionGraph rdf:type owl:Class ;
+                             
+                             rdfs:subClassOf rmo:RevisionGraph .
+
+
+
 ###  http://eatld.et.tu-dresden.de/rmo#Entity
 
 rmo:Entity rdf:type owl:Class ;
            
            rdfs:subClassOf prov:Entity .
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#Evolution
+
+rmo:Evolution rdf:type owl:Class ;
+              
+              rdfs:subClassOf owl:Thing .
 
 
 
@@ -424,17 +557,6 @@ rmo:FastForwardCommit rdf:type owl:Class ;
                                  "fast forward commit"@en ;
                       
                       rdfs:subClassOf rmo:MergeCommit .
-
-
-
-###  http://eatld.et.tu-dresden.de/rmo#Graph
-
-rmo:Graph rdf:type owl:Class ;
-          
-          rdfs:label "Graph"@de ,
-                     "graph"@en ;
-          
-          rdfs:subClassOf rmo:Entity .
 
 
 
@@ -478,7 +600,7 @@ rmo:MergeCommit rdf:type owl:Class ;
 
 rmo:PickCommit rdf:type owl:Class ;
                
-               rdfs:subClassOf rmo:Commit .
+               rdfs:subClassOf rmo:MergeCommit .
 
 
 
@@ -523,14 +645,14 @@ rmo:Revision rdf:type owl:Class ;
 
 
 
-###  http://eatld.et.tu-dresden.de/rmo#RevisionCommit
+###  http://eatld.et.tu-dresden.de/rmo#RevisionGraph
 
-rmo:RevisionCommit rdf:type owl:Class ;
-                   
-                   rdfs:label "Revision Commit"@de ,
-                              "revision commit"@en ;
-                   
-                   rdfs:subClassOf rmo:Commit .
+rmo:RevisionGraph rdf:type owl:Class ;
+                  
+                  rdfs:label "Revisionsgraph"@de ,
+                             "revision graph"@en ;
+                  
+                  rdfs:subClassOf rmo:Entity .
 
 
 
@@ -583,6 +705,17 @@ rmo:ThreeWayMergeCommit rdf:type owl:Class ;
                                    "three way merge commit"@en ;
                         
                         rdfs:subClassOf rmo:MergeCommit .
+
+
+
+###  http://eatld.et.tu-dresden.de/rmo#UpdateCommit
+
+rmo:UpdateCommit rdf:type owl:Class ;
+                 
+                 rdfs:label "Update Commit"@de ,
+                            "update commit"@en ;
+                 
+                 rdfs:subClassOf rmo:Commit .
 
 
 

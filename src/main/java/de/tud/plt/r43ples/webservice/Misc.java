@@ -115,6 +115,9 @@ public class Misc {
 		if (graph.equals("hlc-aggregation") || graph.equals("all")){
 			graphs.add(SampleDataSet.createSampleDataSetHLCAggregation().graphName);
 		}
+		if (graph.equals("coevolution") || graph.equals("all")){
+			graphs.add(SampleDataSet.createSampleDataSetCoEvolution().graphName);
+		}
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
 	    htmlMap.put("graphs", graphs);
 	    

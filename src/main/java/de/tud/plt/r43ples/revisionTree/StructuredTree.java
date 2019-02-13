@@ -63,7 +63,7 @@ public class StructuredTree {
 						+ "  ?branch a rmo:Branch;%n"
 						+ "     rmo:referenceIdentifier ?title;%n"
 						+ "     rmo:references ?rev."
-						+ "  ?commit a rmo:RevisionCommit;%n"
+						+ "  ?commit a rmo:UpdateCommit;%n"
 						+ "     rmo:generated ?rev.%n"
 						+ "} }", revisionGraph);
 
@@ -119,7 +119,7 @@ public class StructuredTree {
 		String queryCommits = Config.prefixes + String.format(
 						"SELECT ?commit ?time ?prev ?next ?title ?authname ?branch%n"
 						+ "WHERE { GRAPH <%s> {%n"
-						+ "?commit a rmo:RevisionCommit;%n"
+						+ "?commit a rmo:UpdateCommit;%n"
 						+ "rmo:commitMessage ?title;%n"
 						+ "rmo:used ?reva;%n"
 						+ "rmo:generated ?revb;%n"

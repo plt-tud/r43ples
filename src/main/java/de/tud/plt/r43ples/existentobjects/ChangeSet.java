@@ -1,15 +1,16 @@
 package de.tud.plt.r43ples.existentobjects;
 
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
 import de.tud.plt.r43ples.exception.InternalErrorException;
 import de.tud.plt.r43ples.iohelper.Helper;
-import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.LinkedList;
 
 /**
  * Provides information of an already existent change set.
@@ -38,6 +39,9 @@ public class ChangeSet {
     /** The change set URI. **/
     private String changeSetURI;
 
+    /** The list of semantic changes associated with this change set. **/
+    private LinkedList<SemanticChange> semanticChangesList;
+
     /** The corresponding revision graph. */
     private RevisionGraph revisionGraph;
 
@@ -54,7 +58,6 @@ public class ChangeSet {
      * @param addSetURI the add set URI
      * @param deleteSetURI the delete set URI
      * @param changeSetURI the change set URI
-     * @throws InternalErrorException
      */
     public ChangeSet(RevisionGraph revisionGraph, Revision priorRevision, String addSetURI, String deleteSetURI, String changeSetURI) {
         // Dependencies
@@ -73,7 +76,6 @@ public class ChangeSet {
      *
      * @param revisionGraph the revision graph
      * @param changeSetURI the change set URI
-     * @throws InternalErrorException
      */
     public ChangeSet(RevisionGraph revisionGraph, String changeSetURI) {
         // Dependencies
@@ -229,6 +231,33 @@ public class ChangeSet {
             this.deleteSetContent = Helper.getContentOfNamedGraphAsN3(this.deleteSetURI);
         }
         return deleteSetContent;
+    }
+
+    /**
+     * Get the list of semantic changes associated with this change set.
+     *
+     * @return the list of semantic changes associated with this change set
+     * @throws InternalErrorException
+     */
+    public LinkedList<SemanticChange> getSemanticChangesList() throws InternalErrorException {
+        if (semanticChangesList == null) {
+            semanticChangesList = new LinkedList<>();
+            logger.debug("Get additional information of current change set " + changeSetURI + ".");
+            String query = Config.prefixes + String.format(""
+                    + "SELECT ?semanticChange "
+                    + "WHERE { GRAPH  <%s> {"
+                    + "	<%s> a rmo:ChangeSet; "
+                    + "	 rmo:semanticChanges ?semanticChange. "
+                    + "} }", revisionGraph.getRevisionGraphUri(), changeSetURI);
+            this.logger.debug(query);
+            ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
+            while (resultSet.hasNext()) {
+                QuerySolution qs = resultSet.next();
+                SemanticChange semanticChange = new SemanticChange(revisionGraph, qs.getResource("?semanticChange").toString());
+                semanticChangesList.add(semanticChange);
+            }
+        }
+        return semanticChangesList;
     }
 
 }

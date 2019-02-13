@@ -134,7 +134,7 @@ public class RevertCommitDraft extends CommitDraft {
 		// Move branch to new revision
 		moveBranchReference(generatedRevision.getRevisionGraph().getRevisionGraphUri(), generatedRevision.getAssociatedBranch().getReferenceURI(), generatedRevision.getDerivedFromRevision().getRevisionURI(), revisionUri);
 
-		return new RevertCommit(generatedRevision.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), generatedRevision.getDerivedFromRevision(), generatedRevision);
+		return new RevertCommit(generatedRevision.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), generatedRevision.getDerivedFromRevision(), generatedRevision, generatedRevision.getChangeSet());
 	}
 
 }

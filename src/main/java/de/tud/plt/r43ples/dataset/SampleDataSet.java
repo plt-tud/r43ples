@@ -702,5 +702,38 @@ public class SampleDataSet {
 		logger.info("Example graph <" + graphName +"> created.");
 		return result;
 	}
+
+
+	/**
+	 * Create an example graph for the coevolution which uses the ontology elements of createSampleDataSetHLCAggregation().
+	 *
+	 * @throws InternalErrorException
+	 */
+	public static DataSetGenerationResult createSampleDataSetCoEvolution() throws InternalErrorException {
+		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
+
+		DataSetGenerationResult result = new DataSetGenerationResult();
+		String graphName = "http://test.com/r43ples-dataset-coevolution";
+		result.graphName = graphName;
+
+		RevisionGraph graph = new RevisionGraph(graphName);
+
+		// delete the old graph
+		graph.purgeRevisionInformation();
+
+		InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, null, null, user, "Create graph");
+		String revision0 = initialCommit.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("master-0", revision0);
+
+		// Initial commit
+		String triples = "<http://example-house.com/yellowhouse> a <http://example.com/house>. \n"
+				+ "<http://example-house.com/yellowhouse> <http://www.w3.org/2000/01/rdf-schema#label> \"a yellow house\". \n";
+		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, triples, null, user, "Initial commit", "master");
+		String revision1 = commit1.getGeneratedRevision().getRevisionIdentifier();
+		result.revisions.put("master-1", revision1);
+
+		logger.info("Example graph <" + graphName +"> created.");
+		return result;
+	}
 	
 }

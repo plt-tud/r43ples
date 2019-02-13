@@ -13,7 +13,7 @@
                 <http://test.com/r43ples-dataset-complex-structure-revision-12> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-8>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "First commit to B2X" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -52,7 +52,7 @@
                 <http://test.com/r43ples-dataset-complex-structure-revision-8> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-2>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Second commit to B1" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -105,7 +105,7 @@
                 <http://test.com/r43ples-dataset-complex-structure-revision-11> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-13>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Third commit to MASTER" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -147,7 +147,7 @@
                 <http://test.com/r43ples-dataset-complex-structure-revision-0> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-7>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Second commit to B2" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -184,7 +184,7 @@
                 <http://eatld.et.tu-dresden.de/persons/butler> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-1>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "First commit to B1" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -217,7 +217,7 @@
                 <http://test.com/r43ples-dataset-complex-structure-revision-7> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-12>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Second commit to MASTER" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -281,7 +281,7 @@
                 <http://test.com/r43ples-dataset-complex-structure-revision-10> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-6>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "First commit to B2" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -316,7 +316,7 @@
                 <http://test.com/r43ples-dataset-complex-structure-revision-6> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-11>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Fourth commit to B2" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -389,7 +389,7 @@
                 <http://test.com/r43ples-dataset-complex-structure-revision-4> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-5>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Third commit to B1" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -442,7 +442,7 @@
                 <http://test.com/r43ples-dataset-complex-structure-revision-6> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-10>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Third commit to B2" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -462,7 +462,7 @@
                 "0" .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-4>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Second commit to B1X" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -524,7 +524,7 @@
                 <http://test.com/r43ples-dataset-complex-structure-revision-9> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-9>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "Second commit to B2X" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
@@ -550,7 +550,7 @@
                 <http://test.com/r43ples-dataset-complex-structure-revision-4> .
 
 <http://test.com/r43ples-dataset-complex-structure-commit-3>
-        a       <http://eatld.et.tu-dresden.de/rmo#RevisionCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
         <http://eatld.et.tu-dresden.de/rmo#commitMessage>
                 "First commit to B1X" ;
         <http://eatld.et.tu-dresden.de/rmo#generated>
