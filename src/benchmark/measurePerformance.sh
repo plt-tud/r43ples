@@ -6,12 +6,12 @@ TIMEFORMAT=%R
 
 
 function init_log_file {
-    export TIME_FILE=logs/time.`date +%Y-%m-%d_%H:%M:%S`.log
+    export TIME_FILE=logs/time.$(date +%Y-%m-%d_%H:%M:%S).log
     
     export EP_TDB=http://localhost:9998/r43ples/sparql
     export EP_STARDOG=http://localhost:9997/r43ples/sparql
     
-    echo "# R43ples Performance test at `date`" > $TIME_FILE
+    echo "# R43ples Performance test at $(date)" > $TIME_FILE
     
 }
 
@@ -35,7 +35,7 @@ function singleTest {
     QUERY_TEMPLATE=$3
     REVISION=$4
     
-    QUERY=`sed -e "s/%%%REV%%%/$REVISION/" $QUERY_TEMPLATE`
+    QUERY=$(sed -e "s/%%%REV%%%/$REVISION/" $QUERY_TEMPLATE)
     
     singleQuery $ENDPOINT $MODE "$QUERY"
 }
@@ -87,9 +87,9 @@ function ldqquery {
     CHANGESIZE=$2
     REVISION=$3
     
-#     QUERY=`sed -e "s/%%%DATASET%%%/$DATASET/; s/%%%CHANGESIZE%%%/$CHANGESIZE/; s/%%%REV%%%/$REVISION/;" scenario/LDQ2014/query.rq`
-     QUERY=`sed -e "s/%%%DATASET%%%/$DATASET/; s/%%%CHANGESIZE%%%/$CHANGESIZE/; s/%%%REV%%%/$REVISION/;" scenario/LDQ2014/query-individual.rq`
-#     QUERY_OLD=`sed -e "s/%%%DATASET%%%/$DATASET/; s/%%%CHANGESIZE%%%/$CHANGESIZE/; s/%%%REV%%%/$REVISION/;" scenario/LDQ2014/query-old.rq`
+#     QUERY=$(sed -e "s/%%%DATASET%%%/$DATASET/; s/%%%CHANGESIZE%%%/$CHANGESIZE/; s/%%%REV%%%/$REVISION/;" scenario/LDQ2014/query.rq)
+     QUERY=$(sed -e "s/%%%DATASET%%%/$DATASET/; s/%%%CHANGESIZE%%%/$CHANGESIZE/; s/%%%REV%%%/$REVISION/;" scenario/LDQ2014/query-individual.rq)
+#     QUERY_OLD=$(sed -e "s/%%%DATASET%%%/$DATASET/; s/%%%CHANGESIZE%%%/$CHANGESIZE/; s/%%%REV%%%/$REVISION/;" scenario/LDQ2014/query-old.rq)
     
 #     echo -n "$DATASET;$CHANGESIZE;$REVISION;TDB;off;" >> $TIME_FILE
 #     singleQuery $EP_TDB off "$QUERY"

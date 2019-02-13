@@ -1,0 +1,4 @@
+@prefix ex:    <http://example.com/> .
+@prefix test:  <http://test.com/> .
+
+ex:newTestS  ex:newTestP  "J" , "I" , "H" , "D" , "B" , "A" .

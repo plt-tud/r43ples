@@ -1,5 +1,26 @@
 package de.tud.plt.r43ples.webservice;
 
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
+import de.tud.plt.r43ples.core.HeaderInformation;
+import de.tud.plt.r43ples.core.R43plesCoreInterface;
+import de.tud.plt.r43ples.core.R43plesCoreSingleton;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.exception.QueryErrorException;
+import de.tud.plt.r43ples.existentobjects.*;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
+import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.management.SparqlRewriter;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.shared.NoWriterForLangException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.ws.rs.*;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import java.io.ByteArrayOutputStream;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -8,60 +29,10 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.UriInfo;
 
-import org.apache.log4j.Logger;
-import org.glassfish.jersey.server.mvc.Template;
-
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.Mustache;
-import com.github.mustachejava.MustacheFactory;
-import com.hp.hpl.jena.query.QuerySolution;
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.shared.NoWriterForLangException;
-
-import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.exception.QueryErrorException;
-import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.GitRepositoryState;
-import de.tud.plt.r43ples.management.Interface;
-import de.tud.plt.r43ples.management.JenaModelManagement;
-import de.tud.plt.r43ples.management.RevisionManagement;
-import de.tud.plt.r43ples.management.SampleDataSet;
-import de.tud.plt.r43ples.management.SparqlRewriter;
-import de.tud.plt.r43ples.merging.MergeManagement;
-import de.tud.plt.r43ples.merging.MergeQueryTypeEnum;
-import de.tud.plt.r43ples.merging.MergeResult;
-import de.tud.plt.r43ples.merging.RebaseQueryTypeEnum;
-import de.tud.plt.r43ples.merging.control.FastForwardControl;
-import de.tud.plt.r43ples.merging.control.MergingControl;
-import de.tud.plt.r43ples.merging.control.RebaseControl;
-import de.tud.plt.r43ples.merging.management.ProcessManagement;
-import de.tud.plt.r43ples.merging.management.StrategyManagement;
-import de.tud.plt.r43ples.merging.model.structure.CommitModel;
-import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
-import de.tud.plt.r43ples.visualisation.VisualisationBatik;
-import de.tud.plt.r43ples.visualisation.VisualisationD3;
 
 /**
  * Provides SPARQL endpoint via [host]:[port]/r43ples/.
@@ -72,161 +43,33 @@ import de.tud.plt.r43ples.visualisation.VisualisationD3;
  * @author Xinyu Yang
  * 
  */
-@Path("/")
+@Path("sparql")
 public class Endpoint {
-
-	private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
-	
-	private final Pattern patternSelectAskConstructQuery = Pattern.compile(
-			"(?<type>SELECT|ASK|CONSTRUCT).*WHERE\\s*\\{(?<where>.*)\\}", 
-			patternModifier);
-	private final Pattern patternUpdateQuery = Pattern.compile(
-			"(?<action>INSERT|DELETE).*<(?<graph>[^>]*)>",
-			patternModifier);
-	private final Pattern patternCreateGraph = Pattern.compile(
-			"CREATE\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
-			patternModifier);
-	private final Pattern patternDropGraph = Pattern.compile(
-			"DROP\\s*(?<silent>SILENT)?\\s*GRAPH\\s*<(?<graph>[^>]*)>",
-			patternModifier);
-	private final Pattern patternBranchOrTagQuery = Pattern.compile(
-			"(?<action>TAG|BRANCH)\\s*GRAPH\\s*<(?<graph>[^>]*)>\\s*REVISION\\s*\"(?<revision>[^\"]*)\"\\s*TO\\s*\"(?<name>[^\"]*)\"",
-			patternModifier);
-	
-	private final Pattern patternUser = Pattern.compile(
-			"USER\\s*\"(?<user>[^\"]*)\"",
-			patternModifier);
-	private final Pattern patternCommitMessage = Pattern.compile(
-			"MESSAGE\\s*\"(?<message>[^\"]*)\"", 
-			patternModifier);
-
-	private final Pattern patternMergeQuery =  Pattern.compile(
-			"MERGE\\s*(?<action>AUTO|MANUAL)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(SDD\\s*<(?<sdd>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
-			patternModifier);
-	private final Pattern patternFastForwardQuery =  Pattern.compile(
-			"MERGE\\s*FF\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(\\s*(?<sdd>SDD)?\\s*<(?<sddURI>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"",
-			patternModifier);
-	private final Pattern patternRebaseQuery =  Pattern.compile(
-			"REBASE\\s*(?<action>AUTO|MANUAL|FORCE)?\\s*GRAPH\\s*<(?<graph>[^>]*?)>\\s*(SDD\\s*<(?<sdd>[^>]*?)>)?\\s*BRANCH\\s*\"(?<branchNameA>[^\"]*?)\"\\s*INTO\\s*\"(?<branchNameB>[^\"]*?)\"(\\s*(?<with>WITH)?\\s*\\{(?<triples>.*)\\})?",
-			patternModifier);
 
 	
 	@Context
 	private UriInfo uriInfo;
+	@Context
+	private Request request;
 	
 	
 
 	
 	/** default logger for this class */
-	private final static Logger logger = Logger.getLogger(Endpoint.class);
-	
-	
-	/**map for client and mergingControlMap
-	 * for each client there is a mergingControlMap**/
-	protected static HashMap<String, HashMap<String, MergingControl>> clientMap = new HashMap<String, HashMap<String, MergingControl>>();
-	
-	
-	
-	/**
-	 * Creates sample datasets
-	 * @return information provided as HTML response
-	 * @throws InternalErrorException 
-	 */
-	@Path("createSampleDataset")
-	@GET
-	@Template(name = "/exampleDatasetGeneration.mustache")
-	public final Map<String, Object> createSampleDataset(@QueryParam("dataset") @DefaultValue("all") final String graph) throws InternalErrorException {
-		List<String> graphs = new ArrayList<>();
-		
-		if (graph.equals("1") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataset1().graphName);
-		}
-		if (graph.equals("2") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataset2().graphName);
-		}
-		if (graph.equals("merging") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataSetMerging().graphName);
-		}
-		if (graph.equals("merging-classes") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataSetMergingClasses());
-		}
-		if (graph.equals("renaming") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataSetRenaming());
-		}
-		if (graph.equals("complex-structure") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataSetComplexStructure());
-		}
-		if (graph.equals("rebase") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataSetRebase());
-		}
-		if (graph.equals("forcerebase") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataSetForceRebase());
-		}
-		if (graph.equals("fastforward") || graph.equals("all")){
-			graphs.add(SampleDataSet.createSampleDataSetFastForward());
-		}
-		Map<String, Object> htmlMap = new HashMap<String, Object>();
-	    htmlMap.put("graphs", graphs);
-	    
-		return htmlMap;			
-	}
-	
-	/**
-	 * Provide revision information about R43ples system.
-	 * 
-	 * @param graph
-	 *            Provide only information about this graph (if not null)
-	 * @return RDF model of revision information
-	 */
-	@Path("revisiongraph")
-	@GET
-	@Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
-			MediaType.APPLICATION_SVG_XML, "application/ld+json" })
-	public final Response getRevisionGraph(@HeaderParam("Accept") final String format_header,
-			@QueryParam("format") final String format_query, @QueryParam("graph") @DefaultValue("") final String graph) {
-		String format = (format_query != null) ? format_query : format_header;
-		logger.info("Get Revision Graph: " + graph + " (format: " + format+")");
-		
-		ResponseBuilder response = Response.ok();
-		if (format.equals("batik")) {
-			response.type(MediaType.TEXT_HTML);
-			response.entity(VisualisationBatik.getHtmlOutput(graph));
-		} else if (format.equals("d3")) {
-			response.entity(VisualisationD3.getHtmlOutput(graph));
-		}
-		else {
-			response.entity(RevisionManagement.getRevisionInformation(graph, format));
-			response.type(format);
-		}
-		return response.build();
-	}
-	
-	/**
-	 * Provides content of graph in the attached triple store
-	 * 
-	 * @return list of graphs which are under revision control
-	 */
-	@Path("contentOfGraph")
-	@GET
-	@Produces({ "text/turtle", "application/rdf+xml", MediaType.APPLICATION_JSON, MediaType.TEXT_HTML,
-		MediaType.APPLICATION_SVG_XML, "application/ld+json" })
-	public final Response getContentOfGraph(
-			@HeaderParam("Accept") final String format_header,
-			@QueryParam("format") @DefaultValue("application/json") final String format_query,
-			@QueryParam("graph") final String graphName) {
-		logger.info("Get Content of graph " + graphName);
-		String format = (format_query != null) ? format_query : format_header;
-		logger.debug("format: " + format);
-		String result = RevisionManagement.getContentOfGraphByConstruct(graphName, format);
-		ResponseBuilder response = Response.ok();
-		return response.entity(result).type(format).build();
-	}
+	private final static Logger logger = LogManager.getLogger(Endpoint.class);
+
+	static final MediaType TEXT_TURTLE_TYPE = new MediaType("text", "turtle");
+	static final String TEXT_TURTLE = "text/turtle";
+	static final MediaType APPLICATION_RDF_XML_TYPE = new MediaType("application", "rdf+xml");
+	static final String APPLICATION_RDF_XML = "application/rdf+xml";
+	static final MediaType APPLICATION_SPARQL_RESULTS_XML_TYPE = new MediaType("application", "sparql-results+xml");
 
 	/**
 	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).
 	 * 
-	 * @param formatHeader
-	 *            format specified in the HTTP header
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
 	 * @param formatQuery
 	 *            format specified in the HTTP parameters
 	 * @param sparqlQuery
@@ -236,49 +79,78 @@ public class Endpoint {
 	 * @return HTTP response
 	 * @throws InternalErrorException 
 	 */
-	@Path("sparql")
 	@POST
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml"})
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	public final Response sparqlPOST(@HeaderParam("Accept") final String formatHeader,
+	public final Response sparqlPOST(
 			@FormParam("format") final String formatQuery, 
 			@FormParam("query") @DefaultValue("") final String sparqlQuery,
+			@HeaderParam("r43ples-revisiongraph") @DefaultValue("") final String revision_information,
 			@FormParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
-		String format = (formatQuery != null) ? formatQuery : formatHeader;
-		logger.debug("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")");
-		return sparql(format, sparqlQuery, query_rewriting);
+		try {
+			String format = getFormat(formatQuery);
+			logger.info("SPARQL POST query (format: "+format+", query: "+sparqlQuery +")" + revision_information);
+			return sparql(format, sparqlQuery, revision_information, query_rewriting);
+		} catch (Exception e) {
+			return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
+		}
+	}
+
+	private String getFormat(final String formatQuery) throws Exception {
+		if (formatQuery == null){
+			List<Variant> reqVariants = Variant.mediaTypes(MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_HTML_TYPE, 
+					MediaType.APPLICATION_JSON_TYPE, TEXT_TURTLE_TYPE, APPLICATION_RDF_XML_TYPE, APPLICATION_SPARQL_RESULTS_XML_TYPE).build();
+			Variant bestVariant = request.selectVariant(reqVariants);
+	        if (bestVariant == null) {
+	        	throw new Exception("Requested datatype not available");
+	        }
+        	MediaType reqMediaType = bestVariant.getMediaType();
+        	return reqMediaType.toString();
+		}
+		else {
+			return formatQuery;
+		}
 	}
 	
 	/**
 	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).
 	 * Direct method (http://www.w3.org/TR/2013/REC-sparql11-protocol-20130321/#query-via-post-direct)
-	 * 
-	 * @param formatHeader
-	 *            format specified in the HTTP header
+	 *
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
 	 * @param sparqlQuery
 	 *            the SPARQL query specified in the HTTP POST body
 	 * @return HTTP response
 	 * @throws InternalErrorException 
 	 */
-	@Path("sparql")
 	@POST
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
 	@Consumes("application/sparql-query")
-	public final Response sparqlPOSTdirectly(@HeaderParam("Accept") final String formatHeader,
+	public final Response sparqlPOSTdirectly(
+			@HeaderParam("r43ples-revisiongraph") @DefaultValue("") final String revision_information,
 			final String sparqlQuery) throws InternalErrorException {
-		logger.debug("SPARQL POST query directly (format: "+formatHeader+", query: "+sparqlQuery +")");
-		return sparql(formatHeader, sparqlQuery);
+		List<Variant> reqVariants = Variant.mediaTypes(MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_HTML_TYPE, 
+				MediaType.APPLICATION_JSON_TYPE, TEXT_TURTLE_TYPE, APPLICATION_RDF_XML_TYPE, APPLICATION_SPARQL_RESULTS_XML_TYPE).build();
+		Variant bestVariant = request.selectVariant(reqVariants);
+        if (bestVariant == null) {
+            return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
+        }
+    	MediaType reqMediaType = bestVariant.getMediaType();
+    	String format = reqMediaType.toString();
+		logger.info("SPARQL POST query directly (format: "+format+", query: "+sparqlQuery +")");
+		return sparql(reqMediaType.toString(), sparqlQuery, revision_information, false);
 	}
-		
 	
 	/**
 	 * HTTP GET interface for query and update (e.g. SELECT, INSERT, DELETE).
 	 * Provides HTML form if no query is specified and HTML is requested
 	 * Provides Service Description if no query is specified and RDF
 	 * representation is requested
-	 * 
-	 * @param formatHeader
-	 *            format specified in the HTTP header
+	 *
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
 	 * @param formatQuery
 	 *            format specified in the HTTP parameters
 	 * @param sparqlQuery
@@ -288,514 +160,23 @@ public class Endpoint {
 	 * @return HTTP response
 	 * @throws InternalErrorException 
 	 */
-	@Path("sparql")
 	@GET
 	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response sparqlGET(@HeaderParam("Accept") final String formatHeader,
+	public final Response sparqlGET(
 			@QueryParam("format") final String formatQuery, 
 			@QueryParam("query") @DefaultValue("") final String sparqlQuery,
-			@QueryParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException {
-		String format = (formatQuery != null) ? formatQuery : formatHeader;
-		
-		String sparqlQueryDecoded;
+			@HeaderParam("r43ples-revisiongraph") @DefaultValue("") final String revision_information,
+			@QueryParam("query_rewriting") @DefaultValue("") final String query_rewriting) throws InternalErrorException, UnsupportedEncodingException {
+		String format;
 		try {
-			sparqlQueryDecoded = URLDecoder.decode(sparqlQuery, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			sparqlQueryDecoded = sparqlQuery;
-		}
-		return sparql(format, sparqlQueryDecoded, query_rewriting);
+			format = getFormat(formatQuery);
+		} catch (Exception e) {
+			return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();
+		}		
+		
+		logger.info("SPARQL GET query (format: "+format+", query: "+sparqlQuery +")");
+		return sparql(format, URLDecoder.decode(sparqlQuery, "UTF-8"), revision_information, query_rewriting);
 	}
-	
-	
-	@Path("debug")
-	@GET
-	public final String debug(@DefaultValue("") @QueryParam("query") final String sparqlQuery) throws InternalErrorException {
-		if (sparqlQuery.equals("")) {
-			logger.info("Get Debug page");
-			return getHTMLDebugResponse();
-		} else {
-			String query;
-			try {
-				query = URLDecoder.decode(sparqlQuery, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
-				query = sparqlQuery;
-			}
-			logger.info("Debug query was requested. Query: " + query);
-			if (sparqlQuery.contains("INSERT")) {
-				TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
-				return "Query executed";
-			}
-			else {
-				String result = TripleStoreInterfaceSingleton.get().executeSelectConstructAskQuery(query, "text/html");
-				return getHTMLResult( result, sparqlQuery);
-			}
-		}
-	}
-	
-	
-	/**
-	 * Landing page
-	 *
-	 */
-	@GET
-	@Template(name = "/home.mustache")
-	@Produces(MediaType.TEXT_HTML)
-	public final Map<String, Object> getLandingPage() {
-		logger.info("Get Landing page");
-		Map<String, Object> htmlMap = new HashMap<String, Object>();
-		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());	
-		return htmlMap;
-	}
-	
-	/**
-	 * get merging HTML start page and input merging information
-	 * */
-	@Path("merging")
-	@GET
-    @Produces(MediaType.TEXT_HTML)
-	public final Response getMerging(@QueryParam("graph") final String graph) {
-		logger.info("Merging -- graph: " + graph);		
-		ResponseBuilder response = Response.ok();
-		List<String> graphList = RevisionManagement.getRevisedGraphsList();	
-	    Map<String, Object> scope = new HashMap<String, Object>();
-	    scope.put("merging_active", true);
-		scope.put("graphList", graphList);
-		
-	    StringWriter sw = new StringWriter();
-	    MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/merge_start_wip.mustache");
-	    mustache.execute(sw, scope);		
-	    response.entity(sw.toString()).type(MediaType.TEXT_HTML);
-		return response.build();
-	}
-	
-	
-	
-	/**
-	 * Perform a Merge query on html interface
-	 * create RevisionProcess Model A
-	 * create RevisionProcess Model B
-	 * create Difference model 
-	 */
-	@Path("mergingProcess")
-	@POST
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response mergingPOST(
-			@FormParam("graph") @DefaultValue("") final String graphName,
-			@FormParam("sdd") final String sddName,
-			@FormParam("strategy") final String strategy,
-			@FormParam("method") final String method,
-			@FormParam("branch1") final String branch1,
-			@FormParam("branch2") final String branch2,
-			@FormParam("user") @DefaultValue("") final String user,
-			@FormParam("message") @DefaultValue("") final String message) throws InternalErrorException {
-			
-		ResponseBuilder response = Response.ok();
-		
-		// Fast Forward
-		if(strategy.equals("Fast-Forward")){
-			CommitModel commitModel = new CommitModel(graphName, sddName, user, message, branch1, branch2, "Fast-Forward", null);
-			StrategyManagement.saveGraphVorMergingInMap(graphName, "application/json");
-			FastForwardControl.executeFastForward(graphName, branch1, branch2);
-			response.entity(commitModel.getReportView());
-			return response.build();	
-		}
-		// Rebase
-		else if(strategy.equals("Rebase")){
-			RebaseQueryTypeEnum type = null;			
-			if (method.equals("auto")) {
-				type = RebaseQueryTypeEnum.AUTO;
-			} else if(method.equals("common")){
-				type = RebaseQueryTypeEnum.COMMON;
-			} else{
-				type = RebaseQueryTypeEnum.MANUAL;
-			}
-		
-			String rebaseQuery = StrategyManagement.createRebaseQuery(graphName, sddName, user, message, branch1, branch2, type, null);
-			StrategyManagement.saveGraphVorMergingInMap(graphName, "application/json");
-			
-			Matcher userMatcher = patternUser.matcher(rebaseQuery);
-			logger.debug("test mergeQuery:"+rebaseQuery);
-			if (userMatcher.find()) {
-				rebaseQuery = userMatcher.replaceAll("");
-			}
-			Matcher messageMatcher = patternCommitMessage.matcher(rebaseQuery);
-			if (messageMatcher.find()) {
-				rebaseQuery = messageMatcher.replaceAll("");
-			}
-			
-			//for each client, create a mergingControlMap and for each named graph create a mergingControl, first check, if namedgraph exist .
-			//first create the mergingcontrol and than create the rebasecontrol
-			MergingControl mergingControl;
-			if(!clientMap.containsKey(user)){
-				mergingControl = new MergingControl();
-				clientMap.put(user, new HashMap<String, MergingControl>());
-				clientMap.get(user).put(graphName, mergingControl);
-			}else if(clientMap.containsKey(user) && (!clientMap.get(user).containsKey(graphName))) {
-				mergingControl = new MergingControl();
-				clientMap.get(user).put(graphName, mergingControl);
-			}else{
-				mergingControl = clientMap.get(user).get(graphName);
-			}
-					
-			
-			mergingControl.setRebaseControl();
-			mergingControl.closeRebaseModel();
-			
-			RebaseControl rebaseControl = mergingControl.getRebaseControl();
-			
-			rebaseControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Rebase", type.toString());
-			
-			Response responsePost = null;
-			if (patternRebaseQuery.matcher(rebaseQuery).find()) {
-				responsePost= getRebaseResponse(rebaseQuery, user, message, "HTML");
-				logger.debug("rebase response status: "+responsePost.getStatusInfo().toString());	
-				logger.debug("rebase response Header: "+responsePost.getHeaders().get("merging-strategy-information").get(0).toString());	
-				logger.debug("rebase response Header: "+responsePost.getHeaders().keySet().toString());	
-			}
-
-			String rebaseResultView = rebaseControl.getRebaseReportView(graphName);
-			response.entity(rebaseResultView);
-			return response.build();		
-		}
-		// Three Way Merge
-		else {
-			Response responsePost = null;
-			MergeQueryTypeEnum type = null;
-			if (method.equals("auto")) {
-				type = MergeQueryTypeEnum.AUTO;
-			} else if (method.equals("common")) {
-				type = MergeQueryTypeEnum.COMMON;
-			} else {
-				type = MergeQueryTypeEnum.MANUAL;
-			}
-			
-			//for each client ,create a mergingControl, first check, if named graph exists
-			MergingControl mergingControl;
-			if(!clientMap.containsKey(user)){
-				mergingControl = new MergingControl();
-				clientMap.put(user, new HashMap<String, MergingControl>());
-				clientMap.get(user).put(graphName, mergingControl);
-			}else if(clientMap.containsKey(user) && (!clientMap.get(user).containsKey(graphName))) {
-				mergingControl = new MergingControl();
-				clientMap.get(user).put(graphName, mergingControl);
-			}else{
-				mergingControl = clientMap.get(user).get(graphName);
-			}
-
-			mergingControl.closeRebaseModel();
-			
-			//save commit information in MergingControl
-			mergingControl.createCommitModel(graphName, sddName, user, message, branch1, branch2, "Three-Way", type.toString());
-						
-			
-			//save the graph information vor merging 
-			StrategyManagement.saveGraphVorMergingInMap(graphName, "application/json" );
-				
-			String mergeQuery = ProcessManagement.createMergeQuery(graphName, sddName, user, message, type, branch1, branch2, null);
-			logger.debug("test mergeQuery:"+mergeQuery);
-			
-			Matcher userMatcher = patternUser.matcher(mergeQuery);
-			if (userMatcher.find()) {
-				mergeQuery = userMatcher.replaceAll("");
-			}
-			Matcher messageMatcher = patternCommitMessage.matcher(mergeQuery);
-			if (messageMatcher.find()) {
-				mergeQuery = messageMatcher.replaceAll("");
-			}
-
-			if (patternMergeQuery.matcher(mergeQuery).find()) {
-				responsePost= getThreeWayMergeResponse(mergeQuery, user, message,"HTML");
-			}
-							
-			if(!(responsePost.getStatusInfo() == Response.Status.CONFLICT)){
-				response.entity(mergingControl.getThreeWayReportView(null));				
-				return response.build();
-			}
-
-			mergingControl.getMergeProcess(responsePost, graphName, branch1, branch2);
-			response.entity(mergingControl.getViewHtmlOutput());
-			return response.build();
-		}	
-	}
-	
-	
-
-
-	/**
-	 * get old revision graph which was saved before in the cache of the server by 
-	 * query revision information and get the graph
-	 * */
-	@Path("getOldRevisiongraph")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public final Response fastForwardGET(
-			 @QueryParam("graph")  @DefaultValue("") final String graph) throws InternalErrorException {
-
-		ResponseBuilder response = Response.ok();
-		logger.info("Get old revision graph: "+ graph);
-
-		response.type(MediaType.APPLICATION_JSON);
-		response.entity(StrategyManagement.loadGraphVorMergingFromMap(graph));
-		
-		return response.build();
-	}	
-	
-	/**
-	 * select the force rebase process
-	 * @throws InternalErrorException 
-	 */
-	@Path("forceRebaseProcess")
-	@GET
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response forceRebaseProcessGET(@QueryParam("graph") @DefaultValue("") final String graph, 
-			@QueryParam("client") @DefaultValue("") final String user ) throws InternalErrorException {
-
-		ResponseBuilder response = Response.ok();
-		//get rebaseControl form map
-		RebaseControl rebaseControl = clientMap.get(user).get(graph).getRebaseControl();
-		rebaseControl.forceRebaseProcess(graph);
-		response.entity(rebaseControl.getRebaseReportView(null));
-		return response.build();
-	}	
-	
-	/**
-	 * select the manual rebase process
-	 * @throws InternalErrorException 
-	 */
-	@Path("manualRebaseProcess")
-	@GET
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response manualRebaseProcessGET( @QueryParam("graph") @DefaultValue("") final String graph, 
-			@QueryParam("client") @DefaultValue("") final String user ) throws InternalErrorException {
-
-		ResponseBuilder response = Response.ok();
-		
-		//get MergingControl and rebaseControl form map
-		MergingControl mergingControl = clientMap.get(user).get(graph);	
-		RebaseControl rebaseControl = mergingControl.getRebaseControl();	
-		rebaseControl.manualRebaseProcess();
-		
-		response.entity(mergingControl.getViewHtmlOutput());
-		
-		return response.build();
-	}	
-	
-	
-	
-	
-	/**
-	 * by high level view approve to server call this method
-	 */
-	@Path("approveHighLevelProcess")
-	@POST
-	public final void approveHighLevelPOST(
-			@FormParam("isChecked") @DefaultValue("") final String isChecked,
-			@FormParam("id")        @DefaultValue("") final String id, 
-			@FormParam("graph")     @DefaultValue("") final String graph, 
-			@FormParam("client")    @DefaultValue("") final String user) throws InternalErrorException {
-		
-		logger.info("ApproveHighLevelProcess test: "+id + " - isChecked: " + isChecked);
-		
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-		mergingControl.approveHighLevelToDifferenceModel(id, isChecked);
-	}
-	
-	
-	/**push check : coflict approved check , difference approved change check
-	 * reportResult create
-	 * save the triplesId in checkbox
-	 * todo 
-	 * @throws ConfigurationException 
-	*/
-	@Path("reportProcess")
-	@GET
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response reportGET(
-			@QueryParam("graph")  @DefaultValue("") final String graph,
-			@QueryParam("client") @DefaultValue("") final String user ) {
-		
-		ResponseBuilder response = Response.ok();
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-		response.entity(mergingControl.createReportProcess());
-		return response.build();	
-	}	
-
-	
-	/** new push process with report view
-	 * */
-	@Path("pushProcess")
-	@GET
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response pushReportGET( @QueryParam("graph") @DefaultValue("") final String graph,
-			@QueryParam("client") @DefaultValue("") final String user) throws InternalErrorException {
-		
-		ResponseBuilder response = Response.ok();
-			
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-		//save the graph information before merging 
-		StrategyManagement.saveGraphVorMergingInMap(graph, "application/json");
-		
-		String mergeQuery = mergingControl.updateMergeQuery();
-		
-		String userCommit = null;
-		Matcher userMatcher = patternUser.matcher(mergeQuery);
-		if (userMatcher.find()) {
-			userCommit = userMatcher.group("user");
-			mergeQuery = userMatcher.replaceAll("");
-		}
-		String messageCommit = null;
-		Matcher messageMatcher = patternCommitMessage.matcher(mergeQuery);
-		if (messageMatcher.find()) {
-			messageCommit = messageMatcher.group("message");
-			mergeQuery = messageMatcher.replaceAll("");
-		}
-
-		if (patternMergeQuery.matcher(mergeQuery).find()) {
-			getThreeWayMergeResponse(mergeQuery, userCommit, messageCommit,"HTML");
-		}
-			
-		response.entity(mergingControl.getThreeWayReportView(null));
-		
-		clientMap.get(user).remove(graph);
-		if(clientMap.get(user).isEmpty()){
-			clientMap.remove(user);
-		}
-		
-		return response.build();
-	}	
-	
-	
-	/** rebase push process with report view
-	 * 
-	 * */
-	@Path("rebasePushProcess")
-	@GET
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response rebasePushReportGET(@QueryParam("graph") @DefaultValue("") final String graph,
-			@QueryParam("client") @DefaultValue("") final String user ) throws InternalErrorException {
-		
-		ResponseBuilder response = Response.ok();
-		
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-		RebaseControl rebaseControl = mergingControl.getRebaseControl();
-		
-		mergingControl.transformDifferenceModelToRebase();
-		
-		// update the new rebase merge query
-		String mergeQuery = mergingControl.updateMergeQuery();
-		
-		logger.info("rebasePushProcess: "+ mergeQuery);
-		
-		// execute the getRebaseResponse()
-		Matcher userMatcher = patternUser.matcher(mergeQuery);
-		if (userMatcher.find()) {
-			mergeQuery = userMatcher.replaceAll("");
-		}
-		Matcher messageMatcher = patternCommitMessage.matcher(mergeQuery);
-		if (messageMatcher.find()) {
-			mergeQuery = messageMatcher.replaceAll("");
-		}
-
-		getRebaseResponse(mergeQuery, user, mergingControl.getCommitModel().getMessage(), "HTML");
-				
-		
-		String rebaseResultView = rebaseControl.getRebaseReportView(null);
-		
-		response.entity(rebaseResultView);
-		
-		//close rebase model
-		mergingControl.closeRebaseModel();
-		
-		//after push remove the graph and release the space
-		clientMap.get(user).remove(graph);
-		if(clientMap.get(user).isEmpty()){
-			clientMap.remove(user);
-		}
-		
-		return response.build();
-	}	
-	
-	
-	
-
-	
-	/**load individual View
-	  */
-	
-	@Path("individualView")
-	@GET
-	@Produces(MediaType.TEXT_HTML)
-	public final Response individualGET( @QueryParam("graph") @DefaultValue("") final String graph,
-			 @QueryParam("client") @DefaultValue("") final String user ) {
-		logger.info("Get individual view: "+ graph);
-		ResponseBuilder response = Response.ok();
-		
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-		
-		response.entity(mergingControl.getIndividualView());
-		return response.build();
-	}
-	
-	
-	/**load updated triple View
-	 *
-	 * */
-	
-	@Path("tripleView")
-	@GET
-	@Produces(MediaType.TEXT_HTML)
-	public final Response tripleViewGET(@QueryParam("graph") @DefaultValue("") final String graph, 
-			@QueryParam("client") @DefaultValue("") final String user ) {
-		ResponseBuilder response = Response.ok();
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-		response.entity(mergingControl.getTripleView());
-		return response.build();
-	}
-	
-	
-	/**load High Level Change Table View 
-	 * */
-	
-	@Path("highLevelView")
-	@GET
-	@Produces(MediaType.TEXT_HTML)
-	public final Response highLevelGET(@QueryParam("graph") @DefaultValue("") final String graph,
-			@QueryParam("client") @DefaultValue("") final String user ) {
-		
-		ResponseBuilder response = Response.ok();
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-		response.entity(mergingControl.getHighLevelView());
-		return response.build();
-	}
-	
-	
-	
-	/**with individual filter the Triple in tripleTable
-	 * @param individualA individual of Branch A
-	 * @param individualB individual of Branch B */
-	
-	@Path("individualFilter")
-	@POST
-	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, "application/rdf+xml", "text/turtle", "application/sparql-results+xml" })
-	public final Response individualFilterPOST(@HeaderParam("Accept") final String formatHeader,
-			@FormParam("individualA") @DefaultValue("null") final String individualA,
-			@FormParam("individualB") @DefaultValue("null") final String individualB, @FormParam("graph") @DefaultValue("") final String graph, 
-			@FormParam("client") @DefaultValue("") final String user ) {
-		
-		ResponseBuilder response = Response.ok();
-		MergingControl mergingControl = clientMap.get(user).get(graph);
-		
-		logger.info("individualFilter (A:"+ individualA +" B:"+ individualB+")");
-		
-		String individualFilter = mergingControl.getIndividualFilter(individualA, individualB);
-		
-		response.entity(individualFilter);
-		return response.build();
-	}	
 	
 	
 	
@@ -809,21 +190,43 @@ public class Endpoint {
 	 *            mime type for response format
 	 * @param sparqlQuery
 	 *            decoded SPARQL query
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
 	 * @param query_rewriting
 	 * 			  should query rewriting option be used
 	 * @return the response
 	 * @throws InternalErrorException 
 	 */
-	public final Response sparql(final String format, final String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
-		if (sparqlQuery.equals("")) {
+	private final Response sparql(final String format, final String sparqlQuery, final String revision_information, final boolean query_rewriting) throws InternalErrorException {
+		if ("".equals(sparqlQuery)) {
 			if (format.contains(MediaType.TEXT_HTML)) {
 				return getHTMLResponse();
 			} else {
 				return getServiceDescriptionResponse(format);
 			}
 		} else {
-			return getSparqlResponse(format, sparqlQuery, query_rewriting);
+			return getSparqlResponse(format, sparqlQuery, revision_information, query_rewriting);
 		}
+	}
+
+	/**
+	 * Interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * Provides HTML form if no query is specified and HTML is requested
+	 * Provides Service Description if no query is specified and RDF
+	 * representation is requested
+	 *
+	 * @param format
+	 *            mime type for response format
+	 * @param sparqlQuery
+	 *            decoded SPARQL query
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
+	 * @return the response
+	 * @throws InternalErrorException
+	 */
+	public final Response sparql(final String format, final String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
+		return sparql(format, sparqlQuery, null, query_rewriting);
 	}
 	
 	/**
@@ -832,17 +235,20 @@ public class Endpoint {
 	 *            mime type for response format
 	 * @param sparqlQuery
 	 *            decoded SPARQL query
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
 	 * @param query_rewriting
 	 * 			  string determining if query rewriting option be used
 	 * @return
 	 * @throws InternalErrorException
 	 */
-	private final Response sparql(final String format, final String sparqlQuery, final String query_rewriting) throws InternalErrorException {
+	private Response sparql(final String format, final String sparqlQuery, final String revision_information, final String query_rewriting) throws InternalErrorException {
 		String option = query_rewriting.toLowerCase();
 		if (option.equals("on") || option.equals("true") || option.equals("new"))
-			return sparql(format, sparqlQuery, true);
+			return sparql(format, sparqlQuery, revision_information, true);
 		else
-			return sparql(format, sparqlQuery, false);
+			return sparql(format, sparqlQuery, revision_information, false);
 	}
 	
 	/**
@@ -859,39 +265,15 @@ public class Endpoint {
 	 * @throws InternalErrorException 
 	 */
 	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException {
-		return sparql(format, sparqlQuery, false);
+		return sparql(format, sparqlQuery, null, false);
 	}
 	
 	
 	public final Response sparql(final String sparqlQuery) throws InternalErrorException {
-		return sparql("application/xml", sparqlQuery, false);
+		return sparql("application/xml", sparqlQuery, null, false);
 	}
 	
 	
-	/**
-	 * Get HTML debug response for standard sparql request form.
-	 * Using mustache templates. 
-	 * 
-	 * @return HTML response for SPARQL form
-	 * @throws InternalErrorException 
-	 */
-	private String getHTMLDebugResponse() throws InternalErrorException {		
-		logger.info("Get Debug page");
-		Map<String, Object> htmlMap = new HashMap<String, Object>();
-		htmlMap.put("version", Endpoint.class.getPackage().getImplementationVersion() );
-		htmlMap.put("git", GitRepositoryState.getGitRepositoryState());
-		htmlMap.put("graphs", TripleStoreInterfaceSingleton.get().getGraphs());
-	    htmlMap.put("revisionGraph", Config.revision_graph);
-	    htmlMap.put("triplestore_type", Config.triplestore_type);
-	    htmlMap.put("triplestore_url", Config.triplestore_url);
-	    htmlMap.put("sdd_graph", Config.sdd_graph);
-	    htmlMap.put("debug_active", true);
-	    StringWriter sw = new StringWriter();	    
-		MustacheFactory mf = new DefaultMustacheFactory();
-	    Mustache mustache = mf.compile("templates/debug.mustache");
-	    mustache.execute(sw, htmlMap);		
-		return sw.toString();
-	}
 	
 
 	/**
@@ -906,7 +288,9 @@ public class Endpoint {
 	    Mustache mustache = mf.compile("templates/endpoint.mustache");
 	    StringWriter sw = new StringWriter();
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
-	    htmlMap.put("graphList", RevisionManagement.getRevisedGraphsList());
+		ArrayList<String> graphList = new ArrayList<>();
+		graphList.addAll(new RevisionControl().getRevisedGraphs().keySet());
+		htmlMap.put("graphList", graphList);
 	    htmlMap.put("endpoint_active", true);
 	    mustache.execute(sw, htmlMap);		
 		String content = sw.toString();
@@ -935,6 +319,7 @@ public class Endpoint {
 		Mustache mustache = mf.compile("templates/result.mustache");
 		StringWriter sw = new StringWriter();
 		Map<String, Object> htmlMap = new HashMap<String, Object>();
+		htmlMap.put("endpoint_active", true);
 		htmlMap.put("result", result);
 		htmlMap.put("query", query);
 		htmlMap.put("query_rewritten", query_rewritten);
@@ -953,52 +338,55 @@ public class Endpoint {
 	 * @return HTTP response of evaluating the sparql query 
 	 * @throws InternalErrorException
 	 */
-	private Response getSparqlResponse(final String format, String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
-		logger.info(String.format("SPARQL request (format=%s, query_rewriting=%s) -> %n %s", format, query_rewriting, sparqlQuery));
-		String user = null;
-		Matcher userMatcher = patternUser.matcher(sparqlQuery);
-		if (userMatcher.find()) {
-			user = userMatcher.group("user");
-			sparqlQuery = userMatcher.replaceAll("");
-		}
-		String message = null;
-		Matcher messageMatcher = patternCommitMessage.matcher(sparqlQuery);
-		if (messageMatcher.find()) {
-			message = messageMatcher.group("message");
-			sparqlQuery = messageMatcher.replaceAll("");
-		}
-		
+	private Response getSparqlResponse(String format, String sparqlQuery, final String revision_information, final boolean query_rewriting) throws InternalErrorException {
+		logger.info(String.format("SPARQL request (format=%s, query_rewriting=%s, header=%s) -> %n %s", format, query_rewriting,revision_information, sparqlQuery));
+
+		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();
+
+		R43plesRequest request = new R43plesRequest(sparqlQuery, format, revision_information);
+
 		String result;
-		if (patternSelectAskConstructQuery.matcher(sparqlQuery).find()) {
-			result = Interface.sparqlSelectConstructAsk(sparqlQuery, format, query_rewriting);
+		if (request.isSelectAskConstructQuery()) {
+			result = r43plesCore.getSparqlSelectConstructAskResponse(request, query_rewriting);
 		}
-		else if (patternUpdateQuery.matcher(sparqlQuery).find()) {
-			Interface.sparqlUpdate(sparqlQuery, user, message);
-			result = "Query executed";
+		else if (request.isUpdateQuery()) {
+			r43plesCore.createUpdateCommit(request);
+			result = "Update executed";
 		}
-		else if (patternCreateGraph.matcher(sparqlQuery).find()) {
-			String graphName = Interface.sparqlCreateGraph(sparqlQuery);
-			result = "Graph <"+graphName+"> successfully created";
+		else if (request.isRevertQuery()) {
+			r43plesCore.createRevertCommit(request);
+			result = "Revert executed";
 		}
-		else if (patternMergeQuery.matcher(sparqlQuery).find()) {
-			return getThreeWayMergeResponse(sparqlQuery, user, message, format);
+		else if (request.isCreateGraphQuery()) {
+			InitialCommit initialCommit = r43plesCore.createInitialCommit(request);
+			result = "Graph <" + initialCommit.getGeneratedRevision().getRevisionGraph().getGraphName() + "> successfully created";
 		}
-		else if (patternDropGraph.matcher(sparqlQuery).find()) {
-			Interface.sparqlDropGraph(sparqlQuery);
+		else if (request.isDropGraphQuery()) {
+			r43plesCore.sparqlDropGraph(sparqlQuery);
 			result = "Graph successfully dropped";
 		}
-		else if (patternBranchOrTagQuery.matcher(sparqlQuery).find()) {
-			Interface.sparqlTagOrBranch(sparqlQuery, user, message);
+		else if (request.isBranchOrTagQuery()) {
+			r43plesCore.createReferenceCommit(request);
 			result = "Tagging or branching successful";
 		}
-		else if (patternFastForwardQuery.matcher(sparqlQuery).find()) {					
-			if (Interface.sparqlFastForwardMerge(sparqlQuery, user, message))
-				result = "Fast Forward Merge successful";
-			else
-				result = "Error in Fast Forward Merge";
+		else if (request.isMergeQuery()) {
+            logger.info("Merge query detected");
+            return getMergeResponse(r43plesCore.createMergeCommit(request), request);
 		}
-		else if (patternRebaseQuery.matcher(sparqlQuery).find()) {
-			return getRebaseResponse(sparqlQuery, user, message, format);
+		else if (request.isPickQuery()) {
+			logger.info("Pick query detected");
+			r43plesCore.createPickCommit(request);
+			result = "Revision(s) successfully picked";
+		}
+		else if (request.isAggQuery()) {
+			logger.info("Aggregation query detected");
+			r43plesCore.aggregate(request);
+			result = "Atomic changes successfully aggregated to high level ones";
+		}
+		else if (request.isCoEvoQuery()) {
+			logger.info("Coevolution query detected");
+			r43plesCore.coevolveAll(request);
+			result = "Semantic changes successfully coevolved";
 		}
 		else
 			throw new QueryErrorException("No R43ples query detected");
@@ -1015,7 +403,8 @@ public class Endpoint {
 			responseBuilder.entity(result);
 		}
 		responseBuilder.type(format);
-		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(sparqlQuery));		
+		HeaderInformation hi = new HeaderInformation();
+		responseBuilder.header("r43ples-revisiongraph", hi.getResponseHeaderFromQuery(sparqlQuery));
 		return responseBuilder.build();
 	}
 
@@ -1069,287 +458,48 @@ public class Endpoint {
 
 
 	/** 
-	 * Creates a merge between the specified branches.
-	 * 
-	 * Using command: MERGE GRAPH \<graphURI\> BRANCH "branchNameA" INTO "branchNameB"
-	 * 
-	 * @param sparqlQuery the SPARQL query
-	 * @param format the result format
+	 * Creates the merge response.
+	 *
+	 * @param commit merge commit object containing all information about the merge
+     * @param request the original R43ples request.
+	 *
+	 * @return the http response
 	 * @throws InternalErrorException 
 	 */
-	private Response getThreeWayMergeResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
+	private Response getMergeResponse(MergeCommit commit, R43plesRequest request) throws InternalErrorException {
 		ResponseBuilder responseBuilder = Response.created(URI.create(""));
-		logger.info("Three-Way-Merge query detected");
-		
-		MergeResult mresult = Interface.sparqlThreeWayMerge(sparqlQuery, user, commitMessage, format);
-		
-		if (mresult.hasConflict) {
-			responseBuilder = Response.status(Response.Status.CONFLICT);
-			responseBuilder.entity(mresult.conflictModel);
+
+		Revision usedSourceRevision;
+
+		if (commit.getClass().equals(ThreeWayMergeCommit.class)) {
+			ThreeWayMergeCommit threeWayMergeCommit = (ThreeWayMergeCommit) commit;
+			if (threeWayMergeCommit.isHasConflict()) {
+				responseBuilder = Response.status(Response.Status.CONFLICT);
+				responseBuilder.entity(threeWayMergeCommit.getConflictModel());
+			}
+			usedSourceRevision = threeWayMergeCommit.getUsedSourceRevision();
+		} else {
+			FastForwardMergeCommit fastForwardMergeCommit = (FastForwardMergeCommit) commit;
+			usedSourceRevision = fastForwardMergeCommit.getUsedSourceRevision();
 		}
+
+
 		String graphNameHeader;
 		try {
-			graphNameHeader = URLEncoder.encode(mresult.graph, "UTF-8");
+			graphNameHeader = URLEncoder.encode(commit.getRevisionGraph().getGraphName(), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
-			graphNameHeader = mresult.graph;
+			graphNameHeader = commit.getRevisionGraph().getGraphName();
 		}
-		
-		// Return the revision number which were used (convert tag or branch identifier to revision number)
-		String revisionGraph = RevisionManagement.getRevisionGraph(mresult.graph);
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(revisionGraph, mresult.branchA));
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(revisionGraph, mresult.branchB));			
-		
-		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(sparqlQuery));	
+
+		// Return the revision identifiers which were used (convert tag or branch identifier to revision identifier)
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-From", usedSourceRevision.getRevisionIdentifier());
+		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-Into", commit.getUsedTargetRevision().getRevisionIdentifier());
+
+		HeaderInformation hi = new HeaderInformation();
+		responseBuilder.header("r43ples-revisiongraph", hi.getResponseHeaderFromQuery(request.query_sparql));
 		
 		return responseBuilder.build();	
 	}
-	
-	
-	
-	/** 
-	 * Creates response query and get Response of it.
-	 * 
-	 * Using command: RESBASE (AUTO|FORCE|MANUAL) GRAPH <graphURI> BRANCH "branchNameA" INTO "branchNameB"
-	 * 
-	 * @param sparqlQuery the SPARQL query
-	 * @throws InternalErrorException 
-	 */
-	
-	private Response getRebaseResponse(final String sparqlQuery, final String user, final String commitMessage, final String format) throws InternalErrorException {
-		
-		ResponseBuilder responseBuilder = Response.created(URI.create(""));
-		logger.info("Three-Way-Merge query detected");
-		
-		// TODO: make it similar to ThreeWayMerge
-		//MergeResult mresult = Interface.sparqlThreeWayMerge(sparqlQuery, user, commitMessage, format);
-		
-		
-		Matcher m = patternRebaseQuery.matcher(sparqlQuery);
-		
 
-		if (!m.find()){
-			throw new InternalErrorException("Error in query: " + sparqlQuery);
-		}
-	
-		String action = m.group("action");
-		String graphName = m.group("graph");
-		String sdd = m.group("sdd");
-		String branchNameA = m.group("branchNameA").toLowerCase();
-		String branchNameB = m.group("branchNameB").toLowerCase();
-		String with = m.group("with");
-		String triples = m.group("triples");
-		String type;
-		if(action ==null) {
-			type = "COMMON";
-		}else if (action.equalsIgnoreCase("AUTO")){
-			type = "AUTO";
-		}else if(action.equalsIgnoreCase("FORCE")){
-			type = "FORCE";
-		}else if(action.equalsIgnoreCase("MANUAL")){
-			type = "MANUAL";
-		}else {
-			throw new InternalErrorException("Error in SPARQL Merge Anfrage , type is not right.");
-		}
-		
-		MergingControl mergingControl;
-		RebaseControl rebaseControl;
-		
-		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-	
-		if(clientMap.containsKey(user) && (clientMap.get(user).containsKey(graphName))) {
-			mergingControl = clientMap.get(user).get(graphName);
-			rebaseControl = mergingControl.getRebaseControl();
-		}else{
-			mergingControl = new MergingControl();
-			mergingControl.setRebaseControl();
-			rebaseControl = mergingControl.getRebaseControl();
-			rebaseControl.createCommitModel(graphName, sdd, user, commitMessage, branchNameA, branchNameB, "Rebase", type);
-		}
-					
-		// get the last revision of each branch
-		String revisionUriA = RevisionManagement.getRevisionUri(revisionGraph, branchNameA);
-		String revisionUriB = RevisionManagement.getRevisionUri(revisionGraph, branchNameB);
-			
-		checkIfRebaseIsPossible(graphName, branchNameA, branchNameB);
-
-		// Differ between MERGE query with specified SDD and without SDD			
-		String usedSDDURI = getSDD(graphName, sdd);
-
-		// Get the common revision with shortest path
-		String commonRevision = MergeManagement.getCommonRevisionWithShortestPath(revisionGraph, revisionUriA, revisionUriB);
-		
-		 
-		// create the patch and patch group
-		LinkedList<String> revisionList = MergeManagement.getPathBetweenStartAndTargetRevision(
-				revisionGraph, commonRevision, revisionUriA);
-		rebaseControl.createPatchGroupOfBranch(revisionGraph, revisionUriB, revisionList);
-		
-		
-		// transform the response to the rebase freundlich check process
-		String graphNameHeader;
-		try {
-			graphNameHeader = URLEncoder.encode(graphName, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-			graphNameHeader = graphName;
-		}
-		
-		// Return the revision number which were used (convert tag or branch identifier to revision number)
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-A", RevisionManagement.getRevisionNumber(revisionGraph, branchNameA));
-		responseBuilder.header(graphNameHeader + "-revision-number-of-branch-B", RevisionManagement.getRevisionNumber(revisionGraph, branchNameB));	
-		
-		
-		String graphStrategy = "merging-strategy-information";
-		
-		if((action!= null) && (action.equalsIgnoreCase("FORCE"))) {
-			rebaseControl.forceRebaseProcess(graphName);	
-			responseBuilder.header(graphStrategy, "force-rebase");
-			return responseBuilder.build();	
-		}
-			
-		// Create the revision progress for A and B
-		String graphNameA = graphName + "-RM-REVISION-PROGRESS-A";
-		String graphNameB = graphName + "-RM-REVISION-PROGRESS-B";
-		String graphNameDiff = graphName + "-RM-DIFFERENCE-MODEL";
-		String uriA = "http://eatld.et.tu-dresden.de/branch-A";
-		String uriB = "http://eatld.et.tu-dresden.de/branch-B";
-		
-		MergeManagement.createRevisionProgresses(revisionGraph, graphName,
-				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriA), graphNameA, uriA, 
-				MergeManagement.getPathBetweenStartAndTargetRevision(revisionGraph, commonRevision, revisionUriB), graphNameB, uriB);
-		
-		
-		// Create difference model
-		MergeManagement.createDifferenceTripleModel(graphName,  graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI);
-		if ((action != null) && (action.equalsIgnoreCase("AUTO")) && (with == null) && (triples == null)) {
-			logger.info("AUTO REBASE query detected");
-			// Create the merged revision
-			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, RebaseQueryTypeEnum.AUTO, "");
-			String addedAsNTriples = addedAndRemovedTriples.get(0);
-			String removedAsNTriples = addedAndRemovedTriples.get(1);
-			
-			String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
-			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
-					user, commitMessage, basisRevisionNumber);
-			
-			responseBuilder.header(graphStrategy, "auto-rebase");
-								
-		} else if ((action != null) && (action.equalsIgnoreCase("MANUAL")) && (with != null) && (triples != null)) {
-			logger.info("MANUAL REBASE query detected");
-			// Create the merged revision
-			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, RebaseQueryTypeEnum.MANUAL, triples);
-			String addedAsNTriples = addedAndRemovedTriples.get(0);
-			String removedAsNTriples = addedAndRemovedTriples.get(1);
-			
-			String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
-			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
-					user, commitMessage, basisRevisionNumber);
-			
-			responseBuilder.header(graphStrategy, "manual-rebase");
-			
-		} else if ((action == null) && (with != null) && (triples != null)) {
-			logger.info("REBASE WITH query detected");
-			// Create the merged revision -- newTriples
-			ArrayList<String> addedAndRemovedTriples = MergeManagement.createRebaseMergedTripleList(graphName, branchNameA, branchNameB, user, commitMessage, graphNameDiff, graphNameA, uriA, graphNameB, uriB, usedSDDURI, RebaseQueryTypeEnum.WITH, triples);
-			String addedAsNTriples = addedAndRemovedTriples.get(0);
-			String removedAsNTriples = addedAndRemovedTriples.get(1);
-			
-			String basisRevisionNumber = rebaseControl.forceRebaseProcess(graphName);
-			RevisionManagement.createNewRevision(graphName, addedAsNTriples, removedAsNTriples,
-					user, commitMessage, basisRevisionNumber);
-			
-			responseBuilder.header(graphStrategy, "with-rebase");
-						
-		} else if ((action == null) && (with == null) && (triples == null)) {
-			// Check if difference model contains conflicts
-			String queryASK = String.format(
-					  "ASK { %n"
-					+ "	GRAPH <%s> { %n"
-					+ " 	?ref <http://eatld.et.tu-dresden.de/sddo#isConflicting> \"true\"^^<http://www.w3.org/2001/XMLSchema#boolean> . %n"
-					+ "	} %n"
-					+ "}", graphNameDiff);
-			if (TripleStoreInterfaceSingleton.get().executeAskQuery(queryASK)) {
-				// Difference model contains conflicts
-				// Return the conflict model to the client
-				logger.info("rebase conflict");
-				responseBuilder = Response.status(Response.Status.CONFLICT);
-				responseBuilder.header(graphStrategy, "rebase-unfreundlich");
-				// write the difference model in the response builder
-				responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));
-			} else{
-				rebaseControl.forceRebaseProcess(graphName);	
-				responseBuilder.entity(RevisionManagement.getContentOfGraphByConstruct(graphNameDiff, format));				
-			}
-					
-		} else {
-			throw new InternalErrorException("This is not a valid MERGE query: " + sparqlQuery);
-		}				
-	
-		responseBuilder.header("r43ples-revisiongraph", RevisionManagement.getResponseHeaderFromQuery(sparqlQuery));	
-				
-		return responseBuilder.build();			
-	}
-
-	/**
-	 * @param graphName
-	 * @param sdd
-	 * @param sddURI
-	 * @return
-	 * @throws InternalErrorException
-	 */
-	public static String getSDD(String graphName, String sdd)
-			throws InternalErrorException {
-		if (sdd != null && sdd != "") {
-			// Specified SDD
-			return sdd;
-		} else {
-			// Default SDD
-			// Query the referenced SDD
-			String querySDD = String.format(
-					  "PREFIX sddo: <http://eatld.et.tu-dresden.de/sddo#> %n"
-					+ "PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#> %n"
-					+ "SELECT ?defaultSDD %n"
-					+ "WHERE { GRAPH <%s> {	%n"
-					+ "	<%s> a rmo:Graph ;%n"
-					+ "		sddo:hasDefaultSDD ?defaultSDD . %n"
-					+ "} }", Config.revision_graph, graphName);
-			
-			ResultSet resultSetSDD = TripleStoreInterfaceSingleton.get().executeSelectQuery(querySDD);
-			if (resultSetSDD.hasNext()) {
-				QuerySolution qs = resultSetSDD.next();
-				return qs.getResource("?defaultSDD").toString();
-			} else {
-				throw new InternalErrorException("Error in revision graph! Selected graph <" + graphName + "> has no default SDD referenced.");
-			}
-		}
-	}
-
-	/** simple checks if rebase could be possible for these two branches of a graph
-	 * @param graphName
-	 * @param branchNameA
-	 * @param branchNameB
-	 * @throws InternalErrorException throws an error if it is not possible
-	 */
-	private void checkIfRebaseIsPossible(String graphName, String branchNameA,
-			String branchNameB) throws InternalErrorException {
-		// Check if graph already exists
-		if (!RevisionManagement.checkGraphExistence(graphName)){
-			logger.error("Graph <"+graphName+"> does not exist.");
-			throw new InternalErrorException("Graph <"+graphName+"> does not exist.");
-		}
-	
-		String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-		// Check if A and B are different revisions
-		if (RevisionManagement.getRevisionNumber(revisionGraph, branchNameA).equals(RevisionManagement.getRevisionNumber(revisionGraph, branchNameB))) {
-			// Branches are equal - throw error
-			throw new InternalErrorException("Specified branches are equal");
-		}
-		
-		// Check if both are terminal nodes
-		if (!(RevisionManagement.isBranch(graphName, branchNameA) && RevisionManagement.isBranch(graphName, branchNameB))) {
-			throw new InternalErrorException("Non terminal nodes were used ");
-		}
-	}
-	
 }

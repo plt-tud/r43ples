@@ -1,0 +1,147 @@
+﻿# Definition of the structural difference groups with possible resolutions
+
+@prefix mmo:	<http://eatld.et.tu-dresden.de/mmo#> .
+@prefix sdg:	<http://eatld.et.tu-dresden.de/sdg#> .
+@prefix xsd:	<http://www.w3.org/2001/XMLSchema#> .
+
+###########################################################
+###########################################################
+# Default SDG - Structural difference groups with possible resolutions
+###########################################################
+###########################################################
+
+sdg:defaultSDG a mmo:StructuralDefinitionGroup ;
+	mmo:hasStructuralDefinition
+#		sdg:deleted-deleted ,
+		sdg:deleted-added ,
+		sdg:deleted-original ,
+#		sdg:deleted-notIncluded ,
+		sdg:added-deleted ,
+#		sdg:added-added ,
+#		sdg:added-original ,
+		sdg:added-notIncluded ,
+		sdg:original-deleted ,
+#		sdg:original-added ,
+#		sdg:original-original ,
+#		sdg:notIncluded-deleted ,
+		sdg:notIncluded-added .
+
+
+###########################################################
+# Deleted - X definitions
+###########################################################
+
+#sdg:deleted-deleted a mmo:StructuralDefinition ;
+#	mmo:hasTripleStateA mmo:Deleted ;
+#	mmo:hasTripleStateB mmo:Deleted ;
+#	mmo:isConflicting "false"^^xsd:boolean ;
+#	mmo:automaticResolutionState mmo:Deleted .
+
+sdg:deleted-added a mmo:StructuralDefinition ;
+	mmo:hasTripleStateA mmo:Deleted ;
+	mmo:hasTripleStateB mmo:Added ;
+	mmo:isConflicting "true"^^xsd:boolean ;
+	mmo:automaticResolutionState mmo:Deleted .
+
+sdg:deleted-original a mmo:StructuralDefinition ;
+	mmo:hasTripleStateA mmo:Deleted ;
+	mmo:hasTripleStateB mmo:Original ;
+	mmo:isConflicting "false"^^xsd:boolean ;
+	mmo:automaticResolutionState mmo:Deleted .
+
+#sdg:deleted-notIncluded a mmo:StructuralDefinition ;
+#	mmo:hasTripleStateA mmo:Deleted ;
+#	mmo:hasTripleStateB mmo:NotIncluded ;
+#	mmo:isConflicting "false"^^xsd:boolean ;
+#	mmo:automaticResolutionState mmo:Deleted .
+
+
+###########################################################
+# Added - X definitions
+###########################################################
+
+sdg:added-deleted a mmo:StructuralDefinition ;
+	mmo:hasTripleStateA mmo:Added ;
+	mmo:hasTripleStateB mmo:Deleted ;
+	mmo:isConflicting "true"^^xsd:boolean ;
+	mmo:automaticResolutionState mmo:Added .
+
+#sdg:added-added a mmo:StructuralDefinition ;
+#	mmo:hasTripleStateA mmo:Added ;
+#	mmo:hasTripleStateB mmo:Added ;
+#	mmo:isConflicting "false"^^xsd:boolean ;
+#	mmo:automaticResolutionState mmo:Added .
+
+#sdg:added-original a mmo:StructuralDefinition ;
+#	mmo:hasTripleStateA mmo:Added ;
+#	mmo:hasTripleStateB mmo:Original ;
+#	mmo:isConflicting "false"^^xsd:boolean ;
+#	mmo:automaticResolutionState mmo:Added .
+
+sdg:added-notIncluded a mmo:StructuralDefinition ;
+	mmo:hasTripleStateA mmo:Added ;
+	mmo:hasTripleStateB mmo:NotIncluded ;
+	mmo:isConflicting "false"^^xsd:boolean ;
+	mmo:automaticResolutionState mmo:Added .
+
+
+###########################################################
+# Original - X definitions
+###########################################################
+
+sdg:original-deleted a mmo:StructuralDefinition ;
+	mmo:hasTripleStateA mmo:Original ;
+	mmo:hasTripleStateB mmo:Deleted ;
+	mmo:isConflicting "false"^^xsd:boolean ;
+	mmo:automaticResolutionState mmo:Added .
+
+#sdg:original-added a mmo:StructuralDefinition ;
+#	mmo:hasTripleStateA mmo:Original ;
+#	mmo:hasTripleStateB mmo:Added ;
+#	mmo:isConflicting "false"^^xsd:boolean ;
+#	mmo:automaticResolutionState mmo:Added .
+
+#sdg:original-original a mmo:StructuralDefinition ;
+#	mmo:hasTripleStateA mmo:Original ;
+#	mmo:hasTripleStateB mmo:Original ;
+#	mmo:isConflicting "false"^^xsd:boolean ;
+#	mmo:automaticResolutionState mmo:Added .
+
+# not possible
+#sdg:original-notIncluded a mmo:StructuralDefinition ;
+#	mmo:hasTripleStateA mmo:Original ;
+#	mmo:hasTripleStateB mmo:NotIncluded ;
+#	mmo:isConflicting "false"^^xsd:boolean ;
+#	mmo:automaticResolutionState mmo:Added .
+
+
+###########################################################
+# Original - X definitions
+###########################################################
+
+#sdg:notIncluded-deleted a mmo:StructuralDefinition ;
+#	mmo:hasTripleStateA mmo:NotIncluded ;
+#	mmo:hasTripleStateB mmo:Deleted ;
+#	mmo:isConflicting "false"^^xsd:boolean ;
+#	mmo:automaticResolutionState mmo:Deleted .
+
+sdg:notIncluded-added a mmo:StructuralDefinition ;
+	mmo:hasTripleStateA mmo:NotIncluded ;
+	mmo:hasTripleStateB mmo:Added ;
+	mmo:isConflicting "false"^^xsd:boolean ;
+	mmo:automaticResolutionState mmo:Added .
+
+# not possible
+#sdg:notIncluded-original a mmo:StructuralDefinition ;
+#	mmo:hasTripleStateA mmo:NotIncluded ;
+#	mmo:hasTripleStateB mmo:Original ;
+#	mmo:isConflicting "false"^^xsd:boolean ;
+#	mmo:automaticResolutionState mmo:Added .
+
+# makes no sense
+#sdg:notIncluded-notIncluded a mmo:StructuralDefinition ;
+#	mmo:hasTripleStateA mmo:NotIncluded ;
+#	mmo:hasTripleStateB mmo:NotIncluded ;
+#	mmo:isConflicting "false"^^xsd:boolean ;
+#	mmo:automaticResolutionState mmo:Deleted .
+	

@@ -11,8 +11,10 @@
 	{{# error.stackTrace }}
 	  {{ toString }}
 	{{/ error.stackTrace }}
+	{{#request}}
 	<h3>Request</h3>
-	{{ request }}
+	{{ toString }}
+	{{/request}}
 	
 </div>
 {{/content}}

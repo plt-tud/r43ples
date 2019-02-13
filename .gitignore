@@ -3,12 +3,23 @@ cov-int/
 bin/
 target/
 database/
+gh-pages/
 
+*~
 .settings
 .externalToolBuilders/
+.metadata/
 
 *.conf
 r43ples.log*
 
 /Todo.md
 /dataset.ttl
+/src/benchmark/scenario/Dbpedia/.deployTestData.sh.kate-swp
+/.Rhistory
+*.log
+/src/benchmark/scenario/Dbpedia/EvaluateR43plesPerformance.R.rkward_autosave
+/src/benchmark/scenario/Dbpedia/Evaluation.xlsx
+/src/benchmark/scenario/Dbpedia/files.txt
+.idea/
+r43ples.iml

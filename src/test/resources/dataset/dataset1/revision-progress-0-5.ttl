@@ -1,0 +1,72 @@
+<http://revision.from/entry>
+        a       <http://eatld.et.tu-dresden.de/mmo#RevisionProgress> ;
+        <http://eatld.et.tu-dresden.de/mmo#Added>
+                [ <http://www.w3.org/1999/02/22-rdf-syntax-ns#object>
+                          "E" ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate>
+                          <http://example.com/testP> ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject>
+                          <http://example.com/testS> ;
+                  <http://eatld.et.tu-dresden.de/rmo#references>
+                          <http://test.com/r43ples-dataset-complex-structure-changeset-0-1>
+                ] ;
+        <http://eatld.et.tu-dresden.de/mmo#Deleted>
+                [ <http://www.w3.org/1999/02/22-rdf-syntax-ns#object>
+                          "D" ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate>
+                          <http://example.com/testP> ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject>
+                          <http://example.com/testS> ;
+                  <http://eatld.et.tu-dresden.de/rmo#references>
+                          <http://test.com/r43ples-dataset-complex-structure-changeset-1-2>
+                ] ;
+        <http://eatld.et.tu-dresden.de/mmo#Added>
+                [ <http://www.w3.org/1999/02/22-rdf-syntax-ns#object>
+                          "G" ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate>
+                          <http://example.com/testP> ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject>
+                          <http://example.com/testS> ;
+                  <http://eatld.et.tu-dresden.de/rmo#references>
+                          <http://test.com/r43ples-dataset-complex-structure-changeset-1-2>
+                ] ;
+        <http://eatld.et.tu-dresden.de/mmo#Added>
+                [ <http://www.w3.org/1999/02/22-rdf-syntax-ns#object>
+                          "F" ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate>
+                          <http://example.com/testP> ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject>
+                          <http://example.com/testS> ;
+                  <http://eatld.et.tu-dresden.de/rmo#references>
+                          <http://test.com/r43ples-dataset-complex-structure-changeset-2-5>
+                ] ;
+        <http://eatld.et.tu-dresden.de/mmo#Original>
+                [ <http://www.w3.org/1999/02/22-rdf-syntax-ns#object>
+                          "C" ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate>
+                          <http://example.com/testP> ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject>
+                          <http://example.com/testS> ;
+                  <http://eatld.et.tu-dresden.de/rmo#references>
+                          <http://test.com/r43ples-dataset-complex-structure-revision-0>
+                ] ;
+        <http://eatld.et.tu-dresden.de/mmo#Original>
+                [ <http://www.w3.org/1999/02/22-rdf-syntax-ns#object>
+                          "B" ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate>
+                          <http://example.com/testP> ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject>
+                          <http://example.com/testS> ;
+                  <http://eatld.et.tu-dresden.de/rmo#references>
+                          <http://test.com/r43ples-dataset-complex-structure-revision-0>
+                ] ;
+        <http://eatld.et.tu-dresden.de/mmo#Deleted>
+                [ <http://www.w3.org/1999/02/22-rdf-syntax-ns#object>
+                          "A" ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#predicate>
+                          <http://example.com/testP> ;
+                  <http://www.w3.org/1999/02/22-rdf-syntax-ns#subject>
+                          <http://example.com/testS> ;
+                  <http://eatld.et.tu-dresden.de/rmo#references>
+                          <http://test.com/r43ples-dataset-complex-structure-changeset-0-1>
+                ] .

@@ -4,7 +4,7 @@
    
 {{$content}}
 <div class="row">
-	<div id="main" class="col-sm-6">
+	<div id="debug-form" class="col-sm-6">
 		<div id="query_form">
 			<h2>Debug Query</h2>
 			<form method="get" role="form" class="form">
@@ -20,23 +20,34 @@ WHERE {
 					</textarea>
 				</div>
 				<div class="form-group">
-				<div class="btn-group col-sm-12">
-					<input type="submit" class="col-sm-8 btn btn-primary" value="Run Query" />
-					<input type="reset"	class="col-sm-4 btn btn-default" value="Reset" />
+					<label for="format" class="control-label">Result Format:</label>
+						<select	name="format" class="form-control" id="name">
+							<option value="text/html">HTML</option>
+							<option value="text/plain">Text</option>
+							<option value="application/sparql-results+xml">RDF/XML</option>
+							<option value="text/turtle">Turtle</option>
+							<option value="application/json">JSON</option>
+						</select>
 				</div>
+				<div class="form-group">
+					<div class="btn-group col-sm-12">
+						<input type="submit" class="col-sm-8 btn btn-primary" value="Run Query" />
+						<input type="reset"	class="col-sm-4 btn btn-default" value="Reset" />
+					</div>
 				</div>
 			</form>
 		</div>
 	</div>
-	<div id="main" class="col-sm-6">
-		<h2>Debug information</h2>
-		<h3>Configuration</h3>
-		<ul>
-			<li>Version: {{#version}}Version: {{toString}}{{/version}}{{^version}}Git: {{git.commitIdAbbrev}} - {{git.branch}}{{/version}}</li>
-			<li>Triplestore: <samp>{{triplestore_type}} - {{triplestore_url}}</samp></li>
-			<li>Revision Graph: <samp>{{revisionGraph}}</samp></li>
-			<li>SDD Graph: <samp>{{sdd_graph}}</samp></li>
-		</ul>
+	<div class="col-sm-6">
+		<h3>Version information</h3>
+		{{#version}}<p>Version: {{toString}}</p>{{/version}}
+		{{^version}}
+			<p>Git: {{git.commitId}} ({{git.describeShort}})</p>
+			<p>Branch: {{git.branch}}</p>
+			<p>Date: {{git.commitTime}}</p>
+		{{/version}}
+	</div>
+	<div id="debug-information" class="col-sm-6">
 		<h3>Existing graphs in triplestore</h3>
 		<ul>
 			{{#graphs}}

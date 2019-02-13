@@ -1,41 +1,30 @@
 package de.tud.plt.r43ples.management;
 
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.sparql.core.TriplePath;
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.expr.*;
+import org.apache.jena.sparql.path.P_Link;
+import org.apache.jena.sparql.path.P_ZeroOrMore1;
+import org.apache.jena.sparql.syntax.*;
+import org.apache.jena.sparql.util.ExprUtils;
+import org.apache.jena.vocabulary.RDF;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.optimization.PathCalculationFabric;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.log4j.Logger;
-
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.query.Query;
-import com.hp.hpl.jena.query.QueryFactory;
-import com.hp.hpl.jena.sparql.core.TriplePath;
-import com.hp.hpl.jena.sparql.core.Var;
-import com.hp.hpl.jena.sparql.expr.E_Equals;
-import com.hp.hpl.jena.sparql.expr.E_OneOf;
-import com.hp.hpl.jena.sparql.expr.Expr;
-import com.hp.hpl.jena.sparql.expr.ExprList;
-import com.hp.hpl.jena.sparql.expr.ExprVar;
-import com.hp.hpl.jena.sparql.path.P_Link;
-import com.hp.hpl.jena.sparql.path.P_ZeroOrMore1;
-import com.hp.hpl.jena.sparql.syntax.Element;
-import com.hp.hpl.jena.sparql.syntax.ElementFilter;
-import com.hp.hpl.jena.sparql.syntax.ElementGroup;
-import com.hp.hpl.jena.sparql.syntax.ElementMinus;
-import com.hp.hpl.jena.sparql.syntax.ElementNamedGraph;
-import com.hp.hpl.jena.sparql.syntax.ElementPathBlock;
-import com.hp.hpl.jena.sparql.syntax.ElementTriplesBlock;
-import com.hp.hpl.jena.sparql.syntax.ElementUnion;
-import com.hp.hpl.jena.sparql.util.ExprUtils;
-import com.hp.hpl.jena.vocabulary.RDF;
-
-import de.tud.plt.r43ples.exception.InternalErrorException;
-import de.tud.plt.r43ples.revisionTree.Revision;
-import de.tud.plt.r43ples.revisionTree.Tree;
 
 /**
  * Rewrites SPARQL queries in order to reflect old revisions.
@@ -46,18 +35,16 @@ import de.tud.plt.r43ples.revisionTree.Tree;
 public class SparqlRewriter {
 
 	/** The logger. **/
-	private static final Logger logger = Logger.getLogger(SparqlRewriter.class);
+	private static final Logger logger = LogManager.getLogger(SparqlRewriter.class);
 
 	private static final String rmo = "http://eatld.et.tu-dresden.de/rmo#";
-	private static final String prov = "http://www.w3.org/ns/prov#";
-
 	private static final Node rmo_Revision = NodeFactory.createURI(rmo + "Revision");
 	private static final Node rmo_deleteSet = NodeFactory.createURI(rmo + "deleteSet");
 	private static final Node rmo_addSet = NodeFactory.createURI(rmo + "addSet");
-	private static final Node rmo_fullGraph = NodeFactory.createURI(rmo + "fullGraph");
+	private static final Node rmo_fullGraph = NodeFactory.createURI(rmo + "fullContent");
 	private static final Node rmo_references = NodeFactory.createURI(rmo + "references");
-	private static final Node prov_wasDerivedFrom = NodeFactory.createURI(prov + "wasDerivedFrom");
-
+	private static final Node rmo_wasDerivedFrom = NodeFactory.createURI(rmo + "wasDerivedFrom");
+	private static final Node rmo_succeedingRevision = NodeFactory.createURI(rmo + "succeedingRevision");
 
 
 	/** instance variables */
@@ -67,7 +54,7 @@ public class SparqlRewriter {
 	private ExprList expression_list_revision_path = new ExprList();
 	private Expr last_revision;
 	private String revisionNumber;
-	private String graphName; 
+	private RevisionGraph revisionGraph;
 	
 	public static String rewriteQuery(final String query_r43ples) throws InternalErrorException {
 		SparqlRewriter sr = new SparqlRewriter();
@@ -80,20 +67,22 @@ public class SparqlRewriter {
 	 * 
 	 * @return false if revisionNumber is still a branch, otherwise true
 	 */
-	private boolean updateRevision(){
+	private boolean updateRevision() throws InternalErrorException {
 		revisionNumber = revisions.removeFirst();
-		graphName = graphs.removeFirst();
-		if (RevisionManagement.isBranch(graphName, revisionNumber))
+		String graphName = graphs.removeFirst();
+		revisionGraph = new RevisionGraph(graphName);
+		if (revisionGraph.hasBranch(revisionNumber))
 			return false;
 		else {
-			String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-			Tree tree =  new Tree(revisionGraph);
-			LinkedList<Revision> list = tree.getPathToRevision(revisionNumber);
+			Revision revision = revisionGraph.getRevision(revisionNumber);
+			LinkedList<Revision> list = PathCalculationFabric.getInstance(revisionGraph).getPathToRevisionWithFullGraph(revision)
+					.getRevisionPath();
+
 			logger.debug("Path to revision: " + list.toString());
-			last_revision = ExprUtils.nodeToExpr(NodeFactory.createURI(list.get(0).getRevisionUri()));
-			list.removeLast();
+			last_revision = ExprUtils.nodeToExpr(NodeFactory.createURI(list.getLast().getRevisionURI()));
+			list.removeFirst();
 			for (Revision ns : list) {
-				expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(ns.getRevisionUri())));
+				expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(ns.getRevisionURI())));
 			}
 			return true;
 		}
@@ -101,8 +90,8 @@ public class SparqlRewriter {
 	
 	public String rewrite(final String r43ples_query) throws InternalErrorException {
 		
-		final Pattern pattern1 = Pattern.compile("GRAPH\\s*<(?<graph>\\S*)>\\s*\\{", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
-		final Pattern pattern2 = Pattern.compile("GRAPH\\s*<(?<graph>\\S*)>\\s*REVISION\\s*\"(?<revision>\\S*)\"", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+		final Pattern pattern1 = Pattern.compile("GRAPH\\s*<(?<revisionGraph>\\S*)>\\s*\\{", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
+		final Pattern pattern2 = Pattern.compile("GRAPH\\s*<(?<revisionGraph>\\S*)>\\s*REVISION\\s*\"(?<revision>\\S*)\"", Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);
 				
 		
 		Matcher m1 = pattern1.matcher(r43ples_query);
@@ -111,11 +100,11 @@ public class SparqlRewriter {
 		Matcher m2 = pattern2.matcher(query_sparql);
 		
 		while (m2.find()) {
-			String graphName = m2.group("graph");
-			String referenceName = m2.group("revision").toLowerCase();
+			String graphName = m2.group("revisionGraph");
+			String referenceName = m2.group("revision");
+			RevisionGraph graph = new RevisionGraph(graphName);
 			
-			String revisionGraph = RevisionManagement.getRevisionGraph(graphName);
-			String revisionNumber = RevisionManagement.getRevisionNumber(revisionGraph, referenceName);
+			String revisionNumber = graph.getRevisionIdentifier(referenceName);
 			graphs.add(graphName);
 			revisions.add(revisionNumber);
 
@@ -129,8 +118,8 @@ public class SparqlRewriter {
 
 		// Do the rewriting and store the modified elements
 		Element el_modified = getRewrittenElement(el_orginal);
-		
-		// force distinct in order to avoid duplicate entries due to multiple graph joins 
+
+		// force distinct in order to avoid duplicate entries due to multiple revisionGraph joins
 		query_new.setDistinct(true);
 		query_new.setQueryPattern(el_modified);
 		query_sparql = query_new.serialize();
@@ -140,12 +129,10 @@ public class SparqlRewriter {
 
 	
 	/**
-	 * @param expression_list_revision_path
-	 * @param branch
-	 * @param eg_orginal
+	 * @param el_orginal
 	 * @return rewritten element group
 	 */
-	private Element getRewrittenElement(final Element el_orginal) {
+	private Element getRewrittenElement(final Element el_orginal) throws InternalErrorException {
 		if (el_orginal.getClass().equals(ElementNamedGraph.class)) {
 			ElementNamedGraph ng_original = (ElementNamedGraph) el_orginal;
 			ElementGroup eg_original = (ElementGroup) ng_original.getElement();
@@ -154,7 +141,7 @@ public class SparqlRewriter {
 			else {
 				ElementNamedGraph ng_new;
 				try {
-					ng_new = new ElementNamedGraph(NodeFactory.createURI(RevisionManagement.getReferenceGraph(graphName, revisionNumber)), eg_original);
+					ng_new = new ElementNamedGraph(NodeFactory.createURI(revisionGraph.getReferenceGraph(revisionNumber)), eg_original);
 					return ng_new;
 				} catch (InternalErrorException e) {
 					e.printStackTrace();
@@ -206,8 +193,6 @@ public class SparqlRewriter {
 	}
 
 	/**
-	 * @param expression_list_revision_path
-	 * @param branch
 	 * @param triplePath
 	 * @return rewritten triple path element
 	 */
@@ -221,14 +206,15 @@ public class SparqlRewriter {
 
 			Node g_delete_set_full_graph = Var.alloc("g_delete_set_full_graph_" + statement_i);
 			Node g_add_set = Var.alloc("g_add_set_" + statement_i);
-			Node g_revisiongraph = NodeFactory.createURI(RevisionManagement.getRevisionGraph(graphName));			
-			
+			Node g_revisiongraph = NodeFactory.createURI(revisionGraph.getRevisionGraphUri());
+
+			Var var_change_set_add = Var.alloc("change_set_add_" + statement_i);
+			Var var_change_set_del = Var.alloc("change_set_del_" + statement_i);
 			Var var_r_delete_set = Var.alloc("r_delete_set_" + statement_i);
 			Var var_r_add_set = Var.alloc("r_add_set_" + statement_i);
 
 			ElementGroup eg_fullgraph = new ElementGroup();
 			Node anon = NodeFactory.createAnon();
-//			eg_fullgraph.addElement(new ElementBind( var_r_delete_set, ExprUtils.nodeToExpr(branch)));
 			eg_fullgraph.addTriplePattern(new Triple(anon, rmo_references, var_r_delete_set));
 			eg_fullgraph.addTriplePattern(new Triple(anon, rmo_fullGraph, g_delete_set_full_graph));
 			eg_fullgraph.addElementFilter(new ElementFilter(new E_Equals(new ExprVar(var_r_delete_set), last_revision)));
@@ -242,7 +228,8 @@ public class SparqlRewriter {
 
 			ElementGroup eg_delete_set = new ElementGroup();
 			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, RDF.type.asNode(), rmo_Revision));
-			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, rmo_deleteSet, g_delete_set_full_graph));
+			eg_delete_set.addTriplePattern(new Triple(var_change_set_del, rmo_succeedingRevision, var_r_delete_set));
+			eg_delete_set.addTriplePattern(new Triple(var_change_set_del, rmo_deleteSet, g_delete_set_full_graph));
 			eg_delete_set.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_delete_set),
 					expression_list_revision_path)));
 			eg_union.addElement(eg_delete_set);
@@ -250,11 +237,12 @@ public class SparqlRewriter {
 			
 			ElementGroup eg_revisiongraph2 = new ElementGroup();
 			ElementPathBlock ebp = new ElementPathBlock();	
-			ebp.addTriplePath(new TriplePath(var_r_delete_set, new P_ZeroOrMore1(new P_Link(prov_wasDerivedFrom)),
+			ebp.addTriplePath(new TriplePath(var_r_delete_set, new P_ZeroOrMore1(new P_Link(rmo_wasDerivedFrom)),
 					var_r_add_set));
 			eg_revisiongraph2.addElement(ebp);
 			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, RDF.type.asNode(), rmo_Revision));
-			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, rmo_addSet, g_add_set));
+			eg_revisiongraph2.addTriplePattern(new Triple(var_change_set_add, rmo_succeedingRevision, var_r_add_set));
+			eg_revisiongraph2.addTriplePattern(new Triple(var_change_set_add, rmo_addSet, g_add_set));
 			eg_revisiongraph2.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_add_set),
 					expression_list_revision_path)));			
 		

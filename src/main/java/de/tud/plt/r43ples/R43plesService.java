@@ -5,9 +5,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.apache.commons.configuration.ConfigurationException;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.glassfish.grizzly.http.server.CLStaticHttpHandler;
 import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.ssl.SSLContextConfigurator;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -23,8 +25,12 @@ import de.tud.plt.r43ples.management.Config;
 import de.tud.plt.r43ples.management.GitRepositoryState;
 import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
 import de.tud.plt.r43ples.webservice.API;
+import de.tud.plt.r43ples.webservice.Configuration;
+import de.tud.plt.r43ples.webservice.Debug;
 import de.tud.plt.r43ples.webservice.Endpoint;
 import de.tud.plt.r43ples.webservice.ExceptionMapper;
+import de.tud.plt.r43ples.webservice.Merging;
+import de.tud.plt.r43ples.webservice.Misc;
 
 
 /**
@@ -38,7 +44,7 @@ import de.tud.plt.r43ples.webservice.ExceptionMapper;
 public class R43plesService {
 
 	/** The logger */
-	private static Logger logger = Logger.getLogger(R43plesService.class);
+	private static Logger logger = LogManager.getLogger(R43plesService.class);
 	/** The HTTP server. **/
 	private static HttpServer server;
 	
@@ -100,7 +106,12 @@ public class R43plesService {
 		URI BASE_URI;
 		
 		ResourceConfig rc = new ResourceConfig()
-			.registerClasses(Endpoint.class, API.class)
+			.registerClasses(Endpoint.class, 
+					Misc.class,
+					API.class, 
+					Configuration.class, 
+					Debug.class, 
+					Merging.class)
 			.property(MustacheMvcFeature.TEMPLATE_BASE_PATH, "templates")
 			.register(MustacheMvcFeature.class)
 			.register(ExceptionMapper.class)
@@ -126,6 +137,9 @@ public class R43plesService {
 			server = GrizzlyHttpServerFactory.createHttpServer(BASE_URI, rc);			
 		}
 		
+		for (NetworkListener l : server.getListeners()) { l.getFileCache().setEnabled(false); }
+		logger.info("File cache disabled");
+		
 		server.getServerConfiguration().addHttpHandler(
 		        new CLStaticHttpHandler(R43plesService.class.getClassLoader(),"webapp/"), "/static/");
 
@@ -135,7 +149,12 @@ public class R43plesService {
 		
 		String version = R43plesService.class.getPackage().getImplementationVersion();
 		if (version==null){
-			version = "Commit: " +GitRepositoryState.getGitRepositoryState().commitIdAbbrev;
+			try{
+				version = "Commit: " +GitRepositoryState.getGitRepositoryState().commitIdAbbrev;
+			}
+			catch(Exception e){
+                version="No version information available";
+            }
 		}
 		logger.info("Version: "+ version);
 	}

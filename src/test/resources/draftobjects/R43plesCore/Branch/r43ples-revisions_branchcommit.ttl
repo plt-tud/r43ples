@@ -1,0 +1,19 @@
+<http://example.com/test>
+        a       <http://eatld.et.tu-dresden.de/rmo#RevisionGraph> , <http://eatld.et.tu-dresden.de/rmo#Entity> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasRevisionGraph>
+                <http://example.com/test-revisiongraph> ;
+        <http://eatld.et.tu-dresden.de/mmo#hasDefaultSDG>
+                <http://eatld.et.tu-dresden.de/sdg#defaultSDG> .
+
+<http://eatld.et.tu-dresden.de/persons/TestUser>
+        a       <http://www.w3.org/ns/prov#Person> ;
+        <http://www.w3.org/2000/01/rdf-schema#label>
+                "TestUser" .
+
+<http://eatld.et.tu-dresden.de/persons/R43ples> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/prov#Person> .
+<http://eatld.et.tu-dresden.de/persons/R43ples> <http://www.w3.org/2000/01/rdf-schema#label> "R43ples" .
+<http://eatld.et.tu-dresden.de/r43ples-evolutions> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://eatld.et.tu-dresden.de/rmo#CoEvolutionRevisionGraph> .
+<http://eatld.et.tu-dresden.de/r43ples-evolutions> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://eatld.et.tu-dresden.de/rmo#RevisionGraph> .
+<http://eatld.et.tu-dresden.de/r43ples-evolutions> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://eatld.et.tu-dresden.de/rmo#Entity> .
+<http://eatld.et.tu-dresden.de/r43ples-evolutions> <http://eatld.et.tu-dresden.de/mmo#hasDefaultSDG> <http://eatld.et.tu-dresden.de/sdg#defaultSDG> .
+<http://eatld.et.tu-dresden.de/r43ples-evolutions> <http://eatld.et.tu-dresden.de/rmo#hasRevisionGraph> <http://eatld.et.tu-dresden.de/r43ples-evolutions-revisiongraph> .

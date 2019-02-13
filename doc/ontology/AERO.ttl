@@ -1,0 +1,306 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rmo: <http://eatld.et.tu-dresden.de/rmo#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix : <http://eatld.et.tu-dresden.de/aero#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix sp: <http://spinrdf.org/sp#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix aero: <http://eatld.et.tu-dresden.de/aero#> .
+@base <http://eatld.et.tu-dresden.de/aero> .
+
+<http://eatld.et.tu-dresden.de/aero> rdf:type owl:Ontology ;
+                                     
+                                     owl:imports <http://eatld.et.tu-dresden.de/rmo> ,
+                                                 <http://spinrdf.org/sp> ,
+                                                 rdfs: .
+
+
+#################################################################
+#
+#    Object Properties
+#
+#################################################################
+
+
+###  http://eatld.et.tu-dresden.de/aero#addSetDetectionQuery
+
+:addSetDetectionQuery rdf:type owl:ObjectProperty ;
+                      
+                      rdfs:domain :HLCAggRule ;
+                      
+                      rdfs:range sp:SubQuery .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#addSetInsertQuery
+
+:addSetInsertQuery rdf:type owl:ObjectProperty ;
+                   
+                   rdfs:domain :CoEvoRule ;
+                   
+                   rdfs:range sp:Modify .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#conditionQuery
+
+:conditionQuery rdf:type owl:ObjectProperty ;
+                
+                rdfs:domain :HLCAggRule ;
+                
+                rdfs:range sp:SubQuery .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#deleteSetDetectionQuery
+
+:deleteSetDetectionQuery rdf:type owl:ObjectProperty ;
+                         
+                         rdfs:domain :HLCAggRule ;
+                         
+                         rdfs:range sp:SubQuery .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#deleteSetInsertQuery
+
+:deleteSetInsertQuery rdf:type owl:ObjectProperty ;
+                      
+                      rdfs:domain :CoEvoRule ;
+                      
+                      rdfs:range sp:Modify .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#dependencyMatchingQuery
+
+:dependencyMatchingQuery rdf:type owl:ObjectProperty ;
+                         
+                         rdfs:domain :CoEvoRule ;
+                         
+                         rdfs:range sp:Select .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#hasRules
+
+:hasRules rdf:type owl:ObjectProperty ;
+          
+          rdfs:range :Rule ;
+          
+          rdfs:domain :RuleSet .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#hasVariableGroup
+
+:hasVariableGroup rdf:type owl:ObjectProperty ;
+                  
+                  rdfs:domain :AppliedCoEvolutionRule ;
+                  
+                  rdfs:range :SPARQLVariableGroup .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#hasVariables
+
+:hasVariables rdf:type owl:ObjectProperty ;
+              
+              rdfs:range :SPARQLVariable ;
+              
+              rdfs:domain :SPARQLVariableGroup ,
+                          rmo:SemanticChange .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#inverts
+
+:inverts rdf:type owl:ObjectProperty ;
+         
+         rdfs:range :HLCAggRule ;
+         
+         rdfs:domain :HLCAggRule .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#spinQuery
+
+:spinQuery rdf:type owl:ObjectProperty ;
+           
+           rdfs:domain :HLCAggRule ;
+           
+           rdfs:range sp:Query .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#usedRule
+
+:usedRule rdf:type owl:ObjectProperty ;
+          
+          rdfs:domain :AppliedCoEvolutionRule ;
+          
+          rdfs:range :CoEvoRule ,
+                     :HLCAggRule ;
+          
+          rdfs:domain rmo:SemanticChange .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#usedSemanticChange
+
+:usedSemanticChange rdf:type owl:ObjectProperty ;
+                    
+                    rdfs:domain :AppliedCoEvolutionRule ;
+                    
+                    rdfs:range rmo:SemanticChange .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#value
+
+:value rdf:type owl:ObjectProperty ;
+       
+       rdfs:domain :SPARQLVariable ;
+       
+       rdfs:range rdfs:Resource .
+
+
+
+
+
+#################################################################
+#
+#    Data properties
+#
+#################################################################
+
+
+###  http://eatld.et.tu-dresden.de/aero#spinResource
+
+:spinResource rdf:type owl:DatatypeProperty ;
+              
+              rdfs:domain :SPARQLVariable ;
+              
+              rdfs:range xsd:string .
+
+
+
+###  http://spinrdf.org/sp#varName
+
+sp:varName rdf:type owl:DatatypeProperty ;
+           
+           rdfs:domain :SPARQLVariable .
+
+
+
+###  http://www.w3.org/2000/01/rdf-schema#comment
+
+rdfs:comment rdf:type owl:DatatypeProperty ;
+             
+             rdfs:domain :Rule ,
+                         :RuleSet .
+
+
+
+###  http://www.w3.org/2000/01/rdf-schema#label
+
+rdfs:label rdf:type owl:DatatypeProperty ;
+           
+           rdfs:domain :Rule ,
+                       :RuleSet .
+
+
+
+
+
+#################################################################
+#
+#    Classes
+#
+#################################################################
+
+
+###  http://eatld.et.tu-dresden.de/aero#AppliedCoEvolutionRule
+
+:AppliedCoEvolutionRule rdf:type owl:Class ;
+                        
+                        rdfs:subClassOf owl:Thing .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#BasicRule
+
+:BasicRule rdf:type owl:Class ;
+           
+           rdfs:subClassOf :RuleType .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#CoEvoRule
+
+:CoEvoRule rdf:type owl:Class ;
+           
+           rdfs:subClassOf :HLCAggRule .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#CompositeRule
+
+:CompositeRule rdf:type owl:Class ;
+               
+               rdfs:subClassOf :RuleType .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#HLCAggRule
+
+:HLCAggRule rdf:type owl:Class ;
+            
+            rdfs:subClassOf :Rule ,
+                            :RuleType .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#HeuristicRule
+
+:HeuristicRule rdf:type owl:Class ;
+               
+               rdfs:subClassOf :RuleType .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#Rule
+
+:Rule rdf:type owl:Class ;
+      
+      rdfs:subClassOf owl:Thing .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#RuleSet
+
+:RuleSet rdf:type owl:Class .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#SPARQLVariable
+
+:SPARQLVariable rdf:type owl:Class ;
+                
+                rdfs:subClassOf owl:Thing .
+
+
+
+###  http://eatld.et.tu-dresden.de/aero#SPARQLVariableGroup
+
+:SPARQLVariableGroup rdf:type owl:Class ;
+                     
+                     rdfs:subClassOf owl:Thing .
+
+
+
+
+###  Generated by the OWL API (version 3.2.0.1502) http://owlapi.sourceforge.net
+

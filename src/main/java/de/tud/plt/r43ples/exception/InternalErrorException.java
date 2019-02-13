@@ -1,7 +1,8 @@
 package de.tud.plt.r43ples.exception;
 
 
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * create a HTTP Internal Server Error de.tud.plt.r43ples.exception
@@ -12,7 +13,7 @@ public class InternalErrorException extends Exception {
 	 * default serialVersionUID
 	 */
 	private static final long serialVersionUID = 1L;
-	private final static Logger logger = Logger.getLogger(InternalErrorException.class);
+	private final static Logger logger = LogManager.getLogger(InternalErrorException.class);
 
 
 	/**

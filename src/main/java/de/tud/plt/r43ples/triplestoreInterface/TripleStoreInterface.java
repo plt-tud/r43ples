@@ -4,44 +4,85 @@ import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
 import java.util.regex.Pattern;
 
-import org.apache.log4j.Logger;
+import de.tud.plt.r43ples.core.R43plesCoreSingleton;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.iohelper.Helper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFormatter;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.shared.NoWriterForLangException;
-import com.hp.hpl.jena.sparql.resultset.ResultsFormat;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.shared.NoWriterForLangException;
+import org.apache.jena.sparql.resultset.ResultsFormat;
 
 import de.tud.plt.r43ples.management.Config;
-import de.tud.plt.r43ples.management.JenaModelManagement;
-import de.tud.plt.r43ples.management.RevisionManagement;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
 
 
 public abstract class TripleStoreInterface {
 	
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(TripleStoreInterface.class);
+	private static Logger logger = LogManager.getLogger(TripleStoreInterface.class);
 	
 	protected void init() {
-		if (!RevisionManagement.checkGraphExistence(Config.revision_graph)){
+		if (!checkGraphExistence(Config.revision_graph)){
 			logger.debug("Create revision graph: "+ Config.revision_graph);
 			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
-	 	}
+			// Create the evolution revision graph
+			try {
+				R43plesCoreSingleton.getInstance().createInitialCommit(Config.evolution_graph, null, null, "R43ples", "Evolution graph created by R43ples");
+				// Add the coevolution revision graph type to the created revision graph
+                String query = Config.prefixes + String.format(
+                        "INSERT DATA { GRAPH <%1$s> {"
+                                + "  <%2$s> a rmo:CoEvolutionRevisionGraph ."
+                                + "} }",
+                        Config.revision_graph, Config.evolution_graph);
+                TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);
+			} catch (InternalErrorException e) {
+				e.printStackTrace();
+			}
+		}
 		
-		if (!RevisionManagement.checkGraphExistence(Config.sdd_graph)){
+		if (!checkGraphExistence(Config.sdg_graph)) {
 			// Insert default content into SDD graph
-			logger.info("Create sdd graph from " + Config.sdd_graph_defaultContent);
-			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.revision_graph +">");
-			
-			Model jena_model = JenaModelManagement.readTurtleFileToJenaModel(Config.sdd_graph_defaultContent);
-			String model = JenaModelManagement.convertJenaModelToNTriple(jena_model);
-			logger.debug("SDD model: " + model);	
-			RevisionManagement.executeINSERT(Config.sdd_graph, model);
+			logger.info("Create sdg graph from " + Config.sdg_graph_defaultContent);
+			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.sdg_graph + ">");
+
+			Model jena_model_sdg = JenaModelManagement.readTurtleFileToJenaModel(Config.sdg_graph_defaultContent);
+			String model_sdg = JenaModelManagement.convertJenaModelToNTriple(jena_model_sdg);
+			logger.debug("SDG model: " + model_sdg);
+			Helper.executeINSERT(Config.sdg_graph, model_sdg);
+		}
+
+		if (!checkGraphExistence(Config.rules_graph)){
+			// Insert default content into SDD graph
+			logger.info("Create rules graph from " + Config.rules_graph_defaultContent);
+			executeUpdateQuery("CREATE SILENT GRAPH <" + Config.rules_graph + ">");
+
+			Model jena_model_rules = JenaModelManagement.readTurtleFileToJenaModel(Config.rules_graph_defaultContent);
+			String model_rules = JenaModelManagement.convertJenaModelToNTriple(jena_model_rules);
+			logger.debug("Rules model: " + model_rules);
+			Helper.executeINSERT(Config.rules_graph, model_rules);
 	 	}		
 	}
 	
 	protected abstract void close();
-		
+
+
+	/**
+	 * Checks if graph exists in triple store. Works only when the graph is not
+	 * empty.
+	 *
+	 * @param graphName
+	 *            the graph name
+	 * @return boolean value if specified graph exists and contains at least one
+	 *         triple elsewhere it will return false
+	 */
+	public boolean checkGraphExistence(final String graphName){
+		String query = "ASK { GRAPH <" + graphName + "> {?s ?p ?o} }";
+		return this.executeAskQuery(query);
+	}
 	
 	public String executeSelectConstructAskQuery(String sparqlQuery, String format) {
 		logger.debug("Query: " + sparqlQuery);
@@ -56,12 +97,12 @@ public abstract class TripleStoreInterface {
 				"CONSTRUCT.*WHERE\\s*\\{(?<where>.*)\\}", 
 				patternModifier);
 		String result;
-		if (patternSelectQuery.matcher(sparqlQuery).find())
-			result = executeSelectQuery(sparqlQuery, format);
+		if (patternConstructQuery.matcher(sparqlQuery).find())
+			result = executeConstructQuery(sparqlQuery, format);
 		else if (patternAskQuery.matcher(sparqlQuery).find())
 			result = executeAskQuery(sparqlQuery)?"true":"false";
-		else if (patternConstructQuery.matcher(sparqlQuery).find())
-			result = executeConstructQuery(sparqlQuery, format);
+		else if (patternSelectQuery.matcher(sparqlQuery).find())
+			result = executeSelectQuery(sparqlQuery, format);
 		else
 			result = executeSelectQuery(sparqlQuery, format);
 		logger.debug("Response: " + result);
@@ -175,6 +216,8 @@ public abstract class TripleStoreInterface {
 
 	
 	public abstract Iterator<String> getGraphs();
+
+	public abstract void dropAllGraphsAndReInit();
 
 	
 }

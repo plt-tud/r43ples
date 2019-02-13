@@ -20,12 +20,13 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import com.hp.hpl.jena.query.ResultSet;
-import com.hp.hpl.jena.query.ResultSetFactory;
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 
 
 /** 
@@ -39,7 +40,7 @@ public class HttpInterface extends TripleStoreInterface {
 
 	private static UsernamePasswordCredentials credentials;
 	/** The logger. */
-	private static Logger logger = Logger.getLogger(HttpInterface.class);
+	private static Logger logger = LogManager.getLogger(HttpInterface.class);
 	private static String endpoint;
 
 
@@ -156,6 +157,7 @@ public class HttpInterface extends TripleStoreInterface {
 		InputStream result = executeQueryWithAuthorization(describeQueryString);
 		Model model = ModelFactory.createDefaultModel();
 		RDFDataMgr.read(model, result, Lang.RDFXML);
+		
 		return model;
 	}
 
@@ -168,7 +170,7 @@ public class HttpInterface extends TripleStoreInterface {
 			result.close();
 			return answer.contains("<boolean>true</boolean>");
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error(e);
 			return false;
 		}
 	}
@@ -182,7 +184,6 @@ public class HttpInterface extends TripleStoreInterface {
 	@Override
 	public void executeCreateGraph(String graph) {
 		executeQueryWithAuthorization("CREATE GRAPH <"+graph+">");
-
 	}
 
 	@Override
@@ -193,6 +194,15 @@ public class HttpInterface extends TripleStoreInterface {
 		while (resultSet.hasNext())
 			list.add(resultSet.next().getResource("?graph").toString());
 		return list.iterator();
+	}
+
+	@Override
+	public void dropAllGraphsAndReInit() {
+		Iterator<String> list = getGraphs();
+		while(list.hasNext()) {
+			executeUpdateQuery("DROP SILENT GRAPH <" + list.next() + ">");
+		}
+		init();
 	}
 	
 	

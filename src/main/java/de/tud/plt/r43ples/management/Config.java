@@ -1,8 +1,13 @@
 package de.tud.plt.r43ples.management;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
+
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
 * General configuration handling.
@@ -22,8 +27,7 @@ public class Config {
 	public static String triplestore_url;
 	public static String triplestore_user;
 	public static String triplestore_password;
-	
-	
+
 	// Service settings
 	/** The service host. **/
 	public static String service_host;
@@ -39,15 +43,28 @@ public class Config {
 	public static String ssl_password;
 	
 	// Internal r43ples settings
-	/** The r43ples revision graph **/
+	/** The r43ples revision graph. **/
 	public static String revision_graph;
-	/** The SDD graph URI. **/
-	public static String sdd_graph;
-	/** The path to the SDD graph default content. **/
-	public static String sdd_graph_defaultContent;
+	/** The r43ples evolution graph. **/
+	public static String evolution_graph;
+
+	/** The SDG graph URI. **/
+	public static String sdg_graph;
+	/** The path to the SDG graph default content. **/
+	public static String sdg_graph_defaultContent;
+	/** Structural Definition Group within the Named Graph (sdg.graph) which should be associated with new graphs under revision control (mmo:hasDefaultSDG). **/
+	public static String sdg_graph_defaultSDG;
+
+	/** The rules graph URI. **/
+	public static String rules_graph;
+	/** The path to the rules graph default content. **/
+	public static String rules_graph_defaultContent;
+
+	public static HashMap<String, String> user_defined_prefixes = new HashMap<String, String>();
+	
 	
 	/** The logger. **/
-	private static Logger logger = Logger.getLogger(Config.class);	
+	private static Logger logger = LogManager.getLogger(Config.class);
 	
 	
 	/**
@@ -56,7 +73,7 @@ public class Config {
 	* @param configFilePath path to configuration file
 	* @throws ConfigurationException
 	*/
-	public static void readConfig(final String configFilePath) throws ConfigurationException{
+	public static void readConfig(final String configFilePath) {
 		PropertiesConfiguration config;
 		try {
 			config = new PropertiesConfiguration(configFilePath);
@@ -74,14 +91,74 @@ public class Config {
 			ssl_password = config.getString("ssl.password");
 			
 			revision_graph = config.getString("revision.graph");
+			evolution_graph = config.getString("evolution.graph");
 			
-			sdd_graph = config.getString("sdd.graph");
-			sdd_graph_defaultContent = config.getString("sdd.graph.defaultContent");
+			sdg_graph = config.getString("sdg.graph");
+			sdg_graph_defaultContent = config.getString("sdg.graph.defaultContent");
+			sdg_graph_defaultSDG = config.getString("sdg.graph.defaultSDG");
+
+			rules_graph = config.getString("rules.graph");
+			rules_graph_defaultContent = config.getString("rules.graph.defaultContent");
+			
+			Iterator<String> it = config.getKeys("prefix");
+			while ( it.hasNext()) {
+				String prefix = it.next();
+				String namespace = config.getString(prefix);
+				prefix = prefix.replace("prefix.", "");
+				user_defined_prefixes.put(prefix, namespace);
+			}
 
 		} catch (ConfigurationException e) {
 			logger.warn("Could not read configuration file '" + configFilePath + "'. Switch to 'r43ples.dist.conf'.");
 			readConfig("r43ples.dist.conf");
 		}
 	}
+	
+	public static String getUserDefinedSparqlPrefixes(){
+		StringBuilder sb = new StringBuilder();
+		Set<String> set = user_defined_prefixes.keySet();
+		Iterator<String> it = set.iterator();
+		while (it.hasNext()){
+			String prefix = it.next();
+			String namespace = user_defined_prefixes.get(prefix);
+			sb.append("PREFIX "+prefix+": <"+namespace+"> \n");
+		}
+		return sb.toString();
+	}
+
+	//TODO spilt into RMO and others
+	/** The SPARQL prefixes **/
+	public static final String prefixes = 
+			  "PREFIX rmo:	<http://eatld.et.tu-dresden.de/rmo#> \n"
+			+ "PREFIX prov: <http://www.w3.org/ns/prov#> \n"
+			+ "PREFIX dc-terms:	<http://purl.org/dc/terms/> \n"
+			+ "PREFIX xsd:	<http://www.w3.org/2001/XMLSchema#> \n"
+			+ "PREFIX mmo: <http://eatld.et.tu-dresden.de/mmo#> \n"
+			//+ "PREFIX sdd:	<http://eatld.et.tu-dresden.de/sdd#> \n"
+			//+ "PREFIX rpo: <http://eatld.et.tu-dresden.de/rpo#> \n"
+			+ "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
+			+ "PREFIX rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#>  \n"
+			+ "PREFIX owl:	<http://www.w3.org/2002/07/owl#> \n"
+			+ "PREFIX aero: <http://eatld.et.tu-dresden.de/aero#> \n"
+			+ "PREFIX rules: <http://eatld.et.tu-dresden.de/rules#> \n"
+			+ "PREFIX sp: <http://spinrdf.org/sp#> \n";
+			//+ "PREFIX spin: <http://spinrdf.org/spin#> \n"; // Currently not used within queries
+
+	/** The Turtle prefixes **/
+	public static final String turtle_prefixes =
+			  "@prefix rmo:	<http://eatld.et.tu-dresden.de/rmo#> . \n"
+			+ "@prefix prov: <http://www.w3.org/ns/prov#> . \n"
+			+ "@prefix dc-terms:	<http://purl.org/dc/terms/> . \n"
+			+ "@prefix xsd:	<http://www.w3.org/2001/XMLSchema#> . \n"
+			+ "@prefix mmo: <http://eatld.et.tu-dresden.de/mmo#> . \n"
+			//+ "@prefix sdd:	<http://eatld.et.tu-dresden.de/sdd#> . \n"
+			//+ "@prefix rpo: <http://eatld.et.tu-dresden.de/rpo#> . \n"
+			+ "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> . \n"
+			+ "@prefix rdf:	<http://www.w3.org/1999/02/22-rdf-syntax-ns#> . \n"
+			+ "@prefix owl:	<http://www.w3.org/2002/07/owl#> . \n"
+			+ "@prefix aero: <http://eatld.et.tu-dresden.de/aero#> . \n"
+			+ "@prefix rules: <http://eatld.et.tu-dresden.de/rules#> . \n"
+			+ "@prefix sp: <http://spinrdf.org/sp#> . \n";
+	//+ "@prefix spin: <http://spinrdf.org/spin#> . \n"; // Currently not used within queries
 
 }

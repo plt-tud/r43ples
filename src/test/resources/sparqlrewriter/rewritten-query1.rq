@@ -1,0 +1,34 @@
+PREFIX  :     <http://test.com/>
+
+SELECT DISTINCT  ?s ?o
+WHERE
+  { GRAPH ?g_delete_set_full_graph_1
+      { ?s  :knows  ?o}
+    GRAPH :r43ples-dataset-1-revisiongraph
+      {   { _:b0  <http://eatld.et.tu-dresden.de/rmo#references>  ?r_delete_set_1 ;
+                  <http://eatld.et.tu-dresden.de/rmo#fullContent>  ?g_delete_set_full_graph_1
+            FILTER ( ?r_delete_set_1 = :r43ples-dataset-1-revision-5 )
+          }
+        UNION
+          { ?r_delete_set_1
+                      a                     <http://eatld.et.tu-dresden.de/rmo#Revision> .
+            ?change_set_del_1
+                      <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>  ?r_delete_set_1 ;
+                      <http://eatld.et.tu-dresden.de/rmo#deleteSet>  ?g_delete_set_full_graph_1
+            FILTER ( ?r_delete_set_1 IN (:r43ples-dataset-1-revision-3, :r43ples-dataset-1-revision-4, :r43ples-dataset-1-revision-5) )
+          }
+      }
+    MINUS
+      { GRAPH ?g_add_set_1
+          { ?s  :knows  ?o}
+        GRAPH :r43ples-dataset-1-revisiongraph
+          { ?r_delete_set_1 (<http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>)* ?r_add_set_1 . 
+            ?r_add_set_1  a                 <http://eatld.et.tu-dresden.de/rmo#Revision> .
+            ?change_set_add_1
+                      <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>  ?r_add_set_1 ;
+                      <http://eatld.et.tu-dresden.de/rmo#addSet>  ?g_add_set_1
+            FILTER ( ?r_add_set_1 IN (:r43ples-dataset-1-revision-3, :r43ples-dataset-1-revision-4, :r43ples-dataset-1-revision-5) )
+          }
+      }
+  }
+ORDER BY ?s ?o

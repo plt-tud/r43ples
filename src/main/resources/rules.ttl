@@ -1,0 +1,305 @@
+# rules - Definition of rules to aggregate atomic changes to high level ones and to execute co-evolutions
+
+@prefix aero:	<http://eatld.et.tu-dresden.de/aero#> .
+@prefix rules:	<http://eatld.et.tu-dresden.de/rules#> .
+@prefix xsd:	<http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs:	<http://www.w3.org/2000/01/rdf-schema#> .
+
+
+###########################################################
+# Rule set definition
+###########################################################
+
+
+rules:my-ruleset a aero:RuleSet;
+    rdfs:label "Aggregation and Co-Evolution rule set"@en ;
+    rdfs:comment "Generic rule set for the aggregation of atomic changes to high level ones and the execution of co-evolutions."@en ;
+    aero:hasRule <http://eatld.et.tu-dresden.de/rules#instances/rename-class/definition> .
+
+
+
+
+
+###########################################################
+# Rename class
+###########################################################
+
+#PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+#PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+#SELECT ?a ?b ?resource
+#WHERE {
+#	{
+#		SELECT ?a ?b ?resource
+#		WHERE {
+#			GRAPH <http://NAMEDGRAPH#ADDSET-1-2> {   # Example: <http://NAMEDGRAPH#ADDSET-1-2> will be replaced with <http://test.com/r43ples-dataset-hlc-aggregation-addSet-1-2>
+#				?b a rdfs:Class.
+#				?b rdfs:subClassOf ?resource.
+#			}
+#		}
+#	}
+#	{
+#		SELECT ?a ?b ?resource
+#		WHERE {
+#			GRAPH <http://NAMEDGRAPH#DELETESET-1-2> {   # Example: <http://NAMEDGRAPH#DELETESET-1-2> will be replaced with <http://test.com/r43ples-dataset-hlc-aggregation-deleteSet-1-2>
+#				?a a rdfs:Class.
+#				?a rdfs:subClassOf ?resource.
+#			}
+#		}
+#	}
+#	MINUS
+#	{
+#		SELECT ?a ?b
+#		WHERE {
+#			GRAPH <http://NAMEDGRAPH#rev1> {  # Example: <http://NAMEDGRAPH#rev1> will replaced with <http://test.com/r43ples-dataset-hlc-aggregation> REVISION "1"
+#				?b ?s1 ?o1.
+#			}
+#			GRAPH <http://NAMEDGRAPH#rev2> {  # Example: <http://NAMEDGRAPH#rev2> will replaced with <http://test.com/r43ples-dataset-hlc-aggregation> REVISION "2"
+#				?a ?s2 ?o2.
+#			}
+#		}
+#	}
+#}
+
+
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/definition> a aero:HLCAggRule, aero:HeuristicRule;
+    rdfs:label "Rename class"@en ;
+    rdfs:comment "Detects a class renaming."@en ;
+    aero:spinQuery <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-1>;
+    aero:addSetDetectionQuery <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-9>;
+    aero:deleteSetDetectionQuery <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-27>;
+    aero:conditionQuery <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-47>.
+
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#Select> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-1> <http://spinrdf.org/sp#resultVariables> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-2> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-1> <http://spinrdf.org/sp#where> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-8> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-3> <http://spinrdf.org/sp#varName> "a" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-3> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-4> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-5> <http://spinrdf.org/sp#varName> "b" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-5> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-6> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-7> <http://spinrdf.org/sp#varName> "resource" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-6> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-7> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-6> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-9> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#SubQuery> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-9> <http://spinrdf.org/sp#query> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-10> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-10> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#Select> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-10> <http://spinrdf.org/sp#resultVariables> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-11> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-10> <http://spinrdf.org/sp#where> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-17> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-12> <http://spinrdf.org/sp#varName> "a" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-11> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-12> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-11> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-13> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-14> <http://spinrdf.org/sp#varName> "b" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-13> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-14> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-13> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-15> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-16> <http://spinrdf.org/sp#varName> "resource" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-15> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-16> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-15> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-18> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#NamedGraph> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-18> <http://spinrdf.org/sp#elements> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-19> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-18> <http://spinrdf.org/sp#graphNameNode> <http://NAMEDGRAPH#ADDSET-1-2> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-20> <http://spinrdf.org/sp#object> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-20> <http://spinrdf.org/sp#predicate> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-20> <http://spinrdf.org/sp#subject> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-21> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-21> <http://spinrdf.org/sp#varName> "b" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-19> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-20> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-19> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-22> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-24> <http://spinrdf.org/sp#varName> "resource" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-23> <http://spinrdf.org/sp#object> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-24> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-23> <http://spinrdf.org/sp#predicate> <http://www.w3.org/2000/01/rdf-schema#subClassOf> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-23> <http://spinrdf.org/sp#subject> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-25> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-25> <http://spinrdf.org/sp#varName> "b" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-22> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-23> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-22> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-17> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-18> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-17> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-9> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-26> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-27> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#SubQuery> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-27> <http://spinrdf.org/sp#query> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-28> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-28> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#Select> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-28> <http://spinrdf.org/sp#resultVariables> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-29> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-28> <http://spinrdf.org/sp#where> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-35> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-30> <http://spinrdf.org/sp#varName> "a" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-29> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-30> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-29> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-31> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-32> <http://spinrdf.org/sp#varName> "b" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-31> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-32> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-31> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-33> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-34> <http://spinrdf.org/sp#varName> "resource" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-33> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-34> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-33> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-36> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#NamedGraph> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-36> <http://spinrdf.org/sp#elements> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-37> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-36> <http://spinrdf.org/sp#graphNameNode> <http://NAMEDGRAPH#DELETESET-1-2> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-38> <http://spinrdf.org/sp#object> <http://www.w3.org/2000/01/rdf-schema#Class> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-38> <http://spinrdf.org/sp#predicate> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-38> <http://spinrdf.org/sp#subject> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-39> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-39> <http://spinrdf.org/sp#varName> "a" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-37> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-38> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-37> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-40> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-42> <http://spinrdf.org/sp#varName> "resource" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-41> <http://spinrdf.org/sp#object> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-42> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-41> <http://spinrdf.org/sp#predicate> <http://www.w3.org/2000/01/rdf-schema#subClassOf> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-41> <http://spinrdf.org/sp#subject> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-43> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-43> <http://spinrdf.org/sp#varName> "a" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-40> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-41> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-40> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-35> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-36> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-35> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-26> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-27> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-26> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-44> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-45> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#Minus> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-45> <http://spinrdf.org/sp#elements> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-46> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-47> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#SubQuery> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-47> <http://spinrdf.org/sp#query> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-48> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-48> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#Select> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-48> <http://spinrdf.org/sp#resultVariables> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-49> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-48> <http://spinrdf.org/sp#where> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-53> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-50> <http://spinrdf.org/sp#varName> "a" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-49> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-50> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-49> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-51> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-52> <http://spinrdf.org/sp#varName> "b" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-51> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-52> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-51> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-54> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#NamedGraph> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-54> <http://spinrdf.org/sp#elements> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-55> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-54> <http://spinrdf.org/sp#graphNameNode> <http://NAMEDGRAPH#rev1> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-57> <http://spinrdf.org/sp#varName> "o1" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-56> <http://spinrdf.org/sp#object> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-57> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-56> <http://spinrdf.org/sp#predicate> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-58> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-56> <http://spinrdf.org/sp#subject> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-59> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-58> <http://spinrdf.org/sp#varName> "s1" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-59> <http://spinrdf.org/sp#varName> "b" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-55> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-56> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-55> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-53> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-54> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-53> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-60> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-61> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#NamedGraph> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-61> <http://spinrdf.org/sp#elements> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-62> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-61> <http://spinrdf.org/sp#graphNameNode> <http://NAMEDGRAPH#rev2> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-64> <http://spinrdf.org/sp#varName> "o2" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-63> <http://spinrdf.org/sp#object> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-64> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-63> <http://spinrdf.org/sp#predicate> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-65> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-63> <http://spinrdf.org/sp#subject> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-66> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-65> <http://spinrdf.org/sp#varName> "s2" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-66> <http://spinrdf.org/sp#varName> "a" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-62> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-63> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-62> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-60> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-61> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-60> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-46> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-47> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-46> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-44> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-45> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/element-44> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+
+# Co-Evolution extension
+#
+# Matching query:
+#SELECT ?subject
+#WHERE {
+#	GRAPH <http://NAMEDGRAPH#master> { # Example: <http://NAMEDGRAPH#master> will replaced with <http://test.com/r43ples-dataset-1>
+#		?subject a ?a .
+#	}
+#}
+#
+# ADD set update query:
+#INSERT
+#  { GRAPH <http://NAMEDGRAPH#ADDSET-NEW> { ?subject a ?b } } # Example: <http://NAMEDGRAPH#master> will replaced with <http://test.com/r43ples-dataset-1-addSet-4-5>
+#WHERE
+#  { GRAPH  <http://NAMEDGRAPH#master> # Example: <http://NAMEDGRAPH#master> will replaced with <http://test.com/r43ples-dataset-1>
+#     { ?subject a ?a .
+#     }
+#  }
+#
+# DELETE set update query
+#INSERT
+#  { GRAPH <http://NAMEDGRAPH#DELETESET-NEW> { ?subject a ?a } } # Example: <http://NAMEDGRAPH#master> will replaced with <http://test.com/r43ples-dataset-1-deleteSet-4-5>
+#WHERE
+#  { GRAPH  <http://NAMEDGRAPH#master> # Example: <http://NAMEDGRAPH#master> will replaced with <http://test.com/r43ples-dataset-1>
+#     { ?subject a ?a .
+#     }
+#  }
+
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class/definition> a aero:CoEvoRule;
+    aero:dependencyMatchingQuery <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-1>;
+    aero:addSetInsertQuery <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-1>;
+    aero:deleteSetInsertQuery <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-1>.
+
+# Matching
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#Select> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-1> <http://spinrdf.org/sp#resultVariables> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-2> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-1> <http://spinrdf.org/sp#where> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-4> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-3> <http://spinrdf.org/sp#varName> "subject" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-3> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-5> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#NamedGraph> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-5> <http://spinrdf.org/sp#elements> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-6> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-5> <http://spinrdf.org/sp#graphNameNode> <http://NAMEDGRAPH#master> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-8> <http://spinrdf.org/sp#varName> "a" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-7> <http://spinrdf.org/sp#object> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-8> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-7> <http://spinrdf.org/sp#predicate> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-7> <http://spinrdf.org/sp#subject> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-9> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-9> <http://spinrdf.org/sp#varName> "subject" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-6> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-7> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-6> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-5> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/matching/element-4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+
+# ADD
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#Modify> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-1> <http://spinrdf.org/sp#insertPattern> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-2> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-1> <http://spinrdf.org/sp#where> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-8> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#NamedGraph> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-3> <http://spinrdf.org/sp#elements> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-4> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-3> <http://spinrdf.org/sp#graphNameNode> <http://NAMEDGRAPH#ADDSET-NEW> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-6> <http://spinrdf.org/sp#varName> "b" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-5> <http://spinrdf.org/sp#object> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-6> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-5> <http://spinrdf.org/sp#predicate> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-5> <http://spinrdf.org/sp#subject> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-7> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-7> <http://spinrdf.org/sp#varName> "subject" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-5> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-3> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-9> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#NamedGraph> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-9> <http://spinrdf.org/sp#elements> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-10> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-9> <http://spinrdf.org/sp#graphNameNode> <http://NAMEDGRAPH#master> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-12> <http://spinrdf.org/sp#varName> "a" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-11> <http://spinrdf.org/sp#object> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-12> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-11> <http://spinrdf.org/sp#predicate> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-11> <http://spinrdf.org/sp#subject> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-13> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-13> <http://spinrdf.org/sp#varName> "subject" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-10> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-11> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-10> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-9> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/add/element-8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+
+# DELETE
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-1> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#Modify> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-1> <http://spinrdf.org/sp#insertPattern> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-2> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-1> <http://spinrdf.org/sp#where> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-8> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-3> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#NamedGraph> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-3> <http://spinrdf.org/sp#elements> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-4> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-3> <http://spinrdf.org/sp#graphNameNode> <http://NAMEDGRAPH#DELETESET-NEW> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-6> <http://spinrdf.org/sp#varName> "a" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-5> <http://spinrdf.org/sp#object> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-6> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-5> <http://spinrdf.org/sp#predicate> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-5> <http://spinrdf.org/sp#subject> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-7> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-7> <http://spinrdf.org/sp#varName> "subject" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-5> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-4> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-3> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-2> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-9> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://spinrdf.org/sp#NamedGraph> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-9> <http://spinrdf.org/sp#elements> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-10> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-9> <http://spinrdf.org/sp#graphNameNode> <http://NAMEDGRAPH#master> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-12> <http://spinrdf.org/sp#varName> "a" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-11> <http://spinrdf.org/sp#object> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-12> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-11> <http://spinrdf.org/sp#predicate> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-11> <http://spinrdf.org/sp#subject> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-13> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-13> <http://spinrdf.org/sp#varName> "subject" .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-10> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-11> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-10> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#first> <http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-9> .
+<http://eatld.et.tu-dresden.de/rules#instances/rename-class-coevo/delete/element-8> <http://www.w3.org/1999/02/22-rdf-syntax-ns#rest> <http://www.w3.org/1999/02/22-rdf-syntax-ns#nil> .

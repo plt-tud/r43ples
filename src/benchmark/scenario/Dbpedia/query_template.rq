@@ -1,0 +1,6 @@
+SELECT * 
+WHERE {
+  GRAPH <http://dbpedia.org> REVISION "%%%REVISION%%%" {
+	?s <http://dbpedia.org/meta/contributor> ?o. 
+  }
+}

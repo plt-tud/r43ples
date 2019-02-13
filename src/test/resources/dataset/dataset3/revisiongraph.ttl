@@ -1,0 +1,239 @@
+<http://test.com/r43ples-dataset-3-revision-5>
+        a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
+        <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
+                "5" ;
+        <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
+                <http://test.com/r43ples-dataset-3-revision-4> , <http://test.com/r43ples-dataset-3-revision-2> .
+
+<http://test.com/r43ples-dataset-3-changeset-1-2>
+        a       <http://eatld.et.tu-dresden.de/rmo#ChangeSet> ;
+        <http://eatld.et.tu-dresden.de/rmo#addSet>
+                <http://test.com/r43ples-dataset-3-addSet-1-2> ;
+        <http://eatld.et.tu-dresden.de/rmo#deleteSet>
+                <http://test.com/r43ples-dataset-3-deleteSet-1-2> ;
+        <http://eatld.et.tu-dresden.de/rmo#priorRevision>
+                <http://test.com/r43ples-dataset-3-revision-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-3-revision-2> .
+
+<http://test.com/r43ples-dataset-3-commit-3>
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        <http://eatld.et.tu-dresden.de/rmo#commitMessage>
+                "test commit message 3" ;
+        <http://eatld.et.tu-dresden.de/rmo#generated>
+                <http://test.com/r43ples-dataset-3-revision-3> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-3-changeset-1-3> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T10:19:24.605"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://eatld.et.tu-dresden.de/rmo#used>
+                <http://test.com/r43ples-dataset-3-revision-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
+                <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-3-changeset-4-5>
+        a       <http://eatld.et.tu-dresden.de/rmo#ChangeSet> ;
+        <http://eatld.et.tu-dresden.de/rmo#addSet>
+                <http://test.com/r43ples-dataset-3-addSet-4-5> ;
+        <http://eatld.et.tu-dresden.de/rmo#deleteSet>
+                <http://test.com/r43ples-dataset-3-deleteSet-4-5> ;
+        <http://eatld.et.tu-dresden.de/rmo#priorRevision>
+                <http://test.com/r43ples-dataset-3-revision-4> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-3-revision-5> .
+
+<http://test.com/r43ples-dataset-3-revision-4>
+        a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
+        <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
+                "4" ;
+        <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
+                <http://test.com/r43ples-dataset-3-revision-3> .
+
+<http://test.com/r43ples-dataset-3-commit-2>
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        <http://eatld.et.tu-dresden.de/rmo#commitMessage>
+                "test commit message 2" ;
+        <http://eatld.et.tu-dresden.de/rmo#generated>
+                <http://test.com/r43ples-dataset-3-revision-2> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-3-changeset-1-2> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T10:19:23.701"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://eatld.et.tu-dresden.de/rmo#used>
+                <http://test.com/r43ples-dataset-3-revision-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
+                <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-3-changeset-0-1>
+        a       <http://eatld.et.tu-dresden.de/rmo#ChangeSet> ;
+        <http://eatld.et.tu-dresden.de/rmo#addSet>
+                <http://test.com/r43ples-dataset-3-addSet-0-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#deleteSet>
+                <http://test.com/r43ples-dataset-3-deleteSet-0-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#priorRevision>
+                <http://test.com/r43ples-dataset-3-revision-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-3-revision-1> .
+
+<http://test.com/r43ples-dataset-3-revision-3>
+        a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
+        <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
+                "3" ;
+        <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
+                <http://test.com/r43ples-dataset-3-revision-1> .
+
+<http://test.com/r43ples-dataset-3-commit-1>
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        <http://eatld.et.tu-dresden.de/rmo#commitMessage>
+                "test commit message 1" ;
+        <http://eatld.et.tu-dresden.de/rmo#generated>
+                <http://test.com/r43ples-dataset-3-revision-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-3-changeset-0-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T10:19:20.816"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://eatld.et.tu-dresden.de/rmo#used>
+                <http://test.com/r43ples-dataset-3-revision-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
+                <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-3-changeset-2-5>
+        a       <http://eatld.et.tu-dresden.de/rmo#ChangeSet> ;
+        <http://eatld.et.tu-dresden.de/rmo#addSet>
+                <http://test.com/r43ples-dataset-3-addSet-2-5> ;
+        <http://eatld.et.tu-dresden.de/rmo#deleteSet>
+                <http://test.com/r43ples-dataset-3-deleteSet-2-5> ;
+        <http://eatld.et.tu-dresden.de/rmo#priorRevision>
+                <http://test.com/r43ples-dataset-3-revision-2> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-3-revision-5> .
+
+<http://test.com/r43ples-dataset-3-changeset-3-4>
+        a       <http://eatld.et.tu-dresden.de/rmo#ChangeSet> ;
+        <http://eatld.et.tu-dresden.de/rmo#addSet>
+                <http://test.com/r43ples-dataset-3-addSet-3-4> ;
+        <http://eatld.et.tu-dresden.de/rmo#deleteSet>
+                <http://test.com/r43ples-dataset-3-deleteSet-3-4> ;
+        <http://eatld.et.tu-dresden.de/rmo#priorRevision>
+                <http://test.com/r43ples-dataset-3-revision-3> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-3-revision-4> .
+
+<http://test.com/r43ples-dataset-3-revision-2>
+        a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
+        <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
+                "2" ;
+        <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
+                <http://test.com/r43ples-dataset-3-revision-1> .
+
+<http://test.com/r43ples-dataset-3-commit-0>
+        a       <http://eatld.et.tu-dresden.de/rmo#Commit> , <http://eatld.et.tu-dresden.de/rmo#InitialCommit> ;
+        <http://eatld.et.tu-dresden.de/rmo#commitMessage>
+                "Create graph" ;
+        <http://eatld.et.tu-dresden.de/rmo#generated>
+                <http://test.com/r43ples-dataset-3-master> , <http://test.com/r43ples-dataset-3-revision-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-3-changeset-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T10:19:19.627"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
+                <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-3-commit-branch-b1>
+        a       <http://eatld.et.tu-dresden.de/rmo#ReferenceCommit> , <http://eatld.et.tu-dresden.de/rmo#BranchCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        <http://eatld.et.tu-dresden.de/rmo#commitMessage>
+                "Create a new branch B1" ;
+        <http://eatld.et.tu-dresden.de/rmo#generated>
+                <http://test.com/r43ples-dataset-3-branch-b1> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T10:19:22.313" ;
+        <http://eatld.et.tu-dresden.de/rmo#used>
+                <http://test.com/r43ples-dataset-3-revision-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
+                <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-3-revision-1>
+        a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
+        <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
+                "1" ;
+        <http://eatld.et.tu-dresden.de/rmo#wasDerivedFrom>
+                <http://test.com/r43ples-dataset-3-revision-0> .
+
+<http://test.com/r43ples-dataset-3-changeset-0>
+        a       <http://eatld.et.tu-dresden.de/rmo#ChangeSet> ;
+        <http://eatld.et.tu-dresden.de/rmo#addSet>
+                <http://test.com/r43ples-dataset-3-addSet-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#deleteSet>
+                <http://test.com/r43ples-dataset-3-deleteSet-0> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-3-revision-0> .
+
+<http://test.com/r43ples-dataset-3-commit-merge-5>
+        a       <http://eatld.et.tu-dresden.de/rmo#MergeCommit> , <http://eatld.et.tu-dresden.de/rmo#ThreeWayMergeCommit> , <http://eatld.et.tu-dresden.de/rmo#BasicMergeCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        <http://eatld.et.tu-dresden.de/rmo#commitMessage>
+                "test commit message 5" ;
+        <http://eatld.et.tu-dresden.de/rmo#generated>
+                <http://test.com/r43ples-dataset-3-revision-5> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-3-changeset-2-5> , <http://test.com/r43ples-dataset-3-changeset-4-5> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T10:19:28.465"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://eatld.et.tu-dresden.de/rmo#usedSourceBranch>
+                <http://test.com/r43ples-dataset-3-branch-b1> ;
+        <http://eatld.et.tu-dresden.de/rmo#usedSourceRevision>
+                <http://test.com/r43ples-dataset-3-revision-2> ;
+        <http://eatld.et.tu-dresden.de/rmo#usedTargetBranch>
+                <http://test.com/r43ples-dataset-3-master> ;
+        <http://eatld.et.tu-dresden.de/rmo#usedTargetRevision>
+                <http://test.com/r43ples-dataset-3-revision-4> ;
+        <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
+                <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-3-revision-0>
+        a       <http://eatld.et.tu-dresden.de/rmo#Entity> , <http://eatld.et.tu-dresden.de/rmo#Revision> ;
+        <http://eatld.et.tu-dresden.de/rmo#revisionIdentifier>
+                "0" .
+
+<http://test.com/r43ples-dataset-3-branch-b1>
+        a       <http://eatld.et.tu-dresden.de/rmo#Reference> , <http://eatld.et.tu-dresden.de/rmo#Branch> , <http://eatld.et.tu-dresden.de/rmo#Entity> ;
+        <http://eatld.et.tu-dresden.de/rmo#fullContent>
+                <http://test.com/r43ples-dataset-3-b1> ;
+        <http://eatld.et.tu-dresden.de/rmo#referenceIdentifier>
+                "b1" ;
+        <http://eatld.et.tu-dresden.de/rmo#references>
+                <http://test.com/r43ples-dataset-3-revision-2> .
+
+<http://test.com/r43ples-dataset-3-changeset-1-3>
+        a       <http://eatld.et.tu-dresden.de/rmo#ChangeSet> ;
+        <http://eatld.et.tu-dresden.de/rmo#addSet>
+                <http://test.com/r43ples-dataset-3-addSet-1-3> ;
+        <http://eatld.et.tu-dresden.de/rmo#deleteSet>
+                <http://test.com/r43ples-dataset-3-deleteSet-1-3> ;
+        <http://eatld.et.tu-dresden.de/rmo#priorRevision>
+                <http://test.com/r43ples-dataset-3-revision-1> ;
+        <http://eatld.et.tu-dresden.de/rmo#succeedingRevision>
+                <http://test.com/r43ples-dataset-3-revision-3> .
+
+<http://test.com/r43ples-dataset-3-commit-4>
+        a       <http://eatld.et.tu-dresden.de/rmo#UpdateCommit> , <http://eatld.et.tu-dresden.de/rmo#Commit> ;
+        <http://eatld.et.tu-dresden.de/rmo#commitMessage>
+                "test commit message 4" ;
+        <http://eatld.et.tu-dresden.de/rmo#generated>
+                <http://test.com/r43ples-dataset-3-revision-4> ;
+        <http://eatld.et.tu-dresden.de/rmo#hasChangeSet>
+                <http://test.com/r43ples-dataset-3-changeset-3-4> ;
+        <http://eatld.et.tu-dresden.de/rmo#timeStamp>
+                "2018-08-24T10:19:26.553"^^<http://www.w3.org/2001/XMLSchema#dateTime> ;
+        <http://eatld.et.tu-dresden.de/rmo#used>
+                <http://test.com/r43ples-dataset-3-revision-3> ;
+        <http://eatld.et.tu-dresden.de/rmo#wasAssociatedWith>
+                <http://eatld.et.tu-dresden.de/persons/butler> .
+
+<http://test.com/r43ples-dataset-3-master>
+        a       <http://eatld.et.tu-dresden.de/rmo#Reference> , <http://eatld.et.tu-dresden.de/rmo#Branch> , <http://eatld.et.tu-dresden.de/rmo#Master> ;
+        <http://eatld.et.tu-dresden.de/rmo#fullContent>
+                <http://test.com/r43ples-dataset-3> ;
+        <http://eatld.et.tu-dresden.de/rmo#referenceIdentifier>
+                "master" ;
+        <http://eatld.et.tu-dresden.de/rmo#references>
+                <http://test.com/r43ples-dataset-3-revision-5> .
