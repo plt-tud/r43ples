@@ -28,7 +28,7 @@ after_success:
 - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
 - mvn -DskipTests package
 - docker build -f Dockerfile -t $REPO:$TAG .
-- docker push $REPO
+- docker push $REPO:$TAG
 before_deploy:
 - mvn -q site
 - "./.update-gh-pages.sh"
