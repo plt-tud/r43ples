@@ -34,7 +34,7 @@ Maven is used for compiling
 
     mvn compile exec:java
 
-Packages (JAR with dependencies for the webservice, a console client and a debian package) can be be built with:
+Packages (JAR with dependencies for the webservice) can be be built with:
 
     mvn package
 
@@ -43,14 +43,17 @@ Packages (JAR with dependencies for the webservice, a console client and a debia
 R43ples runs with standalone web server
 
 ``` bash
-java -jar r43ples-*-with-dependencies.jar
+java -jar target/r43ples.jar
 ```
 
 ### Releases
 
 Releases are stored on [GitHub](https://github.com/plt-tud/r43ples/releases).
 
-There are also debian packages available.
+There are also docker images available:
+```
+docker pull plttud:r43ples
+```
 
 
 
