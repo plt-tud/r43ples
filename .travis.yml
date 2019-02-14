@@ -11,6 +11,8 @@ env:
   - secure: KpBreSWNQyTOxB7lKkX/BZSmxbAOY8AqiH0hNWK0DLuAkbb2tmbrRu3wYZf6gLuZRhUx0jePXJYW5qqAKFX3Wv2cuEcs9slZeC0ovyNOxkIKAy4XA+8BE13ax4vRLoijHf93dPbW4iOFEw53ZB38I/3m/FZUq7NS4x1kqqzT+cE=
   - secure: QoT3VBrqUr4HhxY8zsf2v1bFq/nUN9jH4cUsAy4gefjnlNw+bchAM0rZ+q76bbSubcYOqV2L7niq00PxWxnGUD+DqZImunYxSkoNl0H2THiLtbsQitdaD8aIlxaWEfI58+B8nx+tQr+ApWXVpDTMrSV78NhpCcDkCtuSJvCUwaI=
   - secure: KVRrqsaSkDV4P84t5YSsP26aQtArfappngFpDCiQ00XExC1zl17wd0mG5nKnwoPVCO9sxAICJCJjOitrOu5AAJ+mI7mjmxTxabND2Q6v7SbCd7d4LS2576UxzbqCI+7g23aghJyHajwbeyisdXmHXJR9SeUjVrgCm2jiBG/28Yw=
+  - secure: Y0LPUl3RIqoa/V26EneyiFSi5V3CZy/sDkfUyE644XDqnLNzR94VA5cxhtyCkg9lxelNOa+a4JTlFyekVvFZPPoXHR/tEH6rI5XPs9HFiOx0+W89q2dGayg2Xo7UEXN5IzFmAgRVfjD00R+NHML0lXDepp6fXwc0yAoa0SrUInw=
+  - secure: AAImDJ0FPN0sgGSnUUPXFnhnmcd9Jl3Rt5NiSEAI+WlLCZ9GoL/ks89owbXyxZXRxWfXka7YMa+v9VADPvnhBMl7itKhUgC3gPwEHhddaED8K2FKmmoLTU2DQYyd+qgBrcA8fsDqtsGANX/n1YqYaz4HAKu/pvm3OlNQiI8LQbk=
 addons:
   coverity_scan:
     project:
@@ -25,7 +27,7 @@ script:
 after_success:
 - "./.coverity.sh"
 - bash <(curl -s https://codecov.io/bash)
-- docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+- docker login -u $DOCKER_USER -p $DOCKER_PASS
 - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH;
   fi`
 - mvn -DskipTests package
