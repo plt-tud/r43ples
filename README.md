@@ -52,7 +52,8 @@ Releases are stored on [GitHub](https://github.com/plt-tud/r43ples/releases).
 
 There are also docker images available:
 ```
-docker pull plttud:r43ples
+docker pull plttud/r43ples
+docker run -p 9998:9998 plttud/r43ples
 ```
 
 
