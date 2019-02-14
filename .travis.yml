@@ -4,6 +4,7 @@ jdk:
 - openjdk8
 env:
   global:
+  - REPO=plttud/r43ples
   - secure: hhLVj2gO730WiEpase1qPR/r8eCiFbND9x+lfZqvP5AiDnv9UD2U/QZfg/EBocJySHb0xTE1WSP0VXYCM4qG8IovJaA1/0MxyWgh4JjdOD1xqjHxpOAJHAvnPoAhu1LO45+rClVS5tub7KaiDvYKcCHXVC07yQm3BRee6rwL75I=
   - secure: WHUbL9LOlJo5a/6TewBV7BZgfpUzDnEur0uI3n5KxmbxGPnlSUYyLoaRFF83Ukys3Mb0xjdleLrOCk+EA7VFMtsxADroHGmK5tSPJD/GGWUo+jdmk1/cETKlgpPvOFKG5Ui19ydqMexACMGnzcy9XoyYwOMyIO/ZbrVjdrq3VtI=
   - secure: OjOHD0TO9uIZo4IK96IukFkKMTnFszVOvzR7BYtraaC1ZZPx1bMjvTdRyU3I+3++tYsVUnd2J+zm/wYtNctQrmnXWWb0lYUpH9nhjuClhecN5IH4MbzoDX9AhGfOf/e1thaik6s9zGt3CaU5Ejw2RG9Bg4M1w1nMUIaU+8OAVZY=
@@ -24,7 +25,6 @@ after_success:
 - "./.coverity.sh"
 - bash <(curl -s https://codecov.io/bash)
 - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-- export REPO="mgraube/r43ples"
 - export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH; fi`
 - mvn -DskipTests package
 - docker build -f Dockerfile -t $REPO:$COMMIT .
