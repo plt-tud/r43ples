@@ -50,12 +50,20 @@ java -jar target/r43ples.jar
 
 Releases are stored on [GitHub](https://github.com/plt-tud/r43ples/releases).
 
-There are also docker images available:
+There are also *stable* and *latest* docker images available:
 ```
 docker pull plttud/r43ples
+```
+
+Run default r43ples via docker
+```
 docker run -p 9998:9998 plttud/r43ples
 ```
 
+Run with specific configuration
+```
+docker run -p 9998:9998 -v $PWD/r43ples.conf:/r43ples.conf plttud/r43ples
+```
 
 
 ## Configuration
