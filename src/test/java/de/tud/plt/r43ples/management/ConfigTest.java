@@ -18,8 +18,8 @@ public class ConfigTest {
 	public final void testGetPrefixes() throws ConfigurationException {
 		Config.readConfig("r43ples.test.conf");
 		String prefixes = Config.getUserDefinedSparqlPrefixes();
-		assertEquals("PREFIX ex: <http://example.com/> \nPREFIX test: <http://test.com/> \n", prefixes);
-		
+		assertTrue(prefixes.contains("PREFIX ex: <http://example.com/>"));
+		assertTrue(prefixes.contains("PREFIX test: <http://test.com/>"));
 	}
 
 }

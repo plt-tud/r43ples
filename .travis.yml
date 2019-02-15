@@ -1,67 +1,58 @@
-# enable new container format (see http://docs.travis-ci.com/user/migrating-from-legacy/?utm_source=legacy-notice&utm_medium=banner&utm_campaign=legacy-upgrade)
 sudo: false
-
 language: java
 jdk:
-  - openjdk8
-
+- openjdk8
 env:
   global:
-    # Global variables encypted via "travis encryt"  using the project repo's public key
-    # encrypted COVERITY_SCAN_TOKEN
-    - secure: "hhLVj2gO730WiEpase1qPR/r8eCiFbND9x+lfZqvP5AiDnv9UD2U/QZfg/EBocJySHb0xTE1WSP0VXYCM4qG8IovJaA1/0MxyWgh4JjdOD1xqjHxpOAJHAvnPoAhu1LO45+rClVS5tub7KaiDvYKcCHXVC07yQm3BRee6rwL75I="
-    # encrypted GITHUB_AUTH_TOKEN
-    - secure: "WHUbL9LOlJo5a/6TewBV7BZgfpUzDnEur0uI3n5KxmbxGPnlSUYyLoaRFF83Ukys3Mb0xjdleLrOCk+EA7VFMtsxADroHGmK5tSPJD/GGWUo+jdmk1/cETKlgpPvOFKG5Ui19ydqMexACMGnzcy9XoyYwOMyIO/ZbrVjdrq3VtI="
-
-
+  - REPO=plttud/r43ples
+  - secure: hhLVj2gO730WiEpase1qPR/r8eCiFbND9x+lfZqvP5AiDnv9UD2U/QZfg/EBocJySHb0xTE1WSP0VXYCM4qG8IovJaA1/0MxyWgh4JjdOD1xqjHxpOAJHAvnPoAhu1LO45+rClVS5tub7KaiDvYKcCHXVC07yQm3BRee6rwL75I=
+  - secure: WHUbL9LOlJo5a/6TewBV7BZgfpUzDnEur0uI3n5KxmbxGPnlSUYyLoaRFF83Ukys3Mb0xjdleLrOCk+EA7VFMtsxADroHGmK5tSPJD/GGWUo+jdmk1/cETKlgpPvOFKG5Ui19ydqMexACMGnzcy9XoyYwOMyIO/ZbrVjdrq3VtI=
+  - secure: OjOHD0TO9uIZo4IK96IukFkKMTnFszVOvzR7BYtraaC1ZZPx1bMjvTdRyU3I+3++tYsVUnd2J+zm/wYtNctQrmnXWWb0lYUpH9nhjuClhecN5IH4MbzoDX9AhGfOf/e1thaik6s9zGt3CaU5Ejw2RG9Bg4M1w1nMUIaU+8OAVZY=
+  - secure: KpBreSWNQyTOxB7lKkX/BZSmxbAOY8AqiH0hNWK0DLuAkbb2tmbrRu3wYZf6gLuZRhUx0jePXJYW5qqAKFX3Wv2cuEcs9slZeC0ovyNOxkIKAy4XA+8BE13ax4vRLoijHf93dPbW4iOFEw53ZB38I/3m/FZUq7NS4x1kqqzT+cE=
+  - secure: QoT3VBrqUr4HhxY8zsf2v1bFq/nUN9jH4cUsAy4gefjnlNw+bchAM0rZ+q76bbSubcYOqV2L7niq00PxWxnGUD+DqZImunYxSkoNl0H2THiLtbsQitdaD8aIlxaWEfI58+B8nx+tQr+ApWXVpDTMrSV78NhpCcDkCtuSJvCUwaI=
+  - secure: KVRrqsaSkDV4P84t5YSsP26aQtArfappngFpDCiQ00XExC1zl17wd0mG5nKnwoPVCO9sxAICJCJjOitrOu5AAJ+mI7mjmxTxabND2Q6v7SbCd7d4LS2576UxzbqCI+7g23aghJyHajwbeyisdXmHXJR9SeUjVrgCm2jiBG/28Yw=
+  - secure: Y0LPUl3RIqoa/V26EneyiFSi5V3CZy/sDkfUyE644XDqnLNzR94VA5cxhtyCkg9lxelNOa+a4JTlFyekVvFZPPoXHR/tEH6rI5XPs9HFiOx0+W89q2dGayg2Xo7UEXN5IzFmAgRVfjD00R+NHML0lXDepp6fXwc0yAoa0SrUInw=
+  - secure: AAImDJ0FPN0sgGSnUUPXFnhnmcd9Jl3Rt5NiSEAI+WlLCZ9GoL/ks89owbXyxZXRxWfXka7YMa+v9VADPvnhBMl7itKhUgC3gPwEHhddaED8K2FKmmoLTU2DQYyd+qgBrcA8fsDqtsGANX/n1YqYaz4HAKu/pvm3OlNQiI8LQbk=
 addons:
   coverity_scan:
     project:
-      name: "plt-tud/r43ples"
-      description: "Build submitted via Travis CI"
+      name: plt-tud/r43ples
+      description: Build submitted via Travis CI
     notification_email: markus.graube@tu-dresden.de
-    build_command_prepend: "mvn clean"
-    build_command: "mvn compile"
+    build_command_prepend: mvn clean
+    build_command: mvn compile
     branch_pattern: coverity_scan
-
-
 script:
-    - mvn -B test
-
-
-
+- mvn -B test
 after_success:
-    - ./.coverity.sh
-    - bash <(curl -s https://codecov.io/bash)
-    
-
+- "./.coverity.sh"
+- bash <(curl -s https://codecov.io/bash)
+- docker login -u $DOCKER_USER -p $DOCKER_PASS
+- export TAG=`if [ "$TRAVIS_BRANCH" == "master" ]; then echo "latest"; else echo $TRAVIS_BRANCH;
+  fi`
+- mvn -DskipTests package
+- docker build -f Dockerfile -t $REPO:$TAG .
+- docker push $REPO:$TAG
 before_deploy:
-    - mvn -q site
-    - ./.update-gh-pages.sh
-    # http://stackoverflow.com/questions/25916249/deploying-a-maven-version-to-github-using-travis-ci
-    - mvn package -DskipTests=true -DfinalName=r43ples-$TRAVIS_TAG
-    
-    
+- mvn -q site
+- "./.update-gh-pages.sh"
+- mvn package -DskipTests=true -DfinalName=r43ples-$TRAVIS_TAG
 deploy:
-  - provider: pages
-    skip_cleanup: true
-    github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
-    local_dir: gh-pages
-    on:
-      branch: develop
-  - provider: releases
-    api_key:
-      secure: RHaHxxXNfD8GQBaEfKv2lmpcJK+FeOBt0N0Djz1loTY/VScOEQQRMpWWK7f3Z0O8D8fWKxRHjUKSM63OR7zo6JafIOQU1l/DzS+YK0Rt9NJuGm6MZHc5V32tf2CBBzS8hZJ6MKrCdPJb0WIP+w++zu64ccsFF9ZhWf7EYZ9BYug=
-    file:
-      - target/r43ples-$TRAVIS_TAG--jar-with-dependencies.jar
-      - target/r43ples-$TRAVIS_TAG.deb
-    skip_cleanup: true
-    on:
-      tags: true
-
+- provider: pages
+  skip_cleanup: true
+  github_token: "$GITHUB_TOKEN"
+  local_dir: gh-pages
+  on:
+    branch: develop
+- provider: releases
+  api_key:
+    secure: RHaHxxXNfD8GQBaEfKv2lmpcJK+FeOBt0N0Djz1loTY/VScOEQQRMpWWK7f3Z0O8D8fWKxRHjUKSM63OR7zo6JafIOQU1l/DzS+YK0Rt9NJuGm6MZHc5V32tf2CBBzS8hZJ6MKrCdPJb0WIP+w++zu64ccsFF9ZhWf7EYZ9BYug=
+  file:
+  - target/r43ples-$TRAVIS_TAG.jar
+  skip_cleanup: true
+  on:
+    tags: true
 notifications:
   email:
-    - markus.graube@tu-dresden.de
-    - stephan.hensel@tu-dresden.de
-
-
+  - markus.graube@tu-dresden.de
+  - stephan.hensel@tu-dresden.de
