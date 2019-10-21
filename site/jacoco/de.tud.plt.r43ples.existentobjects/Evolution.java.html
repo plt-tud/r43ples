@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Evolution.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.existentobjects</a> &gt; <span class="el_source">Evolution.java</span></div><h1>Evolution.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.existentobjects;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.LinkedList;
+
+/**
+ * Provides information of an already existent evolution.
+ *
+ * @author Stephan Hensel
+ */
+public class Evolution {
+
+    /** The logger. **/
+<span class="fc" id="L21">    private Logger logger = LogManager.getLogger(Evolution.class);</span>
+
+    /** The evolution URI. */
+    private String evolutionURI;
+
+    /** The start revision. */
+    private Revision startRevision;
+    /** The end revision. */
+    private Revision endRevision;
+    /** The used source revision graph. */
+    private RevisionGraph usedSourceRevisionGraph;
+
+    /** The list of associated semantic changes. */
+    private LinkedList&lt;SemanticChange&gt; associatedSemanticChangeList;
+    /** The list of performed evolutions. */
+    private LinkedList&lt;CoEvolution&gt; performedCoEvolutionList;
+
+
+    /**
+     * The constructor.
+     *
+     * @param evolutionURI the evolution URI
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L45">    public Evolution(String evolutionURI) throws InternalErrorException {</span>
+<span class="fc" id="L46">        this.evolutionURI = evolutionURI;</span>
+<span class="fc" id="L47">        associatedSemanticChangeList = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L48">        performedCoEvolutionList = new LinkedList&lt;&gt;();</span>
+
+<span class="fc" id="L50">        retrieveAdditionalInformation();</span>
+<span class="fc" id="L51">    }</span>
+
+
+    /**
+     * Calculate additional information of the current evolution and store this information to local variables.
+     *
+     * @throws InternalErrorException
+     */
+    private void retrieveAdditionalInformation() throws InternalErrorException {
+<span class="fc" id="L60">        logger.info(&quot;Get additional information of current evolution URI &quot; + evolutionURI + &quot;.&quot;);</span>
+<span class="fc" id="L61">        String query = Config.prefixes + String.format(&quot;&quot;</span>
+                + &quot;SELECT ?startRevisionURI ?endRevisionURI ?usedSourceRevisionGraphURI %n&quot;
+                + &quot;WHERE { GRAPH  &lt;%s&gt; { %n&quot;
+                + &quot;	&lt;%s&gt; a rmo:Evolution; %n&quot;
+                + &quot;	 rmo:startRevision ?startRevisionURI; %n&quot;
+                + &quot;  rmo:endRevision ?endRevisionURI; %n&quot;
+                + &quot;  rmo:usedSourceRevisionGraph ?usedSourceRevisionGraphURI. %n&quot;
+                + &quot;} }&quot;, Config.evolution_graph, evolutionURI);
+<span class="fc" id="L69">        this.logger.debug(query);</span>
+<span class="fc" id="L70">        ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);</span>
+<span class="pc bpc" id="L71" title="1 of 2 branches missed.">        if (resultSet.hasNext()) {</span>
+<span class="fc" id="L72">            QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L73">            usedSourceRevisionGraph = new RevisionGraph(qs.getResource(&quot;?usedSourceRevisionGraphURI&quot;).toString());</span>
+<span class="fc" id="L74">            startRevision = new Revision(usedSourceRevisionGraph, qs.getResource(&quot;?startRevisionURI&quot;).toString(), false);</span>
+<span class="fc" id="L75">            endRevision = new Revision(usedSourceRevisionGraph, qs.getResource(&quot;?endRevisionURI&quot;).toString(), false);</span>
+<span class="fc" id="L76">        } else {</span>
+<span class="nc" id="L77">            throw new InternalErrorException(&quot;No additional information found for evolution URI &quot; + evolutionURI + &quot;.&quot;);</span>
+        }
+
+<span class="fc" id="L80">        query = Config.prefixes + String.format(&quot;&quot;</span>
+                + &quot;SELECT ?associatedSemanticChangeURI %n&quot;
+                + &quot;WHERE { GRAPH  &lt;%s&gt; { %n&quot;
+                + &quot;	&lt;%s&gt; a rmo:Evolution; %n&quot;
+                + &quot;	 rmo:associatedSemanticChange ?associatedSemanticChangeURI. %n&quot;
+                + &quot;} }&quot;, Config.evolution_graph, evolutionURI);
+<span class="fc" id="L86">        this.logger.debug(query);</span>
+<span class="fc" id="L87">        resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        if (resultSet.hasNext()) {</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">            while (resultSet.hasNext()) {</span>
+<span class="fc" id="L90">                QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L91">                SemanticChange semanticChange = new SemanticChange(usedSourceRevisionGraph, qs.getResource(&quot;?associatedSemanticChangeURI&quot;).toString());</span>
+<span class="fc" id="L92">                associatedSemanticChangeList.add(semanticChange);</span>
+<span class="fc" id="L93">            }</span>
+        } else {
+<span class="nc" id="L95">            throw new InternalErrorException(&quot;No additional information (associatedSemanticChange) found for evolution URI &quot; + evolutionURI + &quot;.&quot;);</span>
+        }
+
+<span class="fc" id="L98">        query = Config.prefixes + String.format(&quot;&quot;</span>
+                + &quot;SELECT ?performedCoEvolutionURI %n&quot;
+                + &quot;WHERE { GRAPH  &lt;%s&gt; { %n&quot;
+                + &quot;	&lt;%s&gt; a rmo:Evolution; %n&quot;
+                + &quot;	 rmo:performedCoEvolution ?performedCoEvolutionURI. %n&quot;
+                + &quot;} }&quot;, Config.evolution_graph, evolutionURI);
+<span class="fc" id="L104">        this.logger.debug(query);</span>
+<span class="fc" id="L105">        resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if (resultSet.hasNext()) {</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">            while (resultSet.hasNext()) {</span>
+<span class="fc" id="L108">                QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L109">                CoEvolution coEvolution = new CoEvolution(qs.getResource(&quot;?performedCoEvolutionURI&quot;).toString());</span>
+<span class="fc" id="L110">                performedCoEvolutionList.add(coEvolution);</span>
+<span class="fc" id="L111">            }</span>
+        } else {
+<span class="nc" id="L113">            throw new InternalErrorException(&quot;No additional information (performedCoEvolution) found for evolution URI &quot; + evolutionURI + &quot;.&quot;);</span>
+        }
+<span class="fc" id="L115">    }</span>
+
+    /**
+     * Get the evolution URI.
+     *
+     * @return the evolution URI
+     */
+    public String getEvolutionURI() {
+<span class="nc" id="L123">        return evolutionURI;</span>
+    }
+
+    /**
+     * Get the start revision.
+     *
+     * @return the start revision
+     */
+    public Revision getStartRevision() {
+<span class="fc" id="L132">        return startRevision;</span>
+    }
+
+    /**
+     * Get the end revision.
+     *
+     * @return the end revision
+     */
+    public Revision getEndRevision() {
+<span class="fc" id="L141">        return endRevision;</span>
+    }
+
+    /**
+     * Get the used source revision graph.
+     *
+     * @return the used source revision graph
+     */
+    public RevisionGraph getUsedSourceRevisionGraph() {
+<span class="fc" id="L150">        return usedSourceRevisionGraph;</span>
+    }
+
+    /**
+     * Get the list of associated semantic changes.
+     *
+     * @return the list of associated semantic changes
+     */
+    public LinkedList&lt;SemanticChange&gt; getAssociatedSemanticChangeList() {
+<span class="fc" id="L159">        return associatedSemanticChangeList;</span>
+    }
+
+    /**
+     * Get the list of performed evolutions.
+     *
+     * @return the list of performed evolutions
+     */
+    public LinkedList&lt;CoEvolution&gt; getPerformedCoEvolutionList() {
+<span class="fc" id="L168">        return performedCoEvolutionList;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

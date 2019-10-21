@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SparqlVariableGroup.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.existentobjects</a> &gt; <span class="el_source">SparqlVariableGroup.java</span></div><h1>SparqlVariableGroup.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.existentobjects;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.LinkedList;
+
+/**
+ * Provides information of an already existent SPARQL variable group rule.
+ *
+ * @author Stephan Hensel
+ */
+public class SparqlVariableGroup {
+
+    /** The logger. **/
+<span class="fc" id="L21">    private Logger logger = LogManager.getLogger(SparqlVariableGroup.class);</span>
+
+    /** The SPARQL variable group URI. */
+    private String sparqlVariableGroupURI;
+
+    /** The list of SPARQL variables. */
+    private LinkedList&lt;SparqlVariable&gt; sparqlVariableList;
+
+
+    /**
+     * The constructor.
+     *
+     * @param sparqlVariableGroupURI SPARQL variable group URI
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L36">    public SparqlVariableGroup(String sparqlVariableGroupURI) throws InternalErrorException {</span>
+<span class="fc" id="L37">        this.sparqlVariableGroupURI = sparqlVariableGroupURI;</span>
+<span class="fc" id="L38">        sparqlVariableList = new LinkedList&lt;&gt;();</span>
+
+<span class="fc" id="L40">        retrieveAdditionalInformation();</span>
+<span class="fc" id="L41">    }</span>
+
+
+    /**
+     * Calculate additional information of the current SPARQL variable group and store this information to local variables.
+     *
+     * @throws InternalErrorException
+     */
+    private void retrieveAdditionalInformation() throws InternalErrorException {
+<span class="fc" id="L50">        logger.info(&quot;Get additional information of current SPARQL variable group URI &quot; + sparqlVariableGroupURI + &quot;.&quot;);</span>
+<span class="fc" id="L51">        String query = Config.prefixes + String.format(&quot;&quot;</span>
+                + &quot;SELECT ?variableURI %n&quot;
+                + &quot;WHERE { GRAPH  &lt;%s&gt; { %n&quot;
+                + &quot;	&lt;%s&gt; a aero:SPARQLVariableGroup; %n&quot;
+                + &quot;	 aero:hasVariables ?variableURI. %n&quot;
+                + &quot;} }&quot;, Config.evolution_graph, sparqlVariableGroupURI);
+<span class="fc" id="L57">        this.logger.debug(query);</span>
+<span class="fc" id="L58">        ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (resultSet.hasNext()) {</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">            while (resultSet.hasNext()) {</span>
+<span class="fc" id="L61">                QuerySolution qs = resultSet.next();</span>
+
+<span class="fc" id="L63">                SparqlVariable sparqlVariable = new SparqlVariable(qs.getResource(&quot;?variableURI&quot;).toString());</span>
+<span class="fc" id="L64">                sparqlVariableList.add(sparqlVariable);</span>
+<span class="fc" id="L65">            }</span>
+        } else {
+<span class="nc" id="L67">            throw new InternalErrorException(&quot;No additional information (hasVariables) found for SPARQL variable group URI &quot; + sparqlVariableGroupURI + &quot;.&quot;);</span>
+        }
+
+<span class="fc" id="L70">    }</span>
+
+    /**
+     * Get the SPARQL variable group URI.
+     *
+     * @return the SPARQL variable group URI
+     */
+    public String getSparqlVariableGroupURI() {
+<span class="nc" id="L78">        return sparqlVariableGroupURI;</span>
+    }
+
+    /**
+     * Get the list of SPARQL variables.
+     *
+     * @return the list of SPARQL variables
+     */
+    public LinkedList&lt;SparqlVariable&gt; getSparqlVariableList() {
+<span class="fc" id="L87">        return sparqlVariableList;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

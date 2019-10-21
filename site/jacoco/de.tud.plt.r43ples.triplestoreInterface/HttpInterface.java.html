@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HttpInterface.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.triplestoreInterface</a> &gt; <span class="el_source">HttpInterface.java</span></div><h1>HttpInterface.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.triplestoreInterface;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.ws.rs.core.Response.Status;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+
+
+/** 
+ * Provides a interface to the triple store with URI and port specified via init method.
+ *
+ * @author Stephan Hensel
+ * @author Markus Graube
+ *
+ */
+public class HttpInterface extends TripleStoreInterface {
+
+	private static UsernamePasswordCredentials credentials;
+	/** The logger. */
+<span class="nc" id="L43">	private static Logger logger = LogManager.getLogger(HttpInterface.class);</span>
+	private static String endpoint;
+
+
+	
+	/**
+	 * The constructor.
+	 * 
+	 * @param sparql_endpoint
+	 * 			URI of the endpoint which used be used for further queries
+	 * @param sparql_username
+	 * 			user name which should be used for authentication
+	 * @param sparql_password
+	 * 			password which should be used for authentication
+	 */
+<span class="nc" id="L58">	public HttpInterface(String sparql_endpoint, String sparql_username, String sparql_password) {</span>
+<span class="nc" id="L59">		credentials = new UsernamePasswordCredentials(sparql_username, sparql_password);</span>
+<span class="nc" id="L60">		endpoint = sparql_endpoint;		</span>
+<span class="nc" id="L61">	}</span>
+	
+	
+	/**
+	 * Executes a SPARQL-query against the triple store with authorization.
+	 * 
+	 * @param query the SPARQL query
+	 * @return the result of the query in XML serialisation
+	 */
+	private InputStream executeQueryWithAuthorization(String query) {
+<span class="nc" id="L71">		return executeQueryWithAuthorization(query, &quot;application/sparql-results+xml&quot;);</span>
+	}
+
+	
+    /**
+	 * Executes a SPARQL-query against the triple store with authorization.
+	 * (Based on the source code of the IAF device explorer - created by Sebastian Heinze.)
+	 * 
+	 * @param query the SPARQL query
+	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
+	 * @return the result of the query in the specified format
+	 */
+	private InputStream executeQueryWithAuthorization(String query, String format) {
+<span class="nc" id="L84">		HttpResponse response = executeQueryWithAuthorizationResponse(query, format);</span>
+<span class="nc" id="L85">		logger.info(&quot;Statuscode: &quot; + response.getStatusLine().getStatusCode());</span>
+		try{
+<span class="nc" id="L87">			InputStream in = response.getEntity().getContent();</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">			if (response.getStatusLine().getStatusCode() != Status.OK.getStatusCode()) {</span>
+<span class="nc" id="L89">				logger.warn(response.getStatusLine().toString()+&quot;\n&quot;+in);</span>
+<span class="nc" id="L90">				in.close();</span>
+<span class="nc" id="L91">				return null;</span>
+			}
+<span class="nc" id="L93">			return in;</span>
+<span class="nc" id="L94">		} catch (IOException e){</span>
+<span class="nc" id="L95">			e.printStackTrace();</span>
+<span class="nc" id="L96">			return null;</span>
+		}
+	}
+	
+	 /**
+	 * Executes a SPARQL-query against the triple store with authorization.
+	 * (Based on the source code of the IAF device explorer - created by Sebastian Heinze.)
+	 * 
+	 * @param query the SPARQL query
+	 * @param format the format of the result (e.g. HTML, xml/rdf, JSON, ...)
+	 * @return the result of the query in the specified format
+	 */
+	private HttpResponse executeQueryWithAuthorizationResponse(String query, String format) {
+<span class="nc" id="L109">		logger.debug(&quot;Execute query on SPARQL endpoint:\n&quot;+ query);</span>
+<span class="nc" id="L110">		DefaultHttpClient httpClient = new DefaultHttpClient();</span>
+<span class="nc" id="L111">	    httpClient.getCredentialsProvider().setCredentials(AuthScope.ANY, credentials);</span>
+			
+<span class="nc" id="L113">	    HttpPost request = new HttpPost(endpoint);</span>
+		
+<span class="nc" id="L115">		List&lt;NameValuePair&gt; nameValuePairs = new ArrayList&lt;NameValuePair&gt;(1);</span>
+<span class="nc" id="L116">		nameValuePairs.add(new BasicNameValuePair(&quot;query&quot;, query));</span>
+    	try {
+<span class="nc" id="L118">			request.setEntity(new UrlEncodedFormEntity(nameValuePairs, &quot;UTF-8&quot;));</span>
+<span class="nc" id="L119">		} catch (UnsupportedEncodingException e) {</span>
+<span class="nc" id="L120">			e.printStackTrace();</span>
+<span class="nc" id="L121">		}</span>
+    	//request.setHeader(&quot;Content-Type&quot;, &quot;application/x-www-form-urlencoded; charset=UTF-8&quot;);
+<span class="nc" id="L123">    	request.setHeader(&quot;Accept&quot;, format);</span>
+    	
+		//Execute Query
+		try {
+<span class="nc" id="L127">			return httpClient.execute(request);</span>
+<span class="nc" id="L128">		} catch (IOException e) {</span>
+<span class="nc" id="L129">			e.printStackTrace();</span>
+<span class="nc" id="L130">			return null;</span>
+		}
+	}
+
+	@Override
+	protected void close() {
+		
+<span class="nc" id="L137">	}</span>
+
+	@Override
+	public ResultSet executeSelectQuery(String selectQueryString) {
+<span class="nc" id="L141">		InputStream result = executeQueryWithAuthorization(selectQueryString, &quot;application/sparql-results+xml&quot;);</span>
+<span class="nc" id="L142">		return ResultSetFactory.fromXML(result);</span>
+	}
+
+	@Override
+	public Model executeConstructQuery(String constructQueryString) {
+<span class="nc" id="L147">		InputStream result = executeQueryWithAuthorization(constructQueryString, &quot;application/rdf+xml&quot;);</span>
+<span class="nc" id="L148">		Model model = ModelFactory.createDefaultModel();</span>
+<span class="nc bnc" id="L149" title="All 2 branches missed.">		if (result!=null) {</span>
+<span class="nc" id="L150">			RDFDataMgr.read(model, result, Lang.RDFXML);</span>
+		}
+<span class="nc" id="L152">		return model;</span>
+	}
+
+	@Override
+	public Model executeDescribeQuery(String describeQueryString) {
+<span class="nc" id="L157">		InputStream result = executeQueryWithAuthorization(describeQueryString);</span>
+<span class="nc" id="L158">		Model model = ModelFactory.createDefaultModel();</span>
+<span class="nc" id="L159">		RDFDataMgr.read(model, result, Lang.RDFXML);</span>
+		
+<span class="nc" id="L161">		return model;</span>
+	}
+
+	@Override
+	public boolean executeAskQuery(String askQueryString) {
+<span class="nc" id="L166">		InputStream result = executeQueryWithAuthorization(askQueryString, &quot;application/sparql-results+xml&quot;);</span>
+		String answer;
+		try {
+<span class="nc" id="L169">			answer = IOUtils.toString(result);</span>
+<span class="nc" id="L170">			result.close();</span>
+<span class="nc" id="L171">			return answer.contains(&quot;&lt;boolean&gt;true&lt;/boolean&gt;&quot;);</span>
+<span class="nc" id="L172">		} catch (IOException e) {</span>
+<span class="nc" id="L173">			logger.error(e);</span>
+<span class="nc" id="L174">			return false;</span>
+		}
+	}
+
+	@Override
+	public void executeUpdateQuery(String updateQueryString) {
+<span class="nc" id="L180">		executeQueryWithAuthorization(updateQueryString);</span>
+		
+<span class="nc" id="L182">	}</span>
+
+	@Override
+	public void executeCreateGraph(String graph) {
+<span class="nc" id="L186">		executeQueryWithAuthorization(&quot;CREATE GRAPH &lt;&quot;+graph+&quot;&gt;&quot;);</span>
+<span class="nc" id="L187">	}</span>
+
+	@Override
+	public Iterator&lt;String&gt; getGraphs() {
+<span class="nc" id="L191">		InputStream result = executeQueryWithAuthorization(&quot;SELECT DISTINCT ?graph WHERE { GRAPH ?graph { ?s ?p ?o}}&quot;);</span>
+<span class="nc" id="L192">		ResultSet resultSet = ResultSetFactory.fromXML(result);</span>
+<span class="nc" id="L193">		List&lt;String&gt; list = new ArrayList&lt;String&gt;();</span>
+<span class="nc bnc" id="L194" title="All 2 branches missed.">		while (resultSet.hasNext())</span>
+<span class="nc" id="L195">			list.add(resultSet.next().getResource(&quot;?graph&quot;).toString());</span>
+<span class="nc" id="L196">		return list.iterator();</span>
+	}
+
+	@Override
+	public void dropAllGraphsAndReInit() {
+<span class="nc" id="L201">		Iterator&lt;String&gt; list = getGraphs();</span>
+<span class="nc bnc" id="L202" title="All 2 branches missed.">		while(list.hasNext()) {</span>
+<span class="nc" id="L203">			executeUpdateQuery(&quot;DROP SILENT GRAPH &lt;&quot; + list.next() + &quot;&gt;&quot;);</span>
+		}
+<span class="nc" id="L205">		init();</span>
+<span class="nc" id="L206">	}</span>
+	
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

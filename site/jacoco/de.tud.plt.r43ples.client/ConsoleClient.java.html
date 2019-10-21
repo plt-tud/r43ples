@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConsoleClient.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.client</a> &gt; <span class="el_source">ConsoleClient.java</span></div><h1>ConsoleClient.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.client;
+
+import com.beust.jcommander.JCommander;
+import com.beust.jcommander.ParameterException;
+import de.tud.plt.r43ples.core.R43plesCoreInterface;
+import de.tud.plt.r43ples.core.R43plesCoreSingleton;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.existentobjects.UpdateCommit;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.File;
+import java.io.IOException;
+
+
+<span class="nc" id="L21">public class ConsoleClient {</span>
+
+<span class="fc" id="L23">    private static Logger logger = LogManager.getLogger(ConsoleClient.class);</span>
+
+    public static void main(String[] args) throws ConfigurationException, IOException, InternalErrorException {
+
+
+        // command-line-parser: JCommander-1.29
+<span class="fc" id="L29">        ConsoleClientArgs args_client = new ConsoleClientArgs();</span>
+<span class="fc" id="L30">        JCommander jc = new JCommander(args_client);</span>
+
+        // wrong input =&gt; display usage
+        try {
+<span class="fc" id="L34">            jc.setProgramName(&quot;de.tud.plt.r43ples.client.ConsoleClient&quot;);</span>
+<span class="fc" id="L35">            jc.parse(args);</span>
+<span class="nc" id="L36">        } catch (ParameterException e) {</span>
+<span class="nc" id="L37">            jc.usage();</span>
+<span class="nc" id="L38">            System.err.println(e.toString());</span>
+<span class="nc" id="L39">            return;</span>
+<span class="fc" id="L40">        }</span>
+
+<span class="fc bfc" id="L42" title="All 2 branches covered.">        if (args_client.r43ples.help) {</span>
+<span class="fc" id="L43">            jc.usage();</span>
+<span class="fc" id="L44">            return;</span>
+        }
+
+        // TODO: add file import option for generating new version (only new version instead of add and delete sets)
+
+<span class="fc" id="L49">        logger.info(&quot;config: &quot; + args_client.r43ples.config);</span>
+<span class="fc" id="L50">        logger.info(&quot;graph: &quot; + args_client.graph);</span>
+<span class="fc" id="L51">        logger.info(&quot;create: &quot; + args_client.create);</span>
+<span class="fc" id="L52">        logger.info(&quot;add set file: &quot; + args_client.add_set);</span>
+<span class="fc" id="L53">        logger.info(&quot;delete set file: &quot; + args_client.delete_set);</span>
+<span class="fc" id="L54">        logger.info(&quot;user: &quot; + args_client.user);</span>
+<span class="fc" id="L55">        logger.info(&quot;commit message: &quot; + args_client.message);</span>
+<span class="fc" id="L56">        logger.info(&quot;branch: &quot; + args_client.branch);</span>
+
+
+<span class="fc" id="L59">        Config.readConfig(args_client.r43ples.config);</span>
+<span class="fc" id="L60">        R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();</span>
+
+<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        if (args_client.create) {</span>
+<span class="fc" id="L63">            RevisionGraph graph = new RevisionGraph(args_client.graph);</span>
+<span class="fc" id="L64">            graph.purgeRevisionInformation();</span>
+<span class="fc" id="L65">            TripleStoreInterfaceSingleton.get().executeCreateGraph(args_client.graph);</span>
+
+<span class="fc" id="L67">            r43plesCore.createInitialCommit(args_client.graph, null, null, &quot;Console client&quot;, &quot;Create graph&quot;);</span>
+
+<span class="fc" id="L69">            logger.info(&quot;Graph created: &quot; + args_client.graph);</span>
+<span class="fc" id="L70">        } else {</span>
+<span class="nc" id="L71">            String addSet = readFile(args_client.add_set);</span>
+<span class="nc" id="L72">            String deleteSet = readFile(args_client.delete_set);</span>
+
+<span class="nc" id="L74">            UpdateCommit commit1 = r43plesCore.createUpdateCommit(args_client.graph, addSet, deleteSet, args_client.user, args_client.message, args_client.branch);</span>
+<span class="nc" id="L75">            String result = commit1.getGeneratedRevision().getRevisionIdentifier();</span>
+
+<span class="nc" id="L77">            logger.info(&quot;New Revision: &quot; + result);</span>
+        }
+<span class="fc" id="L79">    }</span>
+
+    /**
+     * @param filename
+     * @return
+     * @throws IOException
+     */
+    private static String readFile(String filename) throws IOException {
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (filename != null) {</span>
+<span class="nc" id="L88">            File inputFile = new File(filename);</span>
+
+<span class="nc bnc" id="L90" title="All 4 branches missed.">            if (!inputFile.canRead() || !inputFile.isFile()) {</span>
+<span class="nc" id="L91">                System.err</span>
+<span class="nc" id="L92">                        .println(&quot;Wrong input file: There was no file found at &quot;</span>
+                                + filename + &quot;!&quot;);
+<span class="nc" id="L94">                System.exit(0);</span>
+            }
+<span class="nc" id="L96">            return FileUtils.readFileToString(inputFile);</span>
+        } else
+<span class="nc" id="L98">            return &quot;&quot;;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

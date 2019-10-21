@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MergeTripleStateEnum.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">MergeTripleStateEnum.java</span></div><h1>MergeTripleStateEnum.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+/**
+ * The merge triple state enum.
+ * 
+ * @author Stephan Hensel
+ *
+ */
+<span class="pc" id="L9">public enum MergeTripleStateEnum {</span>
+<span class="fc" id="L10">	ADDED(&quot;http://eatld.et.tu-dresden.de/mmo#Added&quot;, &quot;http://eatld.et.tu-dresden.de/mmo#Added&quot;),</span>
+<span class="fc" id="L11">	DELETED(&quot;http://eatld.et.tu-dresden.de/mmo#Deleted&quot;, &quot;http://eatld.et.tu-dresden.de/mmo#Deleted&quot;),</span>
+<span class="fc" id="L12">	ORIGINAL(&quot;http://eatld.et.tu-dresden.de/mmo#Original&quot;, &quot;http://eatld.et.tu-dresden.de/mmo#Original&quot;),</span>
+<span class="fc" id="L13">	NOTINCLUDED(&quot;http://eatld.et.tu-dresden.de/mmo#NotIncluded&quot;, null);</span>
+	
+	/** The StructuralDefinition representation. **/
+	private String sdRepresentation;
+	/** The DifferenceGroup representation. **/
+	private String dgRepresentation;
+	
+	
+	/**
+	 * The constructor.
+	 * 
+	 * @param sddRepresentation the StructuralDefinition representation
+	 * @param dgRepresentation the DifferenceGroup representation
+	 */
+<span class="fc" id="L27">	MergeTripleStateEnum(String sddRepresentation, String dgRepresentation) {</span>
+<span class="fc" id="L28">		this.sdRepresentation = sddRepresentation;</span>
+<span class="fc" id="L29">		this.dgRepresentation = dgRepresentation;</span>
+<span class="fc" id="L30">	}</span>
+	
+	
+	/**
+	 * Get the StructuralDefinition representation.
+	 * 
+	 * @return the StructuralDefinition representation
+	 */
+	public String getSdRepresentation() {
+<span class="fc" id="L39">		return sdRepresentation;</span>
+	}
+	
+	
+	/**
+	 * Get the DifferenceGroup representation.
+	 * 
+	 * @return the DifferenceGroup representation
+	 */
+	public String getDgRepresentation() {
+<span class="fc" id="L49">		return dgRepresentation;</span>
+	}
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

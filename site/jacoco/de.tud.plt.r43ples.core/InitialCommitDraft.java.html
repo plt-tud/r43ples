@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>InitialCommitDraft.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">InitialCommitDraft.java</span></div><h1>InitialCommitDraft.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.exception.QueryErrorException;
+import de.tud.plt.r43ples.existentobjects.Branch;
+import de.tud.plt.r43ples.existentobjects.InitialCommit;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.iohelper.Helper;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Collection of information for creating a new initial commit.
+ *
+ * @author Stephan Hensel
+ */
+public class InitialCommitDraft extends CommitDraft {
+
+    /** The logger. **/
+<span class="fc" id="L27">    private Logger logger = LogManager.getLogger(InitialCommitDraft.class);</span>
+
+    /** The pattern modifier. **/
+<span class="fc" id="L30">    private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;</span>
+
+    /** The revision draft. **/
+    private RevisionDraft revisionDraft;
+    /** States if this commit draft was created by a request or add and delete sets. (true =&gt; request, false =&gt; add/delete sets) **/
+    private boolean isCreatedWithRequest;
+    /** The revision graph. **/
+    private RevisionGraph revisionGraph;
+
+
+    /**
+     * The constructor.
+     * Creates an initial commit draft by using the corresponding R43ples request.
+     *
+     * @param request the request received by R43ples
+     * @throws InternalErrorException
+     */
+    public InitialCommitDraft(R43plesRequest request) throws InternalErrorException {
+<span class="fc" id="L48">        super(request);</span>
+<span class="fc" id="L49">        String graphName = getGraphNameOfRequest();</span>
+<span class="fc" id="L50">        this.revisionGraph = new RevisionGraph(graphName, getUriCalculator().getNewRevisionGraphURI(graphName));</span>
+<span class="fc" id="L51">        this.revisionDraft = new RevisionDraft(getUriCalculator(), revisionGraph, null, null);</span>
+<span class="fc" id="L52">        this.isCreatedWithRequest = true;</span>
+<span class="fc" id="L53">    }</span>
+
+    /**
+     * The constructor.
+     * Creates an initial commit draft by using the corresponding add and delete sets.
+     *
+     * @param graphName the graph name
+     * @param addSet the add set as N-Triples
+     * @param deleteSet the delete set as N-Triples
+     * @param user the user
+     * @param message the message
+     * @throws InternalErrorException
+     */
+    protected InitialCommitDraft(String graphName, String addSet, String deleteSet, String user, String message) throws InternalErrorException {
+<span class="fc" id="L67">        super(null);</span>
+<span class="fc" id="L68">        this.setUser(user);</span>
+<span class="fc" id="L69">        this.setMessage(message);</span>
+<span class="fc" id="L70">        this.revisionGraph = new RevisionGraph(graphName, getUriCalculator().getNewRevisionGraphURI(graphName));</span>
+<span class="fc" id="L71">        this.revisionDraft = new RevisionDraft(getUriCalculator(), revisionGraph, addSet, deleteSet);</span>
+<span class="fc" id="L72">        this.isCreatedWithRequest = false;</span>
+<span class="fc" id="L73">    }</span>
+
+    /**
+     * Creates the commit draft as a new commit in the triplestore and creates the corresponding revisions.
+     *
+     * @return the list of created commits
+     * @throws InternalErrorException
+     */
+    protected InitialCommit createInTripleStore() throws InternalErrorException {
+<span class="fc" id="L82">        String commitUri = getUriCalculator().getNewCommitURI(revisionDraft.getRevisionGraph(), revisionDraft.getNewRevisionIdentifier());</span>
+
+        // Create graph
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if (!getUriCalculator().checkNamedGraphExistence(revisionDraft.getRevisionGraph().getGraphName())) {</span>
+<span class="fc" id="L86">            getTripleStoreInterface().executeCreateGraph(revisionDraft.getRevisionGraph().getGraphName());</span>
+        } else {
+<span class="nc" id="L88">            throw new InternalErrorException(&quot;The calculated revision graph is already in use.&quot;);</span>
+        }
+
+<span class="fc" id="L91">        Revision generatedRevision = revisionDraft.createInTripleStore();</span>
+
+<span class="fc" id="L93">        MasterDraft masterDraft = new MasterDraft(getUriCalculator(), revisionGraph, generatedRevision);</span>
+<span class="fc" id="L94">        Branch generatedBranch = masterDraft.createInTripleStore();</span>
+
+<span class="fc" id="L96">        updateReferencedFullGraph(generatedBranch.getFullGraphURI(), generatedRevision.getChangeSet());</span>
+
+<span class="fc" id="L98">        addMetaInformation(generatedRevision, commitUri, generatedBranch.getReferenceURI());</span>
+
+<span class="fc" id="L100">        return new InitialCommit(revisionDraft.getRevisionGraph(), commitUri, getUser(), getTimeStamp(), getMessage(), generatedRevision, generatedBranch, generatedRevision.getChangeSet());</span>
+    }
+
+    /**
+     * Extracts the graph name out of the given request.
+     *
+     * @return the graph name
+     * @throws InternalErrorException
+     */
+    private String getGraphNameOfRequest() throws InternalErrorException {
+<span class="fc" id="L110">        final Pattern patternCreateGraph = Pattern.compile(&quot;CREATE\\s*(SILENT)?\\s*GRAPH\\s*&lt;(?&lt;graph&gt;[^&gt;]*)&gt;&quot;,</span>
+                patternModifier);
+
+<span class="fc" id="L113">        String graphName = null;</span>
+<span class="fc" id="L114">        Matcher m = patternCreateGraph.matcher(getRequest().query_sparql);</span>
+<span class="fc" id="L115">        boolean found = false;</span>
+<span class="fc bfc" id="L116" title="All 2 branches covered.">        while (m.find()) {</span>
+<span class="fc" id="L117">            found = true;</span>
+<span class="fc" id="L118">            graphName = m.group(&quot;graph&quot;);</span>
+        }
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">        if (!found) {</span>
+<span class="nc" id="L121">            throw new QueryErrorException(&quot;Query doesn't contain a correct CREATE query:\n&quot; + getRequest().query_sparql);</span>
+        }
+
+<span class="fc" id="L124">        return graphName;</span>
+    }
+
+    /**
+     * Creates a new revision graph for the new graph under revision control and adds the necessary meta data.
+     *
+     * @param generatedRevision the generated revision
+     * @param commitUri the commit URI
+     * @param branchUri the branch URI
+     */
+    private void addMetaInformation(Revision generatedRevision, String commitUri, String branchUri) {
+
+<span class="fc" id="L136">        String queryAddRevisionGraph = Config.prefixes + String.format(</span>
+                &quot;INSERT DATA { GRAPH &lt;%1$s&gt; {&quot;
+                        + &quot;  &lt;%2$s&gt; a rmo:RevisionGraph, rmo:Entity ;&quot;
+                        + &quot;    rmo:hasRevisionGraph &lt;%3$s&gt;;&quot;
+                        + &quot;    mmo:hasDefaultSDG &lt;%4$s&gt;.&quot;
+                        + &quot;} }&quot;,
+<span class="fc" id="L142">                Config.revision_graph, revisionGraph.getGraphName(), revisionGraph.getRevisionGraphUri(), Config.sdg_graph_defaultSDG);</span>
+<span class="fc" id="L143">        TripleStoreInterfaceSingleton.get().executeUpdateQuery(queryAddRevisionGraph);</span>
+
+        // Create new revision
+<span class="fc" id="L146">        String queryContent = String.format(</span>
+                &quot;&lt;%s&gt; a rmo:InitialCommit, rmo:Commit; &quot;
+                        + &quot;	rmo:wasAssociatedWith &lt;%s&gt; ;&quot;
+                        + &quot;	rmo:generated &lt;%s&gt;, &lt;%s&gt; ;&quot;
+                        + &quot; rmo:hasChangeSet &lt;%s&gt; ;&quot;
+                        + &quot;	rmo:commitMessage \&quot;%s\&quot; ;&quot;
+                        + &quot;	rmo:timeStamp \&quot;%s\&quot;^^xsd:dateTime .%n&quot;,
+<span class="fc" id="L153">                commitUri, Helper.getUserURI(getUser()), generatedRevision.getRevisionURI(), branchUri, generatedRevision.getChangeSet().getChangeSetURI(), getMessage(), getTimeStamp());</span>
+
+<span class="fc" id="L155">        String queryRevision = Config.prefixes + String.format(&quot;INSERT DATA { GRAPH &lt;%s&gt; {%s} }&quot;, revisionGraph.getRevisionGraphUri(), queryContent);</span>
+
+<span class="fc" id="L157">        getTripleStoreInterface().executeUpdateQuery(queryRevision);</span>
+<span class="fc" id="L158">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

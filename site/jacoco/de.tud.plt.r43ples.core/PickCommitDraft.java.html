@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PickCommitDraft.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">PickCommitDraft.java</span></div><h1>PickCommitDraft.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.exception.QueryErrorException;
+import de.tud.plt.r43ples.existentobjects.*;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.iohelper.Helper;
+import de.tud.plt.r43ples.optimization.PathCalculationFabric;
+import de.tud.plt.r43ples.optimization.PathCalculationInterface;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Collection of information for creating a new pick commit.
+ *
+ * @author Stephan Hensel
+ */
+public class PickCommitDraft extends CommitDraft {
+
+    /** The logger. **/
+<span class="nc" id="L27">    private Logger logger = LogManager.getLogger(PickCommitDraft.class);</span>
+
+    /** The pattern modifier. **/
+<span class="nc" id="L30">    private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;</span>
+    /** The merge query pattern. **/
+<span class="nc" id="L32">    private final Pattern patternPickQuery = Pattern.compile(</span>
+            &quot;PICK\\s*GRAPH\\s*&lt;(?&lt;graph&gt;[^&gt;]*?)&gt;\\s*REVISION\\s*\&quot;(?&lt;startRevisionIdentifier&gt;[^\&quot;]*?)\&quot;\\s*(TO\\s*REVISION\\s*\&quot;(?&lt;endRevisionIdentifier&gt;[^\&quot;]*?)\&quot;\\s*)?INTO\\s*BRANCH\\s*\&quot;(?&lt;targetBranchIdentifier&gt;[^\&quot;]*?)\&quot;\&quot;&quot;,
+            patternModifier);
+
+    /** The start revision identifier. **/
+    private String startRevisionIdentifier;
+    /** The end revision identifier. **/
+    private String endRevisionIdentifier;
+    /** The target branch identifier (into). **/
+    private String targetBranchIdentifier;
+    /** The graph name **/
+    private String graphName;
+    /** The revision graph. **/
+    private RevisionGraph revisionGraph;
+
+    /** States if this commit draft was created by a request or add and delete sets. (true =&gt; request, false =&gt; add/delete sets) **/
+    private boolean isCreatedWithRequest;
+
+    //Dependencies
+    /** The path calculation interface to use. **/
+    private PathCalculationInterface pathCalculationInterface;
+
+
+    /**
+     * The constructor.
+     *
+     * @param request the request received by R43ples
+     * @throws InternalErrorException
+     */
+    public PickCommitDraft(R43plesRequest request) throws InternalErrorException {
+<span class="nc" id="L62">        super(request);</span>
+
+<span class="nc" id="L64">        this.extractRequestInformation();</span>
+<span class="nc" id="L65">        this.isCreatedWithRequest = true;</span>
+<span class="nc" id="L66">        this.pathCalculationInterface = PathCalculationFabric.getInstance(this.revisionGraph);</span>
+<span class="nc" id="L67">    }</span>
+
+    /**
+     * The constructor.
+     * Creates a pick commit draft by using the corresponding meta information.
+     *
+     * @param graphName the graph name
+     * @param startRevisionIdentifier the start revision identifier
+     * @param endRevisionIdentifier the end revision identifier
+     * @param targetBranchIdentifier the target branch identifier
+     * @param user the user
+     * @param message the message
+     * @throws InternalErrorException
+     */
+    protected PickCommitDraft(String graphName, String startRevisionIdentifier, String endRevisionIdentifier, String targetBranchIdentifier, String user, String message) throws InternalErrorException {
+<span class="nc" id="L82">        super(null);</span>
+
+<span class="nc" id="L84">        this.setUser(user);</span>
+<span class="nc" id="L85">        this.setMessage(message);</span>
+
+<span class="nc" id="L87">        this.graphName = graphName;</span>
+<span class="nc" id="L88">        this.revisionGraph = new RevisionGraph(graphName);</span>
+<span class="nc" id="L89">        this.startRevisionIdentifier = startRevisionIdentifier;</span>
+<span class="nc" id="L90">        this.endRevisionIdentifier = endRevisionIdentifier;</span>
+<span class="nc" id="L91">        this.targetBranchIdentifier = targetBranchIdentifier;</span>
+<span class="nc" id="L92">        this.pathCalculationInterface = PathCalculationFabric.getInstance(this.revisionGraph);</span>
+
+<span class="nc" id="L94">        this.isCreatedWithRequest = false;</span>
+<span class="nc" id="L95">    }</span>
+
+    /**
+     * Extracts the request information and stores it to local variables.
+     *
+     * @throws InternalErrorException
+     */
+    private void extractRequestInformation() throws InternalErrorException {
+<span class="nc" id="L103">        Matcher m = patternPickQuery.matcher(getRequest().query_sparql);</span>
+
+<span class="nc" id="L105">        boolean foundEntry = false;</span>
+
+<span class="nc bnc" id="L107" title="All 2 branches missed.">        while (m.find()) {</span>
+<span class="nc" id="L108">            foundEntry = true;</span>
+
+<span class="nc" id="L110">            graphName = m.group(&quot;graph&quot;);</span>
+<span class="nc" id="L111">            revisionGraph = new RevisionGraph(graphName);</span>
+
+<span class="nc" id="L113">            startRevisionIdentifier = m.group(&quot;startRevisionIdentifier&quot;);</span>
+<span class="nc" id="L114">            endRevisionIdentifier = m.group(&quot;endRevisionIdentifier&quot;);</span>
+<span class="nc" id="L115">            targetBranchIdentifier = m.group(&quot;targetBranchIdentifier&quot;);</span>
+
+<span class="nc" id="L117">            logger.debug(&quot;graph: &quot; + graphName);</span>
+<span class="nc" id="L118">            logger.debug(&quot;startRevisionIdentifier: &quot; + startRevisionIdentifier);</span>
+<span class="nc" id="L119">            logger.debug(&quot;endRevisionIdentifier: &quot; + endRevisionIdentifier);</span>
+<span class="nc" id="L120">            logger.debug(&quot;targetBranchIdentifier: &quot; + targetBranchIdentifier);</span>
+        }
+<span class="nc bnc" id="L122" title="All 2 branches missed.">        if (!foundEntry) {</span>
+<span class="nc" id="L123">            throw new QueryErrorException(&quot;Error in query: &quot; + getRequest().query_sparql);</span>
+        }
+<span class="nc" id="L125">    }</span>
+
+    /**
+     * Tries to create a new commit draft as a new commit in the triple store.
+     * If possible it will create the corresponding revision and the meta data.
+     *
+     * @return the commit (has attribute which indicates if the commit was executed or not)
+     * @throws InternalErrorException
+     */
+    protected PickCommit createCommitInTripleStore() throws InternalErrorException {
+
+<span class="nc bnc" id="L136" title="All 2 branches missed.">        if (!getUriCalculator().checkNamedGraphExistence(graphName)) {</span>
+<span class="nc" id="L137">            logger.warn(&quot;Graph &lt;&quot; + graphName + &quot;&gt; does not exist.&quot;);</span>
+<span class="nc" id="L138">            throw new InternalErrorException(&quot;Graph &lt;&quot; + graphName + &quot;&gt; does not exist.&quot;);</span>
+        }
+
+        // Check if it is a valid target branch identifier
+<span class="nc bnc" id="L142" title="All 2 branches missed.">        if (!(revisionGraph.hasBranch(targetBranchIdentifier))) {</span>
+<span class="nc" id="L143">            throw new InternalErrorException(&quot;No terminal nodes were used&quot;);</span>
+        }
+
+<span class="nc" id="L146">        ArrayList&lt;Revision&gt; usedSourceRevisions = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L147">        ArrayList&lt;Revision&gt; generatedRevisions = new ArrayList&lt;&gt;();</span>
+
+<span class="nc" id="L149">        Branch usedTargetBranch = revisionGraph.getBranch(targetBranchIdentifier, true);</span>
+<span class="nc" id="L150">        Revision usedTargetRevision = new Revision(revisionGraph, revisionGraph.getRevisionUri(targetBranchIdentifier), false);</span>
+<span class="nc" id="L151">        Path path = null;</span>
+<span class="nc" id="L152">        Revision startRevision = new Revision(revisionGraph, startRevisionIdentifier, true);</span>
+        Revision endRevision;
+<span class="nc bnc" id="L154" title="All 2 branches missed.">        if (endRevisionIdentifier != null) {</span>
+<span class="nc" id="L155">            endRevision = new Revision(revisionGraph, endRevisionIdentifier, true);</span>
+<span class="nc" id="L156">            path = pathCalculationInterface.getPathBetweenStartAndTargetRevision(endRevision, startRevision);</span>
+        }
+
+<span class="nc" id="L159">        String commitURI = getUriCalculator().getNewPickCommitURI(revisionGraph, startRevisionIdentifier, endRevisionIdentifier, targetBranchIdentifier, usedTargetRevision.getRevisionIdentifier());</span>
+
+        // Copy revisions
+<span class="nc" id="L162">        Revision generatedRevision = null;</span>
+<span class="nc bnc" id="L163" title="All 4 branches missed.">        if ((path == null) || (path.getRevisionPath().size() == 1)) {</span>
+<span class="nc" id="L164">            generatedRevision = copyRevisionToTargetBranch(startRevision, usedTargetBranch, commitURI);</span>
+<span class="nc" id="L165">            usedSourceRevisions.add(startRevision);</span>
+<span class="nc" id="L166">            generatedRevisions.add(generatedRevision);</span>
+
+            // Move source branch to new revision
+<span class="nc" id="L169">            moveBranchReference(revisionGraph.getRevisionGraphUri(), usedTargetBranch.getReferenceURI(), usedTargetRevision.getRevisionURI(), generatedRevision.getRevisionURI());</span>
+
+            // Update the target branch object
+<span class="nc" id="L172">            usedTargetBranch = revisionGraph.getBranch(targetBranchIdentifier, true);</span>
+        } else {
+<span class="nc" id="L174">            Iterator&lt;Revision&gt; iteRev = path.getRevisionPath().iterator();</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">            while(iteRev.hasNext()) {</span>
+<span class="nc" id="L176">                Revision currentRevision = iteRev.next();</span>
+<span class="nc" id="L177">                generatedRevision = copyRevisionToTargetBranch(currentRevision, usedTargetBranch, commitURI);</span>
+<span class="nc" id="L178">                usedSourceRevisions.add(currentRevision);</span>
+<span class="nc" id="L179">                generatedRevisions.add(generatedRevision);</span>
+
+                // Move source branch to new revision
+<span class="nc" id="L182">                moveBranchReference(revisionGraph.getRevisionGraphUri(), usedTargetBranch.getReferenceURI(), usedTargetRevision.getRevisionURI(), generatedRevision.getRevisionURI());</span>
+
+                // Update the target branch object
+<span class="nc" id="L185">                usedTargetBranch = revisionGraph.getBranch(targetBranchIdentifier, true);</span>
+<span class="nc" id="L186">            }</span>
+        }
+
+<span class="nc" id="L189">        return addMetaInformation(usedTargetRevision, usedTargetBranch, commitURI, usedSourceRevisions, generatedRevisions);</span>
+    }
+
+    /**
+     * Adds meta information for the commit to the revision graph.
+     *
+     * &lt;img src=&quot;{@docRoot}../../doc/revision management description/r43ples-pick.png&quot; /&gt;
+     *
+     * @param usedTargetRevision the used target revision (into)
+     * @param usedTargetBranch the used target branch (from)
+     * @param commitURI the commit URI
+     * @param usedSourceRevisions the used revisions
+     * @param generatedRevisions the generated revisions
+     * @return the created commit
+     * @throws InternalErrorException
+     */
+    private PickCommit addMetaInformation(Revision usedTargetRevision, Branch usedTargetBranch, String commitURI, ArrayList&lt;Revision&gt; usedSourceRevisions, ArrayList&lt;Revision&gt; generatedRevisions) throws InternalErrorException {
+
+<span class="nc" id="L207">        String personUri = Helper.getUserURI(getUser());</span>
+
+        // Create a new commit (activity)
+<span class="nc" id="L210">        StringBuilder queryContent = new StringBuilder(1000);</span>
+<span class="nc" id="L211">        queryContent.append(String.format(</span>
+                &quot;&lt;%s&gt; a rmo:PickCommit, rmo:MergeCommit, rmo:Commit; %n&quot;
+                        + &quot;	rmo:wasAssociatedWith &lt;%s&gt; ; %n&quot;
+                        + &quot;	rmo:commitMessage \&quot;%s\&quot; ; %n&quot;
+                        + &quot;	rmo:timeStamp \&quot;%s\&quot;^^xsd:dateTime ; %n&quot;
+                        + &quot; rmo:usedTargetRevision &lt;%s&gt; ; %n&quot;
+                        + &quot; rmo:usedTargetBranch &lt;%s&gt; ; %n&quot;,
+<span class="nc" id="L218">                commitURI, personUri, getMessage(), getTimeStamp(),</span>
+<span class="nc" id="L219">                usedTargetRevision.getRevisionURI(), usedTargetBranch.getReferenceURI()));</span>
+
+<span class="nc" id="L221">        String query = Config.prefixes</span>
+<span class="nc" id="L222">                + String.format(&quot;INSERT DATA { GRAPH &lt;%s&gt; { %s } }&quot;, revisionGraph.getRevisionGraphUri(),</span>
+<span class="nc" id="L223">                queryContent.toString());</span>
+
+<span class="nc" id="L225">        getTripleStoreInterface().executeUpdateQuery(query);</span>
+
+<span class="nc" id="L227">        return new PickCommit(revisionGraph, commitURI, getUser(), getTimeStamp(), getMessage(), usedSourceRevisions, usedTargetRevision, usedTargetBranch, generatedRevisions);</span>
+    }
+
+
+    /**
+     * Copies a revision and adds meta information to the revision graph.
+     *
+     * @param revisionToCopy the original revision to copy
+     * @param targetBranch the target branch
+     * @param commitURI the associated commit URI
+     * @return the generated revision
+     */
+    private Revision copyRevisionToTargetBranch(Revision revisionToCopy, Branch targetBranch, String commitURI) throws InternalErrorException {
+
+<span class="nc" id="L241">        String addSetContent = revisionToCopy.getChangeSet().getAddSetContent();</span>
+<span class="nc" id="L242">        String deleteSetContent = revisionToCopy.getChangeSet().getDeleteSetContent();</span>
+
+<span class="nc" id="L244">        RevisionDraft revisionDraft = new RevisionDraft(getUriCalculator(), revisionGraph, targetBranch, addSetContent, deleteSetContent, false);</span>
+<span class="nc" id="L245">        Revision generatedRevision = revisionDraft.createInTripleStore();</span>
+
+        // Create the corresponding meta data
+<span class="nc" id="L248">        StringBuilder queryContentInsert = new StringBuilder(1000);</span>
+<span class="nc" id="L249">        queryContentInsert.append(String.format(</span>
+                &quot;&lt;%1$s&gt; rmo:wasQuotedFrom &lt;%2$s&gt; . &quot;
+                + &quot;&lt;%3$s&gt; prov:generated &lt;%1$s&gt; ; &quot;
+                        + &quot; rmo:hasChangeSet &lt;%4$s&gt; ;&quot;
+                        + &quot; rmo:usedSourceRevision &lt;%2$s&gt; .&quot;,
+<span class="nc" id="L254">                generatedRevision.getRevisionURI(), revisionToCopy.getRevisionURI(), commitURI, generatedRevision.getChangeSet().getChangeSetURI()));</span>
+
+<span class="nc" id="L256">        String query = Config.prefixes	+ String.format(&quot;&quot;</span>
+                        + &quot;INSERT DATA { GRAPH &lt;%1$s&gt; { %2$s } }&quot;,
+<span class="nc" id="L258">                revisionGraph.getRevisionGraphUri(), queryContentInsert.toString());</span>
+<span class="nc" id="L259">        getTripleStoreInterface().executeUpdateQuery(query);</span>
+
+<span class="nc" id="L261">        return generatedRevision;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

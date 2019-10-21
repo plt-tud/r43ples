@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Path.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.existentobjects</a> &gt; <span class="el_source">Path.java</span></div><h1>Path.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.existentobjects;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.LinkedList;
+
+/**
+ * This class provides the path between two revisions (from start revision to target revision).
+ *
+ * @author Stephan Hensel
+ */
+public class Path {
+
+    /** The logger. **/
+<span class="fc" id="L16">    private Logger logger = LogManager.getLogger(Path.class);</span>
+
+    /** The start revision. */
+    private Revision startRevision;
+    /** The target revision. */
+    private Revision targetRevision;
+    /** The path from start to target revision. */
+    private LinkedList&lt;Revision&gt; revisionPath;
+
+    /** The revision graph URI. */
+    private String revisionGraphURI;
+    /** The corresponding revision graph. */
+    private RevisionGraph revisionGraph;
+
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param startRevision the start revision of the path
+     * @param targetRevision the target revision of the path
+     */
+<span class="fc" id="L38">    public Path(RevisionGraph revisionGraph, Revision startRevision, Revision targetRevision) {</span>
+<span class="fc" id="L39">        this.revisionGraph = revisionGraph;</span>
+<span class="fc" id="L40">        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();</span>
+
+<span class="fc" id="L42">        this.startRevision = startRevision;</span>
+<span class="fc" id="L43">        this.targetRevision = targetRevision;</span>
+
+<span class="fc" id="L45">        revisionPath = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L46">    }</span>
+
+    /**
+     * Adds a revision to the revision path end.
+     *
+     * @param revision the revision to add to the end of the list
+     */
+    public void addRevisionToPathEnd(Revision revision) {
+<span class="nc" id="L54">        revisionPath.add(revision);</span>
+<span class="nc" id="L55">    }</span>
+
+    /**
+     * Adds a revision to the revision path start.
+     *
+     * @param revision the revision to add to the end of the list
+     */
+    public void addRevisionToPathStart(Revision revision) {
+<span class="fc" id="L63">        revisionPath.addFirst(revision);</span>
+<span class="fc" id="L64">    }</span>
+
+    /**
+     * Get the revision path. The revision path starts with the start revision and ends with the target revision.
+     *
+     * @return the revision path
+     */
+    public LinkedList&lt;Revision&gt; getRevisionPath() {
+<span class="fc" id="L72">        return revisionPath;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

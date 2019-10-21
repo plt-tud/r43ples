@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MergeCommit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.existentobjects</a> &gt; <span class="el_source">MergeCommit.java</span></div><h1>MergeCommit.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.existentobjects;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ * Provides information of an merge commit.
+ *
+ * @author Stephan Hensel
+ */
+public class MergeCommit extends Commit {
+
+    /** The logger. **/
+<span class="pc" id="L15">    private Logger logger = LogManager.getLogger(MergeCommit.class);</span>
+
+    /** The used target revision. **/
+    private Revision usedTargetRevision;
+    /** The used target branch. **/
+    private Branch usedTargetBranch;
+
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param commitURI the commit URI
+     * @throws InternalErrorException
+     */
+    public MergeCommit(RevisionGraph revisionGraph, String commitURI) throws InternalErrorException {
+<span class="nc" id="L31">        super(revisionGraph, commitURI);</span>
+<span class="nc" id="L32">    }</span>
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param commitURI the commit URI
+     * @param user the user
+     * @param timeStamp the time stamp
+     * @param message the message
+     * @throws InternalErrorException
+     */
+    public MergeCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message) throws InternalErrorException {
+<span class="nc" id="L45">        super(revisionGraph, commitURI, user, timeStamp, message);</span>
+<span class="nc" id="L46">    }</span>
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param commitURI the commit URI
+     * @param user the user
+     * @param timeStamp the time stamp
+     * @param message the message
+     * @param usedTargetRevision the used target revision
+     * @param usedTargetBranch the used target branch
+     * @throws InternalErrorException
+     */
+    public MergeCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message,
+                       Revision usedTargetRevision, Branch usedTargetBranch) throws InternalErrorException {
+<span class="fc" id="L62">        super(revisionGraph, commitURI, user, timeStamp, message);</span>
+<span class="fc" id="L63">        this.usedTargetRevision = usedTargetRevision;</span>
+<span class="fc" id="L64">        this.usedTargetBranch = usedTargetBranch;</span>
+<span class="fc" id="L65">    }</span>
+
+    /**
+     * Get the used target revision.
+     *
+     * @return the used target revision
+     */
+    public Revision getUsedTargetRevision() {
+<span class="fc" id="L73">        return usedTargetRevision;</span>
+    }
+
+    /**
+     * Get the used target branch.
+     *
+     * @return the used target branch
+     */
+    public Branch getUsedTargetBranch() {
+<span class="nc" id="L82">        return usedTargetBranch;</span>
+    }
+
+
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

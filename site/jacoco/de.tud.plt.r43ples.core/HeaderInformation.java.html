@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>HeaderInformation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">HeaderInformation.java</span></div><h1>HeaderInformation.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.util.FileUtils;
+import de.tud.plt.r43ples.exception.OutdatedException;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+<span class="fc" id="L15">public class HeaderInformation {</span>
+
+    /** The logger. **/
+<span class="fc" id="L18">    private Logger logger = LogManager.getLogger(HeaderInformation.class);</span>
+
+
+    /** Creates an RDF description for the revision tree of the graphs specified in the given SPARQL query
+     * @param query SPARQL query
+     * @return RDF string containing information for graphs specified in query
+     */
+    public String getResponseHeaderFromQuery(String query) {
+<span class="fc" id="L26">        final Pattern patternGraph = Pattern.compile(</span>
+                &quot;(GRAPH|FROM|INTO)\\s*&lt;(?&lt;graph&gt;[^&gt;]*)&gt;\\s*&quot;,
+                Pattern.CASE_INSENSITIVE);
+
+<span class="fc" id="L30">        StringBuilder graphNames = new StringBuilder();</span>
+<span class="fc" id="L31">        Matcher m = patternGraph.matcher(query);</span>
+<span class="fc" id="L32">        m.find();</span>
+<span class="fc bfc" id="L33" title="All 2 branches covered.">        while (!m.hitEnd()) {</span>
+<span class="fc" id="L34">            String graphName = m.group(&quot;graph&quot;);</span>
+<span class="fc" id="L35">            graphNames.append(&quot;&lt;&quot;+graphName+&quot;&gt;&quot;);</span>
+<span class="fc" id="L36">            m.find();</span>
+<span class="fc bfc" id="L37" title="All 2 branches covered.">            if (!m.hitEnd())</span>
+<span class="fc" id="L38">                graphNames.append(&quot;, &quot;);</span>
+<span class="fc" id="L39">        }</span>
+<span class="fc" id="L40">        String names = graphNames.toString();</span>
+<span class="fc" id="L41">        String result = getResponseHeader(names);</span>
+<span class="fc" id="L42">        logger.debug(String.format(&quot;Header information for %s: %s&quot;, query, result));</span>
+<span class="fc" id="L43">        return result;</span>
+
+    }
+
+    protected String getResponseHeader(String graphList) {
+<span class="fc" id="L48">        String queryConstruct = String.format(</span>
+                    &quot;PREFIX rmo:	&lt;http://eatld.et.tu-dresden.de/rmo#&gt; &quot;
+                        + &quot;PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt; %n&quot;
+                        + &quot;CONSTRUCT {&quot;
+                        + &quot; ?ref a ?type;&quot;
+                        + &quot;		rdfs:label ?label;&quot;
+                        + &quot;		rmo:references ?rev.&quot;
+                        + &quot; ?rev rmo:revisionNumber ?number . %n&quot;
+                        + &quot;} %n&quot;
+                        + &quot;WHERE {&quot;
+                        + &quot; GRAPH &lt;%s&gt; {&quot;
+                        + &quot;   ?graph a rmo:RevisionGraph; rmo:hasRevisionGraph ?revisionGraph.&quot;
+                        + &quot;   FILTER (?graph IN (%s))&quot;
+                        + &quot; }&quot;
+                        + &quot; GRAPH ?revisionGraph { &quot;
+                        + &quot; ?ref a ?type;&quot;
+                            + &quot;		rmo:referenceIdentifier ?label;%n&quot;
+                        + &quot;		rmo:references ?rev.&quot;
+                            + &quot; ?rev rmo:revisionIdentifier ?number . %n&quot;
+                        + &quot;FILTER (?type IN (rmo:Tag, rmo:Master, rmo:Branch)) %n&quot;
+                        + &quot;} }&quot;, Config.revision_graph, graphList);
+<span class="fc" id="L69">        String header = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryConstruct, FileUtils.langTurtle);</span>
+<span class="fc" id="L70">        return header;</span>
+    }
+
+    protected void checkUpToDate(final String clientRevisionInformation, final String sparqlQuery) throws OutdatedException {
+
+<span class="fc" id="L75">        Model clientModel = JenaModelManagement.readTurtleStringToJenaModel(clientRevisionInformation);</span>
+
+<span class="fc" id="L77">        String recentRevisionInformation = this.getResponseHeaderFromQuery(sparqlQuery);</span>
+
+<span class="fc" id="L79">        Model serverModel = JenaModelManagement.readTurtleStringToJenaModel(recentRevisionInformation);</span>
+
+<span class="fc bfc" id="L81" title="All 2 branches covered.">        if (!clientModel.isIsomorphicWith(serverModel)) {</span>
+<span class="fc" id="L82">             throw new OutdatedException(clientModel, serverModel);</span>
+        }
+<span class="fc" id="L84">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

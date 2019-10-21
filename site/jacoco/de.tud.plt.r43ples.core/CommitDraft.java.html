@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommitDraft.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">CommitDraft.java</span></div><h1>CommitDraft.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+import de.tud.plt.r43ples.exception.OutdatedException;
+import de.tud.plt.r43ples.existentobjects.ChangeSet;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Collection of information for creating a new commit.
+ *
+ * @author Stephan Hensel
+ */
+public class CommitDraft {
+
+	/** The logger. **/
+<span class="fc" id="L26">	private Logger logger = LogManager.getLogger(CommitDraft.class);</span>
+
+	/** The pattern modifier. **/
+<span class="fc" id="L29">	private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;</span>
+	/** The pattern to extract the user name. **/
+<span class="fc" id="L31">	private final Pattern patternUser = Pattern.compile(</span>
+			&quot;USER\\s*\&quot;(?&lt;user&gt;[^\&quot;]*)\&quot;&quot;,
+			patternModifier);
+	/** The pattern to extract the commit message. **/
+<span class="fc" id="L35">	private final Pattern patternCommitMessage = Pattern.compile(</span>
+			&quot;MESSAGE\\s*\&quot;(?&lt;message&gt;[^\&quot;]*)\&quot;&quot;,
+			patternModifier);
+
+	/** The corresponding R43ples request. **/
+	private R43plesRequest request;
+	/** The associated user name of the commit. **/
+	private String user;
+	/** The message of the commit. **/
+	private String message;
+	/** The time stamp of the commit. **/
+	private Date timeStamp;
+	/** RDF model string of revision information used to check if it is up to date (optional) */
+	private String revisionInformation;
+	/** The current URI calculator instance. */
+	private URICalculator uriCalculator;
+
+	// Dependencies
+	/** The triplestore interface to use. **/
+	private TripleStoreInterface tripleStoreInterface;
+
+
+	/**
+	 * The constructor.
+	 *
+	 * @param request the request received by R43ples
+	 *
+	 * @throws OutdatedException
+	 */
+<span class="fc" id="L64">	protected CommitDraft(R43plesRequest request) throws OutdatedException {</span>
+		// Dependencies
+<span class="fc" id="L66">		this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();</span>
+
+<span class="fc" id="L68">		this.uriCalculator = new URICalculator();</span>
+
+<span class="fc" id="L70">		this.request = request;</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">		if (request != null) {</span>
+<span class="fc" id="L72">			this.extractUser();</span>
+<span class="fc" id="L73">			this.extractMessage();</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">			if (request.revisionInformation!=null) {</span>
+<span class="fc" id="L75">				this.revisionInformation = request.revisionInformation;</span>
+
+<span class="pc bpc" id="L77" title="3 of 4 branches missed.">				if (this.revisionInformation.length() &gt; 0 &amp;&amp; this.getRequest() != null) {</span>
+<span class="nc" id="L78">					logger.info(&quot;Revision information available during commit. Check if it is up to date!&quot;);</span>
+<span class="nc" id="L79">					HeaderInformation hi = new HeaderInformation();</span>
+<span class="nc" id="L80">					hi.checkUpToDate(this.revisionInformation, this.getRequest().query_sparql);</span>
+<span class="nc" id="L81">				} else {</span>
+<span class="fc" id="L82">					logger.info(&quot;No revision information available. Skip uptodate check!&quot;);</span>
+				}
+			}
+		}
+<span class="fc" id="L86">		this.timeStamp = new Date();</span>
+<span class="fc" id="L87">	}</span>
+
+	/**
+	 * Extracts the user name out of the given query.
+	 *
+	 * @return the extracted user name
+	 */
+	private String extractUser() {
+<span class="fc" id="L95">		Matcher userMatcher = patternUser.matcher(request.query_sparql);</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">		if (userMatcher.find()) {</span>
+<span class="fc" id="L97">			user = userMatcher.group(&quot;user&quot;);</span>
+<span class="fc" id="L98">			request.query_sparql = userMatcher.replaceAll(&quot;&quot;);</span>
+		}
+<span class="fc" id="L100">		return user;</span>
+	}
+
+	/**
+	 * Extracts the message out of the given query.
+	 *
+	 * @return the extracted message
+	 */
+	private String extractMessage() {
+<span class="fc" id="L109">		Matcher messageMatcher = patternCommitMessage.matcher(request.query_sparql);</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">		if (messageMatcher.find()) {</span>
+<span class="fc" id="L111">			message = messageMatcher.group(&quot;message&quot;);</span>
+<span class="fc" id="L112">			request.query_sparql = messageMatcher.replaceAll(&quot;&quot;);</span>
+		}	
+<span class="fc" id="L114">		return message;</span>
+	}
+
+	/**
+	 * Formats a data as xsd:DateTime
+	 *
+	 * @param date the date to format
+	 * @return current date formatted as xsd:DateTime
+	 */
+	private String formatDateString(Date date) {
+		// Create current time stamp
+<span class="fc" id="L125">		DateFormat df = new SimpleDateFormat(&quot;yyyy'-'MM'-'dd'T'HH:mm:ss.SSS&quot;);</span>
+<span class="fc" id="L126">		String dateString = df.format(date);</span>
+<span class="fc" id="L127">		logger.debug(&quot;Time stamp created: &quot; + dateString);</span>
+<span class="fc" id="L128">		return dateString;</span>
+	}
+
+	/**
+	 * Get the corresponding R43ples request.
+	 *
+	 * @return the corresponding R43ples request
+	 */
+	protected R43plesRequest getRequest() {
+<span class="fc" id="L137">		return request;</span>
+	}
+
+	/**
+	 * Get the associated user name of the commit.
+	 *
+	 * @return the associated user name of the commit
+	 */
+	protected String getUser() {
+<span class="fc" id="L146">		return user;</span>
+	}
+
+	/**
+	 * Set the associated user name of the commit.
+	 *
+	 * @param user the associated user name of the commit
+	 */
+	protected void setUser(String user) {
+<span class="fc" id="L155">		this.user = user;</span>
+<span class="fc" id="L156">	}</span>
+
+	/**
+	 * Get the message of the commit.
+	 *
+	 * @return the message of the commit
+	 */
+	protected String getMessage() {
+<span class="fc" id="L164">		return message;</span>
+	}
+
+	/**
+	 * Set the message of the commit.
+	 *
+	 * @param message the message of the commit
+	 */
+	protected void setMessage(String message) {
+<span class="fc" id="L173">		this.message = message;</span>
+<span class="fc" id="L174">	}</span>
+
+	/**
+	 * Get the time stamp of the commit.
+	 *
+	 * @return the time stamp of the commit
+	 */
+	protected String getTimeStamp() {
+<span class="fc" id="L182">		return formatDateString(timeStamp);</span>
+	}
+
+	/**
+	 * Get the triplestore interface to use.
+	 *
+	 * @return the triplestore interface to use
+	 */
+	protected TripleStoreInterface getTripleStoreInterface() {
+<span class="fc" id="L191">		return tripleStoreInterface;</span>
+	}
+
+	/**
+	 * Get current URI calculator instance.
+	 *
+	 * @return the current URI calculator instance
+	 */
+	protected URICalculator getUriCalculator() {
+<span class="fc" id="L200">		return uriCalculator;</span>
+	}
+
+
+	/**
+	 * Move the reference in the specified revision graph from the old revision to the new one.
+	 *
+	 * @param revisionGraphURI the revision graph URI in the triplestore
+	 * @param branchURI the URI of the branch
+	 * @param revisionUriOld uri of the old revision
+	 * @param revisionUriNew uri of the new revision
+	 *  */
+	protected void moveBranchReference(final String revisionGraphURI, final String branchURI, final String revisionUriOld, final String revisionUriNew) {
+		// delete old reference and create new one
+<span class="fc" id="L214">		String query = Config.prefixes	+ String.format(&quot;&quot;</span>
+						+ &quot;DELETE DATA { GRAPH &lt;%1$s&gt; { &lt;%2$s&gt; rmo:references &lt;%3$s&gt;. } };&quot;
+						+ &quot;INSERT DATA { GRAPH &lt;%1$s&gt; { &lt;%2$s&gt; rmo:references &lt;%4$s&gt;. } }&quot;,
+				revisionGraphURI, branchURI, revisionUriOld, revisionUriNew);
+<span class="fc" id="L218">		getTripleStoreInterface().executeUpdateQuery(query);</span>
+<span class="fc" id="L219">	}</span>
+
+	/**
+	 * Updates the referenced full graph by using the stripped add and delete sets.
+	 *
+	 * @param referencedFullGraphURI the referenced full graph URI
+	 * @param changeSet the change set
+	 */
+	protected void updateReferencedFullGraph(String referencedFullGraphURI, ChangeSet changeSet) {
+		// merge change sets into reference graph
+		// (copy add set to reference graph; remove delete set from reference graph)
+<span class="fc" id="L230">		tripleStoreInterface.executeUpdateQuery(String.format(</span>
+				&quot;INSERT { GRAPH &lt;%s&gt; { ?s ?p ?o. } } WHERE { GRAPH &lt;%s&gt; { ?s ?p ?o. } }&quot;,
+<span class="fc" id="L232">				referencedFullGraphURI, changeSet.getAddSetURI()));</span>
+<span class="fc" id="L233">		tripleStoreInterface.executeUpdateQuery(String.format(</span>
+				&quot;DELETE { GRAPH &lt;%s&gt; { ?s ?p ?o. } } WHERE { GRAPH &lt;%s&gt; { ?s ?p ?o. } }&quot;,
+<span class="fc" id="L235">				referencedFullGraphURI, changeSet.getDeleteSetURI()));</span>
+<span class="fc" id="L236">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

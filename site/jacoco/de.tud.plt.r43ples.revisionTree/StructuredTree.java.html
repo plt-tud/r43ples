@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StructuredTree.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.revisionTree</a> &gt; <span class="el_source">StructuredTree.java</span></div><h1>StructuredTree.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.revisionTree;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+
+public class StructuredTree {
+
+	private List&lt;Branch&gt; branches;
+	private List&lt;Tag&gt; tags;
+	private List&lt;Commit&gt; commits;
+
+	private static Map&lt;Commit, String&gt; commit_branch_tmp;
+<span class="fc" id="L28">	private static Logger logger = LogManager.getLogger(StructuredTree.class);</span>
+
+<span class="fc" id="L30">	private StructuredTree() {</span>
+<span class="fc" id="L31">		commits = new LinkedList&lt;Commit&gt;();</span>
+<span class="fc" id="L32">		branches = new LinkedList&lt;Branch&gt;();</span>
+<span class="fc" id="L33">		tags = new LinkedList&lt;Tag&gt;();</span>
+<span class="fc" id="L34">		commit_branch_tmp = new HashMap&lt;Commit, String&gt;();</span>
+<span class="fc" id="L35">	}</span>
+
+	public static StructuredTree getTreeOfGraph(String revisionGraph) {
+		// new Tree
+<span class="fc" id="L39">		StructuredTree t = new StructuredTree();</span>
+<span class="fc" id="L40">		t.updateCommits(revisionGraph);</span>
+<span class="fc" id="L41">		t.updateBranches(revisionGraph);</span>
+<span class="fc" id="L42">		t.updateTags(revisionGraph);</span>
+
+		// link commits to branches
+<span class="fc bfc" id="L45" title="All 2 branches covered.">		for(Commit c : t.commits) {</span>
+			//get branch of commit
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">			if (commit_branch_tmp.containsKey(c)) {</span>
+<span class="nc" id="L48">				Branch b = t.branches.get(t.branches.indexOf(new Branch(commit_branch_tmp.get(c))));</span>
+<span class="nc" id="L49">				c.setBranch(b);</span>
+<span class="nc" id="L50">			}</span>
+			else
+<span class="fc" id="L52">				c.setBranch(t.branches.get(0));</span>
+<span class="fc" id="L53">		}</span>
+<span class="fc" id="L54">		return t;</span>
+	}
+
+	private void updateBranches(String revisionGraph) {
+		//query all branches
+		
+<span class="fc" id="L60">		String queryBranches = Config.prefixes + String.format(</span>
+						&quot;SELECT ?branch ?title ?commit%n&quot;
+						+ &quot;WHERE { GRAPH &lt;%s&gt; { %n&quot;
+						+ &quot;  ?branch a rmo:Branch;%n&quot;
+						+ &quot;     rmo:referenceIdentifier ?title;%n&quot;
+						+ &quot;     rmo:references ?rev.&quot;
+						+ &quot;  ?commit a rmo:UpdateCommit;%n&quot;
+						+ &quot;     rmo:generated ?rev.%n&quot;
+						+ &quot;} }&quot;, revisionGraph);
+
+<span class="fc" id="L70">		ResultSet resultsBranches = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryBranches);</span>
+
+<span class="fc bfc" id="L72" title="All 2 branches covered.">		while (resultsBranches.hasNext()) {</span>
+<span class="fc" id="L73">			QuerySolution sol = resultsBranches.next();</span>
+<span class="fc" id="L74">			Branch b = new Branch(sol.get(&quot;branch&quot;).toString(), sol.getLiteral(&quot;title&quot;).toString(), commits.get(commits</span>
+<span class="fc" id="L75">					.indexOf(new Commit(sol.get(&quot;commit&quot;).toString()))));</span>
+<span class="fc" id="L76">			branches.add(b);</span>
+<span class="fc" id="L77">		}</span>
+<span class="fc" id="L78">	}</span>
+
+	private void updateTags(String revisionGraph) {
+		// query all tags
+<span class="fc" id="L82">		String queryBranches = Config.prefixes + String.format(</span>
+						&quot;SELECT ?tag ?title ?commit%n&quot;
+						+ &quot;WHERE { GRAPH &lt;%s&gt; {%n&quot;
+						+ &quot;?tag a rmo:Tag;%n&quot;
+						+ &quot;rmo:referenceIdentifier ?title;%n&quot;
+						+ &quot;rmo:references ?rev.&quot;
+						+ &quot;?commit a rmo:TagCommit;%n&quot;
+						+ &quot;rmo:generated ?rev.%n&quot;
+						+ &quot;} }&quot;, revisionGraph);
+
+<span class="fc" id="L92">		ResultSet resultsTags = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryBranches);</span>
+
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">		while (resultsTags.hasNext()) {</span>
+<span class="nc" id="L95">			QuerySolution sol = resultsTags.next();</span>
+<span class="nc" id="L96">			Tag t = new Tag(sol.get(&quot;tag&quot;).toString(), sol.getLiteral(&quot;title&quot;).toString(), commits.get(commits</span>
+<span class="nc" id="L97">					.indexOf(new Commit(sol.get(&quot;commit&quot;).toString()))));</span>
+<span class="nc" id="L98">			tags.add(t);</span>
+<span class="nc" id="L99">		}</span>
+<span class="fc" id="L100">	}</span>
+
+	public List&lt;Commit&gt; getCommits()
+	{
+<span class="fc" id="L104">		return commits;</span>
+	}
+
+	public List&lt;Branch&gt; getBranches()
+	{
+<span class="fc" id="L109">		return branches;</span>
+	}
+
+	public List&lt;Tag&gt; getTags()
+	{
+<span class="fc" id="L114">		return tags;</span>
+	}
+
+	private void updateCommits(String revisionGraph) {
+		// query all commits
+<span class="fc" id="L119">		String queryCommits = Config.prefixes + String.format(</span>
+						&quot;SELECT ?commit ?time ?prev ?next ?title ?authname ?branch%n&quot;
+						+ &quot;WHERE { GRAPH &lt;%s&gt; {%n&quot;
+						+ &quot;?commit a rmo:UpdateCommit;%n&quot;
+						+ &quot;rmo:commitMessage ?title;%n&quot;
+						+ &quot;rmo:used ?reva;%n&quot;
+						+ &quot;rmo:generated ?revb;%n&quot;
+						+ &quot;rmo:timeStamp ?time;%n&quot;
+						+ &quot;rmo:wasAssociatedWith ?author.%n&quot;
+						+ &quot;OPTIONAL { ?author rdfs:label ?authname. }%n&quot;
+						+ &quot;?reva rmo:revisionIdentifier ?prev.%n&quot;
+						+ &quot;?revb rmo:revisionIdentifier ?next.&quot;
+						+ &quot;OPTIONAL { ?revb rmo:belongsTo ?branch. }%n&quot;
+						+ &quot;} }&quot;,//TODO belongsTo does not exist any more
+						revisionGraph);
+		
+<span class="fc" id="L135">		ResultSet resultsCommits = TripleStoreInterfaceSingleton.get().executeSelectQuery(queryCommits);</span>
+
+		// generate list of commits
+<span class="fc" id="L138">		DateFormat df = new SimpleDateFormat(&quot;yyyy-MM-dd'T'HH:mm:ss&quot;);</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">		while (resultsCommits.hasNext()) {</span>
+<span class="fc" id="L140">			QuerySolution sol = resultsCommits.next();</span>
+			try {
+<span class="fc" id="L142">				Commit commit = new Commit(sol.get(&quot;commit&quot;).toString());</span>
+				// commit can be multiple times in solution set because of
+				// multiple &quot;prov:used&quot; attributes
+<span class="pc bpc" id="L145" title="1 of 2 branches missed.">				if (commits.contains(commit))</span>
+				{
+					// if commit is already in list, just add new base revision
+					// to existing commit
+<span class="nc" id="L149">					commits.get(commits.indexOf(commit)).getBaseRevisions().add(sol.getLiteral(&quot;prev&quot;).getString());</span>
+				} else {
+					// generate new commit object
+<span class="pc bpc" id="L152" title="1 of 2 branches missed.">					String authname = sol.getLiteral(&quot;authname&quot;) == null ? &quot;&quot; : sol.getLiteral(&quot;authname&quot;).getString();</span>
+<span class="fc" id="L153">					Commit newCommit = new Commit(</span>
+<span class="fc" id="L154">							sol.get(&quot;commit&quot;).toString(),</span>
+<span class="fc" id="L155">							sol.getLiteral(&quot;title&quot;).getString(),</span>
+<span class="fc" id="L156">							df.parse(sol.getLiteral(&quot;time&quot;).toString()),</span>
+							authname,
+<span class="fc" id="L158">							sol.getLiteral(&quot;prev&quot;).getString(),</span>
+<span class="fc" id="L159">							sol.getLiteral(&quot;next&quot;).getString());</span>
+					// save branch uri in Map to set branch reference later
+					// after branches were generated
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">					if (sol.get(&quot;branch&quot;) != null)</span>
+<span class="nc" id="L163">						commit_branch_tmp.put(newCommit, sol.get(&quot;branch&quot;).toString());</span>
+<span class="fc" id="L164">					commits.add(newCommit);</span>
+				}
+<span class="nc" id="L166">			} catch (ParseException e) {</span>
+<span class="nc" id="L167">				logger.error(&quot;Commit could not be parsed!&quot;);</span>
+<span class="fc" id="L168">			}</span>
+<span class="fc" id="L169">		}</span>
+
+		// fill predecessor and successor lists of commits
+<span class="fc bfc" id="L172" title="All 2 branches covered.">		for (Commit c : commits) {</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">			for (Commit b : commits) {</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">				if (c.getBaseRevisions().contains(b.getNextRevision()))</span>
+<span class="fc" id="L175">					c.predecessor.add(b);</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">				else if (b.getBaseRevisions().contains(c.getNextRevision()))</span>
+<span class="fc" id="L177">					c.successors.add(b);</span>
+<span class="fc" id="L178">			}</span>
+<span class="fc" id="L179">		}</span>
+
+		// sort list of commits by order of their occurrence
+<span class="fc" id="L182">		Collections.sort(commits);</span>
+<span class="fc" id="L183">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,298 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CoEvolutionDraft.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">CoEvolutionDraft.java</span></div><h1>CoEvolutionDraft.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.exception.QueryErrorException;
+import de.tud.plt.r43ples.existentobjects.*;
+import de.tud.plt.r43ples.iohelper.Helper;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import de.tud.plt.r43ples.webservice.Endpoint;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+
+/**
+ * Coevolve all dependent graphs based upon aggregated atomic changes. Uses the coevolution rules provided which are associated with the HLC aggregation.
+ * Example query: USER &quot;Bob&quot; MESSAGE &quot;test coevolution&quot; COEVO GRAPH &lt;http://test.com/r43ples-dataset-hlc-aggregation&gt; REVISION &quot;1&quot; TO REVISION &quot;2&quot;
+ * Currently the implementation only works if the end revision is the direct succeeding revision of the start revision.
+ * Dependent graphs currently only identified on their master branch. The result of the coevolution is currently always committed to the master branch.
+ *
+ * @author Stephan Hensel
+ */
+public class CoEvolutionDraft {
+
+    /** The logger. **/
+<span class="fc" id="L36">    private Logger logger = LogManager.getLogger(SelectConstructAskQuery.class);</span>
+
+    /** The pattern modifier. **/
+<span class="fc" id="L39">    private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;</span>
+    /** The merge query pattern. **/
+<span class="fc" id="L41">    private final Pattern patternAggQuery = Pattern.compile(</span>
+            &quot;COEVO\\s*GRAPH\\s*&lt;(?&lt;graph&gt;[^&gt;]*?)&gt;\\s*REVISION\\s*\&quot;(?&lt;startRevisionIdentifier&gt;[^\&quot;]*?)\&quot;\\s*TO\\s*REVISION\\s*\&quot;(?&lt;endRevisionIdentifier&gt;[^\&quot;]*?)\&quot;\\s*&quot;,
+            patternModifier);
+
+    /** The corresponding R43ples request. **/
+    private R43plesRequest request;
+    /** The associated user name of the commit. **/
+    private String user;
+    /** The message of the commit. **/
+    private String message;
+    /** The start revision identifier. **/
+    private String startRevisionIdentifier;
+    /** The end revision identifier. **/
+    private String endRevisionIdentifier;
+    /** The change set between start and end revision. **/
+    private ChangeSet changeSetStartToEnd;
+    /** The graph name **/
+    private String graphName;
+    /** The revision graph. **/
+    private RevisionGraph revisionGraph;
+
+    // Dependencies
+    /** The triplestore interface to use. **/
+    private TripleStoreInterface tripleStoreInterface;
+    /** The current URI calculator instance. */
+    private URICalculator uriCalculator;
+    /** The endpoint. **/
+<span class="fc" id="L68">    private Endpoint ep = new Endpoint();</span>
+
+
+    /**
+     * The constructor.
+     *
+     * @param request the request received by R43ples
+     * @return the query response
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L78">    protected CoEvolutionDraft(R43plesRequest request) throws InternalErrorException {</span>
+        // Dependencies
+<span class="fc" id="L80">        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();</span>
+<span class="fc" id="L81">        this.uriCalculator = new URICalculator();</span>
+
+<span class="fc" id="L83">        this.request = request;</span>
+
+<span class="fc" id="L85">        this.extractRequestInformation();</span>
+<span class="fc" id="L86">    }</span>
+
+    /**
+     * Triggers the coevolution process and writes meta information into revision graph and the coevolution graph.
+     *
+     * @return the evolution object containing all performed coevolutions
+     * @throws InternalErrorException
+     */
+    protected Evolution coevolveAll() throws InternalErrorException {
+
+        // Stores all meta information of the evolution, has to be integrated into a SPARQL UPDATE query if all data is collected
+<span class="fc" id="L97">        StringBuilder metaInformationTurtle = new StringBuilder();</span>
+<span class="fc" id="L98">        String evolutionURI = uriCalculator.getRandomURI(Config.evolution_graph);</span>
+
+<span class="fc" id="L100">        metaInformationTurtle.append(String.format(</span>
+                &quot;&lt;%1$s&gt; a rmo:Evolution. %n&quot; +
+                &quot;&lt;%1$s&gt; rmo:startRevision &lt;%2$s&gt;. %n&quot; +
+                &quot;&lt;%1$s&gt; rmo:endRevision &lt;%3$s&gt;. %n&quot; +
+                &quot;&lt;%1$s&gt; rmo:usedSourceRevisionGraph &lt;%4$s&gt;. %n&quot;,
+<span class="fc" id="L105">                evolutionURI, revisionGraph.getRevision(startRevisionIdentifier).getRevisionURI(),</span>
+<span class="fc" id="L106">                revisionGraph.getRevision(endRevisionIdentifier).getRevisionURI(), revisionGraph.getGraphName()));</span>
+
+        // Get associated semantic changes with specified change set
+<span class="fc" id="L109">        LinkedList&lt;SemanticChange&gt; semanticChanges = changeSetStartToEnd.getSemanticChangesList();</span>
+
+        // Check if semantic changes are not generated
+<span class="pc bpc" id="L112" title="2 of 4 branches missed.">        if ((semanticChanges == null) || (semanticChanges.isEmpty())) {</span>
+            // Aggregate
+<span class="fc" id="L114">            AggregationDraft aggregationDraft = new AggregationDraft(revisionGraph, changeSetStartToEnd);</span>
+<span class="fc" id="L115">            semanticChanges = aggregationDraft.aggregate();</span>
+<span class="pc bpc" id="L116" title="2 of 4 branches missed.">            if ((semanticChanges == null) || (semanticChanges.isEmpty())) {</span>
+<span class="nc" id="L117">                throw new InternalErrorException(&quot;There are no semantic changes between revision &quot; + startRevisionIdentifier + &quot; and revision &quot; + endRevisionIdentifier + &quot;as basis for the coevolution.&quot;);</span>
+            }
+        }
+
+        // Coevolution rule list
+<span class="fc" id="L122">        LinkedList&lt;CoEvoRule&gt; coevolutionRules = new LinkedList&lt;&gt;();</span>
+
+        // Iterate through all available semantic changes and store results within the coevolution rule list
+<span class="fc bfc" id="L125" title="All 2 branches covered.">        for (SemanticChange semanticChange : semanticChanges) {</span>
+            // Get the rule of the semantic change and check if a coevolution part is specified
+<span class="fc" id="L127">            CoEvoRule coEvoRule = new CoEvoRule(semanticChange);</span>
+<span class="fc" id="L128">            coevolutionRules.add(coEvoRule);</span>
+<span class="fc" id="L129">            metaInformationTurtle.append(String.format(&quot;&lt;%s&gt; rmo:associatedSemanticChange &lt;%s&gt;. %n&quot;, evolutionURI, semanticChange.getSemanticChangeURI()));</span>
+<span class="fc" id="L130">        }</span>
+
+        // Get all graphs within the repository
+<span class="fc" id="L133">        HashMap&lt;String, RevisionGraph&gt; revisedGraphs = new RevisionControl().getRevisedGraphs();</span>
+        // Remove the graph which should be coevolved and the coevolution graph itself
+<span class="fc" id="L135">        revisedGraphs.remove(this.revisionGraph.getGraphName());</span>
+<span class="fc" id="L136">        revisedGraphs.remove(Config.evolution_graph);</span>
+
+        // Iterate through the revised graphs and search for dependencies (Check the master branch of each revised graph if there is a dependency)
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        for (String graphName : revisedGraphs.keySet()) {</span>
+<span class="fc" id="L140">            RevisionGraph revisionGraph = revisedGraphs.get(graphName);</span>
+
+            // URI of the coevolution of the current revision graph
+<span class="fc" id="L143">            String coevolutionURI = uriCalculator.getRandomURI(Config.evolution_graph);</span>
+<span class="fc" id="L144">            metaInformationTurtle.append(String.format(</span>
+                    &quot;&lt;%1$s&gt; rmo:performedCoEvolution &lt;%2$s&gt;. %n&quot; +
+                    &quot;&lt;%2$s&gt; a rmo:CoEvolution. %n&quot; +
+                    &quot;&lt;%2$s&gt; rmo:usedTargetRevisionGraph &lt;%3$s&gt;. %n&quot; +
+                    &quot;&lt;%2$s&gt; rmo:usedTargetBranch &lt;%4$s&gt;. %n&quot;,
+<span class="fc" id="L149">                    evolutionURI, coevolutionURI, revisionGraph.getGraphName(), revisionGraph.getBranchUri(&quot;master&quot;)));</span>
+
+            // Create temporary named graphs for add and delete
+<span class="fc" id="L152">            String tempAddSetURI = uriCalculator.getRandomNamedGraphURI(graphName);</span>
+<span class="fc" id="L153">            String tempDeleteSetURI = uriCalculator.getRandomNamedGraphURI(graphName);</span>
+
+<span class="fc" id="L155">            tripleStoreInterface.executeCreateGraph(tempAddSetURI);</span>
+<span class="fc" id="L156">            tripleStoreInterface.executeCreateGraph(tempDeleteSetURI);</span>
+
+            // Iterate through all available semantic changes and apply the corresponding coevolution match part of the rule
+<span class="fc bfc" id="L159" title="All 2 branches covered.">            for (CoEvoRule coEvoRule : coevolutionRules) {</span>
+
+<span class="fc" id="L161">                String matchQuery = coEvoRule.getDependencyMatchingQuery().replaceAll(&quot;&lt;http://NAMEDGRAPH#master&gt;&quot;, &quot;&lt;&quot; + graphName + &quot;&gt;&quot;);</span>
+<span class="fc" id="L162">                ResultSet resultSetMatchings = tripleStoreInterface.executeSelectQuery(matchQuery);</span>
+
+                // If the result set is not equal to null a coevolution can be executed
+                // URI of the coevolution of the current revision graph
+<span class="fc" id="L166">                String appliedCoevolutionURI = uriCalculator.getRandomURI(Config.evolution_graph);</span>
+<span class="fc" id="L167">                metaInformationTurtle.append(String.format(</span>
+                        &quot;&lt;%1$s&gt; aero:appliedCoEvolutionRule &lt;%2$s&gt;. %n&quot; +
+                        &quot;&lt;%2$s&gt; a aero:AppliedCoEvolutionRule. %n&quot; +
+                        &quot;&lt;%2$s&gt; aero:usedRule &lt;%3$s&gt;. %n&quot; +
+                        &quot;&lt;%2$s&gt; aero:usedSemanticChange &lt;%4$s&gt;. %n&quot;,
+<span class="fc" id="L172">                        coevolutionURI, appliedCoevolutionURI, coEvoRule.getSemanticChange().getUsedRuleURI(), coEvoRule.getSemanticChange().getSemanticChangeURI()));</span>
+
+                // Maybe there are multiple matches within one graph
+<span class="fc bfc" id="L175" title="All 2 branches covered.">                while (resultSetMatchings.hasNext()) {</span>
+<span class="fc" id="L176">                    QuerySolution qsMatching = resultSetMatchings.next();</span>
+
+<span class="fc" id="L178">                    String sparqlVariableGroupURI = uriCalculator.getRandomURI(Config.evolution_graph);</span>
+<span class="fc" id="L179">                    metaInformationTurtle.append(String.format(</span>
+                            &quot;&lt;%1$s&gt; aero:hasVariableGroup &lt;%2$s&gt;. %n&quot; +
+                            &quot;&lt;%2$s&gt; a aero:SPARQLVariableGroup. %n&quot;,
+                            appliedCoevolutionURI, sparqlVariableGroupURI));
+
+                    // Create a list of SPARQL variables and the results regarding the current revision graph
+<span class="fc" id="L185">                    LinkedList&lt;SparqlVariable&gt; sparqlVariablesListCurrentRevisionGraph = new LinkedList&lt;&gt;();</span>
+
+<span class="fc" id="L187">                    String addSetInsertQuery = coEvoRule.getAddSetInsertQuery();</span>
+<span class="fc" id="L188">                    addSetInsertQuery = addSetInsertQuery.replaceAll(&quot;&lt;http://NAMEDGRAPH#master&gt;&quot;, &quot;&lt;&quot; + graphName + &quot;&gt;&quot;);</span>
+<span class="fc" id="L189">                    addSetInsertQuery = addSetInsertQuery.replaceAll(&quot;&lt;http://NAMEDGRAPH#ADDSET-NEW&gt;&quot;, &quot;&lt;&quot; + tempAddSetURI + &quot;&gt;&quot;);</span>
+<span class="fc" id="L190">                    String deleteSetInsertQuery = coEvoRule.getDeleteSetInsertQuery();</span>
+<span class="fc" id="L191">                    deleteSetInsertQuery = deleteSetInsertQuery.replaceAll(&quot;&lt;http://NAMEDGRAPH#master&gt;&quot;, &quot;&lt;&quot; + graphName + &quot;&gt;&quot;);</span>
+<span class="fc" id="L192">                    deleteSetInsertQuery = deleteSetInsertQuery.replaceAll(&quot;&lt;http://NAMEDGRAPH#DELETESET-NEW&gt;&quot;, &quot;&lt;&quot; + tempDeleteSetURI + &quot;&gt;&quot;);</span>
+
+<span class="fc bfc" id="L194" title="All 2 branches covered.">                    for (SparqlVariable genericSparqlVariable : coEvoRule.getSparqlVariablesList()) {</span>
+                        String value;
+                        String valueMetaInfo;
+                        boolean isResource;
+                        try {
+<span class="fc" id="L199">                            value = qsMatching.getResource(&quot;?&quot; + genericSparqlVariable.getVariableName()).toString();</span>
+<span class="fc" id="L200">                            valueMetaInfo = &quot;&lt;&quot; + value + &quot;&gt;&quot;;</span>
+<span class="fc" id="L201">                            isResource = true;</span>
+<span class="nc" id="L202">                        } catch (Exception e) {</span>
+<span class="nc" id="L203">                            value = qsMatching.getLiteral(&quot;?&quot; + genericSparqlVariable.getVariableName()).toString();</span>
+<span class="nc" id="L204">                            valueMetaInfo = &quot;\&quot;&quot; + value + &quot;\&quot;&quot;;</span>
+<span class="nc" id="L205">                            isResource = false;</span>
+<span class="fc" id="L206">                        }</span>
+<span class="fc" id="L207">                        SparqlVariable specificSparqlVariable = new SparqlVariable(revisionGraph, null, genericSparqlVariable.getVariableName(), genericSparqlVariable.getSpinResourceURI(), value, isResource);</span>
+<span class="fc" id="L208">                        sparqlVariablesListCurrentRevisionGraph.add(specificSparqlVariable);</span>
+
+<span class="fc" id="L210">                        addSetInsertQuery = addSetInsertQuery.replaceAll(&quot;\\?&quot; + genericSparqlVariable.getVariableName(), valueMetaInfo);</span>
+<span class="fc" id="L211">                        deleteSetInsertQuery = deleteSetInsertQuery.replaceAll(&quot;\\?&quot; + genericSparqlVariable.getVariableName(), valueMetaInfo);</span>
+
+<span class="fc" id="L213">                        tripleStoreInterface.executeUpdateQuery(addSetInsertQuery);</span>
+<span class="fc" id="L214">                        tripleStoreInterface.executeUpdateQuery(deleteSetInsertQuery);</span>
+
+<span class="fc" id="L216">                        String sparqlVariableURI = uriCalculator.getRandomURI(Config.evolution_graph);</span>
+<span class="fc" id="L217">                        metaInformationTurtle.append(String.format(</span>
+                                &quot;&lt;%1$s&gt; aero:hasVariables &lt;%2$s&gt;. %n&quot; +
+                                &quot;&lt;%2$s&gt; a aero:SPARQLVariable. %n&quot; +
+                                &quot;&lt;%2$s&gt; sp:varName \&quot;%3$s\&quot;. %n&quot; +
+                                &quot;&lt;%2$s&gt; aero:value %4$s. %n&quot; +
+                                &quot;&lt;%2$s&gt; aero:spinResource &lt;%5$s&gt;. %n&quot;,
+<span class="fc" id="L223">                                sparqlVariableGroupURI, sparqlVariableURI, genericSparqlVariable.getVariableName(), valueMetaInfo, genericSparqlVariable.getSpinResourceURI()));</span>
+
+<span class="fc" id="L225">                    }</span>
+<span class="fc" id="L226">                }</span>
+
+<span class="fc" id="L228">            }</span>
+
+<span class="fc" id="L230">            String addSetN3 = Helper.getContentOfNamedGraphAsN3(tempAddSetURI);</span>
+<span class="fc" id="L231">            String deleteSetN3 = Helper.getContentOfNamedGraphAsN3(tempDeleteSetURI);</span>
+
+            // Create a new update commit with the specified add and delete sets from temporary graphs for the current revision graph
+<span class="fc" id="L234">            Branch branch = new Branch(revisionGraph, &quot;master&quot;, true);</span>
+
+<span class="fc" id="L236">            UpdateCommitDraft updateCommitDraft = new UpdateCommitDraft(graphName, addSetN3, deleteSetN3, user, message, branch);</span>
+<span class="fc" id="L237">            UpdateCommit updateCommit = updateCommitDraft.createInTripleStore().get(0);</span>
+
+<span class="fc" id="L239">            tripleStoreInterface.executeUpdateQuery(&quot;DROP SILENT GRAPH &lt;&quot; + tempAddSetURI + &quot;&gt;&quot;);</span>
+<span class="fc" id="L240">            tripleStoreInterface.executeUpdateQuery(&quot;DROP SILENT GRAPH &lt;&quot; + tempDeleteSetURI + &quot;&gt;&quot;);</span>
+
+            // Create the generated revision
+<span class="fc" id="L243">            metaInformationTurtle.append(String.format(</span>
+                    &quot;&lt;%1$s&gt; rmo:generated &lt;%2$s&gt;. %n&quot;,
+<span class="fc" id="L245">                    coevolutionURI, updateCommit.getGeneratedRevision().getRevisionURI()));</span>
+<span class="fc" id="L246">        }</span>
+
+        // Create a new commit within the coevolution revision graph
+<span class="fc" id="L249">        String metaInformationN3 = JenaModelManagement.convertTurtleToNTriple(Config.turtle_prefixes + metaInformationTurtle.toString());</span>
+<span class="fc" id="L250">        R43plesCoreSingleton.getInstance().createUpdateCommit(Config.evolution_graph, metaInformationN3, null, user, message, &quot;master&quot;);</span>
+
+<span class="fc" id="L252">        return new Evolution(evolutionURI);</span>
+    }
+
+    /**
+     * Extracts the request information and stores it to local variables.
+     *
+     * @throws InternalErrorException
+     */
+    private void extractRequestInformation() throws InternalErrorException {
+
+        // Reuse a CommitDraft to extract the user and the commit message
+<span class="fc" id="L263">        CommitDraft commitDraft = new CommitDraft(this.request);</span>
+<span class="fc" id="L264">        this.user = commitDraft.getUser();</span>
+<span class="fc" id="L265">        this.message = commitDraft.getMessage();</span>
+
+<span class="fc" id="L267">        Matcher m = patternAggQuery.matcher(this.request.query_sparql);</span>
+
+<span class="fc" id="L269">        boolean foundEntry = false;</span>
+
+<span class="fc bfc" id="L271" title="All 2 branches covered.">        while (m.find()) {</span>
+<span class="fc" id="L272">            foundEntry = true;</span>
+
+<span class="fc" id="L274">            graphName = m.group(&quot;graph&quot;);</span>
+<span class="fc" id="L275">            revisionGraph = new RevisionGraph(graphName);</span>
+
+<span class="fc" id="L277">            startRevisionIdentifier = m.group(&quot;startRevisionIdentifier&quot;);</span>
+<span class="fc" id="L278">            endRevisionIdentifier = m.group(&quot;endRevisionIdentifier&quot;);</span>
+
+<span class="fc" id="L280">            logger.debug(&quot;graph: &quot; + graphName);</span>
+<span class="fc" id="L281">            logger.debug(&quot;startRevisionIdentifier: &quot; + startRevisionIdentifier);</span>
+<span class="fc" id="L282">            logger.debug(&quot;endRevisionIdentifier: &quot; + endRevisionIdentifier);</span>
+        }
+<span class="pc bpc" id="L284" title="1 of 2 branches missed.">        if (!foundEntry) {</span>
+<span class="nc" id="L285">            throw new QueryErrorException(&quot;Error in query: &quot; + this.request.query_sparql);</span>
+        }
+
+<span class="fc" id="L288">        ArrayList&lt;ChangeSet&gt; changeSets = revisionGraph.getRevision(endRevisionIdentifier).getChangeSets();</span>
+<span class="fc bfc" id="L289" title="All 2 branches covered.">        for (ChangeSet changeSet : changeSets) {</span>
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">            if (changeSet.getPriorRevision().getRevisionIdentifier().equals(startRevisionIdentifier)) {</span>
+<span class="fc" id="L291">                changeSetStartToEnd = changeSet;</span>
+            }
+<span class="fc" id="L293">        }</span>
+
+<span class="fc" id="L295">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

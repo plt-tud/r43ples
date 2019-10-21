@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TagCommitDraft.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">TagCommitDraft.java</span></div><h1>TagCommitDraft.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+import de.tud.plt.r43ples.exception.IdentifierAlreadyExistsException;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.existentobjects.Tag;
+import de.tud.plt.r43ples.existentobjects.TagCommit;
+import de.tud.plt.r43ples.iohelper.Helper;
+import de.tud.plt.r43ples.management.Config;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.regex.Pattern;
+
+/**
+ * Collection of information for creating a new tag commit.
+ *
+ * @author Stephan Hensel
+ */
+public class TagCommitDraft extends ReferenceCommitDraft {
+
+    /** The logger. **/
+<span class="fc" id="L24">    private Logger logger = LogManager.getLogger(TagCommitDraft.class);</span>
+
+    /** The pattern modifier. **/
+<span class="fc" id="L27">    private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;</span>
+
+
+    /**
+     * The constructor.
+     * Creates a tag commit draft by using the corresponding meta information.
+     *
+     * @param revisionGraph the revision graph
+     * @param referenceIdentifier the reference identifier
+     * @param baseRevision the revision identifier (the corresponding revision will be the current base for the reference)
+     * @param user the user
+     * @param message the message
+     * @throws InternalErrorException
+     */
+    protected TagCommitDraft(RevisionGraph revisionGraph, String referenceIdentifier, Revision baseRevision, String user, String message) throws InternalErrorException {
+<span class="fc" id="L42">        super(revisionGraph, referenceIdentifier, baseRevision, user, message, true);</span>
+<span class="fc" id="L43">    }</span>
+
+    /**
+     * Creates the commit draft as a new commit in the triple store.
+     *
+     * @return the created tag commit
+     */
+    protected TagCommit createInTripleStore() throws InternalErrorException {
+<span class="fc" id="L51">        String commitURI = getUriCalculator().getNewTagCommitURI(getRevisionGraph(), getReferenceIdentifier());</span>
+
+        // Check tag existence
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">        if (getRevisionGraph().hasReference(getReferenceIdentifier())) {</span>
+            // Reference name is already in use
+<span class="nc" id="L56">            logger.error(&quot;The reference name '&quot; + getReferenceIdentifier() + &quot;' is for the graph '&quot; + getRevisionGraph().getGraphName()</span>
+                    + &quot;' already in use.&quot;);
+<span class="nc" id="L58">            throw new IdentifierAlreadyExistsException(&quot;The reference name '&quot; + getReferenceIdentifier()</span>
+<span class="nc" id="L59">                    + &quot;' is for the graph '&quot; + getRevisionGraph().getGraphName() + &quot;' already in use.&quot;);</span>
+        }
+
+<span class="fc" id="L62">        TagDraft tagDraft = new TagDraft(getUriCalculator(), getRevisionGraph(), getBaseRevision(), getReferenceIdentifier());</span>
+<span class="fc" id="L63">        Tag generatedTag = tagDraft.createInTripleStore();</span>
+
+<span class="fc" id="L65">        addMetaInformation(generatedTag.getReferenceURI(), commitURI);</span>
+
+
+
+<span class="fc" id="L69">        return new TagCommit(getRevisionGraph(), commitURI, getUser(), getTimeStamp(), getMessage(), getBaseRevision(), generatedTag);</span>
+    }
+
+    /**
+     * Adds the necessary meta data.
+     *
+     * @param referenceURI the reference URI
+     * @param commitURI the commit URI
+     * @throws InternalErrorException
+     */
+    private void addMetaInformation(String referenceURI, String commitURI) {
+<span class="fc" id="L80">        logger.info(&quot;Create new tag '&quot; + getReferenceIdentifier() + &quot;' for graph &quot; + getRevisionGraph().getGraphName());</span>
+
+        // General variables
+<span class="fc" id="L83">        String personUri = Helper.getUserURI(getUser());</span>
+
+        // Create a new commit (activity)
+<span class="fc" id="L86">        String queryContent = String.format(&quot;&quot;</span>
+                        + &quot;&lt;%s&gt; a rmo:TagCommit, rmo:ReferenceCommit, rmo:Commit ; &quot;
+                        + &quot;	rmo:wasAssociatedWith &lt;%s&gt; ;&quot;
+                        + &quot;	rmo:generated &lt;%s&gt; ;&quot;
+                        + &quot; rmo:used &lt;%s&gt; ;&quot;
+                        + &quot;	rmo:commitMessage \&quot;%s\&quot; ;&quot;
+                        + &quot;	rmo:timeStamp \&quot;%s\&quot; .%n&quot;,
+<span class="fc" id="L93">                commitURI, personUri, referenceURI, getBaseRevision().getRevisionURI(), getMessage(), getTimeStamp());</span>
+
+        // Execute queries
+<span class="fc" id="L96">        String query = Config.prefixes</span>
+<span class="fc" id="L97">                + String.format(&quot;INSERT DATA { GRAPH &lt;%s&gt; { %s } } ;&quot;, getRevisionGraph().getRevisionGraphUri(), queryContent);</span>
+<span class="fc" id="L98">        getTripleStoreInterface().executeUpdateQuery(query);</span>
+
+<span class="fc" id="L100">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

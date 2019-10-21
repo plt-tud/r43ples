@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RevisionControl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.existentobjects</a> &gt; <span class="el_source">RevisionControl.java</span></div><h1>RevisionControl.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.existentobjects;
+
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.HashMap;
+
+/**
+ * Provides information of all revised graphs.
+ *
+ * @author Stephan Hensel
+ */
+<span class="fc" id="L17">public class RevisionControl {</span>
+
+    /** The logger. **/
+<span class="fc" id="L20">    private Logger logger = LogManager.getLogger(RevisionControl.class);</span>
+
+
+    /**
+     * Get a hash map of all revised graphs in R43ples.
+     * Key is the corresponding graph name.
+     *
+     * @return the hash map of revised graphs
+     */
+    public HashMap&lt;String, RevisionGraph&gt; getRevisedGraphs() {
+        // As new graphs can be added there is no private variable storing the currently revised graphs
+<span class="fc" id="L31">        HashMap&lt;String, RevisionGraph&gt; revisionGraphMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L32">        String sparqlQuery = Config.prefixes</span>
+<span class="fc" id="L33">                + String.format(&quot;&quot;</span>
+                + &quot;SELECT DISTINCT ?graph &quot;
+                + &quot;WHERE {&quot;
+                + &quot; GRAPH &lt;%s&gt; {  ?graph a rmo:RevisionGraph }&quot;
+                + &quot;} ORDER BY ?graph&quot;, Config.revision_graph);
+<span class="fc" id="L38">        ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(sparqlQuery);</span>
+<span class="fc bfc" id="L39" title="All 2 branches covered.">        while (results.hasNext()) {</span>
+<span class="fc" id="L40">            QuerySolution qs = results.next();</span>
+<span class="fc" id="L41">            String graphName = qs.getResource(&quot;graph&quot;).toString();</span>
+<span class="fc" id="L42">            RevisionGraph revisionGraph = new RevisionGraph(graphName);</span>
+<span class="fc" id="L43">            revisionGraphMap.put(graphName, revisionGraph);</span>
+<span class="fc" id="L44">        }</span>
+
+<span class="fc" id="L46">        return revisionGraphMap;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

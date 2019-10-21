@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>R43plesRequest.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.management</a> &gt; <span class="el_source">R43plesRequest.java</span></div><h1>R43plesRequest.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.management;
+
+import java.util.regex.Pattern;
+
+
+/**
+ * Provides information of a request received by R43ples.
+ *
+ * @author Markus Graube
+ */
+public class R43plesRequest {
+
+	/** The pattern modifier. **/
+	private final static int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;
+	/** Pattern for SELECT, ASK and CONSTRUCT queries. **/
+<span class="fc" id="L16">	private final Pattern patternSelectAskConstructQuery = Pattern.compile(</span>
+			&quot;(?&lt;type&gt;SELECT|ASK|CONSTRUCT).*WHERE\\s*\\{(?&lt;where&gt;.*)\\}&quot;, 
+			patternModifier);
+    /** Pattern for UPDATE queries. **/
+<span class="fc" id="L20">	private final Pattern patternUpdateQuery = Pattern.compile(</span>
+			&quot;(?&lt;action&gt;INSERT|DELETE).*&lt;(?&lt;graph&gt;[^&gt;]*)&gt;&quot;,
+			patternModifier);
+	/** Pattern for REVERT queries. **/
+<span class="fc" id="L24">	private final Pattern patternRevertQuery =  Pattern.compile(</span>
+			&quot;REVERT\\s*GRAPH\\s*&lt;([^&gt;]*?)&gt;\\s*BRANCH\\s*\&quot;([^\&quot;]*?)\&quot;&quot;,
+			patternModifier);
+    /** Pattern for CREATE GRAPH queries. **/
+<span class="fc" id="L28">	private final Pattern patternCreateGraph = Pattern.compile(</span>
+			&quot;CREATE\\s*(?&lt;silent&gt;SILENT)?\\s*GRAPH\\s*&lt;(?&lt;graph&gt;[^&gt;]*)&gt;&quot;,
+			patternModifier);
+    /** Pattern for DROP GRAPH queries. **/
+<span class="fc" id="L32">	private final Pattern patternDropGraph = Pattern.compile(</span>
+			&quot;DROP\\s*(?&lt;silent&gt;SILENT)?\\s*GRAPH\\s*&lt;(?&lt;graph&gt;[^&gt;]*)&gt;&quot;,
+			patternModifier);
+    /** Pattern for BRANCH or TAG queries. **/
+<span class="fc" id="L36">	private final Pattern patternBranchOrTagQuery = Pattern.compile(</span>
+			&quot;(?&lt;action&gt;TAG|BRANCH)\\s*GRAPH\\s*&lt;(?&lt;graph&gt;[^&gt;\\?]*)(\\?|&gt;)(\\s*REVISION\\s*\&quot;|revision=)(?&lt;revision&gt;([^\&quot;&gt;]+))(&gt;|\&quot;)\\s*TO\\s*\&quot;(?&lt;name&gt;[^\&quot;]*)\&quot;&quot;,
+			patternModifier);
+    /** Pattern for MERGE queries. **/
+<span class="fc" id="L40">	private final Pattern patternMergeQuery =  Pattern.compile(</span>
+			&quot;MERGE\\s*(AUTO|MANUAL)?\\s*GRAPH\\s*&lt;([^&gt;]*?)&gt;\\s*(SDD\\s*&lt;([^&gt;]*?)&gt;)?\\s*BRANCH\\s*\&quot;([^\&quot;]*?)\&quot;\\s*INTO\\s*BRANCH\\s*\&quot;([^\&quot;]*?)\&quot;&quot;,
+			patternModifier);
+	/** Pattern for PICK queries. **/
+<span class="fc" id="L44">	private final Pattern patternPickQuery =  Pattern.compile(</span>
+			&quot;PICK\\s*GRAPH\\s*&lt;([^&gt;]*?)&gt;\\s*REVISION\\s*\&quot;([^\&quot;]*?)\&quot;\\s*(TO\\s*REVISION\\s*\&quot;([^\&quot;]*?)\&quot;\\s*)?INTO\\s*BRANCH\\s*\&quot;([^\&quot;]*?)\&quot;&quot;,
+			patternModifier);
+	/** Pattern for AGG queries. **/
+<span class="fc" id="L48">	private final Pattern patternAggQuery =  Pattern.compile(</span>
+			&quot;AGG\\s*GRAPH\\s*&lt;([^&gt;]*?)&gt;\\s*REVISION\\s*\&quot;([^\&quot;]*?)\&quot;\\s*TO\\s*REVISION\\s*\&quot;([^\&quot;]*?)\&quot;&quot;,
+			patternModifier);
+	/** Pattern for COEVO queries. **/
+<span class="fc" id="L52">	private final Pattern patternCoEvoQuery =  Pattern.compile(</span>
+			&quot;COEVO\\s*GRAPH\\s*&lt;([^&gt;]*?)&gt;\\s*REVISION\\s*\&quot;([^\&quot;]*?)\&quot;\\s*TO\\s*REVISION\\s*\&quot;([^\&quot;]*?)\&quot;&quot;,
+			patternModifier);
+	
+	/** The original query received by R43ples. **/
+	public final String query_r43ples;
+	/** The format of the original query. **/
+	public final String format;
+	/** The resulting SPARQL query. **/
+	public String query_sparql;
+	/** revision information as RDF model string **/
+<span class="fc" id="L63">	public String revisionInformation = null;</span>
+
+
+    /**
+     * The constructor with specified revision information
+     *
+     * @param query the query received by R43ples
+     * @param format the query format
+	 * @param revisionInformation revision information as RDF model string
+     */
+<span class="fc" id="L73">    public R43plesRequest(final String query, final String format, final String revisionInformation) {</span>
+<span class="fc" id="L74">		this.query_r43ples = query;</span>
+<span class="fc" id="L75">		this.format = format;</span>
+<span class="fc" id="L76">		this.query_sparql = query;</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">		if (revisionInformation!=&quot;&quot;)</span>
+<span class="fc" id="L78">			this.revisionInformation = revisionInformation;</span>
+<span class="fc" id="L79">	}</span>
+
+	/**
+	 * The constructor.
+	 *
+	 * @param query the query received by R43ples
+	 * @param format the query format
+	 */
+<span class="fc" id="L87">	public R43plesRequest(final String query, final String format) {</span>
+<span class="fc" id="L88">		this.query_r43ples = query;</span>
+<span class="fc" id="L89">		this.format = format;</span>
+<span class="fc" id="L90">		this.query_sparql = query;</span>
+<span class="fc" id="L91">	}</span>
+
+    /**
+     * Test if the SPARQL query is a SELECT, ASK or CONSTRUCT query.
+     *
+     * @return true if the query is a SELECT, ASK or CONSTRUCT query.
+     */
+    public boolean isSelectAskConstructQuery(){
+<span class="fc" id="L99">        return patternSelectAskConstructQuery.matcher(query_sparql).find();</span>
+	}
+
+    /**
+     * Test if the SPARQL query is a REVERT query.
+     *
+     * @return true if the query is a REVERT query.
+     */
+	public boolean isRevertQuery() {
+<span class="fc" id="L108">        return patternRevertQuery.matcher(query_sparql).find();</span>
+	}
+
+	/**
+	 * Test if the SPARQL query is an UPDATE query.
+	 *
+	 * @return true if the query is an UPDATE query.
+	 */
+	public boolean isUpdateQuery() {
+<span class="fc" id="L117">		return patternUpdateQuery.matcher(query_sparql).find();</span>
+	}
+
+    /**
+     * Test if the SPARQL query is a CREATE GRAPH query.
+     *
+     * @return true if the query is a CREATE GRAPH query.
+     */
+	public boolean isCreateGraphQuery() {
+<span class="fc" id="L126">		return patternCreateGraph.matcher(query_sparql).find();</span>
+	}
+
+    /**
+     * Test if the SPARQL query is a DROP GRAPH query.
+     *
+     * @return true if the query is a DROP GRAPH query.
+     */
+	public boolean isDropGraphQuery() {
+<span class="fc" id="L135">		return patternDropGraph.matcher(query_sparql).find();</span>
+	}
+
+    /**
+     * Test if the SPARQL query is a BRANCH or TAG query.
+     *
+     * @return true if the query is a BRANCH or TAG query.
+     */
+	public boolean isBranchOrTagQuery() {
+<span class="fc" id="L144">		return patternBranchOrTagQuery.matcher(query_sparql).find();</span>
+	}
+
+    /**
+     * Test if the SPARQL query is a MERGE query.
+     *
+     * @return true if the query is a MERGE query.
+     */
+	public boolean isMergeQuery() {
+<span class="fc" id="L153">		return patternMergeQuery.matcher(query_sparql).find();</span>
+	}
+
+	/**
+	 * Test if the SPARQL query is a PICK query.
+	 *
+	 * @return true if the query is a PICK query.
+	 */
+	public boolean isPickQuery() {
+<span class="nc" id="L162">		return patternPickQuery.matcher(query_sparql).find();</span>
+	}
+
+	/**
+	 * Test if the SPARQL query is a AGG query.
+	 *
+	 * @return true if the query is a AGG query.
+	 */
+	public boolean isAggQuery() {
+<span class="nc" id="L171">		return patternAggQuery.matcher(query_sparql).find();</span>
+	}
+
+	/**
+	 * Test if the SPARQL query is a COEVO query.
+	 *
+	 * @return true if the query is a COEVO query.
+	 */
+	public boolean isCoEvoQuery() {
+<span class="nc" id="L180">		return patternCoEvoQuery.matcher(query_sparql).find();</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

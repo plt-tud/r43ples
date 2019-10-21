@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SemanticChange.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.existentobjects</a> &gt; <span class="el_source">SemanticChange.java</span></div><h1>SemanticChange.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.existentobjects;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.LinkedList;
+
+/**
+ * Provides information of an already existent semantic change.
+ *
+ * @author Stephan Hensel
+ */
+public class SemanticChange {
+
+    /** The logger. **/
+<span class="pc" id="L21">    private Logger logger = LogManager.getLogger(SemanticChange.class);</span>
+
+    /** The semantic change URI. */
+    private String semanticChangeURI;
+    /** The used rule URI. */
+    private String usedRuleURI;
+    /** The list of SPARQL variables. */
+    private LinkedList&lt;SparqlVariable&gt; sparqlVariableList;
+    /** The additions as a statement set. */
+    private StatementSet additions;
+    /** The deletions as a statement set. */
+    private StatementSet deletions;
+
+    /** The revision graph URI. */
+    private String revisionGraphURI;
+    /** The corresponding revision graph. */
+    private RevisionGraph revisionGraph;
+
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param semanticChangeURI the semantic change URI
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L47">    public SemanticChange(RevisionGraph revisionGraph, String semanticChangeURI) throws InternalErrorException {</span>
+<span class="fc" id="L48">        this.revisionGraph = revisionGraph;</span>
+<span class="fc" id="L49">        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();</span>
+<span class="fc" id="L50">        this.semanticChangeURI = semanticChangeURI;</span>
+<span class="fc" id="L51">        this.sparqlVariableList = new LinkedList&lt;&gt;();</span>
+
+<span class="fc" id="L53">        retrieveAdditionalInformation();</span>
+<span class="fc" id="L54">    }</span>
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param semanticChangeURI semantic change URI
+     * @param usedRuleURI used rule URI
+     * @param sparqlVariableList list of SPARQL variables
+     * @param additions the additions as a statement set
+     * @param deletions the deletions as a statement set
+     */
+<span class="nc" id="L66">    public SemanticChange(RevisionGraph revisionGraph, String semanticChangeURI, String usedRuleURI, LinkedList&lt;SparqlVariable&gt; sparqlVariableList, StatementSet additions, StatementSet deletions) {</span>
+<span class="nc" id="L67">        this.revisionGraph = revisionGraph;</span>
+<span class="nc" id="L68">        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();</span>
+<span class="nc" id="L69">        this.semanticChangeURI = semanticChangeURI;</span>
+<span class="nc" id="L70">        this.usedRuleURI = usedRuleURI;</span>
+<span class="nc" id="L71">        this.sparqlVariableList = sparqlVariableList;</span>
+<span class="nc" id="L72">        this.additions = additions;</span>
+<span class="nc" id="L73">        this.deletions = deletions;</span>
+<span class="nc" id="L74">    }</span>
+
+    /**
+     * Calculate additional information of the current semantic change and store this information to local variables.
+     *
+     * @throws InternalErrorException
+     */
+    private void retrieveAdditionalInformation() throws InternalErrorException {
+<span class="fc" id="L82">        logger.info(&quot;Get additional information of current semantic change URI &quot; + semanticChangeURI + &quot;.&quot;);</span>
+<span class="fc" id="L83">        String query = Config.prefixes + String.format(&quot;&quot;</span>
+                + &quot;SELECT ?usedRule ?variable ?additionsURI ?deletionsURI &quot;
+                + &quot;WHERE { GRAPH  &lt;%s&gt; {&quot;
+                + &quot;	&lt;%s&gt; a rmo:SemanticChange; &quot;
+                + &quot;	 aero:usedRule ?usedRule; &quot;
+                + &quot;  aero:hasVariables ?variable; &quot;
+                + &quot;  rmo:additions ?additionsURI; &quot;
+                + &quot;  rmo:deletions ?deletionsURI. &quot;
+                + &quot;} }&quot;, revisionGraphURI, semanticChangeURI);
+<span class="fc" id="L92">        this.logger.debug(query);</span>
+<span class="fc" id="L93">        ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);</span>
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">        if (resultSet.hasNext()) {</span>
+<span class="fc" id="L95">            QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L96">            usedRuleURI = qs.getResource(&quot;?usedRule&quot;).toString();</span>
+
+<span class="fc" id="L98">            additions = new StatementSet(revisionGraph, qs.getResource(&quot;?additionsURI&quot;).toString());</span>
+<span class="fc" id="L99">            additions = new StatementSet(revisionGraph, qs.getResource(&quot;?deletionsURI&quot;).toString());</span>
+
+<span class="fc" id="L101">            SparqlVariable sparqlVariable = new SparqlVariable(revisionGraph, qs.getResource(&quot;?variable&quot;).toString());</span>
+<span class="fc" id="L102">            sparqlVariableList.add(sparqlVariable);</span>
+
+<span class="fc bfc" id="L104" title="All 2 branches covered.">            while (resultSet.hasNext()) {</span>
+<span class="fc" id="L105">                qs = resultSet.next();</span>
+<span class="fc" id="L106">                SparqlVariable furtherSparqlVariable = new SparqlVariable(revisionGraph, qs.getResource(&quot;?variable&quot;).toString());</span>
+<span class="fc" id="L107">                sparqlVariableList.add(furtherSparqlVariable);</span>
+<span class="fc" id="L108">            }</span>
+<span class="fc" id="L109">        } else {</span>
+<span class="nc" id="L110">            throw new InternalErrorException(&quot;No additional information found for semantic change URI &quot; + semanticChangeURI + &quot;.&quot;);</span>
+        }
+<span class="fc" id="L112">    }</span>
+
+    /**
+     * Get the semantic change URI.
+     *
+     * @return the semantic change URI
+     */
+    public String getSemanticChangeURI() {
+<span class="fc" id="L120">        return semanticChangeURI;</span>
+    }
+
+    /**
+     * Get the used rule URI.
+     *
+     * @return the used rule URI
+     */
+    public String getUsedRuleURI() {
+<span class="fc" id="L129">        return usedRuleURI;</span>
+    }
+
+    /**
+     * Get the list of SPARQL variables.
+     *
+     * @return the list of SPARQL variables
+     */
+    public LinkedList&lt;SparqlVariable&gt; getSparqlVariableList() {
+<span class="fc" id="L138">        return sparqlVariableList;</span>
+    }
+
+    /**
+     * Get additions as a statement set.
+     *
+     * @return the additions as a statement set
+     */
+    public StatementSet getAdditons() {
+<span class="fc" id="L147">        return additions;</span>
+    }
+
+    /**
+     * Get deletions as a statement set.
+     *
+     * @return the deletions as a statement set
+     */
+    public StatementSet getDeletions() {
+<span class="nc" id="L156">        return deletions;</span>
+    }
+
+    /**
+     * Get the revision graph.
+     *
+     * @return the revision graph
+     */
+    public RevisionGraph getRevisionGraph() {
+<span class="nc" id="L165">        return revisionGraph;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

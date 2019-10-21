@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Commit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.existentobjects</a> &gt; <span class="el_source">Commit.java</span></div><h1>Commit.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.existentobjects;
+
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ * Provides information of an already existent commit.
+ *
+ * @author Stephan Hensel
+ */
+public class Commit {
+
+    /** The logger. **/
+<span class="pc" id="L19">    private Logger logger = LogManager.getLogger(Commit.class);</span>
+
+    /** The commit URI. */
+    private String commitURI;
+    /** The commit message. */
+    private String commitMessage;
+    /** The commit time stamp. */
+    private String commitTimeStamp;
+    /** The associated person name. */
+    private String commitAssociatedPersonName;
+
+    /** The revision graph URI. */
+    private String revisionGraphURI;
+    /** The corresponding revision graph. */
+    private RevisionGraph revisionGraph;
+
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param commitURI the commit URI
+     * @throws InternalErrorException
+     */
+<span class="nc" id="L43">    public Commit(RevisionGraph revisionGraph, String commitURI) throws InternalErrorException {</span>
+<span class="nc" id="L44">        this.revisionGraph = revisionGraph;</span>
+<span class="nc" id="L45">        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();</span>
+<span class="nc" id="L46">        this.commitURI = commitURI;</span>
+
+<span class="nc" id="L48">        retrieveAdditionalInformation();</span>
+<span class="nc" id="L49">    }</span>
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param commitURI the commit URI
+     * @param user the user
+     * @param timeStamp the time stamp
+     * @param message the message
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L61">    public Commit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message) throws InternalErrorException {</span>
+<span class="fc" id="L62">        this.revisionGraph = revisionGraph;</span>
+<span class="fc" id="L63">        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();</span>
+<span class="fc" id="L64">        this.commitURI = commitURI;</span>
+<span class="fc" id="L65">        this.commitAssociatedPersonName = user;</span>
+<span class="fc" id="L66">        this.commitTimeStamp = timeStamp;</span>
+<span class="fc" id="L67">        this.commitMessage = message;</span>
+<span class="fc" id="L68">    }</span>
+
+    /**
+     * Calculate additional information of the current commit and store this information to local variables.
+     *
+     * @throws InternalErrorException
+     */
+    private void retrieveAdditionalInformation() throws InternalErrorException {
+<span class="nc" id="L76">        logger.info(&quot;Get additional information of current commit URI &quot; + commitURI + &quot;.&quot;);</span>
+<span class="nc" id="L77">        String query = Config.prefixes + String.format(&quot;&quot;</span>
+                + &quot;SELECT ?title ?time ?person &quot;
+                + &quot;WHERE { GRAPH  &lt;%s&gt; {&quot;
+                + &quot;	&lt;%s&gt; a rmo:Commit; &quot;
+                + &quot;	 rmo:commitMessage ?title; &quot;
+                + &quot;  rmo:timeStamp ?time; &quot;
+                + &quot;  rmo:wasAssociatedWith ?person. &quot;
+                + &quot;} }&quot;, revisionGraphURI, commitURI);
+<span class="nc" id="L85">        this.logger.debug(query);</span>
+<span class="nc" id="L86">        ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">        if (resultSet.hasNext()) {</span>
+<span class="nc" id="L88">            QuerySolution qs = resultSet.next();</span>
+<span class="nc" id="L89">            commitMessage = qs.getLiteral(&quot;?title&quot;).toString();</span>
+<span class="nc" id="L90">            commitTimeStamp = qs.getLiteral(&quot;?timeStamp&quot;).toString();</span>
+<span class="nc" id="L91">            commitAssociatedPersonName = qs.getResource(&quot;?person&quot;).toString();</span>
+<span class="nc" id="L92">        } else {</span>
+<span class="nc" id="L93">            throw new InternalErrorException(&quot;No additional information found for commit URI &quot; + commitURI + &quot;.&quot;);</span>
+        }
+<span class="nc" id="L95">    }</span>
+
+    /**
+     * Get the commit URI.
+     *
+     * @return the commit URI
+     */
+    public String getCommitURI() {
+<span class="nc" id="L103">        return commitURI;</span>
+    }
+
+    /**
+     * Get the commit message.
+     *
+     * @return the commit message
+     */
+    public String getCommitMessage() {
+<span class="nc" id="L112">        return commitMessage;</span>
+    }
+
+    /**
+     * Get the commit time stamp.
+     *
+     * @return the commit time stamp
+     */
+    public String getCommitTimeStamp() {
+<span class="nc" id="L121">        return commitTimeStamp;</span>
+    }
+
+    /**
+     * Get the associated person name.
+     *
+     * @return the associated person name
+     */
+    public String getCommitAssociatedPersonName() {
+<span class="nc" id="L130">        return commitAssociatedPersonName;</span>
+    }
+
+    /**
+     * Get the revision graph.
+     *
+     * @return the revision graph
+     */
+    public RevisionGraph getRevisionGraph() {
+<span class="fc" id="L139">        return revisionGraph;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

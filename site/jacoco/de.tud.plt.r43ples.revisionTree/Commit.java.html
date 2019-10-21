@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Commit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.revisionTree</a> &gt; <span class="el_source">Commit.java</span></div><h1>Commit.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.revisionTree;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+
+import org.apache.commons.lang.builder.HashCodeBuilder;
+
+public class Commit implements Comparable&lt;Commit&gt; {
+	private String uri;
+	private String message;
+	private Date time;
+	private String author;
+	private List&lt;String&gt; baseRev;
+	private String nextRev;
+	private Branch branch;
+	public List&lt;Commit&gt; predecessor;
+	public List&lt;Commit&gt; successors;
+	
+	/**
+	 * @param uri
+	 * @param message
+	 *            commit message
+	 * @param time
+	 *            time of execution
+	 * @param author
+	 *            author of the commit
+	 * @param baseRev
+	 *            name of revision this commit is based on
+	 * @param nextRev
+	 *            name of revision this commit generated
+	 */
+	public Commit(String uri, String message, Date time, String author, String baseRev, String nextRev) {
+<span class="fc" id="L35">		this(uri);</span>
+<span class="fc" id="L36">		this.message = message;</span>
+<span class="fc" id="L37">		this.time = time;</span>
+<span class="fc" id="L38">		this.author = author;</span>
+<span class="fc" id="L39">		this.baseRev = new LinkedList&lt;String&gt;();</span>
+<span class="fc" id="L40">		this.baseRev.add(baseRev);</span>
+<span class="fc" id="L41">		this.nextRev = nextRev;</span>
+<span class="fc" id="L42">	}</span>
+
+<span class="fc" id="L44">	public Commit(String uri) {</span>
+<span class="fc" id="L45">		this.uri = uri;</span>
+<span class="fc" id="L46">		predecessor = new ArrayList&lt;Commit&gt;();</span>
+<span class="fc" id="L47">		successors = new ArrayList&lt;Commit&gt;();</span>
+<span class="fc" id="L48">	}</span>
+
+	public String getMessage() {
+<span class="fc" id="L51">		return message;</span>
+	}
+	
+	public Date getTime() {
+<span class="fc" id="L55">		return time;</span>
+	}
+	
+	public String getAuthor() {
+<span class="fc" id="L59">		return author;</span>
+	}
+	
+	public List&lt;String&gt; getBaseRevisions() {
+<span class="fc" id="L63">		return baseRev;</span>
+	}
+	
+	public String getNextRevision() {
+<span class="fc" id="L67">		return nextRev;</span>
+	}
+
+	public Branch getBranch() {
+<span class="fc" id="L71">		return branch;</span>
+	}
+
+	public void setBranch(Branch branch) {
+<span class="fc" id="L75">		this.branch = branch;</span>
+<span class="fc" id="L76">	}</span>
+
+	@Override
+	public int compareTo(Commit o) {
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">		if(o.equals(this))</span>
+<span class="nc" id="L81">			return 0;</span>
+		
+<span class="fc bfc" id="L83" title="All 2 branches covered.">		if(findInPredecessors(o))</span>
+<span class="fc" id="L84">			return 1;</span>
+		
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">		if(findInSuccessors(o))</span>
+<span class="nc" id="L87">			return -1;</span>
+		
+<span class="fc" id="L89">		return time.compareTo(o.getTime());</span>
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">		if(obj instanceof Commit)</span>
+		{
+<span class="fc" id="L96">			return ((Commit) obj).uri.equals(this.uri);</span>
+		}
+<span class="nc" id="L98">		return false;</span>
+	}
+	
+	@Override
+    public int hashCode() {
+<span class="fc" id="L103">        return new HashCodeBuilder().append(uri).toHashCode();</span>
+    }
+	
+	private boolean findInPredecessors(Commit o)
+	{
+<span class="fc bfc" id="L108" title="All 2 branches covered.">		if(this.predecessor.contains(o))</span>
+<span class="fc" id="L109">			return true;</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">		for(Commit c : predecessor)</span>
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">			if(c.findInPredecessors(o))</span>
+<span class="nc" id="L112">				return true;</span>
+<span class="fc" id="L113">		return false;</span>
+	}
+	
+	private boolean findInSuccessors(Commit o)
+	{
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">		if(this.successors.contains(o))</span>
+<span class="nc" id="L119">			return true;</span>
+<span class="fc bfc" id="L120" title="All 2 branches covered.">		for(Commit c : successors)</span>
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">			if(c.findInSuccessors(o))</span>
+<span class="nc" id="L122">				return true;</span>
+<span class="fc" id="L123">		return false;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

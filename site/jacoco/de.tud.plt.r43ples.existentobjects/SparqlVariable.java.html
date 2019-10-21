@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SparqlVariable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.existentobjects</a> &gt; <span class="el_source">SparqlVariable.java</span></div><h1>SparqlVariable.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.existentobjects;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ * Provides information of a SPARQL variable.
+ *
+ * @author Stephan Hensel
+ */
+public class SparqlVariable {
+
+    /** The logger. **/
+<span class="fc" id="L19">    private Logger logger = LogManager.getLogger(SparqlVariable.class);</span>
+
+    /** The SPARQL variable URI. */
+    private String sparqlVariableURI;
+    /** The variable name. */
+    private String variableName;
+    /** The SPIN resource URI. */
+    private String spinResourceURI;
+    /** The value. */
+    private String value;
+    /** The identification whether the value is a resource (true) or a literal (false). */
+    private boolean isResource;
+
+    /** The revision graph URI. */
+    private String revisionGraphURI;
+    /** The corresponding revision graph. */
+    private RevisionGraph revisionGraph;
+
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param sparqlVariableURI the SPARQL variable URI
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L45">    public SparqlVariable(RevisionGraph revisionGraph, String sparqlVariableURI) throws InternalErrorException {</span>
+<span class="fc" id="L46">        this.revisionGraph = revisionGraph;</span>
+<span class="fc" id="L47">        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();</span>
+<span class="fc" id="L48">        this.sparqlVariableURI = sparqlVariableURI;</span>
+
+<span class="fc" id="L50">        retrieveAdditionalInformation();</span>
+<span class="fc" id="L51">    }</span>
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param sparqlVariableURI the SPARQL variable URI
+     * @param variableName the variable name
+     * @param spinResourceURI the SPIN resource URI
+     * @param value the value
+     * @param isResource the identification whether the value is a resource (true) or a literal (false)
+     */
+<span class="fc" id="L63">    public SparqlVariable(RevisionGraph revisionGraph, String sparqlVariableURI, String variableName, String spinResourceURI, String value, boolean isResource) {</span>
+<span class="fc" id="L64">        this.revisionGraph = revisionGraph;</span>
+        // Null check is necessary because this constructor is also used with an empty revision graph as a temporary object
+<span class="fc bfc" id="L66" title="All 2 branches covered.">        if (this.revisionGraph != null) {</span>
+<span class="fc" id="L67">            this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();</span>
+        }
+<span class="fc" id="L69">        this.sparqlVariableURI = sparqlVariableURI;</span>
+<span class="fc" id="L70">        this.variableName = variableName;</span>
+<span class="fc" id="L71">        this.spinResourceURI = spinResourceURI;</span>
+<span class="fc" id="L72">        this.value = value;</span>
+<span class="fc" id="L73">        this.isResource = isResource;</span>
+<span class="fc" id="L74">    }</span>
+
+    /**
+     * The constructor. Used for the coevolution
+     *
+     * @param sparqlVariableURI the SPARQL variable URI
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L82">    public SparqlVariable(String sparqlVariableURI) throws InternalErrorException {</span>
+<span class="fc" id="L83">        this.revisionGraphURI = Config.evolution_graph;</span>
+<span class="fc" id="L84">        this.sparqlVariableURI = sparqlVariableURI;</span>
+
+<span class="fc" id="L86">        retrieveAdditionalInformation();</span>
+<span class="fc" id="L87">    }</span>
+
+    /**
+     * Calculate additional information of the current SPARQL variable and store this information to local variables.
+     *
+     * @throws InternalErrorException
+     */
+    private void retrieveAdditionalInformation() throws InternalErrorException {
+<span class="fc" id="L95">        logger.info(&quot;Get additional information of current SPARQL variable URI &quot; + sparqlVariableURI + &quot;.&quot;);</span>
+<span class="fc" id="L96">        String query = Config.prefixes + String.format(&quot;&quot;</span>
+                + &quot;SELECT ?variableName ?spinResourceURI ?value &quot;
+                + &quot;WHERE { GRAPH  &lt;%s&gt; {&quot;
+                + &quot;	&lt;%s&gt; a aero:SPARQLVariable; &quot;
+                + &quot;	 sp:varName ?variableName; &quot;
+                + &quot;  aero:spinResource ?spinResourceURI; &quot;
+                + &quot;  aero:value ?value. &quot;
+                + &quot;} }&quot;, revisionGraphURI, sparqlVariableURI);
+<span class="fc" id="L104">        this.logger.debug(query);</span>
+<span class="fc" id="L105">        ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);</span>
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">        if (resultSet.hasNext()) {</span>
+<span class="fc" id="L107">            QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L108">            variableName = qs.getLiteral(&quot;?variableName&quot;).toString();</span>
+<span class="fc" id="L109">            spinResourceURI = qs.getResource(&quot;?spinResourceURI&quot;).toString();</span>
+
+<span class="pc bpc" id="L111" title="1 of 2 branches missed.">            if (qs.getResource(&quot;?value&quot;) != null) {</span>
+<span class="fc" id="L112">                value = qs.getResource(&quot;?value&quot;).toString();</span>
+<span class="fc" id="L113">                isResource = true;</span>
+            } else {
+<span class="nc bnc" id="L115" title="All 2 branches missed.">                if (qs.getLiteral(&quot;?value&quot;) != null) {</span>
+<span class="nc" id="L116">                    value = qs.getLiteral(&quot;?value&quot;).toString();</span>
+<span class="nc" id="L117">                    isResource = false;</span>
+                }
+            }
+<span class="fc" id="L120">        } else {</span>
+<span class="nc" id="L121">            throw new InternalErrorException(&quot;No additional information found for SPARQL variable URI &quot; + sparqlVariableURI + &quot;.&quot;);</span>
+        }
+<span class="fc" id="L123">    }</span>
+
+    /**
+     * Get the SPARQL variable URI.
+     *
+     * @return the SPARQL variable URI
+     */
+    public String getSparqlVariableURI() {
+<span class="nc" id="L131">        return sparqlVariableURI;</span>
+    }
+
+    /**
+     * Get the variable name.
+     *
+     * @return the variable name
+     */
+    public String getVariableName() {
+<span class="fc" id="L140">        return variableName;</span>
+    }
+
+    /**
+     * Get the SPIN resource URI.
+     *
+     * @return the SPIN resource URI
+     */
+    public String getSpinResourceURI() {
+<span class="fc" id="L149">        return spinResourceURI;</span>
+    }
+
+    /**
+     * Get the value.
+     *
+     * @return the value
+     */
+    public String getValue() {
+<span class="fc" id="L158">        return value;</span>
+    }
+
+    /**
+     * Get the identification whether the value is a resource (true) or a literal (false).
+     *
+     * @return true if the value is a resource and false if the value is a literal
+     */
+    public boolean isResource() {
+<span class="fc" id="L167">        return isResource;</span>
+    }
+
+    /**
+     * Get the revision graph.
+     *
+     * @return the revision graph
+     */
+    public RevisionGraph getRevisionGraph() {
+<span class="nc" id="L176">        return revisionGraph;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

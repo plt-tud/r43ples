@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ConsoleClientArgs.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.client</a> &gt; <span class="el_source">ConsoleClientArgs.java</span></div><h1>ConsoleClientArgs.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.client;
+
+
+import com.beust.jcommander.Parameter;
+import com.beust.jcommander.ParametersDelegate;
+
+<span class="fc" id="L7">public class ConsoleClientArgs {</span>
+  
+  @Parameter(names = {&quot;-g&quot;, &quot;--graph&quot;}, required=true, description = &quot;uri of graph&quot;)
+  public String graph;
+
+  @Parameter(names = {&quot;-n&quot;, &quot;--new&quot;}, description = &quot;Creates new graph after deleting the graph when already existing&quot;)
+  public boolean create;
+  
+  @Parameter(names = {&quot;-a&quot;, &quot;--add-set&quot;}, description = &quot;add set file&quot;)
+  public String add_set;
+
+  @Parameter(names = {&quot;-d&quot;, &quot;--delete-set&quot;}, description = &quot;delete set file&quot;)
+  public String delete_set;
+  
+<span class="fc" id="L21">  @Parameter(names = {&quot;-u&quot;, &quot;--user&quot;}, description = &quot;user name&quot;)</span>
+  public String user = &quot;console client&quot;;
+
+<span class="fc" id="L24">  @Parameter(names = {&quot;-m&quot;, &quot;--message&quot;}, description = &quot;commit message&quot;)</span>
+  public String message = &quot;console client commit&quot;;
+  
+<span class="fc" id="L27">  @Parameter(names = {&quot;-b&quot;, &quot;--branch&quot;}, description = &quot;branch which should contain new revision&quot;)</span>
+  public String branch = &quot;master&quot;;
+  
+<span class="fc" id="L30">  @ParametersDelegate</span>
+  public R43plesArgs r43ples = new R43plesArgs();
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

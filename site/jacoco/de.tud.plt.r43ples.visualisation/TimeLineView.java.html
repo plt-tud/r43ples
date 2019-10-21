@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TimeLineView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.visualisation</a> &gt; <span class="el_source">TimeLineView.java</span></div><h1>TimeLineView.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.visualisation;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.List;
+
+import de.tud.plt.r43ples.revisionTree.Commit;
+
+public class TimeLineView {
+
+	/**
+	 * Font of the Text
+	 */
+<span class="fc" id="L17">	private final Font TextFont = new Font(&quot;Monospaced&quot;, Font.PLAIN, 14);</span>
+
+	private List&lt;Commit&gt; commits;
+
+<span class="fc" id="L21">	public TimeLineView(List&lt;Commit&gt; commits2) {</span>
+<span class="fc" id="L22">		commits = commits2;</span>
+<span class="fc" id="L23">	}</span>
+
+	public void draw(Graphics2D g) {
+
+<span class="fc" id="L27">		int y = VisualisationTable.LINE_HEIGHT;</span>
+<span class="fc" id="L28">		int totalHeight = commits.size() * VisualisationTable.LINE_HEIGHT + 10;</span>
+<span class="fc" id="L29">		DateFormat dayFormat = new SimpleDateFormat(&quot;d&quot;);</span>
+<span class="fc" id="L30">		DateFormat monthFormat = new SimpleDateFormat(&quot;MMM&quot;);</span>
+
+<span class="fc" id="L32">		Font tmp = g.getFont();</span>
+<span class="fc" id="L33">		g.setFont(TextFont);</span>
+<span class="fc" id="L34">		int offset = g.getFontMetrics(TextFont).getDescent();</span>
+
+<span class="fc" id="L36">		String oldMonth = &quot;&quot;;</span>
+<span class="fc" id="L37">		String oldDay = &quot;&quot;;</span>
+<span class="fc" id="L38">		g.setColor(new Color(0x222222));</span>
+<span class="fc" id="L39">		g.fillRect(0, offset, 35, totalHeight);</span>
+<span class="fc" id="L40">		g.setColor(new Color(0x444444));</span>
+<span class="fc" id="L41">		g.fillRect(35, offset, 25, totalHeight);</span>
+<span class="fc" id="L42">		g.setColor(Color.BLACK);</span>
+<span class="fc" id="L43">		g.drawLine(35, offset, 35, totalHeight);</span>
+<span class="fc" id="L44">		g.setColor(Color.WHITE);</span>
+
+<span class="fc bfc" id="L46" title="All 2 branches covered.">		for (Commit c : commits) {</span>
+<span class="fc" id="L47">			String month = monthFormat.format(c.getTime());</span>
+<span class="fc" id="L48">			String day = dayFormat.format(c.getTime());</span>
+<span class="fc bfc" id="L49" title="All 2 branches covered.">			if (!month.equals(oldMonth)) {</span>
+<span class="fc" id="L50">				g.drawString(month, 4</span>
+						, y);
+<span class="fc" id="L52">				oldMonth = month;</span>
+			}
+<span class="fc bfc" id="L54" title="All 2 branches covered.">			if (!day.equals(oldDay)) {</span>
+<span class="fc" id="L55">				g.drawString(day, 38, y);</span>
+<span class="fc" id="L56">				oldDay = day;</span>
+			}
+<span class="fc" id="L58">			y += VisualisationTable.LINE_HEIGHT;</span>
+<span class="fc" id="L59">		}</span>
+<span class="fc" id="L60">		g.setColor(Color.BLACK);</span>
+<span class="fc" id="L61">		g.setFont(tmp);</span>
+<span class="fc" id="L62">	}</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

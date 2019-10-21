@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AggregationDraft.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">AggregationDraft.java</span></div><h1>AggregationDraft.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.exception.QueryErrorException;
+import de.tud.plt.r43ples.existentobjects.ChangeSet;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.existentobjects.SemanticChange;
+import de.tud.plt.r43ples.iohelper.Helper;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import de.tud.plt.r43ples.webservice.Endpoint;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFactory;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+
+/**
+ * Aggregation of atomic changes to high level ones based upon the provided aggregation rules as SPIN.
+ * Example query: AGG GRAPH &lt;http://test.com/r43ples-dataset-hlc-aggregation&gt; REVISION &quot;1&quot; TO REVISION &quot;2&quot;
+ * Currently the implementation only works if the end revision is the direct succeeding revision of the start revision.
+ *
+ * @author Stephan Hensel
+ */
+<span class="pc bpc" id="L40" title="1 of 2 branches missed.">public class AggregationDraft {</span>
+
+    /** The logger. **/
+<span class="fc" id="L43">    private Logger logger = LogManager.getLogger(SelectConstructAskQuery.class);</span>
+
+    /** The pattern modifier. **/
+<span class="fc" id="L46">    private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;</span>
+    /** The merge query pattern. **/
+<span class="fc" id="L48">    private final Pattern patternAggQuery = Pattern.compile(</span>
+            &quot;AGG\\s*GRAPH\\s*&lt;(?&lt;graph&gt;[^&gt;]*?)&gt;\\s*REVISION\\s*\&quot;(?&lt;startRevisionIdentifier&gt;[^\&quot;]*?)\&quot;\\s*TO\\s*REVISION\\s*\&quot;(?&lt;endRevisionIdentifier&gt;[^\&quot;]*?)\&quot;\\s*&quot;,
+            patternModifier);
+
+    /** The corresponding R43ples request. **/
+    private R43plesRequest request;
+    /** The start revision identifier. **/
+    private String startRevisionIdentifier;
+    /** The end revision identifier. **/
+    private String endRevisionIdentifier;
+    /** The change set between start and end revision. **/
+    private ChangeSet changeSetStartToEnd;
+    /** The graph name **/
+    private String graphName;
+    /** The revision graph. **/
+    private RevisionGraph revisionGraph;
+
+    // Dependencies
+    /** The triplestore interface to use. **/
+    private TripleStoreInterface tripleStoreInterface;
+    /** The current URI calculator instance. */
+    private URICalculator uriCalculator;
+    /** The endpoint. **/
+<span class="fc" id="L71">    private Endpoint ep = new Endpoint();</span>
+
+
+    /**
+     * The constructor.
+     *
+     * @param request the request received by R43ples
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L80">    protected AggregationDraft(R43plesRequest request) throws InternalErrorException {</span>
+        // Dependencies
+<span class="fc" id="L82">        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();</span>
+<span class="fc" id="L83">        this.uriCalculator = new URICalculator();</span>
+
+<span class="fc" id="L85">        this.request = request;</span>
+
+<span class="fc" id="L87">        this.extractRequestInformation();</span>
+<span class="fc" id="L88">    }</span>
+
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param changeSetStartToEnd the change set between start and end revision
+     */
+<span class="fc" id="L97">    protected AggregationDraft(RevisionGraph revisionGraph, ChangeSet changeSetStartToEnd) {</span>
+        // Dependencies
+<span class="fc" id="L99">        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();</span>
+<span class="fc" id="L100">        this.uriCalculator = new URICalculator();</span>
+
+<span class="fc" id="L102">        this.revisionGraph = revisionGraph;</span>
+<span class="fc" id="L103">        this.graphName = revisionGraph.getGraphName();</span>
+<span class="fc" id="L104">        this.changeSetStartToEnd = changeSetStartToEnd;</span>
+<span class="fc" id="L105">        this.startRevisionIdentifier = changeSetStartToEnd.getPriorRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L106">        this.endRevisionIdentifier = changeSetStartToEnd.getSucceedingRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L107">    }</span>
+
+    /**
+     * Triggers the aggregation process and writes meta information into revision graph.
+     *
+     * @return the list of created semantic changes
+     * @throws InternalErrorException
+     */
+    protected LinkedList&lt;SemanticChange&gt; aggregate() throws InternalErrorException {
+
+        // New linked list to store all created semantic changes
+<span class="fc" id="L118">        LinkedList&lt;SemanticChange&gt; semanticChangesLinkedList = new LinkedList&lt;&gt;();</span>
+
+        // Get all available aggregation rules
+<span class="fc" id="L121">        String queryAggRules = String.format(</span>
+                Config.prefixes
+                        + &quot;SELECT ?aggrule %n&quot;
+                        + &quot;WHERE { GRAPH &lt;%s&gt; { %n&quot;
+                        + &quot;	?aggrule a aero:HLCAggRule . %n&quot;
+                        + &quot;} } %n&quot;, Config.rules_graph);
+
+        // Iterate over available aggregation rules
+<span class="fc" id="L129">        ResultSet resultSetAggRules = tripleStoreInterface.executeSelectQuery(queryAggRules);</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">        while (resultSetAggRules.hasNext()) {</span>
+<span class="fc" id="L131">            QuerySolution qs = resultSetAggRules.next();</span>
+
+<span class="fc" id="L133">            String aggRuleURI = qs.getResource(&quot;?aggrule&quot;).toString();</span>
+
+            // Get the SPIN query
+<span class="fc" id="L136">            String querySpinQuery = String.format(</span>
+                    Config.prefixes
+                            + &quot;SELECT ?query %n&quot;
+                            + &quot;WHERE { GRAPH &lt;%s&gt; { %n&quot;
+                            + &quot;	&lt;%s&gt; a aero:HLCAggRule ; %n&quot;
+                            + &quot;      aero:spinQuery ?query .&quot;
+                            + &quot;} } %n&quot;, Config.rules_graph, aggRuleURI);
+<span class="fc" id="L143">            ResultSet resultSetSpinRule = tripleStoreInterface.executeSelectQuery(querySpinQuery);</span>
+<span class="fc" id="L144">            String spinURI = null;</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">            while (resultSetSpinRule.hasNext()) {</span>
+<span class="fc" id="L146">                QuerySolution qsSpin = resultSetSpinRule.next();</span>
+<span class="fc" id="L147">                spinURI = qsSpin.getResource(&quot;?query&quot;).toString();</span>
+<span class="fc" id="L148">            }</span>
+<span class="fc" id="L149">            String spinQueryN3 = Helper.getAllRelatedElementsToURI(Config.rules_graph, spinURI);</span>
+
+            // Create the SPARQL query
+<span class="fc" id="L152">            String sparqlAggQuery = Helper.getSparqlSelectQueryFromSpin(spinQueryN3, spinURI);</span>
+
+            // Replace placeholder with current request information
+<span class="fc" id="L155">            sparqlAggQuery = sparqlAggQuery.replace(&quot;&lt;http://NAMEDGRAPH#ADDSET-1-2&gt;&quot;, &quot;&lt;&quot; + changeSetStartToEnd.getAddSetURI() + &quot;&gt;&quot;);</span>
+<span class="fc" id="L156">            sparqlAggQuery = sparqlAggQuery.replace(&quot;&lt;http://NAMEDGRAPH#DELETESET-1-2&gt;&quot;, &quot;&lt;&quot; + changeSetStartToEnd.getDeleteSetURI() + &quot;&gt;&quot;);</span>
+<span class="fc" id="L157">            sparqlAggQuery = sparqlAggQuery.replace(&quot;&lt;http://NAMEDGRAPH#rev1&gt;&quot;, &quot;&lt;&quot; + graphName + &quot;&gt; REVISION \&quot;&quot; + startRevisionIdentifier + &quot;\&quot;&quot;);</span>
+<span class="fc" id="L158">            sparqlAggQuery = sparqlAggQuery.replace(&quot;&lt;http://NAMEDGRAPH#rev2&gt;&quot;, &quot;&lt;&quot; + graphName + &quot;&gt; REVISION \&quot;&quot; + endRevisionIdentifier + &quot;\&quot;&quot;);</span>
+
+<span class="fc" id="L160">            String sparqlResult = ep.sparql(sparqlAggQuery).getEntity().toString();</span>
+
+<span class="fc" id="L162">            ResultSet resultSet = ResultSetFactory.fromXML(new ByteArrayInputStream(sparqlResult.getBytes()));</span>
+
+<span class="fc bfc" id="L164" title="All 2 branches covered.">            while (resultSet.hasNext()) {</span>
+<span class="fc" id="L165">                QuerySolution qsResult = resultSet.next();</span>
+<span class="fc" id="L166">                semanticChangesLinkedList.add(addMetaInformation(aggRuleURI, spinQueryN3, spinURI, qsResult));</span>
+<span class="fc" id="L167">            }</span>
+
+<span class="fc" id="L169">        }</span>
+
+<span class="fc" id="L171">        return semanticChangesLinkedList;</span>
+    }
+
+    /**
+     * Adds meta information of aggregation to the revision graph.
+     *
+     * @param aggRuleURI the aggregation rule URI
+     * @param spinQueryN3 the SPIN query as N3
+     * @param spinURI the URI of the SPIN query
+     * @param qsResult the query result after execution of the SPIN query
+     *
+     * @return the created semantic change
+     * @throws InternalErrorException
+     */
+    private SemanticChange addMetaInformation(String aggRuleURI, String spinQueryN3, String spinURI, QuerySolution qsResult) throws InternalErrorException {
+        // Basic meta data
+<span class="fc" id="L187">        String semanticChangeURI = uriCalculator.getRandomURI(revisionGraph);</span>
+<span class="fc" id="L188">        String additionsURI = uriCalculator.getRandomURI(revisionGraph);</span>
+<span class="fc" id="L189">        String deletionsURI = uriCalculator.getRandomURI(revisionGraph);</span>
+
+<span class="fc" id="L191">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc" id="L192">        sb.append(String.format(</span>
+                &quot;&lt;%s&gt; a rmo:SemanticChange ; %n&quot;
+                        + &quot;	rmo:additions &lt;%s&gt; ; %n&quot;
+                        + &quot;	rmo:deletions &lt;%s&gt; ; %n&quot;
+                        + &quot;	aero:usedRule &lt;%s&gt; . %n&quot;,
+                semanticChangeURI, additionsURI, deletionsURI, aggRuleURI));
+
+        // Variable meta data
+<span class="fc" id="L200">        HashMap&lt;String,String&gt; variableMap = Helper.getVariableMapFromSpin(spinQueryN3, spinURI);</span>
+<span class="fc" id="L201">        HashMap&lt;String,String&gt; variableResultMap = new HashMap&lt;&gt;();</span>
+
+<span class="fc" id="L203">        Iterator ite = qsResult.varNames();</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        while (ite.hasNext()) {</span>
+<span class="fc" id="L205">            String sparqlVariableURI = uriCalculator.getRandomURI(revisionGraph);</span>
+<span class="fc" id="L206">            String varName = ite.next().toString();</span>
+            String value;
+            try {
+<span class="fc" id="L209">                value = &quot;&lt;&quot; + qsResult.getResource(&quot;?&quot; + varName).toString() + &quot;&gt;&quot;;</span>
+<span class="nc" id="L210">            } catch (Exception e) {</span>
+<span class="nc" id="L211">                value = &quot;\&quot;&quot; + qsResult.getLiteral(&quot;?&quot; + varName).toString() + &quot;\&quot;&quot;;</span>
+<span class="fc" id="L212">            }</span>
+<span class="fc" id="L213">            variableResultMap.put(varName,value);</span>
+<span class="fc" id="L214">            sb.append(String.format(</span>
+                &quot;&lt;%s&gt; aero:hasVariables &lt;%s&gt; . %n&quot; +
+                &quot;&lt;%s&gt; a aero:SPARQLVariable ; %n&quot;
+                        + &quot;	sp:varName \&quot;%s\&quot; ; %n&quot;
+                        + &quot;	aero:value %s ; %n&quot;
+                        + &quot;	aero:spinResource &lt;%s&gt; . %n&quot;,
+<span class="fc" id="L220">                semanticChangeURI, sparqlVariableURI, sparqlVariableURI, varName, value, variableMap.get(varName)));</span>
+
+<span class="fc" id="L222">        }</span>
+
+        // TRIG data - Get additions and deletions and store them as TRIG
+
+        // Get the additions and deletions SPIN queries
+<span class="fc" id="L227">        String queryAddDelSpinQueries = String.format(</span>
+                Config.prefixes
+                        + &quot;SELECT ?queryAdd ?queryDel %n&quot;
+                        + &quot;WHERE { GRAPH &lt;%s&gt; { %n&quot;
+                        + &quot;	&lt;%s&gt; a aero:HLCAggRule ; %n&quot;
+                        + &quot;      aero:addSetDetectionQuery ?subQueryAdd ; %n&quot;
+                        + &quot;      aero:deleteSetDetectionQuery ?subQueryDel . %n&quot;
+                        + &quot; ?subQueryAdd &lt;http://spinrdf.org/sp#query&gt; ?queryAdd. %n&quot;
+                        + &quot; ?subQueryDel &lt;http://spinrdf.org/sp#query&gt; ?queryDel. %n&quot;
+                        + &quot;} } %n&quot;, Config.rules_graph, aggRuleURI);
+<span class="fc" id="L237">        ResultSet resultSetAddDelQueries = tripleStoreInterface.executeSelectQuery(queryAddDelSpinQueries);</span>
+<span class="fc" id="L238">        String spinAddURI = null;</span>
+<span class="fc" id="L239">        String spinDelURI = null;</span>
+<span class="fc bfc" id="L240" title="All 2 branches covered.">        while (resultSetAddDelQueries.hasNext()) {</span>
+<span class="fc" id="L241">            QuerySolution qsSpin = resultSetAddDelQueries.next();</span>
+<span class="fc" id="L242">            spinAddURI = qsSpin.getResource(&quot;?queryAdd&quot;).toString();</span>
+<span class="fc" id="L243">            spinDelURI = qsSpin.getResource(&quot;?queryDel&quot;).toString();</span>
+<span class="fc" id="L244">        }</span>
+
+<span class="fc" id="L246">        String sparqlAddQuery = Helper.getSparqlSelectQueryFromSpin(spinQueryN3, spinAddURI);</span>
+<span class="fc" id="L247">        String sparqlDelQuery = Helper.getSparqlSelectQueryFromSpin(spinQueryN3, spinDelURI);</span>
+
+        // Get the WHERE part of the queries and replace the variables with query results to get the involved triples
+<span class="fc" id="L250">        Pattern patternWherePart = Pattern.compile(</span>
+                &quot;(?s:.)*WHERE\\s*\\{\\s*GRAPH(?s:.)*\\{(?&lt;where&gt;(?s:.)*)?\\}\\s*\\}&quot;,
+                patternModifier);
+
+<span class="pc bpc" id="L254" title="2 of 4 branches missed.">        assert sparqlAddQuery != null;</span>
+<span class="fc" id="L255">        Matcher mAdd = patternWherePart.matcher(sparqlAddQuery);</span>
+<span class="pc bpc" id="L256" title="2 of 4 branches missed.">        assert sparqlDelQuery != null;</span>
+<span class="fc" id="L257">        Matcher mDel = patternWherePart.matcher(sparqlDelQuery);</span>
+
+<span class="fc" id="L259">        mAdd.find();</span>
+<span class="fc" id="L260">        mDel.find();</span>
+
+<span class="fc" id="L262">        String triplesAdd = mAdd.group(&quot;where&quot;).trim();</span>
+<span class="fc" id="L263">        String triplesDel = mDel.group(&quot;where&quot;).trim();</span>
+
+<span class="pc bpc" id="L265" title="1 of 2 branches missed.">        if (!triplesAdd.endsWith(&quot;.&quot;))</span>
+<span class="fc" id="L266">            triplesAdd = triplesAdd.concat(&quot;.&quot;);</span>
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">        if (!triplesDel.endsWith(&quot;.&quot;))</span>
+<span class="fc" id="L268">            triplesDel = triplesDel.concat(&quot;.&quot;);</span>
+
+<span class="fc bfc" id="L270" title="All 2 branches covered.">        for (String currentKey : variableResultMap.keySet()) {</span>
+<span class="fc" id="L271">            triplesAdd = triplesAdd.replaceAll(&quot;\\?&quot; + currentKey, variableResultMap.get(currentKey));</span>
+<span class="fc" id="L272">            triplesDel = triplesDel.replaceAll(&quot;\\?&quot; + currentKey, variableResultMap.get(currentKey));</span>
+<span class="fc" id="L273">        }</span>
+
+<span class="fc" id="L275">        Model modelAdd = JenaModelManagement.readTurtleStringToJenaModel(triplesAdd);</span>
+
+<span class="fc" id="L277">        sb.append(String.format(&quot;&lt;%s&gt; a rmo:Set . %n&quot;, additionsURI));</span>
+
+<span class="fc" id="L279">        StmtIterator iteStmtAdd = modelAdd.listStatements();</span>
+<span class="fc bfc" id="L280" title="All 2 branches covered.">        while (iteStmtAdd.hasNext()) {</span>
+<span class="fc" id="L281">            Statement statement = iteStmtAdd.next();</span>
+<span class="fc" id="L282">            String statementURI = uriCalculator.getRandomURI(revisionGraph);</span>
+<span class="fc" id="L283">            sb.append(String.format(</span>
+                &quot;&lt;%s&gt; rmo:statements &lt;%s&gt; . %n&quot; +
+                &quot;&lt;%s&gt; a rdf:Statement ; %n&quot;
+                        + &quot; rdf:subject &lt;%s&gt; ; %n&quot;
+                        + &quot; rdf:predicate &lt;%s&gt; ; %n&quot;
+                        + &quot; rdf:object &lt;%s&gt; . %n&quot;,
+<span class="fc" id="L289">                additionsURI, statementURI, statementURI, statement.getSubject().toString(), statement.getPredicate(), statement.getObject()));</span>
+<span class="fc" id="L290">        }</span>
+
+<span class="fc" id="L292">        Model modelDel = JenaModelManagement.readTurtleStringToJenaModel(triplesDel);</span>
+
+<span class="fc" id="L294">        sb.append(String.format(&quot;&lt;%s&gt; a rmo:Set . %n&quot;, deletionsURI));</span>
+
+<span class="fc" id="L296">        StmtIterator iteStmtDel = modelDel.listStatements();</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">        while (iteStmtDel.hasNext()) {</span>
+<span class="fc" id="L298">            Statement statement = iteStmtDel.next();</span>
+<span class="fc" id="L299">            String statementURI = uriCalculator.getRandomURI(revisionGraph);</span>
+<span class="fc" id="L300">            sb.append(String.format(</span>
+                    &quot;&lt;%s&gt; rmo:statements &lt;%s&gt; . %n&quot; +
+                            &quot;&lt;%s&gt; a rdf:Statement ; %n&quot;
+                            + &quot; rdf:subject &lt;%s&gt; ; %n&quot;
+                            + &quot; rdf:predicate &lt;%s&gt; ; %n&quot;
+                            + &quot; rdf:object &lt;%s&gt; . %n&quot;,
+<span class="fc" id="L306">                    deletionsURI, statementURI, statementURI, statement.getSubject().toString(), statement.getPredicate(), statement.getObject()));</span>
+<span class="fc" id="L307">        }</span>
+
+<span class="fc" id="L309">        String queryRevision = Config.prefixes + String.format(&quot;INSERT DATA { GRAPH &lt;%s&gt; {%s} }&quot;, revisionGraph.getRevisionGraphUri(), sb.toString());</span>
+
+<span class="fc" id="L311">        tripleStoreInterface.executeUpdateQuery(queryRevision);</span>
+
+<span class="fc" id="L313">        return new SemanticChange(revisionGraph, semanticChangeURI);</span>
+
+    }
+
+    /**
+     * Extracts the request information and stores it to local variables.
+     *
+     * @throws InternalErrorException
+     */
+    private void extractRequestInformation() throws InternalErrorException {
+<span class="fc" id="L323">        Matcher m = patternAggQuery.matcher(this.request.query_sparql);</span>
+
+<span class="fc" id="L325">        boolean foundEntry = false;</span>
+
+<span class="fc bfc" id="L327" title="All 2 branches covered.">        while (m.find()) {</span>
+<span class="fc" id="L328">            foundEntry = true;</span>
+
+<span class="fc" id="L330">            graphName = m.group(&quot;graph&quot;);</span>
+<span class="fc" id="L331">            revisionGraph = new RevisionGraph(graphName);</span>
+
+<span class="fc" id="L333">            startRevisionIdentifier = m.group(&quot;startRevisionIdentifier&quot;);</span>
+<span class="fc" id="L334">            endRevisionIdentifier = m.group(&quot;endRevisionIdentifier&quot;);</span>
+
+<span class="fc" id="L336">            logger.debug(&quot;graph: &quot; + graphName);</span>
+<span class="fc" id="L337">            logger.debug(&quot;startRevisionIdentifier: &quot; + startRevisionIdentifier);</span>
+<span class="fc" id="L338">            logger.debug(&quot;endRevisionIdentifier: &quot; + endRevisionIdentifier);</span>
+        }
+<span class="pc bpc" id="L340" title="1 of 2 branches missed.">        if (!foundEntry) {</span>
+<span class="nc" id="L341">            throw new QueryErrorException(&quot;Error in query: &quot; + this.request.query_sparql);</span>
+        }
+
+<span class="fc" id="L344">        ArrayList&lt;ChangeSet&gt; changeSets = revisionGraph.getRevision(endRevisionIdentifier).getChangeSets();</span>
+<span class="fc bfc" id="L345" title="All 2 branches covered.">        for (ChangeSet changeSet : changeSets) {</span>
+<span class="pc bpc" id="L346" title="1 of 2 branches missed.">            if (changeSet.getPriorRevision().getRevisionIdentifier().equals(startRevisionIdentifier)) {</span>
+<span class="fc" id="L347">                changeSetStartToEnd = changeSet;</span>
+            }
+<span class="fc" id="L349">        }</span>
+
+<span class="fc" id="L351">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

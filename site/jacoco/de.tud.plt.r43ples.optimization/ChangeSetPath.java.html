@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChangeSetPath.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.optimization</a> &gt; <span class="el_source">ChangeSetPath.java</span></div><h1>ChangeSetPath.java</h1><pre class="source lang-java linenums">/*
+ * Copyright (c) 2017.  Markus Graube
+ */
+
+package de.tud.plt.r43ples.optimization;
+
+import de.tud.plt.r43ples.existentobjects.ChangeSet;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.LinkedList;
+
+public class ChangeSetPath {
+
+    /**
+     * The logger.
+     **/
+<span class="fc" id="L20">    private Logger logger = LogManager.getLogger(ChangeSetPath.class);</span>
+
+    /**
+     * The start revision.
+     */
+    private Revision startRevision;
+    /**
+     * The target revision.
+     */
+    private Revision targetRevision;
+    /**
+     * The path from start to target revision.
+     */
+    private LinkedList&lt;ChangeSet&gt; changeSets;
+
+    /**
+     * The corresponding revision graph.
+     */
+    private RevisionGraph revisionGraph;
+
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph  the revision graph
+     * @param startRevision  the start revision of the path
+     * @param targetRevision the target revision of the path
+     */
+<span class="fc" id="L48">    public ChangeSetPath(RevisionGraph revisionGraph, Revision startRevision, Revision targetRevision) {</span>
+<span class="fc" id="L49">        this.revisionGraph = revisionGraph;</span>
+
+<span class="fc" id="L51">        this.startRevision = startRevision;</span>
+<span class="fc" id="L52">        this.targetRevision = targetRevision;</span>
+
+<span class="fc" id="L54">        changeSets = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L55">    }</span>
+
+    /**
+     * Adds a changeset to the revision path end.
+     *
+     * @param changeSet the revision to add to the end of the list
+     */
+    public void addRevisionToPathEnd(ChangeSet changeSet) {
+<span class="nc" id="L63">        changeSets.add(changeSet);</span>
+<span class="nc" id="L64">    }</span>
+
+    /**
+     * Adds a changeSet to the changeSet path start.
+     *
+     * @param changeSet the changeSet to add to the end of the list
+     */
+    public void addRevisionToPathStart(ChangeSet changeSet) {
+<span class="fc" id="L72">        changeSets.addFirst(changeSet);</span>
+<span class="fc" id="L73">    }</span>
+
+    /**
+     * Get the revision path. The revision path starts with the start revision and ends with the target revision.
+     *
+     * @return the revision path
+     */
+    public LinkedList&lt;ChangeSet&gt; getRevisionPath() {
+<span class="fc" id="L81">        return changeSets;</span>
+    }
+
+    public Revision getTargetRevision() {
+<span class="fc" id="L85">        return targetRevision;</span>
+    }
+
+    public Revision getStartRevision() {
+<span class="nc" id="L89">        return startRevision;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

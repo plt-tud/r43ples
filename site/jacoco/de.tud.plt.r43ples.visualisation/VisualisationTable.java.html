@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>VisualisationTable.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.visualisation</a> &gt; <span class="el_source">VisualisationTable.java</span></div><h1>VisualisationTable.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.visualisation;
+
+import java.awt.Dimension;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.batik.dom.svg.SVGDOMImplementation;
+import org.apache.batik.svggen.SVGGraphics2D;
+import org.apache.batik.svggen.SVGGraphics2DIOException;
+import org.w3c.dom.DOMImplementation;
+import org.w3c.dom.Document;
+
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
+
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.revisionTree.Commit;
+import de.tud.plt.r43ples.revisionTree.StructuredTree;
+
+public class VisualisationTable {
+	
+	private static final int TIMELINEVIEW_WIDTH = 70;
+
+	/**
+	 * Vertical distance between commits
+	 */
+	protected final static int LINE_HEIGHT = 22;
+	
+	protected final static int PADDING = 10;
+	
+	private TimeLineView timeView;
+
+	private List&lt;Commit&gt; commits;
+
+	private CommitGraphView graphView;
+
+	private MessagesTableView msgView;
+	
+
+<span class="fc" id="L45">	public VisualisationTable(StructuredTree revisionTree) {</span>
+<span class="fc" id="L46">		commits = revisionTree.getCommits();</span>
+<span class="fc" id="L47">		Collections.reverse(commits);</span>
+		
+<span class="fc" id="L49">		timeView = new TimeLineView(commits);</span>
+<span class="fc" id="L50">		graphView = new CommitGraphView(commits);</span>
+<span class="fc" id="L51">		msgView = new MessagesTableView(revisionTree);</span>
+<span class="fc" id="L52">	}</span>
+	
+	
+	private String buildSVG() throws SVGGraphics2DIOException {
+		
+		// generate svg document
+<span class="fc" id="L58">		String svgNS = SVGDOMImplementation.SVG_NAMESPACE_URI;</span>
+<span class="fc" id="L59">		DOMImplementation impl = SVGDOMImplementation.getDOMImplementation();</span>
+<span class="fc" id="L60">		Document doc = impl.createDocument(svgNS, &quot;svg&quot;, null);</span>
+
+<span class="fc" id="L62">		SVGGraphics2D g = new SVGGraphics2D(doc);</span>
+		
+
+		// translate to first text-baseline
+<span class="fc" id="L66">		g.translate(0, LINE_HEIGHT);		</span>
+<span class="fc" id="L67">		timeView.draw(g);</span>
+
+<span class="fc" id="L69">		g.translate(TIMELINEVIEW_WIDTH, 0);</span>
+<span class="fc" id="L70">		graphView.drawGraph(g);</span>
+
+<span class="fc" id="L72">		g.translate(graphView.getDimension().getWidth() + PADDING, 0);</span>
+<span class="fc" id="L73">		msgView.draw(g);</span>
+		
+<span class="fc" id="L75">		g.translate(-graphView.getDimension().getWidth() - PADDING - TIMELINEVIEW_WIDTH, 0);</span>
+
+		// calculate overall width
+<span class="fc" id="L78">		int totalWidth = (int) (TIMELINEVIEW_WIDTH + graphView.getDimension().getWidth() + PADDING + msgView.getDimension().getWidth());</span>
+		
+		
+		// draw header line
+<span class="fc" id="L82">		int offset = g.getFontMetrics(msgView.TextFont).getDescent();</span>
+<span class="fc" id="L83">		g.drawLine(0, offset, totalWidth, offset);</span>
+
+<span class="fc" id="L85">		int totalHeight = LINE_HEIGHT * (commits.size()+1) + offset;</span>
+<span class="fc" id="L86">		g.setSVGCanvasSize(new Dimension(totalWidth, totalHeight));</span>
+
+<span class="fc" id="L88">		Writer writer = new StringWriter();</span>
+<span class="fc" id="L89">		g.stream(writer);</span>
+
+<span class="fc" id="L91">		return writer.toString();</span>
+	}
+
+	public static String getHtmlOutput(String graphName) {
+<span class="fc" id="L95">		MustacheFactory mf = new DefaultMustacheFactory();</span>
+<span class="fc" id="L96">		Mustache mustache = mf.compile(&quot;templates/graphvisualisation_table.mustache&quot;);</span>
+<span class="fc" id="L97">		StringWriter sw = new StringWriter();</span>
+
+		// get graph tree
+<span class="fc" id="L100">		RevisionGraph graph = new RevisionGraph(graphName);</span>
+<span class="fc" id="L101">		String revisionGraphUri = graph.getRevisionGraphUri();</span>
+<span class="fc" id="L102">		StructuredTree graphTree = StructuredTree.getTreeOfGraph(revisionGraphUri);</span>
+<span class="fc" id="L103">		VisualisationTable visu = new VisualisationTable(graphTree);</span>
+		
+<span class="fc" id="L105">		Map&lt;String, Object&gt; scope = new HashMap&lt;String, Object&gt;();</span>
+<span class="fc" id="L106">		scope.put(&quot;graphName&quot;, graphName);</span>
+		try {
+<span class="fc" id="L108">			scope.put(&quot;svg_content&quot;, visu.buildSVG());</span>
+<span class="nc" id="L109">		} catch (SVGGraphics2DIOException e) {</span>
+<span class="nc" id="L110">			scope.put(&quot;svg_content&quot;, &quot;Error while creating SVG&quot;);</span>
+<span class="fc" id="L111">		}</span>
+
+<span class="fc" id="L113">		mustache.execute(sw, scope);</span>
+<span class="fc" id="L114">		return sw.toString();</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

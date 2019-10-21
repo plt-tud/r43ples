@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Misc.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.webservice</a> &gt; <span class="el_source">Misc.java</span></div><h1>Misc.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.webservice;
+
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.ResponseBuilder;
+
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.iohelper.Helper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.server.mvc.Template;
+
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
+
+import de.tud.plt.r43ples.dataset.SampleDataSet;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.visualisation.VisualisationTable;
+import de.tud.plt.r43ples.visualisation.VisualisationGraph;
+
+import static de.tud.plt.r43ples.webservice.Endpoint.*;
+
+@Path(&quot;/&quot;)
+<span class="fc" id="L36">public class Misc {</span>
+
+	@Context
+	private Request request;
+	
+<span class="fc" id="L41">	private final static Logger logger = LogManager.getLogger(Misc.class);</span>
+	
+	/**
+	 * Landing page
+	 *
+	 */
+	@GET
+	@Produces(MediaType.TEXT_HTML)
+	public final Response getLandingPage() {
+<span class="fc" id="L50">		logger.info(&quot;Get Landing page&quot;);</span>
+<span class="fc" id="L51">		Map&lt;String, Object&gt; htmlMap = new HashMap&lt;String, Object&gt;();</span>
+<span class="fc" id="L52">		htmlMap.put(&quot;version&quot;, Endpoint.class.getPackage().getImplementationVersion() );</span>
+		
+<span class="fc" id="L54">		StringWriter sw = new StringWriter();</span>
+<span class="fc" id="L55">	    MustacheFactory mf = new DefaultMustacheFactory();</span>
+<span class="fc" id="L56">	    Mustache mustache = mf.compile(&quot;templates/home.mustache&quot;);</span>
+<span class="fc" id="L57">	    mustache.execute(sw, htmlMap);		</span>
+<span class="fc" id="L58">	    ResponseBuilder response = Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML);</span>
+<span class="fc" id="L59">		return response.build();</span>
+	}
+	
+	@Path(&quot;index&quot;)
+	@GET
+	@Produces(MediaType.TEXT_HTML)
+	public final Response getIndex(){
+<span class="fc" id="L66">		return getLandingPage();</span>
+	}
+	
+	@GET
+	@Path(&quot;help&quot;)
+	@Template(name = &quot;/help.mustache&quot;)
+	@Produces(MediaType.TEXT_HTML)
+	public final Map&lt;String, Object&gt; getHelpPage() {
+<span class="nc" id="L74">		logger.info(&quot;Get Landing page&quot;);</span>
+<span class="nc" id="L75">		Map&lt;String, Object&gt; htmlMap = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc" id="L76">		htmlMap.put(&quot;help_active&quot;, true);</span>
+<span class="nc" id="L77">		htmlMap.put(&quot;version&quot;, Endpoint.class.getPackage().getImplementationVersion() );</span>
+<span class="nc" id="L78">		return htmlMap;</span>
+	}
+	
+	/**
+	 * Creates sample datasets
+	 * @return information provided as HTML response
+	 * @throws InternalErrorException 
+	 */
+	@Path(&quot;createSampleDataset&quot;)
+	@GET
+	public final Response createSampleDataset(@QueryParam(&quot;dataset&quot;) @DefaultValue(&quot;all&quot;) final String graph) throws InternalErrorException {
+<span class="fc" id="L89">		List&lt;String&gt; graphs = new ArrayList&lt;&gt;();</span>
+		
+<span class="fc bfc" id="L91" title="All 4 branches covered.">		if (graph.equals(&quot;1&quot;) || graph.equals(&quot;all&quot;)){</span>
+<span class="fc" id="L92">			graphs.add(SampleDataSet.createSampleDataset1().graphName);</span>
+		}
+<span class="fc bfc" id="L94" title="All 4 branches covered.">		if (graph.equals(&quot;2&quot;) || graph.equals(&quot;all&quot;)){</span>
+<span class="fc" id="L95">			graphs.add(SampleDataSet.createSampleDataset2().graphName);</span>
+		}
+<span class="fc bfc" id="L97" title="All 4 branches covered.">		if (graph.equals(&quot;3&quot;) || graph.equals(&quot;all&quot;)){</span>
+<span class="fc" id="L98">			graphs.add(SampleDataSet.createSampleDataset3().graphName);</span>
+		}
+<span class="fc bfc" id="L100" title="All 4 branches covered.">		if (graph.equals(&quot;merging&quot;) || graph.equals(&quot;all&quot;)){</span>
+<span class="fc" id="L101">			graphs.add(SampleDataSet.createSampleDataSetMerging().graphName);</span>
+		}
+<span class="fc bfc" id="L103" title="All 4 branches covered.">		if (graph.equals(&quot;merging-classes&quot;) || graph.equals(&quot;all&quot;)){</span>
+<span class="fc" id="L104">			graphs.add(SampleDataSet.createSampleDataSetMergingClasses());</span>
+		}
+<span class="fc bfc" id="L106" title="All 4 branches covered.">		if (graph.equals(&quot;renaming&quot;) || graph.equals(&quot;all&quot;)){</span>
+<span class="fc" id="L107">			graphs.add(SampleDataSet.createSampleDataSetRenaming());</span>
+		}
+<span class="fc bfc" id="L109" title="All 4 branches covered.">		if (graph.equals(&quot;complex-structure&quot;) || graph.equals(&quot;all&quot;)){</span>
+<span class="fc" id="L110">			graphs.add(SampleDataSet.createSampleDataSetComplexStructure().graphName);</span>
+		}
+<span class="fc bfc" id="L112" title="All 4 branches covered.">		if (graph.equals(&quot;rebase&quot;) || graph.equals(&quot;all&quot;)){</span>
+<span class="fc" id="L113">			graphs.add(SampleDataSet.createSampleDataSetRebase());</span>
+		}
+<span class="pc bpc" id="L115" title="1 of 4 branches missed.">		if (graph.equals(&quot;hlc-aggregation&quot;) || graph.equals(&quot;all&quot;)){</span>
+<span class="fc" id="L116">			graphs.add(SampleDataSet.createSampleDataSetHLCAggregation().graphName);</span>
+		}
+<span class="pc bpc" id="L118" title="1 of 4 branches missed.">		if (graph.equals(&quot;coevolution&quot;) || graph.equals(&quot;all&quot;)){</span>
+<span class="fc" id="L119">			graphs.add(SampleDataSet.createSampleDataSetCoEvolution().graphName);</span>
+		}
+<span class="fc" id="L121">		Map&lt;String, Object&gt; htmlMap = new HashMap&lt;String, Object&gt;();</span>
+<span class="fc" id="L122">	    htmlMap.put(&quot;graphs&quot;, graphs);</span>
+	    
+<span class="fc" id="L124">	    StringWriter sw = new StringWriter();</span>
+<span class="fc" id="L125">	    MustacheFactory mf = new DefaultMustacheFactory();</span>
+<span class="fc" id="L126">	    Mustache mustache = mf.compile(&quot;templates/exampleDatasetGeneration.mustache&quot;);</span>
+<span class="fc" id="L127">	    mustache.execute(sw, htmlMap);		</span>
+<span class="fc" id="L128">	    ResponseBuilder response = Response.ok().entity(sw.toString()).type(MediaType.TEXT_HTML);</span>
+<span class="fc" id="L129">		return response.build();			</span>
+	}
+	
+	
+	/**
+	 * Provide revision information about R43ples system.
+	 * 
+	 * @param graphName
+	 *            Provide only information about this graph
+	 * @return RDF model of revision information
+	 */
+	@Path(&quot;revisiongraph&quot;)
+	@GET
+	@Produces({ TEXT_TURTLE, APPLICATION_RDF_XML, MediaType.APPLICATION_JSON, MediaType.TEXT_HTML })
+	public final Response getRevisionGraph(@HeaderParam(&quot;Accept&quot;) final String format_header,
+			@QueryParam(&quot;format&quot;) final String format_query,
+			@QueryParam(&quot;graph&quot;)  final String graphName) throws Exception {
+<span class="fc" id="L146">		String format = null;</span>
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">		if (format_query == null){</span>
+<span class="nc" id="L148">			List&lt;Variant&gt; reqVariants = Variant.mediaTypes(TEXT_TURTLE_TYPE,</span>
+<span class="nc" id="L149">					APPLICATION_RDF_XML_TYPE, MediaType.APPLICATION_JSON_TYPE).build();</span>
+<span class="nc" id="L150">			Variant bestVariant = request.selectVariant(reqVariants);</span>
+<span class="nc bnc" id="L151" title="All 2 branches missed.">			if (bestVariant == null) {</span>
+<span class="nc" id="L152">				throw new Exception(&quot;Requested datatype not available&quot;);</span>
+			}
+<span class="nc" id="L154">			MediaType reqMediaType = bestVariant.getMediaType();</span>
+<span class="nc" id="L155">			format = reqMediaType.toString();</span>
+<span class="nc" id="L156">		}</span>
+		else {
+<span class="fc" id="L158">			format = format_query;</span>
+		}
+<span class="fc" id="L160">		logger.info(&quot;Get Revision Graph: &quot; + graphName + &quot; (format: &quot; + format+&quot;)&quot;);</span>
+		
+<span class="fc" id="L162">		ResponseBuilder response = Response.ok();</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">		if (&quot;table&quot;.equalsIgnoreCase(format)) {</span>
+<span class="fc" id="L164">			response.type(MediaType.TEXT_HTML);</span>
+<span class="fc" id="L165">			response.entity(VisualisationTable.getHtmlOutput(graphName));</span>
+<span class="fc bfc" id="L166" title="All 2 branches covered.">		}  else if (&quot;graph&quot;.equalsIgnoreCase(format)) {</span>
+<span class="fc" id="L167">			response.type(MediaType.TEXT_HTML);</span>
+<span class="fc" id="L168">			response.entity(VisualisationGraph.getHtmlOutput(graphName));</span>
+		}
+		else {
+<span class="fc" id="L171">			RevisionGraph graph = new RevisionGraph(graphName);</span>
+<span class="fc" id="L172">			response.entity(graph.getContentOfRevisionGraph(format));</span>
+<span class="fc" id="L173">			response.type(format);</span>
+		}
+<span class="fc" id="L175">		return response.build();</span>
+	}
+	
+	/**
+	 * Provides content of graph in the attached triple store
+	 * 
+	 * @return content of specified graph in specified serialisation
+	 */
+	@Path(&quot;contentOfGraph&quot;)
+	@GET
+	@Produces({ &quot;text/turtle&quot;, &quot;application/rdf+xml&quot;, MediaType.APPLICATION_JSON, &quot;application/ld+json&quot; })
+	public final Response getContentOfGraph(
+			@HeaderParam(&quot;Accept&quot;) final String format_header,
+			@QueryParam(&quot;format&quot;) @DefaultValue(&quot;application/json&quot;) final String format_query,
+			@QueryParam(&quot;graph&quot;) final String graphName) {
+<span class="fc" id="L190">		logger.info(&quot;Get Content of graph &quot; + graphName);</span>
+<span class="pc bpc" id="L191" title="1 of 2 branches missed.">		String format = (format_query != null) ? format_query : format_header;</span>
+<span class="fc" id="L192">		logger.debug(&quot;format: &quot; + format);</span>
+
+<span class="fc" id="L194">		String result = Helper.getContentOfGraph(graphName, format);</span>
+<span class="fc" id="L195">		ResponseBuilder response = Response.ok();</span>
+<span class="fc" id="L196">		return response.entity(result).type(format).build();</span>
+	}
+	
+	
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

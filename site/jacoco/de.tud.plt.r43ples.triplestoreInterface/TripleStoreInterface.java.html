@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TripleStoreInterface.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.triplestoreInterface</a> &gt; <span class="el_source">TripleStoreInterface.java</span></div><h1>TripleStoreInterface.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.triplestoreInterface;
+
+import java.io.ByteArrayOutputStream;
+import java.util.Iterator;
+import java.util.regex.Pattern;
+
+import de.tud.plt.r43ples.core.R43plesCoreSingleton;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.iohelper.Helper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.shared.NoWriterForLangException;
+import org.apache.jena.sparql.resultset.ResultsFormat;
+
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
+
+
+<span class="fc" id="L23">public abstract class TripleStoreInterface {</span>
+	
+	/** The logger. */
+<span class="fc" id="L26">	private static Logger logger = LogManager.getLogger(TripleStoreInterface.class);</span>
+	
+	protected void init() {
+<span class="fc bfc" id="L29" title="All 2 branches covered.">		if (!checkGraphExistence(Config.revision_graph)){</span>
+<span class="fc" id="L30">			logger.debug(&quot;Create revision graph: &quot;+ Config.revision_graph);</span>
+<span class="fc" id="L31">			executeUpdateQuery(&quot;CREATE SILENT GRAPH &lt;&quot; + Config.revision_graph +&quot;&gt;&quot;);</span>
+			// Create the evolution revision graph
+			try {
+<span class="fc" id="L34">				R43plesCoreSingleton.getInstance().createInitialCommit(Config.evolution_graph, null, null, &quot;R43ples&quot;, &quot;Evolution graph created by R43ples&quot;);</span>
+				// Add the coevolution revision graph type to the created revision graph
+<span class="fc" id="L36">                String query = Config.prefixes + String.format(</span>
+                        &quot;INSERT DATA { GRAPH &lt;%1$s&gt; {&quot;
+                                + &quot;  &lt;%2$s&gt; a rmo:CoEvolutionRevisionGraph .&quot;
+                                + &quot;} }&quot;,
+                        Config.revision_graph, Config.evolution_graph);
+<span class="fc" id="L41">                TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);</span>
+<span class="nc" id="L42">			} catch (InternalErrorException e) {</span>
+<span class="nc" id="L43">				e.printStackTrace();</span>
+<span class="fc" id="L44">			}</span>
+		}
+		
+<span class="fc bfc" id="L47" title="All 2 branches covered.">		if (!checkGraphExistence(Config.sdg_graph)) {</span>
+			// Insert default content into SDD graph
+<span class="fc" id="L49">			logger.info(&quot;Create sdg graph from &quot; + Config.sdg_graph_defaultContent);</span>
+<span class="fc" id="L50">			executeUpdateQuery(&quot;CREATE SILENT GRAPH &lt;&quot; + Config.sdg_graph + &quot;&gt;&quot;);</span>
+
+<span class="fc" id="L52">			Model jena_model_sdg = JenaModelManagement.readTurtleFileToJenaModel(Config.sdg_graph_defaultContent);</span>
+<span class="fc" id="L53">			String model_sdg = JenaModelManagement.convertJenaModelToNTriple(jena_model_sdg);</span>
+<span class="fc" id="L54">			logger.debug(&quot;SDG model: &quot; + model_sdg);</span>
+<span class="fc" id="L55">			Helper.executeINSERT(Config.sdg_graph, model_sdg);</span>
+		}
+
+<span class="fc bfc" id="L58" title="All 2 branches covered.">		if (!checkGraphExistence(Config.rules_graph)){</span>
+			// Insert default content into SDD graph
+<span class="fc" id="L60">			logger.info(&quot;Create rules graph from &quot; + Config.rules_graph_defaultContent);</span>
+<span class="fc" id="L61">			executeUpdateQuery(&quot;CREATE SILENT GRAPH &lt;&quot; + Config.rules_graph + &quot;&gt;&quot;);</span>
+
+<span class="fc" id="L63">			Model jena_model_rules = JenaModelManagement.readTurtleFileToJenaModel(Config.rules_graph_defaultContent);</span>
+<span class="fc" id="L64">			String model_rules = JenaModelManagement.convertJenaModelToNTriple(jena_model_rules);</span>
+<span class="fc" id="L65">			logger.debug(&quot;Rules model: &quot; + model_rules);</span>
+<span class="fc" id="L66">			Helper.executeINSERT(Config.rules_graph, model_rules);</span>
+	 	}		
+<span class="fc" id="L68">	}</span>
+	
+	protected abstract void close();
+
+
+	/**
+	 * Checks if graph exists in triple store. Works only when the graph is not
+	 * empty.
+	 *
+	 * @param graphName
+	 *            the graph name
+	 * @return boolean value if specified graph exists and contains at least one
+	 *         triple elsewhere it will return false
+	 */
+	public boolean checkGraphExistence(final String graphName){
+<span class="fc" id="L83">		String query = &quot;ASK { GRAPH &lt;&quot; + graphName + &quot;&gt; {?s ?p ?o} }&quot;;</span>
+<span class="fc" id="L84">		return this.executeAskQuery(query);</span>
+	}
+	
+	public String executeSelectConstructAskQuery(String sparqlQuery, String format) {
+<span class="fc" id="L88">		logger.debug(&quot;Query: &quot; + sparqlQuery);</span>
+<span class="fc" id="L89">		final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;</span>
+<span class="fc" id="L90">		final Pattern patternSelectQuery = Pattern.compile(</span>
+				&quot;SELECT.*WHERE\\s*\\{(?&lt;where&gt;.*)\\}&quot;, 
+				patternModifier);
+<span class="fc" id="L93">		final Pattern patternAskQuery = Pattern.compile(</span>
+				&quot;ASK.*WHERE\\s*\\{(?&lt;where&gt;.*)\\}&quot;, 
+				patternModifier);
+<span class="fc" id="L96">		final Pattern patternConstructQuery = Pattern.compile(</span>
+				&quot;CONSTRUCT.*WHERE\\s*\\{(?&lt;where&gt;.*)\\}&quot;, 
+				patternModifier);
+		String result;
+<span class="fc bfc" id="L100" title="All 2 branches covered.">		if (patternConstructQuery.matcher(sparqlQuery).find())</span>
+<span class="fc" id="L101">			result = executeConstructQuery(sparqlQuery, format);</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">		else if (patternAskQuery.matcher(sparqlQuery).find())</span>
+<span class="nc bnc" id="L103" title="All 2 branches missed.">			result = executeAskQuery(sparqlQuery)?&quot;true&quot;:&quot;false&quot;;</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">		else if (patternSelectQuery.matcher(sparqlQuery).find())</span>
+<span class="fc" id="L105">			result = executeSelectQuery(sparqlQuery, format);</span>
+		else
+<span class="nc" id="L107">			result = executeSelectQuery(sparqlQuery, format);</span>
+<span class="fc" id="L108">		logger.debug(&quot;Response: &quot; + result);</span>
+<span class="fc" id="L109">		return result;</span>
+	}
+	
+	/**
+	 * Executes a SELECT query.
+	 * 
+	 * @param selectQueryString the SELECT query
+	 * @return result set
+	 */
+	public abstract ResultSet executeSelectQuery(String selectQueryString) ;
+	
+	
+
+	/**
+	 * Executes a SELECT query.
+	 * 
+	 * @param selectQueryString the SELECT query
+	 * @param format the format
+	 * @return result string in specified format
+	 */
+	public String executeSelectQuery(String selectQueryString, String format) {
+<span class="fc" id="L130">		ResultSet results = executeSelectQuery(selectQueryString);</span>
+<span class="fc" id="L131">		ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+<span class="pc bpc" id="L132" title="1 of 6 branches missed.">		if (format.equals(&quot;application/sparql-results+xml&quot;) || format.equals(&quot;application/xml&quot;) || format.equals(&quot;text/xml&quot;))</span>
+<span class="fc" id="L133">			ResultSetFormatter.outputAsXML(baos, results);</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">		else if (format.equals(&quot;text/turtle&quot;) )</span>
+<span class="fc" id="L135">			ResultSetFormatter.output(baos, results, ResultsFormat.FMT_RDF_TTL);</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">		else if (format.equals(&quot;application/json&quot;) )</span>
+<span class="fc" id="L137">			ResultSetFormatter.outputAsJSON(baos, results);</span>
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">		else if (format.equals(&quot;text/plain&quot;) )</span>
+<span class="nc" id="L139">			ResultSetFormatter.out(baos, results);</span>
+		else
+<span class="fc" id="L141">			ResultSetFormatter.out(baos, results);</span>
+<span class="fc" id="L142">		return baos.toString();</span>
+	}
+	
+	
+	/**
+	 * Executes a CONSTRUCT query.
+	 * 
+	 * @param constructQueryString the CONSTRUCT query
+	 * @param format the result format
+	 * @return formatted result
+	 */
+	public String executeConstructQuery(String constructQueryString, String format) {
+<span class="fc" id="L154">		logger.debug(&quot;Query: &quot; + constructQueryString);</span>
+<span class="fc" id="L155">		Model result = executeConstructQuery(constructQueryString);</span>
+<span class="fc" id="L156">		ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+		
+<span class="fc bfc" id="L158" title="All 2 branches covered.">		if (format.toLowerCase().contains(&quot;xml&quot;) )</span>
+<span class="fc" id="L159">			result.write(baos, &quot;RDF/XML&quot;);</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">		else if (format.toLowerCase().contains(&quot;turtle&quot;) )</span>
+<span class="fc" id="L161">			result.write(baos, &quot;Turtle&quot;);</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">		else if (format.toLowerCase().contains(&quot;json&quot;) )</span>
+<span class="fc" id="L163">			result.write(baos, &quot;RDF/JSON&quot;);</span>
+		else {
+			try {
+<span class="fc" id="L166">				result.write(baos, format);</span>
+			}
+<span class="nc" id="L168">			catch (NoWriterForLangException e) {</span>
+<span class="nc" id="L169">				result.write(baos, &quot;Turtle&quot;);</span>
+<span class="fc" id="L170">			}</span>
+		}
+<span class="fc" id="L172">		logger.debug(&quot;Result: &quot; + baos.toString());</span>
+<span class="fc" id="L173">		return baos.toString();</span>
+	}
+	
+	
+	public abstract Model executeConstructQuery(String constructQueryString) ;
+	
+	
+	/**
+	 * Executes a DESCRIBE query.
+	 * 
+	 * @param describeQueryString the CONSTRUCT query
+	 * @param format the result format
+	 * @return formatted result
+	 */
+	public String executeDescribeQuery(String describeQueryString, String format) {
+<span class="nc" id="L188">		logger.debug(&quot;Query: &quot; + describeQueryString);</span>
+<span class="nc" id="L189">		Model result = executeConstructQuery(describeQueryString);</span>
+<span class="nc" id="L190">		ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+<span class="nc" id="L191">		result.write(baos, format);</span>
+<span class="nc" id="L192">		return baos.toString();</span>
+	}
+	
+
+	public abstract Model executeDescribeQuery(String describeQueryString) ;
+	
+
+	/**
+	 * Executes an ASK query.
+	 * 
+	 * @param askQueryString the ASK query
+	 * @return boolean result of ASK query
+	 */
+	public abstract boolean executeAskQuery(String askQueryString) ;
+	
+	/**
+	 * Executes an UPDATE query.
+	 * 
+	 * @param updateQueryString the UPDATE query
+	 */
+	public abstract void executeUpdateQuery(String updateQueryString);
+
+	
+	public abstract void executeCreateGraph(String graph) ;
+
+	
+	public abstract Iterator&lt;String&gt; getGraphs();
+
+	public abstract void dropAllGraphsAndReInit();
+
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

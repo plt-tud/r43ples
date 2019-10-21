@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChangeSet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.existentobjects</a> &gt; <span class="el_source">ChangeSet.java</span></div><h1>ChangeSet.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.existentobjects;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.iohelper.Helper;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.LinkedList;
+
+/**
+ * Provides information of an already existent change set.
+ *
+ * @author Stephan Hensel
+ */
+public class ChangeSet {
+
+    /** The logger. **/
+<span class="fc" id="L23">    private Logger logger = LogManager.getLogger(ChangeSet.class);</span>
+
+    /** The prior revision. **/
+    private Revision priorRevision;
+    /** The succeeding revision. **/
+    private Revision succeedingRevision;
+
+    /** The ADD set URI. */
+    private String addSetURI;
+    /** The DELETE set URI. */
+    private String deleteSetURI;
+    /** The ADD set content as N-TRIPLES. **/
+    private String addSetContent;
+    /** The DELETE set content as N-TRIPLES. **/
+    private String deleteSetContent;
+
+    /** The change set URI. **/
+    private String changeSetURI;
+
+    /** The list of semantic changes associated with this change set. **/
+    private LinkedList&lt;SemanticChange&gt; semanticChangesList;
+
+    /** The corresponding revision graph. */
+    private RevisionGraph revisionGraph;
+
+    // Dependencies
+    /** The triple store interface to use. **/
+    private TripleStoreInterface tripleStoreInterface;
+
+
+    /**
+     * The constructor
+     *
+     * @param revisionGraph the revision graph
+     * @param priorRevision the prior revision
+     * @param addSetURI the add set URI
+     * @param deleteSetURI the delete set URI
+     * @param changeSetURI the change set URI
+     */
+<span class="fc" id="L62">    public ChangeSet(RevisionGraph revisionGraph, Revision priorRevision, String addSetURI, String deleteSetURI, String changeSetURI) {</span>
+        // Dependencies
+<span class="fc" id="L64">        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();</span>
+
+<span class="fc" id="L66">        this.priorRevision = priorRevision;</span>
+<span class="fc" id="L67">        this.addSetURI = addSetURI;</span>
+<span class="fc" id="L68">        this.deleteSetURI = deleteSetURI;</span>
+<span class="fc" id="L69">        this.changeSetURI = changeSetURI;</span>
+
+<span class="fc" id="L71">        this.revisionGraph = revisionGraph;</span>
+<span class="fc" id="L72">    }</span>
+
+    /**
+     * The constructor
+     *
+     * @param revisionGraph the revision graph
+     * @param changeSetURI the change set URI
+     */
+<span class="fc" id="L80">    public ChangeSet(RevisionGraph revisionGraph, String changeSetURI) {</span>
+        // Dependencies
+<span class="fc" id="L82">        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();</span>
+
+<span class="fc" id="L84">        this.priorRevision = null;</span>
+<span class="fc" id="L85">        this.addSetURI = null;</span>
+<span class="fc" id="L86">        this.deleteSetURI = null;</span>
+<span class="fc" id="L87">        this.changeSetURI = changeSetURI;</span>
+
+<span class="fc" id="L89">        this.revisionGraph = revisionGraph;</span>
+<span class="fc" id="L90">    }</span>
+
+    /**
+     * Get the prior revision.
+     *
+     * @return the prior revision
+     */
+    public Revision getPriorRevision() {
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (this.priorRevision == null) {</span>
+<span class="fc" id="L99">            String query = Config.prefixes + String.format(</span>
+                    &quot;SELECT ?priorRevision %n&quot; +
+                            &quot;WHERE { GRAPH &lt;%s&gt; {&lt;%s&gt; rmo:priorRevision ?priorRevision .} }&quot;
+<span class="fc" id="L102">                    , this.revisionGraph.getRevisionGraphUri(), this.changeSetURI);</span>
+<span class="fc" id="L103">            ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);</span>
+
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">            if (resultSet.hasNext()) {</span>
+<span class="fc" id="L106">                QuerySolution qs = resultSet.next();</span>
+                try {
+<span class="fc" id="L108">                    this.priorRevision = new Revision(this.revisionGraph, qs.getResource(&quot;?priorRevision&quot;).toString(), false);</span>
+<span class="nc" id="L109">                } catch (InternalErrorException e) {</span>
+<span class="nc" id="L110">                    e.printStackTrace();</span>
+<span class="fc" id="L111">                }</span>
+            }
+        }
+<span class="fc" id="L114">        return this.priorRevision;</span>
+    }
+
+    /**
+     * Get the succeeding revision.
+     *
+     * @return the succeeding revision
+     */
+    public Revision getSucceedingRevision() {
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">        if (this.succeedingRevision == null) {</span>
+<span class="fc" id="L124">            String query = Config.prefixes + String.format(</span>
+                    &quot;SELECT ?succeedingRevision %n&quot; +
+                            &quot;WHERE { GRAPH &lt;%s&gt; {&lt;%s&gt; rmo:succeedingRevision ?succeedingRevision .} }&quot;
+<span class="fc" id="L127">                    , this.revisionGraph.getRevisionGraphUri(), this.changeSetURI);</span>
+<span class="fc" id="L128">            ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);</span>
+
+<span class="pc bpc" id="L130" title="1 of 2 branches missed.">            if (resultSet.hasNext()) {</span>
+<span class="fc" id="L131">                QuerySolution qs = resultSet.next();</span>
+                try {
+<span class="fc" id="L133">                    this.succeedingRevision = new Revision(this.revisionGraph, qs.getResource(&quot;?succeedingRevision&quot;).toString(), false);</span>
+<span class="nc" id="L134">                } catch (InternalErrorException e) {</span>
+<span class="nc" id="L135">                    e.printStackTrace();</span>
+<span class="fc" id="L136">                }</span>
+            }
+        }
+<span class="fc" id="L139">        return this.succeedingRevision;</span>
+    }
+
+    /**
+     * Get the revision URI.
+     *
+     * @return the revision URI
+     */
+    public String getChangeSetURI() {
+<span class="fc" id="L148">        return changeSetURI;</span>
+    }
+
+    /**
+     * Get the ADD set URI.
+     *
+     * @return the ADD set URI
+     */
+    public String getAddSetURI() {
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        if (this.addSetURI == null) {</span>
+<span class="fc" id="L158">            logger.debug(&quot;Get additional information of current change set &quot; + changeSetURI + &quot;.&quot;);</span>
+<span class="fc" id="L159">            String query = Config.prefixes + String.format(&quot;&quot;</span>
+                    + &quot;SELECT ?addSetURI &quot;
+                    + &quot;WHERE { GRAPH  &lt;%s&gt; {&quot;
+                    + &quot;	&lt;%s&gt; a rmo:ChangeSet; &quot;
+                    + &quot;	 rmo:addSet ?addSetURI. &quot;
+<span class="fc" id="L164">                    + &quot;} }&quot;, revisionGraph.getRevisionGraphUri(), changeSetURI);</span>
+<span class="fc" id="L165">            this.logger.debug(query);</span>
+<span class="fc" id="L166">            ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);</span>
+<span class="pc bpc" id="L167" title="1 of 2 branches missed.">            if (resultSet.hasNext()) {</span>
+<span class="fc" id="L168">                QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L169">                this.addSetURI = qs.getResource(&quot;?addSetURI&quot;).toString();</span>
+            }
+        }
+
+<span class="fc" id="L173">        return this.addSetURI;</span>
+    }
+
+    /**
+     * Get the DELETE set URI.
+     *
+     * @return the DELETE set URI
+     */
+    public String getDeleteSetURI() {
+<span class="fc bfc" id="L182" title="All 2 branches covered.">        if (this.deleteSetURI == null) {</span>
+<span class="fc" id="L183">            logger.debug(&quot;Get additional information of current change set &quot; + changeSetURI + &quot;.&quot;);</span>
+<span class="fc" id="L184">            String query = Config.prefixes + String.format(&quot;&quot;</span>
+                    + &quot;SELECT ?deleteSetURI &quot;
+                    + &quot;WHERE { GRAPH  &lt;%s&gt; {&quot;
+                    + &quot;	&lt;%s&gt; a rmo:ChangeSet; &quot;
+                    + &quot;	 rmo:deleteSet ?deleteSetURI. &quot;
+<span class="fc" id="L189">                    + &quot;} }&quot;, revisionGraph.getRevisionGraphUri(), changeSetURI);</span>
+<span class="fc" id="L190">            this.logger.debug(query);</span>
+<span class="fc" id="L191">            ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);</span>
+<span class="pc bpc" id="L192" title="1 of 2 branches missed.">            if (resultSet.hasNext()) {</span>
+<span class="fc" id="L193">                QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L194">                this.deleteSetURI = qs.getResource(&quot;?deleteSetURI&quot;).toString();</span>
+            }
+        }
+
+<span class="fc" id="L198">        return this.deleteSetURI;</span>
+    }
+
+    /**
+     * Get the corresponding revision graph.
+     *
+     * @return the corresponding revision graph
+     */
+    public RevisionGraph getRevisionGraph() {
+<span class="nc" id="L207">        return revisionGraph;</span>
+    }
+
+    /**
+     * Get the add set content.
+     *
+     * @return the add set content
+     */
+    public String getAddSetContent() {
+<span class="nc bnc" id="L216" title="All 2 branches missed.">        if (addSetContent == null) {</span>
+            // Calculate the ADD set content
+<span class="nc" id="L218">            this.addSetContent = Helper.getContentOfNamedGraphAsN3(this.addSetURI);</span>
+        }
+<span class="nc" id="L220">        return addSetContent;</span>
+    }
+
+    /**
+     * Get the delete set content.
+     *
+     * @return the delete set content
+     */
+    public String getDeleteSetContent() {
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if (deleteSetContent == null) {</span>
+            // Calculate the ADD set content
+<span class="nc" id="L231">            this.deleteSetContent = Helper.getContentOfNamedGraphAsN3(this.deleteSetURI);</span>
+        }
+<span class="nc" id="L233">        return deleteSetContent;</span>
+    }
+
+    /**
+     * Get the list of semantic changes associated with this change set.
+     *
+     * @return the list of semantic changes associated with this change set
+     * @throws InternalErrorException
+     */
+    public LinkedList&lt;SemanticChange&gt; getSemanticChangesList() throws InternalErrorException {
+<span class="pc bpc" id="L243" title="1 of 2 branches missed.">        if (semanticChangesList == null) {</span>
+<span class="fc" id="L244">            semanticChangesList = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L245">            logger.debug(&quot;Get additional information of current change set &quot; + changeSetURI + &quot;.&quot;);</span>
+<span class="fc" id="L246">            String query = Config.prefixes + String.format(&quot;&quot;</span>
+                    + &quot;SELECT ?semanticChange &quot;
+                    + &quot;WHERE { GRAPH  &lt;%s&gt; {&quot;
+                    + &quot;	&lt;%s&gt; a rmo:ChangeSet; &quot;
+                    + &quot;	 rmo:semanticChanges ?semanticChange. &quot;
+<span class="fc" id="L251">                    + &quot;} }&quot;, revisionGraph.getRevisionGraphUri(), changeSetURI);</span>
+<span class="fc" id="L252">            this.logger.debug(query);</span>
+<span class="fc" id="L253">            ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);</span>
+<span class="pc bpc" id="L254" title="1 of 2 branches missed.">            while (resultSet.hasNext()) {</span>
+<span class="nc" id="L255">                QuerySolution qs = resultSet.next();</span>
+<span class="nc" id="L256">                SemanticChange semanticChange = new SemanticChange(revisionGraph, qs.getResource(&quot;?semanticChange&quot;).toString());</span>
+<span class="nc" id="L257">                semanticChangesList.add(semanticChange);</span>
+<span class="nc" id="L258">            }</span>
+        }
+<span class="fc" id="L260">        return semanticChangesList;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

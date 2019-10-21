@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReferenceCommitDraft.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">ReferenceCommitDraft.java</span></div><h1>ReferenceCommitDraft.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.exception.QueryErrorException;
+import de.tud.plt.r43ples.existentobjects.ReferenceCommit;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.management.R43plesRequest;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Collection of information for creating a new reference commit.
+ *
+ * @author Stephan Hensel
+ */
+public class ReferenceCommitDraft extends CommitDraft {
+
+    /** The logger. **/
+<span class="fc" id="L23">    private Logger logger = LogManager.getLogger(ReferenceCommitDraft.class);</span>
+
+    /** The pattern modifier. **/
+<span class="fc" id="L26">    private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;</span>
+
+    /** The revision graph. **/
+    private RevisionGraph revisionGraph;
+    /** The reference identifier. **/
+    private String referenceIdentifier;
+    /** The base revision. **/
+    private Revision baseRevision;
+    /** States if the created reference is a branch or a tag. (branch =&gt; true; tag =&gt; false) **/
+    private boolean isBranch;
+
+
+    /**
+     * The constructor.
+     *
+     * @param request the request received by R43ples
+     * @throws InternalErrorException
+     */
+    public ReferenceCommitDraft(R43plesRequest request) throws InternalErrorException {
+<span class="fc" id="L45">        super(request);</span>
+<span class="fc" id="L46">        this.extractRequestInformation();</span>
+<span class="fc" id="L47">    }</span>
+
+    /**
+     * The constructor.
+     * Creates a reference commit draft by using the corresponding meta information.
+     *
+     * @param revisionGraph the revision graph
+     * @param referenceIdentifier the reference identifier
+     * @param baseRevision the revision identifier (the corresponding revision will be the current base for the reference)
+     * @param user the user
+     * @param message the message
+     * @param isBranch states if the created reference is a branch or a tag. (branch =&gt; true; tag =&gt; false)
+     * @throws InternalErrorException
+     */
+    protected ReferenceCommitDraft(RevisionGraph revisionGraph, String referenceIdentifier, Revision baseRevision, String user, String message, boolean isBranch) throws InternalErrorException {
+<span class="fc" id="L62">        super(null);</span>
+<span class="fc" id="L63">        this.setUser(user);</span>
+<span class="fc" id="L64">        this.setMessage(message);</span>
+<span class="fc" id="L65">        this.revisionGraph = revisionGraph;</span>
+<span class="fc" id="L66">        this.referenceIdentifier = referenceIdentifier;</span>
+<span class="fc" id="L67">        this.baseRevision = baseRevision;</span>
+<span class="fc" id="L68">        this.isBranch = isBranch;</span>
+<span class="fc" id="L69">    }</span>
+
+    /**
+     * Extracts the request information and stores it to local variables.
+     *
+     * @throws InternalErrorException
+     */
+    private void extractRequestInformation() throws InternalErrorException {
+<span class="fc" id="L77">        final Pattern patternBranchOrTagQuery = Pattern.compile(&quot;(?&lt;action&gt;TAG|BRANCH)\\s*GRAPH\\s*&lt;(?&lt;graph&gt;[^&gt;]*)&gt;\\s*REVISION\\s*\&quot;(?&lt;revision&gt;[^\&quot;]*)\&quot;\\s*TO\\s*\&quot;(?&lt;name&gt;[^\&quot;]*)\&quot;&quot;,</span>
+                patternModifier);
+<span class="fc" id="L79">        Matcher m = patternBranchOrTagQuery.matcher(getRequest().query_sparql);</span>
+
+<span class="fc" id="L81">        boolean foundEntry = false;</span>
+
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        while (m.find()) {</span>
+<span class="fc" id="L84">            foundEntry = true;</span>
+<span class="fc" id="L85">            String action = m.group(&quot;action&quot;);</span>
+<span class="fc" id="L86">            this.revisionGraph = new RevisionGraph(m.group(&quot;graph&quot;));</span>
+<span class="fc" id="L87">            this.baseRevision = new Revision(this.revisionGraph, m.group(&quot;revision&quot;), true);</span>
+<span class="fc" id="L88">            this.referenceIdentifier = m.group(&quot;name&quot;);</span>
+<span class="fc bfc" id="L89" title="All 2 branches covered.">            if (action.equals(&quot;TAG&quot;)) {</span>
+<span class="fc" id="L90">                this.isBranch = false;</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">            } else if (action.equals(&quot;BRANCH&quot;)) {</span>
+<span class="fc" id="L92">                this.isBranch = true;</span>
+            } else {
+<span class="nc" id="L94">                throw new QueryErrorException(&quot;Error in query: &quot; + getRequest().query_sparql);</span>
+            }
+<span class="fc" id="L96">        }</span>
+<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        if (!foundEntry) {</span>
+<span class="nc" id="L98">            throw new QueryErrorException(&quot;Error in query: &quot; + getRequest().query_sparql);</span>
+        }
+<span class="fc" id="L100">    }</span>
+
+    /**
+     * Creates the commit draft as a new commit in the triple store.
+     *
+     * @return the created reference commit
+     */
+    protected ReferenceCommit createInTripleStore() throws InternalErrorException {
+<span class="fc bfc" id="L108" title="All 2 branches covered.">        if (isBranch) {</span>
+<span class="fc" id="L109">            BranchCommitDraft branchCommitDraft = new BranchCommitDraft(revisionGraph, referenceIdentifier, baseRevision, getUser(), getMessage());</span>
+<span class="fc" id="L110">            return branchCommitDraft.createInTripleStore();</span>
+        } else {
+<span class="fc" id="L112">            TagCommitDraft tagCommitDraft = new TagCommitDraft(revisionGraph, referenceIdentifier, baseRevision, getUser(), getMessage());</span>
+<span class="fc" id="L113">            return tagCommitDraft.createInTripleStore();</span>
+        }
+    }
+
+    /**
+     * Get the revision graph.
+     *
+     * @return the revision graph
+     */
+    public RevisionGraph getRevisionGraph() {
+<span class="fc" id="L123">        return revisionGraph;</span>
+    }
+
+    /**
+     * Get the referenceIdentifier.
+     *
+     * @return the referenceIdentifier
+     */
+    public String getReferenceIdentifier() {
+<span class="fc" id="L132">        return referenceIdentifier;</span>
+    }
+
+    /**
+     * Get the base revision.
+     *
+     * @return the base revision
+     */
+    public Revision getBaseRevision() {
+<span class="fc" id="L141">        return baseRevision;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

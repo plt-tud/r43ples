@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JenaModelManagement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.iohelper</a> &gt; <span class="el_source">JenaModelManagement.java</span></div><h1>JenaModelManagement.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.iohelper;
+
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import de.tud.plt.r43ples.management.Config;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Iterator;
+import java.util.Map.Entry;
+
+<span class="nc" id="L12">public class JenaModelManagement {</span>
+	
+	/**
+	 * Read turtle file to jena model.
+	 * 
+	 * @param path the file path to the turtle file
+	 * @return the jena model
+	 */
+	public static Model readTurtleFileToJenaModel(String path) {
+<span class="fc" id="L21">		Model model = ModelFactory.createDefaultModel();</span>
+<span class="fc" id="L22">		InputStream is = ClassLoader.getSystemResourceAsStream(path);</span>
+<span class="fc" id="L23">		model.read(is, null, &quot;TURTLE&quot;);</span>
+		try {
+<span class="fc" id="L25">			is.close();</span>
+<span class="nc" id="L26">		} catch (IOException e) {</span>
+<span class="nc" id="L27">			e.printStackTrace();</span>
+<span class="fc" id="L28">		}</span>
+		
+<span class="fc" id="L30">		return model;</span>
+	}
+	
+	
+	
+	/**
+	 * Read RDF string to jena model.
+	 * 
+	 * @param triples the triples in RDF serialization
+	 * @param format Jena format of triples
+	 * @return the model
+	 */
+	public static Model readStringToJenaModel(String triples, String format) {
+<span class="fc" id="L43">		Model model = ModelFactory.createDefaultModel();</span>
+<span class="fc" id="L44">		InputStream is = new ByteArrayInputStream(triples.getBytes(StandardCharsets.UTF_8));</span>
+<span class="fc" id="L45">		model.read(is, null, format);</span>
+		try {
+<span class="fc" id="L47">			is.close();</span>
+<span class="nc" id="L48">		} catch (IOException e) {</span>
+<span class="nc" id="L49">			e.printStackTrace();</span>
+<span class="fc" id="L50">		}</span>
+<span class="fc" id="L51">		Iterator&lt;Entry&lt;String, String&gt;&gt; it = Config.user_defined_prefixes.entrySet().iterator();</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">		while (it.hasNext()) {</span>
+<span class="fc" id="L53">			Entry&lt;String, String&gt; ns = it.next();</span>
+<span class="fc" id="L54">			model.setNsPrefix(ns.getKey(), ns.getValue());</span>
+<span class="fc" id="L55">		}</span>
+		
+<span class="fc" id="L57">		return model;</span>
+	}
+	
+	
+	/**
+	 * Read N-Triple string to jena model.
+	 * 
+	 * @param triples the triples in N-Triple serialization
+	 * @return the model
+	 */
+	public static Model readNTripleStringToJenaModel(String triples) {
+<span class="fc" id="L68">        return readStringToJenaModel(triples, &quot;N-TRIPLE&quot;);</span>
+    }
+
+    /**
+     * Read Turtle string to jena model.
+     *
+     * @param triples the triples in turtle serialization
+     * @return the model
+     */
+    public static Model readTurtleStringToJenaModel(String triples) {
+<span class="fc" id="L78">        return readStringToJenaModel(triples, &quot;TURTLE&quot;);</span>
+    }
+
+
+	/**
+	 * Converts a jena model to the specified serialization. 
+	 * 
+	 * @param model the jena model
+	 * @return the string which contains the N-Triples
+	 */
+	public static String convertJenaModelToString(Model model, String format) {
+			
+<span class="fc" id="L90">		ByteArrayOutputStream os = new ByteArrayOutputStream();</span>
+<span class="fc" id="L91">		model.write(os, format);</span>
+		
+		try {
+<span class="fc" id="L94">			return new String(os.toByteArray(), &quot;UTF-8&quot;);</span>
+<span class="nc" id="L95">		} catch (UnsupportedEncodingException e) {</span>
+<span class="nc" id="L96">			e.printStackTrace();</span>
+<span class="nc" id="L97">			return &quot;&quot;;</span>
+        }
+    }
+
+    /**
+     * Converts a jena model to N-Triple serialization.
+     *
+     * @param model the jena model
+	 * @return the string which contains the N-Triples
+	 */
+    public static String convertJenaModelToNTriple(Model model) {
+<span class="fc" id="L108">        return convertJenaModelToString(model, &quot;N-TRIPLES&quot;);</span>
+    }
+
+    /**
+     * Converts a jena model to Turtle serialization.
+     *
+     * @param model the jena model
+     * @return the string which contains the Turtle serialization
+     */
+    public static String convertJenaModelToTurtle(Model model) {
+<span class="nc" id="L118">        return convertJenaModelToString(model, &quot;TURTLE&quot;);</span>
+    }
+
+	/**
+	 * Converts Turtle serialization to N-Triple serialization.
+	 *
+	 * @param triples the triples in turtle serialization
+	 * @return the string which contains the N-Triples
+	 */
+	public static String convertTurtleToNTriple(String triples) {
+<span class="fc" id="L128">		return convertJenaModelToNTriple(readTurtleStringToJenaModel(triples));</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

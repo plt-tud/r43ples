@@ -1,0 +1,740 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SampleDataSet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.dataset</a> &gt; <span class="el_source">SampleDataSet.java</span></div><h1>SampleDataSet.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.dataset;
+
+import de.tud.plt.r43ples.core.MergeTypes;
+import de.tud.plt.r43ples.core.R43plesCoreInterface;
+import de.tud.plt.r43ples.core.R43plesCoreSingleton;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.*;
+import de.tud.plt.r43ples.iohelper.ResourceManagement;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ * Creates different sample data sets.
+ *
+ * @author Stephan Hensel
+ * @author Markus Graube
+ *
+ */
+<span class="nc" id="L19">public class SampleDataSet {</span>
+
+	/** The logger. */
+<span class="fc" id="L22">	private static Logger logger = LogManager.getLogger(SampleDataSet.class);</span>
+	
+	/** The user. **/
+	private static final String user = &quot;butler&quot;;
+
+
+
+	public static DataSetGenerationResult createSampleDataset1() throws InternalErrorException  {
+
+<span class="fc" id="L31">		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();</span>
+
+<span class="fc" id="L33">		DataSetGenerationResult result = new DataSetGenerationResult();</span>
+<span class="fc" id="L34">		String graphName = &quot;http://test.com/r43ples-dataset-1&quot;;</span>
+<span class="fc" id="L35">		result.graphName = graphName;</span>
+<span class="fc" id="L36">		RevisionGraph graph = new RevisionGraph(graphName);</span>
+<span class="fc" id="L37">		graph.purgeRevisionInformation();</span>
+
+<span class="fc" id="L39">		String masterBranch = &quot;master&quot;;</span>
+
+<span class="fc" id="L41">		InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, null, null, user, &quot;Create graph&quot;);</span>
+<span class="fc" id="L42">		String revisionNumber0 = initialCommit.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L43">		result.revisions.put(&quot;master-0&quot;, revisionNumber0);</span>
+
+<span class="fc" id="L45">		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName,</span>
+<span class="fc" id="L46">				ResourceManagement.getContentFromResource(&quot;samples/dataset1/added-1.nt&quot;),</span>
+<span class="fc" id="L47">				ResourceManagement.getContentFromResource(&quot;samples/dataset1/removed-1.nt&quot;),</span>
+				user,
+				&quot;test commit message 1&quot;,
+				masterBranch);
+<span class="fc" id="L51">		String revisionNumber1 = commit1.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L52">		result.revisions.put(&quot;master-1&quot;, revisionNumber1);</span>
+
+<span class="fc" id="L54">		UpdateCommit commit2 = r43plesCore.createUpdateCommit(graphName,</span>
+<span class="fc" id="L55">				ResourceManagement.getContentFromResource(&quot;samples/dataset1/added-2.nt&quot;),</span>
+<span class="fc" id="L56">				ResourceManagement.getContentFromResource(&quot;samples/dataset1/removed-2.nt&quot;),</span>
+				user,
+				&quot;test commit message 2&quot;,
+				masterBranch);
+<span class="fc" id="L60">		String revisionNumber2 = commit2.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L61">		result.revisions.put(&quot;master-2&quot;, revisionNumber2);</span>
+
+<span class="fc" id="L63">		UpdateCommit commit3 = r43plesCore.createUpdateCommit(graphName,</span>
+<span class="fc" id="L64">				ResourceManagement.getContentFromResource(&quot;samples/dataset1/added-3.nt&quot;),</span>
+<span class="fc" id="L65">				ResourceManagement.getContentFromResource(&quot;samples/dataset1/removed-3.nt&quot;),</span>
+				user,
+				&quot;test commit message 3&quot;,
+				masterBranch);
+<span class="fc" id="L69">		String revisionNumber3 = commit3.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L70">		result.revisions.put(&quot;master-3&quot;, revisionNumber3);</span>
+
+<span class="fc" id="L72">		UpdateCommit commit4 = r43plesCore.createUpdateCommit(graphName,</span>
+<span class="fc" id="L73">				ResourceManagement.getContentFromResource(&quot;samples/dataset1/added-4.nt&quot;),</span>
+<span class="fc" id="L74">				ResourceManagement.getContentFromResource(&quot;samples/dataset1/removed-4.nt&quot;),</span>
+				user,
+				&quot;test commit message 4&quot;,
+				masterBranch);
+<span class="fc" id="L78">		String revisionNumber4 = commit4.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L79">		result.revisions.put(&quot;master-4&quot;, revisionNumber4);</span>
+
+<span class="fc" id="L81">		UpdateCommit commit5 = r43plesCore.createUpdateCommit(graphName,</span>
+<span class="fc" id="L82">				ResourceManagement.getContentFromResource(&quot;samples/dataset1/added-5.nt&quot;),</span>
+<span class="fc" id="L83">				ResourceManagement.getContentFromResource(&quot;samples/dataset1/removed-5.nt&quot;),</span>
+				user,
+				&quot;test commit message 5&quot;,
+				masterBranch);
+<span class="fc" id="L87">		String revisionNumber5 = commit5.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L88">		result.revisions.put(&quot;master-5&quot;, revisionNumber5);</span>
+<span class="fc" id="L89">		return result;</span>
+	}
+
+	public static DataSetGenerationResult createSampleDataset2() throws InternalErrorException {
+
+<span class="fc" id="L94">		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();</span>
+
+<span class="fc" id="L96">		DataSetGenerationResult result = new DataSetGenerationResult();</span>
+<span class="fc" id="L97">		String graphName = &quot;http://test.com/r43ples-dataset-2&quot;;</span>
+<span class="fc" id="L98">		result.graphName = graphName;</span>
+<span class="fc" id="L99">		RevisionGraph graph = new RevisionGraph(graphName);</span>
+<span class="fc" id="L100">		graph.purgeRevisionInformation();</span>
+
+<span class="fc" id="L102">        InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, null, null, user, &quot;Create graph&quot;);</span>
+<span class="fc" id="L103">        String revisionNumber0 = initialCommit.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L104">		result.revisions.put(&quot;master-0&quot;, revisionNumber0);</span>
+
+<span class="fc" id="L106">		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName,</span>
+<span class="fc" id="L107">				ResourceManagement.getContentFromResource(&quot;samples/dataset2/added-1.nt&quot;),</span>
+<span class="fc" id="L108">				ResourceManagement.getContentFromResource(&quot;samples/dataset2/removed-1.nt&quot;), user,</span>
+				&quot;test commit message 1&quot;, &quot;master&quot;);
+<span class="fc" id="L110">		String revisionNumber1 = commit1.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L111">		result.revisions.put(&quot;master-1&quot;, revisionNumber1);</span>
+
+<span class="fc" id="L113">		UpdateCommit commit2 = r43plesCore.createUpdateCommit(graphName,</span>
+<span class="fc" id="L114">				ResourceManagement.getContentFromResource(&quot;samples/dataset2/added-2.nt&quot;),</span>
+<span class="fc" id="L115">				ResourceManagement.getContentFromResource(&quot;samples/dataset2/removed-2.nt&quot;), user,</span>
+				&quot;test commit message 2&quot;, &quot;master&quot;);
+<span class="fc" id="L117">		String revisionNumber2 = commit2.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L118">		result.revisions.put(&quot;master-2&quot;, revisionNumber2);</span>
+
+<span class="fc" id="L120">		logger.info(&quot;SampleDataset2 successfully created&quot;);</span>
+<span class="fc" id="L121">		return result;</span>
+	}
+
+	public static DataSetGenerationResult createSampleDataset3() throws InternalErrorException  {
+<span class="fc" id="L125">		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();</span>
+
+<span class="fc" id="L127">		DataSetGenerationResult result = new DataSetGenerationResult();</span>
+<span class="fc" id="L128">		String graphName = &quot;http://test.com/r43ples-dataset-3&quot;;</span>
+<span class="fc" id="L129">		result.graphName = graphName;</span>
+<span class="fc" id="L130">		RevisionGraph graph = new RevisionGraph(graphName);</span>
+<span class="fc" id="L131">		graph.purgeRevisionInformation();</span>
+
+<span class="fc" id="L133">        InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, null, null, user, &quot;Create graph&quot;);</span>
+<span class="fc" id="L134">        String revisionNumber0 = initialCommit.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L135">		result.revisions.put(&quot;master-0&quot;, revisionNumber0);</span>
+
+<span class="fc" id="L137">		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName,</span>
+<span class="fc" id="L138">				ResourceManagement.getContentFromResource(&quot;samples/dataset3/added-1.nt&quot;),</span>
+<span class="fc" id="L139">				ResourceManagement.getContentFromResource(&quot;samples/dataset3/removed-1.nt&quot;), user,</span>
+				&quot;test commit message 1&quot;, &quot;master&quot;);
+<span class="fc" id="L141">		String revisionNumber1 = commit1.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L142">		result.revisions.put(&quot;master-1&quot;, revisionNumber1);</span>
+		// Create a new branch B1
+<span class="fc" id="L144">		String branchNameB1 = &quot;b1&quot;;</span>
+<span class="fc" id="L145">		DatasetGenerationManagement.createNewBranch(user, &quot;Create a new branch B1&quot;, graphName, revisionNumber1, branchNameB1);</span>
+
+<span class="fc" id="L147">		UpdateCommit commitB1_0 = r43plesCore.createUpdateCommit(graphName,</span>
+<span class="fc" id="L148">				ResourceManagement.getContentFromResource(&quot;samples/dataset3/added-2.nt&quot;),</span>
+<span class="fc" id="L149">				ResourceManagement.getContentFromResource(&quot;samples/dataset3/removed-2.nt&quot;), user,</span>
+				&quot;test commit message 2&quot;, branchNameB1);
+<span class="fc" id="L151">		String revisionB1_0 = commitB1_0.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L152">		result.revisions.put(&quot;b1-0&quot;, revisionB1_0);</span>
+
+<span class="fc" id="L154">		UpdateCommit commit3 = r43plesCore.createUpdateCommit(graphName,</span>
+<span class="fc" id="L155">				ResourceManagement.getContentFromResource(&quot;samples/dataset3/added-3.nt&quot;),</span>
+<span class="fc" id="L156">				ResourceManagement.getContentFromResource(&quot;samples/dataset3/removed-3.nt&quot;), user,</span>
+				&quot;test commit message 3&quot;, &quot;master&quot;);
+<span class="fc" id="L158">		String revisionNumber3 = commit3.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L159">		result.revisions.put(&quot;master-3&quot;, revisionNumber3);</span>
+
+<span class="fc" id="L161">		UpdateCommit commit4 = r43plesCore.createUpdateCommit(graphName,</span>
+<span class="fc" id="L162">				ResourceManagement.getContentFromResource(&quot;samples/dataset3/added-4.nt&quot;),</span>
+<span class="fc" id="L163">				ResourceManagement.getContentFromResource(&quot;samples/dataset3/removed-4.nt&quot;), user,</span>
+				&quot;test commit message 4&quot;, &quot;master&quot;);
+<span class="fc" id="L165">		String revisionNumber4 = commit4.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L166">		result.revisions.put(&quot;master-4&quot;, revisionNumber4);</span>
+
+<span class="fc" id="L168">		ThreeWayMergeCommit mergeCommit5 = r43plesCore.createThreeWayMergeCommit(graphName,</span>
+				branchNameB1, &quot;master&quot;,
+				user, &quot;test commit message 5&quot;,
+				null, null, MergeTypes.AUTO, false);
+<span class="fc" id="L172">		String revisionNumber5 = mergeCommit5.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L173">		result.revisions.put(&quot;master-5&quot;, revisionNumber5);</span>
+
+<span class="fc" id="L175">		return result;</span>
+	}
+
+
+
+	/**
+	 * Create an example graph of the following structure,
+	 *
+	 *                  ADD: D,E              ADD: G
+	 *               +-----X---------------------X--------- (Branch B1 = [B,C,E,G)
+	 *               |  DEL: A                DEL: D
+	 * ADD: A,B,C    |
+	 * ---X----------+ (Master)
+	 * DEL: -        |
+	 *               |  ADD: D,H              ADD: I    ADD: J
+	 *               +-----X---------------------X---------X----- (Branch B2 = [A,B,D,H,I,J)
+	 *                  DEL: C                DEL: -    DEL: -
+	 *
+	 *
+	 * @throws InternalErrorException
+	 */
+	public static DataSetGenerationResult createSampleDataSetMerging() throws InternalErrorException {
+<span class="fc" id="L197">		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();</span>
+
+<span class="fc" id="L199">		DataSetGenerationResult result = new DataSetGenerationResult();</span>
+<span class="fc" id="L200">		String graphName = &quot;http://test.com/r43ples-dataset-merging&quot;;</span>
+<span class="fc" id="L201">		result.graphName = graphName;</span>
+
+<span class="fc" id="L203">		RevisionGraph graph = new RevisionGraph(graphName);</span>
+
+		//delete the old graph
+<span class="fc" id="L206">		graph.purgeRevisionInformation();</span>
+
+<span class="fc" id="L208">        InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, null, null, user, &quot;Create graph&quot;);</span>
+<span class="fc" id="L209">        String revision0 = initialCommit.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L210">		result.revisions.put(&quot;master-0&quot;, revision0);</span>
+
+		// Initial commit
+<span class="fc" id="L213">		String triples = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;A\&quot;. \n&quot;</span>
+				+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;B\&quot;. \n&quot;
+				+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;C\&quot;. \n&quot;;
+<span class="fc" id="L216">		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, triples, null, user, &quot;Initial commit&quot;, &quot;master&quot;);</span>
+<span class="fc" id="L217">		String revision1 = commit1.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L218">		result.revisions.put(&quot;master-1&quot;, revision1);</span>
+
+		// Create a new branch B1
+<span class="fc" id="L221">		String branchNameB1 = &quot;b1&quot;;</span>
+<span class="fc" id="L222">		DatasetGenerationManagement.createNewBranch(user, &quot;Create a new branch B1&quot;, graphName, revision1, branchNameB1);</span>
+
+		// Create a new branch B2
+<span class="fc" id="L225">		String branchNameB2 = &quot;b2&quot;;</span>
+<span class="fc" id="L226">		DatasetGenerationManagement.createNewBranch(user, &quot;Create a new branch B2&quot;, graphName, revision1, branchNameB2);</span>
+
+		// First commit to B1
+<span class="fc" id="L229">		String triplesInsert = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;D\&quot;. \n&quot;</span>
+				+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;E\&quot;. \n&quot;;
+<span class="fc" id="L231">		String triplesDelete = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;A\&quot;. \n&quot;;</span>
+<span class="fc" id="L232">		UpdateCommit commitB1_0 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user, &quot;First commit to B1&quot;, branchNameB1);</span>
+<span class="fc" id="L233">		String revisionB1_0 = commitB1_0.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L234">		result.revisions.put(&quot;b1-0&quot;, revisionB1_0);</span>
+
+		// Second commit to B1
+<span class="fc" id="L237">		triplesInsert = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;G\&quot;. \n&quot;;</span>
+<span class="fc" id="L238">		triplesDelete = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;D\&quot;. \n&quot;;</span>
+<span class="fc" id="L239">		UpdateCommit commitB1_1 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user, &quot;Second commit to B1&quot;, branchNameB1);</span>
+<span class="fc" id="L240">		String revisionB1_1 = commitB1_1.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L241">		result.revisions.put(&quot;b1-1&quot;, revisionB1_1);</span>
+
+		// First commit to B2
+<span class="fc" id="L244">		triplesInsert = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;D\&quot;. \n&quot;</span>
+				+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;H\&quot;. \n&quot;;
+<span class="fc" id="L246">		triplesDelete = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;C\&quot;. \n&quot;;</span>
+<span class="fc" id="L247">		UpdateCommit commitB2_0 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user, &quot;First commit to B2&quot;, branchNameB2);</span>
+<span class="fc" id="L248">		String revisionB2_0 = commitB2_0.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L249">		result.revisions.put(&quot;b2-0&quot;, revisionB2_0);</span>
+
+		// Second commit to B2
+<span class="fc" id="L252">		triplesInsert = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;I\&quot;. \n&quot;;</span>
+<span class="fc" id="L253">		UpdateCommit commitB2_1 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user, &quot;Second commit to B2&quot;, branchNameB2);</span>
+<span class="fc" id="L254">		String revisionB2_1 = commitB2_1.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L255">		result.revisions.put(&quot;b2-1&quot;, revisionB2_1);</span>
+
+		// Third commit to B2
+<span class="fc" id="L258">		triplesInsert = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;J\&quot;. \n&quot;;</span>
+<span class="fc" id="L259">		UpdateCommit commitB2_2 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user, &quot;Third commit to B2&quot;, branchNameB2);</span>
+<span class="fc" id="L260">		String revisionB2_2 = commitB2_2.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L261">		result.revisions.put(&quot;b2-2&quot;, revisionB2_2);</span>
+
+<span class="fc" id="L263">		logger.info(&quot;Example graph &lt;&quot; + graphName +&quot;&gt; created.&quot;);</span>
+<span class="fc" id="L264">		return result;</span>
+	}
+
+
+	/**
+	 * Create an example graph of the following structure,
+	 *
+	 *                  ADD: D,E              ADD: G
+	 *               +-----X---------------------X--------- (Branch B1)
+	 *               |  DEL: -                DEL: -
+	 * ADD: A,B,C    |
+	 * ---X----------+ (Master)
+	 * DEL: -        |
+	 *               |  ADD: H              ADD: I    ADD: J
+	 *               +-----X---------------------X---------X----- (Branch B2)
+	 *                  DEL: C                DEL: -    DEL: -
+	 *
+	 *
+	 * @throws InternalErrorException
+	 *
+	 */
+	public static String createSampleDataSetRebase() throws InternalErrorException {
+<span class="fc" id="L286">		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();</span>
+
+<span class="fc" id="L288">		String graphName = &quot;http://test.com/r43ples-dataset-rebase&quot;;</span>
+
+<span class="fc" id="L290">		RevisionGraph graph = new RevisionGraph(graphName);</span>
+
+		//delete the old graph
+<span class="fc" id="L293">		graph.purgeRevisionInformation();</span>
+
+<span class="fc" id="L295">        InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, null, null, user, &quot;Create graph&quot;);</span>
+<span class="fc" id="L296">        String revision0 = initialCommit.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// Initial commit
+<span class="fc" id="L299">		String triples = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;A\&quot;. \n&quot;</span>
+				+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;B\&quot;. \n&quot;
+				+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;C\&quot;. \n&quot;;
+<span class="fc" id="L302">		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, triples, null, user, &quot;Initial commit&quot;, &quot;master&quot;);</span>
+<span class="fc" id="L303">		String revision1 = commit1.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// Create a new branch B1
+<span class="fc" id="L306">		String branchNameB1 = &quot;b1&quot;;</span>
+<span class="fc" id="L307">		DatasetGenerationManagement.createNewBranch(user, &quot;Create a new branch B1&quot;, graphName, revision1, branchNameB1);</span>
+
+		// Create a new branch B2
+<span class="fc" id="L310">		String branchNameB2 = &quot;b2&quot;;</span>
+<span class="fc" id="L311">		DatasetGenerationManagement.createNewBranch(user, &quot;Create a new branch B2&quot;, graphName, revision1, branchNameB2);</span>
+
+		// First commit to B1
+<span class="fc" id="L314">		String triplesInsert = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;D\&quot;. \n&quot;</span>
+				+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;E\&quot;. \n&quot;;
+<span class="fc" id="L316">		UpdateCommit commitB1_0 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user, &quot;First commit to B1&quot;, branchNameB1);</span>
+<span class="fc" id="L317">		String revisionB1_0 = commitB1_0.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// First commit to B2
+<span class="fc" id="L320">		triplesInsert = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;H\&quot;. \n&quot;;</span>
+<span class="fc" id="L321">		String triplesDelete = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;C\&quot;. \n&quot;;</span>
+<span class="fc" id="L322">		UpdateCommit commitB2_0 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user, &quot;First commit to B2&quot;, branchNameB2);</span>
+<span class="fc" id="L323">		String revisionB2_0 = commitB2_0.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// Second commit to B1
+<span class="fc" id="L326">		triplesInsert = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;G\&quot;. \n&quot;;</span>
+<span class="fc" id="L327">		UpdateCommit commitB1_1 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user, &quot;Second commit to B1&quot;, branchNameB1);</span>
+<span class="fc" id="L328">		String revisionB1_1 = commitB1_1.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// Second commit to B2
+<span class="fc" id="L331">		triplesInsert = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;I\&quot;. \n&quot;;</span>
+<span class="fc" id="L332">		UpdateCommit commitB2_1 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user, &quot;Second commit to B2&quot;, branchNameB2);</span>
+<span class="fc" id="L333">		String revisionB2_1 = commitB2_1.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// Third commit to B2
+<span class="fc" id="L336">		triplesInsert = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;J\&quot;. \n&quot;;</span>
+<span class="fc" id="L337">		UpdateCommit commitB2_2 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user, &quot;Third commit to B2&quot;, branchNameB2);</span>
+<span class="fc" id="L338">		String revisionB2_2 = commitB2_2.getGeneratedRevision().getRevisionIdentifier();</span>
+
+<span class="fc" id="L340">		logger.info(&quot;Example graph &lt;&quot; + graphName + &quot;&gt; created.&quot;);</span>
+
+<span class="fc" id="L342">		return graphName;</span>
+	}
+
+	/**
+	 *
+	 *
+	 * @return graphName
+	 * @throws InternalErrorException
+	 */
+	public static String createSampleDataSetMergingClasses() throws InternalErrorException {
+<span class="fc" id="L352">		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();</span>
+
+<span class="fc" id="L354">		String graphName = &quot;http://test.com/r43ples-dataset-merging-classes&quot;;</span>
+
+<span class="fc" id="L356">		RevisionGraph graph = new RevisionGraph(graphName);</span>
+
+		/** The initial content file path **/
+<span class="fc" id="L359">		String initialContentFilePath = &quot;verification/ExampleGraphClasses_initial.triples&quot;;</span>
+
+		// Read initial content from file to string
+<span class="fc" id="L362">		String initialContent = ResourceManagement.getContentFromResource(initialContentFilePath);</span>
+
+		//delete the old graph
+<span class="fc" id="L365">		graph.purgeRevisionInformation();</span>
+
+<span class="fc" id="L367">        InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, null, null, user, &quot;Create graph&quot;);</span>
+<span class="fc" id="L368">        String revision0 = initialCommit.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// Initial commit
+<span class="fc" id="L371">		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, initialContent, null, user, &quot;Initial commit&quot;, &quot;master&quot;);</span>
+<span class="fc" id="L372">		String revision1 = commit1.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// Create a new branch B1
+<span class="fc" id="L375">		String branchNameB1 = &quot;b1&quot;;</span>
+<span class="fc" id="L376">		DatasetGenerationManagement.createNewBranch(user, &quot;Create a new branch B1&quot;, graphName, revision1, branchNameB1);</span>
+
+		// Create a new branch B2
+<span class="fc" id="L379">		String branchNameB2 = &quot;b2&quot;;</span>
+<span class="fc" id="L380">		DatasetGenerationManagement.createNewBranch(user, &quot;Create a new branch B2&quot;, graphName, revision1, branchNameB2);</span>
+
+		// First commit to B1 - insert sub plant T4
+<span class="fc" id="L383">		String insertT4 = &quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#type&gt; &lt;http://eatld.et.tu-dresden.de/mso/Unit&gt; . \n&quot;</span>
+				+ &quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; &lt;http://www.w3.org/2000/01/rdf-schema#label&gt; \&quot;T4\&quot;@en . \n&quot;
+				+ &quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; &lt;http://eatld.et.tu-dresden.de/mso/rfid&gt; \&quot;E00401007837683C\&quot;@en . \n&quot;
+				+ &quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; &lt;http://eatld.et.tu-dresden.de/mso/hasEquipment&gt; &lt;http://eatld.et.tu-dresden.de/batch/A3A5R02ZZU&gt; . \n&quot;
+				+ &quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; &lt;http://eatld.et.tu-dresden.de/mso/isPartOfProcessCell&gt; &lt;http://eatld.et.tu-dresden.de/batch/A3A5R03UZU&gt; . \n&quot;
+				+ &quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; &lt;http://eatld.et.tu-dresden.de/mso/hasEquipment&gt; &lt;http://eatld.et.tu-dresden.de/batch/A3A5R06OZU&gt; . \n&quot;
+				+ &quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; &lt;http://eatld.et.tu-dresden.de/mso/hasEquipment&gt; &lt;http://eatld.et.tu-dresden.de/batch/A3A5R01ZZU&gt; . \n&quot;
+				+ &quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; &lt;http://eatld.et.tu-dresden.de/mso/comosUid&gt; \&quot;A3A5R07QZU\&quot;@en . \n&quot;
+				+ &quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; &lt;http://eatld.et.tu-dresden.de/mso/plantID&gt; \&quot;=TUDPLT.A1.T4\&quot;@en . \n&quot;
+				+ &quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; &lt;http://eatld.et.tu-dresden.de/mso/hasEquipment&gt; &lt;http://eatld.et.tu-dresden.de/batch/A3A5R02BZU&gt; . \n&quot;
+				+ &quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; &lt;http://eatld.et.tu-dresden.de/mso/hasEquipment&gt; &lt;http://eatld.et.tu-dresden.de/batch/A3A5R1AMZU&gt; . \n&quot;
+				+ &quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; &lt;http://eatld.et.tu-dresden.de/mso/hasEquipment&gt; &lt;http://eatld.et.tu-dresden.de/batch/A3A5R05NZU&gt; . \n&quot;
+				+ &quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; &lt;http://eatld.et.tu-dresden.de/mso/hasEquipment&gt; &lt;http://eatld.et.tu-dresden.de/batch/A3A5R01PZU&gt; . \n&quot;
+				+ &quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; &lt;http://www.w3.org/2000/01/rdf-schema#comment&gt; \&quot;Subplant flush\&quot;@en . \n&quot;;
+<span class="fc" id="L397">		UpdateCommit commitB1_0 = r43plesCore.createUpdateCommit(graphName, insertT4, null, user, &quot;First commit to B1&quot;, branchNameB1);</span>
+<span class="fc" id="L398">		String revisionB1_0 = commitB1_0.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// Second commit to B1 - delete sub plant T4
+<span class="fc" id="L401">		DatasetGenerationManagement.executeDeleteWhereQuery(user, &quot;Second commit to B1&quot;, graphName, branchNameB1,</span>
+				&quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R07QZU&gt; ?p ?o . \n&quot;);
+
+		// First commit to B2 - insert sub plant T4
+<span class="fc" id="L405">		UpdateCommit commitB2_0 = r43plesCore.createUpdateCommit(graphName, insertT4, null, user, &quot;First commit to B2&quot;, branchNameB2);</span>
+<span class="fc" id="L406">		String revisionB2_0 = commitB2_0.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// Second commit to B2 - delete armature V002
+<span class="fc" id="L409">		DatasetGenerationManagement.executeDeleteWhereQuery(user, &quot;Second commit to B2&quot;, graphName,branchNameB2,</span>
+				&quot;&lt;http://eatld.et.tu-dresden.de/batch/A3A5R01TZU&gt; ?p ?o . \n&quot;);
+
+<span class="fc" id="L412">		logger.info(&quot;Example graph &lt;&quot; + graphName +&quot;&gt; created.&quot;);</span>
+<span class="fc" id="L413">		return graphName;</span>
+	}
+
+
+	/**
+	 * Create an example graph of the following structure:
+	 *
+	 *                  ADD: 2D               ADD: 1G
+	 *               +-----X---------------------X--------- (Branch B1)
+	 *               |  DEL: 1A               DEL: 2D
+	 * ADD: 1A,1B,2C |
+	 * ---X----------+ (Master)
+	 * DEL: -        |
+	 *               |  ADD: 2D,2H            ADD: 2I
+	 *               +-----X---------------------X--------- (Branch B2)
+	 *                  DEL: 2C               DEL: -
+	 *
+	 * Contains the renaming of 1A to 1G.
+	 *
+	 * @return graphName
+	 * @throws InternalErrorException
+	 */
+	public static String createSampleDataSetRenaming() throws InternalErrorException {
+<span class="fc" id="L436">		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();</span>
+
+<span class="fc" id="L438">		String graphName = &quot;http://test.com/r43ples-dataset-renaming&quot;;</span>
+
+<span class="fc" id="L440">		RevisionGraph graph = new RevisionGraph(graphName);</span>
+
+		//delete the old graph
+<span class="fc" id="L443">		graph.purgeRevisionInformation();</span>
+
+<span class="fc" id="L445">        InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, null, null, user, &quot;Create graph&quot;);</span>
+<span class="fc" id="L446">        String revision0 = initialCommit.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// Initial commit
+<span class="fc" id="L449">		String triples = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP1&gt; \&quot;A\&quot;. \n&quot;</span>
+				+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP1&gt; \&quot;B\&quot;. \n&quot;
+				+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP2&gt; \&quot;C\&quot;. \n&quot;;
+<span class="fc" id="L452">		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, triples, null, user, &quot;Initial commit&quot;, &quot;master&quot;);</span>
+<span class="fc" id="L453">		String revision1 = commit1.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// Create a new branch B1
+<span class="fc" id="L456">		String branchNameB1 = &quot;b1&quot;;</span>
+<span class="fc" id="L457">		DatasetGenerationManagement.createNewBranch(user, &quot;Create a new branch B1&quot;, graphName, revision1, branchNameB1);</span>
+
+		// Create a new branch B2
+<span class="fc" id="L460">		String branchNameB2 = &quot;b2&quot;;</span>
+<span class="fc" id="L461">		DatasetGenerationManagement.createNewBranch(user, &quot;Create a new branch B2&quot;, graphName, revision1, branchNameB2);</span>
+
+		// First commit to B1
+<span class="fc" id="L464">		String triplesInsert = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP2&gt; \&quot;D\&quot;. \n&quot;;</span>
+
+<span class="fc" id="L466">		String triplesDelete = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP1&gt; \&quot;A\&quot;. \n&quot;;</span>
+<span class="fc" id="L467">		UpdateCommit commitB1_0 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user, &quot;First commit to B1&quot;, branchNameB1);</span>
+<span class="fc" id="L468">		String revisionB1_0 = commitB1_0.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// First commit to B2
+<span class="fc" id="L471">		triplesInsert = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP2&gt; \&quot;D\&quot;. \n&quot;</span>
+				+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP2&gt; \&quot;H\&quot;. \n&quot;;
+<span class="fc" id="L473">		triplesDelete = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP2&gt; \&quot;C\&quot;. \n&quot;;</span>
+<span class="fc" id="L474">		UpdateCommit commitB2_0 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user, &quot;First commit to B2&quot;, branchNameB2);</span>
+<span class="fc" id="L475">		String revisionB2_0 = commitB2_0.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// Second commit to B1
+<span class="fc" id="L478">		triplesInsert = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP1&gt; \&quot;G\&quot;. \n&quot;;</span>
+<span class="fc" id="L479">		triplesDelete = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP2&gt; \&quot;D\&quot;. \n&quot;;</span>
+<span class="fc" id="L480">		UpdateCommit commitB1_1 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user, &quot;Second commit to B1&quot;, branchNameB1);</span>
+<span class="fc" id="L481">		String revisionB1_1 = commitB1_1.getGeneratedRevision().getRevisionIdentifier();</span>
+
+		// Second commit to B2
+<span class="fc" id="L484">		triplesInsert = &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP2&gt; \&quot;I\&quot;. \n&quot;;</span>
+<span class="fc" id="L485">		UpdateCommit commitB2_1 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user, &quot;Second commit to B2&quot;, branchNameB2);</span>
+<span class="fc" id="L486">		String revisionB2_1 = commitB2_1.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L487">		logger.info(&quot;Example graph &lt;&quot; + graphName + &quot;&gt; created.&quot;);</span>
+
+<span class="fc" id="L489">		return graphName;</span>
+	}
+
+
+	/**
+	 * Create an example graph of the following structure:
+	 *
+	 *                                              ADD: -      ADD: -
+	 *                                           +-----3-----------4-----------(Branch B1X)
+	 *                                           |  DEL: B      DEL: C
+	 *                                           |
+	 *                  ADD: D,E       ADD: G    |        ADD: F
+	 *               +-----1--------------2------+-----------5-----------------(Branch B1)
+	 *               |  DEL: A         DEL: D             DEL: -
+	 *               |
+	 *               |                              ADD: J      ADD: C
+	 *               |                           +-----X-----------X-----------(Branch B2X)
+	 *               |                           |  DEL: -      DEL: I
+	 *               |                           |
+	 *               |  ADD: D,H       ADD: I    |  ADD: K,L    ADD: M
+	 *               +-----X--------------X------+-----X-----------X-----------(Branch B2)
+	 *               |  DEL: C         DEL: -       DEL: I      DEL: -
+	 *               |
+	 *               |
+	 * ADD: A,B,C    |          ADD: M,N            ADD: P,R,S
+	 * ---0----------+-------------X-------------------13-----------------------(MASTER)
+	 * DEL: -                   DEL: C              DEL: M
+	 *
+	 * @return graphName
+	 * @throws InternalErrorException
+	 */
+	public static DataSetGenerationResult createSampleDataSetComplexStructure() throws InternalErrorException {
+<span class="fc" id="L521">		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();</span>
+
+<span class="fc" id="L523">		String graphName = &quot;http://test.com/r43ples-dataset-complex-structure&quot;;</span>
+
+<span class="fc" id="L525">		DataSetGenerationResult result = new DataSetGenerationResult();</span>
+
+		// Branch identifier
+<span class="fc" id="L528">		String masterBranch = &quot;master&quot;;</span>
+<span class="fc" id="L529">		String b1Branch = &quot;B1&quot;;</span>
+<span class="fc" id="L530">		String b2Branch = &quot;B2&quot;;</span>
+<span class="fc" id="L531">		String b1XBranch = &quot;B1X&quot;;</span>
+<span class="fc" id="L532">		String b2XBranch = &quot;B2X&quot;;</span>
+
+<span class="fc" id="L534">		RevisionGraph graph = new RevisionGraph(graphName);</span>
+<span class="fc" id="L535">		result.graphName = graphName;</span>
+
+		//delete the old graph
+<span class="fc" id="L538">		graph.purgeRevisionInformation();</span>
+
+		// Initial commit
+<span class="fc" id="L541">		String triples =  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;A\&quot;. \n&quot;</span>
+						+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;B\&quot;. \n&quot;
+						+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;C\&quot;. \n&quot;;
+<span class="fc" id="L544">		InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, triples, null, user, &quot;Initial commit&quot;);</span>
+<span class="fc" id="L545">		Revision revisionMaster_1 = initialCommit.getGeneratedRevision();</span>
+<span class="fc" id="L546">		String revisionIdentifierMaster_1 = revisionMaster_1.getRevisionIdentifier();</span>
+<span class="fc" id="L547">		result.revisions.put(&quot;master-1&quot;, revisionIdentifierMaster_1);</span>
+
+		// Create a new branch B1
+<span class="fc" id="L550">		BranchCommit b1Commit = r43plesCore.createBranchCommit(graph, b1Branch, revisionMaster_1, user, &quot;Create a new branch B1&quot;);</span>
+		// Create a new branch B2
+<span class="fc" id="L552">		BranchCommit b2Commit = r43plesCore.createBranchCommit(graph, b2Branch, revisionMaster_1, user, &quot;Create a new branch B2&quot;);</span>
+
+		// First commit to B1
+<span class="fc" id="L555">		String triplesInsert =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;D\&quot;. \n&quot;</span>
+								+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;E\&quot;. \n&quot;;
+<span class="fc" id="L557">		String triplesDelete =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;A\&quot;. \n&quot;;</span>
+<span class="fc" id="L558">		UpdateCommit b1Commit1 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user,&quot;First commit to B1&quot;, b1Branch);</span>
+<span class="fc" id="L559">		String revisionIdentifierB1_1 = b1Commit1.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L560">		result.revisions.put(&quot;b1-1&quot;, revisionIdentifierB1_1);</span>
+
+		// Second commit to B1
+<span class="fc" id="L563">		triplesInsert =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;G\&quot;. \n&quot;;</span>
+<span class="fc" id="L564">		triplesDelete =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;D\&quot;. \n&quot;;</span>
+<span class="fc" id="L565">		UpdateCommit b1Commit2 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user,&quot;Second commit to B1&quot;, b1Branch);</span>
+<span class="fc" id="L566">		Revision revisionB1_2 = b1Commit2.getGeneratedRevision();</span>
+<span class="fc" id="L567">		String revisionIdentifierB1_2 = revisionB1_2.getRevisionIdentifier();</span>
+<span class="fc" id="L568">		result.revisions.put(&quot;b1-2&quot;, revisionIdentifierB1_2);</span>
+
+		// Create a new branch B1X
+<span class="fc" id="L571">		BranchCommit b1XCommit = r43plesCore.createBranchCommit(graph, b1XBranch, revisionB1_2, user, &quot;Create a new branch B1X&quot;);</span>
+
+		// First commit to B1X
+<span class="fc" id="L574">		triplesDelete =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;B\&quot;. \n&quot;;</span>
+<span class="fc" id="L575">		UpdateCommit b1XCommit1 = r43plesCore.createUpdateCommit(graphName, null, triplesDelete, user,&quot;First commit to B1X&quot;, b1XBranch);</span>
+<span class="fc" id="L576">		String revisionIdentifierB1X_1 = b1XCommit1.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L577">		result.revisions.put(&quot;b1X-1&quot;, revisionIdentifierB1X_1);</span>
+
+		// Second commit to B1X
+<span class="fc" id="L580">		triplesDelete =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;C\&quot;. \n&quot;;</span>
+<span class="fc" id="L581">		UpdateCommit b1XCommit2 = r43plesCore.createUpdateCommit(graphName, null, triplesDelete, user,&quot;Second commit to B1X&quot;, b1XBranch);</span>
+<span class="fc" id="L582">		String revisionIdentifierB1X_2 = b1XCommit2.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L583">		result.revisions.put(&quot;b1X-2&quot;, revisionIdentifierB1X_2);</span>
+
+		// Third commit to B1
+<span class="fc" id="L586">		triplesInsert =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;F\&quot;. \n&quot;;</span>
+<span class="fc" id="L587">		UpdateCommit b1Commit3 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user,&quot;Third commit to B1&quot;, b1Branch);</span>
+<span class="fc" id="L588">		String revisionIdentifierB1_3 = b1Commit3.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L589">		result.revisions.put(&quot;b1-3&quot;, revisionIdentifierB1_3);</span>
+
+		// First commit to B2
+<span class="fc" id="L592">		triplesInsert =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;D\&quot;. \n&quot;</span>
+						+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;H\&quot;. \n&quot;;
+<span class="fc" id="L594">		triplesDelete =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;C\&quot;. \n&quot;;</span>
+<span class="fc" id="L595">		UpdateCommit b2Commit1 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user,&quot;First commit to B2&quot;, b2Branch);</span>
+<span class="fc" id="L596">		String revisionIdentifierB2_1 = b2Commit1.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L597">		result.revisions.put(&quot;b2-1&quot;, revisionIdentifierB2_1);</span>
+
+		// Second commit to B2
+<span class="fc" id="L600">		triplesInsert =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;I\&quot;. \n&quot;;</span>
+<span class="fc" id="L601">		UpdateCommit b2Commit2 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user,&quot;Second commit to B2&quot;, b2Branch);</span>
+<span class="fc" id="L602">		Revision revisionB2_2 = b2Commit2.getGeneratedRevision();</span>
+<span class="fc" id="L603">		String revisionIdentifierB2_2 = revisionB2_2.getRevisionIdentifier();</span>
+<span class="fc" id="L604">		result.revisions.put(&quot;b2-2&quot;, revisionIdentifierB2_2);</span>
+
+		// Create a new branch B2X
+<span class="fc" id="L607">		BranchCommit b2XCommit = r43plesCore.createBranchCommit(graph, b2XBranch, revisionB2_2, user, &quot;Create a new branch B2X&quot;);</span>
+
+		// First commit to B2X
+<span class="fc" id="L610">		triplesInsert =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;J\&quot;. \n&quot;;</span>
+<span class="fc" id="L611">		UpdateCommit b2XCommit1 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user,&quot;First commit to B2X&quot;, b2XBranch);</span>
+<span class="fc" id="L612">		Revision revisionB2X_1 = b2XCommit1.getGeneratedRevision();</span>
+<span class="fc" id="L613">		String revisionIdentifierB2X_1 = revisionB2X_1.getRevisionIdentifier();</span>
+<span class="fc" id="L614">		result.revisions.put(&quot;b2X-1&quot;, revisionIdentifierB2X_1);</span>
+
+		// Tag the last revision of branch B2X
+<span class="fc" id="L617">        TagCommit tagCommit = r43plesCore.createTagCommit(graph, &quot;v0.2&quot;, revisionB2X_1, user, &quot;tag version v0.2&quot;);</span>
+
+		// Second commit to B2X
+<span class="fc" id="L620">		triplesInsert =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;C\&quot;. \n&quot;;</span>
+<span class="fc" id="L621">		triplesDelete =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;I\&quot;. \n&quot;;</span>
+<span class="fc" id="L622">		UpdateCommit b2XCommit2 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user,&quot;Second commit to B2X&quot;, b2XBranch);</span>
+<span class="fc" id="L623">		String revisionIdentifierB2X_2 = b2XCommit2.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L624">		result.revisions.put(&quot;b2X-2&quot;, revisionIdentifierB2X_2);</span>
+
+		// Third commit to B2
+<span class="fc" id="L627">		triplesInsert =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;K\&quot;. \n&quot;</span>
+						+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;L\&quot;. \n&quot;;
+<span class="fc" id="L629">		triplesDelete =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;I\&quot;. \n&quot;;</span>
+<span class="fc" id="L630">		UpdateCommit b2Commit3 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user,&quot;Third commit to B2&quot;, b2Branch);</span>
+<span class="fc" id="L631">		String revisionIdentifierB2_3 = b2Commit3.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L632">		result.revisions.put(&quot;b2-3&quot;, revisionIdentifierB2_3);</span>
+
+		// Fourth commit to B2
+<span class="fc" id="L635">		triplesInsert =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;M\&quot;. \n&quot;;</span>
+<span class="fc" id="L636">		UpdateCommit b2Commit4 = r43plesCore.createUpdateCommit(graphName, triplesInsert, null, user,&quot;Fourth commit to B2&quot;, b2Branch);</span>
+<span class="fc" id="L637">		String revisionIdentifierB2_4 = b2Commit4.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L638">		result.revisions.put(&quot;b2-4&quot;, revisionIdentifierB2_4);</span>
+
+		// Second commit to master
+<span class="fc" id="L641">		triplesInsert =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;M\&quot;. \n&quot;</span>
+						+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;N\&quot;. \n&quot;;
+<span class="fc" id="L643">		triplesDelete =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;C\&quot;. \n&quot;;</span>
+<span class="fc" id="L644">		UpdateCommit masterCommit2 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user,&quot;Second commit to MASTER&quot;, masterBranch);</span>
+<span class="fc" id="L645">		String revisionIdentifierMaster_2 = masterCommit2.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L646">		result.revisions.put(&quot;master-2&quot;, revisionIdentifierMaster_2);</span>
+
+		// Third commit to master
+<span class="fc" id="L649">		triplesInsert =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;P\&quot;. \n&quot;</span>
+						+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;R\&quot;. \n&quot;
+						+ &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;S\&quot;. \n&quot;;
+<span class="fc" id="L652">		triplesDelete =	  &quot;&lt;http://example.com/testS&gt; &lt;http://example.com/testP&gt; \&quot;M\&quot;. \n&quot;;</span>
+<span class="fc" id="L653">		UpdateCommit masterCommit3 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user,&quot;Third commit to MASTER&quot;, masterBranch);</span>
+<span class="fc" id="L654">		String revisionIdentifierMaster_3 = masterCommit3.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L655">		result.revisions.put(&quot;master-3&quot;, revisionIdentifierMaster_3);</span>
+
+<span class="fc" id="L657">		logger.info(&quot;Example graph &lt;&quot; + graphName +&quot;&gt; created.&quot;);</span>
+<span class="fc" id="L658">		return result;</span>
+	}
+
+
+	/**
+	 * Create an example graph containing a rename class.
+	 *
+	 * @throws InternalErrorException
+	 */
+	public static DataSetGenerationResult createSampleDataSetHLCAggregation() throws InternalErrorException {
+<span class="fc" id="L668">		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();</span>
+
+<span class="fc" id="L670">		DataSetGenerationResult result = new DataSetGenerationResult();</span>
+<span class="fc" id="L671">		String graphName = &quot;http://test.com/r43ples-dataset-hlc-aggregation&quot;;</span>
+<span class="fc" id="L672">		result.graphName = graphName;</span>
+<span class="fc" id="L673">		String masterBranch = &quot;master&quot;;</span>
+
+<span class="fc" id="L675">		RevisionGraph graph = new RevisionGraph(graphName);</span>
+
+		//delete the old graph
+<span class="fc" id="L678">		graph.purgeRevisionInformation();</span>
+
+<span class="fc" id="L680">		InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, null, null, user, &quot;Create graph&quot;);</span>
+<span class="fc" id="L681">		String revision0 = initialCommit.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L682">		result.revisions.put(&quot;master-0&quot;, revision0);</span>
+
+		// Initial commit
+<span class="fc" id="L685">		String triples = &quot;&lt;http://example.com/house&gt; a &lt;http://www.w3.org/2000/01/rdf-schema#Class&gt;. \n&quot;</span>
+				+ &quot;&lt;http://example.com/house&gt; &lt;http://www.w3.org/2000/01/rdf-schema#subClassOf&gt; &lt;http://example.com/building&gt;. \n&quot;
+				+ &quot;&lt;http://example.com/building&gt; a &lt;http://www.w3.org/2000/01/rdf-schema#Class&gt;. \n&quot;;
+<span class="fc" id="L688">		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, triples, null, user, &quot;Initial commit&quot;, &quot;master&quot;);</span>
+<span class="fc" id="L689">		String revision1 = commit1.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L690">		result.revisions.put(&quot;master-1&quot;, revision1);</span>
+
+		// Commit to master
+<span class="fc" id="L693">		String triplesInsert = &quot;&lt;http://example.com/myhouse&gt; a &lt;http://www.w3.org/2000/01/rdf-schema#Class&gt;. \n&quot;</span>
+				+ &quot;&lt;http://example.com/myhouse&gt; &lt;http://www.w3.org/2000/01/rdf-schema#subClassOf&gt; &lt;http://example.com/building&gt;. \n&quot;
+				+ &quot;&lt;http://example.com/myhouse&gt; &lt;http://example.com/hasDoor&gt; \&quot;BigDoor\&quot;. \n&quot;;
+<span class="fc" id="L696">		String triplesDelete = &quot;&lt;http://example.com/house&gt; a &lt;http://www.w3.org/2000/01/rdf-schema#Class&gt;. \n&quot;</span>
+				+ &quot;&lt;http://example.com/house&gt; &lt;http://www.w3.org/2000/01/rdf-schema#subClassOf&gt; &lt;http://example.com/building&gt;. \n&quot;;
+<span class="fc" id="L698">		UpdateCommit commit2 = r43plesCore.createUpdateCommit(graphName, triplesInsert, triplesDelete, user, &quot;Rename class&quot;, masterBranch);</span>
+<span class="fc" id="L699">		String revision2 = commit2.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L700">		result.revisions.put(&quot;master-2&quot;, revision2);</span>
+
+<span class="fc" id="L702">		logger.info(&quot;Example graph &lt;&quot; + graphName +&quot;&gt; created.&quot;);</span>
+<span class="fc" id="L703">		return result;</span>
+	}
+
+
+	/**
+	 * Create an example graph for the coevolution which uses the ontology elements of createSampleDataSetHLCAggregation().
+	 *
+	 * @throws InternalErrorException
+	 */
+	public static DataSetGenerationResult createSampleDataSetCoEvolution() throws InternalErrorException {
+<span class="fc" id="L713">		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();</span>
+
+<span class="fc" id="L715">		DataSetGenerationResult result = new DataSetGenerationResult();</span>
+<span class="fc" id="L716">		String graphName = &quot;http://test.com/r43ples-dataset-coevolution&quot;;</span>
+<span class="fc" id="L717">		result.graphName = graphName;</span>
+
+<span class="fc" id="L719">		RevisionGraph graph = new RevisionGraph(graphName);</span>
+
+		// delete the old graph
+<span class="fc" id="L722">		graph.purgeRevisionInformation();</span>
+
+<span class="fc" id="L724">		InitialCommit initialCommit = r43plesCore.createInitialCommit(graphName, null, null, user, &quot;Create graph&quot;);</span>
+<span class="fc" id="L725">		String revision0 = initialCommit.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L726">		result.revisions.put(&quot;master-0&quot;, revision0);</span>
+
+		// Initial commit
+<span class="fc" id="L729">		String triples = &quot;&lt;http://example-house.com/yellowhouse&gt; a &lt;http://example.com/house&gt;. \n&quot;</span>
+				+ &quot;&lt;http://example-house.com/yellowhouse&gt; &lt;http://www.w3.org/2000/01/rdf-schema#label&gt; \&quot;a yellow house\&quot;. \n&quot;;
+<span class="fc" id="L731">		UpdateCommit commit1 = r43plesCore.createUpdateCommit(graphName, triples, null, user, &quot;Initial commit&quot;, &quot;master&quot;);</span>
+<span class="fc" id="L732">		String revision1 = commit1.getGeneratedRevision().getRevisionIdentifier();</span>
+<span class="fc" id="L733">		result.revisions.put(&quot;master-1&quot;, revision1);</span>
+
+<span class="fc" id="L735">		logger.info(&quot;Example graph &lt;&quot; + graphName +&quot;&gt; created.&quot;);</span>
+<span class="fc" id="L736">		return result;</span>
+	}
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

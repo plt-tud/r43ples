@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommitGraphView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.visualisation</a> &gt; <span class="el_source">CommitGraphView.java</span></div><h1>CommitGraphView.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.visualisation;
+
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.geom.Dimension2D;
+import java.awt.geom.GeneralPath;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+
+import de.tud.plt.r43ples.revisionTree.Commit;
+
+public class CommitGraphView {
+	
+	/**
+	 * Diameter of the circles representing commits
+	 */
+	private static final int CIRCLE_DIAMETER = 10;
+	
+	
+	/**
+	 * Horizontal distance between commits respective branches
+	 */
+	private static final int COLUMN_WIDTH = 15;
+	
+	// dimensions of this graph, is null until drawn
+	private Dimension2D dimension;
+	// saves terminal commits of columns
+<span class="fc" id="L33">	private List&lt;Commit&gt; terminalCommits = new LinkedList&lt;Commit&gt;();</span>
+	// saves on which column a commit was drawn
+<span class="fc" id="L35">	private Map&lt;Commit, Integer&gt; commit_column = new HashMap&lt;Commit, Integer&gt;();</span>
+	// holds colors of branches, is cycled
+	private Queue&lt;Color&gt; colorQueue;
+	// list of commits
+	private List&lt;Commit&gt; commits;
+
+<span class="fc" id="L41">	public CommitGraphView(List&lt;Commit&gt; commits) {</span>
+<span class="fc" id="L42">		this.commits = commits;</span>
+<span class="fc" id="L43">		colorQueue = new LinkedList&lt;Color&gt;();</span>
+<span class="fc" id="L44">		colorQueue.add(new Color(0.5f, 0.1f, 0.1f));</span>
+<span class="fc" id="L45">		colorQueue.add(new Color(0.1f, 0.5f, 0.1f));</span>
+<span class="fc" id="L46">		colorQueue.add(new Color(0.1f, 0.1f, 0.5f));</span>
+<span class="fc" id="L47">		colorQueue.add(new Color(0.5f, 0.5f, 0.1f));</span>
+<span class="fc" id="L48">		colorQueue.add(new Color(0.5f, 0.1f, 0.5f));</span>
+<span class="fc" id="L49">		colorQueue.add(new Color(0.1f, 0.5f, 0.5f));</span>
+<span class="fc" id="L50">	}</span>
+	
+	public void drawGraph(Graphics2D g) {
+
+<span class="fc" id="L54">		int currentLine = 0;</span>
+<span class="fc" id="L55">		int maxColumn = 0;</span>
+<span class="fc" id="L56">		g.translate(0, VisualisationTable.LINE_HEIGHT/2);</span>
+<span class="fc" id="L57">		g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));</span>
+		
+<span class="fc" id="L59">		Map&lt;Commit, Color&gt; commit_color = new HashMap&lt;Commit, Color&gt;();</span>
+
+<span class="fc bfc" id="L61" title="All 2 branches covered.">		for (Commit c : commits) {</span>
+
+			// get column for this commit
+<span class="fc" id="L64">			int currentColumn = getColumnForCommit(c);</span>
+
+			// find color
+<span class="fc" id="L67">			Color currentColor = null;</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">			for (Commit suc : c.successors) {</span>
+<span class="pc bpc" id="L69" title="1 of 2 branches missed.">				if (suc.getBranch().equals(c.getBranch()))</span>
+<span class="fc" id="L70">					currentColor = commit_color.get(suc);</span>
+<span class="fc" id="L71">			}</span>
+<span class="fc bfc" id="L72" title="All 2 branches covered.">			if (currentColor == null)</span>
+<span class="fc" id="L73">				currentColor = getNextColor();</span>
+
+			// connect with any succeeding commits
+<span class="fc bfc" id="L76" title="All 2 branches covered.">			for (Commit suc : c.successors) {</span>
+
+				// calculate and set starting point
+<span class="fc" id="L79">				GeneralPath path = new GeneralPath();</span>
+<span class="fc" id="L80">				int x = COLUMN_WIDTH * currentColumn + CIRCLE_DIAMETER / 2;</span>
+<span class="fc" id="L81">				int y = VisualisationTable.LINE_HEIGHT * currentLine + CIRCLE_DIAMETER / 2;</span>
+<span class="fc" id="L82">				path.moveTo(x, y);</span>
+
+				// set color
+<span class="pc bpc" id="L85" title="3 of 4 branches missed.">				if (!suc.getBranch().equals(c.getBranch()) &amp;&amp; suc.predecessor.size() == 1)</span>
+<span class="nc" id="L86">					g.setColor(commit_color.get(suc));</span>
+				else
+<span class="fc" id="L88">					g.setColor(currentColor);</span>
+
+				// get line and column of successor
+<span class="fc" id="L91">				int endLine = commits.indexOf(suc);</span>
+<span class="fc" id="L92">				int endColumn = commit_column.get(suc);</span>
+
+				// find column for connection line
+<span class="fc" id="L95">				int column = currentColumn; // fallback</span>
+<span class="pc bpc" id="L96" title="1 of 2 branches missed.">				if (terminalCommits.contains(suc)) {</span>
+					// if successor terminates a column, use his column
+<span class="fc" id="L98">					column = terminalCommits.indexOf(suc);</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">				} else if (!terminalCommits.contains(c)) {</span>
+					// if successor is not terminating a column and current
+					// commit is not the first commit of his column, use new
+					// column
+<span class="nc" id="L103">					column = terminalCommits.size();</span>
+<span class="nc" id="L104">					terminalCommits.add(null);</span>
+				}
+				int line;
+<span class="fc bfc" id="L107" title="All 2 branches covered.">				for (line = currentLine; line &gt; endLine + 1; line--) {</span>
+					// drawConnection
+<span class="fc" id="L109">					drawConnectionTo(path, line - 1, column);</span>
+<span class="fc" id="L110">					maxColumn = Math.max(maxColumn, column);</span>
+				}
+<span class="fc" id="L112">				maxColumn = Math.max(maxColumn, column);</span>
+<span class="fc" id="L113">				drawConnectionTo(path, endLine, endColumn);</span>
+<span class="fc" id="L114">				g.draw(path);</span>
+<span class="fc" id="L115">			}</span>
+			
+			// update memory
+<span class="fc" id="L118">			terminalCommits.set(currentColumn, c);</span>
+<span class="fc" id="L119">			commit_column.put(c, currentColumn);</span>
+<span class="fc" id="L120">			commit_color.put(c, currentColor);</span>
+
+			// advance to next line
+<span class="fc" id="L123">			currentLine++;</span>
+<span class="fc" id="L124">		}</span>
+
+		// draw circles
+<span class="fc bfc" id="L127" title="All 2 branches covered.">		for (int l = 0; l &lt; commits.size(); l++) {</span>
+<span class="fc" id="L128">			Commit c = commits.get(l);</span>
+<span class="fc" id="L129">			g.setColor(commit_color.get(c));</span>
+<span class="fc" id="L130">			int column = commit_column.get(c);</span>
+<span class="fc" id="L131">			drawCircle(g, l, column);</span>
+		}
+		
+<span class="fc" id="L134">		g.translate(0, -VisualisationTable.LINE_HEIGHT/2);</span>
+
+		// calculate dimensions
+<span class="fc" id="L137">		dimension = new Dimension();</span>
+<span class="fc" id="L138">		dimension.setSize((maxColumn+1) * COLUMN_WIDTH, commits.size()</span>
+				* VisualisationTable.LINE_HEIGHT);
+
+<span class="fc" id="L141">	}</span>
+	
+	/**
+	 * @return Dimension of drawn graph or null if nothing has been drawn yet
+	 */
+	public Dimension2D getDimension() {
+<span class="fc" id="L147">		return dimension;</span>
+	}
+
+	private void drawConnectionTo(GeneralPath path, int line,
+			int column) {
+		
+<span class="fc" id="L153">		int x1 = (int) path.getCurrentPoint().getX();</span>
+<span class="fc" id="L154">		int y1 = (int) path.getCurrentPoint().getY();</span>
+<span class="fc" id="L155">		int x2 = COLUMN_WIDTH * column + CIRCLE_DIAMETER / 2;</span>
+<span class="fc" id="L156">		int y2 = VisualisationTable.LINE_HEIGHT * line + CIRCLE_DIAMETER / 2;</span>
+
+<span class="fc bfc" id="L158" title="All 2 branches covered.">		if (x1 == x2) {</span>
+			// draw straight line
+<span class="fc" id="L160">			path.lineTo(x2, y2);</span>
+		} else {
+			// draw curved line
+<span class="fc" id="L163">			int curvedLineBase = (int) (VisualisationTable.LINE_HEIGHT * 0.7);</span>
+<span class="fc" id="L164">			path.curveTo(x1, y1 - curvedLineBase, x2, y2 + curvedLineBase,</span>
+					x2, y2);
+		}
+<span class="fc" id="L167">	}</span>
+
+	private void drawCircle(Graphics2D g, int line, int column) {
+<span class="fc" id="L170">		g.fillOval(COLUMN_WIDTH * column, VisualisationTable.LINE_HEIGHT * line, CIRCLE_DIAMETER,</span>
+				CIRCLE_DIAMETER);
+<span class="fc" id="L172">	}</span>
+
+	private int getColumnForCommit(Commit c) {
+
+<span class="fc" id="L176">		int column = -1;</span>
+
+		// test if there is a successor of same branch terminating a column
+<span class="fc bfc" id="L179" title="All 2 branches covered.">		for (Commit suc : c.successors) {</span>
+<span class="pc bpc" id="L180" title="2 of 4 branches missed.">			if (terminalCommits.contains(suc) &amp;&amp; suc.getBranch().equals(c.getBranch())) {</span>
+<span class="fc" id="L181">				return terminalCommits.indexOf(suc);</span>
+			}
+<span class="nc" id="L183">		}</span>
+
+		// test for reusable columns
+<span class="fc bfc" id="L186" title="All 2 branches covered.">		for (Commit term : terminalCommits) {</span>
+<span class="fc" id="L187">			boolean isReusable = true;</span>
+
+			// test whether terminal commit has predecessors not yet drawn
+<span class="fc bfc" id="L190" title="All 2 branches covered.">			for (Commit term_pre : term.predecessor) {</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">				if (commits.indexOf(term_pre) &gt; commits.indexOf(c)) {</span>
+<span class="fc" id="L192">					isReusable = false;</span>
+<span class="fc" id="L193">					break;</span>
+				}
+				// test whether current commit has successors that would lead to
+				// overlapping
+<span class="pc bpc" id="L197" title="1 of 2 branches missed.">				for (Commit suc : c.successors) {</span>
+<span class="nc bnc" id="L198" title="All 4 branches missed.">					if (!terminalCommits.contains(suc) &amp;&amp; (commits.indexOf(suc) &lt; commits.indexOf(term_pre))) {</span>
+<span class="nc" id="L199">						isReusable = false;</span>
+<span class="nc" id="L200">						break;</span>
+					}
+<span class="nc" id="L202">				}</span>
+<span class="pc bpc" id="L203" title="1 of 2 branches missed.">				if (!isReusable)</span>
+<span class="nc" id="L204">					break;</span>
+<span class="fc" id="L205">			}</span>
+
+<span class="fc bfc" id="L207" title="All 2 branches covered.">			if (isReusable)</span>
+			{
+<span class="fc" id="L209">				return terminalCommits.indexOf(term);</span>
+			}
+<span class="fc" id="L211">		}</span>
+
+		// no column found, add new column
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">		if (column == -1) {</span>
+<span class="fc" id="L215">			terminalCommits.add(c);</span>
+<span class="fc" id="L216">			column = terminalCommits.indexOf(c);</span>
+		}
+
+<span class="fc" id="L219">		return column;</span>
+	}
+
+	private Color getNextColor() {
+<span class="fc" id="L223">		Color c = colorQueue.poll();</span>
+<span class="fc" id="L224">		colorQueue.add(c);</span>
+<span class="fc" id="L225">		return c;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

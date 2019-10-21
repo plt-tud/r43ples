@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MessagesTableView.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.visualisation</a> &gt; <span class="el_source">MessagesTableView.java</span></div><h1>MessagesTableView.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.visualisation;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics2D;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import de.tud.plt.r43ples.revisionTree.Branch;
+import de.tud.plt.r43ples.revisionTree.Commit;
+import de.tud.plt.r43ples.revisionTree.StructuredTree;
+import de.tud.plt.r43ples.revisionTree.Tag;
+
+public class MessagesTableView {
+
+	/**
+	 * Font of the Text
+	 */
+<span class="fc" id="L23">	protected final Font TextFont = new Font(&quot;SansSerif&quot;, Font.PLAIN, 16);</span>
+
+	private List&lt;Commit&gt; commits;
+	private Map&lt;Commit, List&lt;Branch&gt;&gt; branch_index;
+	private Map&lt;Commit, List&lt;Tag&gt;&gt; tag_index;
+<span class="fc" id="L28">	private Dimension dimension = null;</span>
+
+<span class="fc" id="L30">	public MessagesTableView(StructuredTree tree) {</span>
+<span class="fc" id="L31">		commits = tree.getCommits();</span>
+
+		// generate branches index
+<span class="fc" id="L34">		branch_index = new HashMap&lt;Commit, List&lt;Branch&gt;&gt;();</span>
+<span class="fc bfc" id="L35" title="All 2 branches covered.">		for (Branch b : tree.getBranches()) {</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">			if (branch_index.containsKey(b.getReference()))</span>
+<span class="nc" id="L37">				branch_index.get(b.getReference()).add(b);</span>
+			else {
+<span class="fc" id="L39">				List&lt;Branch&gt; list = new LinkedList&lt;Branch&gt;();</span>
+<span class="fc" id="L40">				list.add(b);</span>
+<span class="fc" id="L41">				branch_index.put(b.getReference(), list);</span>
+			}
+<span class="fc" id="L43">		}</span>
+
+		// generate tags index
+<span class="fc" id="L46">		tag_index = new HashMap&lt;Commit, List&lt;Tag&gt;&gt;();</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">		for (Tag t : tree.getTags()) {</span>
+<span class="nc bnc" id="L48" title="All 2 branches missed.">			if (tag_index.containsKey(t.getReference()))</span>
+<span class="nc" id="L49">				tag_index.get(t.getReference()).add(t);</span>
+			else {
+<span class="nc" id="L51">				List&lt;Tag&gt; list = new LinkedList&lt;Tag&gt;();</span>
+<span class="nc" id="L52">				list.add(t);</span>
+<span class="nc" id="L53">				tag_index.put(t.getReference(), list);</span>
+			}
+<span class="nc" id="L55">		}</span>
+<span class="fc" id="L56">	}</span>
+
+	public void draw(Graphics2D g) {
+
+<span class="fc" id="L60">		int y = 0;</span>
+<span class="fc" id="L61">		int pos = 0;</span>
+<span class="fc" id="L62">		FontMetrics fm = g.getFontMetrics(TextFont);</span>
+<span class="fc" id="L63">		Font tmp = g.getFont();</span>
+<span class="fc" id="L64">		g.setColor(Color.BLACK);</span>
+<span class="fc" id="L65">		g.setFont(TextFont);</span>
+<span class="fc" id="L66">		Font branchTagFont = new Font(&quot;Monospaced&quot;, Font.PLAIN, TextFont.getSize() - 2);</span>
+<span class="fc" id="L67">		FontMetrics branchTagMetrics = g.getFontMetrics(branchTagFont);</span>
+		
+		// Number
+		// header line
+<span class="fc" id="L71">		g.drawString(&quot;Number&quot;, pos, y);</span>
+<span class="fc" id="L72">		int numberWidth = fm.stringWidth(&quot;Number&quot;);</span>
+<span class="fc" id="L73">		y = VisualisationTable.LINE_HEIGHT;</span>
+
+<span class="fc bfc" id="L75" title="All 2 branches covered.">		for (Commit c : commits) {</span>
+			
+<span class="fc" id="L77">			String rev = c.getNextRevision();</span>
+<span class="fc" id="L78">			g.drawString(rev, pos, y);</span>
+
+			// calculate offset of next column
+<span class="fc" id="L81">			numberWidth = Math.max(numberWidth, fm.stringWidth(rev));</span>
+
+<span class="fc" id="L83">			y += VisualisationTable.LINE_HEIGHT;</span>
+<span class="fc" id="L84">		}</span>
+		
+		
+<span class="fc" id="L87">		pos += numberWidth + VisualisationTable.PADDING;</span>
+		
+		// Commit message
+		// header line
+<span class="fc" id="L91">		y=0;</span>
+<span class="fc" id="L92">		g.drawString(&quot;Commit Message&quot;, pos, y);</span>
+<span class="fc" id="L93">		int commitWidth = fm.stringWidth(&quot;Commit Message&quot;);</span>
+<span class="fc" id="L94">		y += VisualisationTable.LINE_HEIGHT;</span>
+
+<span class="fc bfc" id="L96" title="All 2 branches covered.">		for (Commit c : commits) {</span>
+<span class="fc" id="L97">			String message = c.getMessage();</span>
+
+<span class="fc" id="L99">			int branchesWidth = 0;</span>
+<span class="fc" id="L100">			g.setFont(branchTagFont);</span>
+
+			// draw branches
+<span class="fc bfc" id="L103" title="All 2 branches covered.">			if (branch_index.containsKey(c)) {</span>
+<span class="fc bfc" id="L104" title="All 2 branches covered.">				for (Branch b : branch_index.get(c)) {</span>
+<span class="fc" id="L105">					String name = b.getName();</span>
+
+<span class="fc" id="L107">					int width = branchTagMetrics.stringWidth(name);</span>
+<span class="fc" id="L108">					int height = branchTagMetrics.getAscent() + branchTagMetrics.getDescent();</span>
+<span class="fc" id="L109">					g.translate(0, y);</span>
+<span class="fc" id="L110">					g.setColor(new Color(0.5f, 0.1f, 0.1f));</span>
+<span class="fc" id="L111">					g.fillRoundRect(pos + branchesWidth, -branchTagMetrics.getAscent(), width + 8, height, 5, 5);</span>
+<span class="fc" id="L112">					g.setColor(Color.WHITE);</span>
+<span class="fc" id="L113">					g.drawString(name, pos + branchesWidth + 2, 0);</span>
+<span class="fc" id="L114">					g.translate(0, -y);</span>
+<span class="fc" id="L115">					branchesWidth += width + 12;</span>
+<span class="fc" id="L116">				}</span>
+			}
+
+			// draw tags
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">			if (tag_index.containsKey(c)) {</span>
+<span class="nc bnc" id="L121" title="All 2 branches missed.">				for (Tag t : tag_index.get(c)) {</span>
+<span class="nc" id="L122">					String name = t.getName();</span>
+
+<span class="nc" id="L124">					int width = branchTagMetrics.stringWidth(name);</span>
+<span class="nc" id="L125">					int height = branchTagMetrics.getAscent() + branchTagMetrics.getDescent();</span>
+<span class="nc" id="L126">					g.translate(0, y);</span>
+<span class="nc" id="L127">					g.setColor(new Color(0.1f, 0.1f, 0.5f));</span>
+<span class="nc" id="L128">					g.fillRoundRect(pos + branchesWidth, -branchTagMetrics.getAscent(), width + 8, height, 5, 5);</span>
+<span class="nc" id="L129">					g.setColor(Color.WHITE);</span>
+<span class="nc" id="L130">					g.drawString(name, pos + branchesWidth + 2, 0);</span>
+<span class="nc" id="L131">					g.translate(0, -y);</span>
+<span class="nc" id="L132">					branchesWidth += width + 12;</span>
+<span class="nc" id="L133">				}</span>
+			}
+
+<span class="fc" id="L136">			g.setColor(Color.BLACK);</span>
+<span class="fc" id="L137">			g.setFont(TextFont);</span>
+
+			// infos of commit
+<span class="fc" id="L140">			g.drawString(message, pos + branchesWidth, y);</span>
+
+			// calculate offset of next column
+<span class="fc" id="L143">			commitWidth = Math.max(commitWidth, branchesWidth + fm.stringWidth(message));</span>
+
+<span class="fc" id="L145">			y += VisualisationTable.LINE_HEIGHT;</span>
+<span class="fc" id="L146">		}</span>
+		
+<span class="fc" id="L148">		pos += commitWidth + VisualisationTable.PADDING;</span>
+
+		
+		// Author
+<span class="fc" id="L152">		y = 0;</span>
+
+		// header line
+<span class="fc" id="L155">		g.drawString(&quot;Author&quot;, pos, y);</span>
+<span class="fc" id="L156">		int authorWidth = fm.stringWidth(&quot;Author&quot;);</span>
+<span class="fc" id="L157">		y += VisualisationTable.LINE_HEIGHT;</span>
+
+<span class="fc bfc" id="L159" title="All 2 branches covered.">		for (Commit c : commits) {</span>
+<span class="fc" id="L160">			String author = c.getAuthor();</span>
+<span class="fc" id="L161">			g.drawString(author, pos, y);</span>
+
+			// calculate offset of next column
+<span class="fc" id="L164">			authorWidth = Math.max(authorWidth, fm.stringWidth(author));</span>
+
+<span class="fc" id="L166">			y += VisualisationTable.LINE_HEIGHT;</span>
+<span class="fc" id="L167">		}</span>
+<span class="fc" id="L168">		pos += authorWidth;</span>
+<span class="fc" id="L169">		dimension = new Dimension(pos, y);</span>
+
+<span class="fc" id="L171">		g.setFont(tmp);</span>
+<span class="fc" id="L172">	}</span>
+
+	public Dimension getDimension() {
+<span class="fc" id="L175">		return dimension;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

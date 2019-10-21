@@ -1,0 +1,99 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head><meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+<title>HeaderInformation xref</title>
+<link type="text/css" rel="stylesheet" href="../../../../../stylesheet.css" />
+</head>
+<body>
+<div id="overview"><a href="../../../../../../apidocs/de/tud/plt/r43ples/core/HeaderInformation.html">View Javadoc</a></div><pre>
+<a class="jxr_linenumber" name="L1" href="#L1">1</a>   <strong class="jxr_keyword">package</strong> de.tud.plt.r43ples.core;
+<a class="jxr_linenumber" name="L2" href="#L2">2</a>   
+<a class="jxr_linenumber" name="L3" href="#L3">3</a>   <strong class="jxr_keyword">import</strong> org.apache.jena.rdf.model.Model;
+<a class="jxr_linenumber" name="L4" href="#L4">4</a>   <strong class="jxr_keyword">import</strong> org.apache.jena.util.FileUtils;
+<a class="jxr_linenumber" name="L5" href="#L5">5</a>   <strong class="jxr_keyword">import</strong> de.tud.plt.r43ples.exception.OutdatedException;
+<a class="jxr_linenumber" name="L6" href="#L6">6</a>   <strong class="jxr_keyword">import</strong> de.tud.plt.r43ples.iohelper.JenaModelManagement;
+<a class="jxr_linenumber" name="L7" href="#L7">7</a>   <strong class="jxr_keyword">import</strong> de.tud.plt.r43ples.management.Config;
+<a class="jxr_linenumber" name="L8" href="#L8">8</a>   <strong class="jxr_keyword">import</strong> de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+<a class="jxr_linenumber" name="L9" href="#L9">9</a>   <strong class="jxr_keyword">import</strong> org.apache.logging.log4j.LogManager;
+<a class="jxr_linenumber" name="L10" href="#L10">10</a>  <strong class="jxr_keyword">import</strong> org.apache.logging.log4j.Logger;
+<a class="jxr_linenumber" name="L11" href="#L11">11</a>  
+<a class="jxr_linenumber" name="L12" href="#L12">12</a>  <strong class="jxr_keyword">import</strong> java.util.regex.Matcher;
+<a class="jxr_linenumber" name="L13" href="#L13">13</a>  <strong class="jxr_keyword">import</strong> java.util.regex.Pattern;
+<a class="jxr_linenumber" name="L14" href="#L14">14</a>  
+<a class="jxr_linenumber" name="L15" href="#L15">15</a>  <strong class="jxr_keyword">public</strong> <strong class="jxr_keyword">class</strong> <a href="../../../../../de/tud/plt/r43ples/core/HeaderInformation.html">HeaderInformation</a> {
+<a class="jxr_linenumber" name="L16" href="#L16">16</a>  
+<a class="jxr_linenumber" name="L17" href="#L17">17</a>      <em class="jxr_javadoccomment">/** The logger. **/</em>
+<a class="jxr_linenumber" name="L18" href="#L18">18</a>      <strong class="jxr_keyword">private</strong> Logger logger = LogManager.getLogger(HeaderInformation.<strong class="jxr_keyword">class</strong>);
+<a class="jxr_linenumber" name="L19" href="#L19">19</a>  
+<a class="jxr_linenumber" name="L20" href="#L20">20</a>  
+<a class="jxr_linenumber" name="L21" href="#L21">21</a>      <em class="jxr_javadoccomment">/** Creates an RDF description for the revision tree of the graphs specified in the given SPARQL query</em>
+<a class="jxr_linenumber" name="L22" href="#L22">22</a>  <em class="jxr_javadoccomment">     * @param query SPARQL query</em>
+<a class="jxr_linenumber" name="L23" href="#L23">23</a>  <em class="jxr_javadoccomment">     * @return RDF string containing information for graphs specified in query</em>
+<a class="jxr_linenumber" name="L24" href="#L24">24</a>  <em class="jxr_javadoccomment">     */</em>
+<a class="jxr_linenumber" name="L25" href="#L25">25</a>      <strong class="jxr_keyword">public</strong> String getResponseHeaderFromQuery(String query) {
+<a class="jxr_linenumber" name="L26" href="#L26">26</a>          <strong class="jxr_keyword">final</strong> Pattern patternGraph = Pattern.compile(
+<a class="jxr_linenumber" name="L27" href="#L27">27</a>                  <span class="jxr_string">"(GRAPH|FROM|INTO)&#92;&#92;s*&lt;(?&lt;graph&gt;[^&gt;]*)&gt;&#92;&#92;s*"</span>,
+<a class="jxr_linenumber" name="L28" href="#L28">28</a>                  Pattern.CASE_INSENSITIVE);
+<a class="jxr_linenumber" name="L29" href="#L29">29</a>  
+<a class="jxr_linenumber" name="L30" href="#L30">30</a>          StringBuilder graphNames = <strong class="jxr_keyword">new</strong> StringBuilder();
+<a class="jxr_linenumber" name="L31" href="#L31">31</a>          Matcher m = patternGraph.matcher(query);
+<a class="jxr_linenumber" name="L32" href="#L32">32</a>          m.find();
+<a class="jxr_linenumber" name="L33" href="#L33">33</a>          <strong class="jxr_keyword">while</strong> (!m.hitEnd()) {
+<a class="jxr_linenumber" name="L34" href="#L34">34</a>              String graphName = m.group(<span class="jxr_string">"graph"</span>);
+<a class="jxr_linenumber" name="L35" href="#L35">35</a>              graphNames.append(<span class="jxr_string">"&lt;"</span>+graphName+<span class="jxr_string">"&gt;"</span>);
+<a class="jxr_linenumber" name="L36" href="#L36">36</a>              m.find();
+<a class="jxr_linenumber" name="L37" href="#L37">37</a>              <strong class="jxr_keyword">if</strong> (!m.hitEnd())
+<a class="jxr_linenumber" name="L38" href="#L38">38</a>                  graphNames.append(<span class="jxr_string">", "</span>);
+<a class="jxr_linenumber" name="L39" href="#L39">39</a>          }
+<a class="jxr_linenumber" name="L40" href="#L40">40</a>          String names = graphNames.toString();
+<a class="jxr_linenumber" name="L41" href="#L41">41</a>          String result = getResponseHeader(names);
+<a class="jxr_linenumber" name="L42" href="#L42">42</a>          logger.debug(String.format(<span class="jxr_string">"Header information for %s: %s"</span>, query, result));
+<a class="jxr_linenumber" name="L43" href="#L43">43</a>          <strong class="jxr_keyword">return</strong> result;
+<a class="jxr_linenumber" name="L44" href="#L44">44</a>  
+<a class="jxr_linenumber" name="L45" href="#L45">45</a>      }
+<a class="jxr_linenumber" name="L46" href="#L46">46</a>  
+<a class="jxr_linenumber" name="L47" href="#L47">47</a>      <strong class="jxr_keyword">protected</strong> String getResponseHeader(String graphList) {
+<a class="jxr_linenumber" name="L48" href="#L48">48</a>          String queryConstruct = String.format(
+<a class="jxr_linenumber" name="L49" href="#L49">49</a>                      <span class="jxr_string">"PREFIX rmo:	&lt;http://eatld.et.tu-dresden.de/rmo#&gt; "</span>
+<a class="jxr_linenumber" name="L50" href="#L50">50</a>                          + <span class="jxr_string">"PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt; %n"</span>
+<a class="jxr_linenumber" name="L51" href="#L51">51</a>                          + <span class="jxr_string">"CONSTRUCT {"</span>
+<a class="jxr_linenumber" name="L52" href="#L52">52</a>                          + <span class="jxr_string">" ?ref a ?type;"</span>
+<a class="jxr_linenumber" name="L53" href="#L53">53</a>                          + <span class="jxr_string">"		rdfs:label ?label;"</span>
+<a class="jxr_linenumber" name="L54" href="#L54">54</a>                          + <span class="jxr_string">"		rmo:references ?rev."</span>
+<a class="jxr_linenumber" name="L55" href="#L55">55</a>                          + <span class="jxr_string">" ?rev rmo:revisionNumber ?number . %n"</span>
+<a class="jxr_linenumber" name="L56" href="#L56">56</a>                          + <span class="jxr_string">"} %n"</span>
+<a class="jxr_linenumber" name="L57" href="#L57">57</a>                          + <span class="jxr_string">"WHERE {"</span>
+<a class="jxr_linenumber" name="L58" href="#L58">58</a>                          + <span class="jxr_string">" GRAPH &lt;%s&gt; {"</span>
+<a class="jxr_linenumber" name="L59" href="#L59">59</a>                          + <span class="jxr_string">"   ?graph a rmo:RevisionGraph; rmo:hasRevisionGraph ?revisionGraph."</span>
+<a class="jxr_linenumber" name="L60" href="#L60">60</a>                          + <span class="jxr_string">"   FILTER (?graph IN (%s))"</span>
+<a class="jxr_linenumber" name="L61" href="#L61">61</a>                          + <span class="jxr_string">" }"</span>
+<a class="jxr_linenumber" name="L62" href="#L62">62</a>                          + <span class="jxr_string">" GRAPH ?revisionGraph { "</span>
+<a class="jxr_linenumber" name="L63" href="#L63">63</a>                          + <span class="jxr_string">" ?ref a ?type;"</span>
+<a class="jxr_linenumber" name="L64" href="#L64">64</a>                              + <span class="jxr_string">"		rmo:referenceIdentifier ?label;%n"</span>
+<a class="jxr_linenumber" name="L65" href="#L65">65</a>                          + <span class="jxr_string">"		rmo:references ?rev."</span>
+<a class="jxr_linenumber" name="L66" href="#L66">66</a>                              + <span class="jxr_string">" ?rev rmo:revisionIdentifier ?number . %n"</span>
+<a class="jxr_linenumber" name="L67" href="#L67">67</a>                          + <span class="jxr_string">"FILTER (?type IN (rmo:Tag, rmo:Master, rmo:Branch)) %n"</span>
+<a class="jxr_linenumber" name="L68" href="#L68">68</a>                          + <span class="jxr_string">"} }"</span>, Config.revision_graph, graphList);
+<a class="jxr_linenumber" name="L69" href="#L69">69</a>          String header = TripleStoreInterfaceSingleton.get().executeConstructQuery(queryConstruct, FileUtils.langTurtle);
+<a class="jxr_linenumber" name="L70" href="#L70">70</a>          <strong class="jxr_keyword">return</strong> header;
+<a class="jxr_linenumber" name="L71" href="#L71">71</a>      }
+<a class="jxr_linenumber" name="L72" href="#L72">72</a>  
+<a class="jxr_linenumber" name="L73" href="#L73">73</a>      <strong class="jxr_keyword">protected</strong> <strong class="jxr_keyword">void</strong> checkUpToDate(<strong class="jxr_keyword">final</strong> String clientRevisionInformation, <strong class="jxr_keyword">final</strong> String sparqlQuery) <strong class="jxr_keyword">throws</strong> OutdatedException {
+<a class="jxr_linenumber" name="L74" href="#L74">74</a>  
+<a class="jxr_linenumber" name="L75" href="#L75">75</a>          Model clientModel = JenaModelManagement.readTurtleStringToJenaModel(clientRevisionInformation);
+<a class="jxr_linenumber" name="L76" href="#L76">76</a>  
+<a class="jxr_linenumber" name="L77" href="#L77">77</a>          String recentRevisionInformation = <strong class="jxr_keyword">this</strong>.getResponseHeaderFromQuery(sparqlQuery);
+<a class="jxr_linenumber" name="L78" href="#L78">78</a>  
+<a class="jxr_linenumber" name="L79" href="#L79">79</a>          Model serverModel = JenaModelManagement.readTurtleStringToJenaModel(recentRevisionInformation);
+<a class="jxr_linenumber" name="L80" href="#L80">80</a>  
+<a class="jxr_linenumber" name="L81" href="#L81">81</a>          <strong class="jxr_keyword">if</strong> (!clientModel.isIsomorphicWith(serverModel)) {
+<a class="jxr_linenumber" name="L82" href="#L82">82</a>               <strong class="jxr_keyword">throw</strong> <strong class="jxr_keyword">new</strong> <a href="../../../../../de/tud/plt/r43ples/exception/OutdatedException.html">OutdatedException</a>(clientModel, serverModel);
+<a class="jxr_linenumber" name="L83" href="#L83">83</a>          }
+<a class="jxr_linenumber" name="L84" href="#L84">84</a>      }
+<a class="jxr_linenumber" name="L85" href="#L85">85</a>  
+<a class="jxr_linenumber" name="L86" href="#L86">86</a>  }
+</pre>
+<hr/>
+<div id="footer">Copyright &#169; 2019 <a href="http://www.et.tu-dresden.de/ifa/index.php?id=prozessleittechnik">Technische Universität Dresden - Professur für Prozessleittechnik</a>. All rights reserved.</div>
+</body>
+</html>

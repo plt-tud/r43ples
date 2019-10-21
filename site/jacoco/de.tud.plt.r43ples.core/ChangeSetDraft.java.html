@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ChangeSetDraft.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">ChangeSetDraft.java</span></div><h1>ChangeSetDraft.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.ChangeSet;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.iohelper.Helper;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ * Collection of information for creating a new change set.
+ *
+ * @author Stephan Hensel
+ *
+ */
+public class ChangeSetDraft {
+
+    /** The logger. **/
+<span class="fc" id="L23">    private Logger logger = LogManager.getLogger(ChangeSetDraft.class);</span>
+
+    /** The prior revision. **/
+    private Revision priorRevision;
+    /** The new revision identifier. **/
+    private String newRevisionIdentifier;
+    /** The new revision URI. **/
+    private String newRevisionURI;
+    /** The referenced full graph URI. **/
+    private String referencedFullGraphURI;
+
+    /** The ADD set URI. */
+    private String addSetURI;
+    /** The DELETE set URI. */
+    private String deleteSetURI;
+    /** The add set as N-Triples. **/
+    private String addSet;
+    /** The delete set as N-Triples. **/
+    private String deleteSet;
+
+    /** The new change set URI. **/
+    private String changeSetURI;
+
+    /** The corresponding revision graph. */
+    private RevisionGraph revisionGraph;
+    /** The current URI calculator instance. */
+    private URICalculator uriCalculator;
+
+    /** States if the add and delete sets were already stripped regarding the prior revision. **/
+    private boolean isStripped;
+    /** States if the the content of the add and delete sets will be specified by a following rewritten query (in that case add and delete set can be null but the corresponding graphs will be created anyway). **/
+    private boolean isSpecifiedByRewrittenQuery;
+
+    // Dependencies
+    /** The triple store interface to use. **/
+    private TripleStoreInterface tripleStoreInterface;
+
+
+    /**
+     * The constructor. Add and delete sets can be specified which are associated with this revision.
+     *
+     * @param uriCalculator the current URI calculator instance
+     * @param revisionGraph the revision graph
+     * @param priorRevision the prior revision
+     * @param newRevisionIdentifier the new revision identifier
+     * @param newRevisionURI the new revision URI
+     * @param referencedFullGraphURI the referenced full graph URI
+     * @param addSet the add set of the revision as N-Triples
+     * @param deleteSet the delete set of the revision as N-Triples
+     * @param isStripped states if the add and delete sets were already stripped regarding the prior revision
+     * @param isSpecifiedByRewrittenQuery states if the the content of the add and delete sets will be specified by a following rewritten query (in that case add and delete set can be null but the corresponding graphs will be created anyway)
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L76">    protected ChangeSetDraft(URICalculator uriCalculator, RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier, String newRevisionURI, String referencedFullGraphURI, String addSet, String deleteSet, boolean isStripped, boolean isSpecifiedByRewrittenQuery) throws InternalErrorException {</span>
+        // Dependencies
+<span class="fc" id="L78">        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();</span>
+
+<span class="fc" id="L80">        this.uriCalculator = uriCalculator;</span>
+<span class="fc" id="L81">        this.revisionGraph = revisionGraph;</span>
+
+<span class="fc" id="L83">        this.priorRevision = priorRevision;</span>
+<span class="fc" id="L84">        this.newRevisionIdentifier = newRevisionIdentifier;</span>
+<span class="fc" id="L85">        this.newRevisionURI = newRevisionURI;</span>
+<span class="fc" id="L86">        this.referencedFullGraphURI = referencedFullGraphURI;</span>
+
+<span class="fc" id="L88">        this.changeSetURI = this.uriCalculator.getNewChangeSetURI(revisionGraph, priorRevision, newRevisionIdentifier);</span>
+<span class="fc" id="L89">        this.addSetURI = this.uriCalculator.getNewAddSetURI(revisionGraph, priorRevision, newRevisionIdentifier);</span>
+<span class="fc" id="L90">        this.deleteSetURI = this.uriCalculator.getNewDeleteSetURI(revisionGraph, priorRevision, newRevisionIdentifier);</span>
+
+<span class="fc" id="L92">        this.isStripped = isStripped;</span>
+<span class="fc" id="L93">        this.isSpecifiedByRewrittenQuery = isSpecifiedByRewrittenQuery;</span>
+
+<span class="fc" id="L95">        this.addSet = addSet;</span>
+<span class="fc" id="L96">        this.deleteSet = deleteSet;</span>
+<span class="fc" id="L97">	}</span>
+
+    /**
+     * The constructor. Add and delete set URIs can be specified which are associated with this revision.
+     *
+     * @param uriCalculator the current URI calculator instance
+     * @param revisionGraph the revision graph
+     * @param priorRevision the prior revision
+     * @param newRevisionIdentifier the new revision identifier
+     * @param newRevisionURI the new revision URI
+     * @param referencedFullGraphURI the referenced full graph URI
+     * @param addSetURI the add set URI of the revision
+     * @param deleteSetURI the delete set URI of the revision
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L112">    protected ChangeSetDraft(URICalculator uriCalculator, RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier, String newRevisionURI, String referencedFullGraphURI, String addSetURI, String deleteSetURI) throws InternalErrorException {</span>
+        // Dependencies
+<span class="fc" id="L114">        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();</span>
+
+<span class="fc" id="L116">        this.uriCalculator = uriCalculator;</span>
+<span class="fc" id="L117">        this.revisionGraph = revisionGraph;</span>
+
+<span class="fc" id="L119">        this.priorRevision = priorRevision;</span>
+<span class="fc" id="L120">        this.newRevisionIdentifier = newRevisionIdentifier;</span>
+<span class="fc" id="L121">        this.newRevisionURI = newRevisionURI;</span>
+<span class="fc" id="L122">        this.referencedFullGraphURI = referencedFullGraphURI;</span>
+
+<span class="fc" id="L124">        this.changeSetURI = this.uriCalculator.getNewChangeSetURI(revisionGraph, priorRevision, newRevisionIdentifier);</span>
+<span class="fc" id="L125">        this.addSetURI = addSetURI;</span>
+<span class="fc" id="L126">        this.deleteSetURI = deleteSetURI;</span>
+
+<span class="fc" id="L128">        this.isStripped = true;</span>
+<span class="fc" id="L129">        this.isSpecifiedByRewrittenQuery = false;</span>
+
+<span class="fc" id="L131">        this.addSet = null;</span>
+<span class="fc" id="L132">        this.deleteSet = null;</span>
+<span class="fc" id="L133">    }</span>
+
+    /**
+     * Creates the change set draft with all meta data and named graphs in the triplestore.
+     * Creates add and delete sets, strips the resulting sets if necessary and adds meta information.
+     *
+     * @return the created change set
+     */
+    protected ChangeSet createInTripleStore() {
+<span class="fc" id="L142">        logger.debug(&quot;Create new change set for graph &quot; + revisionGraph.getGraphName() + &quot;.&quot;);</span>
+
+<span class="fc" id="L144">        createAddAndDeleteSetsInTripleStore();</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        if (!isStripped) {</span>
+<span class="fc" id="L146">            stripSets();</span>
+        }
+<span class="fc" id="L148">        addMetaInformation();</span>
+
+<span class="fc" id="L150">        return new ChangeSet(revisionGraph, priorRevision, addSetURI, deleteSetURI, changeSetURI);</span>
+    }
+
+    /**
+     * Creates the add and delete sets in the triplestore.
+     */
+    private void createAddAndDeleteSetsInTripleStore() {
+<span class="pc bpc" id="L157" title="1 of 4 branches missed.">        if (addSet!=null &amp;&amp; !addSet.isEmpty()) {</span>
+            // Create new named graph for add set
+<span class="fc" id="L159">            logger.debug(&quot;Create new graph with name &quot; + addSetURI + &quot;.&quot;);</span>
+<span class="fc" id="L160">            tripleStoreInterface.executeUpdateQuery(String.format(&quot;CREATE SILENT GRAPH &lt;%s&gt;%n&quot;, addSetURI));</span>
+<span class="fc" id="L161">            Helper.executeINSERT(addSetURI, addSet);</span>
+        }
+
+<span class="fc bfc" id="L164" title="All 4 branches covered.">        if (deleteSet!=null &amp;&amp; !deleteSet.isEmpty()) {</span>
+            // Create new named graph for delete set
+<span class="fc" id="L166">            logger.debug(&quot;Create new graph with name &quot; + deleteSetURI + &quot;.&quot;);</span>
+<span class="fc" id="L167">            tripleStoreInterface.executeUpdateQuery(String.format(&quot;CREATE SILENT GRAPH &lt;%s&gt;%n&quot;, deleteSetURI));</span>
+<span class="fc" id="L168">            Helper.executeINSERT(deleteSetURI, deleteSet);</span>
+        }
+
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        if (isSpecifiedByRewrittenQuery) {</span>
+<span class="fc" id="L172">            logger.debug(&quot;Create new graph with name &quot; + addSetURI + &quot; without content.&quot;);</span>
+<span class="fc" id="L173">            tripleStoreInterface.executeUpdateQuery(String.format(&quot;CREATE SILENT GRAPH &lt;%s&gt;%n&quot;, addSetURI));</span>
+<span class="fc" id="L174">            logger.debug(&quot;Create new graph with name &quot; + deleteSetURI + &quot; without content.&quot;);</span>
+<span class="fc" id="L175">            tripleStoreInterface.executeUpdateQuery(String.format(&quot;CREATE SILENT GRAPH &lt;%s&gt;%n&quot;, deleteSetURI));</span>
+        }
+<span class="fc" id="L177">    }</span>
+
+    /**
+     * Strips the add and delete sets. Removes duplicated data regarding the full graph.
+     */
+    private void stripSets() {
+        // remove doubled data
+        // (already existing triples in add set; not existing triples in delete set)
+<span class="fc" id="L185">        tripleStoreInterface.executeUpdateQuery(String.format(</span>
+                &quot;DELETE { GRAPH &lt;%s&gt; { ?s ?p ?o. } } WHERE { GRAPH &lt;%s&gt; { ?s ?p ?o. } }&quot;,
+                addSetURI, referencedFullGraphURI));
+<span class="fc" id="L188">        tripleStoreInterface.executeUpdateQuery(String.format(</span>
+                &quot;DELETE { GRAPH &lt;%s&gt; { ?s ?p ?o. } } WHERE { GRAPH &lt;%s&gt; { ?s ?p ?o. } MINUS { GRAPH &lt;%s&gt; { ?s ?p ?o. } } }&quot;,
+                deleteSetURI, deleteSetURI, referencedFullGraphURI));
+<span class="fc" id="L191">    }</span>
+
+    /**
+     * Adds meta information of the created revision to the revision graph.
+     *
+     * @throws InternalErrorException
+     */
+    private void addMetaInformation() {
+        // The prior revision could be null because of the initial commit
+        String queryContent;
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        if (priorRevision != null) {</span>
+            // Create new revision
+<span class="fc" id="L203">            queryContent = String.format(</span>
+                    &quot;&lt;%s&gt; a rmo:ChangeSet;&quot;
+                            + &quot;	rmo:addSet &lt;%s&gt; ;&quot;
+                            + &quot;	rmo:deleteSet &lt;%s&gt; ;&quot;
+                            + &quot;	rmo:priorRevision &lt;%s&gt; ;&quot;
+                            + &quot; rmo:succeedingRevision &lt;%s&gt; .&quot;,
+<span class="fc" id="L209">                    changeSetURI, addSetURI, deleteSetURI, priorRevision.getRevisionURI(), newRevisionURI);</span>
+        } else {
+            // Create new revision without prior revision
+<span class="fc" id="L212">            queryContent = String.format(</span>
+                    &quot;&lt;%s&gt; a rmo:ChangeSet;&quot;
+                            + &quot;	rmo:addSet &lt;%s&gt; ;&quot;
+                            + &quot;	rmo:deleteSet &lt;%s&gt; ;&quot;
+                            + &quot; rmo:succeedingRevision &lt;%s&gt; .&quot;,
+                    changeSetURI, addSetURI, deleteSetURI, newRevisionURI);
+        }
+
+<span class="fc" id="L220">        String queryRevision = Config.prefixes + String.format(&quot;INSERT DATA { GRAPH &lt;%s&gt; {%s} }&quot;, revisionGraph.getRevisionGraphUri(), queryContent);</span>
+
+<span class="fc" id="L222">        tripleStoreInterface.executeUpdateQuery(queryRevision);</span>
+<span class="fc" id="L223">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

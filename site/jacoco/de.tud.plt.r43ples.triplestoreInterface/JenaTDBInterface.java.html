@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JenaTDBInterface.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.triplestoreInterface</a> &gt; <span class="el_source">JenaTDBInterface.java</span></div><h1>JenaTDBInterface.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.triplestoreInterface;
+
+import java.io.File;
+import java.util.Iterator;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import org.apache.jena.query.Dataset;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.ReadWrite;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.tdb.TDBFactory;
+import org.apache.jena.update.GraphStore;
+import org.apache.jena.update.GraphStoreFactory;
+import org.apache.jena.update.UpdateExecutionFactory;
+import org.apache.jena.update.UpdateFactory;
+import org.apache.jena.update.UpdateProcessor;
+import org.apache.jena.update.UpdateRequest;
+
+
+/** 
+ * Provides a interface to the TDB triple store.
+ *
+ * @author Stephan Hensel
+ * @author Markus Graube
+ *
+ */
+public class JenaTDBInterface extends TripleStoreInterface {
+
+	/** The TDB dataset. **/
+	private static Dataset dataset;
+	/** The logger. */
+<span class="fc" id="L36">	private static Logger logger = LogManager.getLogger(JenaTDBInterface.class);</span>
+	
+
+	/**
+	 * The constructor.
+	 * 
+	 * @param databaseDirectory the database directory of TDB
+	 */
+<span class="fc" id="L44">	public JenaTDBInterface(String databaseDirectory) {</span>
+
+    	// if the directory does not exist, create it
+<span class="fc" id="L47">		File theDir = new File(databaseDirectory);</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">		if (!theDir.exists()) {</span>
+<span class="fc" id="L49">			logger.info(&quot;creating directory: &quot; + theDir.toString());</span>
+<span class="pc bpc" id="L50" title="1 of 2 branches missed.">		    if (theDir.mkdirs())</span>
+<span class="fc" id="L51">		    	logger.info(&quot;Directory successfully created&quot;);</span>
+		    else
+<span class="nc" id="L53">		    	logger.error(&quot;Could not create directory&quot;);</span>
+		  }
+		
+		// Initialize the database
+<span class="fc" id="L57">		dataset = TDBFactory.createDataset(databaseDirectory);</span>
+<span class="fc" id="L58">	}</span>
+	
+	@Override
+	public void close() {
+<span class="fc" id="L62">		dataset.close();</span>
+<span class="fc" id="L63">	}</span>
+	
+	
+	
+	/**
+	 * Executes a SELECT query.
+	 * 
+	 * @param selectQueryString the SELECT query
+	 * @return result set
+	 */
+	@Override
+	public ResultSet executeSelectQuery(String selectQueryString) {
+<span class="fc" id="L75">		dataset.begin(ReadWrite.READ);</span>
+		try {
+<span class="fc" id="L77">			logger.debug(selectQueryString);</span>
+<span class="fc" id="L78">			QueryExecution qExec = QueryExecutionFactory.create(selectQueryString, dataset);</span>
+
+<span class="fc" id="L80">			ResultSet result = qExec.execSelect();</span>
+<span class="fc" id="L81">			return result;</span>
+<span class="pc" id="L82">		} finally { dataset.end(); }</span>
+	}
+	
+	
+	/**
+	 * Executes a CONSTRUCT query.
+	 * 
+	 * @param constructQueryString the CONSTRUCT query
+	 * @return model
+	 */
+	@Override
+	public Model executeConstructQuery(String constructQueryString) {
+<span class="fc" id="L94">		dataset.begin(ReadWrite.READ);</span>
+<span class="fc" id="L95">		QueryExecution qExec = QueryExecutionFactory.create(constructQueryString, dataset);</span>
+<span class="fc" id="L96">		Model result = qExec.execConstruct();</span>
+<span class="fc" id="L97">		qExec.close();</span>
+<span class="fc" id="L98">		dataset.end();</span>
+<span class="fc" id="L99">		return result;</span>
+	}
+	
+	
+	
+	/**
+	 * Executes a DESCRIBE query.
+	 * 
+	 * @param describeQueryString the DESCRIBE query
+	 * @return model
+	 */
+	@Override
+	public Model executeDescribeQuery(String describeQueryString) {
+<span class="nc" id="L112">		logger.debug(&quot;Query: &quot; + describeQueryString);</span>
+<span class="nc" id="L113">		dataset.begin(ReadWrite.READ);</span>
+<span class="nc" id="L114">		QueryExecution qExec = QueryExecutionFactory.create(describeQueryString, dataset);</span>
+<span class="nc" id="L115">		Model result = qExec.execDescribe();</span>
+<span class="nc" id="L116">		qExec.close();</span>
+<span class="nc" id="L117">		dataset.end();</span>
+<span class="nc" id="L118">		return result;</span>
+	}
+	
+
+	/**
+	 * Executes an ASK query.
+	 * 
+	 * @param askQueryString the ASK query
+	 * @return boolean result of ASK query
+	 */
+	@Override
+	public boolean executeAskQuery(String askQueryString) {
+<span class="fc" id="L130">		dataset.begin(ReadWrite.READ);</span>
+<span class="fc" id="L131">		QueryExecution qe = QueryExecutionFactory.create(askQueryString, dataset);</span>
+<span class="fc" id="L132">		boolean result = qe.execAsk();</span>
+<span class="fc" id="L133">		qe.close();</span>
+<span class="fc" id="L134">		dataset.end();</span>
+
+<span class="fc" id="L136">		return result;</span>
+	}
+	
+	/**
+	 * Executes an UPDATE query.
+	 * 
+	 * @param updateQueryString the UPDATE query
+	 */
+	@Override
+	public void executeUpdateQuery(String updateQueryString) {
+<span class="fc" id="L146">		logger.debug(&quot;Query:&quot; + updateQueryString);</span>
+<span class="fc" id="L147">		dataset.begin(ReadWrite.WRITE);</span>
+		
+<span class="fc" id="L149">		GraphStore graphStore = GraphStoreFactory.create(dataset) ;</span>
+		
+<span class="fc" id="L151">	    UpdateRequest request = UpdateFactory.create(updateQueryString) ;</span>
+<span class="fc" id="L152">	    UpdateProcessor proc = UpdateExecutionFactory.create(request, graphStore) ;</span>
+<span class="fc" id="L153">	    proc.execute();</span>
+<span class="fc" id="L154">	    dataset.commit();</span>
+<span class="fc" id="L155">		dataset.end();</span>
+<span class="fc" id="L156">	}</span>
+	
+
+	@Override
+	public void executeCreateGraph(String graph) {
+<span class="fc" id="L161">		dataset.begin(ReadWrite.WRITE);</span>
+		
+<span class="fc" id="L163">		GraphStore graphStore = GraphStoreFactory.create(dataset) ;</span>
+
+<span class="fc" id="L165">	    UpdateRequest request = UpdateFactory.create(&quot;CREATE GRAPH &lt;&quot;+graph+&quot;&gt;&quot;) ;</span>
+<span class="fc" id="L166">	    UpdateProcessor proc = UpdateExecutionFactory.create(request, graphStore) ;</span>
+<span class="fc" id="L167">	    proc.execute();</span>
+
+<span class="fc" id="L169">	    dataset.commit();</span>
+<span class="fc" id="L170">		dataset.end();</span>
+<span class="fc" id="L171">	}</span>
+
+	@Override
+	public Iterator&lt;String&gt; getGraphs() {
+<span class="fc" id="L175">		dataset.begin(ReadWrite.READ);</span>
+<span class="fc" id="L176">		Iterator&lt;String&gt; list = dataset.listNames();</span>
+<span class="fc" id="L177">		dataset.end();</span>
+<span class="fc" id="L178">		return list;</span>
+	}
+
+	@Override
+	public void dropAllGraphsAndReInit() {
+<span class="fc" id="L183">		Iterator&lt;String&gt; list = getGraphs();</span>
+<span class="fc" id="L184">		dataset.begin(ReadWrite.WRITE);</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">		while(list.hasNext()) {</span>
+<span class="fc" id="L186">			dataset.removeNamedModel(list.next());</span>
+		}
+<span class="fc" id="L188">		dataset.commit();</span>
+<span class="fc" id="L189">		dataset.end();</span>
+<span class="fc" id="L190">		init();</span>
+<span class="fc" id="L191">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

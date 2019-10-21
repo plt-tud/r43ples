@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SparqlRewriter.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.management</a> &gt; <span class="el_source">SparqlRewriter.java</span></div><h1>SparqlRewriter.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.management;
+
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryFactory;
+import org.apache.jena.sparql.core.TriplePath;
+import org.apache.jena.sparql.core.Var;
+import org.apache.jena.sparql.expr.*;
+import org.apache.jena.sparql.path.P_Link;
+import org.apache.jena.sparql.path.P_ZeroOrMore1;
+import org.apache.jena.sparql.syntax.*;
+import org.apache.jena.sparql.util.ExprUtils;
+import org.apache.jena.vocabulary.RDF;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.optimization.PathCalculationFabric;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Rewrites SPARQL queries in order to reflect old revisions.
+ * 
+ * @author Markus Graube
+ *
+ */
+<span class="fc" id="L35">public class SparqlRewriter {</span>
+
+	/** The logger. **/
+<span class="fc" id="L38">	private static final Logger logger = LogManager.getLogger(SparqlRewriter.class);</span>
+
+	private static final String rmo = &quot;http://eatld.et.tu-dresden.de/rmo#&quot;;
+<span class="fc" id="L41">	private static final Node rmo_Revision = NodeFactory.createURI(rmo + &quot;Revision&quot;);</span>
+<span class="fc" id="L42">	private static final Node rmo_deleteSet = NodeFactory.createURI(rmo + &quot;deleteSet&quot;);</span>
+<span class="fc" id="L43">	private static final Node rmo_addSet = NodeFactory.createURI(rmo + &quot;addSet&quot;);</span>
+<span class="fc" id="L44">	private static final Node rmo_fullGraph = NodeFactory.createURI(rmo + &quot;fullContent&quot;);</span>
+<span class="fc" id="L45">	private static final Node rmo_references = NodeFactory.createURI(rmo + &quot;references&quot;);</span>
+<span class="fc" id="L46">	private static final Node rmo_wasDerivedFrom = NodeFactory.createURI(rmo + &quot;wasDerivedFrom&quot;);</span>
+<span class="fc" id="L47">	private static final Node rmo_succeedingRevision = NodeFactory.createURI(rmo + &quot;succeedingRevision&quot;);</span>
+
+
+	/** instance variables */
+<span class="fc" id="L51">	private int statement_i = 0;</span>
+<span class="fc" id="L52">	private LinkedList&lt;String&gt; revisions = new LinkedList&lt;String&gt;();</span>
+<span class="fc" id="L53">	private LinkedList&lt;String&gt; graphs = new LinkedList&lt;String&gt;();</span>
+<span class="fc" id="L54">	private ExprList expression_list_revision_path = new ExprList();</span>
+	private Expr last_revision;
+	private String revisionNumber;
+	private RevisionGraph revisionGraph;
+	
+	public static String rewriteQuery(final String query_r43ples) throws InternalErrorException {
+<span class="fc" id="L60">		SparqlRewriter sr = new SparqlRewriter();</span>
+<span class="fc" id="L61">		return sr.rewrite(query_r43ples);</span>
+	}
+	
+	
+	
+	/** updates last_revision and expression_list_revision_path by pulling first item of revisionNumber and graphName
+	 * 
+	 * @return false if revisionNumber is still a branch, otherwise true
+	 */
+	private boolean updateRevision() throws InternalErrorException {
+<span class="fc" id="L71">		revisionNumber = revisions.removeFirst();</span>
+<span class="fc" id="L72">		String graphName = graphs.removeFirst();</span>
+<span class="fc" id="L73">		revisionGraph = new RevisionGraph(graphName);</span>
+<span class="fc bfc" id="L74" title="All 2 branches covered.">		if (revisionGraph.hasBranch(revisionNumber))</span>
+<span class="fc" id="L75">			return false;</span>
+		else {
+<span class="fc" id="L77">			Revision revision = revisionGraph.getRevision(revisionNumber);</span>
+<span class="fc" id="L78">			LinkedList&lt;Revision&gt; list = PathCalculationFabric.getInstance(revisionGraph).getPathToRevisionWithFullGraph(revision)</span>
+<span class="fc" id="L79">					.getRevisionPath();</span>
+
+<span class="fc" id="L81">			logger.debug(&quot;Path to revision: &quot; + list.toString());</span>
+<span class="fc" id="L82">			last_revision = ExprUtils.nodeToExpr(NodeFactory.createURI(list.getLast().getRevisionURI()));</span>
+<span class="fc" id="L83">			list.removeFirst();</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">			for (Revision ns : list) {</span>
+<span class="fc" id="L85">				expression_list_revision_path.add(ExprUtils.nodeToExpr(NodeFactory.createURI(ns.getRevisionURI())));</span>
+<span class="fc" id="L86">			}</span>
+<span class="fc" id="L87">			return true;</span>
+		}
+	}
+	
+	public String rewrite(final String r43ples_query) throws InternalErrorException {
+		
+<span class="fc" id="L93">		final Pattern pattern1 = Pattern.compile(&quot;GRAPH\\s*&lt;(?&lt;revisionGraph&gt;\\S*)&gt;\\s*\\{&quot;, Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);</span>
+<span class="fc" id="L94">		final Pattern pattern2 = Pattern.compile(&quot;GRAPH\\s*&lt;(?&lt;revisionGraph&gt;\\S*)&gt;\\s*REVISION\\s*\&quot;(?&lt;revision&gt;\\S*)\&quot;&quot;, Pattern.MULTILINE + Pattern.CASE_INSENSITIVE);</span>
+				
+		
+<span class="fc" id="L97">		Matcher m1 = pattern1.matcher(r43ples_query);</span>
+<span class="fc" id="L98">		String query_sparql = m1.replaceAll(&quot;GRAPH &lt;$1&gt; REVISION \&quot;master\&quot; {&quot;);</span>
+				
+<span class="fc" id="L100">		Matcher m2 = pattern2.matcher(query_sparql);</span>
+		
+<span class="fc bfc" id="L102" title="All 2 branches covered.">		while (m2.find()) {</span>
+<span class="fc" id="L103">			String graphName = m2.group(&quot;revisionGraph&quot;);</span>
+<span class="fc" id="L104">			String referenceName = m2.group(&quot;revision&quot;);</span>
+<span class="fc" id="L105">			RevisionGraph graph = new RevisionGraph(graphName);</span>
+			
+<span class="fc" id="L107">			String revisionNumber = graph.getRevisionIdentifier(referenceName);</span>
+<span class="fc" id="L108">			graphs.add(graphName);</span>
+<span class="fc" id="L109">			revisions.add(revisionNumber);</span>
+
+<span class="fc" id="L111">			query_sparql = m2.replaceFirst(&quot;GRAPH &lt;&quot;+graphName+&quot;&gt;&quot;);</span>
+<span class="fc" id="L112">			m2 = pattern2.matcher(query_sparql);</span>
+<span class="fc" id="L113">		}</span>
+
+		// creates the Query
+<span class="fc" id="L116">		Query query_new = QueryFactory.create(query_sparql);</span>
+<span class="fc" id="L117">		Element el_orginal = query_new.getQueryPattern();</span>
+
+		// Do the rewriting and store the modified elements
+<span class="fc" id="L120">		Element el_modified = getRewrittenElement(el_orginal);</span>
+
+		// force distinct in order to avoid duplicate entries due to multiple revisionGraph joins
+<span class="fc" id="L123">		query_new.setDistinct(true);</span>
+<span class="fc" id="L124">		query_new.setQueryPattern(el_modified);</span>
+<span class="fc" id="L125">		query_sparql = query_new.serialize();</span>
+<span class="fc" id="L126">		logger.debug(&quot;Rewritten query: \n&quot; + query_sparql);</span>
+<span class="fc" id="L127">		return query_sparql;</span>
+	}
+
+	
+	/**
+	 * @param el_orginal
+	 * @return rewritten element group
+	 */
+	private Element getRewrittenElement(final Element el_orginal) throws InternalErrorException {
+<span class="fc bfc" id="L136" title="All 2 branches covered.">		if (el_orginal.getClass().equals(ElementNamedGraph.class)) {</span>
+<span class="fc" id="L137">			ElementNamedGraph ng_original = (ElementNamedGraph) el_orginal;</span>
+<span class="fc" id="L138">			ElementGroup eg_original = (ElementGroup) ng_original.getElement();</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">			if (updateRevision())</span>
+<span class="fc" id="L140">				return getRewrittenElement(eg_original);</span>
+			else {
+				ElementNamedGraph ng_new;
+				try {
+<span class="fc" id="L144">					ng_new = new ElementNamedGraph(NodeFactory.createURI(revisionGraph.getReferenceGraph(revisionNumber)), eg_original);</span>
+<span class="fc" id="L145">					return ng_new;</span>
+<span class="nc" id="L146">				} catch (InternalErrorException e) {</span>
+<span class="nc" id="L147">					e.printStackTrace();</span>
+<span class="nc" id="L148">					return null;</span>
+				}
+			}
+		} 
+<span class="fc bfc" id="L152" title="All 2 branches covered.">		else if (el_orginal.getClass().equals(ElementGroup.class)) {</span>
+<span class="fc" id="L153">			ElementGroup elementgroup = (ElementGroup) el_orginal;</span>
+			
+<span class="fc" id="L155">			ElementGroup eg_modified = new ElementGroup();</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">			for (Element el : elementgroup.getElements()) {</span>
+<span class="fc" id="L157">				Element el_mod = getRewrittenElement(el);</span>
+<span class="fc" id="L158">				expand(eg_modified, el_mod);</span>
+<span class="fc" id="L159">			}</span>
+<span class="fc" id="L160">			return eg_modified;</span>
+		} 
+<span class="fc bfc" id="L162" title="All 2 branches covered.">		else if (el_orginal.getClass().equals(ElementMinus.class)) {</span>
+<span class="fc" id="L163">			ElementMinus elementMinus = (ElementMinus) el_orginal;</span>
+<span class="fc" id="L164">			ElementGroup elementgroup = (ElementGroup) elementMinus.getMinusElement();</span>
+<span class="fc" id="L165">			Element minusPart = getRewrittenElement(elementgroup);</span>
+<span class="fc" id="L166">			ElementMinus em = new ElementMinus(minusPart);</span>
+<span class="fc" id="L167">			return em;</span>
+		}
+<span class="fc bfc" id="L169" title="All 2 branches covered.">		else if (el_orginal.getClass().equals(ElementUnion.class)) {</span>
+<span class="fc" id="L170">			ElementUnion elementUnion = (ElementUnion) el_orginal;</span>
+<span class="fc" id="L171">			List&lt;Element&gt; elements = elementUnion.getElements();</span>
+<span class="fc" id="L172">			ElementUnion elementModified = new ElementUnion();</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">			for (Element el : elements)</span>
+<span class="fc" id="L174">				elementModified.addElement(getRewrittenElement(el));</span>
+<span class="fc" id="L175">			return elementModified;</span>
+		}
+<span class="fc bfc" id="L177" title="All 2 branches covered.">		else if (el_orginal.getClass().equals(ElementPathBlock.class)){</span>
+<span class="fc" id="L178">			ElementPathBlock epb = (ElementPathBlock) el_orginal;</span>
+<span class="fc" id="L179">			Iterator&lt;TriplePath&gt; itPatternElts = epb.patternElts();</span>
+
+<span class="fc" id="L181">			ElementGroup eg_modified = new ElementGroup();</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">			while (itPatternElts.hasNext()) {</span>
+<span class="fc" id="L183">				TriplePath triplePath = itPatternElts.next();</span>
+<span class="fc" id="L184">				statement_i += 1;</span>
+<span class="fc" id="L185">				ElementGroup eg = getRewrittenTriplePath(triplePath);</span>
+<span class="fc" id="L186">				expand(eg_modified, eg);</span>
+<span class="fc" id="L187">			}</span>
+<span class="fc" id="L188">			return eg_modified;</span>
+		}
+		else {
+<span class="fc" id="L191">			return el_orginal;</span>
+		}
+	}
+
+	/**
+	 * @param triplePath
+	 * @return rewritten triple path element
+	 */
+	private ElementGroup getRewrittenTriplePath(TriplePath triplePath) {
+		{
+<span class="fc" id="L201">			ElementGroup eg_modified = new ElementGroup();</span>
+			
+<span class="fc" id="L203">			ElementTriplesBlock block_triple_path = new ElementTriplesBlock();</span>
+<span class="fc" id="L204">			block_triple_path.addTriple(triplePath.asTriple());</span>
+			
+
+<span class="fc" id="L207">			Node g_delete_set_full_graph = Var.alloc(&quot;g_delete_set_full_graph_&quot; + statement_i);</span>
+<span class="fc" id="L208">			Node g_add_set = Var.alloc(&quot;g_add_set_&quot; + statement_i);</span>
+<span class="fc" id="L209">			Node g_revisiongraph = NodeFactory.createURI(revisionGraph.getRevisionGraphUri());</span>
+
+<span class="fc" id="L211">			Var var_change_set_add = Var.alloc(&quot;change_set_add_&quot; + statement_i);</span>
+<span class="fc" id="L212">			Var var_change_set_del = Var.alloc(&quot;change_set_del_&quot; + statement_i);</span>
+<span class="fc" id="L213">			Var var_r_delete_set = Var.alloc(&quot;r_delete_set_&quot; + statement_i);</span>
+<span class="fc" id="L214">			Var var_r_add_set = Var.alloc(&quot;r_add_set_&quot; + statement_i);</span>
+
+<span class="fc" id="L216">			ElementGroup eg_fullgraph = new ElementGroup();</span>
+<span class="fc" id="L217">			Node anon = NodeFactory.createAnon();</span>
+<span class="fc" id="L218">			eg_fullgraph.addTriplePattern(new Triple(anon, rmo_references, var_r_delete_set));</span>
+<span class="fc" id="L219">			eg_fullgraph.addTriplePattern(new Triple(anon, rmo_fullGraph, g_delete_set_full_graph));</span>
+<span class="fc" id="L220">			eg_fullgraph.addElementFilter(new ElementFilter(new E_Equals(new ExprVar(var_r_delete_set), last_revision)));</span>
+			
+
+<span class="fc" id="L223">			ElementUnion eg_union = new ElementUnion();</span>
+<span class="fc" id="L224">			eg_union.addElement(eg_fullgraph);			</span>
+			
+<span class="fc" id="L226">			ElementGroup eg_revisiongraph = new ElementGroup();</span>
+<span class="fc" id="L227">			eg_revisiongraph.addElement(eg_union);</span>
+
+<span class="fc" id="L229">			ElementGroup eg_delete_set = new ElementGroup();</span>
+<span class="fc" id="L230">			eg_delete_set.addTriplePattern(new Triple(var_r_delete_set, RDF.type.asNode(), rmo_Revision));</span>
+<span class="fc" id="L231">			eg_delete_set.addTriplePattern(new Triple(var_change_set_del, rmo_succeedingRevision, var_r_delete_set));</span>
+<span class="fc" id="L232">			eg_delete_set.addTriplePattern(new Triple(var_change_set_del, rmo_deleteSet, g_delete_set_full_graph));</span>
+<span class="fc" id="L233">			eg_delete_set.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_delete_set),</span>
+					expression_list_revision_path)));
+<span class="fc" id="L235">			eg_union.addElement(eg_delete_set);</span>
+
+			
+<span class="fc" id="L238">			ElementGroup eg_revisiongraph2 = new ElementGroup();</span>
+<span class="fc" id="L239">			ElementPathBlock ebp = new ElementPathBlock();	</span>
+<span class="fc" id="L240">			ebp.addTriplePath(new TriplePath(var_r_delete_set, new P_ZeroOrMore1(new P_Link(rmo_wasDerivedFrom)),</span>
+					var_r_add_set));
+<span class="fc" id="L242">			eg_revisiongraph2.addElement(ebp);</span>
+<span class="fc" id="L243">			eg_revisiongraph2.addTriplePattern(new Triple(var_r_add_set, RDF.type.asNode(), rmo_Revision));</span>
+<span class="fc" id="L244">			eg_revisiongraph2.addTriplePattern(new Triple(var_change_set_add, rmo_succeedingRevision, var_r_add_set));</span>
+<span class="fc" id="L245">			eg_revisiongraph2.addTriplePattern(new Triple(var_change_set_add, rmo_addSet, g_add_set));</span>
+<span class="fc" id="L246">			eg_revisiongraph2.addElementFilter(new ElementFilter(new E_OneOf(new ExprVar(var_r_add_set),</span>
+					expression_list_revision_path)));			
+		
+<span class="fc" id="L249">			ElementGroup eg_minus = new ElementGroup();</span>
+<span class="fc" id="L250">			eg_minus.addElement(new ElementNamedGraph(g_add_set, block_triple_path));</span>
+<span class="fc" id="L251">			eg_minus.addElement(new ElementNamedGraph(g_revisiongraph, eg_revisiongraph2));</span>
+			
+<span class="fc" id="L253">			eg_modified.addElement(new ElementNamedGraph(g_delete_set_full_graph, block_triple_path));</span>
+<span class="fc" id="L254">			eg_modified.addElement(new ElementNamedGraph(g_revisiongraph, eg_revisiongraph));</span>
+<span class="fc" id="L255">			eg_modified.addElement(new ElementMinus(eg_minus));</span>
+<span class="fc" id="L256">			return eg_modified;</span>
+		}
+	}
+	
+	private static ElementGroup expand(ElementGroup eg, final Element el) {
+<span class="fc bfc" id="L261" title="All 2 branches covered.">		if (el.getClass().equals(ElementGroup.class))</span>
+<span class="fc bfc" id="L262" title="All 2 branches covered.">			for (Element el_new : ((ElementGroup) el).getElements())</span>
+<span class="fc" id="L263">				eg.addElement(el_new);</span>
+		else
+<span class="fc" id="L265">			eg.addElement(el);</span>
+<span class="fc" id="L266">		return eg;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

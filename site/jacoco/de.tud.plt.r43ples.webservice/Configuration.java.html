@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Configuration.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.webservice</a> &gt; <span class="el_source">Configuration.java</span></div><h1>Configuration.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.webservice;
+
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.ws.rs.FormParam;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.glassfish.jersey.server.mvc.Template;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
+/**
+ * REST services for managing the configuration on R43ples
+ * @author mgraube
+ *
+ */
+@Path(&quot;configuration&quot;)
+<span class="nc" id="L28">public class Configuration {</span>
+	
+	@Context UriInfo uriInfo;
+	
+<span class="nc" id="L32">	private final static Logger logger = LogManager.getLogger(Configuration.class);</span>
+	
+	/**
+	 * Get all configuration variables of R43ples and the user defined namespaces
+	 * @return map with all configuration variables
+	 * @throws InternalErrorException
+	 */
+	@GET
+	@Template(name = &quot;/configuration.mustache&quot;)
+	public final Map&lt;String, Object&gt; getConfiguration() throws InternalErrorException {
+<span class="nc" id="L42">		logger.info(&quot;Get Configuration page&quot;);</span>
+<span class="nc" id="L43">		Map&lt;String, Object&gt; htmlMap = new HashMap&lt;String, Object&gt;();</span>
+<span class="nc" id="L44">		htmlMap.put(&quot;version&quot;, Endpoint.class.getPackage().getImplementationVersion());</span>
+<span class="nc" id="L45">	    htmlMap.put(&quot;revisionGraph&quot;, Config.revision_graph);</span>
+<span class="nc" id="L46">	    htmlMap.put(&quot;triplestore_type&quot;, Config.triplestore_type);</span>
+<span class="nc" id="L47">	    htmlMap.put(&quot;triplestore_url&quot;, Config.triplestore_url);</span>
+<span class="nc" id="L48">	    htmlMap.put(&quot;sdg_graph&quot;, Config.sdg_graph);</span>
+<span class="nc" id="L49">	    htmlMap.put(&quot;namespaces&quot;, Config.user_defined_prefixes.entrySet());</span>
+<span class="nc" id="L50">	    htmlMap.put(&quot;configuration_active&quot;, true);</span>
+<span class="nc" id="L51">		return htmlMap;</span>
+	}
+	
+	/**
+	 * Add user defined prefix to R43ples configuration
+	 * 
+	 * @param prefix	prefix to be added
+	 * @param namespace	namespaces used for specified prefix
+	 * @return	updated configuration
+	 * @throws InternalErrorException
+	 */
+	@POST
+	@Template(name = &quot;/configuration.mustache&quot;)
+	public final Map&lt;String, Object&gt; addPrefix(
+			@FormParam(&quot;prefix&quot;) final String prefix,
+			@FormParam(&quot;namespace&quot;) final String namespace) throws InternalErrorException {
+<span class="nc bnc" id="L67" title="All 4 branches missed.">		if (prefix!=null &amp;&amp; namespace!=null){</span>
+<span class="nc" id="L68">			Config.user_defined_prefixes.put(prefix, namespace);</span>
+		}
+<span class="nc" id="L70">		return getConfiguration();</span>
+	}
+	
+	/**
+	 * Delete specified prefix from R43ples configuration
+	 * @param prefix	prefix which specified the namespace to be deleted
+	 * @return redirect to configuration site
+	 * @throws InternalErrorException
+	 */
+	@GET
+	@Path(&quot;deletePrefix&quot;)
+	public final Response deletePrefix(
+			@QueryParam(&quot;prefix&quot;) final String prefix) throws InternalErrorException {
+<span class="nc bnc" id="L83" title="All 4 branches missed.">		if (prefix!=null &amp;&amp; Config.user_defined_prefixes.containsKey(prefix)){</span>
+<span class="nc" id="L84">			Config.user_defined_prefixes.remove(prefix);</span>
+		}
+<span class="nc" id="L86">		URI uri = uriInfo.getBaseUriBuilder().path(&quot;configuration&quot;).build();</span>
+<span class="nc" id="L87">		return Response.seeOther(uri).build();</span>
+	}
+	
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

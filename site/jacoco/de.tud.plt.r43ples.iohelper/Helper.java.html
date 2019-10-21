@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Helper.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.iohelper</a> &gt; <span class="el_source">Helper.java</span></div><h1>Helper.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.iohelper;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.ChangeSet;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.optimization.ChangeSetPath;
+import de.tud.plt.r43ples.optimization.PathCalculationFabric;
+import de.tud.plt.r43ples.optimization.PathCalculationInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.jena.query.*;
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
+import org.apache.jena.update.UpdateFactory;
+import org.apache.jena.util.FileUtils;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.topbraid.spin.arq.ARQFactory;
+import org.topbraid.spin.model.SPINFactory;
+import org.topbraid.spin.vocabulary.SP;
+
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.HashMap;
+import java.util.LinkedList;
+
+/**
+ * This class provides several helpful methods.
+ * 
+ * @author Stephan Hensel
+ * @author Markus Graube
+ * 
+ */
+<span class="nc" id="L41">public class Helper {</span>
+
+	/** The logger. **/
+<span class="fc" id="L44">	private static Logger logger = LogManager.getLogger(Helper.class);</span>
+
+
+	/**
+	 * Generates difference between revision a and revision b of a named graph.
+	 * Revision a is considered older than revision b (a -&gt; b)
+	 * @param graphName name of graph
+	 * @param revAIdentifier identifier revision a
+	 * @param revBIdentifier identifier revision b
+	 * @param fileFormat format of outputfile. possible options: nquads, trig
+	 * @return list of diffs
+	 */
+	public static String getDiffsBetweenStartAndTargetRevision(
+			final String graphName,
+			final String revAIdentifier,
+			final String revBIdentifier,
+			final String fileFormat) {
+
+		// create revision graph
+<span class="nc" id="L63">		RevisionGraph graph = new RevisionGraph(graphName);</span>
+<span class="nc" id="L64">		PathCalculationInterface calculation = PathCalculationFabric.getInstance(graph);</span>
+
+		// get revisions
+<span class="nc" id="L67">		Revision revA = null;</span>
+<span class="nc" id="L68">		Revision revB = null;</span>
+
+		try {
+<span class="nc" id="L71">			revA = new Revision(graph, revAIdentifier, true);</span>
+<span class="nc" id="L72">		} catch (InternalErrorException e) {</span>
+<span class="nc" id="L73">			e.printStackTrace();</span>
+<span class="nc" id="L74">			return &quot;Error finding revision A:\n&quot; + e.getMessage();</span>
+<span class="nc" id="L75">		}</span>
+
+		try {
+<span class="nc" id="L78">			revB = new Revision(graph, revBIdentifier, true);</span>
+<span class="nc" id="L79">		} catch (InternalErrorException e) {</span>
+<span class="nc" id="L80">			e.printStackTrace();</span>
+<span class="nc" id="L81">			return &quot;Error finding revision B:\n&quot; + e.getMessage();</span>
+<span class="nc" id="L82">		}</span>
+
+		// get changeset path
+<span class="nc" id="L85">		ChangeSetPath path = null;</span>
+		try {
+<span class="nc" id="L87">			path = calculation.getChangeSetsBetweenStartAndTargetRevision(revA, revB);</span>
+<span class="nc" id="L88">		} catch (InternalErrorException e) {</span>
+<span class="nc" id="L89">			e.printStackTrace();</span>
+<span class="nc" id="L90">			return &quot;Error creating changeset. Make sure revision a lies before revision b:\n&quot; + e.getMessage();</span>
+<span class="nc" id="L91">		}</span>
+
+		// process changeset to get diffs
+
+<span class="nc" id="L95">		LinkedList&lt;ChangeSet&gt; changeSets = path.getRevisionPath();</span>
+
+		// first changeset as base
+		// ! changeSets starts with last changeset (inverse)
+<span class="nc" id="L99">		ChangeSet oldCS = changeSets.get(changeSets.size() - 1);</span>
+
+<span class="nc" id="L101">		Model oldAddModel = JenaModelManagement.readStringToJenaModel(oldCS.getAddSetContent(), &quot;TURTLE&quot;);</span>
+<span class="nc" id="L102">		Model oldDeleteModel = JenaModelManagement.readStringToJenaModel(oldCS.getDeleteSetContent(), &quot;TURTLE&quot;);</span>
+
+		// generate diff model (cross compare add and delete sets)
+<span class="nc bnc" id="L105" title="All 2 branches missed.">		for (int i = changeSets.size() - 2; i &gt;= 0; i--) {</span>
+
+<span class="nc" id="L107">			ChangeSet newCS = changeSets.get(i);</span>
+
+<span class="nc" id="L109">			Model addModel = JenaModelManagement.readStringToJenaModel(newCS.getAddSetContent(), &quot;TURTLE&quot;);</span>
+<span class="nc" id="L110">			Model deleteModel = JenaModelManagement.readStringToJenaModel(newCS.getDeleteSetContent(), &quot;TURTLE&quot;);</span>
+
+			// find neutralizing triples and delete them
+<span class="nc" id="L113">			Model neutralAdd = oldDeleteModel.intersection(addModel);</span>
+<span class="nc" id="L114">			Model neutralDelete = oldAddModel.intersection(deleteModel);</span>
+
+<span class="nc" id="L116">			Model test = oldDeleteModel.remove(neutralAdd);</span>
+<span class="nc" id="L117">			addModel.remove(neutralAdd);</span>
+<span class="nc" id="L118">			oldAddModel.remove(neutralDelete);</span>
+<span class="nc" id="L119">			deleteModel.remove(neutralDelete);</span>
+
+			// add remaining triples of new model to old model
+<span class="nc" id="L122">			oldDeleteModel.add(deleteModel);</span>
+<span class="nc" id="L123">			oldAddModel.add(addModel);</span>
+		}
+
+<span class="nc" id="L126">		ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+
+		// create dataset from add and delete model for transmission
+<span class="nc" id="L129">		Dataset resultSet = DatasetFactory.create();</span>
+<span class="nc" id="L130">		resultSet.addNamedModel(&quot;AddSet&quot;, oldAddModel);</span>
+<span class="nc" id="L131">		resultSet.addNamedModel(&quot;DeleteSet&quot;, oldDeleteModel);</span>
+
+		// create returnable result string
+<span class="nc bnc" id="L134" title="All 2 branches missed.">		if (fileFormat.toLowerCase().contains(&quot;trig&quot;))</span>
+<span class="nc" id="L135">			RDFDataMgr.write(baos, resultSet, RDFFormat.TRIG_PRETTY);</span>
+<span class="nc bnc" id="L136" title="All 2 branches missed.">		else if (fileFormat.toLowerCase().contains(&quot;nquads&quot;))</span>
+<span class="nc" id="L137">			RDFDataMgr.write(baos, resultSet, RDFFormat.NQUADS_UTF8);</span>
+		else {
+<span class="nc" id="L139">			return &quot;unsupported file format&quot;;</span>
+		}
+
+<span class="nc" id="L142">		return baos.toString();</span>
+	}
+
+
+	/**
+	 * Split huge INSERT statements into separate queries of up to 500 triple
+	 * statements.
+	 * 
+	 * @param graphName
+	 *            the graph name
+	 * @param dataSetAsNTriples
+	 *            the data to insert as N-Triples
+	 */
+	public static void executeINSERT(final String graphName, final String dataSetAsNTriples) {
+
+<span class="fc" id="L157">		String insertQueryTemplate = &quot;INSERT DATA { GRAPH &lt;%s&gt; { %s } }&quot;;</span>
+		
+<span class="fc" id="L159">		splitAndExecuteBigQuery(graphName, dataSetAsNTriples, insertQueryTemplate);</span>
+<span class="fc" id="L160">	}</span>
+	
+	/**
+	 * Split huge DELETE statements into separate queries of up to fifty triple statements.
+	 * 
+	 * @param graphName the graph name
+	 * @param dataSetAsNTriples the data to insert as N-Triples 
+	 */
+	public static void executeDELETE(final String graphName, final String dataSetAsNTriples) {
+
+<span class="fc" id="L170">		String deleteQueryTemplate = &quot;DELETE DATA { GRAPH &lt;%s&gt; { %s } }&quot;;</span>
+		
+<span class="fc" id="L172">		splitAndExecuteBigQuery(graphName, dataSetAsNTriples, deleteQueryTemplate);</span>
+<span class="fc" id="L173">	}</span>
+	
+	
+	
+	public static void splitAndExecuteBigQuery(final String graphName, final String dataSetAsNTriples, final String template){
+<span class="fc" id="L178">		final int MAX_STATEMENTS = 500;</span>
+<span class="fc" id="L179">		String[] lines = dataSetAsNTriples.split(&quot;\n&quot;);</span>
+<span class="fc" id="L180">		int counter = 0;</span>
+<span class="fc" id="L181">		StringBuilder insert = new StringBuilder();</span>
+		
+<span class="fc bfc" id="L183" title="All 2 branches covered.">		for (int i=0; i &lt; lines.length; i++) {</span>
+<span class="fc" id="L184">			insert.append(lines[i]);</span>
+<span class="fc" id="L185">			insert.append(&quot;\n&quot;);</span>
+<span class="fc" id="L186">			counter++;</span>
+<span class="pc bpc" id="L187" title="1 of 2 branches missed.">			if (counter == MAX_STATEMENTS-1) {</span>
+<span class="nc" id="L188">				TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(template, graphName, insert));</span>
+<span class="nc" id="L189">				counter = 0;</span>
+<span class="nc" id="L190">				insert = new StringBuilder();</span>
+			}
+		}
+
+<span class="fc" id="L194">		TripleStoreInterfaceSingleton.get().executeUpdateQuery(String.format(template, graphName, insert));</span>
+<span class="fc" id="L195">	}</span>
+
+	
+	/**
+	 * Get the content of this revision graph by execution of CONSTRUCT.
+	 * 
+	 * @param graphName the graphName
+	 * @param format RDF serialization format which should be returned
+	 * @return the constructed graph content as specified RDF serialization format
+	 */
+	public static String getContentOfGraph(final String graphName, final String format) {
+<span class="fc" id="L206">		String query = String.format(</span>
+				  &quot;CONSTRUCT {?s ?p ?o} %n&quot;
+				+ &quot;WHERE { GRAPH &lt;%s&gt; {?s ?p ?o} }&quot;, graphName);
+<span class="fc" id="L209">		return TripleStoreInterfaceSingleton.get().executeConstructQuery(query, format);		</span>
+	}
+
+	/**
+	 * Get the content of a named graph as N-TRIPLES.
+	 *
+	 * @param namedGraphURI the named graph URI
+	 * @return the content of the named graph as N-TRIPLES
+	 */
+	public static String getContentOfNamedGraphAsN3(String namedGraphURI) {
+<span class="fc" id="L219">		String query = Config.prefixes + String.format(</span>
+				&quot;CONSTRUCT {?s ?p ?o} %n&quot;
+						+ &quot;WHERE { GRAPH &lt;%s&gt; {?s ?p ?o} }&quot;, namedGraphURI);
+<span class="fc" id="L222">		String resultAsTurtle = TripleStoreInterfaceSingleton.get().executeConstructQuery(query, &quot;TURTLE&quot;);</span>
+<span class="fc" id="L223">		return JenaModelManagement.convertJenaModelToNTriple(JenaModelManagement.readStringToJenaModel(resultAsTurtle, &quot;TURTLE&quot;));</span>
+	}
+
+	/**
+	 * Get revised graphs in R43ples.
+	 * 
+	 * @param format
+	 *            serialization of the response
+	 * @return String containing the SPARQL response in specified format
+	 */
+	public static String getRevisedGraphsSparql(final String format) {
+<span class="fc" id="L234">		String sparqlQuery = Config.prefixes</span>
+<span class="fc" id="L235">				+ String.format(&quot;&quot; </span>
+						+ &quot;SELECT DISTINCT ?graph &quot; 
+						+ &quot;WHERE {&quot;
+						+ &quot; GRAPH &lt;%s&gt; { ?graph a rmo:RevisionGraph. }&quot;
+						+ &quot;} ORDER BY ?graph&quot;, Config.revision_graph);
+<span class="fc" id="L240">		return TripleStoreInterfaceSingleton.get().executeSelectQuery(sparqlQuery, format);</span>
+	}
+
+	/**
+	 * Get the user URI. If the user does not exist then the user will be created.
+	 *
+	 * @param user name as string
+	 * @return URI of user
+	 */
+	public static String getUserURI(final String user) {
+		// When user does not already exists - create new
+
+<span class="fc" id="L252">		String query = Config.prefixes</span>
+<span class="fc" id="L253">				+ String.format(&quot;SELECT ?personUri { GRAPH &lt;%s&gt;  { &quot; + &quot;?personUri a prov:Person;&quot;</span>
+						+ &quot;  rdfs:label \&quot;%s\&quot;.&quot; + &quot;} }&quot;, Config.revision_graph, user); //TODO check if the users are created within the special revision graph - maybe move to RevisionGraph
+<span class="fc" id="L255">		ResultSet results = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">		if (results.hasNext()) {</span>
+<span class="fc" id="L257">			logger.debug(&quot;User &quot; + user + &quot; already exists.&quot;);</span>
+<span class="fc" id="L258">			QuerySolution qs = results.next();</span>
+<span class="fc" id="L259">			return qs.getResource(&quot;?personUri&quot;).toString();</span>
+		} else {
+<span class="fc" id="L261">			String personUri = null;</span>
+			try {
+<span class="fc" id="L263">				personUri = &quot;http://eatld.et.tu-dresden.de/persons/&quot; + URLEncoder.encode(user, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L264">			} catch (UnsupportedEncodingException e) {</span>
+<span class="nc" id="L265">				e.printStackTrace();</span>
+<span class="fc" id="L266">			}</span>
+<span class="fc" id="L267">			logger.debug(&quot;User does not exists. Create user &quot; + personUri + &quot;.&quot;);</span>
+<span class="fc" id="L268">			query = Config.prefixes</span>
+<span class="fc" id="L269">					+ String.format(&quot;INSERT DATA { GRAPH &lt;%s&gt; { &lt;%s&gt; a prov:Person; rdfs:label \&quot;%s\&quot;. } }&quot;,</span>
+							Config.revision_graph, personUri, user);
+<span class="fc" id="L271">			TripleStoreInterfaceSingleton.get().executeUpdateQuery(query);</span>
+<span class="fc" id="L272">			return personUri;</span>
+		}
+	}
+
+
+	/**
+	 * Get a SPARQL SELECT query in human readable syntax from SPIN.
+	 *
+	 * @param spinQueryN3 the SPIN content as N3
+	 * @param resourceURI the resource URI of the SELECT query to search for
+	 * @return the SPARQL query in human readable syntax
+	 */
+	public static String getSparqlSelectQueryFromSpin(String spinQueryN3, String resourceURI) {
+
+<span class="fc" id="L286">		Model model = JenaModelManagement.readNTripleStringToJenaModel(spinQueryN3);</span>
+
+<span class="fc" id="L288">		StmtIterator it = model.listStatements(null, RDF.type, SP.Select);</span>
+<span class="pc bpc" id="L289" title="1 of 2 branches missed.">		while(it.hasNext()) {</span>
+<span class="fc" id="L290">			Resource rsrc = it.next().getSubject();</span>
+<span class="fc bfc" id="L291" title="All 2 branches covered.">			if (rsrc.toString().equals(resourceURI)) {</span>
+<span class="fc" id="L292">				org.topbraid.spin.model.Query newQuery = SPINFactory.asQuery(rsrc);</span>
+<span class="fc" id="L293">				return ARQFactory.get().createQuery(newQuery).toString();</span>
+			}
+<span class="fc" id="L295">		}</span>
+
+<span class="nc" id="L297">		return null;</span>
+
+	}
+
+	/**
+	 * Get a SPARQL UPDATE query in human readable syntax from SPIN.
+	 *
+	 * @param spinQueryN3 the SPIN content as N3
+	 * @param resourceURI the resource URI of the UPDATE query to search for
+	 * @return the SPARQL query in human readable syntax
+	 */
+	public static String getSparqlUpdateQueryFromSpin(String spinQueryN3, String resourceURI) {
+
+<span class="fc" id="L310">		Model model = JenaModelManagement.readNTripleStringToJenaModel(spinQueryN3);</span>
+
+<span class="fc" id="L312">		StmtIterator it = model.listStatements(null, RDF.type, SP.Modify);</span>
+<span class="pc bpc" id="L313" title="1 of 2 branches missed.">		while(it.hasNext()) {</span>
+<span class="fc" id="L314">			Resource rsrc = it.next().getSubject();</span>
+<span class="pc bpc" id="L315" title="1 of 2 branches missed.">			if (rsrc.toString().equals(resourceURI)) {</span>
+<span class="fc" id="L316">				org.topbraid.spin.model.update.Update newQuery = SPINFactory.asUpdate(rsrc);</span>
+<span class="fc" id="L317">				return newQuery.toString();</span>
+			}
+<span class="nc" id="L319">		}</span>
+
+<span class="nc" id="L321">		return null;</span>
+
+	}
+
+	/**
+	 * Get a map of SPARQL variables and there URIs in SPIN.
+	 *
+	 * @param spinQueryN3 the SPIN content as N3
+	 * @param resourceURI the resource URI of the SELECT query to search for
+	 * @return the map
+	 */
+	public static HashMap&lt;String,String&gt; getVariableMapFromSpin(String spinQueryN3, String resourceURI) {
+
+<span class="fc" id="L334">		HashMap&lt;String,String&gt; resultMap = new HashMap&lt;&gt;();</span>
+
+<span class="fc" id="L336">		Model model = JenaModelManagement.readNTripleStringToJenaModel(spinQueryN3);</span>
+
+		// Create SELECT query to query further resources from current URI
+<span class="fc" id="L339">		String selectQuery = String.format(</span>
+				  &quot;SELECT ?variables %n&quot;
+				+ &quot;WHERE { %n&quot;
+				+ &quot;	 &lt;%s&gt; &lt;http://spinrdf.org/sp#resultVariables&gt; ?variables . %n&quot;
+				+ &quot;} %n&quot;, resourceURI);
+
+<span class="fc" id="L345">		Query qry = QueryFactory.create(selectQuery);</span>
+<span class="fc" id="L346">		QueryExecution qe = QueryExecutionFactory.create(qry, model);</span>
+<span class="fc" id="L347">		ResultSet resultSet = qe.execSelect();</span>
+<span class="fc bfc" id="L348" title="All 2 branches covered.">		while (resultSet.hasNext()) {</span>
+<span class="fc" id="L349">			QuerySolution qs = resultSet.next();</span>
+			Resource resource;
+			try {
+<span class="fc" id="L352">				resource = qs.getResource(&quot;?variables&quot;);</span>
+<span class="nc" id="L353">			} catch (Exception e) {</span>
+<span class="nc" id="L354">				resource = null;</span>
+<span class="fc" id="L355">			}</span>
+
+<span class="pc bpc" id="L357" title="1 of 2 branches missed.">			if (resource != null) {</span>
+<span class="fc" id="L358">				String startURI = resource.toString();</span>
+<span class="fc" id="L359">				resultMap = calculateVariableMapFromSpin(model, startURI);</span>
+			}
+<span class="fc" id="L361">		}</span>
+
+<span class="fc" id="L363">		return resultMap;</span>
+
+	}
+
+	/**
+	 * Get a map of SPARQL variables and there URIs in SPIN.
+	 *
+	 * @param model the jena model
+	 * @param startURI the resource URI of the SELECT query to search for
+	 * @return the map
+	 */
+	private static HashMap&lt;String,String&gt; calculateVariableMapFromSpin(Model model, String startURI) {
+
+<span class="fc" id="L376">		HashMap&lt;String, String&gt; resultMap = new HashMap&lt;&gt;();</span>
+
+		// Get first of given resource
+<span class="fc" id="L379">		String selectQuery = String.format(</span>
+				&quot;SELECT ?first ?rest ?varName %n&quot;
+						+ &quot;WHERE { %n&quot;
+						+ &quot;	 &lt;%s&gt; &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#first&gt; ?first . %n&quot;
+						+ &quot;	 ?first &lt;http://spinrdf.org/sp#varName&gt; ?varName . %n&quot;
+						+ &quot;	 &lt;%s&gt; &lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#rest&gt; ?rest . %n&quot;
+						+ &quot;} %n&quot;, startURI, startURI);
+
+<span class="fc" id="L387">		Query qry = QueryFactory.create(selectQuery);</span>
+<span class="fc" id="L388">		QueryExecution qe = QueryExecutionFactory.create(qry, model);</span>
+<span class="fc" id="L389">		ResultSet resultSet = qe.execSelect();</span>
+<span class="fc bfc" id="L390" title="All 2 branches covered.">		while (resultSet.hasNext()) {</span>
+<span class="fc" id="L391">			QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L392">			Resource resourceFirst = qs.getResource(&quot;?first&quot;);</span>
+<span class="fc" id="L393">			Literal literalVarName = qs.getLiteral(&quot;?varName&quot;);</span>
+<span class="fc" id="L394">			Resource resourceRest = qs.getResource(&quot;?rest&quot;);</span>
+
+<span class="pc bpc" id="L396" title="2 of 4 branches missed.">			if ((resourceFirst != null) &amp;&amp; (literalVarName != null)) {</span>
+<span class="fc" id="L397">				resultMap.put(literalVarName.toString(), resourceFirst.toString());</span>
+			}
+			// Get rest
+<span class="pc bpc" id="L400" title="1 of 2 branches missed.">			if (resourceRest != null) {</span>
+<span class="fc bfc" id="L401" title="All 2 branches covered.">				if (!resourceRest.toString().equals(&quot;http://www.w3.org/1999/02/22-rdf-syntax-ns#nil&quot;)) {</span>
+<span class="fc" id="L402">					resultMap.putAll(calculateVariableMapFromSpin(model, resourceRest.toString()));</span>
+				}
+			}
+<span class="fc" id="L405">		}</span>
+
+<span class="fc" id="L407">		return resultMap;</span>
+	}
+
+	/**
+	 * Get all related elements to a start URI.
+	 *
+	 * @param graph the graph to search in
+	 * @param startURI the start URI
+	 * @return the related elements
+	 */
+	public static String getAllRelatedElementsToURI(String graph, String startURI) {
+
+<span class="fc" id="L419">		LinkedList&lt;String&gt; elements = calculateListOfURIsRelatedToStartURI(graph, startURI);</span>
+
+<span class="fc" id="L421">		String constructQueryTemplate =</span>
+				&quot;CONSTRUCT {?s ?p ?o} %n&quot;
+						+ &quot;WHERE { GRAPH &lt;%s&gt; { %n&quot;
+						+ &quot; ?s ?p ?o . %n&quot;
+						+ &quot;}&quot;
+						+ &quot;FILTER (?s = &lt;%s&gt;) &quot;
+						+ &quot;} %n&quot;;
+
+<span class="fc" id="L429">		StringBuilder sb = new StringBuilder();</span>
+
+		// Iterate through the detected URIs and make construct queries
+<span class="fc bfc" id="L432" title="All 2 branches covered.">		for (String currentURI : elements) {</span>
+<span class="fc" id="L433">			String constructQuery = String.format(constructQueryTemplate, graph, currentURI);</span>
+<span class="fc" id="L434">			sb.append(TripleStoreInterfaceSingleton.get().executeConstructQuery(constructQuery, FileUtils.langNTriple));</span>
+<span class="fc" id="L435">		}</span>
+
+<span class="fc" id="L437">		return sb.toString();</span>
+
+	}
+
+	/**
+	 * Calculates a list of URIs related to a given start URI.
+	 *
+	 * @param graph the graph to search in
+	 * @param startURI the start URI
+	 * @return the list of related URIs
+	 */
+	private static LinkedList&lt;String&gt; calculateListOfURIsRelatedToStartURI(String graph, String startURI) {
+
+<span class="fc" id="L450">		LinkedList&lt;String&gt; elements = new LinkedList&lt;&gt;();</span>
+
+<span class="fc" id="L452">		String selectQueryTemplate =</span>
+				&quot;SELECT ?p ?o %n&quot;
+						+ &quot;WHERE { GRAPH &lt;%s&gt; { %n&quot;
+						+ &quot;	&lt;%s&gt; ?p ?o . %n&quot;
+						+ &quot;} } %n&quot;;
+
+		// Add the current URI to the list of already processed URIs
+<span class="fc" id="L459">		elements.add(startURI);</span>
+
+		// Create SELECT query to query further resources from current URI
+<span class="fc" id="L462">		String selectQuery = String.format(selectQueryTemplate, graph, startURI);</span>
+
+		// Iterate over results
+<span class="fc" id="L465">		ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(selectQuery);</span>
+<span class="fc bfc" id="L466" title="All 2 branches covered.">		while (resultSet.hasNext()) {</span>
+<span class="fc" id="L467">			QuerySolution qs = resultSet.next();</span>
+			Resource resource;
+			try {
+<span class="fc" id="L470">				resource = qs.getResource(&quot;?o&quot;);</span>
+<span class="fc" id="L471">			} catch (Exception e) {</span>
+<span class="fc" id="L472">				resource = null;</span>
+<span class="fc" id="L473">			}</span>
+
+<span class="fc bfc" id="L475" title="All 2 branches covered.">			if (resource != null) {</span>
+<span class="fc" id="L476">				String resourceString = resource.toString();</span>
+<span class="pc bpc" id="L477" title="1 of 2 branches missed.">				if (!elements.contains(resourceString)) {</span>
+<span class="fc" id="L478">					elements.addAll(calculateListOfURIsRelatedToStartURI(graph, resourceString));</span>
+				}
+			}
+<span class="fc" id="L481">		}</span>
+
+<span class="fc" id="L483">		return elements;</span>
+
+	}
+
+}
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

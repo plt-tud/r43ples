@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DatasetGenerationManagement.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.dataset</a> &gt; <span class="el_source">DatasetGenerationManagement.java</span></div><h1>DatasetGenerationManagement.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.dataset;
+
+import javax.ws.rs.core.MediaType;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.webservice.Endpoint;
+
+/**
+ * Provides methods for generation of example graphs.
+ * 
+ * @author Stephan Hensel
+ *
+ */
+<span class="nc" id="L17">public class DatasetGenerationManagement {</span>
+
+	// TODO Change this class to a template class which provides queries as strings, do not execute the queries
+
+	/** The logger. */
+<span class="fc" id="L22">	private static Logger logger = LogManager.getLogger(DatasetGenerationManagement.class);</span>
+	/** The endpoint. **/
+<span class="fc" id="L24">	private static Endpoint ep = new Endpoint();</span>
+	
+	
+
+	
+	/**
+	 * Create new branch.
+	 * 
+	 * @param user the user
+	 * @param message the message
+	 * @param graphName the graph name
+	 * @param revision the revision
+	 * @param branchName the branch name
+	 * @throws InternalErrorException 
+	 */
+	public static void createNewBranch(String user, String message, String graphName, String revision, String branchName) throws InternalErrorException {
+		//TODO Change to new Reference commit
+<span class="fc" id="L41">		String query = String.format(&quot;&quot;</span>
+				+ &quot;USER \&quot;%s\&quot; %n&quot;
+				+ &quot;MESSAGE \&quot;%s\&quot; %n&quot;
+				+ &quot;BRANCH GRAPH &lt;%s&gt; REVISION \&quot;%s\&quot; TO \&quot;%s\&quot;&quot;, user, message, graphName, revision, branchName);
+<span class="fc" id="L45">		ep.sparql(MediaType.TEXT_HTML, query);</span>
+<span class="fc" id="L46">		logger.info(&quot;New branch \&quot;&quot; + branchName +&quot;\&quot; for &lt;&quot; + graphName +&quot;&gt; created.&quot;);</span>
+<span class="fc" id="L47">	}</span>
+	
+	
+	/**
+	 * Execute INSERT query.
+	 * 
+	 * @param user the user
+	 * @param message the message
+	 * @param graphName the graph name
+	 * @param revision the revision
+	 * @param triples the triples to insert
+	 * @throws InternalErrorException 
+	 */
+	 public static void executeInsertQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
+<span class="nc" id="L61">		String query = String.format(</span>
+				  &quot;USER \&quot;%s\&quot; %n&quot;
+				+ &quot;MESSAGE \&quot;%s\&quot; %n&quot;
+				+ &quot;INSERT DATA { GRAPH &lt;%s&gt; BRANCH \&quot;%s\&quot; %n&quot;
+				+ &quot;	{ %n&quot;
+				+ &quot;	  %s %n&quot;
+				+ &quot;	} %n&quot;
+				+ &quot;}&quot;, user, message, graphName, revision, triples);
+<span class="nc" id="L69">		ep.sparql(MediaType.TEXT_HTML, query);</span>
+<span class="nc" id="L70">	}</span>
+	
+	
+	/**
+	 * Execute DELETE query.
+	 * 
+	 * @param user the user
+	 * @param message the message
+	 * @param graphName the graph name
+	 * @param revision the revision
+	 * @param triples the triples to delete
+	 * @throws InternalErrorException 
+	 */
+	public static void executeDeleteQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
+<span class="nc" id="L84">		String query = String.format(</span>
+				  &quot;USER \&quot;%s\&quot; %n&quot;
+				+ &quot;MESSAGE \&quot;%s\&quot; %n&quot;
+				+ &quot;DELETE DATA { GRAPH &lt;%s&gt; BRANCH \&quot;%s\&quot; %n&quot;
+				+ &quot;	{ %n&quot;
+				+ &quot;	  %s %n&quot;
+				+ &quot;	} %n&quot;
+				+ &quot;}&quot;, user, message, graphName, revision, triples);
+<span class="nc" id="L92">		ep.sparql(MediaType.TEXT_HTML, query);</span>
+<span class="nc" id="L93">	}</span>
+	
+	
+	/**
+	 * Execute DELETE WHERE query.
+	 * 
+	 * @param user the user
+	 * @param message the message
+	 * @param graphName the graph name
+	 * @param revision the revision
+	 * @param triples the triples to delete
+	 * @throws InternalErrorException 
+	 */
+	public static void executeDeleteWhereQuery(String user, String message, String graphName, String revision, String triples) throws InternalErrorException {
+<span class="fc" id="L107">		String query = String.format(</span>
+				  &quot;USER \&quot;%s\&quot; %n&quot;
+				+ &quot;MESSAGE \&quot;%s\&quot; %n&quot;
+				+ &quot;DELETE { GRAPH &lt;%s&gt; BRANCH \&quot;%s\&quot; %n&quot;
+				+ &quot;	{ %n&quot;
+				+ &quot;		%s %n&quot;
+				+ &quot;	} %n&quot;
+				+ &quot;}&quot;
+				+ &quot;WHERE { GRAPH &lt;%s&gt; BRANCH \&quot;%s\&quot; %n&quot;
+				+ &quot;	{ %n&quot;
+				+ &quot;		%s %n&quot;
+				+ &quot;	} %n&quot;
+				+ &quot;}&quot;, user, message, graphName, revision, triples, graphName, revision, triples);
+<span class="fc" id="L120">		ep.sparql(MediaType.TEXT_HTML, query);</span>
+<span class="fc" id="L121">	}</span>
+	
+	
+	/**
+	 * Execute INSERT - DELETE query.
+	 * 
+	 * @param user the user
+	 * @param message the message
+	 * @param graphName the graphName
+	 * @param revision the revision
+	 * @param triplesInsert the triples to insert
+	 * @param triplesDelete the triples to delete
+	 * @throws InternalErrorException 
+	 */
+	public static void executeInsertDeleteQuery(String user, String message, String graphName, String revision, String triplesInsert, String triplesDelete) throws InternalErrorException {
+<span class="nc" id="L136">		String query = String.format(</span>
+				  &quot;USER \&quot;%s\&quot; %n&quot;
+				+ &quot;MESSAGE \&quot;%s\&quot; %n&quot;
+				+ &quot;INSERT DATA { GRAPH &lt;%s&gt; BRANCH \&quot;%s\&quot; %n&quot;
+				+ &quot;	{ %n&quot;
+				+ &quot;	  %s %n&quot;
+				+ &quot;	} %n&quot;
+				+ &quot;} ; %n&quot;
+				+ &quot;DELETE DATA { GRAPH &lt;%s&gt; BRANCH \&quot;%s\&quot; %n&quot;
+				+ &quot;	{ %n&quot;
+				+ &quot;	  %s %n&quot;
+				+ &quot;	} %n&quot;
+				+ &quot;}&quot;, user, message, graphName, revision, triplesInsert, graphName, revision, triplesDelete);
+<span class="nc" id="L149">		ep.sparql(MediaType.TEXT_HTML, query);</span>
+<span class="nc" id="L150">	}</span>
+	
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

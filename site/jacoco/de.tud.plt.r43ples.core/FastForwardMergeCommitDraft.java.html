@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FastForwardMergeCommitDraft.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">FastForwardMergeCommitDraft.java</span></div><h1>FastForwardMergeCommitDraft.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.Branch;
+import de.tud.plt.r43ples.existentobjects.FastForwardMergeCommit;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.iohelper.Helper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ * Collection of information for creating a new fast forward merge commit.
+ *
+ * @author Stephan Hensel
+ */
+public class FastForwardMergeCommitDraft extends MergeCommitDraft {
+
+    /** The logger. **/
+<span class="fc" id="L20">    private Logger logger = LogManager.getLogger(FastForwardMergeCommitDraft.class);</span>
+
+
+    /**
+     * The constructor.
+     * Creates a fast forward merge commit draft by using the corresponding meta information.
+     *
+     * @param graphName the graph name
+     * @param branchNameFrom the branch name (from)
+     * @param branchNameInto the branch name (into)
+     * @param user the user
+     * @param message the message
+     * @param triples the triples of the query WITH part
+     * @param type the query type (FORCE, AUTO, MANUAL)
+     * @param with states if the WITH part is available
+     * @throws InternalErrorException
+     */
+    protected FastForwardMergeCommitDraft(String graphName, String branchNameFrom, String branchNameInto, String user, String message, String triples, MergeTypes type, boolean with) throws InternalErrorException {
+<span class="fc" id="L38">        super(graphName, branchNameFrom, branchNameInto, user, message, MergeActions.MERGE, triples, type, with);</span>
+<span class="fc" id="L39">    }</span>
+
+    /**
+     * Tries to create a new commit draft as a new commit in the triple store.
+     * If possible it will create the corresponding revision and the meta data.
+     *
+     * @return the commit (has attribute which indicates if the commit was executed or not)
+     */
+    protected FastForwardMergeCommit createCommitInTripleStore() throws InternalErrorException {
+<span class="fc" id="L48">        String revisionUriFrom = getRevisionGraph().getRevisionUri(getBranchNameFrom());</span>
+<span class="fc" id="L49">        String revisionUriInto = getRevisionGraph().getRevisionUri(getBranchNameInto());</span>
+
+<span class="fc" id="L51">        Revision usedSourceRevision = new Revision(getRevisionGraph(), revisionUriFrom, false);</span>
+<span class="fc" id="L52">        Revision usedTargetRevision = new Revision(getRevisionGraph(), revisionUriInto, false);</span>
+
+<span class="fc" id="L54">        Branch usedSourceBranch = getRevisionGraph().getBranch(getBranchNameFrom(), true);</span>
+<span class="fc" id="L55">        Branch usedTargetBranch = getRevisionGraph().getBranch(getBranchNameInto(), true);</span>
+
+<span class="fc" id="L57">        fullGraphCopy(usedSourceBranch.getFullGraphURI(), usedTargetBranch.getFullGraphURI());</span>
+
+<span class="fc" id="L59">        return addMetaInformation(usedSourceRevision, usedSourceBranch, usedTargetRevision, usedTargetBranch);</span>
+    }
+
+    /**
+     * Adds meta information for commit and revision to the revision graph.
+     *
+     * &lt;img src=&quot;{@docRoot}../../doc/revision management description/r43ples-fastforward.png&quot; /&gt;
+     *
+     * @param usedSourceRevision the used source revision (from)
+     * @param usedSourceBranch the used source branch (from)
+     * @param usedTargetRevision the used target revision (into)
+     * @param usedTargetBranch the used target branch (from)
+     * @return the created commit
+     * @throws InternalErrorException
+     */
+    private FastForwardMergeCommit addMetaInformation(Revision usedSourceRevision, Branch usedSourceBranch, Revision usedTargetRevision, Branch usedTargetBranch) throws InternalErrorException {
+
+<span class="fc" id="L76">        String commitURI = getUriCalculator().getNewFastForwardMergeCommitURI(getRevisionGraph(), usedSourceRevision.getRevisionIdentifier(), usedTargetRevision.getRevisionIdentifier());</span>
+<span class="fc" id="L77">        String personUri = Helper.getUserURI(getUser());</span>
+
+        // Create a new commit (activity)
+<span class="fc" id="L80">        String queryContent = String.format(</span>
+                &quot;&lt;%s&gt; a rmo:FastForwardMergeCommit, rmo:MergeCommit, rmo:BasicMergeCommit, rmo:Commit; &quot;
+                        + &quot;	rmo:wasAssociatedWith &lt;%s&gt; ;&quot;
+                        + &quot;	rmo:commitMessage \&quot;%s\&quot; ;&quot;
+                        + &quot;	rmo:timeStamp \&quot;%s\&quot;^^xsd:dateTime ; %n&quot;
+                        + &quot; rmo:usedSourceRevision &lt;%s&gt; ;&quot;
+                        + &quot; rmo:usedSourceBranch &lt;%s&gt; ;&quot;
+                        + &quot; rmo:usedTargetRevision &lt;%s&gt; ;&quot;
+                        + &quot; rmo:usedTargetBranch &lt;%s&gt; .&quot;,
+<span class="fc" id="L89">                commitURI, personUri, getMessage(), getTimeStamp(),</span>
+<span class="fc" id="L90">                usedSourceRevision.getRevisionURI(), usedSourceBranch.getReferenceURI(),</span>
+<span class="fc" id="L91">                usedTargetRevision.getRevisionURI(), usedTargetBranch.getReferenceURI());</span>
+<span class="fc" id="L92">        String query = Config.prefixes</span>
+<span class="fc" id="L93">                + String.format(&quot;INSERT DATA { GRAPH &lt;%s&gt; { %s } }&quot;, getRevisionGraph().getRevisionGraphUri(),</span>
+                queryContent);
+
+<span class="fc" id="L96">        getTripleStoreInterface().executeUpdateQuery(query);</span>
+
+        // Update the full graph of the target branch
+<span class="fc" id="L99">        fullGraphCopy(getRevisionGraph().getFullGraphUri(usedSourceBranch.getReferenceURI()), getRevisionGraph().getFullGraphUri(usedTargetBranch.getReferenceURI()));</span>
+
+        // Move branch to new revision
+<span class="fc" id="L102">        moveBranchReference(getRevisionGraph().getRevisionGraphUri(), usedTargetBranch.getReferenceURI(), usedTargetRevision.getRevisionURI(), usedSourceRevision.getRevisionURI());</span>
+        // Update the target branch object
+<span class="fc" id="L104">        usedTargetBranch = getRevisionGraph().getBranch(getBranchNameInto(), true);</span>
+
+<span class="fc" id="L106">        return new FastForwardMergeCommit(getRevisionGraph(), commitURI, getUser(), getTimeStamp(), getMessage(),</span>
+                usedSourceRevision, usedSourceBranch, usedTargetRevision, usedTargetBranch);
+    }
+
+}
+
+
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

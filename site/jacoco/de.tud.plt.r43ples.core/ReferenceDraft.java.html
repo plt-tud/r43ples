@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ReferenceDraft.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">ReferenceDraft.java</span></div><h1>ReferenceDraft.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ * Collection of information for creating a new reference.
+ *
+ * @author Stephan Hensel
+ *
+ */
+public class ReferenceDraft {
+
+    /** The logger. **/
+<span class="fc" id="L20">    private Logger logger = LogManager.getLogger(ReferenceDraft.class);</span>
+
+    /** The referenced revision. **/
+    private Revision referencedRevision;
+    /** The reference identifier. **/
+    private String referenceIdentifier;
+    /** The referenced full graph URI. **/
+    private String referencedFullGraphURI;
+
+    /** The new reference URI. **/
+    private String referenceURI;
+
+    /** The corresponding revision graph. */
+    private RevisionGraph revisionGraph;
+    /** The current URI calculator instance. */
+    private URICalculator uriCalculator;
+
+    // Dependencies
+    /** The triple store interface to use. **/
+    private TripleStoreInterface tripleStoreInterface;
+
+
+    /**
+     * The constructor.
+     *
+     * @param uriCalculator the current URI calculator instance
+     * @param revisionGraph the revision graph
+     * @param referencedRevision the referenced revision
+     * @param referenceIdentifier the reference identifier
+     * @param referencedFullGraphURI the referenced full graph URI
+     * @param referenceURI the reference URI
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L53">    protected ReferenceDraft(URICalculator uriCalculator, RevisionGraph revisionGraph, Revision referencedRevision, String referenceIdentifier, String referencedFullGraphURI, String referenceURI) throws InternalErrorException {</span>
+        // Dependencies
+<span class="fc" id="L55">        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();</span>
+
+<span class="fc" id="L57">        this.uriCalculator = uriCalculator;</span>
+<span class="fc" id="L58">        this.revisionGraph = revisionGraph;</span>
+
+<span class="fc" id="L60">        this.referencedRevision = referencedRevision;</span>
+<span class="fc" id="L61">        this.referenceIdentifier = referenceIdentifier;</span>
+<span class="fc" id="L62">        this.referencedFullGraphURI = referencedFullGraphURI;</span>
+
+<span class="fc" id="L64">        this.referenceURI = referenceURI;</span>
+<span class="fc" id="L65">	}</span>
+
+    /**
+     * Get the referenced revision.
+     *
+     * @return the referenced revision
+     */
+    public Revision getReferencedRevision() {
+<span class="fc" id="L73">        return referencedRevision;</span>
+    }
+
+    /**
+     * Get the reference identifier.
+     *
+     * @return the reference identifier
+     */
+    public String getReferenceIdentifier() {
+<span class="fc" id="L82">        return referenceIdentifier;</span>
+    }
+
+    /**
+     * Get the referenced full graph URI.
+     *
+     * @return the referenced full graph URI
+     */
+    public String getReferencedFullGraphURI() {
+<span class="fc" id="L91">        return referencedFullGraphURI;</span>
+    }
+
+    /**
+     * Get the reference URI.
+     *
+     * @return the reference URI
+     */
+    public String getReferenceURI() {
+<span class="fc" id="L100">        return referenceURI;</span>
+    }
+
+    /**
+     * Get the revision graph.
+     *
+     * @return the revision graph
+     */
+    public RevisionGraph getRevisionGraph() {
+<span class="fc" id="L109">        return revisionGraph;</span>
+    }
+
+    /**
+     * Get the URI calculator.
+     *
+     * @return the URI calculator
+     */
+    public URICalculator getUriCalculator() {
+<span class="nc" id="L118">        return uriCalculator;</span>
+    }
+
+    /**
+     * Get the triple store interface.
+     *
+     * @return the triple store interface
+     */
+    public TripleStoreInterface getTripleStoreInterface() {
+<span class="fc" id="L127">        return tripleStoreInterface;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

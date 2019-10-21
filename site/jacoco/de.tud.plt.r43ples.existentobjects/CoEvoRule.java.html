@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CoEvoRule.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.existentobjects</a> &gt; <span class="el_source">CoEvoRule.java</span></div><h1>CoEvoRule.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.existentobjects;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.iohelper.Helper;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+
+/**
+ * Provides information of an coevolution rule and the corresponding semantic change.
+ *
+ * @author Stephan Hensel
+ */
+public class CoEvoRule {
+
+    /** The logger. **/
+<span class="fc" id="L24">    private Logger logger = LogManager.getLogger(CoEvoRule.class);</span>
+
+    /** The corresponding semantic change. */
+    private SemanticChange semanticChange;
+
+    /** The SPIN dependency matching query URI. */
+    private String spinDependencyMatchingQueryURI;
+    /** The SPIN add set insert query URI. */
+    private String spinAddSetInsertQueryURI;
+    /** The SPIN delete set insert query URI. */
+    private String spinDeleteSetInsertQueryURI;
+
+    /** The dependency matching query. */
+    private String dependencyMatchingQuery;
+    /** The add set insert query. */
+    private String addSetInsertQuery;
+    /** The delete set insert query. */
+    private String deleteSetInsertQuery;
+
+    /** The list of SPARQL variables associated with the dependency matching query. */
+    private LinkedList&lt;SparqlVariable&gt; sparqlVariablesList;
+
+    // Dependencies
+    /** The triplestore interface to use. **/
+    private TripleStoreInterface tripleStoreInterface;
+
+
+    /**
+     * The constructor.
+     *
+     * @param semanticChange the semantic change which builds the basis for the coevolution
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L57">    public CoEvoRule(SemanticChange semanticChange) throws InternalErrorException {</span>
+        // Dependencies
+<span class="fc" id="L59">        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();</span>
+
+<span class="fc" id="L61">        this.semanticChange = semanticChange;</span>
+
+<span class="fc" id="L63">        retrieveAdditionalInformation();</span>
+<span class="fc" id="L64">    }</span>
+
+
+    /**
+     * Calculate additional information of the current commit and store this information to local variables.
+     *
+     * @throws InternalErrorException
+     */
+    private void retrieveAdditionalInformation() throws InternalErrorException {
+<span class="fc" id="L73">        logger.info(&quot;Get associated coevolution rule information of semantic change.&quot;);</span>
+        // Get the rule of the semantic change and check if a coevolution part is specified
+<span class="fc" id="L75">        String ruleURI = semanticChange.getUsedRuleURI();</span>
+<span class="fc" id="L76">        String queryCoEvoRule = String.format(</span>
+                Config.prefixes
+                        + &quot;SELECT ?dependencyQuery ?addQuery ?delQuery %n&quot;
+                        + &quot;WHERE { GRAPH &lt;%s&gt; { %n&quot;
+                        + &quot;	&lt;%s&gt; a aero:CoEvoRule ; %n&quot;
+                        + &quot;   aero:dependencyMatchingQuery ?dependencyQuery; %n&quot;
+                        + &quot;   aero:addSetInsertQuery ?addQuery; %n&quot;
+                        + &quot;   aero:deleteSetInsertQuery ?delQuery. %n&quot;
+                        + &quot;} } %n&quot;, Config.rules_graph, ruleURI);
+
+<span class="fc" id="L86">        ResultSet resultSetCoEvoRule = tripleStoreInterface.executeSelectQuery(queryCoEvoRule);</span>
+<span class="pc bpc" id="L87" title="1 of 2 branches missed.">        if (resultSetCoEvoRule.hasNext()) {</span>
+<span class="fc" id="L88">            QuerySolution qsSpin = resultSetCoEvoRule.next();</span>
+<span class="fc" id="L89">            this.spinDependencyMatchingQueryURI = qsSpin.getResource(&quot;?dependencyQuery&quot;).toString();</span>
+<span class="fc" id="L90">            this.spinAddSetInsertQueryURI = qsSpin.getResource(&quot;?addQuery&quot;).toString();</span>
+<span class="fc" id="L91">            this.spinDeleteSetInsertQueryURI = qsSpin.getResource(&quot;?delQuery&quot;).toString();</span>
+<span class="fc" id="L92">        } else {</span>
+<span class="nc" id="L93">            throw new InternalErrorException(&quot;No coevolution rules specified for semantic change.&quot;);</span>
+        }
+
+        // Get the SPARQL queries from SPIN URIs
+<span class="fc" id="L97">        String spinDependencyMatchingQueryN3 = Helper.getAllRelatedElementsToURI(Config.rules_graph, this.spinDependencyMatchingQueryURI);</span>
+<span class="fc" id="L98">        String spinAddSetQueryN3 = Helper.getAllRelatedElementsToURI(Config.rules_graph, this.spinAddSetInsertQueryURI);</span>
+<span class="fc" id="L99">        String spinDeleteSetQueryN3 = Helper.getAllRelatedElementsToURI(Config.rules_graph, this.spinDeleteSetInsertQueryURI);</span>
+
+<span class="fc" id="L101">        this.dependencyMatchingQuery = Helper.getSparqlSelectQueryFromSpin(spinDependencyMatchingQueryN3, this.spinDependencyMatchingQueryURI);</span>
+<span class="fc" id="L102">        this.addSetInsertQuery = Helper.getSparqlUpdateQueryFromSpin(spinAddSetQueryN3, this.spinAddSetInsertQueryURI);</span>
+<span class="fc" id="L103">        this.deleteSetInsertQuery = Helper.getSparqlUpdateQueryFromSpin(spinDeleteSetQueryN3, this.spinDeleteSetInsertQueryURI);</span>
+
+        // Replace all dependent variables within the queries
+<span class="fc bfc" id="L106" title="All 2 branches covered.">        for (SparqlVariable sparqlVariable : semanticChange.getSparqlVariableList()) {</span>
+<span class="fc" id="L107">            String name = sparqlVariable.getVariableName();</span>
+<span class="fc" id="L108">            String value = sparqlVariable.getValue();</span>
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">            if (sparqlVariable.isResource()) {</span>
+<span class="fc" id="L110">                value = &quot;&lt;&quot; + value + &quot;&gt;&quot;;</span>
+            } else {
+<span class="nc" id="L112">                value = &quot;\&quot;&quot; + value + &quot;\&quot;&quot;;</span>
+            }
+<span class="fc" id="L114">            dependencyMatchingQuery = dependencyMatchingQuery.replaceAll(&quot;\\?&quot; + name, value);</span>
+<span class="fc" id="L115">            addSetInsertQuery = addSetInsertQuery.replaceAll(&quot;\\?&quot; + name, value);</span>
+<span class="fc" id="L116">            deleteSetInsertQuery = deleteSetInsertQuery.replaceAll(&quot;\\?&quot; + name, value);</span>
+<span class="fc" id="L117">        }</span>
+
+        // Get the variables of the dependency matching query
+<span class="fc" id="L120">        sparqlVariablesList = new LinkedList&lt;&gt;();</span>
+<span class="fc" id="L121">        HashMap&lt;String, String&gt; variableMapFromSpin = Helper.getVariableMapFromSpin(spinDependencyMatchingQueryN3, spinDependencyMatchingQueryURI);</span>
+<span class="fc bfc" id="L122" title="All 2 branches covered.">        for (String variableName : variableMapFromSpin.keySet()) {</span>
+<span class="fc" id="L123">            String variableURI = variableMapFromSpin.get(variableName);</span>
+<span class="fc" id="L124">            SparqlVariable sparqlVariable = new SparqlVariable(null, null, variableName, variableURI, null, false);</span>
+<span class="fc" id="L125">            sparqlVariablesList.add(sparqlVariable);</span>
+<span class="fc" id="L126">        }</span>
+
+<span class="fc" id="L128">    }</span>
+
+    /**
+     * Get the corresponding semantic change.
+     *
+     * @return the corresponding semantic change
+     */
+    public SemanticChange getSemanticChange() {
+<span class="fc" id="L136">        return semanticChange;</span>
+    }
+
+    /**
+     * Get the SPIN dependency matching query URI.
+     *
+     * @return the SPIN dependency matching query URI
+     */
+    public String getSpinDependencyMatchingQueryURI() {
+<span class="nc" id="L145">        return spinDependencyMatchingQueryURI;</span>
+    }
+
+    /**
+     * Get the SPIN add set insert query URI.
+     *
+     * @return the SPIN add set insert query URI
+     */
+    public String getSpinAddSetInsertQueryURI() {
+<span class="fc" id="L154">        return spinAddSetInsertQueryURI;</span>
+    }
+
+    /**
+     * Get the SPIN delete set insert query URI.
+     *
+     * @return the SPIN delete set insert query URI
+     */
+    public String getSpinDeleteSetInsertQueryURI() {
+<span class="nc" id="L163">        return spinDeleteSetInsertQueryURI;</span>
+    }
+
+    /**
+     * Get the dependency matching query.
+     *
+     * @return the dependency matching query
+     */
+    public String getDependencyMatchingQuery() {
+<span class="fc" id="L172">        return dependencyMatchingQuery;</span>
+    }
+
+    /**
+     * Get the add set insert query.
+     *
+     * @return the add set insert query
+     */
+    public String getAddSetInsertQuery() {
+<span class="fc" id="L181">        return addSetInsertQuery;</span>
+    }
+
+    /**
+     * Get the delete set insert query.
+     *
+     * @return the delete set insert query
+     */
+    public String getDeleteSetInsertQuery() {
+<span class="fc" id="L190">        return deleteSetInsertQuery;</span>
+    }
+
+    /**
+     * Get the list of SPARQL variables associated with the dependency matching query.
+     *
+     * @return the list of SPARQL variables associated with the dependency matching query.
+     */
+    public LinkedList&lt;SparqlVariable&gt; getSparqlVariablesList() {
+<span class="fc" id="L199">        return sparqlVariablesList;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

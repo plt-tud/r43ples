@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SimplePathCalculation.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.optimization</a> &gt; <span class="el_source">SimplePathCalculation.java</span></div><h1>SimplePathCalculation.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.optimization;
+
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.jena.query.ResultSetFactory;
+import org.apache.jena.query.ResultSetRewindable;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.*;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+/**
+ * This class implements the PathCalculationInterface interface for a specific RevisionGraph and provides simple not optimized algorithms to calculate paths between revisions.
+ *
+ * @author Stephan Hensel
+ *
+ */
+public class SimplePathCalculation implements PathCalculationInterface {
+
+    /** The logger. **/
+<span class="fc" id="L27">    private Logger logger = LogManager.getLogger(SimplePathCalculation.class);</span>
+
+    // Dependencies
+    /** The triple store interface to use. **/
+    private TripleStoreInterface tripleStoreInterface;
+
+    private RevisionGraph revisionGraph;
+
+
+    /**
+     * The constructor.
+     */
+<span class="fc" id="L39">    protected SimplePathCalculation(RevisionGraph revisionGraph) {</span>
+        // Dependencies
+<span class="fc" id="L41">        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();</span>
+<span class="fc" id="L42">        this.revisionGraph = revisionGraph;</span>
+<span class="fc" id="L43">    }</span>
+
+
+    /**
+     * Get the path to the nearest revision which has a full graph.
+     *
+     * @param revision revision where the search should start
+     * @return path containing all revisions from start revision to next revision with a full graph
+     * @throws InternalErrorException
+     */
+    @Override
+    public Path getPathToRevisionWithFullGraph(Revision revision) throws InternalErrorException {
+<span class="fc" id="L55">        logger.info(&quot;Get path to full graph revision starting from revision &quot; + revision.getRevisionIdentifier());</span>
+<span class="fc" id="L56">        String query = Config.prefixes + String.format(&quot;&quot;</span>
+                + &quot;SELECT DISTINCT ?revision &quot;
+                + &quot;WHERE { &quot;
+                + &quot;    GRAPH &lt;%1$s&gt; {&quot;
+                + &quot;        ?revision rmo:wasDerivedFrom* &lt;%2$s&gt; .&quot;
+                + &quot;        ?reference rmo:references ?revision .&quot;
+                + &quot;    }&quot;
+<span class="fc" id="L63">                + &quot;}&quot;, revisionGraph.getRevisionGraphUri(), revision.getRevisionURI());</span>
+<span class="fc" id="L64">        this.logger.info(query);</span>
+
+<span class="fc" id="L66">        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);</span>
+
+
+<span class="fc" id="L69">        Path bestPath = null;</span>
+
+<span class="fc bfc" id="L71" title="All 2 branches covered.">        while (resultSet.hasNext()) {</span>
+<span class="fc" id="L72">            QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L73">            String revision_uri_end = qs.getResource(&quot;?revision&quot;).toString();</span>
+<span class="fc" id="L74">            Revision revision_end = new Revision(revisionGraph, revision_uri_end, false);</span>
+
+<span class="fc" id="L76">            Path path = this.getPathBetweenStartAndTargetRevision(revision, revision_end);</span>
+<span class="pc bpc" id="L77" title="1 of 4 branches missed.">            if (bestPath==null || bestPath.getRevisionPath().size()&gt; path.getRevisionPath().size()){</span>
+<span class="fc" id="L78">            	this.logger.info(&quot;new best path: &quot;+ path.getRevisionPath().size());</span>
+<span class="fc" id="L79">                bestPath = path;</span>
+            }
+<span class="fc" id="L81">        }</span>
+<span class="fc" id="L82">        return bestPath;</span>
+    }
+
+
+    /**
+     * Get the path to the nearest revision which has a full graph.
+     *
+     * @param revision      revision where the search should start
+     * @return path containing all revisions from start revision to next revision with a full graph
+     * @throws InternalErrorException
+     */
+    @Override
+    public ChangeSetPath getPathOfChangeSets(Revision revision) throws InternalErrorException {
+<span class="fc" id="L95">        logger.info(&quot;Get path of change sets to full graph revision starting from revision &quot; + revision.getRevisionIdentifier());</span>
+
+<span class="fc" id="L97">        Branch branch = revision.getAssociatedBranch();</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if (branch != null) {</span>
+<span class="fc" id="L99">            return new ChangeSetPath(revisionGraph, revision, revision);</span>
+        }
+
+        // get nearest reference
+<span class="fc" id="L103">        String query_select_nearest_reference = String.format(&quot;&quot; +</span>
+                        &quot;PREFIX rmo: &lt;http://eatld.et.tu-dresden.de/rmo#&gt; \n&quot; +
+                        &quot;SELECT DISTINCT  ?branch (COUNT(?revision) as ?length)\n&quot; +
+                        &quot;WHERE { \n&quot; +
+                        &quot;  GRAPH &lt;%s&gt; { \n&quot; +
+                        &quot;    ?lastRevision rmo:wasDerivedFrom* ?revision.\n&quot; +
+                        &quot;    ?revision rmo:wasDerivedFrom* &lt;%s&gt;.\n&quot; +
+                        &quot;    ?branch rmo:references ?lastRevision.\n&quot; +
+                        &quot;  }\n&quot; +
+                        &quot;}\n&quot; +
+                        &quot;GROUP BY ?branch \n&quot; +
+                        &quot;ORDER BY ?length\n&quot; +
+                        &quot;LIMIT 1&quot;,
+<span class="fc" id="L116">                revisionGraph.getRevisionGraphUri(), revision.getRevisionURI());</span>
+<span class="fc" id="L117">        this.logger.info(query_select_nearest_reference);</span>
+
+<span class="fc" id="L119">        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query_select_nearest_reference);</span>
+
+<span class="pc bpc" id="L121" title="1 of 2 branches missed.">        if (resultSet.hasNext()) {</span>
+<span class="fc" id="L122">            QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L123">            String branch_uri = qs.getResource(&quot;?branch&quot;).toString();</span>
+<span class="fc" id="L124">            branch = revisionGraph.getBranch(branch_uri, false);</span>
+<span class="fc" id="L125">            Revision revision_end = branch.getLeafRevision();</span>
+
+<span class="fc" id="L127">            return this.getChangeSetsBetweenStartAndTargetRevision(revision, revision_end);</span>
+        } else {
+<span class="nc" id="L129">            throw new InternalErrorException(&quot;Could not find nearest branch for revision&quot;);</span>
+        }
+
+    }
+
+
+    /**
+     * Get the common revision of the specified revisions which has the shortest path to the two.
+     * To ensure wise results the revisions should be terminal branch nodes.
+     *
+     * @param revision1 the first revision should be a terminal branch node
+     * @param revision2 the second revision should be a terminal branch node
+     * @return the nearest common revision
+     * @throws InternalErrorException
+     */
+    @Override
+    public Revision getCommonRevisionWithShortestPath(Revision revision1, Revision revision2) throws InternalErrorException {
+<span class="fc" id="L146">        logger.info(&quot;Get the common revision of revision &quot; + revision1.getRevisionIdentifier() + &quot; and revision &quot; + revision2.getRevisionIdentifier() + &quot; which has the shortest path.&quot;);</span>
+<span class="fc" id="L147">        String query = Config.prefixes + String.format(&quot;&quot;</span>
+                + &quot;SELECT DISTINCT ?revision &quot;
+                + &quot;WHERE { &quot;
+                + &quot;    GRAPH &lt;%s&gt; {&quot;
+                + &quot;        &lt;%2$s&gt; rmo:wasDerivedFrom+ ?revision .&quot;
+                + &quot;        &lt;%3$s&gt; rmo:wasDerivedFrom+ ?revision .&quot;
+                + &quot;        ?next rmo:wasDerivedFrom ?revision.&quot;
+                + &quot;        FILTER NOT EXISTS {&quot;
+                + &quot;            &lt;%2$s&gt; rmo:wasDerivedFrom+ ?next .&quot;
+                + &quot;            &lt;%3$s&gt; rmo:wasDerivedFrom+ ?next .&quot;
+                + &quot;        }&quot;
+                + &quot;    }&quot;
+                + &quot;}&quot;
+<span class="fc" id="L160">                + &quot;LIMIT 1&quot;, revisionGraph.getRevisionGraphUri(), revision1.getRevisionURI(), revision2.getRevisionURI());</span>
+<span class="fc" id="L161">        this.logger.debug(query);</span>
+
+<span class="fc" id="L163">        ResultSet results = tripleStoreInterface.executeSelectQuery(query);</span>
+
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        if (results.hasNext()) {</span>
+<span class="fc" id="L166">            QuerySolution qs = results.next();</span>
+<span class="fc" id="L167">            logger.info(&quot;Common revision found.&quot;);</span>
+<span class="fc" id="L168">            return new Revision(revisionGraph, qs.getResource(&quot;?revision&quot;).toString(), false);</span>
+        } else {
+<span class="nc" id="L170">            throw new InternalErrorException(&quot;No common revision of revision &quot; + revision1.getRevisionIdentifier() + &quot; and revision &quot; + revision2.getRevisionIdentifier() + &quot; could be found.&quot;);</span>
+        }
+    }
+
+    /**
+     * Calculate the path from start revision to target revision.
+     * Example: target rmo:wasDerivedFrom source
+     *
+     * @param startRevision the start revision
+     * @param targetRevision the target revision
+     * @return path containing all revisions from start revision to target revision
+     */
+    @Override
+    public Path getPathBetweenStartAndTargetRevision(Revision startRevision, Revision targetRevision) throws InternalErrorException {
+<span class="fc" id="L184">        logger.info(&quot;Calculate the shortest path from revision &quot; + startRevision.getRevisionIdentifier() + &quot; to &quot; + targetRevision.getRevisionIdentifier() + &quot;.&quot;);</span>
+
+<span class="fc" id="L186">        String query = Config.prefixes + String.format(&quot;&quot;</span>
+                + &quot;SELECT DISTINCT ?revision ?previousRevision %n&quot;
+                + &quot;WHERE { %n&quot;
+                + &quot;	GRAPH &lt;%s&gt; { %n&quot;
+                + &quot;		&lt;%s&gt; rmo:wasDerivedFrom* ?revision.&quot;
+                + &quot;		?revision rmo:wasDerivedFrom* &lt;%s&gt;.&quot;
+                + &quot;		OPTIONAL{?revision rmo:wasDerivedFrom ?previousRevision}&quot;
+                + &quot; }&quot;
+<span class="fc" id="L194">                + &quot;}&quot;, revisionGraph.getRevisionGraphUri(), targetRevision.getRevisionURI(), startRevision.getRevisionURI());</span>
+<span class="fc" id="L195">        this.logger.debug(query);</span>
+
+<span class="fc" id="L197">        HashMap&lt;String, ArrayList&lt;String&gt;&gt; resultMap = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L198">        Path path = new Path(revisionGraph, startRevision, targetRevision);</span>
+
+<span class="fc" id="L200">        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);</span>
+
+        // Path element counter
+<span class="fc" id="L203">        int counterLength = 0;</span>
+
+<span class="fc bfc" id="L205" title="All 2 branches covered.">        while (resultSet.hasNext()) {</span>
+<span class="fc" id="L206">            QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L207">            String resource = qs.getResource(&quot;?revision&quot;).toString();</span>
+<span class="fc" id="L208">            String previousResource = null;</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">            if (qs.getResource(&quot;?previousRevision&quot;) != null) {</span>
+<span class="fc" id="L210">                previousResource = qs.getResource(&quot;?previousRevision&quot;).toString();</span>
+            }
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">            if (resultMap.containsKey(resource)) {</span>
+<span class="nc" id="L213">                resultMap.get(resource).add(previousResource);</span>
+            } else {
+<span class="fc" id="L215">                ArrayList&lt;String&gt; arrayList = new ArrayList&lt;String&gt;();</span>
+<span class="fc" id="L216">                counterLength++;</span>
+<span class="fc" id="L217">                arrayList.add(previousResource);</span>
+<span class="fc" id="L218">                resultMap.put(resource, arrayList);</span>
+            }
+<span class="fc" id="L220">        }</span>
+
+        // Sort the result map -&gt; sorted list of path elements
+        // A merged revision can have two predecessors -&gt; it is important to choose the right predecessor revision according to the selected path
+<span class="fc" id="L224">        String currentPathElement = targetRevision.getRevisionURI();</span>
+<span class="pc bpc" id="L225" title="1 of 2 branches missed.">        for (int i = 0; i &lt; counterLength; i++) {</span>
+<span class="fc" id="L226">            path.addRevisionToPathStart(new Revision(revisionGraph, currentPathElement, false));</span>
+
+            // Check if start revision was already reached
+<span class="fc bfc" id="L229" title="All 2 branches covered.">            if (currentPathElement.equals(startRevision.getRevisionURI())) {</span>
+<span class="fc" id="L230">                return path;</span>
+            }
+
+<span class="pc bpc" id="L233" title="1 of 2 branches missed.">            if (resultMap.get(currentPathElement).size() &gt; 1) {</span>
+<span class="nc bnc" id="L234" title="All 2 branches missed.">                if (resultMap.containsKey(resultMap.get(currentPathElement).get(0))) {</span>
+<span class="nc" id="L235">                    currentPathElement = resultMap.get(currentPathElement).get(0);</span>
+                } else {
+<span class="nc" id="L237">                    currentPathElement = resultMap.get(currentPathElement).get(1);</span>
+                }
+            } else {
+<span class="fc" id="L240">                currentPathElement = resultMap.get(currentPathElement).get(0);</span>
+            }
+        }
+
+<span class="nc" id="L244">        return path;</span>
+    }
+
+
+    /**
+     * Calculate the path from start revision to target revision.
+     * Example: target rmo:wasDerivedFrom source
+     *
+     * @param startRevision  the start revision
+     * @param targetRevision the target revision
+     * @return path containing all revisions from start revision to target revision
+     */
+    @Override
+    public ChangeSetPath getChangeSetsBetweenStartAndTargetRevision(Revision startRevision, Revision targetRevision) throws InternalErrorException {
+<span class="fc" id="L258">        logger.info(&quot;Calculate the shortest path from revision &quot; + startRevision.getRevisionIdentifier() + &quot; to &quot; + targetRevision.getRevisionIdentifier() + &quot;.&quot;);</span>
+
+<span class="fc" id="L260">        String query = String.format(&quot;&quot; +</span>
+                        &quot;PREFIX rmo: &lt;http://eatld.et.tu-dresden.de/rmo#&gt; %n&quot; +
+                        &quot;SELECT DISTINCT ?revision ?nextRevision ?changeSet ?addSet ?deleteSet %n&quot; +
+                        &quot;WHERE { %n&quot; +
+                        &quot;	GRAPH &lt;%s&gt; { %n&quot; +
+                        &quot;		&lt;%s&gt; rmo:wasDerivedFrom* ?revision, ?nextRevision.&quot; +
+                        &quot;		?revision rmo:wasDerivedFrom* &lt;%s&gt;. &quot; +
+                        &quot;       ?nextRevision rmo:wasDerivedFrom ?revision. &quot; +
+                        &quot;       ?changeSet rmo:succeedingRevision ?nextRevision. &quot; +
+                        &quot;       ?changeSet rmo:priorRevision ?revision; &quot; +
+                        &quot;                  rmo:addSet    ?addSet ; &quot; +
+                        &quot;                  rmo:deleteSet ?deleteSet . &quot; +
+                        &quot; }&quot; +
+                        &quot;}&quot;,
+<span class="fc" id="L274">                revisionGraph.getRevisionGraphUri(), targetRevision.getRevisionURI(), startRevision.getRevisionURI());</span>
+<span class="fc" id="L275">        this.logger.debug(query);</span>
+
+<span class="fc" id="L277">        ChangeSetPath path = new ChangeSetPath(revisionGraph, startRevision, targetRevision);</span>
+
+<span class="fc" id="L279">        ResultSetRewindable resultSet = ResultSetFactory.copyResults(tripleStoreInterface.executeSelectQuery(query));</span>
+
+<span class="fc" id="L281">        String currentRevisionUri = startRevision.getRevisionURI();</span>
+        String nextResource;
+        String changeSet;
+
+<span class="pc bpc" id="L285" title="1 of 2 branches missed.">        while (resultSet.hasNext()) {</span>
+<span class="fc" id="L286">            QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L287">            String resource = qs.getResource(&quot;?revision&quot;).toString();</span>
+<span class="fc bfc" id="L288" title="All 2 branches covered.">            if (resource.equals(currentRevisionUri)) {</span>
+<span class="fc" id="L289">                nextResource = qs.getResource(&quot;?nextRevision&quot;).toString();</span>
+<span class="fc" id="L290">                changeSet = qs.getResource(&quot;?changeSet&quot;).toString();</span>
+
+<span class="fc" id="L292">                Revision nextRevision = new Revision(revisionGraph, nextResource, false);</span>
+<span class="fc" id="L293">                String addSet = qs.getResource(&quot;?addSet&quot;).toString();</span>
+<span class="fc" id="L294">                String deleteSet = qs.getResource(&quot;?deleteSet&quot;).toString();</span>
+
+<span class="fc" id="L296">                ChangeSet cs = new ChangeSet(revisionGraph, nextRevision, addSet, deleteSet, changeSet);</span>
+
+<span class="fc" id="L298">                path.addRevisionToPathStart(cs);</span>
+<span class="fc bfc" id="L299" title="All 2 branches covered.">                if (nextRevision.getRevisionURI().equals(targetRevision.getRevisionURI())) {</span>
+<span class="fc" id="L300">                    return path;</span>
+                }
+<span class="fc" id="L302">                currentRevisionUri = nextResource;</span>
+<span class="fc" id="L303">                resultSet.reset();</span>
+            }
+<span class="fc" id="L305">        }</span>
+<span class="nc" id="L306">        throw new InternalErrorException(&quot;Shortest path between revisions could not be found&quot;);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

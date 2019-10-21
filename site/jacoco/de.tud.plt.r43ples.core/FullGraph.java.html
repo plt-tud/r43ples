@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FullGraph.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">FullGraph.java</span></div><h1>FullGraph.java</h1><pre class="source lang-java linenums">/*
+ * Copyright (c) 2017.  Markus Graube
+ */
+
+package de.tud.plt.r43ples.core;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.ChangeSet;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.optimization.ChangeSetPath;
+import de.tud.plt.r43ples.optimization.PathCalculationFabric;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.LinkedList;
+
+public class FullGraph {
+
+    private final String fullGraphUri;
+    private final Revision revision;
+    private final RevisionGraph revisionGraph;
+<span class="fc" id="L24">    private boolean created = false;</span>
+
+    /**
+     * The logger.
+     **/
+<span class="fc" id="L29">    private Logger logger = LogManager.getLogger(FullGraph.class);</span>
+
+
+    /**
+     * Creates the whole revision from the add and delete sets of the
+     * predecessors. Saved in a new graph.
+     * Already existent graphs will be dropped and recreated.
+     *
+     * @param revisionGraph the revision graph
+     * @param revision      the revision
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L41">    public FullGraph(RevisionGraph revisionGraph, Revision revision) throws InternalErrorException {</span>
+
+<span class="fc" id="L43">        this.revisionGraph = revisionGraph;</span>
+<span class="fc" id="L44">        this.revision = revision;</span>
+
+<span class="fc bfc" id="L46" title="All 2 branches covered.">        if (revision.getAssociatedBranch() != null) {</span>
+<span class="fc" id="L47">            this.fullGraphUri = revision.getAssociatedBranch().getFullGraphURI();</span>
+<span class="fc" id="L48">            this.logger.info(&quot;Full graph of revision &quot; + revision.getRevisionIdentifier() + &quot; of graph &lt;&quot; + revisionGraph.getGraphName()</span>
+                    + &quot;&gt; already exists in &lt;&quot; + this.fullGraphUri + &quot;&gt;&quot;);
+        } else {
+<span class="fc" id="L51">            this.fullGraphUri = revision.getRevisionURI() + &quot;-fullGraph&quot;;</span>
+<span class="fc" id="L52">            this.createNewFullGraph();</span>
+        }
+<span class="fc" id="L54">    }</span>
+
+    /**
+     * Creates the whole revision from the add and delete sets of the
+     * predecessors. Saved in a new graph with specified name.
+     * Already existent graphs will be dropped and recreated.
+     *
+     * @param revisionGraph the revision graph
+     * @param revision      the revision
+     * @param fullGraphUri  URI where full graph should be created
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L66">    public FullGraph(RevisionGraph revisionGraph, Revision revision, String fullGraphUri) throws InternalErrorException {</span>
+
+<span class="fc" id="L68">        this.revisionGraph = revisionGraph;</span>
+<span class="fc" id="L69">        this.revision = revision;</span>
+<span class="fc" id="L70">        this.fullGraphUri = fullGraphUri;</span>
+<span class="fc" id="L71">        this.createNewFullGraph();</span>
+<span class="fc" id="L72">    }</span>
+
+
+    protected void createNewFullGraph() throws InternalErrorException {
+
+<span class="fc" id="L77">        this.logger.info(&quot;Rebuild whole content of revision &quot; + revision.getRevisionIdentifier() + &quot; of graph &lt;&quot; + revisionGraph.getGraphName()</span>
+                + &quot;&gt; into temporary graph &lt;&quot; + this.fullGraphUri + &quot;&gt;&quot;);
+
+        // Create temporary graph
+<span class="fc" id="L81">        TripleStoreInterfaceSingleton.get().executeUpdateQuery(&quot;DROP SILENT GRAPH &lt;&quot; + fullGraphUri + &quot;&gt;&quot;);</span>
+<span class="fc" id="L82">        TripleStoreInterfaceSingleton.get().executeUpdateQuery(&quot;CREATE GRAPH &lt;&quot; + fullGraphUri + &quot;&gt;&quot;);</span>
+
+        // Create path to revision
+<span class="fc" id="L85">        ChangeSetPath changeSetPath = PathCalculationFabric.getInstance(revisionGraph).getPathOfChangeSets(revision);</span>
+
+        // Copy branch to temporary graph
+<span class="fc" id="L88">        Revision currentRevision = changeSetPath.getTargetRevision();</span>
+<span class="fc" id="L89">        String copyQuery = &quot;COPY GRAPH &lt;&quot; + currentRevision.getAssociatedReference().getFullGraphURI() + &quot;&gt; TO GRAPH &lt;&quot; + fullGraphUri + &quot;&gt;&quot;;</span>
+<span class="fc" id="L90">        TripleStoreInterfaceSingleton.get().executeUpdateQuery(copyQuery);</span>
+
+        // Apply changesets
+<span class="fc" id="L93">        LinkedList&lt;ChangeSet&gt; list = changeSetPath.getRevisionPath();</span>
+<span class="fc bfc" id="L94" title="All 2 branches covered.">        while (!list.isEmpty()) {</span>
+<span class="fc" id="L95">            ChangeSet currentChangeSet = list.remove();</span>
+
+            // Add data to temporary graph
+<span class="fc" id="L98">            String graph_deleted = currentChangeSet.getDeleteSetURI();</span>
+<span class="fc" id="L99">            this.applyDeleteSet(graph_deleted);</span>
+
+            // Remove data from temporary graph (no opposite of SPARQL ADD available)
+<span class="fc" id="L102">            String graph_added = currentChangeSet.getAddSetURI();</span>
+<span class="fc" id="L103">            this.applyAddSet(graph_added);</span>
+<span class="fc" id="L104">        }</span>
+<span class="fc" id="L105">        this.created = true;</span>
+<span class="fc" id="L106">    }</span>
+
+    /**
+     * Applies delete set stored in named graph graph_deleted
+     *
+     * @param graph_deleted Uri of named graph containing delete set
+     */
+    protected void applyDeleteSet(String graph_deleted) {
+<span class="fc" id="L114">        String deleteQuery = String.format(&quot;ADD SILENT GRAPH &lt;%s&gt; TO GRAPH &lt;%s&gt;&quot;, graph_deleted, this.fullGraphUri);</span>
+<span class="fc" id="L115">        TripleStoreInterfaceSingleton.get().executeUpdateQuery(deleteQuery);</span>
+<span class="fc" id="L116">    }</span>
+
+
+    /**
+     * Applies add set stored in named graph graph_added
+     *
+     * @param graph_added Uri of named graph containing add set
+     */
+    protected void applyAddSet(String graph_added) {
+<span class="fc" id="L125">        String addQuery = String.format(&quot;&quot; +</span>
+                &quot;DELETE { GRAPH &lt;%s&gt; {?s ?p ?o.} } &quot; +
+                &quot;WHERE  { GRAPH &lt;%s&gt; {?s ?p ?o.} }&quot;, this.fullGraphUri, graph_added);
+<span class="fc" id="L128">        TripleStoreInterfaceSingleton.get().executeUpdateQuery(addQuery);</span>
+<span class="fc" id="L129">    }</span>
+
+
+    public String getFullGraphUri() {
+<span class="fc" id="L133">        return fullGraphUri;</span>
+    }
+
+    public Revision getRevision() {
+<span class="fc" id="L137">        return revision;</span>
+    }
+
+    public RevisionGraph getRevisionGraph() {
+<span class="nc" id="L141">        return revisionGraph;</span>
+    }
+
+    public void purge() {
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        if (this.created) {</span>
+<span class="fc" id="L146">            String deleteQuery = String.format(&quot;DROP SILENT GRAPH &lt;%s&gt;&quot;, this.fullGraphUri);</span>
+<span class="fc" id="L147">            TripleStoreInterfaceSingleton.get().executeUpdateQuery(deleteQuery);</span>
+        }
+<span class="fc" id="L149">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

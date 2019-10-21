@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StatementSet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.existentobjects</a> &gt; <span class="el_source">StatementSet.java</span></div><h1>StatementSet.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.existentobjects;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.LinkedList;
+
+/**
+ * Provides information of an already existent set of statements.
+ *
+ * @author Stephan Hensel
+ */
+public class StatementSet {
+
+    /** The logger. **/
+<span class="pc" id="L21">    private Logger logger = LogManager.getLogger(StatementSet.class);</span>
+
+    /** The statement set URI. */
+    private String statementSetURI;
+    /** The list of statements. */
+    private LinkedList&lt;Statement&gt; statementList;
+
+    /** The revision graph URI. */
+    private String revisionGraphURI;
+    /** The corresponding revision graph. */
+    private RevisionGraph revisionGraph;
+
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param statementSetURI the statement set URI
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L41">    public StatementSet(RevisionGraph revisionGraph, String statementSetURI) throws InternalErrorException {</span>
+<span class="fc" id="L42">        this.revisionGraph = revisionGraph;</span>
+<span class="fc" id="L43">        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();</span>
+<span class="fc" id="L44">        this.statementSetURI = statementSetURI;</span>
+<span class="fc" id="L45">        this.statementList = new LinkedList&lt;&gt;();</span>
+
+<span class="fc" id="L47">        retrieveAdditionalInformation();</span>
+<span class="fc" id="L48">    }</span>
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param statementSetURI the statement set URI
+     * @param statementList the list of statements
+     */
+<span class="nc" id="L57">    public StatementSet(RevisionGraph revisionGraph, String statementSetURI, LinkedList&lt;Statement&gt; statementList) {</span>
+<span class="nc" id="L58">        this.revisionGraph = revisionGraph;</span>
+<span class="nc" id="L59">        this.revisionGraphURI = this.revisionGraph.getRevisionGraphUri();</span>
+<span class="nc" id="L60">        this.statementSetURI = statementSetURI;</span>
+<span class="nc" id="L61">        this.statementList = statementList;</span>
+<span class="nc" id="L62">    }</span>
+
+    /**
+     * Calculate additional information of the current commit and store this information to local variables.
+     *
+     * @throws InternalErrorException
+     */
+    private void retrieveAdditionalInformation() throws InternalErrorException {
+<span class="fc" id="L70">        logger.info(&quot;Get additional information of current statement set URI &quot; + statementSetURI + &quot;.&quot;);</span>
+<span class="fc" id="L71">        String query = Config.prefixes + String.format(&quot;&quot;</span>
+                + &quot;SELECT ?statement &quot;
+                + &quot;WHERE { GRAPH  &lt;%s&gt; {&quot;
+                + &quot;	&lt;%s&gt; a rmo:Set; &quot;
+                + &quot;	 rmo:statements ?statement. &quot;
+                + &quot;} }&quot;, revisionGraphURI, statementSetURI);
+<span class="fc" id="L77">        this.logger.debug(query);</span>
+<span class="fc" id="L78">        ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">        if (resultSet.hasNext()) {</span>
+<span class="fc bfc" id="L80" title="All 2 branches covered.">            while (resultSet.hasNext()) {</span>
+<span class="fc" id="L81">                QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L82">                Statement statement = new Statement(revisionGraph, qs.getResource(&quot;?statement&quot;).toString());</span>
+<span class="fc" id="L83">                statementList.add(statement);</span>
+<span class="fc" id="L84">            }</span>
+        } else {
+<span class="nc" id="L86">            throw new InternalErrorException(&quot;No additional information found for statement set URI &quot; + statementSetURI + &quot;.&quot;);</span>
+        }
+<span class="fc" id="L88">    }</span>
+
+    /**
+     * Get the statement set URI.
+     *
+     * @return the statement set URI
+     */
+    public String getStatementSetURI() {
+<span class="nc" id="L96">        return statementSetURI;</span>
+    }
+
+    /**
+     * Get the list of statements.
+     *
+     * @return the list of statements
+     */
+    public LinkedList&lt;Statement&gt; getStatementList() {
+<span class="fc" id="L105">        return statementList;</span>
+    }
+
+    /**
+     * Get the revision graph.
+     *
+     * @return the revision graph
+     */
+    public RevisionGraph getRevisionGraph() {
+<span class="nc" id="L114">        return revisionGraph;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

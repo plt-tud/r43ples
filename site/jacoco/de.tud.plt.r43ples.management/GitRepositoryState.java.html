@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GitRepositoryState.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.management</a> &gt; <span class="el_source">GitRepositoryState.java</span></div><h1>GitRepositoryState.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.management;
+
+import org.apache.commons.configuration.ConfigurationException;
+import org.apache.commons.configuration.PropertiesConfiguration;
+
+public class GitRepositoryState {
+
+<span class="fc" id="L8">	private static GitRepositoryState gitRepositoryState = null;</span>
+
+	public String branch; // =${git.branch}
+	public String describe; // =${git.commit.id.describe}
+	public String describeShort; // =${git.commit.id.describe-short}
+	public String commitId; // =${git.commit.id}
+	public String commitIdAbbrev; // =${git.commit.id.abbrev}
+	public String commitTime; // =${git.commit.time}
+
+<span class="fc" id="L17">	private GitRepositoryState(PropertiesConfiguration properties) {</span>
+<span class="fc" id="L18">		this.branch = properties.getString(&quot;git.branch&quot;);</span>
+<span class="fc" id="L19">		this.describe = properties.getString(&quot;git.commit.id.describe&quot;);</span>
+<span class="fc" id="L20">		this.describeShort = properties.getString(&quot;git.commit.id.describe-short&quot;);</span>
+<span class="fc" id="L21">		this.commitId = properties.getString(&quot;git.commit.id&quot;);</span>
+<span class="fc" id="L22">		this.commitIdAbbrev = properties.getString(&quot;git.commit.id.abbrev&quot;);</span>
+<span class="fc" id="L23">		this.commitTime = properties.getString(&quot;git.commit.time&quot;);</span>
+<span class="fc" id="L24">	}</span>
+
+	public static GitRepositoryState getGitRepositoryState() {
+
+<span class="pc bpc" id="L28" title="1 of 2 branches missed.">		if (gitRepositoryState == null) {</span>
+			PropertiesConfiguration config;
+			try {
+<span class="fc" id="L31">				config = new PropertiesConfiguration(&quot;git.properties&quot;);</span>
+<span class="fc" id="L32">				gitRepositoryState = new GitRepositoryState(config);</span>
+<span class="nc" id="L33">			} catch (ConfigurationException e) {</span>
+<span class="nc" id="L34">				e.printStackTrace();</span>
+<span class="fc" id="L35">			}</span>
+
+		}
+<span class="fc" id="L38">		return gitRepositoryState;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

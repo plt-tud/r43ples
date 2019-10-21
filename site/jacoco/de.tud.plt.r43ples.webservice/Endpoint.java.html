@@ -1,0 +1,506 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Endpoint.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.webservice</a> &gt; <span class="el_source">Endpoint.java</span></div><h1>Endpoint.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.webservice;
+
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
+import de.tud.plt.r43ples.core.HeaderInformation;
+import de.tud.plt.r43ples.core.R43plesCoreInterface;
+import de.tud.plt.r43ples.core.R43plesCoreSingleton;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.exception.QueryErrorException;
+import de.tud.plt.r43ples.existentobjects.*;
+import de.tud.plt.r43ples.iohelper.JenaModelManagement;
+import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.management.SparqlRewriter;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.shared.NoWriterForLangException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.ws.rs.*;
+import javax.ws.rs.Path;
+import javax.ws.rs.core.*;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import java.io.ByteArrayOutputStream;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
+
+/**
+ * Provides SPARQL endpoint via [host]:[port]/r43ples/.
+ * Supplies version information, service description as well as SPARQL queries.
+ * 
+ * @author Stephan Hensel
+ * @author Markus Graube
+ * @author Xinyu Yang
+ * 
+ */
+@Path(&quot;sparql&quot;)
+<span class="fc" id="L47">public class Endpoint {</span>
+
+	
+	@Context
+	private UriInfo uriInfo;
+	@Context
+	private Request request;
+	
+	
+
+	
+	/** default logger for this class */
+<span class="fc" id="L59">	private final static Logger logger = LogManager.getLogger(Endpoint.class);</span>
+
+<span class="fc" id="L61">	static final MediaType TEXT_TURTLE_TYPE = new MediaType(&quot;text&quot;, &quot;turtle&quot;);</span>
+	static final String TEXT_TURTLE = &quot;text/turtle&quot;;
+<span class="fc" id="L63">	static final MediaType APPLICATION_RDF_XML_TYPE = new MediaType(&quot;application&quot;, &quot;rdf+xml&quot;);</span>
+	static final String APPLICATION_RDF_XML = &quot;application/rdf+xml&quot;;
+<span class="fc" id="L65">	static final MediaType APPLICATION_SPARQL_RESULTS_XML_TYPE = new MediaType(&quot;application&quot;, &quot;sparql-results+xml&quot;);</span>
+
+	/**
+	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * 
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
+	 * @param formatQuery
+	 *            format specified in the HTTP parameters
+	 * @param sparqlQuery
+	 *            the SPARQL query
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
+	 * @return HTTP response
+	 * @throws InternalErrorException 
+	 */
+	@POST
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, &quot;application/rdf+xml&quot;, &quot;text/turtle&quot;, &quot;application/sparql-results+xml&quot;})
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public final Response sparqlPOST(
+			@FormParam(&quot;format&quot;) final String formatQuery, 
+			@FormParam(&quot;query&quot;) @DefaultValue(&quot;&quot;) final String sparqlQuery,
+			@HeaderParam(&quot;r43ples-revisiongraph&quot;) @DefaultValue(&quot;&quot;) final String revision_information,
+			@FormParam(&quot;query_rewriting&quot;) @DefaultValue(&quot;&quot;) final String query_rewriting) throws InternalErrorException {
+		try {
+<span class="nc" id="L91">			String format = getFormat(formatQuery);</span>
+<span class="nc" id="L92">			logger.info(&quot;SPARQL POST query (format: &quot;+format+&quot;, query: &quot;+sparqlQuery +&quot;)&quot; + revision_information);</span>
+<span class="nc" id="L93">			return sparql(format, sparqlQuery, revision_information, query_rewriting);</span>
+<span class="nc" id="L94">		} catch (Exception e) {</span>
+<span class="nc" id="L95">			return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();</span>
+		}
+	}
+
+	private String getFormat(final String formatQuery) throws Exception {
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">		if (formatQuery == null){</span>
+<span class="nc" id="L101">			List&lt;Variant&gt; reqVariants = Variant.mediaTypes(MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_HTML_TYPE, </span>
+<span class="nc" id="L102">					MediaType.APPLICATION_JSON_TYPE, TEXT_TURTLE_TYPE, APPLICATION_RDF_XML_TYPE, APPLICATION_SPARQL_RESULTS_XML_TYPE).build();</span>
+<span class="nc" id="L103">			Variant bestVariant = request.selectVariant(reqVariants);</span>
+<span class="nc bnc" id="L104" title="All 2 branches missed.">	        if (bestVariant == null) {</span>
+<span class="nc" id="L105">	        	throw new Exception(&quot;Requested datatype not available&quot;);</span>
+	        }
+<span class="nc" id="L107">        	MediaType reqMediaType = bestVariant.getMediaType();</span>
+<span class="nc" id="L108">        	return reqMediaType.toString();</span>
+		}
+		else {
+<span class="fc" id="L111">			return formatQuery;</span>
+		}
+	}
+	
+	/**
+	 * HTTP POST interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * Direct method (http://www.w3.org/TR/2013/REC-sparql11-protocol-20130321/#query-via-post-direct)
+	 *
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
+	 * @param sparqlQuery
+	 *            the SPARQL query specified in the HTTP POST body
+	 * @return HTTP response
+	 * @throws InternalErrorException 
+	 */
+	@POST
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, &quot;application/rdf+xml&quot;, &quot;text/turtle&quot;, &quot;application/sparql-results+xml&quot; })
+	@Consumes(&quot;application/sparql-query&quot;)
+	public final Response sparqlPOSTdirectly(
+			@HeaderParam(&quot;r43ples-revisiongraph&quot;) @DefaultValue(&quot;&quot;) final String revision_information,
+			final String sparqlQuery) throws InternalErrorException {
+<span class="fc" id="L133">		List&lt;Variant&gt; reqVariants = Variant.mediaTypes(MediaType.TEXT_PLAIN_TYPE, MediaType.TEXT_HTML_TYPE, </span>
+<span class="fc" id="L134">				MediaType.APPLICATION_JSON_TYPE, TEXT_TURTLE_TYPE, APPLICATION_RDF_XML_TYPE, APPLICATION_SPARQL_RESULTS_XML_TYPE).build();</span>
+<span class="fc" id="L135">		Variant bestVariant = request.selectVariant(reqVariants);</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        if (bestVariant == null) {</span>
+<span class="nc" id="L137">            return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();</span>
+        }
+<span class="fc" id="L139">    	MediaType reqMediaType = bestVariant.getMediaType();</span>
+<span class="fc" id="L140">    	String format = reqMediaType.toString();</span>
+<span class="fc" id="L141">		logger.info(&quot;SPARQL POST query directly (format: &quot;+format+&quot;, query: &quot;+sparqlQuery +&quot;)&quot;);</span>
+<span class="fc" id="L142">		return sparql(reqMediaType.toString(), sparqlQuery, revision_information, false);</span>
+	}
+	
+	/**
+	 * HTTP GET interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * Provides HTML form if no query is specified and HTML is requested
+	 * Provides Service Description if no query is specified and RDF
+	 * representation is requested
+	 *
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
+	 * @param formatQuery
+	 *            format specified in the HTTP parameters
+	 * @param sparqlQuery
+	 *            the SPARQL query
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
+	 * @return HTTP response
+	 * @throws InternalErrorException 
+	 */
+	@GET
+	@Produces({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML, MediaType.APPLICATION_JSON, &quot;application/rdf+xml&quot;, &quot;text/turtle&quot;, &quot;application/sparql-results+xml&quot; })
+	public final Response sparqlGET(
+			@QueryParam(&quot;format&quot;) final String formatQuery, 
+			@QueryParam(&quot;query&quot;) @DefaultValue(&quot;&quot;) final String sparqlQuery,
+			@HeaderParam(&quot;r43ples-revisiongraph&quot;) @DefaultValue(&quot;&quot;) final String revision_information,
+			@QueryParam(&quot;query_rewriting&quot;) @DefaultValue(&quot;&quot;) final String query_rewriting) throws InternalErrorException, UnsupportedEncodingException {
+		String format;
+		try {
+<span class="fc" id="L172">			format = getFormat(formatQuery);</span>
+<span class="nc" id="L173">		} catch (Exception e) {</span>
+<span class="nc" id="L174">			return Response.serverError().status(Response.Status.NOT_ACCEPTABLE).build();</span>
+<span class="fc" id="L175">		}		</span>
+		
+<span class="fc" id="L177">		logger.info(&quot;SPARQL GET query (format: &quot;+format+&quot;, query: &quot;+sparqlQuery +&quot;)&quot;);</span>
+<span class="fc" id="L178">		return sparql(format, URLDecoder.decode(sparqlQuery, &quot;UTF-8&quot;), revision_information, query_rewriting);</span>
+	}
+	
+	
+	
+	/**
+	 * Interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * Provides HTML form if no query is specified and HTML is requested
+	 * Provides Service Description if no query is specified and RDF
+	 * representation is requested
+	 * 
+	 * @param format
+	 *            mime type for response format
+	 * @param sparqlQuery
+	 *            decoded SPARQL query
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
+	 * @return the response
+	 * @throws InternalErrorException 
+	 */
+	private final Response sparql(final String format, final String sparqlQuery, final String revision_information, final boolean query_rewriting) throws InternalErrorException {
+<span class="fc bfc" id="L202" title="All 2 branches covered.">		if (&quot;&quot;.equals(sparqlQuery)) {</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">			if (format.contains(MediaType.TEXT_HTML)) {</span>
+<span class="fc" id="L204">				return getHTMLResponse();</span>
+			} else {
+<span class="fc" id="L206">				return getServiceDescriptionResponse(format);</span>
+			}
+		} else {
+<span class="fc" id="L209">			return getSparqlResponse(format, sparqlQuery, revision_information, query_rewriting);</span>
+		}
+	}
+
+	/**
+	 * Interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * Provides HTML form if no query is specified and HTML is requested
+	 * Provides Service Description if no query is specified and RDF
+	 * representation is requested
+	 *
+	 * @param format
+	 *            mime type for response format
+	 * @param sparqlQuery
+	 *            decoded SPARQL query
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
+	 * @return the response
+	 * @throws InternalErrorException
+	 */
+	public final Response sparql(final String format, final String sparqlQuery, final boolean query_rewriting) throws InternalErrorException {
+<span class="fc" id="L229">		return sparql(format, sparqlQuery, null, query_rewriting);</span>
+	}
+	
+	/**
+	 * 
+	 * @param format
+	 *            mime type for response format
+	 * @param sparqlQuery
+	 *            decoded SPARQL query
+	 * @param revision_information
+	 *            (optional) recent revision information about used revision graphs. If exisitent, commits are only
+	 *            performed if revision information is up to date.
+	 * @param query_rewriting
+	 * 			  string determining if query rewriting option be used
+	 * @return
+	 * @throws InternalErrorException
+	 */
+	private Response sparql(final String format, final String sparqlQuery, final String revision_information, final String query_rewriting) throws InternalErrorException {
+<span class="fc" id="L247">		String option = query_rewriting.toLowerCase();</span>
+<span class="pc bpc" id="L248" title="2 of 6 branches missed.">		if (option.equals(&quot;on&quot;) || option.equals(&quot;true&quot;) || option.equals(&quot;new&quot;))</span>
+<span class="fc" id="L249">			return sparql(format, sparqlQuery, revision_information, true);</span>
+		else
+<span class="fc" id="L251">			return sparql(format, sparqlQuery, revision_information, false);</span>
+	}
+	
+	/**
+	 * Interface for query and update (e.g. SELECT, INSERT, DELETE).
+	 * Provides HTML form if no query is specified and HTML is requested
+	 * Provides Service Description if no query is specified and RDF
+	 * representation is requested
+	 * 
+	 * @param format
+	 *            mime type for response format
+	 * @param sparqlQuery
+	 *            decoded SPARQL query
+	 * @return the response
+	 * @throws InternalErrorException 
+	 */
+	public final Response sparql(final String format, final String sparqlQuery) throws InternalErrorException {
+<span class="fc" id="L268">		return sparql(format, sparqlQuery, null, false);</span>
+	}
+	
+	
+	public final Response sparql(final String sparqlQuery) throws InternalErrorException {
+<span class="fc" id="L273">		return sparql(&quot;application/xml&quot;, sparqlQuery, null, false);</span>
+	}
+	
+	
+	
+
+	/**
+	 * Get HTML response for standard sparql request form.
+	 * Using mustache templates. 
+	 * 
+	 * @return HTML response for SPARQL form
+	 */
+	private Response getHTMLResponse() {
+<span class="fc" id="L286">		logger.info(&quot;SPARQL form requested&quot;);</span>
+<span class="fc" id="L287">		MustacheFactory mf = new DefaultMustacheFactory();</span>
+<span class="fc" id="L288">	    Mustache mustache = mf.compile(&quot;templates/endpoint.mustache&quot;);</span>
+<span class="fc" id="L289">	    StringWriter sw = new StringWriter();</span>
+<span class="fc" id="L290">		Map&lt;String, Object&gt; htmlMap = new HashMap&lt;String, Object&gt;();</span>
+<span class="fc" id="L291">		ArrayList&lt;String&gt; graphList = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L292">		graphList.addAll(new RevisionControl().getRevisedGraphs().keySet());</span>
+<span class="fc" id="L293">		htmlMap.put(&quot;graphList&quot;, graphList);</span>
+<span class="fc" id="L294">	    htmlMap.put(&quot;endpoint_active&quot;, true);</span>
+<span class="fc" id="L295">	    mustache.execute(sw, htmlMap);		</span>
+<span class="fc" id="L296">		String content = sw.toString();</span>
+<span class="fc" id="L297">		return Response.ok().entity(content).type(MediaType.TEXT_HTML).build();</span>
+	}
+
+
+	
+	/**
+	 * Generates HTML representation of SPARQL query result 
+	 * @param query SPARQL query which was passed to R43ples
+	 * @param result result from the attached triplestore
+	 */
+	private String getHTMLResult(final String result, String query) {
+<span class="fc" id="L308">		return getHTMLResult(result, query, null);</span>
+	}
+	
+	/**
+	 * Generates HTML representation of SPARQL query result including the rewritten query 
+	 * @param query SPARQL query which was passed to R43ples
+	 * @param query_rewritten rewritten SPARQL query passed to triplestore
+	 * @param result result from the attached triplestore
+	 */
+	private String getHTMLResult(final String result, String query, String query_rewritten) {
+<span class="fc" id="L318">		MustacheFactory mf = new DefaultMustacheFactory();</span>
+<span class="fc" id="L319">		Mustache mustache = mf.compile(&quot;templates/result.mustache&quot;);</span>
+<span class="fc" id="L320">		StringWriter sw = new StringWriter();</span>
+<span class="fc" id="L321">		Map&lt;String, Object&gt; htmlMap = new HashMap&lt;String, Object&gt;();</span>
+<span class="fc" id="L322">		htmlMap.put(&quot;endpoint_active&quot;, true);</span>
+<span class="fc" id="L323">		htmlMap.put(&quot;result&quot;, result);</span>
+<span class="fc" id="L324">		htmlMap.put(&quot;query&quot;, query);</span>
+<span class="fc" id="L325">		htmlMap.put(&quot;query_rewritten&quot;, query_rewritten);</span>
+<span class="fc" id="L326">		mustache.execute(sw, htmlMap);		</span>
+<span class="fc" id="L327">		return sw.toString();</span>
+	}
+
+	
+	/**
+	 * @param format
+	 * 			requested mime type 
+	 * @param sparqlQuery
+	 * 			string containing the SPARQL query
+	 * @param query_rewriting
+	 * 			  should query rewriting option be used
+	 * @return HTTP response of evaluating the sparql query 
+	 * @throws InternalErrorException
+	 */
+	private Response getSparqlResponse(String format, String sparqlQuery, final String revision_information, final boolean query_rewriting) throws InternalErrorException {
+<span class="fc" id="L342">		logger.info(String.format(&quot;SPARQL request (format=%s, query_rewriting=%s, header=%s) -&gt; %n %s&quot;, format, query_rewriting,revision_information, sparqlQuery));</span>
+
+<span class="fc" id="L344">		R43plesCoreInterface r43plesCore = R43plesCoreSingleton.getInstance();</span>
+
+<span class="fc" id="L346">		R43plesRequest request = new R43plesRequest(sparqlQuery, format, revision_information);</span>
+
+		String result;
+<span class="fc bfc" id="L349" title="All 2 branches covered.">		if (request.isSelectAskConstructQuery()) {</span>
+<span class="fc" id="L350">			result = r43plesCore.getSparqlSelectConstructAskResponse(request, query_rewriting);</span>
+		}
+<span class="fc bfc" id="L352" title="All 2 branches covered.">		else if (request.isUpdateQuery()) {</span>
+<span class="fc" id="L353">			r43plesCore.createUpdateCommit(request);</span>
+<span class="fc" id="L354">			result = &quot;Update executed&quot;;</span>
+		}
+<span class="pc bpc" id="L356" title="1 of 2 branches missed.">		else if (request.isRevertQuery()) {</span>
+<span class="nc" id="L357">			r43plesCore.createRevertCommit(request);</span>
+<span class="nc" id="L358">			result = &quot;Revert executed&quot;;</span>
+		}
+<span class="pc bpc" id="L360" title="1 of 2 branches missed.">		else if (request.isCreateGraphQuery()) {</span>
+<span class="nc" id="L361">			InitialCommit initialCommit = r43plesCore.createInitialCommit(request);</span>
+<span class="nc" id="L362">			result = &quot;Graph &lt;&quot; + initialCommit.getGeneratedRevision().getRevisionGraph().getGraphName() + &quot;&gt; successfully created&quot;;</span>
+<span class="nc" id="L363">		}</span>
+<span class="pc bpc" id="L364" title="1 of 2 branches missed.">		else if (request.isDropGraphQuery()) {</span>
+<span class="nc" id="L365">			r43plesCore.sparqlDropGraph(sparqlQuery);</span>
+<span class="nc" id="L366">			result = &quot;Graph successfully dropped&quot;;</span>
+		}
+<span class="fc bfc" id="L368" title="All 2 branches covered.">		else if (request.isBranchOrTagQuery()) {</span>
+<span class="fc" id="L369">			r43plesCore.createReferenceCommit(request);</span>
+<span class="fc" id="L370">			result = &quot;Tagging or branching successful&quot;;</span>
+		}
+<span class="pc bpc" id="L372" title="1 of 2 branches missed.">		else if (request.isMergeQuery()) {</span>
+<span class="fc" id="L373">            logger.info(&quot;Merge query detected&quot;);</span>
+<span class="fc" id="L374">            return getMergeResponse(r43plesCore.createMergeCommit(request), request);</span>
+		}
+<span class="nc bnc" id="L376" title="All 2 branches missed.">		else if (request.isPickQuery()) {</span>
+<span class="nc" id="L377">			logger.info(&quot;Pick query detected&quot;);</span>
+<span class="nc" id="L378">			r43plesCore.createPickCommit(request);</span>
+<span class="nc" id="L379">			result = &quot;Revision(s) successfully picked&quot;;</span>
+		}
+<span class="nc bnc" id="L381" title="All 2 branches missed.">		else if (request.isAggQuery()) {</span>
+<span class="nc" id="L382">			logger.info(&quot;Aggregation query detected&quot;);</span>
+<span class="nc" id="L383">			r43plesCore.aggregate(request);</span>
+<span class="nc" id="L384">			result = &quot;Atomic changes successfully aggregated to high level ones&quot;;</span>
+		}
+<span class="nc bnc" id="L386" title="All 2 branches missed.">		else if (request.isCoEvoQuery()) {</span>
+<span class="nc" id="L387">			logger.info(&quot;Coevolution query detected&quot;);</span>
+<span class="nc" id="L388">			r43plesCore.coevolveAll(request);</span>
+<span class="nc" id="L389">			result = &quot;Semantic changes successfully coevolved&quot;;</span>
+		}
+		else
+<span class="nc" id="L392">			throw new QueryErrorException(&quot;No R43ples query detected&quot;);</span>
+
+<span class="fc" id="L394">		ResponseBuilder responseBuilder = Response.ok();</span>
+<span class="fc bfc" id="L395" title="All 2 branches covered.">		if (format.equals(&quot;text/html&quot;)){</span>
+<span class="pc bpc" id="L396" title="1 of 2 branches missed.">			if (query_rewriting) {</span>
+<span class="nc" id="L397">				responseBuilder.entity(getHTMLResult(result, sparqlQuery, SparqlRewriter.rewriteQuery(sparqlQuery)));</span>
+			}
+			else {
+<span class="fc" id="L400">				responseBuilder.entity(getHTMLResult(result, sparqlQuery));</span>
+			}
+		} else {
+<span class="fc" id="L403">			responseBuilder.entity(result);</span>
+		}
+<span class="fc" id="L405">		responseBuilder.type(format);</span>
+<span class="fc" id="L406">		HeaderInformation hi = new HeaderInformation();</span>
+<span class="fc" id="L407">		responseBuilder.header(&quot;r43ples-revisiongraph&quot;, hi.getResponseHeaderFromQuery(sparqlQuery));</span>
+<span class="fc" id="L408">		return responseBuilder.build();</span>
+	}
+
+
+	
+	/**
+	 * Provides the SPARQL Endpoint description of the original sparql endpoint
+	 * with the additional R43ples feature (sd:feature) and replaced URIs.
+	 * 
+	 * @param format
+	 *            serialisation format of the service description
+	 * @return Extended Service Description
+	 */
+	private Response getServiceDescriptionResponse(final String format) {
+<span class="fc" id="L422">		logger.info(&quot;Service Description requested&quot;);</span>
+<span class="fc" id="L423">		String triples =String.format(&quot;@prefix rdf:	&lt;http://www.w3.org/1999/02/22-rdf-syntax-ns#&gt; . %n&quot;</span>
+				+ &quot;@prefix ns3:	&lt;http://www.w3.org/ns/formats/&gt; .%n&quot;
+				+ &quot;@prefix sd:	&lt;http://www.w3.org/ns/sparql-service-description#&gt; .%n&quot;
+				+ &quot;&lt;%1$s&gt;	rdf:type	sd:Service ;%n&quot;
+				+ &quot;	sd:endpoint	&lt;%1$s&gt; ;%n&quot;
+				+ &quot;	sd:feature	sd:r43ples ;&quot;
+				+ &quot;	sd:resultFormat	ns3:SPARQL_Results_JSON ,%n&quot;
+				+ &quot;		ns3:SPARQL_Results_XML ,%n&quot;
+				+ &quot;		ns3:Turtle ,%n&quot;
+				+ &quot;		ns3:N-Triples ,%n&quot;
+				+ &quot;		ns3:N3 ,%n&quot;
+				+ &quot;		ns3:RDF_XML ,%n&quot;
+				+ &quot;		ns3:SPARQL_Results_CSV ,%n&quot;
+				+ &quot;		ns3:RDFa ;%n&quot;
+				+ &quot;	sd:supportedLanguage	sd:SPARQL10Query, sd:SPARQL11Query, sd:SPARQL11Query, sd:SPARQL11Update, sd:R43plesQuery  ;%n&quot;
+<span class="fc" id="L438">				+ &quot;	sd:url	&lt;%1$s&gt; .%n&quot;, uriInfo.getAbsolutePath()) ;</span>
+<span class="fc" id="L439">		Model model = JenaModelManagement.readStringToJenaModel(triples, &quot;TURTLE&quot;);</span>
+<span class="fc" id="L440">		ByteArrayOutputStream baos = new ByteArrayOutputStream();</span>
+		
+<span class="pc bpc" id="L442" title="1 of 2 branches missed.">		if (format.toLowerCase().contains(&quot;xml&quot;) )</span>
+<span class="nc" id="L443">			model.write(baos, &quot;RDF/XML&quot;);</span>
+<span class="pc bpc" id="L444" title="1 of 2 branches missed.">		else if (format.toLowerCase().contains(&quot;turtle&quot;) )</span>
+<span class="fc" id="L445">			model.write(baos, &quot;Turtle&quot;);</span>
+<span class="nc bnc" id="L446" title="All 2 branches missed.">		else if (format.toLowerCase().contains(&quot;json&quot;) )</span>
+<span class="nc" id="L447">			model.write(baos, &quot;RDF/JSON&quot;);</span>
+		else {
+			try {
+<span class="nc" id="L450">				model.write(baos, format);</span>
+			}
+<span class="nc" id="L452">			catch (NoWriterForLangException e) {</span>
+<span class="nc" id="L453">				model.write(baos, &quot;Turtle&quot;);</span>
+<span class="nc" id="L454">			}</span>
+		}
+<span class="fc" id="L456">		return Response.ok().entity(baos.toString()).build();</span>
+	}
+
+
+	/** 
+	 * Creates the merge response.
+	 *
+	 * @param commit merge commit object containing all information about the merge
+     * @param request the original R43ples request.
+	 *
+	 * @return the http response
+	 * @throws InternalErrorException 
+	 */
+	private Response getMergeResponse(MergeCommit commit, R43plesRequest request) throws InternalErrorException {
+<span class="fc" id="L470">		ResponseBuilder responseBuilder = Response.created(URI.create(&quot;&quot;));</span>
+
+		Revision usedSourceRevision;
+
+<span class="fc bfc" id="L474" title="All 2 branches covered.">		if (commit.getClass().equals(ThreeWayMergeCommit.class)) {</span>
+<span class="fc" id="L475">			ThreeWayMergeCommit threeWayMergeCommit = (ThreeWayMergeCommit) commit;</span>
+<span class="fc bfc" id="L476" title="All 2 branches covered.">			if (threeWayMergeCommit.isHasConflict()) {</span>
+<span class="fc" id="L477">				responseBuilder = Response.status(Response.Status.CONFLICT);</span>
+<span class="fc" id="L478">				responseBuilder.entity(threeWayMergeCommit.getConflictModel());</span>
+			}
+<span class="fc" id="L480">			usedSourceRevision = threeWayMergeCommit.getUsedSourceRevision();</span>
+<span class="fc" id="L481">		} else {</span>
+<span class="fc" id="L482">			FastForwardMergeCommit fastForwardMergeCommit = (FastForwardMergeCommit) commit;</span>
+<span class="fc" id="L483">			usedSourceRevision = fastForwardMergeCommit.getUsedSourceRevision();</span>
+		}
+
+
+		String graphNameHeader;
+		try {
+<span class="fc" id="L489">			graphNameHeader = URLEncoder.encode(commit.getRevisionGraph().getGraphName(), &quot;UTF-8&quot;);</span>
+<span class="nc" id="L490">		} catch (UnsupportedEncodingException e) {</span>
+<span class="nc" id="L491">			e.printStackTrace();</span>
+<span class="nc" id="L492">			graphNameHeader = commit.getRevisionGraph().getGraphName();</span>
+<span class="fc" id="L493">		}</span>
+
+		// Return the revision identifiers which were used (convert tag or branch identifier to revision identifier)
+<span class="fc" id="L496">		responseBuilder.header(graphNameHeader + &quot;-revision-number-of-branch-From&quot;, usedSourceRevision.getRevisionIdentifier());</span>
+<span class="fc" id="L497">		responseBuilder.header(graphNameHeader + &quot;-revision-number-of-branch-Into&quot;, commit.getUsedTargetRevision().getRevisionIdentifier());</span>
+
+<span class="fc" id="L499">		HeaderInformation hi = new HeaderInformation();</span>
+<span class="fc" id="L500">		responseBuilder.header(&quot;r43ples-revisiongraph&quot;, hi.getResponseHeaderFromQuery(request.query_sparql));</span>
+		
+<span class="fc" id="L502">		return responseBuilder.build();	</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

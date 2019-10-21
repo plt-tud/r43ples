@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>URICalculator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">URICalculator.java</span></div><h1>URICalculator.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.UUID;
+
+/**
+ * Provides access to the basic revision graph which stores all references to sub revision graphs.
+ *
+ * @author Stephan Hensel
+ */
+public class URICalculator {
+
+    /**
+     * The logger.
+     **/
+<span class="fc" id="L29">    private Logger logger = LogManager.getLogger(URICalculator.class);</span>
+
+    // Dependencies
+    /**
+     * The triplestore interface to use.
+     **/
+    private TripleStoreInterface tripleStoreInterface;
+
+
+    /**
+     * The constructor.
+     */
+<span class="fc" id="L41">    protected URICalculator() {</span>
+        // Dependencies
+<span class="fc" id="L43">        this.tripleStoreInterface = TripleStoreInterfaceSingleton.get();</span>
+
+<span class="fc" id="L45">    }</span>
+
+    /**
+     * Get all named graphs URIs by querying the main revision graph.
+     *
+     * @return the list of named graphs URIs
+     */
+    private ArrayList&lt;String&gt; getAllNamedGraphsURIs() {
+<span class="fc" id="L53">        this.logger.debug(&quot;Get all named graph URIs.&quot;);</span>
+
+<span class="fc" id="L55">        ArrayList&lt;String&gt; uriList = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L57">        String query = Config.prefixes + String.format(&quot;&quot;</span>
+                + &quot;SELECT DISTINCT ?uri\n&quot;
+                + &quot;WHERE {\n&quot;
+                + &quot;  GRAPH &lt;%s&gt; {\n&quot;
+                + &quot;    ?graph a rmo:RevisionGraph;\n&quot;
+                + &quot;      rmo:hasRevisionGraph ?uriGraph.\n&quot;
+                + &quot;  }\n&quot;
+                + &quot;  GRAPH ?uriGraph {\n&quot;
+                + &quot;    { bind( ?uriGraph as ?uri) }\n&quot;
+                + &quot;    UNION\n&quot;
+                + &quot;    { ?ref rmo:fullContent ?uri. }\n&quot;
+                + &quot;    UNION\n&quot;
+                + &quot;    { ?rev rmo:addSet ?uri. }\n&quot;
+                + &quot;    UNION\n&quot;
+                + &quot;    { ?rev rmo:deleteSet ?uri }\n&quot;
+                + &quot;  }\n&quot;
+                + &quot;}\n&quot;, Config.revision_graph);
+<span class="fc" id="L74">        this.logger.debug(query);</span>
+<span class="fc" id="L75">        ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">        while (resultSet.hasNext()) {</span>
+<span class="fc" id="L77">            QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L78">            uriList.add(qs.getResource(&quot;?uri&quot;).toString());</span>
+<span class="fc" id="L79">        }</span>
+
+<span class="fc" id="L81">        return uriList;</span>
+    }
+
+    /**
+     * Checks if a named graph URI is already used by R43ples.
+     *
+     * @param namedGraphURI the named graph URI to check
+     * @return true if the named graph URI is already in use
+     */
+    protected boolean checkNamedGraphExistence(String namedGraphURI) {
+<span class="fc" id="L91">        return getAllNamedGraphsURIs().contains(namedGraphURI);</span>
+    }
+
+    /**
+     * Get a new revision graph URI.
+     *
+     * @param revisionGraphName  the revision graph name
+     * @return the new revision graph URI
+     * @throws InternalErrorException
+     */
+    protected String getNewRevisionGraphURI(String revisionGraphName) throws InternalErrorException {
+<span class="fc" id="L102">        String revisionGraphURI = revisionGraphName + &quot;-revisiongraph&quot;;</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        if (!checkNamedGraphExistence(revisionGraphURI)) {</span>
+<span class="fc" id="L104">            return revisionGraphURI;</span>
+        } else {
+<span class="fc" id="L106">            throw new InternalErrorException(&quot;The calculated revision graph URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new full graph (named graph) URI.
+     *
+     * @param revisionGraph the revision graph
+     * @param referenceIdentifier the reference identifier
+     * @return the new full graph URI
+     * @throws InternalErrorException
+     */
+    protected String getNewFullGraphURI(RevisionGraph revisionGraph, String referenceIdentifier) throws InternalErrorException {
+        String fullGraphURI;
+        try {
+<span class="fc" id="L121">            fullGraphURI = revisionGraph.getGraphName() + &quot;-&quot; + URLEncoder.encode(referenceIdentifier, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L122">        } catch (UnsupportedEncodingException e) {</span>
+<span class="nc" id="L123">            e.printStackTrace();</span>
+<span class="nc" id="L124">            throw new InternalErrorException(&quot;The specified reference identifier could not be URL encoded.&quot;);</span>
+<span class="fc" id="L125">        }</span>
+
+<span class="pc bpc" id="L127" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(fullGraphURI)) {</span>
+<span class="fc" id="L128">            return fullGraphURI;</span>
+        } else {
+<span class="nc" id="L130">            throw new InternalErrorException(&quot;The calculated full graph URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a master full graph (named graph) URI.
+     *
+     * @param revisionGraph the revision graph
+     * @return the new full graph URI
+     * @throws InternalErrorException
+     */
+    protected String getMasterFullGraphURI(RevisionGraph revisionGraph) throws InternalErrorException {
+<span class="fc" id="L142">        String fullGraphURI = revisionGraph.getGraphName();</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(fullGraphURI)) {</span>
+<span class="fc" id="L144">            return fullGraphURI;</span>
+        } else {
+<span class="nc" id="L146">            throw new InternalErrorException(&quot;The calculated full graph URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new revision URI.
+     *
+     * @param revisionGraph      the corresponding revision graph
+     * @param revisionIdentifier the revision identifier of the corresponding revision
+     * @return the new revision URI
+     * @throws InternalErrorException
+     */
+    protected String getNewRevisionURI(RevisionGraph revisionGraph, String revisionIdentifier) throws InternalErrorException {
+<span class="fc" id="L159">        String revisionURI = revisionGraph.getGraphName() + &quot;-revision-&quot; + revisionIdentifier;</span>
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(revisionURI)) {</span>
+<span class="fc" id="L161">            return revisionURI;</span>
+        } else {
+<span class="nc" id="L163">            throw new InternalErrorException(&quot;The calculated revision URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new change set URI.
+     *
+     * @param revisionGraph      the corresponding revision graph
+     * @param priorRevision      the prior revision
+     * @param newRevisionIdentifier the new revision identifier
+     * @return the new change set URI
+     * @throws InternalErrorException
+     */
+    protected String getNewChangeSetURI(RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier) throws InternalErrorException {
+        String changeSetURI;
+<span class="fc bfc" id="L178" title="All 2 branches covered.">        if (priorRevision != null) {</span>
+<span class="fc" id="L179">            changeSetURI = revisionGraph.getGraphName() + &quot;-changeset-&quot; + priorRevision.getRevisionIdentifier() + &quot;-&quot; + newRevisionIdentifier;</span>
+        } else {
+<span class="fc" id="L181">            changeSetURI = revisionGraph.getGraphName() + &quot;-changeset-&quot; + newRevisionIdentifier;</span>
+        }
+<span class="pc bpc" id="L183" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(changeSetURI)) {</span>
+<span class="fc" id="L184">            return changeSetURI;</span>
+        } else {
+<span class="nc" id="L186">            throw new InternalErrorException(&quot;The calculated revision URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new add set URI.
+     *
+     * @param revisionGraph      the corresponding revision graph
+     * @param priorRevision      the prior revision
+     * @param newRevisionIdentifier the new revision identifier
+     * @return the new add set URI
+     * @throws InternalErrorException
+     */
+    protected String getNewAddSetURI(RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier) throws InternalErrorException {
+        String addSetURI;
+<span class="fc bfc" id="L201" title="All 2 branches covered.">        if (priorRevision != null) {</span>
+<span class="fc" id="L202">            addSetURI = revisionGraph.getGraphName() + &quot;-addSet-&quot; + priorRevision.getRevisionIdentifier() + &quot;-&quot; + newRevisionIdentifier;</span>
+        } else {
+<span class="fc" id="L204">            addSetURI = revisionGraph.getGraphName() + &quot;-addSet-&quot; + newRevisionIdentifier;</span>
+        }
+<span class="pc bpc" id="L206" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(addSetURI)) {</span>
+<span class="fc" id="L207">            return addSetURI;</span>
+        } else {
+<span class="nc" id="L209">            throw new InternalErrorException(&quot;The calculated add set URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new delete set URI.
+     *
+     * @param revisionGraph      the corresponding revision graph
+     * @param priorRevision      the prior revision
+     * @param newRevisionIdentifier the new revision identifier
+     * @return the new delete set URI
+     * @throws InternalErrorException
+     */
+    protected String getNewDeleteSetURI(RevisionGraph revisionGraph, Revision priorRevision, String newRevisionIdentifier) throws InternalErrorException {
+        String deleteSetURI;
+<span class="fc bfc" id="L224" title="All 2 branches covered.">        if (priorRevision != null) {</span>
+<span class="fc" id="L225">            deleteSetURI = revisionGraph.getGraphName() + &quot;-deleteSet-&quot; + priorRevision.getRevisionIdentifier() + &quot;-&quot; + newRevisionIdentifier;</span>
+        } else {
+<span class="fc" id="L227">            deleteSetURI = revisionGraph.getGraphName() + &quot;-deleteSet-&quot; + newRevisionIdentifier;</span>
+        }
+<span class="pc bpc" id="L229" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(deleteSetURI)) {</span>
+<span class="fc" id="L230">            return deleteSetURI;</span>
+        } else {
+<span class="nc" id="L232">            throw new InternalErrorException(&quot;The calculated delete set URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new branch URI.
+     *
+     * @param revisionGraph    the corresponding revision graph
+     * @param branchIdentifier the branch identifier of the corresponding revision
+     * @return the new branch URI
+     * @throws InternalErrorException
+     */
+    protected String getNewBranchURI(RevisionGraph revisionGraph, String branchIdentifier) throws InternalErrorException {
+        String branchURI;
+        try {
+<span class="fc" id="L247">            branchURI = revisionGraph.getGraphName() + &quot;-branch-&quot; + URLEncoder.encode(branchIdentifier, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L248">        } catch (UnsupportedEncodingException e) {</span>
+<span class="nc" id="L249">            e.printStackTrace();</span>
+<span class="nc" id="L250">            throw new InternalErrorException(&quot;The specified branch identifier could not be URL encoded.&quot;);</span>
+<span class="fc" id="L251">        }</span>
+
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(branchURI)) {</span>
+<span class="fc" id="L254">            return branchURI;</span>
+        } else {
+<span class="nc" id="L256">            throw new InternalErrorException(&quot;The calculated branch URI is already in use.&quot;);</span>
+    }
+    }
+
+    /**
+     * Get a new master URI.
+     *
+     * @param revisionGraph    the corresponding revision graph
+     * @return the new master URI
+     * @throws InternalErrorException
+     */
+    protected String getNewMasterURI(RevisionGraph revisionGraph) throws InternalErrorException {
+<span class="fc" id="L268">        String masterURI = revisionGraph.getGraphName() + &quot;-master&quot;;</span>
+<span class="pc bpc" id="L269" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(masterURI)) {</span>
+<span class="fc" id="L270">            return masterURI;</span>
+        } else {
+<span class="nc" id="L272">            throw new InternalErrorException(&quot;The calculated master URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new tag URI.
+     *
+     * @param revisionGraph the corresponding revision graph
+     * @param tagIdentifier the tag identifier of the corresponding revision
+     * @return the new tag URI
+     * @throws InternalErrorException
+     */
+    protected String getNewTagURI(RevisionGraph revisionGraph, String tagIdentifier) throws InternalErrorException {
+        String tagURI;
+        try {
+<span class="fc" id="L287">            tagURI = revisionGraph.getGraphName() + &quot;-tag-&quot; + URLEncoder.encode(tagIdentifier, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L288">        } catch (UnsupportedEncodingException e) {</span>
+<span class="nc" id="L289">            e.printStackTrace();</span>
+<span class="nc" id="L290">            throw new InternalErrorException(&quot;The specified tag identifier could not be URL encoded.&quot;);</span>
+<span class="fc" id="L291">        }</span>
+
+<span class="pc bpc" id="L293" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(tagURI)) {</span>
+<span class="fc" id="L294">            return tagURI;</span>
+        } else {
+<span class="nc" id="L296">            throw new InternalErrorException(&quot;The calculated tag URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new commit URI.
+     *
+     * @param revisionGraph      the corresponding revision graph
+     * @param revisionIdentifier the revision identifier of the created revision
+     * @return the new commit URI
+     * @throws InternalErrorException
+     */
+    protected String getNewCommitURI(RevisionGraph revisionGraph, String revisionIdentifier) throws InternalErrorException {
+<span class="fc" id="L309">        String commitURI = revisionGraph.getGraphName() + &quot;-commit-&quot; + revisionIdentifier;</span>
+<span class="pc bpc" id="L310" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(commitURI)) {</span>
+<span class="fc" id="L311">            return commitURI;</span>
+        } else {
+<span class="nc" id="L313">            throw new InternalErrorException(&quot;The calculated commit URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new three way merge commit URI.
+     *
+     * @param revisionGraph      the corresponding revision graph
+     * @param revisionIdentifier the revision identifier of the created revision
+     * @return the new commit URI
+     * @throws InternalErrorException
+     */
+    protected String getNewThreeWayMergeCommitURI(RevisionGraph revisionGraph, String revisionIdentifier) throws InternalErrorException {
+<span class="fc" id="L326">        String commitURI = revisionGraph.getGraphName() + &quot;-commit-merge-&quot; + revisionIdentifier;</span>
+<span class="pc bpc" id="L327" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(commitURI)) {</span>
+<span class="fc" id="L328">            return commitURI;</span>
+        } else {
+<span class="nc" id="L330">            throw new InternalErrorException(&quot;The calculated commit URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new fast forward merge commit URI.
+     *
+     * @param revisionGraph the corresponding revision graph
+     * @param sourceRevisionIdentifier the source revision identifier
+     * @param targetRevisionIdentifier the target revision identifier
+     * @return the new commit URI
+     * @throws InternalErrorException
+     */
+    protected String getNewFastForwardMergeCommitURI(RevisionGraph revisionGraph, String sourceRevisionIdentifier, String targetRevisionIdentifier) throws InternalErrorException {
+<span class="fc" id="L344">        String commitURI = revisionGraph.getGraphName() + &quot;-commit-ff-merge-&quot; + sourceRevisionIdentifier + &quot;-&quot; + targetRevisionIdentifier;</span>
+<span class="pc bpc" id="L345" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(commitURI)) {</span>
+<span class="fc" id="L346">            return commitURI;</span>
+        } else {
+<span class="nc" id="L348">            throw new InternalErrorException(&quot;The calculated commit URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new rebase merge commit URI.
+     *
+     * @param revisionGraph the corresponding revision graph
+     * @param startRevisionIdentifier the start revision identifier
+     * @param endRevisionIdentifier the end revision identifier
+     * @param targetBranchIdentifier the target branch identifier
+     * @param targetRevisionIdentifier the target revision identifier
+     * @return the new commit URI
+     * @throws InternalErrorException
+     */
+    protected String getNewPickCommitURI(RevisionGraph revisionGraph, String startRevisionIdentifier, String endRevisionIdentifier, String targetBranchIdentifier, String targetRevisionIdentifier) throws InternalErrorException {
+<span class="nc bnc" id="L364" title="All 2 branches missed.">        if (endRevisionIdentifier == null) {</span>
+<span class="nc" id="L365">            endRevisionIdentifier = &quot;&quot;;</span>
+        }
+<span class="nc" id="L367">        String commitURI = revisionGraph.getGraphName() + &quot;-commit-pick-&quot; + startRevisionIdentifier + &quot;-&quot; + endRevisionIdentifier + &quot;-&quot; + targetBranchIdentifier + &quot;-&quot; + targetRevisionIdentifier;</span>
+<span class="nc bnc" id="L368" title="All 2 branches missed.">        if (!checkNamedGraphExistence(commitURI)) {</span>
+<span class="nc" id="L369">            return commitURI;</span>
+        } else {
+<span class="nc" id="L371">            throw new InternalErrorException(&quot;The calculated commit URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new branch commit URI.
+     *
+     * @param revisionGraph      the corresponding revision graph
+     * @param branchIdentifier the branch identifier of the created branch
+     * @return the new branch commit URI
+     * @throws InternalErrorException
+     */
+    protected String getNewBranchCommitURI(RevisionGraph revisionGraph, String branchIdentifier) throws InternalErrorException {
+        String commitURI;
+        try {
+<span class="fc" id="L386">            commitURI = revisionGraph.getGraphName() + &quot;-commit-branch-&quot; + URLEncoder.encode(branchIdentifier, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L387">        } catch (UnsupportedEncodingException e) {</span>
+<span class="nc" id="L388">            e.printStackTrace();</span>
+<span class="nc" id="L389">            throw new InternalErrorException(&quot;The specified branch identifier could not be URL encoded.&quot;);</span>
+<span class="fc" id="L390">        }</span>
+
+<span class="pc bpc" id="L392" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(commitURI)) {</span>
+<span class="fc" id="L393">            return commitURI;</span>
+        } else {
+<span class="nc" id="L395">            throw new InternalErrorException(&quot;The calculated branch commit URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new tag commit URI.
+     *
+     * @param revisionGraph    the corresponding revision graph
+     * @param tagIdentifier the tag identifier of the created tag
+     * @return the new tag commit URI
+     * @throws InternalErrorException
+     */
+    protected String getNewTagCommitURI(RevisionGraph revisionGraph, String tagIdentifier) throws InternalErrorException {
+        String commitURI;
+        try {
+<span class="fc" id="L410">            commitURI = revisionGraph.getGraphName() + &quot;-commit-tag-&quot; + URLEncoder.encode(tagIdentifier, &quot;UTF-8&quot;);</span>
+<span class="nc" id="L411">        } catch (UnsupportedEncodingException e) {</span>
+<span class="nc" id="L412">            e.printStackTrace();</span>
+<span class="nc" id="L413">            throw new InternalErrorException(&quot;The specified tag identifier could not be URL encoded.&quot;);</span>
+<span class="fc" id="L414">        }</span>
+
+<span class="pc bpc" id="L416" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(commitURI)) {</span>
+<span class="fc" id="L417">            return commitURI;</span>
+        } else {
+<span class="nc" id="L419">            throw new InternalErrorException(&quot;The calculated tag commit URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new temporary revision progress URI (from).
+     *
+     * @param revisionGraph    the corresponding revision graph
+     * @return the new temporary revision progress URI (from)
+     * @throws InternalErrorException
+     */
+    protected String getTemporaryRevisionProgressFromURI(RevisionGraph revisionGraph) throws InternalErrorException {
+        // TODO Create one method which calculates a temporary random URI (Attention the methods which are using this URI will have to drop the named graph after the usage is finished!)
+<span class="fc" id="L432">        String tempURI = revisionGraph.getGraphName() + &quot;-RM-REVISION-PROGRESS-FROM&quot;;</span>
+<span class="pc bpc" id="L433" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(tempURI)) {</span>
+<span class="fc" id="L434">            return tempURI;</span>
+        } else {
+<span class="nc" id="L436">            throw new InternalErrorException(&quot;The calculated temporary URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new temporary revision progress URI (into).
+     *
+     * @param revisionGraph    the corresponding revision graph
+     * @return the new temporary revision progress URI (into)
+     * @throws InternalErrorException
+     */
+    protected String getTemporaryRevisionProgressIntoURI(RevisionGraph revisionGraph) throws InternalErrorException {
+        // TODO Create one method which calculates a temporary random URI (Attention the methods which are using this URI will have to drop the named graph after the usage is finished!)
+<span class="fc" id="L449">        String tempURI = revisionGraph.getGraphName() + &quot;-RM-REVISION-PROGRESS-INTO&quot;;</span>
+<span class="pc bpc" id="L450" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(tempURI)) {</span>
+<span class="fc" id="L451">            return tempURI;</span>
+        } else {
+<span class="nc" id="L453">            throw new InternalErrorException(&quot;The calculated temporary URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new temporary difference model URI.
+     *
+     * @param revisionGraph    the corresponding revision graph
+     * @return the new temporary difference model URI
+     * @throws InternalErrorException
+     */
+    protected String getTemporaryDifferenceModelURI(RevisionGraph revisionGraph) throws InternalErrorException {
+        // TODO Create one method which calculates a temporary random URI (Attention the methods which are using this URI will have to drop the named graph after the usage is finished!)
+<span class="fc" id="L466">        String tempURI = revisionGraph.getGraphName() + &quot;-RM-DIFFERENCE-MODEL&quot;;</span>
+<span class="pc bpc" id="L467" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(tempURI)) {</span>
+<span class="fc" id="L468">            return tempURI;</span>
+        } else {
+<span class="nc" id="L470">            throw new InternalErrorException(&quot;The calculated temporary URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new temporary merged URI.
+     *
+     * @param revisionGraph    the corresponding revision graph
+     * @return the new temporary difference model URI
+     * @throws InternalErrorException
+     */
+    protected String getTemporaryMergedURI(RevisionGraph revisionGraph) throws InternalErrorException {
+        // TODO Create one method which calculates a temporary random URI (Attention the methods which are using this URI will have to drop the named graph after the usage is finished!)
+<span class="fc" id="L483">        String tempURI = revisionGraph.getGraphName() + &quot;-RM-MERGED-TEMP&quot;;</span>
+<span class="pc bpc" id="L484" title="1 of 2 branches missed.">        if (!checkNamedGraphExistence(tempURI)) {</span>
+<span class="fc" id="L485">            return tempURI;</span>
+        } else {
+<span class="nc" id="L487">            throw new InternalErrorException(&quot;The calculated temporary URI is already in use.&quot;);</span>
+        }
+    }
+
+    /**
+     * Get a new random URI which is unique within a specific revision graph.
+     *
+     * @param revisionGraph the revision graph
+     * @return the random URI
+     */
+    protected String getRandomURI(RevisionGraph revisionGraph) {
+<span class="fc" id="L498">        boolean searchURI = true;</span>
+<span class="fc" id="L499">        String tempURI = null;</span>
+<span class="fc bfc" id="L500" title="All 2 branches covered.">        while (searchURI) {</span>
+<span class="fc" id="L501">            String uuid = UUID.randomUUID().toString();</span>
+<span class="fc" id="L502">            tempURI = revisionGraph.getGraphName() + &quot;-&quot; + uuid;</span>
+<span class="fc" id="L503">            String queryAskSubject = String.format(&quot;ASK FROM &lt;%s&gt; {&lt;%s&gt; ?p ?o} %n&quot;, revisionGraph.getRevisionGraphUri(), tempURI);</span>
+<span class="fc" id="L504">            searchURI = tripleStoreInterface.executeAskQuery(queryAskSubject);</span>
+<span class="fc" id="L505">        }</span>
+<span class="fc" id="L506">        return tempURI;</span>
+    }
+
+    /**
+     * Get a new random URI which is unique within a specific named graph.
+     *
+     * @param namedGraphURI the named graph URI
+     * @return the random URI
+     */
+    protected String getRandomURI(String namedGraphURI) {
+<span class="fc" id="L516">        boolean searchURI = true;</span>
+<span class="fc" id="L517">        String tempURI = null;</span>
+<span class="fc bfc" id="L518" title="All 2 branches covered.">        while (searchURI) {</span>
+<span class="fc" id="L519">            String uuid = UUID.randomUUID().toString();</span>
+<span class="fc" id="L520">            tempURI = namedGraphURI + &quot;-&quot; + uuid;</span>
+<span class="fc" id="L521">            String queryAskSubject = String.format(&quot;ASK FROM &lt;%s&gt; {&lt;%s&gt; ?p ?o} %n&quot;, namedGraphURI, tempURI);</span>
+<span class="fc" id="L522">            searchURI = tripleStoreInterface.executeAskQuery(queryAskSubject);</span>
+<span class="fc" id="L523">        }</span>
+<span class="fc" id="L524">        return tempURI;</span>
+    }
+
+    /**
+     * Get a random named graph URI which is unique within the triple store.
+     *
+     * @param baseURI the base URI which will be extended with UUID
+     * @return the new random named graph URI
+     */
+    protected String getRandomNamedGraphURI(String baseURI) {
+<span class="fc" id="L534">        boolean searchURI = true;</span>
+<span class="fc" id="L535">        String tempURI = null;</span>
+<span class="fc bfc" id="L536" title="All 2 branches covered.">        while (searchURI) {</span>
+<span class="fc" id="L537">            String uuid = UUID.randomUUID().toString();</span>
+<span class="fc" id="L538">            tempURI = baseURI + &quot;-&quot; + uuid;</span>
+<span class="fc" id="L539">            searchURI = checkNamedGraphExistence(tempURI);</span>
+<span class="fc" id="L540">        }</span>
+<span class="fc" id="L541">        return tempURI;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,47 @@
+# Find most recent common revision for two branches
+# Query selects the revision which is on both paths (branch 1 and branch 2)
+# and has the minimal path element count 
+PREFIX prov: <http://www.w3.org/ns/prov#>
+
+SELECT DISTINCT ?revision ?step1 ?step2 (?step1 + ?step2) as ?sum
+FROM <http://eatld.et.tu-dresden.de/r43ples-revisions>
+WHERE { 
+
+    # Find all revision in path 1 (leading to branch 1)
+    # with their distance to the branch revision
+    {
+        SELECT * WHERE { ?branch1 prov:wasDerivedFrom ?revision . } 
+    }
+    OPTION ( TRANSITIVE, 
+            t_distinct, 
+            t_in(?branch1), 
+            t_out(?revision), 
+            t_step ('step_no') as ?step1,
+            t_direction 1
+        )
+
+    # Find all revision in path 2 (leading to branch 2)
+    # with their distance to the branch revision
+    {
+        SELECT * WHERE { ?branch2 prov:wasDerivedFrom ?revision . } 
+    }
+    OPTION ( TRANSITIVE, 
+            t_distinct, 
+            t_in(?branch2), 
+            t_out(?revision), 
+            t_step ('step_no') as ?step2,
+            t_direction 1
+        )
+
+    # Since both sub query share the same variable ?revision only revisions are
+    # matched which are on both paths. However, every path has for each revision
+    # its distance to its branch (?step1, ?step2)
+
+    # revision of branch 1
+    FILTER ( ?branch1 = <exampleGraph-revision-1.0-1> )
+
+    # revision of branch 2
+    FILTER ( ?branch2 = <exampleGraph-revision-1.1-0> )
+}
+ORDER BY ?sum
+#LIMIT 1

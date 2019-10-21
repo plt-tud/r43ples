@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FastForwardMergeCommit.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.existentobjects</a> &gt; <span class="el_source">FastForwardMergeCommit.java</span></div><h1>FastForwardMergeCommit.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.existentobjects;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ * Provides information of an already existent fast forward merge commit.
+ *
+ * @author Stephan Hensel
+ */
+public class FastForwardMergeCommit extends MergeCommit {
+
+    /** The logger. **/
+<span class="pc" id="L15">    private Logger logger = LogManager.getLogger(FastForwardMergeCommit.class);</span>
+
+    /** The used source branch. **/
+    private Branch usedSourceBranch;
+    /** The used source revision. **/
+    private Revision usedSourceRevision;
+
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param commitURI the commit URI
+     * @throws InternalErrorException
+     */
+    public FastForwardMergeCommit(RevisionGraph revisionGraph, String commitURI) throws InternalErrorException {
+<span class="nc" id="L31">        super(revisionGraph, commitURI);</span>
+<span class="nc" id="L32">    }</span>
+
+    /**
+     * The constructor.
+     *
+     * @param revisionGraph the revision graph
+     * @param commitURI the commit URI
+     * @param user the user
+     * @param timeStamp the time stamp
+     * @param message the message
+     * @param usedSourceRevision the used source revision
+     * @param usedSourceBranch the used source branch
+     * @param usedTargetRevision the used target revision
+     * @param usedTargetBranch the used target branch
+     * @throws InternalErrorException
+     */
+    public FastForwardMergeCommit(RevisionGraph revisionGraph, String commitURI, String user, String timeStamp, String message,
+                                  Revision usedSourceRevision, Branch usedSourceBranch, Revision usedTargetRevision, Branch usedTargetBranch) throws InternalErrorException {
+<span class="fc" id="L50">        super(revisionGraph, commitURI, user, timeStamp, message, usedTargetRevision, usedTargetBranch);</span>
+<span class="fc" id="L51">        this.usedSourceBranch = usedSourceBranch;</span>
+<span class="fc" id="L52">        this.usedSourceRevision = usedSourceRevision;</span>
+<span class="fc" id="L53">    }</span>
+
+    /**
+     * Get the used source branch.
+     *
+     * @return the used source branch
+     */
+    public Branch getUsedSourceBranch() {
+<span class="nc" id="L61">        return usedSourceBranch;</span>
+    }
+
+    /**
+     * Get the used source revision.
+     *
+     * @return the used source revision
+     */
+    public Revision getUsedSourceRevision() {
+<span class="fc" id="L70">        return usedSourceRevision;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

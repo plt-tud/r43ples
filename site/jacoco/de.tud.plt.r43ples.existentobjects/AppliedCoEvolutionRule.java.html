@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AppliedCoEvolutionRule.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.existentobjects</a> &gt; <span class="el_source">AppliedCoEvolutionRule.java</span></div><h1>AppliedCoEvolutionRule.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.existentobjects;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.LinkedList;
+
+/**
+ * Provides information of an already existent applied coevolution rule.
+ *
+ * @author Stephan Hensel
+ */
+public class AppliedCoEvolutionRule {
+
+    /** The logger. **/
+<span class="fc" id="L21">    private Logger logger = LogManager.getLogger(AppliedCoEvolutionRule.class);</span>
+
+    /** The applied coevolution rule URI. */
+    private String appliedCoEvolutionRuleURI;
+
+    /** The used rule. */
+    private CoEvoRule usedRule;
+    /** The used semantic change. */
+    private SemanticChange usedSemanticChange;
+
+    /** The list of SPARQL variable groups (grouped per matching). */
+    private LinkedList&lt;SparqlVariableGroup&gt; sparqlVariableGroupList;
+
+
+    /**
+     * The constructor.
+     *
+     * @param appliedCoEvolutionRuleURI the applied coevolution rule URI
+     * @throws InternalErrorException
+     */
+<span class="fc" id="L41">    public AppliedCoEvolutionRule(String appliedCoEvolutionRuleURI) throws InternalErrorException {</span>
+<span class="fc" id="L42">        this.appliedCoEvolutionRuleURI = appliedCoEvolutionRuleURI;</span>
+<span class="fc" id="L43">        sparqlVariableGroupList = new LinkedList&lt;&gt;();</span>
+
+<span class="fc" id="L45">        retrieveAdditionalInformation();</span>
+<span class="fc" id="L46">    }</span>
+
+
+    /**
+     * Calculate additional information of the current applied coevolution rule and store this information to local variables.
+     *
+     * @throws InternalErrorException
+     */
+    private void retrieveAdditionalInformation() throws InternalErrorException {
+<span class="fc" id="L55">        logger.info(&quot;Get additional information of current applied coevolution rule URI &quot; + appliedCoEvolutionRuleURI + &quot;.&quot;);</span>
+<span class="fc" id="L56">        String query = Config.prefixes + String.format(&quot;&quot;</span>
+                + &quot;SELECT ?usedRuleURI ?usedSemanticChangeURI ?sourceRevisionGraph %n&quot;
+                + &quot;WHERE { GRAPH  &lt;%s&gt; { %n&quot;
+                + &quot;	&lt;%s&gt; a aero:AppliedCoEvolutionRule; %n&quot;
+                + &quot;	 aero:usedRule ?usedRuleURI; %n&quot;
+                + &quot;	 aero:usedSemanticChange ?usedSemanticChangeURI. %n&quot;
+                + &quot; ?coEvolutionURI aero:appliedCoEvolutionRule &lt;%s&gt;. %n&quot;
+                + &quot; ?evolutionURI rmo:performedCoEvolution ?coEvolutionURI. %n&quot;
+                + &quot; ?evolutionURI rmo:usedSourceRevisionGraph ?sourceRevisionGraph. %n&quot;
+                + &quot;} }&quot;, Config.evolution_graph, appliedCoEvolutionRuleURI, appliedCoEvolutionRuleURI);
+<span class="fc" id="L66">        this.logger.debug(query);</span>
+<span class="fc" id="L67">        ResultSet resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);</span>
+<span class="pc bpc" id="L68" title="1 of 2 branches missed.">        if (resultSet.hasNext()) {</span>
+<span class="fc" id="L69">            QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L70">            RevisionGraph usedSourceRevisionGraph = new RevisionGraph(qs.getResource(&quot;?sourceRevisionGraph&quot;).toString());</span>
+<span class="fc" id="L71">            usedSemanticChange = new SemanticChange(usedSourceRevisionGraph, qs.getResource(&quot;?usedSemanticChangeURI&quot;).toString());</span>
+<span class="fc" id="L72">            usedRule = new CoEvoRule(usedSemanticChange);</span>
+<span class="fc" id="L73">        } else {</span>
+<span class="nc" id="L74">            throw new InternalErrorException(&quot;No additional information found for applied coevolution rule URI &quot; + appliedCoEvolutionRuleURI + &quot;.&quot;);</span>
+        }
+
+<span class="fc" id="L77">        query = Config.prefixes + String.format(&quot;&quot;</span>
+                + &quot;SELECT ?variableGroupURI %n&quot;
+                + &quot;WHERE { GRAPH  &lt;%s&gt; { %n&quot;
+                + &quot;	&lt;%s&gt; a aero:AppliedCoEvolutionRule; %n&quot;
+                + &quot;	 aero:hasVariableGroup ?variableGroupURI. %n&quot;
+                + &quot;} }&quot;, Config.evolution_graph, appliedCoEvolutionRuleURI);
+<span class="fc" id="L83">        this.logger.debug(query);</span>
+<span class="fc" id="L84">        resultSet = TripleStoreInterfaceSingleton.get().executeSelectQuery(query);</span>
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if (resultSet.hasNext()) {</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">            while (resultSet.hasNext()) {</span>
+<span class="fc" id="L87">                QuerySolution qs = resultSet.next();</span>
+<span class="fc" id="L88">                SparqlVariableGroup sparqlVariableGroup = new SparqlVariableGroup(qs.getResource(&quot;?variableGroupURI&quot;).toString());</span>
+<span class="fc" id="L89">                sparqlVariableGroupList.add(sparqlVariableGroup);</span>
+<span class="fc" id="L90">            }</span>
+        } else {
+<span class="nc" id="L92">            throw new InternalErrorException(&quot;No additional information (hasVariableGroup) found for applied coevolution rule URI &quot; + appliedCoEvolutionRuleURI + &quot;.&quot;);</span>
+        }
+
+<span class="fc" id="L95">    }</span>
+
+    /**
+     * Get the applied coevolution rule URI.
+     *
+     * @return the applied coevolution rule URI
+     */
+    public String getAppliedCoEvolutionRuleURI() {
+<span class="nc" id="L103">        return appliedCoEvolutionRuleURI;</span>
+    }
+
+    /**
+     * Get the used rule.
+     *
+     * @return the used rule
+     */
+    public CoEvoRule getUsedRule() {
+<span class="fc" id="L112">        return usedRule;</span>
+    }
+
+    /**
+     * Get the used semantic change.
+     *
+     * @return the used semantic change
+     */
+    public SemanticChange getUsedSemanticChange() {
+<span class="fc" id="L121">        return usedSemanticChange;</span>
+    }
+
+    /**
+     * Get the list of SPARQL variable groups (grouped per matching).
+     *
+     * @return the list of SPARQL variable groups (grouped per matching)
+     */
+    public LinkedList&lt;SparqlVariableGroup&gt; getSparqlVariableGroupList() {
+<span class="fc" id="L130">        return sparqlVariableGroupList;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MergeCommitDraft.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">MergeCommitDraft.java</span></div><h1>MergeCommitDraft.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.exception.QueryErrorException;
+import de.tud.plt.r43ples.existentobjects.MergeCommit;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.management.Config;
+import de.tud.plt.r43ples.management.R43plesRequest;
+import de.tud.plt.r43ples.optimization.PathCalculationFabric;
+import de.tud.plt.r43ples.optimization.PathCalculationInterface;
+import de.tud.plt.r43ples.triplestoreInterface.TripleStoreInterfaceSingleton;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * Collection of information for creating a new merge commit.
+ *
+ * @author Stephan Hensel
+ */
+public class MergeCommitDraft extends CommitDraft {
+
+    /** The logger. **/
+<span class="fc" id="L26">    private Logger logger = LogManager.getLogger(MergeCommitDraft.class);</span>
+
+    /** The pattern modifier. **/
+<span class="fc" id="L29">    private final int patternModifier = Pattern.DOTALL + Pattern.MULTILINE + Pattern.CASE_INSENSITIVE;</span>
+    /** The merge query pattern. **/
+<span class="fc" id="L31">    private final Pattern patternMergeQuery = Pattern.compile(</span>
+            &quot;(?&lt;action&gt;MERGE)\\s*(?&lt;type&gt;AUTO|MANUAL)?\\s*GRAPH\\s*&lt;(?&lt;graph&gt;[^&gt;]*?)&gt;\\s*BRANCH\\s*\&quot;(?&lt;branchNameFrom&gt;[^\&quot;]*?)\&quot;\\s*INTO\\s*BRANCH\\s*\&quot;(?&lt;branchNameInto&gt;[^\&quot;]*?)\&quot;(?&lt;with&gt;\\s*WITH\\s*\\{(?&lt;triples&gt;.*)\\})?&quot;,
+            patternModifier);
+
+    /** The triples of the query WITH part. **/
+    private String triples;
+    /** The branch name (from). **/
+    private String branchNameFrom;
+    /** The branch name (into). **/
+    private String branchNameInto;
+    /** The graph name **/
+    private String graphName;
+    /** The revision graph. **/
+    private RevisionGraph revisionGraph;
+    /** The query type (FORCE, AUTO, MANUAL). **/
+    private MergeTypes type;
+    /** The query action (MERGE, REBASE, MERGE FF). **/
+    private MergeActions action;
+    /** States if the WITH part is available. **/
+    private boolean with;
+
+    /** States if this commit draft was created by a request or add and delete sets. (true =&gt; request, false =&gt; add/delete sets) **/
+    private boolean isCreatedWithRequest;
+
+    //Dependencies
+    /** The path calculation interface to use. **/
+    private PathCalculationInterface pathCalculationInterface;
+
+
+    /**
+     * The constructor.
+     *
+     * @param request the request received by R43ples
+     * @throws InternalErrorException
+     */
+    public MergeCommitDraft(R43plesRequest request) throws InternalErrorException {
+<span class="fc" id="L67">        super(request);</span>
+
+<span class="fc" id="L69">        this.extractRequestInformation();</span>
+<span class="fc" id="L70">        this.pathCalculationInterface = PathCalculationFabric.getInstance(this.revisionGraph);</span>
+<span class="fc" id="L71">        this.isCreatedWithRequest = true;</span>
+<span class="fc" id="L72">    }</span>
+
+    /**
+     * The constructor.
+     * Creates an merge commit draft by using the corresponding meta information.
+     *
+     * @param graphName the graph name
+     * @param branchNameFrom the branch name (from)
+     * @param branchNameInto the branch name (into)
+     * @param user the user
+     * @param message the message
+     * @param action the query action (MERGE, REBASE, MERGE FF)
+     * @param triples the triples of the query WITH part
+     * @param type the query type (FORCE, AUTO, MANUAL)
+     * @param with states if the WITH part is available
+     * @throws InternalErrorException
+     */
+    protected MergeCommitDraft(String graphName, String branchNameFrom, String branchNameInto, String user, String message, MergeActions action, String triples, MergeTypes type, boolean with) throws InternalErrorException {
+<span class="fc" id="L90">        super(null);</span>
+
+<span class="fc" id="L92">        this.setUser(user);</span>
+<span class="fc" id="L93">        this.setMessage(message);</span>
+
+<span class="fc" id="L95">        this.graphName = graphName;</span>
+<span class="fc" id="L96">        this.revisionGraph = new RevisionGraph(graphName);</span>
+<span class="fc" id="L97">        this.branchNameFrom = branchNameFrom;</span>
+<span class="fc" id="L98">        this.branchNameInto = branchNameInto;</span>
+<span class="fc" id="L99">        this.action = action;</span>
+<span class="fc" id="L100">        this.triples = triples;</span>
+<span class="fc" id="L101">        this.type = type;</span>
+<span class="fc" id="L102">        this.with = with;</span>
+<span class="fc" id="L103">        this.pathCalculationInterface = PathCalculationFabric.getInstance(this.revisionGraph);</span>
+
+<span class="fc" id="L105">        this.isCreatedWithRequest = false;</span>
+<span class="fc" id="L106">    }</span>
+
+    /**
+     * Extracts the request information and stores it to local variables.
+     *
+     * @throws InternalErrorException
+     */
+    private void extractRequestInformation() throws InternalErrorException {
+<span class="fc" id="L114">        Matcher m = patternMergeQuery.matcher(getRequest().query_sparql);</span>
+
+<span class="fc" id="L116">        boolean foundEntry = false;</span>
+
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        while (m.find()) {</span>
+<span class="fc" id="L119">            foundEntry = true;</span>
+
+<span class="pc bpc" id="L121" title="3 of 6 branches missed.">            switch (m.group(&quot;action&quot;).toUpperCase()) {</span>
+                case &quot;MERGE&quot;:
+<span class="fc" id="L123">                    action = MergeActions.MERGE;</span>
+<span class="fc" id="L124">                    break;</span>
+                default:
+<span class="nc" id="L126">                    action = null;</span>
+                    break;
+            }
+<span class="fc" id="L129">            String typeID = m.group(&quot;type&quot;);</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            if (typeID != null) {</span>
+<span class="pc bpc" id="L131" title="4 of 10 branches missed.">                switch (typeID.toUpperCase()) {</span>
+                    case &quot;AUTO&quot;:
+<span class="fc" id="L133">                        type = MergeTypes.AUTO;</span>
+<span class="fc" id="L134">                        break;</span>
+                    case &quot;MANUAL&quot;:
+<span class="fc" id="L136">                        type = MergeTypes.MANUAL;</span>
+<span class="fc" id="L137">                        break;</span>
+                    default:
+<span class="nc" id="L139">                        type = null;</span>
+<span class="fc" id="L140">                        break;</span>
+                }
+            } else {
+<span class="fc" id="L143">                type = null;</span>
+            }
+
+<span class="fc" id="L146">            graphName = m.group(&quot;graph&quot;);</span>
+<span class="fc" id="L147">            revisionGraph = new RevisionGraph(graphName);</span>
+<span class="fc" id="L148">            branchNameFrom = m.group(&quot;branchNameFrom&quot;);</span>
+<span class="fc" id="L149">            branchNameInto = m.group(&quot;branchNameInto&quot;);</span>
+<span class="fc bfc" id="L150" title="All 2 branches covered.">            with = m.group(&quot;with&quot;) != null;</span>
+<span class="fc" id="L151">            triples = m.group(&quot;triples&quot;);</span>
+
+<span class="fc" id="L153">            logger.debug(&quot;type: &quot; + type);</span>
+<span class="fc" id="L154">            logger.debug(&quot;graph: &quot; + graphName);</span>
+<span class="fc" id="L155">            logger.debug(&quot;branchNameFrom: &quot; + branchNameFrom);</span>
+<span class="fc" id="L156">            logger.debug(&quot;branchNameInto: &quot; + branchNameInto);</span>
+<span class="fc" id="L157">            logger.debug(&quot;with: &quot; + with);</span>
+<span class="fc" id="L158">            logger.debug(&quot;triples: &quot; + triples);</span>
+<span class="fc" id="L159">        }</span>
+<span class="pc bpc" id="L160" title="1 of 2 branches missed.">        if (!foundEntry) {</span>
+<span class="nc" id="L161">            throw new QueryErrorException(&quot;Error in query: &quot; + getRequest().query_sparql);</span>
+        }
+<span class="fc" id="L163">    }</span>
+
+    /**
+     * Creates the commit draft as a new commit in the triple store and creates the corresponding revisions.
+     *
+     * @return the created commit
+     */
+    protected MergeCommit createCommitInTripleStore() throws InternalErrorException {
+        // Select the right child element and create a corresponding commit using the createCommitInTripleStore method.
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">        if (action.equals(MergeActions.MERGE)) {</span>
+<span class="fc" id="L173">            String revisionGraphURI = getRevisionGraph().getRevisionGraphUri();</span>
+<span class="fc" id="L174">            String revisionUriFrom = getRevisionGraph().getRevisionUri(getBranchNameFrom());</span>
+<span class="fc" id="L175">            String revisionUriInto = getRevisionGraph().getRevisionUri(getBranchNameInto());</span>
+
+            // Check the named graph existence
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">            if (!getUriCalculator().checkNamedGraphExistence(getGraphName())) {</span>
+<span class="nc" id="L179">                logger.warn(&quot;Graph &lt;&quot; + getGraphName() + &quot;&gt; does not exist.&quot;);</span>
+<span class="nc" id="L180">                throw new InternalErrorException(&quot;Graph &lt;&quot; + getGraphName() + &quot;&gt; does not exist.&quot;);</span>
+            }
+
+            // Check if from and into are different revisions
+<span class="pc bpc" id="L184" title="1 of 2 branches missed.">            if (revisionUriFrom.equals(revisionUriInto)) {</span>
+                // Branches are equal - throw error
+<span class="nc" id="L186">                throw new InternalErrorException(&quot;Specified branches are equal&quot;);</span>
+            }
+
+            // Check if both are terminal nodes
+<span class="pc bpc" id="L190" title="2 of 4 branches missed.">            if (!(getRevisionGraph().hasBranch(getBranchNameFrom()) &amp;&amp; getRevisionGraph().hasBranch(getBranchNameInto()))) {</span>
+<span class="nc" id="L191">                throw new InternalErrorException(&quot;No terminal nodes were used&quot;);</span>
+            }
+
+            // Check if the into revision is derived from the from revision and fast forward can be applied
+<span class="fc" id="L195">            String query = Config.prefixes</span>
+<span class="fc" id="L196">                    + String.format(&quot;ASK { GRAPH &lt;%s&gt; { &quot;</span>
+                            + &quot;&lt;%s&gt; rmo:wasDerivedFrom+ &lt;%s&gt; .&quot;
+                            + &quot; }} &quot;,
+                    revisionGraphURI, revisionUriFrom, revisionUriInto);
+<span class="fc bfc" id="L200" title="All 2 branches covered.">            if (!getTripleStoreInterface().executeAskQuery(query)) {</span>
+<span class="fc" id="L201">                ThreeWayMergeCommitDraft threeWayMergeCommit = new ThreeWayMergeCommitDraft(graphName, branchNameFrom, branchNameInto, getUser(), getMessage(), triples, type, with);</span>
+<span class="fc" id="L202">                return threeWayMergeCommit.createCommitInTripleStore();</span>
+            } else {
+<span class="fc" id="L204">                FastForwardMergeCommitDraft fastForwardMergeCommitDraft = new FastForwardMergeCommitDraft(graphName, branchNameFrom, branchNameInto, getUser(), getMessage(), triples, type, with);</span>
+<span class="fc" id="L205">                return fastForwardMergeCommitDraft.createCommitInTripleStore();</span>
+            }
+        } else {
+<span class="nc" id="L208">            throw new QueryErrorException(&quot;Error in query: &quot; + getRequest().query_sparql);</span>
+        }
+    }
+
+    /**
+     * Get the triples of the query WITH part.
+     *
+     * @return the triples of the query WITH part
+     */
+    protected String getTriples() {
+<span class="fc" id="L218">        return triples;</span>
+    }
+
+    /**
+     * Get the branch name (from).
+     *
+     * @return the branch name
+     */
+    protected String getBranchNameFrom() {
+<span class="fc" id="L227">        return branchNameFrom;</span>
+    }
+
+    /**
+     * Get the branch name (into).
+     *
+     * @return the branch name
+     */
+    protected String getBranchNameInto() {
+<span class="fc" id="L236">        return branchNameInto;</span>
+    }
+
+    /**
+     * The revision graph.
+     *
+     * @return the revision graph
+     */
+    protected RevisionGraph getRevisionGraph() {
+<span class="fc" id="L245">        return revisionGraph;</span>
+    }
+
+    /**
+     * The graph name.
+     *
+     * @return the graph name
+     */
+    protected String getGraphName() {
+<span class="fc" id="L254">        return graphName;</span>
+    }
+
+    /**
+     * Get the query type (FORCE, AUTO, MANUAL).
+     *
+     * @return the query type
+     */
+    protected MergeTypes getType() {
+<span class="fc" id="L263">        return type;</span>
+    }
+
+    /**
+     * Get the query action (MERGE, REBASE, MERGE FF).
+     *
+     * @return the query action
+     */
+    protected MergeActions getAction() {
+<span class="nc" id="L272">        return action;</span>
+    }
+
+    /**
+     * Get the boolean indicator if the WITH part os available.
+     *
+     * @return true if the WITH part is available
+     */
+    protected boolean isWith() {
+<span class="fc" id="L281">        return with;</span>
+    }
+
+    /**
+     * Get the path calculation interface.
+     *
+     * @return the path calculation interface
+     */
+    protected PathCalculationInterface getPathCalculationInterface() {
+<span class="fc" id="L290">        return pathCalculationInterface;</span>
+    }
+
+    /**
+     * Copy a full graph from one branch to another.
+     * @param sourceGraphURI the URI of the source graph
+     * @param targetGraphURI the URI of the target graph
+     * */
+    protected void fullGraphCopy(String sourceGraphURI, String targetGraphURI) {
+<span class="fc" id="L299">        getTripleStoreInterface().executeUpdateQuery(</span>
+                &quot;COPY GRAPH &lt;&quot; + sourceGraphURI + &quot;&gt; TO GRAPH &lt;&quot;+ targetGraphURI + &quot;&gt;&quot;);
+<span class="fc" id="L301">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

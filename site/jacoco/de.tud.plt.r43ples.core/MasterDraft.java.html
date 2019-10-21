@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>MasterDraft.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">r43ples</a> &gt; <a href="index.source.html" class="el_package">de.tud.plt.r43ples.core</a> &gt; <span class="el_source">MasterDraft.java</span></div><h1>MasterDraft.java</h1><pre class="source lang-java linenums">package de.tud.plt.r43ples.core;
+
+import de.tud.plt.r43ples.exception.InternalErrorException;
+import de.tud.plt.r43ples.existentobjects.Branch;
+import de.tud.plt.r43ples.existentobjects.Revision;
+import de.tud.plt.r43ples.existentobjects.RevisionGraph;
+import de.tud.plt.r43ples.management.Config;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ * Collection of information for creating a new master branch.
+ *
+ * @author Stephan Hensel
+ *
+ */
+public class MasterDraft extends ReferenceDraft {
+
+    /** The logger. **/
+<span class="fc" id="L20">    private Logger logger = LogManager.getLogger(MasterDraft.class);</span>
+
+
+    /**
+     * The constructor.
+     *
+     * @param uriCalculator the current URI calculator instance
+     * @param revisionGraph the revision graph
+     * @param referencedRevision the referenced revision
+     * @throws InternalErrorException
+     */
+    protected MasterDraft(URICalculator uriCalculator, RevisionGraph revisionGraph, Revision referencedRevision) throws InternalErrorException {
+<span class="fc" id="L32">        super(uriCalculator, revisionGraph, referencedRevision, &quot;master&quot;, uriCalculator.getMasterFullGraphURI(revisionGraph), uriCalculator.getNewMasterURI(revisionGraph));</span>
+<span class="fc" id="L33">	}</span>
+
+
+    /**
+     * Creates the change set draft with all meta data and named graphs in the triplestore.
+     * Creates add and delete sets, strips the resulting sets if necessary, updates the referenced full graph and adds meta information.
+     *
+     * @return the created change set
+     */
+    protected Branch createInTripleStore() throws InternalErrorException {
+<span class="fc" id="L43">        logger.info(&quot;Create new branch for graph &quot; + getRevisionGraph().getGraphName() + &quot;.&quot;);</span>
+
+<span class="fc" id="L45">        addMetaInformation();</span>
+
+        // Create full graph
+<span class="fc" id="L48">        getTripleStoreInterface().executeCreateGraph(getReferencedFullGraphURI());</span>
+
+<span class="fc" id="L50">        return new Branch(getRevisionGraph(), getReferenceIdentifier(), getReferenceURI(), getReferencedFullGraphURI());</span>
+    }
+
+    /**
+     * Adds meta information of the created revision to the revision graph.
+     *
+     * @throws InternalErrorException
+     */
+    private void addMetaInformation() {
+<span class="fc" id="L59">        String queryContent = String.format(</span>
+                    &quot;&lt;%s&gt; a rmo:Master, rmo:Branch, rmo:Reference ;&quot;
+                            + &quot;	rmo:references &lt;%s&gt; ;&quot;
+                            + &quot;	rmo:fullContent &lt;%s&gt; ;&quot;
+                            + &quot;	rmo:referenceIdentifier \&quot;%s\&quot; .&quot;,
+<span class="fc" id="L64">                    getReferenceURI(), getReferencedRevision().getRevisionURI(), getReferencedFullGraphURI(), getReferenceIdentifier());</span>
+
+<span class="fc" id="L66">        String queryRevision = Config.prefixes + String.format(&quot;INSERT DATA { GRAPH &lt;%s&gt; {%s} }&quot;, getRevisionGraph().getRevisionGraphUri(), queryContent);</span>
+
+<span class="fc" id="L68">        getTripleStoreInterface().executeUpdateQuery(queryRevision);</span>
+<span class="fc" id="L69">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.7.9.201702052155</span></div></body></html>

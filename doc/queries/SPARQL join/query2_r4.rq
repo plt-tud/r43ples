@@ -1,0 +1,28 @@
+PREFIX rmo: <http://eatld.et.tu-dresden.de/rmo#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX rev: <http://test.com/r43ples-dataset-1-revision->
+PREFIX : <http://test.com/>
+
+SELECT DISTINCT ?s ?o
+WHERE{
+    GRAPH ?g_delete_set_full_graph { ?s  :knows  ?o .}
+    GRAPH <http://eatld.et.tu-dresden.de/r43ples-revisions> {
+        { <http://test.com/r43ples-dataset-1-master> rmo:references ?r_delete_set ;
+                rmo:fullGraph  ?g_delete_set_full_graph.}
+        UNION
+        {?r_delete_set  a  rmo:Revision ;
+            rmo:deleteSet  ?g_delete_set_full_graph .
+        FILTER ( ?r_delete_set IN (rev:5) ) }
+    }
+    
+    MINUS { 
+        GRAPH ?g_add_set { ?s  :knows  ?o .}
+        GRAPH <http://eatld.et.tu-dresden.de/r43ples-revisions> {
+            ?r_delete_set prov:wasDerivedFrom* ?r_add_set.
+            ?r_add_set  a  rmo:Revision ;
+                  rmo:addSet  ?g_add_set .
+            FILTER ( ?r_add_set IN (rev:5) )
+        }
+    }
+}
+ORDER BY ?s ?o
