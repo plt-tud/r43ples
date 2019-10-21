@@ -283,3 +283,8 @@ Following libraries are used in R43ples:
 * [SpinRDF](https://github.com/spinrdf/spinrdf) as SPIN engine
 
  
+## Literature
+Following articles describe the funcionalities and rationales of *R43ples*:
+
+ * [Graube, M., Hensel, S., & Urbas, L. (2014). R43ples: Revisions for Triples—An Approach for Version Control in the Semantic Web. In M. Knuth, D. Kontokostas, & H. Sack (Eds.), Proceedings of the 1st Workshop on Linked Data Quality (LDQ)](http://ceur-ws.org/Vol-1215/#paper-03)
+* [Graube, M., Hensel, S., & Urbas, L. (2016). Open Semantic Revision Control with R43ples—Extending SPARQL to access revisions of Named Graphs. Presented at the SEMANTICS, Leipzig](https://dl.acm.org/citation.cfm?doid=2993318.2993336)
