@@ -75,7 +75,9 @@ public class URICalculator {
         ResultSet resultSet = tripleStoreInterface.executeSelectQuery(query);
         while (resultSet.hasNext()) {
             QuerySolution qs = resultSet.next();
-            uriList.add(qs.getResource("?uri").toString());
+            if (qs.getResource("?uri") != null) {
+                uriList.add(qs.getResource("?uri").toString());
+            }
         }
 
         return uriList;
